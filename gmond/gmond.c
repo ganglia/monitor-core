@@ -6,9 +6,6 @@
 
 #include <signal.h>
 
-/*
-#include "lib/interface.h"
-*/
 #include "lib/ganglia_private.h"
 #include "lib/dotconf.h"
 #include "lib/hash.h"
@@ -119,10 +116,12 @@ gexec_func ( void )
 {
    g_val_t val;
 
+#if 0
    if( gmond_config.no_gexec || ( SUPPORT_GEXEC == 0 ) )
       snprintf(val.str, MAX_G_STRING_SIZE, "%s", "OFF");
    else
       snprintf(val.str, MAX_G_STRING_SIZE, "%s", "ON");
+#endif
 
    return val;
 }
