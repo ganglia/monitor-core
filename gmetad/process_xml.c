@@ -324,6 +324,7 @@ process_xml(data_source_list_t *d, char *buf)
          err_msg ("save_to_rrd() XML_ParseBuffer() error at line %d:\n%s\n",
                          XML_GetCurrentLineNumber (xml_parser),
                          XML_ErrorString (XML_GetErrorCode (xml_parser)));
+         xml_data.rval = 1;
       }
 
    /* Free memory that might have been allocated in xml_data */
