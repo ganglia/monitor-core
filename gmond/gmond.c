@@ -3,8 +3,14 @@
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "lib/ganglia_private.h"
 #include "lib/dotconf.h"
@@ -114,14 +120,23 @@ send_all_metric_data( void )
 g_val_t
 gexec_func ( void )
 {
-   g_val_t val;
+  int rval;
+  g_val_t val;
+  struct stat info;
 
-#if 0
-   if( gmond_config.no_gexec || ( SUPPORT_GEXEC == 0 ) )
-      snprintf(val.str, MAX_G_STRING_SIZE, "%s", "OFF");
-   else
-#endif
-      snprintf(val.str, MAX_G_STRING_SIZE, "%s", "ON");
+  /* Later on .. we'll pass on errors and change the binary OFF, ON
+   * status to be more complex.  For example, a host may both accept
+   * gexec jobs and also send gexec jobs.
+   */
+  rval = stat(GAUTHD_PUBLIC_KEY, &info);
+  if(rval <0)
+    {
+      snprintf(val.str, MAX_G_STRING_SIZE, "OFF");
+    }
+  else
+    {
+      snprintf(val.str, MAX_G_STRING_SIZE, "ON");
+    }
 
    return val;
 }
@@ -220,7 +235,7 @@ main ( int argc, char *argv[] )
    signal( SIGPIPE, SIG_IGN );    
 
    if(debug_level)
-     print_conf(&gmond_config);
+     gmond_print_conf(&gmond_config);
 
    if(! gmond_config.deaf )
       {
