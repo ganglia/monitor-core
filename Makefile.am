@@ -44,8 +44,10 @@ dist-local: README ganglia.html ChangeLog
 # since the packages in that directory might not
 # handle a "make dist" correctly
 dist-hook:
-	tar -c --exclude=".libs" --exclude "core.*" --exclude="*CVS" \
-	--exclude="*.o"  --exclude="*.lo" \
-	--exclude="*.la" --exclude=".deps" \
-	--exclude="*.tar.gz" \
-	-f - ./srclib | (cd $(distdir) && tar -xf -)
+	for subdir in "./srclib ./web"; do \
+	  tar -c --exclude=".libs" --exclude "core.*" --exclude="*CVS" \
+	  --exclude="*.o"  --exclude="*.lo" \
+	  --exclude="*.la" --exclude=".deps" \
+	  --exclude="*.tar.gz" \
+	  -f - $$subdir | (cd $(distdir) && tar -xf -)\
+	done;

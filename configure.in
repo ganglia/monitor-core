@@ -74,6 +74,7 @@ AC_SUBST(GANGLIA_MAJOR_VERSION)
 AC_SUBST(GANGLIA_MINOR_VERSION)
 AC_SUBST(GANGLIA_MICRO_VERSION)
 AC_SUBST(GANGLIA_VERSION)
+AC_SUBST(GANGLIA_RELEASE_NAME)
 
 AC_SUBST(LIBGANGLIA_INTERFACE_AGE)
 AC_SUBST(LIBGANGLIA_BINARY_AGE)
@@ -366,7 +367,7 @@ dnl
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
 
-AC_OUTPUT(Makefile srclib/Makefile tests/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile)
+AC_OUTPUT(Makefile srclib/Makefile tests/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile web/conf.php)
 
 
 echo ""
