@@ -1,3 +1,4 @@
+/* $Id$ */
 #include "gangliaconf.h"
 #include "dotconf.h"
 #include <ganglia/gmond_config.h>
