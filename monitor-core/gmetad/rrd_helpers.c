@@ -8,6 +8,7 @@
 #include <rrd.h>
 #include <gmetad.h>
 #include <errno.h>
+#include <pthread.h>
 
 extern char * rrd_rootdir;
 
@@ -18,6 +19,9 @@ static int RRD_update( char *rrd, char *sum );
 static int summary_RRD_create( char *rrd, char *polling_interval);
 static int summary_RRD_update( char *rrd, char *sum, char *num );
 static void inline my_mkdir ( char *dir );
+
+pthread_mutex_t rrd_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 
 int
 write_data_to_rrd ( char *cluster, char *host, char *metric, char *sum, char *num, char *polling_interval )
@@ -120,15 +124,18 @@ RRD_update( char *rrd, char *value )
    argv[1] = rrd;
    argv[2] = val; 
 
+   pthread_mutex_lock( &rrd_mutex );
    optind=0; opterr=0;
    rrd_clear_error();
    rrd_update(argc, argv);
    if(rrd_test_error())
       {
          err_msg("RRD_update: %s", rrd_get_error());
+         pthread_mutex_unlock( &rrd_mutex );
          return 1;
       } 
    debug_msg("Updated rrd %s with value %s", rrd, val);
+   pthread_mutex_unlock( &rrd_mutex );
    return 0;
 }
 
@@ -145,15 +152,18 @@ summary_RRD_update( char *rrd, char *sum, char *num )
    argv[1] = rrd;
    argv[2] = val;
 
+   pthread_mutex_lock( &rrd_mutex );
    optind=0; opterr=0;
    rrd_clear_error();
    rrd_update(argc, argv);
    if(rrd_test_error())
       {
-         err_msg("RRD_update: %s", rrd_get_error());
+         err_msg("summary_RRD_update: %s", rrd_get_error());
+         pthread_mutex_unlock( &rrd_mutex );
          return 1;
       }
    debug_msg("Updated rrd %s with value %s", rrd, val);
+   pthread_mutex_unlock( &rrd_mutex );
    return 0;
 }
 
@@ -176,15 +186,18 @@ RRD_create( char *rrd, char *polling_interval)
    argv[8] = "RRA:AVERAGE:0.5:672:240";
    argv[9] = "RRA:AVERAGE:0.5:5760:370";
 
+   pthread_mutex_lock( &rrd_mutex );
    optind=0; opterr=0;  
    rrd_clear_error();
    rrd_create(argc, argv);
    if(rrd_test_error())
       {
          err_msg("RRD_create: %s", rrd_get_error());
+         pthread_mutex_unlock( &rrd_mutex );
          return 1;
       }
    debug_msg("Created rrd %s", rrd);
+   pthread_mutex_unlock( &rrd_mutex );
    return 0;
 }
 
@@ -206,14 +219,17 @@ summary_RRD_create( char *rrd, char *polling_interval)
    argv[9] = "RRA:AVERAGE:0.5:672:240";
    argv[10] = "RRA:AVERAGE:0.5:5760:370";
 
+   pthread_mutex_lock( &rrd_mutex );
    optind=0; opterr=0;
    rrd_clear_error();
    rrd_create(argc, argv);
    if(rrd_test_error())
       {
          err_msg("RRD_create: %s", rrd_get_error());
+         pthread_mutex_unlock( &rrd_mutex );
          return 1;
       }
    debug_msg("Created rrd %s", rrd);
+   pthread_mutex_unlock( &rrd_mutex );
    return 0;
 }
