@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "msg.h"
+#include "protocol.h"
 
 #define MAXMSGLEN 1500
 
