@@ -1640,7 +1640,7 @@ process_collection_groups( apr_time_t now )
     }
 
   /* make sure we don't schedule for the past */
-  return next < now ? now: next;
+  return next < now ? now + 1 * APR_USEC_PER_SEC: next;
 }
 
 static void
