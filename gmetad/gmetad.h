@@ -16,11 +16,12 @@ struct ganglia_metric
    };
 
 /* This value is taken from the metric_hash.c file (MAX_HASH_VALUE+1) */
-#define MAX_METRIC_HASH_VALUE 64
+#define MAX_METRIC_HASH_VALUE 73
 
 /* For xml_hash */
 typedef enum {
    GANGLIA_XML_TAG,
+   GRID_TAG,
    CLUSTER_TAG,
    HOST_TAG,
    NAME_TAG,
@@ -47,6 +48,7 @@ struct xml_tag
 typedef struct
    {
       char *name;
+      unsigned int step;
       unsigned int num_sources;
       g_inet_addr **sources;
       long double  sum[MAX_METRIC_HASH_VALUE];
