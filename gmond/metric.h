@@ -76,6 +76,17 @@ extern g_val_t part_max_used_func(void);
 
 #endif
 
+#ifdef HPUX
+
+extern g_val_t cpu_wait_func(void);
+extern g_val_t cpu_intr_func(void);
+extern g_val_t cpu_ssys_func(void);
+extern g_val_t mem_rm_func(void);
+extern g_val_t mem_arm_func(void);
+extern g_val_t mem_vm_func(void);
+extern g_val_t mem_avm_func(void);
+
+#endif
 
 #define INIT 0, 0, {0}, {0}
 #define KEY(NAME) { #NAME, NAME ##_func, INIT
@@ -174,6 +185,17 @@ KEY(part_max_used), 1, 30, 40, 120, 180, g_float, "%", "%.1f" }
 
 #endif
 
+#ifdef HPUX
+,
+KEY(cpu_intr),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_ssys),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_wait),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(mem_arm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
+KEY(mem_rm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
+KEY(mem_avm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
+KEY(mem_vm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" }
+
+#endif
 };
 
 #endif  /* METRIC_H */
