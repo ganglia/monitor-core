@@ -66,43 +66,127 @@ static DOTCONF_CB(cb_url)
    return NULL;
 }
 
-static DOTCONF_CB(cb_msg_channel)
+static DOTCONF_CB(cb_receive_channels)
+{
+  int i;
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+  char *p = NULL;
+
+  if(!c->receive_channels_given)
+    {
+      /* Reset the defaults */
+      c->receive_channels_given = 1;
+      c->num_receive_channels = 0;
+      free(c->receive_channels[0]);
+      free(c->receive_ports[0]);
+      c->receive_channels[0] = NULL;
+      c->receive_ports[0] = NULL;
+    }
+
+  for(i=0; i< cmd->arg_count; i++)
+    {
+      if(c->num_receive_channels < MAX_NUM_CHANNELS-1)
+        {
+          p = strchr( cmd->data.list[i], ':');
+          if(p)
+            {
+              /* they specified a host */
+              *p = '\0';
+              c->receive_channels[c->num_receive_channels] = conf_strdup( cmd->data.list[i] );
+              c->receive_ports[c->num_receive_channels]    = conf_strdup( p+1 );
+            } 
+          else
+            {
+              c->receive_channels[c->num_receive_channels] = NULL;  /* Any address */
+              c->receive_ports[c->num_receive_channels]    = conf_strdup( cmd->data.list[i] );
+            }
+          c->num_receive_channels++;
+        }
+    }
+
+  return NULL;
+}
+
+static DOTCONF_CB(cb_send_channels)
+{
+  int i;
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+  char *p = NULL;
+
+  if(!c->send_channels_given)
+    {
+      /* Reset the defaults */
+      c->send_channels_given = 1;
+      c->num_send_channels = 0;
+      free(c->send_channels[0]);
+      free(c->send_ports[0]);
+      c->send_channels[0] = NULL;
+      c->send_ports[0] = NULL;
+    }
+
+  for(i=0; i< cmd->arg_count; i++)
+    {
+      if(c->num_send_channels < MAX_NUM_CHANNELS-1)
+        {
+          p = strchr( cmd->data.list[i], ':');
+          if(p)
+            {
+              /* they specified a port */
+              *p = '\0';
+              c->send_channels[c->num_send_channels] = conf_strdup( cmd->data.list[i] );
+              c->send_ports   [c->num_send_channels] = conf_strdup( p+1 );
+            }
+          else 
+            {
+              c->send_channels[c->num_send_channels] = conf_strdup( cmd->data.list[i] );
+              c->send_ports   [c->num_send_channels] = conf_strdup( "8649" );
+            }
+          c->num_send_channels++;
+        }
+    }
+
+  return NULL;
+}
+
+static DOTCONF_CB(cb_mcast_channel)
+{
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+  free(c->send_channels[0]);
+  c->send_channels[0] = conf_strdup(cmd->data.str);
+  free(c->receive_channels[0]);
+  c->receive_channels[0] = conf_strdup(cmd->data.str);
+  return NULL;
+}
+
+static DOTCONF_CB(cb_mcast_port)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   free(c->msg_channel);
-   c->msg_channel = conf_strdup(cmd->data.str);
+   free(c->send_ports[0]);
+   c->send_ports[0] = conf_strdup(cmd->data.str);
+   free(c->receive_ports[0]);
+   c->receive_ports[0] = conf_strdup(cmd->data.str);
    return NULL;
 }
 
-static DOTCONF_CB(cb_msg_port)
-{
-   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   free(c->msg_port);
-   c->msg_port_given = 1;
-   c->msg_port = conf_strdup(cmd->data.str);
-   return NULL;
-}
-
-static DOTCONF_CB(cb_msg_if)
+static DOTCONF_CB(cb_mcast_if)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
    /* no free.. set to NULL by default */
-   c->msg_if_given = 1;
-   c->msg_if = conf_strdup(cmd->data.str);
+   c->mcast_if = conf_strdup(cmd->data.str);
    return NULL;
 }
 
-static DOTCONF_CB(cb_msg_ttl)
+static DOTCONF_CB(cb_mcast_ttl)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   c->msg_ttl  = cmd->data.value;
+   c->mcast_ttl  = cmd->data.value;
    return NULL;
 }
 
-static DOTCONF_CB(cb_msg_threads)
+static DOTCONF_CB(cb_mcast_threads)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   c->msg_threads = cmd->data.value;
+   c->mcast_threads = cmd->data.value;
    return NULL;
 }
 
@@ -281,12 +365,24 @@ set_defaults(gmond_config_t *config )
    config->latlong = conf_strdup("unspecified");
    config->url = conf_strdup("unspecified");
    config->location = conf_strdup("unspecified");
+
+   config->num_send_channels = 1;
+   config->send_channels_given = 0;
+   config->send_channels[0] = conf_strdup("239.2.11.71");
+   config->send_ports[0]    = conf_strdup("8649");
+
+   config->num_receive_channels = 1;
+   config->receive_channels_given = 0;
+   config->receive_channels[0] = conf_strdup("239.2.11.71");
+   config->receive_ports[0]    = conf_strdup("8649");
+#if 0
    config->msg_channel = conf_strdup("239.2.11.71");
    config->msg_port = conf_strdup("8649");
    config->msg_if_given = 0;
    config->msg_port_given = 0;
    config->msg_ttl = 1;
    config->msg_threads = 2;
+#endif
    config->xml_port = conf_strdup("8649");
    config->compressed_xml_port = conf_strdup("8650");
    config->xml_threads = 2;
@@ -306,22 +402,31 @@ set_defaults(gmond_config_t *config )
    return 0;
 }
 
-static void
+void
 print_conf( gmond_config_t *config )
 {
+   int i;
    printf("name is %s\n", config->name);
    printf("owner is %s\n", config->owner);
    printf("latlong is %s\n", config->latlong);
-   printf("Cluster URL is %s\n", config->url);
-   printf("Host location is (x,y,z): %s\n", config->location);
-   printf("msg_channel is %s\n", config->msg_channel);
-   printf("msg_port is %s\n", config->msg_port);
-   if(config->msg_if_given)
-      printf("msg_if is %s\n", config->msg_if);
+   printf("cluster URL is %s\n", config->url);
+   printf("host location is (x,y,z): %s\n", config->location);
+   printf("There are %d send channels\n", config->num_send_channels);
+   for(i=0; i< config->num_send_channels; i++)
+     {
+       printf("\t%s : %s\n", config->send_channels[i], config->send_ports[i]);
+     }
+   printf("There are %d receive channels\n", config->num_receive_channels);
+   for(i=0; i< config->num_receive_channels; i++)
+     {
+       printf("\t%s : %s\n", config->receive_channels[i], config->receive_ports[i]);
+     }
+   if(config->mcast_if_given)
+      printf("mcast_if is %s\n", config->mcast_if);
    else
-      printf("msg_if is chosen by the kernel\n");
-   printf("msg_ttl is %ld\n", config->msg_ttl);
-   printf("msg_threads is %ld\n", config->msg_threads);
+      printf("mcast_if is chosen by the kernel\n");
+   printf("mcast_ttl is %ld\n", config->mcast_ttl);
+   printf("mcast_threads is %ld\n", config->mcast_threads);
    printf("xml_port is %s\n", config->xml_port);
    printf("compressed_xml_port is %s\n", config->compressed_xml_port);
    printf("xml_threads is %ld\n", config->xml_threads);
@@ -355,16 +460,13 @@ get_gmond_config( char *conffile )
          {"latlong", ARG_STR, cb_latlong, &gmond_config, 0},
          {"url", ARG_STR, cb_url, &gmond_config, 0},
          {"location", ARG_STR, cb_location, &gmond_config, 0},
-         {"mcast_channel", ARG_STR, cb_msg_channel, &gmond_config, 0},
-         {"mcast_port", ARG_STR, cb_msg_port, &gmond_config, 0},
-         {"mcast_if", ARG_STR, cb_msg_if, &gmond_config, 0},
-         {"mcast_ttl", ARG_INT, cb_msg_ttl, &gmond_config, 0},
-         {"mcast_threads", ARG_INT, cb_msg_threads, &gmond_config, 0},
-         {"msg_channel", ARG_STR, cb_msg_channel, &gmond_config, 0},
-         {"msg_port", ARG_STR, cb_msg_port, &gmond_config, 0},
-         {"msg_if", ARG_STR, cb_msg_if, &gmond_config, 0},
-         {"msg_ttl", ARG_INT, cb_msg_ttl, &gmond_config, 0},
-         {"msg_threads", ARG_INT, cb_msg_threads, &gmond_config, 0},
+         {"mcast_channel", ARG_STR, cb_mcast_channel, &gmond_config, 0},
+         {"mcast_port", ARG_STR, cb_mcast_port, &gmond_config, 0},
+         {"mcast_if", ARG_STR, cb_mcast_if, &gmond_config, 0},
+         {"mcast_ttl", ARG_INT, cb_mcast_ttl, &gmond_config, 0},
+         {"mcast_threads", ARG_INT, cb_mcast_threads, &gmond_config, 0},
+         {"send_channels", ARG_LIST, cb_send_channels, &gmond_config, 0},
+         {"receive_channels", ARG_LIST, cb_receive_channels, &gmond_config, 0},
          {"xml_port", ARG_STR, cb_xml_port, &gmond_config, 0},
          {"compressed_xml_port", ARG_STR, cb_compressed_xml_port, &gmond_config, 0},
          {"xml_threads", ARG_INT, cb_xml_threads, &gmond_config, 0},
