@@ -146,32 +146,14 @@ main ( int argc, char *argv[] )
    /* fd for incoming multicast messages */
    if(! gmond_config.deaf )
       {
-         g_inet_addr * addr;
-
-         addr = (g_inet_addr *) g_inetaddr_new( gmond_config.mcast_channel, gmond_config.mcast_port );
-         mcast_join_socket = g_mcast_socket_new( addr );
+         mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port, gmond_config.mcast_if );
          if (! mcast_join_socket )
             {
-               g_inetaddr_delete(addr);
-               perror("gmond could not join the multicast channel");
+               perror("g_mcast_in() failed");
                return -1;
             }
+
          debug_msg("mcast listening on %s %hu", gmond_config.mcast_channel, gmond_config.mcast_port); 
-
-         /* Make sure we have loopback on */
-         if ( g_mcast_socket_set_loopback( mcast_join_socket, 1) != 0 )
-            {
-               g_inetaddr_delete(addr);
-               perror("gmond could not set loopback");
-               return -1;
-            }
-
-         if ( g_mcast_socket_join_group( mcast_join_socket, addr ) != 0 )
-            {
-               g_inetaddr_delete(addr);
-               perror("gmond could not join group");
-               return -1;
-            }
 
          server_socket = g_tcp_socket_server_new( gmond_config.xml_port );
          if (! server_socket )
@@ -201,30 +183,14 @@ main ( int argc, char *argv[] )
    /* fd for outgoing multicast messages */
    if(! gmond_config.mute )
       {
-         g_inet_addr *addr;
- 
-         addr = g_inetaddr_new ( gmond_config.mcast_channel, gmond_config.mcast_port );
-         mcast_socket = g_mcast_socket_new( addr );
-         g_inetaddr_delete( addr );
+         mcast_socket = g_mcast_out ( gmond_config.mcast_channel, gmond_config.mcast_port,  
+                                      gmond_config.mcast_if,      gmond_config.mcast_ttl);
          if ( !mcast_socket )
             {
                perror("gmond could not connect to multicast channel");
                return -1;
             }
          debug_msg("multicasting on channel %s %d", gmond_config.mcast_channel, gmond_config.mcast_port);
-
-         if ( g_mcast_socket_set_ttl(mcast_socket, gmond_config.mcast_ttl ) < 0)
-            {
-               perror("gmond could not set the ttl");
-               return -1;
-            } 
-
-         rval = g_mcast_socket_connect ( mcast_socket, gmond_config.mcast_channel, gmond_config.mcast_port );
-         if ( rval <0)
-            {
-               perror("mcast_connect() connect() error");
-               return -1;
-            }
 
          /* in machine.c */
          initval = metric_init();

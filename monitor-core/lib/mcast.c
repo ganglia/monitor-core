@@ -24,6 +24,65 @@
  */
 #include <ganglia/net.h>
 
+g_mcast_socket *
+g_mcast_in ( char *channel, unsigned short port, const char* ifname )
+{
+   g_mcast_socket *ms;
+   g_inet_addr *addr;
+
+   addr = (g_inet_addr *) g_inetaddr_new( channel, port );
+   if (!addr)
+      return NULL;
+
+   ms = g_mcast_socket_new( addr );
+   g_inetaddr_delete(addr);
+   if (! ms )
+      goto error;
+
+   /* Make sure we have loopback on */
+   if ( g_mcast_socket_set_loopback( ms, 1) != 0 )
+      goto error;
+
+   /* Join the group */
+   if ( g_mcast_socket_join_group( ms, addr ) != 0 )
+      goto error;
+
+   /* Bind the socket */
+   if ( g_mcast_socket_bind ( ms ) ) 
+      goto error;
+  
+   return ms; 
+
+ error:
+    g_mcast_socket_unref(ms);
+    return NULL;
+}
+
+g_mcast_socket *
+g_mcast_out ( char *channel, unsigned short port, const char *ifname, unsigned char ttl )
+{
+   g_mcast_socket *ms;
+   g_inet_addr *addr;
+
+   addr = g_inetaddr_new ( channel, port );
+   ms = g_mcast_socket_new( addr );
+   g_inetaddr_delete( addr );
+   if ( !ms )
+      goto error;
+
+   if ( g_mcast_socket_set_ttl(ms, ttl ) < 0)
+      goto error;
+
+   if ( g_mcast_socket_connect (ms ) < 0)
+      goto error;
+ 
+   return ms;
+
+ error:
+   g_mcast_socket_unref(ms);
+   return NULL;
+}
+
 g_mcast_socket*
 g_mcast_socket_new (const g_inet_addr* ia)
 {
@@ -52,22 +111,13 @@ g_mcast_socket_new (const g_inet_addr* ia)
   if (setsockopt(ms->sockfd, SOL_SOCKET, SO_REUSEADDR,
                      (void*) &on, sizeof(on)) != 0)
     {
-       /* error */
-       /* g_warning("Can't reuse mcast socket\n");*/
-       return NULL;
-    }
-
-  /* Bind to the socket to some local address and port */
-  if (bind(ms->sockfd, &ms->sa, sizeof(ms->sa)) != 0)
-    {
-       /* error */
        return NULL;
     }
 
   return ms;
 }
 
-static void
+void
 g_mcast_socket_unref(g_mcast_socket* s)
 {
   if(s==NULL)
@@ -89,7 +139,7 @@ g_mcast_socket_delete(g_mcast_socket* ms)
     g_mcast_socket_unref(ms);
 }
 
-static void
+void
 g_mcast_socket_ref(g_mcast_socket* s)
 {
   if(s==NULL)
@@ -99,15 +149,15 @@ g_mcast_socket_ref(g_mcast_socket* s)
 }
 
 int
-g_mcast_socket_connect ( g_mcast_socket *ms, const char*name, int port)
+g_mcast_socket_connect ( g_mcast_socket *ms )
 {
-   g_inet_addr *inet_addr;
+   return connect ( ms->sockfd, (struct sockaddr *)&(ms->sa), sizeof(struct sockaddr_in));
+}
 
-   inet_addr = g_inetaddr_new( name, port );
-   if ( inet_addr == NULL )
-      return -1;
-
-   return connect ( ms->sockfd, (struct sockaddr *)&(inet_addr->sa), sizeof(struct sockaddr_in) );
+int 
+g_mcast_socket_bind ( g_mcast_socket *ms )
+{
+   return bind ( ms->sockfd, (struct sockaddr *)&(ms->sa), sizeof(struct sockaddr_in));
 }
 
 int
