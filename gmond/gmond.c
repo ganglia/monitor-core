@@ -40,7 +40,7 @@ extern int debug_level;
 
 struct gengetopt_args_info args_info;
 
-gmond_config_t config;
+extern gmond_config_t gmond_config;
 
 uint32_t start_time;
 
@@ -61,7 +61,7 @@ gexec_func ( void )
 {
    g_val_t val;
 
-   if( config.no_gexec || ( SUPPORT_GEXEC == 0 ) )
+   if( gmond_config.no_gexec || ( SUPPORT_GEXEC == 0 ) )
       snprintf(val.str, MAX_G_STRING_SIZE, "%s", "OFF");
    else
       snprintf(val.str, MAX_G_STRING_SIZE, "%s", "ON");
@@ -97,7 +97,7 @@ main ( int argc, char *argv[] )
    if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
 
-   rval = gmond_config(&config, args_info.conf_arg);
+   rval = get_gmond_config(args_info.conf_arg);
    if ( rval == 0 )
       {
          debug_msg("no config file found.. going with defaults");
@@ -111,20 +111,21 @@ main ( int argc, char *argv[] )
          err_quit("failed to process %s. Exiting.", args_info.conf_arg);
       }
 
-   if(!config.no_setuid)
-      become_a_nobody(config.setuid);
+   if(!gmond_config.no_setuid)
+      become_a_nobody(gmond_config.setuid);
 
-   debug_level = config.debug_level;
+   debug_level = gmond_config.debug_level;
    if (! debug_level )
       {
          daemon_init ( argv[0], 0);
       }
 
+   debug_msg("pthread_attr_init");
    pthread_attr_init( &attr );
    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
-   debug_msg("creating cluster hash for %d nodes", config.num_nodes);
-   cluster = hash_create(config.num_nodes);
+   debug_msg("creating cluster hash for %d nodes", gmond_config.num_nodes);
+   cluster = hash_create(gmond_config.num_nodes);
    debug_msg("gmond initialized cluster hash");
 
    srand(1);
@@ -143,11 +144,11 @@ main ( int argc, char *argv[] )
       }
 
    /* fd for incoming multicast messages */
-   if(! config.deaf )
+   if(! gmond_config.deaf )
       {
          g_inet_addr * addr;
 
-         addr = (g_inet_addr *) g_inetaddr_new( config.mcast_channel, config.mcast_port );
+         addr = (g_inet_addr *) g_inetaddr_new( gmond_config.mcast_channel, gmond_config.mcast_port );
          mcast_join_socket = g_mcast_socket_new( addr );
          if (! mcast_join_socket )
             {
@@ -155,7 +156,7 @@ main ( int argc, char *argv[] )
                perror("gmond could not join the multicast channel");
                return -1;
             }
-         debug_msg("mcast listening on %s %hu", config.mcast_channel, config.mcast_port); 
+         debug_msg("mcast listening on %s %hu", gmond_config.mcast_channel, gmond_config.mcast_port); 
 
          /* Make sure we have loopback on */
          if ( g_mcast_socket_set_loopback( mcast_join_socket, 1) != 0 )
@@ -172,25 +173,25 @@ main ( int argc, char *argv[] )
                return -1;
             }
 
-         server_socket = g_tcp_socket_server_new( config.xml_port );
+         server_socket = g_tcp_socket_server_new( gmond_config.xml_port );
          if (! server_socket )
             {
                perror("tcp_listen() on xml_port failed");
                return -1;
             }      
-         debug_msg("XML listening on port %d", config.xml_port);
+         debug_msg("XML listening on port %d", gmond_config.xml_port);
 
          /* thread(s) to listen to the multicast traffic */
-         barrier_init(&mcast_listen_barrier, config.mcast_threads);
-         for ( i = 0 ; i < config.mcast_threads; i++ )
+         barrier_init(&mcast_listen_barrier, gmond_config.mcast_threads);
+         for ( i = 0 ; i < gmond_config.mcast_threads; i++ )
             {
                pthread_create(&tid, &attr, mcast_listen_thread, (void *)mcast_listen_barrier);
             }
          debug_msg("listening thread(s) have been started");
 
          /* threads to answer requests for XML */
-         barrier_init(&server_barrier, (config.xml_threads));
-         for ( i=0 ; i < config.xml_threads; i++ )
+         barrier_init(&server_barrier, (gmond_config.xml_threads));
+         for ( i=0 ; i < gmond_config.xml_threads; i++ )
             {
                pthread_create(&tid, &attr, server_thread, (void *)server_barrier);
             }
@@ -198,11 +199,11 @@ main ( int argc, char *argv[] )
       }
 
    /* fd for outgoing multicast messages */
-   if(! config.mute )
+   if(! gmond_config.mute )
       {
          g_inet_addr *addr;
  
-         addr = g_inetaddr_new ( config.mcast_channel, config.mcast_port );
+         addr = g_inetaddr_new ( gmond_config.mcast_channel, gmond_config.mcast_port );
          mcast_socket = g_mcast_socket_new( addr );
          g_inetaddr_delete( addr );
          if ( !mcast_socket )
@@ -210,9 +211,9 @@ main ( int argc, char *argv[] )
                perror("gmond could not connect to multicast channel");
                return -1;
             }
-         debug_msg("multicasting on channel %s %d", config.mcast_channel, config.mcast_port);
+         debug_msg("multicasting on channel %s %d", gmond_config.mcast_channel, gmond_config.mcast_port);
 
-         if ( g_mcast_socket_set_ttl(mcast_socket, config.mcast_ttl ) < 0)
+         if ( g_mcast_socket_set_ttl(mcast_socket, gmond_config.mcast_ttl ) < 0)
             {
                perror("gmond could not set the ttl");
                return -1;
@@ -236,7 +237,10 @@ main ( int argc, char *argv[] )
          debug_msg("created monitor thread");
       }
 
+   
    for(;;)
-      pause();
+      {
+         pause();
+      }
    return 0;
 }
