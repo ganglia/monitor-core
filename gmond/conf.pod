@@ -213,7 +213,7 @@ within the limitations of memory and file descriptors.  If B<gmond>
 is configured to be B<mute>, then these sections are ignored.
 
 The B<tcp_accept_channel> has the following attributes: B<bind>, B<port>, 
-B<interface>, and B<family>.  A B<tcp_accept_channel> may also have
+B<interface>, B<family> and B<timeout>.  A B<tcp_accept_channel> may also have
 an B<acl> section specified (see ACCESS CONTROL LISTS below).
 
 For example, 2.5.x gmond would accept connections on a single TCP
@@ -247,6 +247,10 @@ B<inet6> for a particular port, explicitly state it with the following:
 If you specify a bind address, the family of that address takes precedence.
 If your IPv6 stack doesn't support IPV6_V6ONLY, a warning will be issued
 but gmond will continue working (this should rarely happen).
+
+The B<timeout> attribute allows you to specify how many microseconds to block before
+closing a connection to a client.  The default is set to 1 second (1000000 usecs).  
+If you have a very slow connection you may need to increase this value.
 
 The B<interface> is not implemented at this time (use B<bind>).
 
