@@ -1,5 +1,8 @@
-AM_CFLAGS = -I../lib -I../gmond -I../lib/dnet 
+AM_CFLAGS = -I../lib -I../gmond -I$(top_builddir)/srclib/libmetrics
 
 bin_PROGRAMS = gmetric
 gmetric_SOURCES =  gmetric.c cmdline.c cmdline.h
-gmetric_LDADD   =  ../lib/.libs/libganglia.a ../lib/libdnet.a ../lib/libgetopthelper.a
+gmetric_LDADD   =  $(top_builddir)/lib/libganglia.la \
+                   $(top_builddir)/lib/libgetopthelper.a \
+	           $(top_builddir)/srclib/libmetrics/libmetrics.la
+gmetric_LDFLAGS = -static

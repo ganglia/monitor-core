@@ -14,10 +14,12 @@
  *    immortal metrics.
  *
  */
-#include <ganglia.h>
-#include <ganglia/hash.h>
-#include <ganglia/barrier.h>
-#include <ganglia/gmond_config.h>
+#include "hash.h"
+#include "barrier.h"
+#include "gmond_config.h"
+#include "net.h"
+#include "debug_msg.h"
+#include "ganglia.h"
 #include "cmdline.h"
 #include "key_metrics.h"
 #include "metric_typedefs.h"

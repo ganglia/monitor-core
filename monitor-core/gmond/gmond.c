@@ -3,16 +3,16 @@
 #include "gangliaconf.h"
 #include "dotconf.h"
 
-#include <ganglia/error.h>
-#include <ganglia/hash.h>
-#include <ganglia/llist.h>
-#include <ganglia/net.h>
-#include <ganglia/xmlparse.h>
-#include <ganglia/gmond_config.h>
-#include <ganglia/hash.h>
-#include <ganglia/barrier.h>
-#include <ganglia/become_a_nobody.h>
-#include <ganglia/net.h>
+#include "lib/error.h"
+#include "lib/hash.h"
+#include "lib/llist.h"
+#include "lib/net.h"
+#include "expat.h"
+#include "lib/gmond_config.h"
+#include "lib/hash.h"
+#include "lib/barrier.h"
+#include "lib/become_a_nobody.h"
+#include "lib/net.h"
 #include <signal.h>
 #include "metric.h"
 #include <pwd.h>
@@ -153,7 +153,7 @@ main ( int argc, char *argv[] )
    pthread_attr_t attr;
    barrier *mcast_listen_barrier, *server_barrier;
    struct timeval tv;
-   struct intf_entry *entry = NULL;
+   struct ifi_info *entry = NULL;
 
    gettimeofday(&tv, NULL);
    start_time = (uint32_t) tv.tv_sec;
@@ -226,7 +226,7 @@ main ( int argc, char *argv[] )
             if (!entry)
                err_quit("We don't have any interfaces besides loopback, exiting.\n");
          }
-         debug_msg("Using interface %s", entry->intf_name);
+         debug_msg("Using interface %s", entry->ifi_name);
       }
    else
       {
@@ -242,10 +242,11 @@ main ( int argc, char *argv[] )
    /* fd for incoming multicast messages */
    if(! gmond_config.deaf )
       {
+	 struct in_addr *addr =  &(((struct sockaddr_in *)(entry->ifi_addr))->sin_addr);
 	 if( is_multicast( gmond_config.mcast_channel ))
 	     {
                 mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port,
-                                          (struct in_addr *)&(entry->intf_addr.addr_ip));
+                                          addr);
 	     }
 	 else
 	     {
@@ -353,8 +354,9 @@ main ( int argc, char *argv[] )
       {
 	 if( is_multicast( gmond_config.mcast_channel ))
 	   {
+	     struct in_addr *addr =   &( ((struct sockaddr_in *)(entry->ifi_addr)) ->sin_addr);
              mcast_socket = g_mcast_out ( gmond_config.mcast_channel, gmond_config.mcast_port,  
-                             (struct in_addr *)&(entry->intf_addr.addr_ip), gmond_config.mcast_ttl);
+                             addr, gmond_config.mcast_ttl);
 	   }
 	 else
 	   {

@@ -51,6 +51,8 @@ echo
 
 AM_INIT_AUTOMAKE(ganglia-monitor-core, $GANGLIA_VERSION)
 
+sinclude(config/apr_common.m4)
+
 AC_SUBST(GANGLIA_MAJOR_VERSION)
 AC_SUBST(GANGLIA_MINOR_VERSION)
 AC_SUBST(GANGLIA_MICRO_VERSION)
@@ -87,6 +89,14 @@ dnl
 AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
 AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
 AC_CYGWIN
+
+echo $ac_n "${nl}Configuring libmetrics ...${nl}"
+APR_SUBDIR_CONFIG(srclib/libmetrics, [ --cache-file=../../config.cache ])
+
+echo $ac_n "${nl}Configuring expat ...${nl}"
+APR_SUBDIR_CONFIG(srclib/expat,
+[ --prefix=$prefix --cache-file=../../config.cache ])
+
 
 dnl ##################################################################
 dnl Checks for programs.
@@ -190,24 +200,6 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS(syslog.h pthread.h fcntl.h signal.h sys/time.h sys/types.h sys/stat.h sys/socket.h sys/ioctl.h netinet/in.h arpa/inet.h net/if.h netinet/tcp.h unistd.h stropts.h sys/sockio.h ctype.h errno.h netdb.h stdio.h sys/uio.h sys/wait.h sys/un.h sys/select.h sys/filio.h getopt.h net/if_dl.h net/raw.h poll.h)
 AC_CHECK_HEADERS(inttypes.h limits.h sys/param.h sys/mount.h sys/vfs.h sys/statfs.h sys/statvfs.h)
 
-
-
-# For libdnet
-if test "$CYGWIN" = yes ; then
-   AC_CHECK_HEADERS(Iphlpapi.h winsock2.h)
-else
-   AC_CHECK_HEADERS(fcntl.h unistd.h)
-   AC_CHECK_HEADERS(sys/bufmod.h sys/dlpi.h sys/dlpihdr.h sys/dlpi_ext.h \
-       sys/ioctl.h sys/mib.h sys/ndd_var.h sys/socket.h sys/sockio.h \
-       sys/sysctl.h sys/time.h)
-   AC_CHECK_HEADERS(net/bpf.h net/if.h net/if_arp.h net/if_dl.h \
-       net/pfvar.h netinet/ip_fw.h )
-   AC_CHECK_HEADERS(ip_fil_compat.h netinet/ip_fil_compat.h ip_compat.h \
-       netinet/ip_compat.h ip_fil.h netinet/ip_fil.h)
-   AC_CHECK_HEADERS(hpsecurity.h)
-fi
-
-
 dnl ##################################################################
 dnl Checks for typedefs.
 dnl
@@ -234,36 +226,6 @@ dnl AC_CHECK_SIZEOF(void *)
 dnl ##################################################################
 dnl Check for structure definitions.
 dnl   
-if test "$ac_cv_header_sys_socket_h" = yes ; then
-   AC_DNET_SOCKADDR_SA_LEN
-fi
-
-dnl Check for Ethernet interface.
-if test "$ac_cv_header_Iphlpapi_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-win32.o"
-elif test "$ac_cv_dnet_bsd_bpf" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-bsd.o"
-elif test "$ac_cv_dnet_linux_pf_packet" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-linux.o"
-elif test "$ac_cv_header_net_raw_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-snoop.o"
-elif test "$ac_cv_header_sys_ndd_var_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-ndd.o"
-elif test "$ac_cv_header_sys_dlpi_h" = yes || \
-     test "$ac_cv_header_sys_dlpihdr_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-dlpi.o"
-else
-   DNET_OBJS="$DNET_OBJS eth-none.o"
-fi
-
-dnl Check for network interface interface.
-if test "$ac_cv_header_Iphlpapi_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS intf-win32.o"
-else
-   DNET_OBJS="$DNET_OBJS intf.o"
-fi
-
-AC_SUBST(DNET_OBJS)
 
 
 dnl ##################################################################
@@ -316,7 +278,6 @@ case "$host" in
                 metric_source="linux.c"
                 CFLAGS="$CFLAGS -D_REENTRANT"
                 AC_DEFINE(LINUX, 1, LINUX)
-                AC_DNET_LINUX_PROCFS   
 dnl
 dnl For fsusage.c - disk usage.
 dnl
@@ -373,9 +334,10 @@ dnl
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
 
-AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
+dnl Handled by libmetrics now...
+dnl AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
-AC_OUTPUT(Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile)
+AC_OUTPUT(Makefile srclib/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile)
 
 echo ""
 echo "-- Ganglia $VERSION --"
