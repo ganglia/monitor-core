@@ -282,7 +282,7 @@ print_config(char *path, gmond_config_t *config)
       fprintf(stdout,"acl{\n  default=\"deny\"\n");
       for(i = 0, p = config->trusted_hosts[i]; p; i++, p = config->trusted_hosts[i])
 	{
-	  fprintf(stdout, "  access {\n  ip=\"%s\"\n  mask = 24\n  action = \"allow\"\n  }\n", p);
+	  fprintf(stdout, "  access {\n  ip=\"%s\"\n  mask = 32\n  action = \"allow\"\n  }\n", p);
 	}
       fprintf(stdout,"}\n");/* close acl */
     }
