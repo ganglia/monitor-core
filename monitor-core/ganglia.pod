@@ -702,58 +702,58 @@ is not yet complete).
 
   Metric Name    Description                             Platforms
   -----------------------------------------------------------------------
-  boottime      System boot timestamp                    l,f
-  bread_sec
-  bwrite_sec
-  bytes_in      Number of bytes in per second            l,f
-  bytes_out     Number of bytes out per second           l,f
+  boottime      System boot timestamp                    e 
+  bread_sec     Buffer reads per second                  s
+  bwrite_sec    Buffer writes per second                 s
+  bytes_in      Number of bytes in per second            l,f,s
+  bytes_out     Number of bytes out per second           l,f,s
   cpu_aidle     Percent of time since boot idle CPU      l
-  cpu_arm
-  cpu_avm
-  cpu_idle      Percent CPU idle                         l,f
-  cpu_intr
-  cpu_nice      Percent CPU nice                         l,f
-  cpu_num       Number of CPUs                           l,f
-  cpu_rm
-  cpu_speed     Speed in MHz of CPU                      l,f
-  cpu_ssys
-  cpu_system    Percent CPU system                       l,f
-  cpu_user      Percent CPU user                         l,f
-  cpu_vm
-  cpu_wait
-  cpu_wio
+  cpu_idle      Percent CPU idle                         e
+  cpu_intr      Time spent processing interrupts         h
+  cpu_nice      Percent CPU nice                         l,f,h,t
+  cpu_num       Number of CPUs                           e 
+  cpu_speed     Speed in MHz of CPU                      e 
+  cpu_ssys      Time in kernel mode                      h
+  cpu_system    Percent CPU system                       l,f,h,t,s
+  cpu_user      Percent CPU user                         l,f,h,t,s
+  cpu_wait      Time spent waiting                       h
+  cpu_wio       Time spent in i/o wait                   s
   disk_free     Total free disk space                    l,f
   disk_total    Total available disk space               l,f
-  load_fifteen  Fifteen minute load average              l,f
-  load_five     Five minute load average                 l,f
-  load_one      One minute load average                  l,f
+  load_fifteen  Fifteen minute load average              e 
+  load_five     Five minute load average                 e 
+  load_one      One minute load average                  e 
   location      GPS coordinates for host                 e
-  lread_sec
-  lwrite_sec
-  machine_type
-  mem_buffers   Amount of buffered memory                l,f
-  mem_cached    Amount of cached memory                  l,f
-  mem_free      Amount of available memory               l,f
+  lread_sec     Linear reads per second                  s
+  lwrite_sec    Linear writes per second                 s
+  machine_type  Type of machine hardward (uname -m)      e 
+  mem_arm                                                h
+  mem_avm                                                h
+  mem_buffers   Amount of buffered memory                l,f,i
+  mem_cached    Amount of cached memory                  l,f,h
+  mem_free      Amount of available memory               e
+  mem_rm                                                 h
   mem_shared    Amount of shared memory                  l,f
   mem_total     Amount of available memory               l,f
+  mem_vm                                                 h
   mtu           Network maximum transmission unit        l,f
   os_name       Operating system name                    l,f
   os_release    Operating system release (version)       l,f
   part_max_used Maximum percent used for all partitions  l,f
-  phread_sec
-  phwrite_sec
+  phread_sec    Physical reads per second                s
+  phwrite_sec   Physical writes per second               s
   pkts_in       Packets in per second                    l,f
   pkts_out      Packets out per second                   l,f
   proc_run      Total number of running processes        l,f
   proc_total    Total number of processes                l,f
-  rcache
+  rcache        Read cache hit ratio                     s
   swap_free     Amount of available swap memory          l,f
   swap_total    Total amount of swap memory              l,f
   sys_clock     Current time on host                     l,f
-  wcache
+  wcache        Write cache hit ratio                    s
 
   Platform key:
-  l = Linux, f = FreeBSD, a = AIX, c = Cygwin
+  l = Linux, f = FreeBSD, s = Solaris, a = AIX
   m = MacOS, i = IRIX, h = HPUX,  t = Tru64
   e = Every Platform
 
