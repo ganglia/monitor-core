@@ -46,6 +46,9 @@ typedef struct
       char *name;
       unsigned int num_sources;
       g_inet_addr **sources;
+      long double  sum[MAX_METRIC_HASH_VALUE];
+      unsigned int num[MAX_METRIC_HASH_VALUE];
+      int dead;
    }
 data_source_list_t;
 
