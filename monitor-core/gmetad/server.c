@@ -7,12 +7,12 @@
 #include "gmetad.h"
 
 #include "lib/llist.h"
-#include "lib/my_inet_ntop.h"
+#include "libunp/unp.h"
 #include "lib/zio.h"
 
-extern g_tcp_socket *server_socket;
+extern int server_socket;
 extern pthread_mutex_t  server_socket_mutex;
-extern g_tcp_socket *interactive_socket;
+extern int interactive_socket;
 extern pthread_mutex_t  server_interactive_mutex;
 
 extern Source_t root;
@@ -462,13 +462,13 @@ server_thread (void *arg)
          if (interactive)
             {
                pthread_mutex_lock(&server_interactive_mutex);
-               SYS_CALL( client.fd, accept(interactive_socket->sockfd, (struct sockaddr *) &(client.addr), &len));
+               SYS_CALL( client.fd, accept(interactive_socket, (struct sockaddr *) &(client.addr), &len));
                pthread_mutex_unlock(&server_interactive_mutex);
             }
          else
             {
                pthread_mutex_lock  ( &server_socket_mutex );
-               SYS_CALL( client.fd, accept(server_socket->sockfd, (struct sockaddr *) &(client.addr), &len));
+               SYS_CALL( client.fd, accept(server_socket, (struct sockaddr *) &(client.addr), &len));
                pthread_mutex_unlock( &server_socket_mutex );
             }
          if ( client.fd < 0 )
@@ -479,7 +479,7 @@ server_thread (void *arg)
                continue;
             }
 
-         my_inet_ntop( AF_INET, (void *)&(client.addr.sin_addr), remote_ip, 16 );
+         inet_ntop( AF_INET, (void *)&(client.addr.sin_addr), remote_ip, 16 );
 
          if ( !strcmp(remote_ip, "127.0.0.1")
                || gmetad_config.all_trusted

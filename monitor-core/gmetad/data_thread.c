@@ -20,10 +20,8 @@ extern int process_xml(data_source_list_t *, char *);
 void *
 data_thread ( void *arg )
 {
-   int i, sleep_time, bytes_read, rval;
+   int i, sleep_time, bytes_read, rval, sock = -1;
    data_source_list_t *d = (data_source_list_t *)arg;
-   g_inet_addr *addr;
-   g_tcp_socket *sock=0;
    datum_t key;
    char *buf;
    /* This will grow as needed */
@@ -37,8 +35,7 @@ data_thread ( void *arg )
          fprintf(stderr,"Data thread %d is monitoring [%s] data source\n", (int) pthread_self(), d->name);
          for(i = 0; i < d->num_sources; i++)
             {
-               addr = d->sources[i];
-               fprintf(stderr, "\t%s\n", addr->name);
+               fprintf(stderr, "\t%s : %s\n", d->names[i], d->ports[i]);
             }
       }
 
@@ -60,23 +57,23 @@ data_thread ( void *arg )
          for(i=0; i < d->num_sources; i++)
             {
                /* Find first viable source in list. */
-               sock = g_tcp_socket_new ( d->sources[i] );
-               if( sock )
+               sock = Tcp_connect( d->names[i], d->ports[i]);
+               if( sock > 0 )
                   break;
             }
 
-         if(!sock)
+         if(sock < 0)
             {
-               err_msg("data_thread() got not answer from any [%s] datasource", d->name);
+               err_msg("data_thread() got no answer from any [%s] datasource", d->name);
                d->dead = 1;
                goto take_a_break;
             }
 
-         struct_poll.fd = sock->sockfd;
+         struct_poll.fd = sock;
          struct_poll.events = POLLIN; 
   
          /* Create a zlib stream */
-         z = gzdopen( sock->sockfd, "rb" ); 
+         z = gzdopen( sock, "rb" ); 
          if(!z)
            {
              err_msg("unable to create zlib stream\n");
@@ -168,7 +165,7 @@ data_thread ( void *arg )
        take_a_break:
          if(z)
            gzclose(z);
-         g_tcp_socket_delete(sock);
+         close(sock);
 
          gettimeofday(&end, NULL);
          /* Sleep somewhere between (step +/- 5sec.) */

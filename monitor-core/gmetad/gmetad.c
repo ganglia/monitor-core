@@ -11,7 +11,7 @@
 
 #include "lib/llist.h"
 #include "lib/become_a_nobody.h"
-#include "lib/daemon_init.h"
+#include "libunp/unp.h"
 
 #include "gmetad.h"
 #include "cmdline.h"
@@ -22,8 +22,8 @@ hash_t *sources;
 /* The root of our local grid. Replaces the old "xml" hash table. */
 Source_t root;
 
-g_tcp_socket *server_socket;
-g_tcp_socket *interactive_socket;
+int server_socket;
+int interactive_socket;
 
 pthread_mutex_t  server_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  server_interactive_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -46,15 +46,26 @@ static int
 print_sources ( datum_t *key, datum_t *val, void *arg )
 {
    int i;
-   data_source_list_t *d = *((data_source_list_t **)(val->data));
-   g_inet_addr *addr;
+   data_source_list_t *d;
+
+   if(!key || !key->data)
+     {
+       err_quit("invalid key data in source hash");
+     }
+   debug_msg("Source: %s", key->data);
+
+   if(!val || !val->data)
+     {
+       err_quit("invalid value data in source hash");
+     }
+
+   d = *((data_source_list_t **)(val->data));
 
    fprintf(stderr,"Source: [%s, step %d] has %d sources\n",
       (char*) key->data, d->step, d->num_sources);
    for(i = 0; i < d->num_sources; i++)
       {
-         addr = d->sources[i];
-         fprintf(stderr, "\t%s\n", addr->name);
+         fprintf(stderr, "\t%s:%s\n", d->names[i], d->ports[i]);
       }
 
    return 0;
@@ -267,6 +278,7 @@ main ( int argc, char *argv[] )
    struct passwd *pw;
    char hostname[HOSTNAMESZ];
    gmetad_config_t *c = &gmetad_config;
+   char port[64];
 
    srand(52336789);
 
@@ -304,13 +316,16 @@ main ( int argc, char *argv[] )
          err_quit("Unable to create root summary hash");
       }
 
+   fprintf(stderr,"parsing %s\n", args_info.conf_arg);
    parse_config_file ( args_info.conf_arg );
+
     /* If given, use command line directives over config file ones. */
    if (args_info.debug_given)
       {
          c->debug_level = args_info.debug_arg;
       }
    debug_level = c->debug_level;
+
 
    /* Setup our default authority pointer if the conf file hasnt yet.
     * Done in the style of hash node strings. */
@@ -363,7 +378,7 @@ main ( int argc, char *argv[] )
 
    if(debug_level)
       {
-         printf("Sources are ...\n");
+         printf("Sources (%p) are ...\n", sources);
          hash_foreach( sources, print_sources, NULL);
       }
 
@@ -373,21 +388,13 @@ main ( int argc, char *argv[] )
          daemon_init (argv[0], 0);
       }
 
-   server_socket = g_tcp_socket_server_new( c->xml_port );
-   if (server_socket == NULL)
-      {
-         perror("tcp_listen() on xml_port failed");
-         exit(1);
-      }
-   debug_msg("xml listening on port %d", c->xml_port);
+   sprintf(port, "%d", c->xml_port);
+   server_socket = Tcp_listen( NULL, port, NULL );
+   debug_msg("xml listening on port %s", port);
    
-   interactive_socket = g_tcp_socket_server_new( c->interactive_port );
-   if (interactive_socket == NULL)
-      {
-         perror("tcp_listen() on interactive_port failed");
-         exit(1);
-      }
-   debug_msg("interactive xml listening on port %d", c->interactive_port);
+   sprintf(port, "%d", c->interactive_port);
+   interactive_socket = Tcp_listen(NULL, port, NULL );
+   debug_msg("interactive xml listening on port %s", port);
 
    pthread_attr_init( &attr );
    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
