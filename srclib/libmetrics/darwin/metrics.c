@@ -123,20 +123,23 @@ cpu_speed_func ( void )
 g_val_t
 mem_total_func ( void )
 {
-   g_val_t val;
-   unsigned long long physmem;
-   size_t len = sizeof (physmem);
-   int mib[2];
+  g_val_t val;
+#if HW_MEMSIZE
+  unsigned long long physmem;
+  size_t len = sizeof (physmem);
+  int mib[2];
 
-   mib[0] = CTL_HW;
-   mib[1] = HW_MEMSIZE;
+  mib[0] = CTL_HW;
+  mib[1] = HW_MEMSIZE;
 
-   sysctl(mib, 2, &physmem, &len, NULL, 0);
+  sysctl(mib, 2, &physmem, &len, NULL, 0);
 
-   val.uint32 = (unsigned long) (physmem / 1024);
-
-   return val;
-}
+  val.uint32 = (unsigned long) (physmem / 1024);
+#else
+  val.uint32 = 0;
+#endif
+  return val;
+} 
 
 g_val_t
 swap_total_func ( void )
