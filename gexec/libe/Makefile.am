@@ -1,6 +1,3 @@
-CFLAGS				= -O2 -Wall -D_REENTRANT -g
-INCLUDES			= -I.
-
 pkgincludedir		= ${prefix}/include/e
 
 lib_LIBRARIES		= libe.a
