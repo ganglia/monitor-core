@@ -25,12 +25,7 @@ RRD_update( char *rrd, char *value )
          err_msg("RRD_update: %s", rrd_get_error());
          return 1;
       } 
-
    debug_msg("Updated rrd %s with value %s", rrd, val);
-
-   /*
-   RRDs::update ("$rrd", "N:$val");
-   */
    return 0;
 }
 
