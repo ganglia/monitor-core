@@ -6,7 +6,9 @@ development.
 To prepare the distribution for compilation, run the 
 script "./bootstrap".
 
-You should have the following software installed...
+For best results, make sure you have
+at least the following installed.
+
 automake (GNU automake) 1.6.3
 autoconf (GNU Autoconf) 2.53
 ltmain.sh (GNU libtool) 1.4.2
