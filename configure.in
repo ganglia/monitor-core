@@ -404,7 +404,8 @@ dnl ##################################################################
 dnl Checks for library functions.
 dnl
 dnl AC_FUNC_MEMCMP
-AC_CHECK_FUNCS(getopt_long inet_ntop)
+AC_CHECK_FUNCS(inet_ntop)
+AC_CHECK_FUNCS(getopt_long)
 AC_CHECK_FUNCS(bzero)
 AC_CHECK_FUNCS(getaddrinfo)
 AC_CHECK_FUNCS(freeaddrinfo)
