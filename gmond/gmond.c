@@ -12,6 +12,7 @@
 #include "lib/barrier.h"
 #include "lib/become_a_nobody.h"
 #include "libunp/unp.h"
+#include "libunp/unpifi.h"
 #include "lib/debug_msg.h"
 #include "lib/tpool.h"
 
@@ -23,10 +24,13 @@
 hash_t *cluster;
 
 g3_thread_pool collect_send_pool = NULL;
-int **send_sockets;
+int send_sockets[1024];
+int   send_index;
 
 g3_thread_pool receive_pool = NULL;
-int **receive_sockets;
+int receive_sockets[1024];
+int   receive_index;
+
 
 int server_socket;
 pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
@@ -36,7 +40,6 @@ pthread_mutex_t  compressed_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* In monitor.c */
 extern void monitor_thread(void *arg);
-extern int send_value ( uint32_t key );
 
 /* In listen.c */
 extern void msg_listen_thread(void *arg);  
@@ -55,6 +58,8 @@ struct gengetopt_args_info args_info;
 extern gmond_config_t gmond_config;
 
 uint32_t start_time;
+
+struct ifi_info *interfaces;
 
 /* This only works on IPv4 for right now */
 static int
@@ -147,7 +152,7 @@ location_func(void)
 int 
 main ( int argc, char *argv[] )
 {
-   int rval, i=0;
+   int rval, i=0, j, multicast;
    g_val_t initval;
    pthread_t tid;
    pthread_attr_t attr;
@@ -156,6 +161,9 @@ main ( int argc, char *argv[] )
    struct sockaddr *sa;
    socklen_t salen;
    const int on = 1;
+   struct ifi_info *n;
+   channel_t *channel;
+   char *ifi;
 
    gettimeofday(&tv, NULL);
    start_time = (uint32_t) tv.tv_sec;
@@ -177,9 +185,6 @@ main ( int argc, char *argv[] )
          err_quit("failed to process %s. Exiting.", args_info.conf_arg);
       }
   
-   print_conf(&gmond_config);
-   exit(0);
-
    /* If given, use command line directives over config file ones. */
    if (args_info.debug_given) {
       gmond_config.debug_level = args_info.debug_arg;
@@ -219,36 +224,80 @@ main ( int argc, char *argv[] )
    /* Ignore any SIGPIPE signals */
    signal( SIGPIPE, SIG_IGN );    
 
-#if 0
+   /* Collect the names/info of all the interfaces on this machine */
+   interfaces = get_ifi_info( AF_INET, 0);
+
+   if(debug_level)
+     print_conf(&gmond_config);
 
    if(! gmond_config.deaf )
       {
+        /* We need to calculate how many channels we will be listening on */
         receive_pool = g3_thread_pool_create( gmond_config.num_receive_channels, 128, 1 );
 
-        for(i=0; i< gmond_config.num_receive_channels; i++)
-          {
-            if(gmond_config.receive_channels[i] && is_multicast(gmond_config.receive_channels[i]))
-              {
-                /* Multicast channels.. we need to join a Multicast group */
-                receive_sockets[i] = Udp_client( gmond_config.receive_channels[i], 
-                                                 gmond_config.receive_ports[i],
-                                                 (void **)&sa, &salen);
-                Setsockopt( receive_sockets[i], SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-                Bind( receive_sockets[i], sa, salen );
-                Mcast_join( receive_sockets[i], sa, salen, 
-                       gmond_config.mcast_if_given ? gmond_config.mcast_if : NULL, 0);
-              }
-            else
-              {
-                /* Non-multicast channels */
-                receive_sockets[i] = Udp_server( gmond_config.receive_channels[i], 
-                                             gmond_config.receive_ports[i],
-                                             &salen);
-                Setsockopt( receive_sockets[i], SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-              }
+	receive_index = 0;
 
-             g3_run( receive_pool, msg_listen_thread, (void *)&receive_sockets[i]); 
-           }
+        for(i=0; i<= gmond_config.current_channel; i++)
+          {
+            channel = gmond_config.channels[i];
+
+	    /* We only process the channels with receive actions */
+            if(!strstr(channel->action, "receive"))
+	      continue;
+
+	    /* Check if the address is multicast */
+	    multicast = is_multicast(channel->address) == 1? 1: 0;
+
+	    for(j = 0; j <= channel->num_interfaces; j++)
+	      {
+		ifi = NULL;
+		if(channel->num_interfaces)
+		  {
+		    int found = 0;
+
+		    ifi = channel->interfaces[j];
+
+		    for(n = interfaces; n; n = n->ifi_next)
+		      {
+			/* Check if the interface exists on the machine */
+                        if(!strcmp( n->ifi_name, ifi))
+			  {
+			    found =1;
+			    break;
+			  }
+		      }
+		    if(!found)
+		      {
+			fprintf(stderr,"The interface %s was not found. Check your config file\n", ifi);
+			exit(1);
+		      }
+		  }
+
+	        /* Whether it's a multicast channel or not, we need to create the UDP client socket */
+	        receive_sockets[receive_index] = Udp_client( channel->address, channel->port, (void **)&sa, &salen);
+	        Setsockopt( receive_sockets[receive_index], SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+
+	        if(multicast)
+	          {
+		    /* Multicast channels.. we need to join a Multicast group */
+		    Bind( receive_sockets[receive_index], sa, salen );
+		    Mcast_join( receive_sockets[receive_index], sa, salen, ifi, 0);
+	          }
+		else
+		  {
+		    /* Not implemented just yet.  We need to set up explicit routes for unicast routes here */
+		  }
+
+                g3_run( receive_pool, msg_listen_thread, (void *)&receive_sockets[receive_index]); 
+		receive_index++;
+		if(receive_index >= 1024)
+		  {
+		    fprintf(stderr,"The maximum number of receive sockets is 1024\n");
+		    exit(1);
+		  }
+
+	      } /* interfaces loop */
+           } /* channels loop */
         
          debug_msg("Starting socket to listen on XML port %s", gmond_config.xml_port);
          server_socket = Tcp_listen(NULL, gmond_config.xml_port, &salen );
@@ -279,19 +328,31 @@ main ( int argc, char *argv[] )
    if(! gmond_config.mute )
       {
          collect_send_pool = g3_thread_pool_create( 4, 128, 1);
-         for(i = 0 ; i < gmond_config.num_send_channels; i++)
-           {
-             send_sockets[i] = Udp_connect( gmond_config.send_channels[i],
-                                               gmond_config.send_ports[i]);
-             debug_msg("sending messages on channel %s %s", 
-		    gmond_config.send_channels[i], gmond_config.send_ports[i]);
 
-             if(is_multicast( gmond_config.send_channels[i] ))
+	 send_index = 0;
+
+         for(i = 0 ; i <= gmond_config.current_channel; i++)
+           {
+	     channel = gmond_config.channels[i];
+
+	     if(!strstr(channel->action, "send"))
+	       continue;
+
+             send_sockets[send_index] = Udp_connect( channel->address, channel->port );
+             debug_msg("sending messages on channel %s %s", channel->address, channel->port );
+
+             if(is_multicast( channel->address ) == 1)
                {
                  /* Set the TTL for the multicast channel.  In the future, this will have
                     meaning in the context of plain UDP channels too. */
-                 Mcast_set_ttl( send_sockets[i], gmond_config.mcast_ttl); 
+                 Mcast_set_ttl( send_sockets[send_index], channel->ttl);
                }
+	     send_index++;
+	     if(send_index>=1024)
+	       {
+		 fprintf(stderr,"You have specified over 1024 send channels.\n");
+		 exit(1);
+	       }
            }
 
         /* Start up the threads for monitoring and sending metrics */
@@ -306,7 +367,6 @@ main ( int argc, char *argv[] )
       {
          pause();
       }
-#endif
 
    return 0;
 }

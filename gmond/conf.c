@@ -193,8 +193,6 @@ static DOTCONF_CB(cb_open_channel)
   const char *err = 0;
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
 
-  fprintf(stderr,"<OPEN>\n");
-
   if(context->permissions & CHANNEL_SECTION)
     return "<Channel> cannot be nested";
 
@@ -203,6 +201,8 @@ static DOTCONF_CB(cb_open_channel)
       /* User has specified a channel but we're just going to overwrite
          the first channel (which is set to the defaults) */
       c->channel_given = 1;
+      c->num_send_channels = 0; /* reset */
+      c->num_receive_channels = 0; /* reset */
     }
   else
     {
@@ -266,7 +266,6 @@ static DOTCONF_CB(cb_close_channel)
       return buf;
     }
 
-  fprintf(stderr,"</CLOSE>\n");
   /* Count the number of actions required for the thread pools later */
   channel = c->channels[c->current_channel];
   if(strstr(channel->action, "send"))
@@ -552,8 +551,8 @@ set_defaults(gmond_config_t *config )
    config->location = conf_strdup("unspecified");
 
    config->current_channel = 0; 
-   config->num_send_channels = 0;
-   config->num_receive_channels =0;
+   config->num_send_channels = 1; /* The default */
+   config->num_receive_channels = 1; /* channel */
 
    /* Make room for the first channel */
    config->channels = (channel_t **) malloc ( sizeof(channel_t *));
