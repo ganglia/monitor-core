@@ -621,9 +621,14 @@ dnl
 		   CFLAGS="$CFLAGS -D__STDC__ -D_POSIX_C_SOURCE=199506L -DHAVE_STRERROR"
 		fi 
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
-*freebsd*)      metric_source="freebsd.c" 
-                CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
-                AC_DEFINE(FREEBSD, 1, FREEBSD);; 
+*freebsd*)
+		metric_source="freebsd.c" 
+		osreldate=`awk '/^\#define[[:space:]]*__FreeBSD_version/ { print $3 }' /usr/include/osreldate.h`
+		if test $osreldate -lt 502102; then   
+			CFLAGS="-pthread $CFLAGS -D_REENTRANT"
+		fi
+		AC_DEFINE(FREEBSD, 1, FREEBSD)
+		;; 
 *cygwin*)      	metric_source="cygwin.c" 
                 LIBS="$LIBS -lrpc"
 		AC_DEFINE(CYGWIN,1,CYGWIN)
