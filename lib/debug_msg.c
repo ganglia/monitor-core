@@ -15,7 +15,7 @@ int debug_level = 0;
 void
 debug_msg(const char *format, ...)
 {
-   if (debug_level && format)
+   if (debug_level > 1 && format)
       {
          va_list ap;
          va_start(ap, format);
