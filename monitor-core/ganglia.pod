@@ -47,15 +47,14 @@ small utility programs.
 
 Gmond is a multi-threaded daemon which runs on each cluster node you want to monitor. 
 Installation is easy. You don't have to have a common NFS filesystem or a database backend, 
-install special accounts, maintain configuration files or other annoying hassles. Gmond is 
-its own redundant, distributed database.
+install special accounts, maintain configuration files or other annoying hassles. 
 
-Gmond has four main responsibilities: monitor changes in host state, multicast relevant changes, 
-listen to the state of all other ganglia nodes via a multicast channel and answer requests for 
-an XML description of the cluster state. 
+Gmond has four main responsibilities: monitor changes in host state, announce relevant changes, 
+listen to the state of all other ganglia nodes via a unicast or multicast channel and answer requests for 
+an XML description of the cluster state.  
 
-Each gmond transmits in information in two different ways: multicasting host state in external data 
-representation (XDR) format or sending XML over a TCP connection.
+Each gmond transmits in information in two different ways: unicasting/multicasting host state in external data 
+representation (XDR) format using UDP messages or sending XML over a TCP connection.
 
 =item B<Ganglia Meta Daemon (gmetad)>
 
@@ -105,11 +104,10 @@ flavours of Unix (primarily Linux) with the Apache webserver and the PHP 4.1 mod
 
 =head1 Installation
 
-The latest version of all ganglia software can always be downloaded from 
-http://ganglia.sourceforge.net/downloads.php
+The latest version of all ganglia software can always be downloaded from http://ganglia.info/
 
 Ganglia runs on Linux (i386, ia64, sparc, alpha, powerpc, m68k, mips, arm, hppa, s390), 
-Solaris, FreeBSD, AIX, IRIX, Tru64, HPUX, MacOS X and Windows (cygwin beta) making it as 
+Solaris, FreeBSD, AIX, IRIX, Tru64, HPUX, MacOS X and Windows NT/XP/2000 making it as 
 portable as it is scalable.
 
 =head2 Monitoring Core Installation
@@ -129,10 +127,10 @@ but there are some issues that you need to take a look at first.
 
 =item B<Kernel multicast support>
 
-Currently ganglia will only run on machines with multicast support.  The
+If you use the ganglia multicast support, you much have a kernel that 
+supports multicast.  The
 vast majority of machines have multicast support by default.  If you have
-problems with ganglia this is a core issue.  Later versions of ganglia will not
-have the multicast requirement.
+problems with ganglia this is a core issue.  
 
 =item B<Gmetad is not installed by default>
 
@@ -171,8 +169,8 @@ across multiple nodes, thereby eliminating problems associated with single node 
 (e.g., limits on the number of file descriptors on front-end nodes). 
 (from http://www.theether.org/gexec )
 
-C<gexec> is a great cluster execution tool but integrating it with ganglia is very clumsy to
-say the least.  GEXEC can run standalone without access to a ganglia C<gmond>.  In standalone
+C<gexec> is a great cluster execution tool but integrating it with ganglia is a bit clumsy.
+GEXEC can run standalone without access to a ganglia C<gmond>.  In standalone
 mode gexec will use the hosts listed in your GEXEC_SVRS variable to run on.  For example,
 say I want to run C<hostname> on three machines in my cluster: C<host1>, C<host2> and C<host3>.
 I use the following command line.
@@ -197,7 +195,7 @@ flag
 
   % ./configure --enable-gexec
 
-Enabling C<gexec> means that by default any host running gmond will send a special multicast
+Enabling C<gexec> means that by default any host running gmond will send a special
 message announcing that gexec is installed on it and open for requests.
 
 Now the question is, what if I don't want gexec to run on every host in my cluster?  For
@@ -231,7 +229,8 @@ you should find the following files installed in C</usr> (by default).
 If you installed ganglia using RPMs then these files will be installed when you install
 the RPM.  The RPM is installed simply by running
 
-  % rpm -Uvh ganglia-monitor-core-GANGLIA_VERSION.tar.gz
+  % rpm -Uvh ganglia-gmond-GANGLIA_VERSION.i386.rpm
+  % rpm -Uvh ganglia-gmetad-GANGLIA_VERSION.i386.rpm
 
 Once you have the necessary binaries installed, you can test your installation by running
 
@@ -262,14 +261,11 @@ Repeat this step with gmetad.
 
 =item 1.
 
-Unzip the webfrontend distribution in your website tree. This is often under the directory 
-C</var/www/html>, however look for the variable C<DocumentRoot> in your Apache configuration 
+The B<./web> directory of the ganglia distribution contains all the necessary PHP files for
+running your web frontend.  Copy those files to C</var/www/html>, however look for the variable 
+C<DocumentRoot> in your Apache configuration 
 files to be sure. All the PHP script files use relative URLs in their links, so you may 
-place the C<ganglia/> directory anywhere convenient. I like to unzip *tar.gz 
-files with one tar command:
-
-  % cd /var/www/html
-  % tar xvzf gmetad-webfrontend-2.5.0.tar.gz
+place the C<ganglia/> directory anywhere convenient. 
 
 =item 2.
 
@@ -311,142 +307,50 @@ With a web-browser, where localhost is the address of your webserver.
 
 Installation of the web frontend is simplified on Linux by using rpm.
 
-  % rpm -Uvh gmetad-webfrontend-GANGLIA_VERSION-1.i386.rpm
+  % rpm -Uvh ganglia-web-GANGLIA_VERSION-1.i386.rpm
   Preparing...                ########################################### [100%]
-     1:gmetad-webfrontend     ########################################### [100%]
+     1:ganglia-web            ########################################### [100%]
 
 =head1 Configuration
 
 =head2 Gmond Configuration
 
-While the default options for gmond will work for most clusters, gmond is very 
-flexible and can be customize with the configuration file: C</etc/gmond.conf>.
+The configuration file format has changed between gmond version 2.5.x and version
+2.6.x.  The change was necessary in order to allow more complex configuration options.
 
-C</etc/gmond.conf> is not required as its absence will only cause gmond to start 
-in a default configuration. Here is a sample of a gmond.conf configuration file
-with comment to help you configure gmond
+Gmond has a default configuration it will use if it does not find the default configuration
+file B</etc/gmond.conf>.  To see the default configuration simply run the command:
 
-   # This is the configuration file for the Ganglia Monitor Daemon (gmond)
-   # Documentation can be found at http://ganglia.sourceforge.net/docs/
-   #
-   # To change a value from it's default simply uncomment the line
-   # and alter the value
-   #####################
-   #
-   # The name of the cluster this node is a part of
-   # default: "unspecified"
-   # name  "My Cluster"
-   #
-   # The owner of this cluster. Represents an administrative
-   # domain. The pair name/owner should be unique for all clusters
-   # in the world.
-   # default: "unspecified"
-   # owner "My Organization"
-   #
-   # The latitude and longitude GPS coordinates of this cluster on earth.
-   # Specified to 1 mile accuracy with two decimal places per axis in Decimal
-   # DMS format: "N61.18 W130.50".
-   # default: "unspecified"
-   # latlong "N32.87 W117.22"
-   #
-   # The URL for more information on the Cluster. Intended to give purpose,
-   # owner, administration, and account details for this cluster.
-   # default: "unspecified"
-   # url "http://www.mycluster.edu/"
-   #
-   # The location of this host in the cluster. Given as a 3D coordinate:
-   # "Rack,Rank,Plane" that corresponds to a Euclidean coordinate "x,y,z".
-   # default: "unspecified"
-   # location "0,0,0"
-   #
-   # The multicast channel for gmond to send/receive data on
-   # default: 239.2.11.71
-   # mcast_channel 239.2.11.71
-   #
-   # The multicast port for gmond to send/receive data on
-   # default: 8649
-   # mcast_port    8649
-   #
-   # The multicast interface for gmond to send/receive data on
-   # default: the kernel decides based on routing configuration
-   # mcast_if  eth1
-   #
-   # The multicast Time-To-Live (TTL) for outgoing messages
-   # default: 1
-   # mcast_ttl  1
-   #
-   # The number of threads listening to multicast traffic
-   # default: 2
-   # mcast_threads 2
-   #
-   # Which port should gmond listen for XML requests on
-   # default: 8649
-   # xml_port     8649
-   #
-   # The number of threads answering XML requests
-   # default: 2
-   # xml_threads   2
-   #
-   # Hosts ASIDE from "127.0.0.1"/localhost and those multicasting
-   # on the same multicast channel which you will share your XML
-   # data with.  Multiple hosts are allowed on multiple lines.
-   # Can be specified with either hostnames or IP addresses.
-   # default: none
-   # trusted_hosts 1.1.1.1 1.1.1.2 1.1.1.3 \
-   # 2.3.2.3 3.4.3.4 5.6.5.6
-   #
-   # The number of nodes in your cluster.  This value is used in the
-   # creation of the cluster hash.
-   # default: 1024
-   # num_nodes  1024
-   #
-   # The number of custom metrics this gmond will be storing.  This
-   # value is used in the creation of the host custom_metrics hash.
-   # default: 16
-   # num_custom_metrics 16
-   #
-   # Run gmond in "mute" mode.  Gmond will only listen to the multicast
-   # channel but will not send any data on the channel.
-   # default: off
-   # mute on
-   #
-   # Run gmond in "deaf" mode.  Gmond will only send data on the multicast
-   # channel but will not listen/store any data from the channel.
-   # default: off
-   # deaf on
-   #
-   # Run gmond in "debug" mode.  Gmond will not background.  Debug messages
-   # are sent to stdout.  Value from 0-100.  The higher the number the more
-   # detailed debugging information will be sent.
-   # default: 0
-   # debug_level 10
-   #
-   # If you don't want gmond to setuid, set this to "on"
-   # default: off
-   # no_setuid  on
-   #
-   # Which user should gmond run as?
-   # default: nobody
-   # setuid     nobody
-   #
-   # If you do not want this host to appear in the gexec host list, set
-   # this value to "on"
-   # default: off
-   # no_gexec   on
-   #
-   # If you want any host which connects to the gmond XML to receive
-   # data, then set this value to "on"
-   # default: off
-   # all_trusted on
+  % gmond --default_config
 
-If you want to customize the operation of gmond, simply edit this file and save it to 
-C</etc/gmond.conf>. You can create multiple gmond configurations by writing the 
-configuration file to a different file, say C</etc/gmond_test.conf>, and the using the 
-C<--conf> option of gmond to specify which configuration file to use.
+and gmond will output its default configuration to stdout.  This default configuration can
+serve as a good starting place for building a more custom configuration.
 
-  % ./gmond --conf=/etc/gmond_test.conf
+  % gmond --default_config > gmond.conf
 
-would start gmond with the settings in /etc/gmond_test.conf
+would create a file B<gmond.conf> which you can then edit to taste and copy to B</etc/gmond.conf>
+or elsewhere.
+
+To start gmond with a configuration file other then B</etc/gmond.conf>, simply specify the
+configuration file location by running
+
+  % gmond --config /my/ganglia/configs/custom.conf
+
+If you want to convert a 2.5.x configuration file to 2.6.x file format, run the following command
+
+  % gmond --convert ./old_25_config.conf  
+
+and gmond with output the equivalent 2.6.x configuration file to stdout.  You can then redirect
+that output to a new configuration file which can serve as a starting point for your configuration.
+
+  % gmond --convert ./old_25_config.conf > ./new_26_config.conf
+
+For details about gmond configuration options, simply run
+
+  % man gmond.conf
+
+for a complete listing of options with detailed explanations.
+
 
 =head2 Gmetad Configuration
 
@@ -609,33 +513,38 @@ host metrics that you like expanding on the core metrics that gmond measures by 
 If you want help with the gmetric sytax, simply use the "help" commandline option
 
   % gmetric --help
-    gmetric GANGLIA_VERSION
+  gmetric GANGLIA_VERSION
 
-   Purpose:
-     The Ganglia Metric Client (gmetric) announces a metric
-     value to all Ganglia Monitoring Daemons (gmonds) that are listening
-     on the cluster multicast channel.
+  Purpose:
+    The Ganglia Metric Client (gmetric) announces a metric
+    on the list of defined send channels defined in a configuration file
 
-   Usage: gmetric [OPTIONS]...
-      -h         --help                  Print help and exit
-      -V         --version               Print version and exit
-      -nSTRING   --name=STRING           Name of the metric
-      -vSTRING   --value=STRING          Value of the metric
-      -tSTRING   --type=STRING           Either string|int8|uint8|int16|uint16|int32|uint32|float|double
-      -uSTRING   --units=STRING          Unit of measure for the value e.g. Kilobytes, Celcius
-      -sSTRING   --slope=STRING          Either zero|positive|negative|both (default='both')
-      -xINT      --tmax=INT              The maximum time in seconds between gmetric calls (default=60)
-      -dINT      --dmax=INT              The lifetime in seconds of this metric (default=0)
-      -cSTRING   --mcast_channel=STRING  Multicast channel to send/receive on (default='239.2.11.71')
-      -pINT      --mcast_port=INT        Multicast port to send/receive on (default=8649)
-      -iSTRING   --mcast_if=STRING       Network interface to multicast on e.g. 'eth1' (default='kernel decides') 
-      -lINT      --mcast_ttl=INT         Multicast Time-To-Live (TTL) (default=1)
+  Usage: gmetric [OPTIONS]...
 
-The gmetric tool formats a special multicast message and sends it to all gmonds that are listening.
+    -h, --help          Print help and exit
+    -V, --version       Print version and exit
+    -c, --conf=STRING   The configuration file to use for finding send channels
+                        (default=`/etc/gmond.conf')
+    -n, --name=STRING   Name of the metric
+    -v, --value=STRING  Value of the metric
+    -t, --type=STRING   Either
+                        string|int8|uint8|int16|uint16|int32|uint32|float|double
+    -u, --units=STRING  Unit of measure for the value e.g. Kilobytes, Celcius
+                        (default=`')
+    -s, --slope=STRING  Either zero|positive|negative|both  (default=`both')
+    -x, --tmax=INT      The maximum time in seconds between gmetric calls
+                        (default=`60')
+    -d, --dmax=INT      The lifetime in seconds of this metric  (default=`0')
+
+Gmetric sends the metric specified on the commandline to all B<udp_send_channel>s specified
+in the configuration file B</etc/gmond.conf> by default.  If you want to send metric to 
+alternate B<udp_send_channel>s, you can specify a different configuration file as such:
+
+  % gmetric --conf=./custom.conf -n "wow" -v "it works" -t "string"
 
 All metrics in ganglia have a name, value, type and optionally units. For example, say I wanted 
 to measure the temperature of my CPU (something gmond doesn't do by default) then I could 
-multicast this metric with name="temperature", value="63", type="int16" and units="Celcius".
+send this metric with name="temperature", value="63", type="int16" and units="Celcius".
 
 Assume I have a program called C<cputemp> which outputs in text the temperature of the CPU
 
@@ -676,15 +585,29 @@ To get help with the commandline options, simply pass C<gstat> the C<--help> opt
      -iSTRING   --gmond_ip=STRING  Specify the ip address of the gmond to query (default='127.0.0.1')
      -pINT      --gmond_port=INT   Specify the gmond port to query (default=8649)
 
+Note: gstat with no option will only show gexec-enabled hosts.  To see all hosts that are UP (regardless
+of their gexec state) you need to add the B<--all> flag.
+
+  % gstat --all
+
 =head1 Frequently Asked Questions (FAQ)
 
 =over 4
 
 =item B<What metrics does ganglia collect on platform x?>
 
+To see a complete list of the metrics
+that a particular gmond supports, run the command:
+
+  % gmond -m
+
+and gmond will output all the metrics that it is capable of collecting 
+and sending.
+
 This table describes all the metrics that ganglia collects and
 shows what platforms the metric are supported on.  (The following table
-is not yet complete).
+is only partially complete).
+
 
   Metric Name    Description                             Platforms
   -----------------------------------------------------------------------
@@ -744,7 +667,7 @@ is not yet complete).
   e = Every Platform
 
 If you are interested in B<how> the metrics are collected, just
-take a look in directory C<./gmond/machines> in the source distribution.
+take a look in directory C<./srclib/libmetrics> in the source distribution.
 There is a single source file in the directory for each platform that is supported.
 
 =item B<What does the error "Process XML (x): XML_ParseBuffer() error at line x: not well-formed">
@@ -783,10 +706,10 @@ those messages to C<stderr> but they are send to C<stdout>).
 There are many ways that XML can be misformed.  The great tool for validating XML is C<xmllint>.
 C<xmllint> will read the file and find the line containing the error.  
 
-  % xmllint --valid XML.txt
+  % xmllint --valid --noout XML.txt
 
 will read your captured XML stream, validate it against the ganglia DTD and check that it is 
-well-formed XML.  C<xmllint> will print the entire XML stream if there are no errors.  If 
+well-formed XML.  C<xmllint> will quiet exit if there are no errors.  If 
 there are errors they will be reported with line numbers.  For example...
 
   /tmp/XML.txt:3393: error: Opening and ending tag mismatch: HOST and CLUSTER
@@ -816,7 +739,7 @@ Here is a common scenario
 =over 4
 
 =item 1.
-All hosts in a cluster are multicasting on the ganglia channel.
+All hosts in a cluster are send on the ganglia udp_send_channels.
 
 =item 2.
 One of the hosts fails or is moved for whatever reason.
@@ -833,6 +756,15 @@ Unfortunately there is currently no nice way to remove a single dead host from t
 All data in gmond is soft state so you will need to restart all gmond and gmetad processes.
 It is important to note that ALL dead hosts will be flushed from the record by restarting
 the processes (since they have to hear the host at least once to know it is expired).
+
+If you add the line
+
+  globals {
+    host_dmax = 3600
+  }
+
+then hosts will be removed from host tables when they haven't been heard from in 3600 seconds.
+See C<man gmond.conf> for details.
 
 =item B<How good is Solaris, IRIX, Tru64 support?>
 
