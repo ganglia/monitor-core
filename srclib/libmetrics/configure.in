@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.57)
 AC_INIT(libmetrics.c)
-AM_CONFIG_HEADER([config.h])
+AM_CONFIG_HEADER(config.h)
 AC_CONFIG_AUX_DIR(build)
 DATE_VERSION=`date +%Y%m%d%H%M`
 AM_INIT_AUTOMAKE("libmetrics", $DATE_VERSION)
