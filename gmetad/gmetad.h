@@ -1,6 +1,8 @@
 #ifndef GMETAD_H
 #define GMETAD_H 1 
 
+#include <zlib.h>
+
 #include "conf.h"
 #include "net.h"
 #include "hash.h"
@@ -123,6 +125,7 @@ typedef struct
       struct sockaddr_in addr;
       int valid;
       filter_type_t filter;
+      gzFile z;
    }
 client_t;
 

@@ -8,6 +8,7 @@ typedef struct
    {
       char *gridname;
       int xml_port;
+      int xml_compression_level;
       int interactive_port;
       int server_threads;
       llist_entry *trusted_hosts;
