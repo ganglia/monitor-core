@@ -28,11 +28,11 @@
 /* The entire cluster this gmond knows about */
 hash_t *cluster;
 
-g3_thread_pool collect_send_pool = NULL;
+ganglia_thread_pool collect_send_pool = NULL;
 int send_sockets[1024];
 int send_index;
 
-g3_thread_pool receive_pool = NULL;
+ganglia_thread_pool receive_pool = NULL;
 int receive_sockets[1024];
 int receive_index;
 
@@ -244,7 +244,7 @@ main ( int argc, char *argv[] )
    if(! gmond_config.deaf )
       {
         /* We need to calculate how many channels we will be listening on */
-        receive_pool = g3_thread_pool_create( gmond_config.num_receive_channels, 128, 1 );
+        receive_pool = ganglia_thread_pool_create( gmond_config.num_receive_channels, 128, 1 );
 
 	/* Set the receive socket index to zero */
 	receive_index = 0;
@@ -286,7 +286,7 @@ main ( int argc, char *argv[] )
 		    Setsockopt( receive_sockets[i], SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)); 
 		  }
 
-                g3_run( receive_pool, msg_listen_thread, (void *)&receive_sockets[receive_index]); 
+                ganglia_run( receive_pool, msg_listen_thread, (void *)&receive_sockets[receive_index]); 
 		receive_index++;
 		if(receive_index >= 1024)
 		  {
@@ -326,7 +326,7 @@ main ( int argc, char *argv[] )
 
    if(! gmond_config.mute )
       {
-         collect_send_pool = g3_thread_pool_create( 4, 128, 1);
+         collect_send_pool = ganglia_thread_pool_create( 4, 128, 1);
 
 	 send_index = 0;
 
@@ -372,7 +372,7 @@ main ( int argc, char *argv[] )
           for( i = 1 ; i < num_key_metrics; i++ )
             {
               metric[i].key = i;
-              g3_run( collect_send_pool, monitor_thread, &metric[i]);
+              ganglia_run( collect_send_pool, monitor_thread, &metric[i]);
             }
         }
 

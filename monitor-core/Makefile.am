@@ -6,7 +6,7 @@ libe_dir = libe
 endif
 
 # web is last since on 'make install' we echo a message
-SUBDIRS = libunp ${libe_dir} libhttpd lib ${gexec_dirs} tests gmetad gmond gmetric web
+SUBDIRS = libunp ${libe_dir} lib ${gexec_dirs} gmetad gmond gmetric web
 
 EXTRA_DIST = config ganglia.spec ganglia.pod ganglia.html mans
 

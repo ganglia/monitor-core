@@ -20,7 +20,7 @@
 /* Holds our data sources. */
 hash_t *sources;
 
-g3_thread_pool data_source_pool = NULL;
+ganglia_thread_pool data_source_pool = NULL;
 
 /* The root of our local grid. Replaces the old "xml" hash table. */
 Source_t root;
@@ -85,7 +85,7 @@ spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
 
    d->len = 1024;
 
-   g3_run( data_source_pool, data_thread, d );
+   ganglia_run( data_source_pool, data_thread, d );
    return 0;
 }
 
@@ -412,7 +412,7 @@ main ( int argc, char *argv[] )
       pthread_create(&pid, &attr, server_thread, (void*) 1);
 
    /* 4 workers, maximum queue of 256 and blocking (for now) */
-   data_source_pool = g3_thread_pool_create(4, 256, 0);
+   data_source_pool = ganglia_thread_pool_create(4, 256, 0);
    if(!data_source_pool)
      {
        err_quit("Unable to create data source thread pool\n");
