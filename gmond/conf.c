@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "conf.h"
 
+#if 0
 extern cfg_t *config_file;
 
 /* This function is necessary only because I need
@@ -34,3 +35,4 @@ value_callback(cfg_t *cfg, cfg_opt_t *opt, const char *value, void *result)
   fprintf(stderr,"CALLED\n");
   return 0;
 }
+#endif
