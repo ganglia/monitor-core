@@ -329,7 +329,6 @@ dnl
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
       AC_DEFINE(IA64,1,IA64)
       AC_DEFINE(HPUX,1,HPUX);;
-*ia64*)         AC_DEFINE(IA64,1,IA64);;
 *aix*)		metric_source="aix.c"
                 CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
                 AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
