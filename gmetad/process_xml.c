@@ -872,6 +872,9 @@ process_xml(data_source_list_t *d, char *buf)
 
    memset( &xmldata, 0, sizeof( xmldata ));
 
+   /* Set the return value to zero by default */
+   xmldata.rval = 0;
+
    /* Set the pointer to the data source record */
    xmldata.ds = d;
    
@@ -903,15 +906,14 @@ process_xml(data_source_list_t *d, char *buf)
        rval= XML_Parse( xml_parser, buf, strlen(buf), gmetad_config.force_names? 0: 1 );
        if(! rval )
           {
-             err_msg ("Process XML (%s): XML_ParseBuffer() error at line %d:\n%s\n",
+             err_msg ("Process XML (%s): XML_ParseBuffer() error:\n%s\n",
                              d->name,
-                             XML_GetCurrentLineNumber (xml_parser),
                              XML_ErrorString (XML_GetErrorCode (xml_parser)));
              xmldata.rval = 1;
           }
      }
 
-   if( gmetad_config.force_names )
+   if( xmldata.rval == 0 && gmetad_config.force_names )
      {
        XML_Parse(xml_parser, "</CLUSTER></GANGLIA_XML>",24, 1 );
      }
