@@ -120,9 +120,9 @@ send_all_metric_data( void )
 g_val_t
 gexec_func ( void )
 {
+  g_val_t val;
 #if GEXEC_SUPPORTED == 1
   int rval;
-  g_val_t val;
   struct stat info;
 
   /* Later on .. we'll pass on errors and change the binary OFF, ON
