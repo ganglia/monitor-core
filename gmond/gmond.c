@@ -1,6 +1,7 @@
 /* $Id$ */
 #include "gangliaconf.h"
 #include "dotconf.h"
+#include "dnet.h"
 #include <ganglia/gmond_config.h>
 #include <ganglia/hash.h>
 #include <ganglia/barrier.h>
@@ -79,6 +80,57 @@ heartbeat_func( void )
    return val;
 }
 
+static int
+print_intf(const struct intf_entry *entry, void *arg)
+{
+   struct addr bcast;
+   uint32_t mask;
+   int i;
+
+   /* We only want interfaces that are up and multicast-enabled */
+   if (!   (entry->intf_flags & INTF_FLAG_UP) ||
+       !   (entry->intf_flags & INTF_FLAG_MULTICAST) )
+      return (0);
+
+   printf("%s: UP and MULTICAST-ENABLED", entry->intf_name);
+
+   printf("\n");
+
+   if (entry->intf_addr.addr_type == ADDR_TYPE_IP) {
+      addr_btom(entry->intf_addr.addr_bits, &mask, IP_ADDR_LEN);
+      mask = ntohl(mask);
+      addr_bcast(&entry->intf_addr, &bcast);
+
+      if (entry->intf_dst_addr.addr_type == ADDR_TYPE_IP) {
+         printf("\tinet %s --> %s netmask 0x%x broadcast %s\n",
+             ip_ntoa(&entry->intf_addr.addr_ip),
+             addr_ntoa(&entry->intf_dst_addr),
+             mask, addr_ntoa(&bcast));
+      } else {
+         printf("\tinet %s netmask 0x%x broadcast %s\n",
+             ip_ntoa(&entry->intf_addr.addr_ip),
+             mask, addr_ntoa(&bcast));
+      }
+   }
+   if (entry->intf_link_addr.addr_type == ADDR_TYPE_ETH)
+      printf("\tlink %s\n", addr_ntoa(&entry->intf_link_addr));
+
+   for (i = 0; i < entry->intf_alias_num; i++)
+      printf("\talias %s\n", addr_ntoa(&entry->intf_alias_addrs[i]));
+
+   return (0);
+}
+
+int
+get_all_interfaces( void )
+{
+   intf_t *intf;
+
+   intf = intf_open();
+   intf_loop( intf, print_intf, NULL );
+   intf_close( intf );
+}
+
 int 
 main ( int argc, char *argv[] )
 {
@@ -93,6 +145,8 @@ main ( int argc, char *argv[] )
 
    gettimeofday(&tv, NULL);
    start_time = (uint32_t) tv.tv_sec;
+
+   get_all_interfaces();
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
