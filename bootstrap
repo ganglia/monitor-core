@@ -1,0 +1,14 @@
+#!/bin/sh
+echo "make distclean"  
+make distclean   
+echo "aclocal"  &&
+aclocal   &&
+echo "autoheader"  &&
+autoheader  &&
+echo "automake"  &&
+automake --add-missing  &&
+echo "autoconf"  &&
+autoconf  &&
+echo  &&
+echo  &&
+echo "ready for a configure now" 

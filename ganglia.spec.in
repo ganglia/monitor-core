@@ -1,0 +1,119 @@
+#
+# @configure_input@
+#
+Summary: Ganglia Cluster Toolkit http://ganglia.sourceforge.net/
+Name: @PACKAGE@
+Version: @VERSION@
+Release: 1 
+Copyright: BSD
+Vendor: Matt Massie <massie@cs.berkeley.edu>
+Group: System Environment/Base
+Obsoletes: ganglia-monitor-core-gmond
+Obsoletes: ganglia-monitor-core-gmetric
+Provides: ganglia-monitor-core-gmond
+Provides: ganglia-monitor-core-gmetric
+Source: %{name}-%{version}.tar.gz
+Buildroot: /tmp/%{name}-%{version}-buildroot
+Prefix: /usr
+
+%package lib
+Summary: Ganglia Cluster Toolkit Library http://ganglia.sourceforge.net/
+Group: System Environment/Base
+
+%description
+Ganglia is a scalable, real-time cluster monitoring and execution environment 
+with all execution requests and cluster statistics expressed in an open 
+well-defined XML format.
+
+%description lib
+The Ganglia Monitoring Core library provides a set of functions that programmers
+can use to build scalable cluster or grid applications
+
+##
+## PREP
+##
+
+%prep 
+%setup
+
+##
+## BUILD
+##
+%build
+./configure -prefix=$RPM_BUILD_ROOT/usr
+make
+
+##
+## PRE
+##
+%pre
+
+##
+## POST
+##
+%post
+if [ "$1" = 1 ]
+then
+   /etc/rc.d/init.d/gmond restart
+   /sbin/chkconfig --add gmond
+fi
+
+##
+## PREUN
+##
+%preun
+if [ "$1" = 0 ]
+then
+   /etc/rc.d/init.d/gmond stop
+   /sbin/chkconfig --del gmond
+fi
+
+##
+## POSTUN
+##
+%postun
+if [ "$1" = 1 ]
+then
+   /etc/rc.d/init.d/gmond restart
+fi
+
+##
+## INSTALL
+##
+%install
+%__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
+%__mkdir -p $RPM_BUILD_ROOT/usr/include/ganglia
+%__cp -f %{_builddir}/%{name}-%{version}/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
+%__make install
+
+##
+## FILES
+##
+%files 
+%defattr(-,root,root)
+%attr(0500,root,root)/usr/bin/gmetric
+%attr(0555,root,root)/usr/bin/gstat
+/usr/sbin/gmond
+/etc/rc.d/init.d/gmond
+
+%files lib
+/usr/include/ganglia.h
+/usr/include/ganglia
+/usr/lib/libganglia*
+
+##
+## CLEAN
+##
+%clean
+%__rm -rf $RPM_BUILD_ROOT
+
+##
+## CHANGELOG
+##
+%changelog
+* Mon Mar 11 2002 Matt Massie <massie@cs.berkeley.edu>
+- Added support for libganglia, added Prefix: for RPM relocation
+* Wed Feb 27 2002 Matt Massie <massie@cs.berkeley.edu>
+- Merge gmetric and gmond together into one RPM.  Fix some small bugs.
+* Fri Nov  2 2001 Matt Massie <massie@cs.berkeley.edu>
+- initial release
