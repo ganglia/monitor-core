@@ -11,7 +11,7 @@ option "dead" d "Print only the hosts which are dead" flag off
 option "mpifile" m "Print a load-balanced mpifile" flag off
 option "single_line" 1 "Print host and information all on one line" flag off
 option "list" l  "Print ONLY the host list" flag off
-option "gmond_ip" i "Specify the ip address of the gmond to query" string default="127.0.0.1" no
+option "gmond_ip" i "Specify the ip address of the gmond to query" string default="localhost" no
 option "gmond_port" p "Specify the gmond port to query" int default="8649" no
 
 #Usage (a little tutorial)
