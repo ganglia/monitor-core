@@ -124,6 +124,12 @@ RRD_update( char *rrd, char *value )
    argv[1] = rrd;
    argv[2] = val; 
 
+   if( strchr( value, ':' ) )
+      {
+         err_msg("RRD_update() got a value with a ':' in it");
+         return 1;
+      }
+
    sprintf(val, "N:%s", value); 
   
    optind=0; opterr=0;
@@ -148,6 +154,12 @@ summary_RRD_update( char *rrd, char *sum, char *num )
    argv[0] = "dummy";
    argv[1] = rrd;
    argv[2] = val;
+
+   if( strchr( sum, ':' ) || strchr( num, ':' ) )
+      {
+         err_msg("summary_RRD_update() got a sum or num with a ':' in it");
+         return 1;
+      }
 
    sprintf(val, "N:%s:%s", sum, num);
 
