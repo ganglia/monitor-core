@@ -107,7 +107,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
  * the metric value in the attribute list.
  */
 static void
-fillmetric(const char** attr, Metric_t *metric, const char* type, const int old)
+fillmetric(const char** attr, Metric_t *metric, const char* type)
 {
    int i;
    /* INV: always points to the next free byte in metric.strings buffer. */
@@ -115,6 +115,9 @@ fillmetric(const char** attr, Metric_t *metric, const char* type, const int old)
    struct type_tag *tt;
    struct xml_tag *xt;
    char *metricval, *p;
+
+   /* For old versions of gmond. */
+   metric->slope = -1;
 
    for(i = 0; attr[i] ; i+=2)
       {
@@ -177,10 +180,6 @@ fillmetric(const char** attr, Metric_t *metric, const char* type, const int old)
                   break;
             }
       }
-      if (old)
-         {
-            metric->slope = -1;
-         }
       metric->stringslen = edge;
       
       /* We are ok with growing metric values b/c we write to a full-sized buffer in xmldata. */
@@ -203,17 +202,17 @@ start (void *data, const char *el, const char **attr)
    const char *metricval = NULL;
    const char *metricnum = NULL;
    const char *type = NULL;
-   int tn=0;
-   int tmax=0;
    int edge;
 
    Metric_t *metric;
    int do_summary = 0;
-
-   int host_reported = 0;
    Host_t *host;
+   uint32_t tn=0;
+   uint32_t tmax=0;
+   uint32_t reported=0;
 
    Source_t *source;
+   unsigned int localtime=0;
    hash_t *summary;
    hash_t *hosts;  /* The current cluster-hosts table. */
 
@@ -319,9 +318,6 @@ start (void *data, const char *el, const char **attr)
 
          case CLUSTER_TAG:
 
-            /* Only keep metric details if we are the authority on this cluster. */
-            if (!authority_mode(xmldata)) return;
-
             /* Get name for hash key */
             for(i = 0; attr[i]; i+=2)
                {
@@ -329,17 +325,24 @@ start (void *data, const char *el, const char **attr)
                   if (!xt) continue;
 
                   if (xt->tag == NAME_TAG)
+                     name = attr[i+1];
+                   else if (xt->tag == LOCALTIME_TAG)
                      {
-                        name = attr[i+1];
-                        xmldata->sourcename = realloc(xmldata->sourcename, strlen(name)+1);
-                        strcpy(xmldata->sourcename, name);
-
-                        hashkey.data = (void*) name;
-                        hashkey.size =  strlen(name) + 1;
+                        localtime = strtoul(attr[i+1], (char **)NULL, 10);
+                        xmldata->source.localtime = localtime;
                      }
                }
 
+            /* Only keep cluster details if we are the authority on this cluster. */
+            if (!authority_mode(xmldata)) 
+               return;
+
             source = &(xmldata->source);
+            
+            xmldata->sourcename = realloc(xmldata->sourcename, strlen(name)+1);
+            strcpy(xmldata->sourcename, name);
+            hashkey.data = (void*) name;
+            hashkey.size =  strlen(name) + 1;
 
             hash_datum = hash_lookup(&hashkey, xmldata->root);
             if (!hash_datum)
@@ -383,6 +386,10 @@ start (void *data, const char *el, const char **attr)
             /* Edge has the same invariant as in fillmetric(). */
             edge = 0;
 
+            source->owner = -1;
+            source->latlong = -1;
+            source->url = -1;
+            source->localtime = localtime;
             /* Fill in cluster attributes. */
             for(i = 0; attr[i]; i+=2)
                {
@@ -392,9 +399,6 @@ start (void *data, const char *el, const char **attr)
 
                   switch( xt->tag )
                      {
-                        case LOCALTIME_TAG:
-                           source->localtime = strtoul(attr[i+1], (char **)NULL, 10);
-                           break;
                         case OWNER_TAG:
                            source->owner = addstring(source->strings, &edge, attr[i+1]);
                            break;
@@ -407,12 +411,6 @@ start (void *data, const char *el, const char **attr)
                         default:
                            break;
                      }
-               }
-            if (xmldata->old)
-               {
-                  source->owner = -1;
-                  source->latlong = -1;
-                  source->url = -1;
                }
             source->stringslen = edge;
 
@@ -432,7 +430,7 @@ start (void *data, const char *el, const char **attr)
                   if (!xt) continue;
 
                   if (xt->tag == REPORTED_TAG)
-                     host_reported = strtoul(attr[i+1], (char **)NULL, 10);
+                     reported = strtoul(attr[i+1], (char **)NULL, 10);
                   else if (xt->tag == TN_TAG)
                      tn = atoi(attr[i+1]);
                   else if (xt->tag == TMAX_TAG)
@@ -444,8 +442,8 @@ start (void *data, const char *el, const char **attr)
             /* Is this host alive? For pre-2.5.0, we use the 60-second 
              * method, otherwise we use the host's TN and TMAX attrs.
              */
-            xmldata->host_alive = xmldata->old ?
-               abs(xmldata->source.localtime - host_reported) < 60 :
+            xmldata->host_alive = (xmldata->old || !tmax) ?
+               abs(xmldata->source.localtime - reported) < 60 :
                tn < tmax * 4;
 
             if (xmldata->host_alive)
@@ -457,7 +455,9 @@ start (void *data, const char *el, const char **attr)
             if (!authority_mode(xmldata))
                return;
 
-            /* Use node Name for hash key (Query processing 
+            host = &(xmldata->host);
+
+            /* Use node Name for hash key (Query processing
              * requires a name key).
              */
             xmldata->hostname = realloc(xmldata->hostname, strlen(name)+1);
@@ -465,8 +465,6 @@ start (void *data, const char *el, const char **attr)
             hashkey.data = (void*) name;
             hashkey.size =  strlen(name) + 1;
 
-            host = &(xmldata->host);
-            
             hosts = xmldata->source.authority;
             hash_datum = hash_lookup (&hashkey, hosts);
             if (!hash_datum)
@@ -495,6 +493,11 @@ start (void *data, const char *el, const char **attr)
             /* Edge has the same invariant as in fillmetric(). */
             edge = 0;
 
+            host->location = -1;
+            host->reported = reported;
+            host->tn = tn;
+            host->tmax = tmax;
+
             /* We will store this host in the cluster's authority table. */
             for(i = 0; attr[i]; i+=2)
                {
@@ -506,20 +509,11 @@ start (void *data, const char *el, const char **attr)
                         case IP_TAG:
                            host->ip = addstring(host->strings, &edge, attr[i+1]);
                            break;
-                        case TN_TAG:
-                           host->tn = strtoul(attr[i+1], (char **)NULL, 10);
-                           break;
-                        case TMAX_TAG:
-                           host->tmax = strtoul(attr[i+1], (char **)NULL, 10);
-                           break;
                         case DMAX_TAG:
                            host->dmax = strtoul(attr[i+1], (char **)NULL, 10);
                            break;
                         case LOCATION_TAG:
                            host->location = addstring(host->strings, &edge, attr[i+1]);
-                           break;
-                        case REPORTED_TAG:
-                           host->reported = strtoul(attr[i+1], (char **)NULL, 10);
                            break;
                         case STARTED_TAG:
                            host->started = strtoul(attr[i+1], (char **)NULL, 10);
@@ -527,10 +521,6 @@ start (void *data, const char *el, const char **attr)
                         default:
                            break;
                      }
-               }
-            if (xmldata->old)
-               {
-                  host->location = -1;
                }
             host->stringslen = edge;
 
@@ -627,7 +617,7 @@ start (void *data, const char *el, const char **attr)
                   metric->report_start = metric_report_start;
                   metric->report_end = metric_report_end;
 
-                  fillmetric(attr, metric, type, xmldata->old);
+                  fillmetric(attr, metric, type);
 
                   /* Trim metric structure to the correct length. */
                   hashval.size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
@@ -652,7 +642,7 @@ start (void *data, const char *el, const char **attr)
                            {
                               metric = &(xmldata->metric);
                               memset((void*) metric, 0, sizeof(*metric));
-                              fillmetric(attr, metric, type, xmldata->old);
+                              fillmetric(attr, metric, type);
                            }
                         /* else we have already filled in the metric above. */
                      }
@@ -725,7 +715,7 @@ start (void *data, const char *el, const char **attr)
                {
                   metric = &(xmldata->metric);
                   memset((void*) metric, 0, sizeof(*metric));
-                  fillmetric(attr, metric, type, xmldata->old);
+                  fillmetric(attr, metric, type);
                }
             else
                {
