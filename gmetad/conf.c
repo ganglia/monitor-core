@@ -56,9 +56,8 @@ static DOTCONF_CB(cb_trusted_hosts)
 
 static DOTCONF_CB(cb_data_source)
 {
-   unsigned int i, len;
+   unsigned int i;
    data_source_list_t *dslist;
-   g_inet_addr *ia;
    datum_t key, val, *find;
    int port, rv;
    char *p, *str;
