@@ -1,13 +1,7 @@
 /* C code produced by gperf version 2.7.2 */
 /* Command-line: gperf -l -H xml_hash -t -F ', 0' -N in_xml_list -k '1,$' -W xml_tags ./xml_hash.gperf  */
 /* $Id$ */
-/* Including gmetad.h for the xml_tag_t definition */
 #include <gmetad.h>
-struct xml_tag
-   {
-      const char *name;
-      xml_tag_t tag;
-   };
 
 #define TOTAL_KEYWORDS 10
 #define MIN_WORD_LENGTH 2
