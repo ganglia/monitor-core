@@ -1,3 +1,4 @@
+$Id$
 #!/bin/sh
 echo "make distclean"  
 make distclean   
