@@ -13,12 +13,18 @@ struct gengetopt_args_info args_info;
 
 void process_opts( int argc, char **argv );
 
+extern int debug_level;
+
 int main(int argc, char *argv[])
 {
    int rval;
    gexec_cluster_t cluster;
    gexec_host_t *host;
    llist_entry *li;
+
+/*
+   debug_level = 1;
+*/
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
