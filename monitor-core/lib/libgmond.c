@@ -46,6 +46,7 @@ static cfg_opt_t globals_opts[] = {
   CFG_BOOL("mute", 0, CFGF_NONE),
   CFG_BOOL("deaf", 0, CFGF_NONE),
   CFG_INT("host_dmax", 0, CFGF_NONE),
+  CFG_INT("cleanup_threshold", 300, CFGF_NONE),
   CFG_BOOL("gexec", 0, CFGF_NONE),
   CFG_END()
 };
@@ -110,8 +111,9 @@ char *default_gmond_configuration = NULL;
 /* This configuration is as close to 2.5.x default behavior as possible \n\
    The values closely match ./gmond/metric.h definitions in 2.5.x */ \n\
 globals {                    \n\
-  setuid = no                \n\
+  setuid = yes              \n\
   user = nobody              \n\
+  cleanup_threshold = 300 /*secs */ \n\
 } \n\
 \n\
 /* If a cluster attribute is specified, then all gmond hosts are wrapped inside \n\
