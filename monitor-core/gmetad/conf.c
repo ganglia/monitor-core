@@ -16,42 +16,6 @@ extern hash_t *sources;
 
 gmetad_config_t gmetad_config;
 
-/* This function will disappear soon */
-static int
-g_gethostbyname(const char* hostname, struct sockaddr_in* sa, char** nicename)
-{
-  int rv = 0;
-  struct in_addr inaddr;
-  struct hostent* he;  
-
-  if (inet_aton(hostname, &inaddr) != 0)
-    {
-      sa->sin_family = AF_INET;
-      memcpy(&sa->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
-      if (nicename)
-         *nicename = (char *)strdup (hostname);
-      return 1;
-    }
-
-  he = (struct hostent*)gethostbyname(hostname);
-  if (he && he->h_addrtype==AF_INET && he->h_addr_list[0])
-    {
-     if (sa)
-        {
-           sa->sin_family = he->h_addrtype;
-           memcpy(&sa->sin_addr, he->h_addr_list[0], he->h_length);
-        }
-
-      if (nicename && he->h_name)
-         *nicename = (char *)strdup(he->h_name);
-
-      rv = 1;
-    }
-
-  return rv;
-}
-
-
 static DOTCONF_CB(cb_gridname)
 {
     gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
@@ -110,19 +74,34 @@ static DOTCONF_CB(cb_trusted_hosts)
 {
    int i,rv;
    llist_entry *le;
-   struct sockaddr_in sa;
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   struct addrinfo *info;
+   void *addr;
 
    for (i = 0; i < cmd->arg_count; i++)
       {
          le = (llist_entry *)malloc(sizeof(llist_entry));
-         rv = g_gethostbyname( cmd->data.list[i], &sa, NULL);
-         if (!rv) {
-            err_msg("Warning: we failed to resolve trusted host name %s", cmd->data.list[i]);
-            continue;
-         }
-         le->val = (char*) malloc(MAXHOSTNAME);
-         inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAME);
+
+	 info = host_serv( cmd->data.list[i], NULL, AF_UNSPEC, SOCK_STREAM);
+	 if(!info || (info->ai_family != AF_INET && info->ai_family != AF_INET6))
+	   {
+	     err_msg("Warning: %s is not being added as a trusted host",
+	                 cmd->data.list[i]);
+	     continue;
+	   }
+
+         le->val = (char*) malloc(INET6_ADDRSTRLEN + 1);
+
+         if( info->ai_family == AF_INET )
+           {
+             addr = &(((struct sockaddr_in *) info->ai_addr )->sin_addr);
+	   }
+	 else
+	   {
+	     addr = &(((struct sockaddr_in6 *)info->ai_addr )->sin6_addr);
+	   }
+
+         inet_ntop(info->ai_family, addr, le->val, INET6_ADDRSTRLEN);
          llist_add(&(c->trusted_hosts), le);
       }
    return NULL;

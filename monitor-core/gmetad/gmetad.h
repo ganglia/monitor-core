@@ -122,9 +122,10 @@ typedef union
    }
 metric_val_t;
 
+#define CLIENT_ADDR_SIZE 32
 typedef struct
    {
-      struct sockaddr_in addr;
+      void *addr[CLIENT_ADDR_SIZE];
       filter_type_t filter;
       int fd;
       int valid;
