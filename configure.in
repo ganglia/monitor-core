@@ -454,4 +454,3 @@ AC_OUTPUT(Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmon
 echo ""
 echo "-- Ganglia $VERSION --"
 echo "Type \"make\" to compile."
-

@@ -1,5 +1,6 @@
 #ifndef GANGLIA_H
 #define GANGLIA_H 1
+/* $Id$ */
 
 #ifdef __cplusplus
 extern "C" {
