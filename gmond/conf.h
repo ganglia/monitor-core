@@ -8,6 +8,8 @@
 /* autoconf me later */
 #define DEFAULT_GMOND_CONFIG_FILE "/etc/gmond.conf"
 
+#define MAX_NUM_CHANNELS 64
+
 typedef struct
    {
       char *name;
@@ -15,13 +17,18 @@ typedef struct
       char *latlong;
       char *url;
       char *location;
-      char *msg_channel;
-      char *msg_port;
-      int msg_port_given;
-      int msg_if_given;
-      char *msg_if;
-      long int msg_ttl;
-      long int msg_threads;
+      int   num_send_channels;
+      int   send_channels_given;
+      char *send_channels[MAX_NUM_CHANNELS]; 
+      char *send_ports[MAX_NUM_CHANNELS];
+      int  num_receive_channels;
+      int  receive_channels_given;
+      char *receive_channels[MAX_NUM_CHANNELS];
+      char *receive_ports[MAX_NUM_CHANNELS];
+      int   mcast_if_given;
+      char *mcast_if;
+      long int mcast_ttl;
+      long int mcast_threads;
       char *xml_port;
       char *compressed_xml_port;
       long int xml_threads;
