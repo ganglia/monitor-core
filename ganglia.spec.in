@@ -6,7 +6,7 @@
 Summary: Ganglia Cluster Toolkit http://ganglia.sourceforge.net/
 Name: @PACKAGE@
 Version: @VERSION@
-Release: 8 
+Release: 9 
 Copyright: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
