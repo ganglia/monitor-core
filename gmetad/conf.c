@@ -1,20 +1,17 @@
+#include <dotconf.h>
 #include <string.h>
-
-#include "lib/dotconf.h"
-#include "lib/ganglia.h"
-#include "lib/hash.h"
-#include "lib/llist.h"
-#include "libunp/unp.h"
-
-#include "gmetad.h"
+#include <ganglia/hash.h>
+#include <ganglia/llist.h>
+#include <gmetad.h>
+#include <ganglia.h>
 #include "conf.h"
 
 /* Variables that get filled in by configuration file */
 extern Source_t root;
-
 extern hash_t *sources;
 
 gmetad_config_t gmetad_config;
+
 
 static DOTCONF_CB(cb_gridname)
 {
@@ -42,72 +39,23 @@ static DOTCONF_CB(cb_all_trusted)
    return NULL;
 }
 
-static DOTCONF_CB(cb_rras)
-{
-  int i;
-  gmetad_config_t *c = (gmetad_config_t *)cmd->option->info;
-
-  /* free the old data */
-  for(i=0; i< c->num_rras; i++)
-    {
-      free(c->rras[i]);
-    }
-  free(c->rras);
-
-  c->num_rras = cmd->arg_count;
-  c->rras = (char **) malloc (sizeof(char *)* c->num_rras);
-  if(!c->rras)
-    {
-      fprintf(stderr,"Unable to malloc memory for round-robin archives\n");
-      exit(1);
-    }
-
-  for(i=0; i< c->num_rras; i++)
-    {
-      c->rras[i] = strdup( cmd->data.list[i] );
-    }
-
-  return NULL;
-}
-
 static DOTCONF_CB(cb_trusted_hosts)
 {
    int i,rv;
    llist_entry *le;
+   struct sockaddr_in sa;
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
-   struct addrinfo *info;
-   void *addr;
 
    for (i = 0; i < cmd->arg_count; i++)
       {
          le = (llist_entry *)malloc(sizeof(llist_entry));
-
-	 info = host_serv( cmd->data.list[i], NULL, AF_UNSPEC, SOCK_STREAM);
-	 if(!info || (info->ai_family != AF_INET 
-#ifdef AF_INET6
-&& info->ai_family != AF_INET6
-#endif
-           ))
-	   {
-	     err_msg("Warning: %s is not being added as a trusted host",
-	                 cmd->data.list[i]);
-	     continue;
-	   }
-
-         le->val = (char*) malloc(INET6_ADDRSTRLEN + 1);
-
-         if( info->ai_family == AF_INET )
-           {
-             addr = &(((struct sockaddr_in *) info->ai_addr )->sin_addr);
-	   }
-	 else
-	   {
-#ifdef AF_INET6
-	     addr = &(((struct sockaddr_in6 *)info->ai_addr )->sin6_addr);
-#endif
-	   }
-
-         inet_ntop(info->ai_family, addr, le->val, INET6_ADDRSTRLEN);
+         rv = g_gethostbyname( cmd->data.list[i], &sa, NULL);
+         if (!rv) {
+            err_msg("Warning: we failed to resolve trusted host name %s", cmd->data.list[i]);
+            continue;
+         }
+         le->val = (char*) malloc(MAXHOSTNAMELEN);
+         my_inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAMELEN);
          llist_add(&(c->trusted_hosts), le);
       }
    return NULL;
@@ -118,9 +66,16 @@ static DOTCONF_CB(cb_data_source)
    unsigned int i;
    data_source_list_t *dslist;
    datum_t key, val, *find;
+   int port, rv=0;
    unsigned long step;
-   char *p, *str, *port;
+   unsigned int source_index=0;
+   char *p, *str;
    char *endptr;
+   struct sockaddr_in sa;
+
+   source_index++;
+
+   debug_msg("Datasource = [%s]", cmd->data.list[0]);
 
    dslist = (data_source_list_t *) malloc ( sizeof(data_source_list_t) );
    if(!dslist)
@@ -144,39 +99,44 @@ static DOTCONF_CB(cb_data_source)
    else
       dslist->step = 15;
 
-   dslist->names = (char **) malloc( (cmd->arg_count - 1) * sizeof(char *) );
-   if (! dslist->names )
-      err_quit("Unable to malloc names array");
+   debug_msg("Polling interval for %s is %u sec.", dslist->name, dslist->step);
 
-   dslist->ports = (char **) malloc( (cmd->arg_count - 1) * sizeof(char *));
-   if (! dslist->ports )
-      err_quit("Unable to malloc ports array");
+   dslist->sources = (g_inet_addr **) malloc( (cmd->arg_count-i) * sizeof(g_inet_addr *) );
+   if (! dslist->sources )
+      err_quit("Unable to malloc sources array");
 
    dslist->num_sources = 0;
 
    for ( ; i< cmd->arg_count; i++)
       {
          str = cmd->data.list[i];
-   
+
          p = strchr( str, ':' );
          if( p )
             {
                /* Port is specified */
                *p = '\0';
-               port = strdup( p+1 );
+               port = atoi ( p+1 );
             }
          else
-            {
-               port = strdup("8649");
-            }
+            port = 8649;
 
-         dslist->names[dslist->num_sources] = strdup(str);
-         dslist->ports[dslist->num_sources] = port;
- 
-         dslist->num_sources++;
+         rv = g_gethostbyname( cmd->data.list[i], &sa, NULL);
+         if (!rv) {
+            err_msg("Warning: we failed to resolve data source name %s", cmd->data.list[i]);
+            continue;
+         }
+         str = (char*) malloc(MAXHOSTNAMELEN);
+         my_inet_ntop(AF_INET, &sa.sin_addr, str, MAXHOSTNAMELEN);
+
+         debug_msg("Trying to connect to %s:%d for [%s]", str, port, dslist->name);
+         dslist->sources[dslist->num_sources] = (g_inet_addr *) g_inetaddr_new ( str, port );
+         if(! dslist->sources[dslist->num_sources])
+               err_quit("Unable to create inetaddr [%s:%d] and save it to [%s]", str, port, dslist->name);
+         else
+               dslist->num_sources++;
+         free(str);
       }
-
-   dslist->last_heard_from = 0;
 
    key.data = cmd->data.list[0];
    key.size = strlen(key.data) + 1;
@@ -247,21 +207,6 @@ static DOTCONF_CB(cb_setuid)
    return NULL;
 }
 
-static DOTCONF_CB(cb_force_names)
-{
-  gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
-  c->force_names = cmd->data.value;
-  return NULL;
-}
-
-
-static DOTCONF_CB(cb_xml_compression_level)
-{
-   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
-   c->xml_compression_level = cmd->data.value;
-   return NULL;
-}
-
 static DOTCONF_CB(cb_scalable)
 {  
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
@@ -274,7 +219,7 @@ static DOTCONF_CB(cb_scalable)
 static FUNC_ERRORHANDLER(errorhandler)
 {
    err_quit("gmetad config file error: %s\n", msg);
-   return 0;
+   return NULL;
 }
 
 static configoption_t gmetad_options[] =
@@ -290,11 +235,8 @@ static configoption_t gmetad_options[] =
       {"server_threads", ARG_INT, cb_server_threads, &gmetad_config, 0},
       {"rrd_rootdir", ARG_STR, cb_rrd_rootdir, &gmetad_config, 0},
       {"setuid", ARG_TOGGLE, cb_setuid, &gmetad_config, 0},
-      {"force_names", ARG_TOGGLE, cb_force_names, &gmetad_config, 0},
       {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
       {"scalable", ARG_STR, cb_scalable, &gmetad_config, 0},
-      {"xml_compression_level", ARG_INT, cb_xml_compression_level, &gmetad_config, 0},
-      {"round_robin_archives", ARG_STR, cb_rras, &gmetad_config, 0},
       LAST_OPTION
    };
 
@@ -304,25 +246,15 @@ set_defaults (gmetad_config_t *config)
    /* Gmetad defaults */
    config->gridname = "unspecified";
    config->xml_port = 8651;
-   config->xml_compression_level = 0; /* no compression */
    config->interactive_port = 8652;
    config->server_threads = 4;
    config->trusted_hosts = NULL;
    config->debug_level = 0;
    config->should_setuid = 1;
    config->setuid_username = "nobody";
-   config->rrd_rootdir = VARSTATEDIR"/ganglia/rrds";
+   config->rrd_rootdir = "/var/lib/ganglia/rrds";
    config->scalable_mode = 1;
    config->all_trusted = 0;
-   /* round-robin archives */
-   config->num_rras = 4;
-   config->rras = (char **) malloc (sizeof(char *) * config->num_rras);
-   config->rras[0] = strdup("RRA:AVERAGE:0.5:15:240");  /* 1 hour of 15 sec samples */
-   config->rras[1] = strdup("RRA:AVERAGE:0.5:360:240"); /* 1 day of 6 minute samples */
-   config->rras[2] = strdup("RRA:AVERAGE:0.5:3600:744");/* 1 month of hourly samples */
-   config->rras[3] = strdup("RRA:AVERAGE:0.5:86400:365");/* 1 year of daily samples */
-
-   config->force_names = 0;
 }
 
 int

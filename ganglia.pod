@@ -326,132 +326,118 @@ C</etc/gmond.conf> is not required as its absence will only cause gmond to start
 in a default configuration. Here is a sample of a gmond.conf configuration file
 with comment to help you configure gmond
 
-
-  # $Id$
-  # This is the configuration file for the Ganglia Monitor Daemon (gmond)
-  # Documentation can be found at http://ganglia.sourceforge.net/docs/
-  #
-  # To change a value from it's default simply uncomment the line
-  # and alter the value
-  #####################
-  #
-  # The name of the cluster this node is a part of
-  # default: "unspecified"
-  # name  "My Cluster"
-  #
-  # The owner of this cluster. Represents an administrative
-  # domain. The pair name/owner should be unique for all clusters
-  # in the world.
-  # default: "unspecified"
-  # owner "My Organization"
-  #
-  # The latitude and longitude GPS coordinates of this cluster on earth.
-  # Specified to 1 mile accuracy with two decimal places per axis in Decimal
-  # DMS format: "N61.18 W130.50".
-  # default: "unspecified"
-  # latlong "N32.87 W117.22"
-  #
-  # The URL for more information on the Cluster. Intended to give purpose,
-  # owner, administration, and account details for this cluster.
-  # default: "unspecified"
-  # url "http://www.mycluster.edu/"
-  #
-  # The location of this host in the cluster. Given as a 3D coordinate:
-  # "Rack,Rank,Plane" that corresponds to a Euclidean coordinate "x,y,z".
-  # default: "unspecified"
-  # location "0,0,0"
-  #
-  # The multicast channel for gmond to send/receive data on
-  # default: 239.2.11.71
-  # mcast_channel 239.2.11.71
-  #
-  # The multicast port for gmond to send/receive data on
-  # default: 8649
-  # mcast_port    8649
-  #
-  # The multicast interface for gmond to send/receive data on
-  # default: the kernel decides based on routing configuration
-  # mcast_if  eth1
-  #
-  # The multicast Time-To-Live (TTL) for outgoing messages
-  # default: 1
-  # mcast_ttl  1
-  #
-  # The number of threads listening to multicast traffic
-  # default: 2
-  # mcast_threads 2
-  #
-  # Which port should gmond listen for XML requests on
-  # default: 8649
-  # xml_port     8649
-  #
-  # The number of threads answering XML requests
-  # default: 2
-  # xml_threads   2
-  #
-  # The compression level of the XML served from 0-9
-  # (0 means no compression and 9 is the best compression although it requires more CPU)
-  # default: 6
-  # xml_compression_level 9
-  #
-  # Hosts ASIDE from "127.0.0.1"/localhost and those multicasting
-  # on the same multicast channel which you will share your XML
-  # data with.  Multiple hosts are allowed on multiple lines.
-  # Can be specified with either hostnames or IP addresses.
-  # default: none
-  # trusted_hosts 1.1.1.1 1.1.1.2 1.1.1.3 \
-  # 2.3.2.3 3.4.3.4 5.6.5.6
-  #
-  # The number of nodes in your cluster.  This value is used in the
-  # creation of the cluster hash.
-  # default: 1024
-  # num_nodes  1024
-  #
-  # The number of custom metrics this gmond will be storing.  This
-  # value is used in the creation of the host custom_metrics hash.
-  # default: 16
-  # num_custom_metrics 16
-  #
-  # Run gmond in "mute" mode.  Gmond will only listen to the multicast
-  # channel but will not send any data on the channel.
-  # default: off
-  # mute on
-  #
-  # Run gmond in "deaf" mode.  Gmond will only send data on the multicast
-  # channel but will not listen/store any data from the channel.
-  # default: off
-  # deaf on
-  #
-  # Run gmond in "debug" mode.  Gmond will not background.  Debug messages
-  # are sent to stdout.  Value from 0-100.  The higher the number the more
-  # detailed debugging information will be sent.
-  # default: 0
-  # debug_level 10
-  #
-  # If you don't want gmond to setuid, set this to "on"
-  # default: off
-  # no_setuid  on
-  #
-  # Which user should gmond run as?
-  # default: nobody
-  # setuid     nobody
-  #
-  # If you do not want this host to appear in the gexec host list, set
-  # this value to "on"
-  # default: off
-  # no_gexec   on
-  #
-  # If you want any host which connects to the gmond XML to receive
-  # data, then set this value to "on"
-  # default: off
-  # all_trusted on
-  #
-  # If you want dead nodes to "time out", enter a nonzero value here. If specified,
-  # a host will be removed from our state if we have not heard from it in this
-  # number of seconds.
-  # default: 0 (immortal)
-  # host_dmax 108000
-
+   # This is the configuration file for the Ganglia Monitor Daemon (gmond)
+   # Documentation can be found at http://ganglia.sourceforge.net/docs/
+   #
+   # To change a value from it's default simply uncomment the line
+   # and alter the value
+   #####################
+   #
+   # The name of the cluster this node is a part of
+   # default: "unspecified"
+   # name  "My Cluster"
+   #
+   # The owner of this cluster. Represents an administrative
+   # domain. The pair name/owner should be unique for all clusters
+   # in the world.
+   # default: "unspecified"
+   # owner "My Organization"
+   #
+   # The latitude and longitude GPS coordinates of this cluster on earth.
+   # Specified to 1 mile accuracy with two decimal places per axis in Decimal
+   # DMS format: "N61.18 W130.50".
+   # default: "unspecified"
+   # latlong "N32.87 W117.22"
+   #
+   # The URL for more information on the Cluster. Intended to give purpose,
+   # owner, administration, and account details for this cluster.
+   # default: "unspecified"
+   # url "http://www.mycluster.edu/"
+   #
+   # The location of this host in the cluster. Given as a 3D coordinate:
+   # "Rack,Rank,Plane" that corresponds to a Euclidean coordinate "x,y,z".
+   # default: "unspecified"
+   # location "0,0,0"
+   #
+   # The multicast channel for gmond to send/receive data on
+   # default: 239.2.11.71
+   # mcast_channel 239.2.11.71
+   #
+   # The multicast port for gmond to send/receive data on
+   # default: 8649
+   # mcast_port    8649
+   #
+   # The multicast interface for gmond to send/receive data on
+   # default: the kernel decides based on routing configuration
+   # mcast_if  eth1
+   #
+   # The multicast Time-To-Live (TTL) for outgoing messages
+   # default: 1
+   # mcast_ttl  1
+   #
+   # The number of threads listening to multicast traffic
+   # default: 2
+   # mcast_threads 2
+   #
+   # Which port should gmond listen for XML requests on
+   # default: 8649
+   # xml_port     8649
+   #
+   # The number of threads answering XML requests
+   # default: 2
+   # xml_threads   2
+   #
+   # Hosts ASIDE from "127.0.0.1"/localhost and those multicasting
+   # on the same multicast channel which you will share your XML
+   # data with.  Multiple hosts are allowed on multiple lines.
+   # Can be specified with either hostnames or IP addresses.
+   # default: none
+   # trusted_hosts 1.1.1.1 1.1.1.2 1.1.1.3 \
+   # 2.3.2.3 3.4.3.4 5.6.5.6
+   #
+   # The number of nodes in your cluster.  This value is used in the
+   # creation of the cluster hash.
+   # default: 1024
+   # num_nodes  1024
+   #
+   # The number of custom metrics this gmond will be storing.  This
+   # value is used in the creation of the host custom_metrics hash.
+   # default: 16
+   # num_custom_metrics 16
+   #
+   # Run gmond in "mute" mode.  Gmond will only listen to the multicast
+   # channel but will not send any data on the channel.
+   # default: off
+   # mute on
+   #
+   # Run gmond in "deaf" mode.  Gmond will only send data on the multicast
+   # channel but will not listen/store any data from the channel.
+   # default: off
+   # deaf on
+   #
+   # Run gmond in "debug" mode.  Gmond will not background.  Debug messages
+   # are sent to stdout.  Value from 0-100.  The higher the number the more
+   # detailed debugging information will be sent.
+   # default: 0
+   # debug_level 10
+   #
+   # If you don't want gmond to setuid, set this to "on"
+   # default: off
+   # no_setuid  on
+   #
+   # Which user should gmond run as?
+   # default: nobody
+   # setuid     nobody
+   #
+   # If you do not want this host to appear in the gexec host list, set
+   # this value to "on"
+   # default: off
+   # no_gexec   on
+   #
+   # If you want any host which connects to the gmond XML to receive
+   # data, then set this value to "on"
+   # default: off
+   # all_trusted on
 
 If you want to customize the operation of gmond, simply edit this file and save it to 
 C</etc/gmond.conf>. You can create multiple gmond configurations by writing the 
@@ -698,62 +684,62 @@ To get help with the commandline options, simply pass C<gstat> the C<--help> opt
 
 This table describes all the metrics that ganglia collects and
 shows what platforms the metric are supported on.  (The following table
-is current as of ganglia 2.5.6).
+is not yet complete).
 
   Metric Name    Description                             Platforms
   -----------------------------------------------------------------------
-  boottime      System boot timestamp                    e 
-  bread_sec     Buffer reads per second                  s
-  bwrite_sec    Buffer writes per second                 s
-  bytes_in      Number of bytes in per second            l,f,s
-  bytes_out     Number of bytes out per second           l,f,s
-  cpu_aidle     Percent of time since boot idle CPU      l,h
-  cpu_idle      Percent CPU idle                         e
-  cpu_intr      Time spent processing interrupts         h
-  cpu_nice      Percent CPU nice                         l,f,h,t
-  cpu_num       Number of CPUs                           e 
-  cpu_speed     Speed in MHz of CPU                      e 
-  cpu_ssys      Time in kernel mode                      h
-  cpu_system    Percent CPU system                       l,f,h,t,s
-  cpu_user      Percent CPU user                         l,f,h,t,s
-  cpu_wait      Time spent waiting                       h
-  cpu_wio       Time spent in i/o wait                   s
+  boottime      System boot timestamp                    l,f
+  bread_sec
+  bwrite_sec
+  bytes_in      Number of bytes in per second            l,f
+  bytes_out     Number of bytes out per second           l,f
+  cpu_aidle     Percent of time since boot idle CPU      l
+  cpu_arm
+  cpu_avm
+  cpu_idle      Percent CPU idle                         l,f
+  cpu_intr
+  cpu_nice      Percent CPU nice                         l,f
+  cpu_num       Number of CPUs                           l,f
+  cpu_rm
+  cpu_speed     Speed in MHz of CPU                      l,f
+  cpu_ssys
+  cpu_system    Percent CPU system                       l,f
+  cpu_user      Percent CPU user                         l,f
+  cpu_vm
+  cpu_wait
+  cpu_wio
   disk_free     Total free disk space                    l,f
   disk_total    Total available disk space               l,f
-  load_fifteen  Fifteen minute load average              e 
-  load_five     Five minute load average                 e 
-  load_one      One minute load average                  e 
+  load_fifteen  Fifteen minute load average              l,f
+  load_five     Five minute load average                 l,f
+  load_one      One minute load average                  l,f
   location      GPS coordinates for host                 e
-  lread_sec     Linear reads per second                  s
-  lwrite_sec    Linear writes per second                 s
-  machine_type  Type of machine hardward (uname -m)      e 
-  mem_arm       Available real memory                    h
-  mem_avm       Available virtual memory                 h
-  mem_buffers   Amount of buffered memory                l,f,i,t
-  mem_cached    Amount of cached memory                  l,f,i,h
-  mem_free      Amount of available memory               e
-  mem_rm        Total real memory                        h
-  mem_shared    Amount of shared memory                  l,f,i,h
-  mem_total     Amount of available memory               e 
-  mem_vm        Total virtual memory                     h
-  mtu           Network maximum transmission unit        e 
-  os_name       Operating system name                    e 
-  os_release    Operating system release (version)       e 
+  lread_sec
+  lwrite_sec
+  machine_type
+  mem_buffers   Amount of buffered memory                l,f
+  mem_cached    Amount of cached memory                  l,f
+  mem_free      Amount of available memory               l,f
+  mem_shared    Amount of shared memory                  l,f
+  mem_total     Amount of available memory               l,f
+  mtu           Network maximum transmission unit        l,f
+  os_name       Operating system name                    l,f
+  os_release    Operating system release (version)       l,f
   part_max_used Maximum percent used for all partitions  l,f
-  phread_sec    Physical reads per second                s
-  phwrite_sec   Physical writes per second               s
-  pkts_in       Packets in per second                    l,f,s
-  pkts_out      Packets out per second                   l,f,s
-  proc_run      Total number of running processes        l,f,s,m,i,h
-  proc_total    Total number of processes                l,f,s,m,i,h
-  rcache        Read cache hit ratio                     s
-  swap_free     Amount of available swap memory          l,f,s,a,i,h,t
-  swap_total    Total amount of swap memory              l,f,s,a,i,h,t
-  sys_clock     Current time on host                     e
-  wcache        Write cache hit ratio                    s
+  phread_sec
+  phwrite_sec
+  pkts_in       Packets in per second                    l,f
+  pkts_out      Packets out per second                   l,f
+  proc_run      Total number of running processes        l,f
+  proc_total    Total number of processes                l,f
+  rcache
+  swap_free     Amount of available swap memory          l,f
+  swap_total    Total amount of swap memory              l,f
+  sys_clock     Current time on host                     l,f
+  wcache
 
   Platform key:
-  l = Linux, f = FreeBSD, s = Solaris, a = AIX
+  l = Linux, f = FreeBSD, a = AIX, c = Cygwin
   m = MacOS, i = IRIX, h = HPUX,  t = Tru64
   e = Every Platform
 
@@ -1038,13 +1024,23 @@ already been asked and answered.
 
 =head1 Copyright
 
-  Copyright (C) 2002,2003,2004 University of California, Berkeley
+  Copyright (C) 2002,2003 University of California, Berkeley
+ 
+The ganglia source tree incorporated great source code from other projects as well.
+
+  Copyright (c) 2000 Dug Song <dugsong@monkey.org>
+  Copyright (C) 1999,2000,2001,2002 Lukas Schroeder <lukas@azzit.de>,
+   and others.
+  Copyright (C) 1991, 1992, 1996, 1998, 1999 Free Software Foundation, Inc.
+  Copyright (C) 2000  David Helder
+  Copyright (C) 2000  Andrew Lanoix
 
 =head1 Authors
 
-The B<Ganglia Development Team>...
+  Matt Massie <massie@CS.Berkeley.EDU>
 
- Matt Massie            massie          Project Lead    massie at users.sourceforge.net
+and the B<Ganglia Development Team>...
+
  Bas van der Vlies  	basv  	           Developer  	basv at users.sourceforge.net 
  Neil T. Spring 	bluehal	           Developer 	bluehal at users.sourceforge.net
  Brooks Davis 	        brooks_en_davis    Developer 	brooks_en_davis at users.sourceforge.net

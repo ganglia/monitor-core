@@ -1,17 +1,12 @@
-#include <zlib.h>
-#include <unistd.h>
 #include <pthread.h>
+#include <ganglia/llist.h>
 #include <stdarg.h>
-
+#include "dtd.h"
 #include "gmetad.h"
 
-#include "lib/llist.h"
-#include "lib/gzio.h"
-#include "libunp/unp.h"
-
-extern int server_socket;
+extern g_tcp_socket *server_socket;
 extern pthread_mutex_t  server_socket_mutex;
-extern int interactive_socket;
+extern g_tcp_socket *interactive_socket;
 extern pthread_mutex_t  server_interactive_mutex;
 
 extern Source_t root;
@@ -20,6 +15,39 @@ extern gmetad_config_t gmetad_config;
 
 extern char* getfield(char *buf, short int index);
 extern struct type_tag* in_type_list (char *, unsigned int);
+
+
+static inline int
+xml_print( client_t *client, const char *fmt, ... )
+{
+   int rval, len;
+   va_list ap;
+   char buf[4096];
+
+   va_start (ap, fmt);
+
+   if(! client->valid ) 
+      {
+         va_end(ap);
+         return 1;
+      }
+
+   vsnprintf (buf, sizeof (buf), fmt, ap);  
+
+   len = strlen(buf);
+
+   SYS_CALL( rval, write( client->fd, buf, len)); 
+   if ( rval < 0 && rval != len ) 
+      {
+         va_end(ap);
+         client->valid = 0;
+         return 1;
+      }
+
+   va_end(ap);
+   return 0;
+}
+
 
 static int
 metric_summary(datum_t *key, datum_t *val, void *arg)
@@ -51,13 +79,13 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
             break;
       }
 
-   return ganglia_gzprintf(client->io, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
+   return xml_print(client, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
       "TYPE=\"%s\" UNITS=\"%s\" SLOPE=\"%s\" SOURCE=\"%s\"/>\n",
       name, sum, metric->num,
       getfield(metric->strings, metric->type),
       getfield(metric->strings, metric->units),
       getfield(metric->strings, metric->slope),
-      getfield(metric->strings, metric->source)) <= 0? 1: 0;
+      getfield(metric->strings, metric->source));
 }
 
 
@@ -66,28 +94,37 @@ source_summary(Source_t *source, client_t *client)
 {
    int rc;
 
-   rc=ganglia_gzprintf(client->io, "<HOSTS UP=\"%u\" DOWN=\"%u\" SOURCE=\"gmetad\"/>\n",
+   rc=xml_print(client, "<HOSTS UP=\"%u\" DOWN=\"%u\" SOURCE=\"gmetad\"/>\n",
       source->hosts_up, source->hosts_down);
-   if (rc<=0) return 1;
+   if (rc) return 1;
 
    return hash_foreach(source->metric_summary, metric_summary, (void*) client);
 }
 
+
 int
 metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 {
+   int rc;
    char *name = (char*) key->data;
    Metric_t *metric = (Metric_t*) self;
+   long tn = 0;
 
-   return ganglia_gzprintf(client->io, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
+   tn = client->now.tv_sec - metric->t0.tv_sec;
+   if (tn<0) tn = 0;
+
+   rc=xml_print(client, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
       "UNITS=\"%s\" TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" SLOPE=\"%s\" "
       "SOURCE=\"%s\"/>\n",
       name, getfield(metric->strings, metric->valstr),
       getfield(metric->strings, metric->type),
-      getfield(metric->strings, metric->units), metric->tn,
+      getfield(metric->strings, metric->units), tn,
       metric->tmax, metric->dmax, getfield(metric->strings, metric->slope),
-      getfield(metric->strings, metric->source)) <= 0? 1: 0;
+      getfield(metric->strings, metric->source));
+      
+   return rc;
 }
+
 
 int
 metric_report_end(Generic_t *self, client_t *client, void *arg)
@@ -95,46 +132,59 @@ metric_report_end(Generic_t *self, client_t *client, void *arg)
    return 0;
 }
 
+
 int
 host_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 {
+   int rc;
    char *name = (char*) key->data;
    Host_t *host = (Host_t*) self;
+   long tn = 0;
+
+   tn = client->now.tv_sec - host->t0.tv_sec;
+   if (tn<0) tn = 0;
 
    /* Note the hash key is the host's IP address. */
-   return ganglia_gzprintf(client->io, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
+   rc = xml_print(client, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
       "TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" LOCATION=\"%s\" GMOND_STARTED=\"%u\">\n",
-      name, getfield(host->strings, host->ip), host->reported, host->tn,
+      name, getfield(host->strings, host->ip), host->reported, tn,
       host->tmax, host->dmax, getfield(host->strings, host->location),
-      host->started) <= 0? 1: 0;
+      host->started);
+
+   return rc;
 }
 
 
 int
 host_report_end(Generic_t *self, client_t *client, void *arg)
 {
-   return ganglia_gzprintf(client->io, "</HOST>\n") <= 0? 1: 0;
+   return xml_print(client, "</HOST>\n");
 }
 
 
 int
 source_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 {
+   int rc;
    char *name = (char*) key->data;
    Source_t *source = (Source_t*) self;
 
    if (self->id == CLUSTER_NODE)
       {
-            return ganglia_gzprintf(client->io, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%u\" OWNER=\"%s\" "
+            rc=xml_print(client, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%u\" OWNER=\"%s\" "
                "LATLONG=\"%s\" URL=\"%s\">\n",
                name, source->localtime, getfield(source->strings, source->owner),
                getfield(source->strings, source->latlong),
-               getfield(source->strings, source->url)) <= 0? 1: 0;
+               getfield(source->strings, source->url));
+      }
+   else
+      {
+            rc=xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" "
+               "LOCALTIME=\"%u\">\n",
+               name, getfield(source->strings, source->authority_ptr), source->localtime);
       }
 
-   return ganglia_gzprintf(client->io, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" "
-         "LOCALTIME=\"%u\">\n",
-          name, getfield(source->strings, source->authority_ptr), source->localtime) <= 0? 1:0;
+   return rc;
 }
 
 
@@ -143,9 +193,9 @@ source_report_end(Generic_t *self,  client_t *client, void *arg)
 {
 
    if (self->id == CLUSTER_NODE)
-      return ganglia_gzprintf(client->io, "</CLUSTER>\n") <= 0? 1: 0;
-
-   return ganglia_gzprintf(client->io, "</GRID>\n") <= 0? 1: 0;
+      return xml_print(client, "</CLUSTER>\n");
+   else
+      return xml_print(client, "</GRID>\n");
 }
 
 
@@ -155,25 +205,23 @@ root_report_start(client_t *client)
 {
    int rc;
 
-   rc = ganglia_gzprintf(client->io, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?>\n");
-   if( rc <= 0) return 1;
+   rc = xml_print(client, DTD);
+   if (rc) return 1;
 
-   rc = ganglia_gzprintf(client->io, "<!DOCTYPE GANGLIA_XML SYSTEM \"http://ganglia.sourceforge.net/dtd/v2.dtd\">\n"); 
-   if( rc <= 0) return 1;
-
-   rc = ganglia_gzprintf(client->io, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
+   rc = xml_print(client, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
       VERSION);
-   if (rc <= 0) return 1;
 
-   return ganglia_gzprintf(client->io, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
-       gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0)) <= 0? 1: 0;
+   rc = xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
+       gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0));
+
+   return rc;
 }
 
 
 int
 root_report_end(client_t *client)
 {
-    return ganglia_gzprintf(client->io, "</GRID>\n</GANGLIA_XML>\n") <= 0? 1: 0;
+    return xml_print(client, "</GRID>\n</GANGLIA_XML>\n");
 }
 
 
@@ -447,32 +495,29 @@ readline(int fd, char *buf, int maxlen)
 void *
 server_thread (void *arg)
 {
-  int rval;
    int interactive = (int) arg;
    int len;
    client_t client;
+   char remote_ip[16];
    char request[REQUESTLEN];
    llist_entry *le;
    datum_t rootdatum;
-   char mode[32];
-   char clienthost[NI_MAXHOST];
-   char clientservice[NI_MAXSERV];
 
    for (;;)
       {
-         len = CLIENT_ADDR_SIZE;
          client.valid = 0;
+         len = sizeof(client.addr);
 
          if (interactive)
             {
                pthread_mutex_lock(&server_interactive_mutex);
-               SYS_CALL( client.fd, accept(interactive_socket, (struct sockaddr *) &(client.addr), &len));
+               SYS_CALL( client.fd, accept(interactive_socket->sockfd, (struct sockaddr *) &(client.addr), &len));
                pthread_mutex_unlock(&server_interactive_mutex);
             }
          else
             {
                pthread_mutex_lock  ( &server_socket_mutex );
-               SYS_CALL( client.fd, accept(server_socket, (struct sockaddr *) &(client.addr), &len));
+               SYS_CALL( client.fd, accept(server_socket->sockfd, (struct sockaddr *) &(client.addr), &len));
                pthread_mutex_unlock( &server_socket_mutex );
             }
          if ( client.fd < 0 )
@@ -483,21 +528,11 @@ server_thread (void *arg)
                continue;
             }
 
-	 rval = getnameinfo((struct sockaddr *)&(client.addr), len,
-		            clienthost, sizeof(clienthost),
-		            clientservice, sizeof(clientservice),
-		            NI_NUMERICHOST);
-	 if(rval != 0)
-	   {
-	     /* We got an error. Do the paranoid thing and close the client socket
-	      * since we can't determine if we trust the client or not. */
-	     close(client.fd);
-	     continue;
-	   }
+         my_inet_ntop( AF_INET, (void *)&(client.addr.sin_addr), remote_ip, 16 );
 
-         if ( !strcmp(clienthost, "127.0.0.1")
+         if ( !strcmp(remote_ip, "127.0.0.1")
                || gmetad_config.all_trusted
-               || (llist_search(&(gmetad_config.trusted_hosts), (void *)clienthost, strcmp, &le) == 0) )
+               || (llist_search(&(gmetad_config.trusted_hosts), (void *)remote_ip, strcmp, &le) == 0) )
             {
                client.valid = 1;
             }
@@ -505,27 +540,28 @@ server_thread (void *arg)
          if(! client.valid )
             {
                debug_msg("server_thread() %s tried to connect and is not a trusted host",
-                  clienthost);
+                  remote_ip);
                close( client.fd );
                continue;
             }
          
          client.filter=0;
+         gettimeofday(&client.now, NULL);
 
          if (interactive)
             {
                len = readline(client.fd, request, REQUESTLEN);
                if (len<0)
                   {
-                     err_msg("server_thread() could not read request from %s", clienthost);
+                     err_msg("server_thread() could not read request from %s", remote_ip);
                      close(client.fd);
                      continue;
                   }
-               debug_msg("server_thread() received request \"%s\" from %s", request, clienthost);
+               debug_msg("server_thread() received request \"%s\" from %s", request, remote_ip);
 
                if (process_request(&client, request))
                   {
-                     err_msg("Got a malformed path request from %s", clienthost);
+                     err_msg("Got a malformed path request from %s", remote_ip);
                      /* Send them the entire tree to discourage attacks. */
                      strcpy(request, "/");
                   }
@@ -533,20 +569,11 @@ server_thread (void *arg)
          else
             strcpy(request, "/");
 
-	 sprintf(mode, "wb%d", gmetad_config.xml_compression_level);
-         client.io = ganglia_gzdopen( client.fd, mode );
-         if(!client.io)
-           {
-             err_msg("unable to create client stream");
-             close(client.fd);
-             continue;
-           }
-
          if(root_report_start(&client))
             {
                err_msg("server_thread() %d unable to write root preamble (DTD, etc)",
                          pthread_self() );
-               ganglia_gzclose(client.io);
+               close(client.fd);
                continue;
             }
 
@@ -557,7 +584,7 @@ server_thread (void *arg)
          if (process_path(&client, request, &rootdatum, NULL))
             {
                err_msg("server_thread() %d unable to write XML tree info", pthread_self() );
-               ganglia_gzclose(client.io);
+               close(client.fd);
                continue;
             }
 
@@ -566,6 +593,6 @@ server_thread (void *arg)
                err_msg("server_thread() %d unable to write root epilog", pthread_self() );
             }
 
-         ganglia_gzclose( client.io);
+         close(client.fd);
       }
 }
