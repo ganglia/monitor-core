@@ -1,7 +1,7 @@
 #include <dotconf.h>
 #include <ganglia/hash.h>
 #include <ganglia/llist.h>
-#include <gmetad_typedefs.h>
+#include <gmetad.h>
 
 /* Variables that get filled in by configuration file */
 extern llist_entry *trusted_hosts;

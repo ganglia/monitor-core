@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/poll.h>
-#include "gmetad_typedefs.h"
+#include "gmetad.h"
 #include <string.h>
 #include <ganglia/hash.h>
 
