@@ -44,8 +44,15 @@ Most Full Disk: <b>{most_full}</b><br>
 
 <hr>
 
+
 <table border=0>
-<tr><td align=left><font size=-1><b>Legend</b></font></td></tr>
+<tr>
+ <td align=left>
+<font size=-1>
+Legend
+</font>
+ </td>
+</tr>
 <tr>
 <td class=odd>
 <table width=100% cellpadding=1 cellspacing=0 border=0>
@@ -62,11 +69,13 @@ Most Full Disk: <b>{most_full}</b><br>
 <tr>
 <td colspan=2 style="color: rgb(70,70,70)">
 <font size=-1>
-<em>cpu: </em> CPU clock (Mhz) (num CPUs)<br>
-<em>mem: </em> Total Memory (MB)</td>
+<em>cpu: </em> CPU clock (Ghz) (num CPUs)<br>
+<em>mem: </em> Total Memory (GB)</td>
 </font>
 </tr>
 </table>
+</font>
+
 </td>
 </tr>
 </table>

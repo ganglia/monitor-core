@@ -13,7 +13,7 @@
 <TR>
   <TD ROWSPAN="2" WIDTH="150">
   <A HREF="http://ganglia.sourceforge.net/">
-  <IMG SRC="{images}/logo.jpg" HEIGHT="118" WIDTH="150" 
+  <IMG SRC="{images}/logo.jpg" HEIGHT="91" WIDTH="150" 
       ALT="Ganglia" BORDER="0"></A>
   </TD>
   <TD VALIGN="TOP">
@@ -39,16 +39,13 @@
       <B>{alt_view}</B>
      </TD>
   </TR>
-  <tr>
-     <td colspan="1">
-       <FONT SIZE="+1">
-         {node_menu}
-       </FONT>
-     </td>
-  </tr> 
   </TABLE>
 
   </TD>
 </TR>
 </TABLE> 
+
+<FONT SIZE="+1">
+{node_menu}
+</FONT>
 <HR SIZE="1" NOSHADE>
