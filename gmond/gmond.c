@@ -283,7 +283,7 @@ main ( int argc, char *argv[] )
 		  {
 		    /* Todo: need to allow explicit routes for unicast routes here */
 		    receive_sockets[receive_index] = Udp_server( channel->address, channel->port, &salen);
-		    Setsockopt( receive_sockets[i], SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)); 
+		    Setsockopt( receive_sockets[receive_index], SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)); 
 		  }
 
                 ganglia_run( receive_pool, msg_listen_thread, (void *)&receive_sockets[receive_index]); 
