@@ -257,8 +257,8 @@ fi
 %files gexec-client
 %defattr(-, root, root)
 /usr/bin/gexec
-/usr/sbin/guathd
-/etc/init.d/guathd
+/usr/sbin/gauthd
+/etc/init.d/gauthd
 
 ##
 ## FILES GEXEC-SERVER
