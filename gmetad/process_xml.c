@@ -37,6 +37,7 @@ typedef struct
       data_source_list_t *ds;
       int grid_depth;   /* The number of nested grids at this point. Will begin at zero. */
       int host_alive;   /* True if the current host is alive. */
+      unsigned int cluster_localtime;  /* Needed for old hosts. */
       Source_t source; /* The current source structure. */
       Host_t host;  /* The current host structure. */
       Metric_t metric;  /* The current metric structure. */
@@ -210,9 +211,7 @@ start (void *data, const char *el, const char **attr)
    uint32_t tn=0;
    uint32_t tmax=0;
    uint32_t reported=0;
-
    Source_t *source;
-   unsigned int localtime=0;
    hash_t *summary;
    hash_t *hosts;  /* The current cluster-hosts table. */
 
@@ -305,7 +304,6 @@ start (void *data, const char *el, const char **attr)
                   source->stringslen = edge;
 
                   /* Grab the "partial sum" mutex until we are finished summarizing. */
-                  /*err_msg("%s grabbing lock", name);*/
                   pthread_mutex_lock(source->sum_finished);
                }
 
@@ -327,14 +325,11 @@ start (void *data, const char *el, const char **attr)
                   if (xt->tag == NAME_TAG)
                      name = attr[i+1];
                    else if (xt->tag == LOCALTIME_TAG)
-                     {
-                        localtime = strtoul(attr[i+1], (char **)NULL, 10);
-                        xmldata->source.localtime = localtime;
-                     }
+                      xmldata->cluster_localtime = strtoul(attr[i+1], (char **)NULL, 10);
                }
 
             /* Only keep cluster details if we are the authority on this cluster. */
-            if (!authority_mode(xmldata)) 
+            if (!authority_mode(xmldata))
                return;
 
             source = &(xmldata->source);
@@ -389,7 +384,7 @@ start (void *data, const char *el, const char **attr)
             source->owner = -1;
             source->latlong = -1;
             source->url = -1;
-            source->localtime = localtime;
+            source->localtime = xmldata->cluster_localtime;
             /* Fill in cluster attributes. */
             for(i = 0; attr[i]; i+=2)
                {
@@ -415,7 +410,6 @@ start (void *data, const char *el, const char **attr)
             source->stringslen = edge;
 
             /* Grab the "partial sum" mutex until we are finished summarizing. */
-            /*err_msg("%s grabbing lock", name);*/
             pthread_mutex_lock(source->sum_finished);
 
             break;
@@ -443,7 +437,7 @@ start (void *data, const char *el, const char **attr)
              * method, otherwise we use the host's TN and TMAX attrs.
              */
             xmldata->host_alive = (xmldata->old || !tmax) ?
-               abs(xmldata->source.localtime - reported) < 60 :
+               abs(xmldata->cluster_localtime - reported) < 60 :
                tn < tmax * 4;
 
             if (xmldata->host_alive)
@@ -451,7 +445,7 @@ start (void *data, const char *el, const char **attr)
             else
                xmldata->source.hosts_down++;
 
-            /* Only keep metric details if we are the authority on this cluster. */
+            /* Only keep host details if we are the authority on this cluster. */
             if (!authority_mode(xmldata))
                return;
 
