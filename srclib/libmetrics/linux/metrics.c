@@ -681,9 +681,9 @@ cpu_system_func ( void )
        p = skip_token(p);
        p = skip_token(p);
        p = skip_token(p);
-       system_jiffies += strtod( p , (char **)NULL );
+       system_jiffies += strtod( p , (char **)NULL ); /* "intr" counted in system */
        p = skip_token(p);
-       system_jiffies += strtod( p , (char **)NULL );
+       system_jiffies += strtod( p , (char **)NULL ); /* "sintr" counted in system */
        }
      total_jiffies  = total_jiffies_func();
 

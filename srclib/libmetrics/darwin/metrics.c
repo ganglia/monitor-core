@@ -384,6 +384,105 @@ cpu_wio_func ( void )
    return val;
 }
 
+/*
+** FIXME
+*/
+g_val_t 
+cpu_intr_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+cpu_sintr_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+bytes_in_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+bytes_out_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+pkts_in_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+pkts_out_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+disk_free_func ( void )
+{
+   g_val_t val;
+   val.d = 0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+disk_total_func ( void )
+{
+   g_val_t val;
+   val.d = 0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+part_max_used_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
 g_val_t
 load_one_func ( void )
 {
