@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <netdb.h>
 
-#include "error.h"
 #include "conf.h"
 
 #include "lib/ganglia.h"
