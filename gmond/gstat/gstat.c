@@ -6,7 +6,7 @@
 #include "../../lib/ganglia.h"
 #include "../../lib/llist.h"
 
-#include <getopt.h>
+#include "lib/getopt.h"
 #include "cmdline.h"
 #include <stdio.h>
 #include <stdlib.h>
