@@ -40,13 +40,13 @@ g_gethostbyname(const char* hostname, struct sockaddr_in* sa, char** nicename)
       sa->sin_family = AF_INET;
       memcpy(&sa->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
       if (nicename)
-	      *nicename = (char *)strdup (hostname);
+         *nicename = (char *)strdup (hostname);
       return 1;
     }
 
   pthread_mutex_lock (&gethostbyname_mutex);
   he = (struct hostent*)gethostbyname(hostname);
-  if (he != NULL && he->h_addr_list[0] != NULL)
+  if (he && he->h_addrtype==AF_INET && he->h_addr_list[0])
     {
      if (sa)
         {
