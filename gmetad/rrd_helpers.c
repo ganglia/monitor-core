@@ -22,7 +22,6 @@ static void inline my_mkdir ( char *dir );
 
 pthread_mutex_t rrd_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-
 int
 write_data_to_rrd ( char *cluster, char *host, char *metric, char *sum, char *num, char *polling_interval )
 {
