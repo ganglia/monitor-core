@@ -60,6 +60,18 @@ static DOTCONF_CB(cb_trusted_hosts)
    return NULL;
 }
 
+static DOTCONF_CB(cb_RRAs)
+{
+  int i;
+  gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+  c->num_RRAs = cmd->arg_count;
+  for(i = 0; i < c->num_RRAs; i++)
+    {
+      c->RRAs[i] = cmd->data.list[i];
+    }
+  return NULL;
+}
+
 static DOTCONF_CB(cb_data_source)
 {
    unsigned int i;
@@ -236,6 +248,7 @@ static configoption_t gmetad_options[] =
       {"setuid", ARG_TOGGLE, cb_setuid, &gmetad_config, 0},
       {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
       {"scalable", ARG_STR, cb_scalable, &gmetad_config, 0},
+      {"RRAs", ARG_LIST, cb_RRAs, &gmetad_config, 0},
       LAST_OPTION
    };
 
@@ -254,6 +267,12 @@ set_defaults (gmetad_config_t *config)
    config->rrd_rootdir = "/var/lib/ganglia/rrds";
    config->scalable_mode = 1;
    config->all_trusted = 0;
+   config->num_RRAs = 5;
+   config->RRAs[0] = "RRA:AVERAGE:0.5:1:240";
+   config->RRAs[1] = "RRA:AVERAGE:0.5:24:240";
+   config->RRAs[2] = "RRA:AVERAGE:0.5:168:240";
+   config->RRAs[3] = "RRA:AVERAGE:0.5:672:240";
+   config->RRAs[4] = "RRA:AVERAGE:0.5:5760:370";
 }
 
 int

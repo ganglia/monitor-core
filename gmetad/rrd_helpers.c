@@ -66,12 +66,13 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
 static int
 RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time)
 {
-   char *argv[15];
+   char *argv[128];
    int  argc=0;
    int heartbeat;
    char s[16], start[64];
    char sum[64];
    char num[64];
+   int i;
 
    /* Our heartbeat is twice the step interval. */
    heartbeat = 8*step;
@@ -90,11 +91,18 @@ RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time
       sprintf(num,"DS:num:GAUGE:%d:U:U", heartbeat);
       argv[argc++] = num;
    }
+
+   for(i = 0; i< gmetad_config.num_RRAs; i++)
+     {
+       argv[argc++] = gmetad_config.RRAs[i];
+     }
+#if 0
    argv[argc++] = "RRA:AVERAGE:0.5:1:240";
    argv[argc++] = "RRA:AVERAGE:0.5:24:240";
    argv[argc++] = "RRA:AVERAGE:0.5:168:240";
    argv[argc++] = "RRA:AVERAGE:0.5:672:240";
    argv[argc++] = "RRA:AVERAGE:0.5:5760:370";
+#endif
 
    pthread_mutex_lock( &rrd_mutex );
    optind=0; opterr=0;

@@ -4,6 +4,7 @@
 #include <string.h>
 #include "llist.h"
 
+#define MAX_RRAS 32
 typedef struct
    {
       char *gridname;
@@ -17,6 +18,8 @@ typedef struct
       char *rrd_rootdir;
       int scalable_mode;
       int all_trusted;
+      int num_RRAs;
+      char *RRAs[MAX_RRAS];
 } gmetad_config_t;
 
 int get_gmetad_config(char *conffile);
