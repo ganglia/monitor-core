@@ -858,6 +858,7 @@ process_xml(data_source_list_t *d, char *buf)
    int rval;
    XML_Parser xml_parser;
    xmldata_t xmldata;
+   char tmp[4096];
 
    memset( &xmldata, 0, sizeof( xmldata ));
 
@@ -877,7 +878,13 @@ process_xml(data_source_list_t *d, char *buf)
    XML_SetElementHandler (xml_parser, start, end);
    XML_SetUserData (xml_parser, &xmldata);
 
-   rval = XML_Parse( xml_parser, buf, strlen(buf), 1 );
+   if( gmetad_config.force_names )
+     {
+       snprintf(tmp, 4096, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%d\" OWNER=\"unspecified\" LATLONG=\"unspecified\" URL=\"unspecified\">", d->name, (int)time(NULL));
+       XML_Parse(xml_parser, tmp, strlen(tmp), 0);
+     }
+
+   rval = XML_Parse( xml_parser, buf, strlen(buf), gmetad_config.force_names? 0: 1 );
    if(! rval )
       {
          err_msg ("Process XML (%s): XML_ParseBuffer() error at line %d:\n%s\n",
@@ -886,6 +893,12 @@ process_xml(data_source_list_t *d, char *buf)
                          XML_ErrorString (XML_GetErrorCode (xml_parser)));
          xmldata.rval = 1;
       }
+
+   if( gmetad_config.force_names )
+     {
+       snprintf(tmp, 4096, "</CLUSTER>\n");
+       XML_Parse(xml_parser, tmp, 11, 1); 
+     }
 
    /* Release lock again for good measure (required under certain errors). */
    if (xmldata.source.sum_finished)

@@ -260,6 +260,14 @@ static DOTCONF_CB(cb_setuid)
    return NULL;
 }
 
+static DOTCONF_CB(cb_force_names)
+{
+  gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+  c->force_names = cmd->data.value;
+  return NULL;
+}
+
+
 static DOTCONF_CB(cb_xml_compression_level)
 {
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
@@ -295,6 +303,7 @@ static configoption_t gmetad_options[] =
       {"server_threads", ARG_INT, cb_server_threads, &gmetad_config, 0},
       {"rrd_rootdir", ARG_STR, cb_rrd_rootdir, &gmetad_config, 0},
       {"setuid", ARG_TOGGLE, cb_setuid, &gmetad_config, 0},
+      {"force_names", ARG_TOGGLE, cb_force_names, &gmetad_config, 0},
       {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
       {"scalable", ARG_STR, cb_scalable, &gmetad_config, 0},
       {"xml_compression_level", ARG_INT, cb_xml_compression_level, &gmetad_config, 0},
@@ -325,6 +334,8 @@ set_defaults (gmetad_config_t *config)
    config->rras[1] = strdup("RRA:AVERAGE:0.5:360:240"); /* 1 day of 6 minute samples */
    config->rras[2] = strdup("RRA:AVERAGE:0.5:3600:744");/* 1 month of hourly samples */
    config->rras[3] = strdup("RRA:AVERAGE:0.5:86400:365");/* 1 year of daily samples */
+
+   config->force_names = 0;
 }
 
 int
