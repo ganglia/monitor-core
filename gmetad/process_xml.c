@@ -284,6 +284,7 @@ end (void *data, const char *el)
                         debug_msg("OVERALL %s overall_sum = %Lf overall_num = %d", metrics[i].name, xml_data->overall_sum[i], xml_data->overall_num[i]);
                     }
               }
+
            break;
 
      }
@@ -318,7 +319,18 @@ process_xml(data_source_list_t *d, char *buf)
          err_msg ("save_to_rrd() XML_ParseBuffer() error at line %d:\n%s\n",
                          XML_GetCurrentLineNumber (xml_parser),
                          XML_ErrorString (XML_GetErrorCode (xml_parser)));
-         return 1;
+      }
+
+   /* Free memory that might have been allocated in xml_data */
+   if( xml_data.cluster )
+      {
+         free(xml_data.cluster);
+         xml_data.cluster = NULL;
+      }
+   if( xml_data.host )
+      {
+         free(xml_data.host);
+         xml_data.host = NULL;
       }
 
    XML_ParserFree(xml_parser);
