@@ -23,6 +23,7 @@ extern g_val_t sys_clock_func(void);
 extern g_val_t machine_type_func(void);
 extern g_val_t os_name_func(void);
 extern g_val_t os_release_func(void);
+extern g_val_t mtu_func(void);
 extern g_val_t cpu_user_func(void);
 extern g_val_t cpu_nice_func(void);
 extern g_val_t cpu_system_func(void);
@@ -36,10 +37,11 @@ extern g_val_t mem_free_func(void);
 extern g_val_t mem_shared_func(void);
 extern g_val_t mem_buffers_func(void);
 extern g_val_t mem_cached_func(void);
-extern g_val_t swap_free_func(void);        
+extern g_val_t swap_free_func(void);
 extern g_val_t gexec_func(void);
 extern g_val_t heartbeat_func(void);
 extern g_val_t mtu_func(void);
+extern g_val_t location_func(void);
 
 /* the following are additional internal metrics added by swagner
  * what for the monitoring of buffer/linear read/writes on Solaris boxen.
@@ -67,21 +69,24 @@ extern g_val_t bytes_in_func(void);
 extern g_val_t bytes_out_func(void);
 extern g_val_t pkts_in_func(void);
 extern g_val_t pkts_out_func(void);
+extern g_val_t disk_total_func(void);
+extern g_val_t disk_free_func(void);
+extern g_val_t part_max_used_func(void);
 
 #endif
-     
+
 
 #define INIT 0, 0, {0}, {0}
 #define KEY(NAME) { #NAME, NAME ##_func, INIT
 
 /*
- * All behavior of the gmond is tweak'd by this array.. 
+ * All behavior of the gmond is tweak'd by this array..
  *
  * Each metric is checked during some random interval between "check_min" and
- * "check_max" (assuming the threshold value is not negative).  If the metric is 
- * "threshold" greater than the previous metric value then the key_metric 
- * (listed on the left) is multicast.  If there has been no multicast 
- * during some random interval from "mcast_min" to "mcast_max" then a multicast 
+ * "check_max" (assuming the threshold value is not negative).  If the metric is
+ * "threshold" greater than the previous metric value then the key_metric
+ * (listed on the left) is multicast.  If there has been no multicast
+ * during some random interval from "mcast_min" to "mcast_max" then a multicast
  * is sent regardless of the metric value.
  *
  * NOTE: it is critical that the key matches the key in the enum key_metrics above
@@ -125,7 +130,8 @@ KEY(swap_free),  1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
 /* gmond internals */
 KEY(gexec),        -1,  -1,   -1,  180,  300, g_string, "",    "%s"},
 KEY(heartbeat),    -1,  -1,   -1,   10,   20, g_uint32, "",    "%u"},
-KEY(mtu), -1, -1,  -1, 900, 1200, g_uint32, "B", "%u" }
+KEY(mtu), -1, -1,  -1, 900, 1200, g_uint32, "B", "%u" },
+KEY(location), -1, -1,  -1, 900, 1200, g_string, "(x,y,z)", "%s" }
 
 #ifdef SOLARIS
 ,
@@ -158,7 +164,11 @@ KEY(phwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" }
 KEY(bytes_out),  1, 30,   40,  50,  70, g_float, "bytes/sec", "%.2f" },
 KEY(bytes_in),   1, 30,   40,  50,  70, g_float, "bytes/sec", "%.2f" },
 KEY(pkts_in), 1, 30,   40,  50,  70, g_float, "packets/sec", "%.2f" },
-KEY(pkts_out),   1, 30,   40,  50,  70, g_float, "packets/sec", "%.2f" }
+KEY(pkts_out),   1, 30,   40,  50,  70, g_float, "packets/sec", "%.2f" },
+/* The amount of disk space could change - hot-swap, mounts, etc... check: 30-60min. */
+KEY(disk_total), 1, 1800, 3600, 900, 1200, g_double, "GB", "%.3f" },
+KEY(disk_free), 1, 30, 40, 120, 180, g_double, "GB", "%.3f" },
+KEY(part_max_used), 1, 30, 40, 120, 180, g_float, "%", "%.1f" }
 
 #endif
 

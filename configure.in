@@ -68,7 +68,7 @@ AC_DEFINE_UNQUOTED(GANGLIA_INTERFACE_AGE, $GANGLIA_INTERFACE_AGE)
 AC_DEFINE_UNQUOTED(GANGLIA_BINARY_AGE,    $GANGLIA_BINARY_AGE)
 
 
-########################3
+########################
 AC_CANONICAL_HOST
 AM_CONFIG_HEADER(config.h)
 
@@ -196,7 +196,8 @@ dnl
 dnl Check for stdlib.h stdarg.h string.h float.h
 AC_HEADER_STDC
 
-AC_CHECK_HEADERS(syslog.h pthread.h fcntl.h signal.h sys/time.h sys/types.h sys/stat.h sys/socket.h sys/ioctl.h netinet/in.h arpa/inet.h net/if.h netinet/tcp.h unistd.h stropts.h sys/sockio.h ctype.h errno.h netdb.h stdio.h sys/uio.h sys/wait.h sys/un.h sys/select.h sys/filio.h getopt.h) 
+AC_CHECK_HEADERS(syslog.h pthread.h fcntl.h signal.h sys/time.h sys/types.h sys/stat.h sys/socket.h sys/ioctl.h netinet/in.h arpa/inet.h net/if.h netinet/tcp.h unistd.h stropts.h sys/sockio.h ctype.h errno.h netdb.h stdio.h sys/uio.h sys/wait.h sys/un.h sys/select.h sys/filio.h getopt.h)
+AC_CHECK_HEADERS(inttypes.h limits.h sys/param.h sys/mount.h sys/vfs.h sys/statfs.h sys/statvfs.h)
 
 dnl # If we can't find a system getopt header than add getopt functions to my own library
 dnl #if test "$ac_cv_header_getopt" = no; then
@@ -348,8 +349,13 @@ dnl the definitions that we're looking for in some system headers.
 case "$host" in
 *linux*)
                 metric_source="linux.c"
-                CFLAGS="$CFLAGS -D_REENTRANT" 
-                AC_DEFINE(LINUX);;
+                CFLAGS="$CFLAGS -D_REENTRANT"
+                AC_DEFINE(LINUX)
+dnl
+dnl For fsusage.c - disk usage.
+dnl
+                AC_DEFINE(STAT_STATVFS)
+                ;;
 *ia64*)         AC_DEFINE(IA64);;
 *aix*)		metric_source="aix.c"
                 CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
@@ -420,3 +426,4 @@ AC_OUTPUT(Makefile ganglia.spec lib/Makefile gmond/Makefile gmond/gstat/Makefile
 echo ""
 echo "-- Ganglia $VERSION --"
 echo "Type \"make\" to compile."
+

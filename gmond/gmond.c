@@ -54,7 +54,7 @@ send_all_metric_data( void )
       {
          metric[i].mcast_threshold = 0;
       }
-}              
+}
 
 /* Added temporarily to make gexec work until I build the service model */
 g_val_t
@@ -80,6 +80,16 @@ heartbeat_func( void )
    return val;
 }
 
+g_val_t
+location_func(void)
+{
+   g_val_t val;
+
+   strncpy(val.str, gmond_config.location, MAX_G_STRING_SIZE);
+   debug_msg("my location is %s", val.str);
+   return val;
+}
+
 int 
 main ( int argc, char *argv[] )
 {
@@ -102,7 +112,7 @@ main ( int argc, char *argv[] )
    if ( rval == 0 )
       {
          debug_msg("no config file found.. going with defaults");
-      } 
+      }
    else if( rval == 1)
       {
          debug_msg("config file %s processed with no errors", args_info.conf_arg);
@@ -134,9 +144,13 @@ main ( int argc, char *argv[] )
    if(! gmond_config.mcast_if_given )
       {
          entry = get_first_multicast_interface();
-         if(!entry)
-            err_quit("Could not find the first multicast interface");
-         debug_msg("The first multicast-enabled interface is %s", entry->intf_name);
+         if(!entry) {
+            err_msg("Warning: Could not find a multicast-enabled interface, using anything we can find.\n");
+            entry = get_first_interface();
+            if (!entry)
+               err_quit("Libdnet says we don't have any interfaces besides loopback, exiting.\n");
+         }
+         debug_msg("Using interface %s", entry->intf_name);
       }
    else
       {
@@ -144,12 +158,12 @@ main ( int argc, char *argv[] )
          if(!entry)
             err_quit("%s is not a valid multicast-enabled interface", gmond_config.mcast_if);
          debug_msg("Using multicast-enabled interface %s", gmond_config.mcast_if);
-      } 
+      }
 
    /* fd for incoming multicast messages */
    if(! gmond_config.deaf )
       {
-         mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port, 
+         mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port,
                                           (struct in_addr *)&(entry->intf_addr.addr_ip));
          if (! mcast_join_socket )
             {
@@ -157,14 +171,14 @@ main ( int argc, char *argv[] )
                return -1;
             }
 
-         debug_msg("mcast listening on %s %hu", gmond_config.mcast_channel, gmond_config.mcast_port); 
+         debug_msg("mcast listening on %s %hu", gmond_config.mcast_channel, gmond_config.mcast_port);
 
          server_socket = g_tcp_socket_server_new( gmond_config.xml_port );
          if (! server_socket )
             {
                perror("tcp_listen() on xml_port failed");
                return -1;
-            }      
+            }
          debug_msg("XML listening on port %d", gmond_config.xml_port);
 
          /* thread(s) to listen to the multicast traffic */
