@@ -11,6 +11,8 @@ extern pthread_mutex_t  server_socket_mutex;
 extern llist_entry *trusted_hosts;
 
 extern hash_t *xml;
+extern char *gridname;
+extern char *authority;
 
 int
 xml_print_func( datum_t *key, datum_t *val, void *arg )
@@ -31,10 +33,10 @@ server_thread ( void *arg)
    struct sockaddr_in cliaddr;
    char remote_ip[16];
    llist_entry *le;
-   char ganglia_xml[64];
+   char ganglia_xml[256];
 
    sprintf(ganglia_xml, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", VERSION);
-
+   sprintf(ganglia_xml, "%s<GRID NAME=\"%s\" AUTHORITY=\"%s\">\n", ganglia_xml, gridname, authority);
    for (;;)
       {
          client_valid = 0;
@@ -92,7 +94,7 @@ server_thread ( void *arg)
                continue;
             }
 
-         SYS_CALL( rval, write( clifd, "</GANGLIA_XML>\n", 15));
+         SYS_CALL( rval, write( clifd, "</GRID>\n</GANGLIA_XML>\n", 23));
          if(rval < 0)
             {
                debug_msg("server_thread() %d unable to write </GANGLIA_XML>", pthread_self() );

@@ -27,6 +27,12 @@ extern int number_of_datasources ( char *config_file );
 
 extern struct ganglia_metric metrics[];
 
+/* The name of this grid. Will encompass all our data sources. */
+char *gridname = "Unspecified";
+/* The authority on this level of the grid, for obtaining the RRDs.
+   Default is set to http://hostname/ganglia-webfrontend/. */
+char *authority;
+
 llist_entry *trusted_hosts = NULL;
 extern int debug_level;
 int xml_port = 8651;
@@ -40,7 +46,7 @@ unsigned int source_index = 0;
 
 struct gengetopt_args_info args_info;
 
-long double  sum_of_sums[MAX_METRIC_HASH_VALUE]; 
+long double  sum_of_sums[MAX_METRIC_HASH_VALUE];
 unsigned int sum_of_nums[MAX_METRIC_HASH_VALUE];
 
 int
@@ -110,6 +116,7 @@ main ( int argc, char *argv[] )
    struct passwd *pw;
    char sum[512];
    char num[512];  
+   char hostname[64];
 
    srand(52336789);
 
@@ -138,7 +145,16 @@ main ( int argc, char *argv[] )
          err_quit("Unable to create XML hash\n");
       }
 
+   gethostname(hostname,64);
+   authority = (char*) malloc(100);
+   if (authority) 
+      sprintf(authority, "http://%s/ganglia-webfrontend/", hostname);
+
    parse_config_file ( args_info.conf_arg );
+    /* If given, use command line directives over config file ones. */
+   if (args_info.debug_given) {
+      debug_level = args_info.debug_arg;
+   }
 
    /* The rrd_rootdir must be writable by the gmetad process */
    if( should_setuid )
@@ -175,7 +191,7 @@ main ( int argc, char *argv[] )
       {
           err_quit("Please make sure that %s is owned by %s", rrd_rootdir, gmetad_username);
       }
-        
+
    if (! (struct_stat.st_mode & S_IWUSR) )
       {
           err_quit("Please make sure %s has WRITE permission for %s", gmetad_username, rrd_rootdir);
@@ -229,10 +245,10 @@ main ( int argc, char *argv[] )
                      sprintf(sum, "%Lf", sum_of_sums[i]);
 
                      /* Save the data to a round robin database */
-                     if( write_data_to_rrd( NULL, NULL, (char *)metrics[i].name, sum, num, "15") )
+                     if( write_data_to_rrd( NULL, NULL, (char *)metrics[i].name, sum, num, 15) )
                         {
                            err_msg("Unable to write meta data to RRDbs");
-                        }                     
+                        }
                   }
             }
       }
