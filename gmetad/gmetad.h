@@ -53,6 +53,7 @@ typedef struct
       g_inet_addr **sources;
       long double  sum[MAX_METRIC_HASH_VALUE];
       unsigned int num[MAX_METRIC_HASH_VALUE];
+      long double timestamp;   /* added by swagner */
       int dead;
    }
 data_source_list_t;
