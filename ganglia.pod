@@ -987,6 +987,11 @@ There are three mailing lists available to you: C<ganglia-general>, C<ganglia-de
 C<ganglia-announce>.  You can join these lists or read their archives by 
 visiting https://sourceforge.net/mail/?group_id=43021
 
+C<All of the ganglia mailing lists are closed>.  That means that in order to
+post to the lists, you must be subscribed to the list.  We're sorry for the 
+inconvenience however it is very easy to subscribe and unsubscribe from the 
+lists.  We had to close the mailing lists because of SPAM problems.
+
 When you need help please follow these steps until your problem is resolved.
 
 =over 4
