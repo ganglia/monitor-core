@@ -8,7 +8,7 @@ sbin_PROGRAMS = gmond
 gmond_SOURCES =  gmond.c monitor.c server.c listen.c node_data_t.h \
 	machine.c metric.h metric_typedefs.h key_metrics.h cmdline.c cmdline.h \
 	interface.c interface.h
-gmond_LDADD   = ../lib/.libs/libganglia.a
+gmond_LDADD   = ../lib/.libs/libganglia.a ../lib/libdnet.a
 
 distclean-local: 
 	rm -f machine.c 
