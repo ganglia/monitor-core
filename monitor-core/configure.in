@@ -697,6 +697,9 @@ else
   echo "Your platform does _not_ support the ganglia execution environment at this time."
   echo "If you are interested in working to port it to your platform,"
   echo "please contact us at <ganglia-developers@lists.sourceforge.net>."
+  echo
+  echo "NOTE: The monitoring components will run just fine on this platform."
+  echo "      Simply run \"make\" to build the monitoring system."
 fi
 echo ""
 echo "-- Ganglia $VERSION --"
