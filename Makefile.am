@@ -8,6 +8,8 @@ endif
 
 GANGLIA_SUBDIRS = lib tests $(GMETAD_SUBDIR) gmond gmetric
 
+AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-shar dist-zip
+
 # Make sure we run the srclib but don't distribute it.  That
 # is handled in the "dist-hook" below...
 SUBDIRS = srclib $(GANGLIA_SUBDIRS)
@@ -33,6 +35,7 @@ CHANGE_LOG_GEN_BIN = scripts/cvs2cl.pl
 CHANGE_LOG_GEN_FLAGS = -t -r -b --accum -I ChangeLog --gmt --prune
 
 ChangeLog::
+	touch ChangeLog
 	$(CHANGE_LOG_GEN_BIN) $(CHANGE_LOG_GEN_FLAGS)
 
 CLEANFILES = ganglia.sub pod2htm*
@@ -51,3 +54,5 @@ dist-hook:
 	  --exclude="*.tar.gz" \
 	  -f - $$subdir | (cd $(distdir) && tar -xf -)\
 	done;
+
+bin_SCRIPTS = ganglia-config
