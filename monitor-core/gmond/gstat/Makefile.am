@@ -1,4 +1,4 @@
-AM_CFLAGS = -I../../lib
+AM_CFLAGS = -I$(top_builddir)/lib  -I$(top_builddir)/srclib/expat/lib/
 
 bin_PROGRAMS = gstat
 gstat_SOURCES =  gstat.c cmdline.c cmdline.h

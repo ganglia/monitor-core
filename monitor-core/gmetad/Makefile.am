@@ -1,4 +1,4 @@
-AM_CFLAGS = -O0 -I$(top_builddir)/lib -I$(top_builddir)/gmond
+AM_CFLAGS = -O0 -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/srclib/expat/lib/
 
 sbin_PROGRAMS = gmetad 
 gmetad_SOURCES =  gmetad.c cmdline.c cmdline.h gmetad.h data_thread.c \
