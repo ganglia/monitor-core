@@ -1,4 +1,4 @@
-enum gangliaValueTypes {
+enum Ganglia_value_types {
   GANGLIA_VALUE_UNKNOWN,
   GANGLIA_VALUE_STRING, 
   GANGLIA_VALUE_UNSIGNED_SHORT,
@@ -11,7 +11,7 @@ enum gangliaValueTypes {
 
 typedef string varstring<>;
 
-union gangliaValue switch(gangliaValueTypes type) {
+union Ganglia_value switch(Ganglia_value_types type) {
   case GANGLIA_VALUE_STRING:
      string str<>;
   case GANGLIA_VALUE_INT:
@@ -24,24 +24,24 @@ union gangliaValue switch(gangliaValueTypes type) {
      void;
 };
 
-struct gangliaMetric {
+struct Ganglia_metric {
   string name<>;
-  gangliaValue value;
+  Ganglia_value value;
 };
 
 /* Necessary for source to act as proxy */
-struct gangliaHostinfo {
+struct Ganglia_hostinfo {
   string hostname<>;
   string ip<>;
 };
 
 /* Necessary for reliable UDP (later) */
-struct gangliaMsginfo {
+struct Ganglia_msginfo {
   unsigned int seq; 
   unsigned int timestamp;
 };
 
-enum gangliaDataState {
+enum Ganglia_data_state {
   GANGLIA_METRIC_CONSTANT,               /* slope == "zero" */
   GANGLIA_METRIC_TIME_THRESHOLD,         /* slope != "zero" here down */
   GANGLIA_METRIC_VALUE_THRESHOLD,
@@ -50,43 +50,38 @@ enum gangliaDataState {
   GANGLIA_METRIC_UNKNOWN_OLD_FORMAT
 };
 
-struct gangliaMessageHeader {
-  gangliaHostinfo *host;
-  gangliaMsginfo  *msg;
+struct Ganglia_message_header {
+  Ganglia_hostinfo *host;
+  Ganglia_msginfo  *msg;
 };
 
-struct gangliaMessageBody {
+struct Ganglia_message_body {
   unsigned int source_instance;
-  gangliaDataState state;
+  Ganglia_data_state state;
   unsigned int age;
   unsigned int step;
   string units<>;
-  gangliaMetric metrics<>;
+  Ganglia_metric metrics<>;
 };
 
-struct gangliaFormat_1 {
-  gangliaMessageHeader *hdr;
-  gangliaMessageBody   *bdy;
+struct Ganglia_format_1 {
+  Ganglia_message_header *hdr;
+  Ganglia_message_body   *bdy;
 };
 
 /* 2.5.x compatibility..... */
-struct gmetricMessage {
-  opaque type<>;
-  opaque name<>;
-  opaque values<>;
-  opaque units<>;
+struct Ganglia_gmetric_message {
+  string type<>;
+  string name<>;
+  string values<>;
+  string units<>;
   unsigned int slope;
   unsigned int tmax;
   unsigned int dmax;
 };
 
-/* This is based on the old key_metrics.h file given #ifdef LINUX.
-   All other operating system metric keys have been placed at the end
-   of the list.  This breaks backward compatibility for those platforms
-   unfortunately.
-*/
-enum gangliaFormats {
-   metric_user_defined,
+enum Ganglia_message_formats {
+   metric_user_defined = 0, /* gmetric message */
    metric_cpu_num,
    metric_cpu_speed,
    metric_mem_total,
@@ -122,7 +117,7 @@ enum gangliaFormats {
    metric_disk_total,
    metric_disk_free,
    metric_part_max_used,
-   GANGLIA_NUM_OLD_METRICS, /* this should always directly follow the last 25 metric */
+   GANGLIA_NUM_OLD_METRICS, /* this should always directly follow the last metric_* */
 
    GANGLIA_FORMAT_1 = 2874789, /* give a little space for old metrics in case they are modified */
 
@@ -131,13 +126,13 @@ enum gangliaFormats {
    GANGLIA_NUM_FORMATS     /* this should always be the last entry */
 };
 
-union gangliaMessage switch (gangliaFormats format) {
+union Ganglia_message switch (Ganglia_message_formats format) {
   case GANGLIA_FORMAT_1:
-    gangliaFormat_1 *format_1; 
+    Ganglia_format_1 *format_1; 
 
   /* 2.5.x sources... */
   case metric_user_defined:
-    gmetricMessage gmetric;
+    Ganglia_gmetric_message gmetric;
 
   case metric_cpu_num:       /* xdr_u_short */
     unsigned short u_short;
@@ -191,26 +186,26 @@ union gangliaMessage switch (gangliaFormats format) {
 #ifdef RPC_HDR
 %
 %
-%struct gangliaOldMetric /* this is for limited 2.5.x compatibility ... */
+%struct Ganglia_old_metric /* this is for limited 2.5.x compatibility ... */
 %{
 %   int key;                /* the unique key for this metric.
 %                              matches position in metric array and enum. */
 %   const char name[16];    /* the name of the metric */
 %   int step;               /* how often is the metric collected */
-%   gangliaValueTypes type; /* the type of data to expect */
+%   Ganglia_value_types type; /* the type of data to expect */
 %   char units[32];         /* units the value are in */
 %};
-%typedef struct gangliaOldMetric gangliaOldMetric;
+%typedef struct Ganglia_old_metric Ganglia_old_metric;
 %
-% gangliaOldMetric *gangliaOldMetric_get( int key );
+% Ganglia_old_metric *Ganglia_old_metric_get( int key );
 %
 #endif
 #ifdef RPC_XDR
 %
-% gangliaOldMetric *
-% gangliaOldMetric_get( int key )
+% Ganglia_old_metric *
+% Ganglia_old_metric_get( int key )
 % {
-% static gangliaOldMetric gangliaOldMetricArray[GANGLIA_NUM_OLD_METRICS] = {
+% static Ganglia_old_metric ganglia_old_metric_array[GANGLIA_NUM_OLD_METRICS] = {
 %   {   metric_user_defined, "gmetric",          0,    GANGLIA_VALUE_UNKNOWN,  ""  },
 %   {   metric_cpu_num,      "cpu_num",         -1,    GANGLIA_VALUE_UNSIGNED_SHORT,   "CPUs"       },
 %   {   metric_cpu_speed,    "cpu_speed",       -1,    GANGLIA_VALUE_UNSIGNED_INT,     "MHz"        },
@@ -253,7 +248,7 @@ union gangliaMessage switch (gangliaFormats format) {
 %   {
 %     return NULL;
 %   }
-% return &gangliaOldMetricArray[key];
+% return &ganglia_old_metric_array[key];
 % }
 #endif
 

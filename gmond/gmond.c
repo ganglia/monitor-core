@@ -51,7 +51,7 @@ apr_array_header_t *udp_send_array = NULL;
 /* The hash to hold the hosts (key = host IP) */
 apr_hash_t *hosts;
 /* The "hosts" hash contains values of type "hostdata" */
-struct hostdata_t {
+struct Ganglia_host_data {
   /* Name of the host */
   char *hostname;
   /* Timestamp of when the remote host gmond started */
@@ -65,7 +65,7 @@ struct hostdata_t {
   /* Last heard from */
   apr_time_t last_heard_from;
 };
-typedef struct hostdata_t hostdata_t;
+typedef struct Ganglia_host_data Ganglia_host_data;
 
 static void
 cleanup_configuration_file(void)
@@ -218,6 +218,7 @@ setup_udp_recv_pollset( void )
       apr_socket_t *socket = NULL;
       apr_ipsubnet_t *ipsub = NULL;
       apr_pollfd_t socket_pollfd;
+      apr_pool_t *pool = NULL;
 
       udp_recv_channel = cfg_getnsec( config_file, "udp_recv_channel", i);
       mcast_join     = cfg_getstr( udp_recv_channel, "mcast_join" );
@@ -234,10 +235,13 @@ setup_udp_recv_pollset( void )
 		  bindaddr? bindaddr: "NULL",
 		  protocol? protocol:"NULL");
 
+      /* Create a sub-pool for this channel */
+      apr_pool_create(&pool, global_context);
+
       if( mcast_join )
 	{
 	  /* Listen on the specified multicast channel */
-	  socket = create_mcast_server(global_context, mcast_join, port, bindaddr, mcast_if );
+	  socket = create_mcast_server(pool, mcast_join, port, bindaddr, mcast_if );
 	  if(!socket)
 	    {
 	      fprintf(stderr,"Error creating multicast server mcast_join=%s port=%d mcast_if=%s. Exiting.\n",
@@ -248,8 +252,8 @@ setup_udp_recv_pollset( void )
 	}
       else
 	{
-	  /* Create a standard UDP server */
-          socket = create_udp_server( global_context, port, bindaddr );
+	  /* Create a UDP server */
+          socket = create_udp_server( pool, port, bindaddr );
           if(!socket)
             {
               fprintf(stderr,"Error creating UDP server on port %d bind=%s. Exiting.\n",
@@ -289,16 +293,16 @@ setup_udp_recv_pollset( void )
 }
 
 /* TODO: This function needs to be updated later to handle proxy information */
-static hostdata_t *
+static Ganglia_host_data *
 find_host_data( char *remoteip, apr_sockaddr_t *sa)
 {
   apr_status_t status;
   apr_pool_t *pool;
-  hostdata_t *hostdata;
+  Ganglia_host_data *hostdata;
   char *hostname = NULL;
   char *remoteipdup = NULL;
 
-  hostdata =  (hostdata_t *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
+  hostdata =  (Ganglia_host_data *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
   if(!hostdata)
     {
       /* Lookup the hostname (TODO: check for proxy info) */
@@ -316,7 +320,7 @@ find_host_data( char *remoteip, apr_sockaddr_t *sa)
 	}
 
       /* Malloc the hostdata_t from the new pool */
-      hostdata = apr_pcalloc( pool, sizeof( hostdata_t ));
+      hostdata = apr_pcalloc( pool, sizeof( Ganglia_host_data ));
       if(!hostdata)
 	{
 	  return NULL;
@@ -414,28 +418,28 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 	  if(!strcasecmp(protocol, "xdr"))
 	    {
 	      XDR x;
-	      gangliaMessage msg;
-	      hostdata_t *hostdata = NULL;
-	      gangliaOldMetric *old_metric;
+	      Ganglia_message msg;
+	      Ganglia_host_data *hostdata = NULL;
+	      Ganglia_old_metric *old_metric;
 
               /* Create the XDR receive stream */
 	      xdrmem_create(&x, buf, max_udp_message_len, XDR_DECODE);
 
               /* Flush the data */
-	      memset( &msg, 0, sizeof(gangliaMessage));
+	      memset( &msg, 0, sizeof(Ganglia_message));
 
 	      /* Read the gangliaMessage from the stream */
-	      if(!xdr_gangliaMessage(&x, &msg))
+	      if(!xdr_Ganglia_message(&x, &msg))
                 {	
 	          continue;
 	        }
 
 	      /* Check if this is an old metric format */
-	      old_metric = gangliaOldMetric_get( msg.format );
+	      old_metric = Ganglia_old_metric_get( msg.format );
 	      if(old_metric)
 		{
 		  /* Move this data into a newer format (later) */
-		  fprintf(stderr,"Got a %s message from %s\n", old_metric->name, remoteip);
+		  fprintf(stderr,"%s\t=>\t%s\n", remoteip, old_metric->name);
 		}
 	      
 	      /* If I want to find out how much data I decoded 
@@ -463,6 +467,7 @@ setup_udp_send_array( void )
       char *mcast_join, *mcast_if, *protocol, *ip;
       int port;
       apr_socket_t *socket = NULL;
+      apr_pool_t *pool = NULL;
 
       udp_send_channel = cfg_getnsec( config_file, "udp_send_channel", i);
       ip             = cfg_getstr( udp_send_channel, "ip" );
@@ -478,24 +483,29 @@ setup_udp_send_array( void )
 		  port, 
 		  protocol? protocol:"NULL");
 
-      /* Create a standard UDP socket */
-      socket = create_udp_client( global_context, ip, port );
-      if(!socket)
-        {
-          fprintf(stderr,"Unable to create UDP client for %s:%d. Exiting.\n",
-		      ip? ip: "NULL", port);
-	  exit(1);
-	}
+      /* Create a subpool */
+      apr_pool_create(&pool, global_context);
 
       /* Join the specified multicast channel */
       if( mcast_join )
 	{
 	  /* We'll be listening on a multicast channel */
-	  socket = NULL;
+	  socket = NULL; /* create_mcast_client(...); */
 	  if(!socket)
 	    {
 	      fprintf(stderr,"Unable to join multicast channel %s:%d. Exiting\n",
 		      mcast_join, port);
+	      exit(1);
+	    }
+	}
+      else
+	{
+          /* Create a UDP socket */
+          socket = create_udp_client( pool, ip, port );
+          if(!socket)
+            {
+              fprintf(stderr,"Unable to create UDP client for %s:%d. Exiting.\n",
+		      ip? ip: "NULL", port);
 	      exit(1);
 	    }
 	}
