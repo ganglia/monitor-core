@@ -36,6 +36,9 @@ extern void *mcast_listen_thread(void *arg);
 /* In dserver.c */
 extern void *server_thread(void *arg);
 
+/* In cleanup.c */
+extern void *cleanup_thread(void *arg);
+
 /* In debug_msg.c */
 extern int debug_level;
 
@@ -196,6 +199,10 @@ main ( int argc, char *argv[] )
                pthread_create(&tid, &attr, server_thread, (void *)server_barrier);
             }
          debug_msg("listening thread(s) have been started");
+         
+         /* A thread to cleanup old metrics and hosts */
+         pthread_create(&tid, &attr, cleanup_thread, (void *) NULL);
+         debug_msg("cleanup thread has been started");
       }
 
    /* fd for outgoing multicast messages */
