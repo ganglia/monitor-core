@@ -264,7 +264,7 @@ gexec_cluster (gexec_cluster_t *cluster, char *ip, unsigned short port)
       }
 
    gmond_socket = g_tcp_socket_connect( ip, port ); 
-   if (! gmond_socket->sockfd )
+   if (!gmond_socket)
       {
          gexec_errno = 3;
          return gexec_errno;
