@@ -1,8 +1,7 @@
 #ifndef DTD_H
 #define DTD_H 1
 
-#define DTD "\
-<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\"?>\n\
+#define DTD "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\"?>\n\
 <!DOCTYPE GANGLIA_XML [\n\
    <!ELEMENT GANGLIA_XML (GRID)*>\n\
       <!ATTLIST GANGLIA_XML VERSION CDATA #REQUIRED>\n\

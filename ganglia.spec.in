@@ -8,7 +8,7 @@
 # build mixed architecture packages.  As a workaround, you must build
 # the RPMs using the following commandline
 #
-# % rpmbuild -ba --target noarch,i386 ganglia.spec
+# % rpmbuild -ba --target noarch,i386 ganglia-monitor-core-@VERSION@.tar.gz
 #
 Summary: Ganglia Distributed Monitoring and Execution System
 Name: @PACKAGE@
@@ -36,7 +36,9 @@ Summary: Ganglia Web Frontend
 Group: System Environment/Base
 Obsoletes: ganglia-webfrontend
 Provides: ganglia-webfrontend
-Requires: rrdtool, ganglia-monitor-core-gmetad >= 2.5.4
+# We should put rrdtool as a Requires too but rrdtool rpm support is very weak
+# so most people install from source
+Requires: ganglia-monitor-core-gmetad >= 2.5.4
 %define web_prefixdir /var/www/html/ganglia
 Prefix: %{web_prefixdir}
 
