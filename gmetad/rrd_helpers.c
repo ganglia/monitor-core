@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -137,6 +138,23 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
    return RRD_update( rrd, sum, num, process_time );
 }
 
+/* Returns the last position in the string (not \0) */
+char *
+lowercase_it( char *string )
+{
+  char *p;
+   /* We need to make the file path all lower-case since most
+      good filesystems are case-sensitive.  We don't want
+      host00.foo.bar and host00.Foo.Bar data to be save to two
+      different locations */
+  for (p = string; p && *p; p++)
+     {
+       *p = tolower (*p);
+     }
+
+  return p;
+}
+
 
 /* Assumes num argument will be NULL for a host RRD. */
 int
@@ -144,35 +162,37 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
    const char *sum, const char *num, unsigned int step, unsigned int process_time )
 {
    char rrd[ PATHSIZE ];
-   char *summary_dir = "__SummaryInfo__";
+   char *summary_dir = "__summaryinfo__";
+   char *p;
 
    /* Build the path to our desired RRD file. Assume the rootdir exists. */
    strcpy(rrd, gmetad_config.rrd_rootdir);
+   p = lowercase_it( rrd );
 
    if (source) {
       strncat(rrd, "/", PATHSIZE);
       strncat(rrd, source, PATHSIZE);
+      p = lowercase_it( p );
       my_mkdir( rrd );
    }
 
    if (host) {
       strncat(rrd, "/", PATHSIZE);
       strncat(rrd, host, PATHSIZE);
+      p = lowercase_it( p );
       my_mkdir( rrd );
    }
    else {
       strncat(rrd, "/", PATHSIZE);
       strncat(rrd, summary_dir, PATHSIZE);
+      p = lowercase_it( p );
       my_mkdir( rrd );
    }
 
    strncat(rrd, "/", PATHSIZE);
    strncat(rrd, metric, PATHSIZE);
    strncat(rrd, ".rrd", PATHSIZE);
+   p = lowercase_it ( p );
 
    return push_data_to_rrd( rrd, sum, num, step, process_time );
-
-   /* Shouldn't get here */
-   return 1;
 }
-
