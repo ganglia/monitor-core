@@ -1,8 +1,6 @@
 # $Id$
 #
-SUBDIRS = lib gmetad gmond gmetric
-
-DIST_SUBDIRS = web
+SUBDIRS = lib gmetad gmond gmetric web
 
 #DIST_SUBDIRS = lib gmetad gmond gmetric
 

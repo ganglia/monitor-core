@@ -13,6 +13,7 @@ Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
 Buildroot: /tmp/%{name}-%{version}-buildroot
 Prefix: /usr
+%define web_prefixdir /var/www/html/ganglia
 
 %description
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -59,14 +60,12 @@ can use to build scalable cluster or grid applications
 Summary: Ganglia PHP Web Interface http://ganglia.sourceforge.net/
 Group: System Environment/Base
 Obsoletes: ganglia-webfrontend
-%define web_prefixdir /var/www/html/ganglia
-Prefix: /var/www/html/ganglia
+Prefix: %{web_prefixdir}
 
 %description web
 This package provides a web frontend to display the XML tree published by
 ganglia, and to provide historical graphs of collected metrics. This website is
 written in the PHP4 language.
-
 
 
 ##
@@ -150,12 +149,9 @@ fi
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.conf $RPM_BUILD_ROOT/etc/gmond.conf
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
 %__make install prefix=$RPM_BUILD_ROOT/usr
-
-# Web files
 %__mkdir -p $RPM_BUILD_ROOT/%{web_prefixdir}
-%__cp -rf %{_builddir}/%{name}-%{version}/* $RPM_BUILD_ROOT/%{web_prefixdir}
-
-%__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*spec
+%__cp -rf %{_builddir}/%{name}-%{version}/web $RPM_BUILD_ROOT/%{web_prefixdir}
+%__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*spec $RPM_BUILD_ROOT/%{web_prefixdir}/*.in
 
 ##
 ## FILES GMETA
@@ -178,11 +174,17 @@ fi
 /etc/rc.d/init.d/gmond
 %config(noreplace) /etc/gmond.conf
 
+##
+## FILES LIB
+##
 %files lib
 /usr/include/ganglia.h
 /usr/include/ganglia
 /usr/lib/libganglia*
 
+##
+## FILES WEB
+##
 %files web
 %defattr(-,root,root)
 %{web_prefixdir}
@@ -198,7 +200,7 @@ fi
 ## CHANGELOG
 ##
 %changelog
-* Web Feb 18 2004 Matt Massie <massie@cs.berkeley.edu>
+* Wed Feb 18 2004 Matt Massie <massie@cs.berkeley.edu>
 - Integrated the PHP web code into the monitor-core distribution
 * Mon Oct 14 2002 Federico Sacerdoti <fds@sdsc.edu>
 - Split package into -gmetad and -gmond subpackages for clarity,
