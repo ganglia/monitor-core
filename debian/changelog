@@ -1,3 +1,10 @@
+ganglia-monitor-core (2.5.0-3) unstable; urgency=low
+
+  * Another fix, upstream's autoconf stuff doesn't make config scripts
+   all correctly.
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Mon, 23 Sep 2002 17:30:16 -0500
+
 ganglia-monitor-core (2.5.0-2) unstable; urgency=low
 
   * Fixed a problematic build-depends: changed the dependency on any libgd-dev
