@@ -5,6 +5,7 @@
 #include <ganglia/hash.h>
 #include <ganglia/barrier.h>
 #include <ganglia/become_a_nobody.h>
+#include <ganglia/net.h>
 #include "metric.h"
 #include <pwd.h>
 #ifdef HAVE_SYS_TYPES_H
@@ -15,14 +16,14 @@
 /* The entire cluster this gmond knows about */
 hash_t *cluster;
 
-int             mcast_fd;
-pthread_mutex_t mcast_fd_mutex      = PTHREAD_MUTEX_INITIALIZER;
+g_mcast_socket * mcast_socket;
+pthread_mutex_t  mcast_socket_mutex  = PTHREAD_MUTEX_INITIALIZER;
 
-int             mcast_join_fd;
-pthread_mutex_t mcast_join_fd_mutex = PTHREAD_MUTEX_INITIALIZER;
+g_mcast_socket * mcast_join_socket;
+pthread_mutex_t  mcast_join_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-int             server_fd;
-pthread_mutex_t server_fd_mutex     = PTHREAD_MUTEX_INITIALIZER;
+g_tcp_socket *   server_socket;
+pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
 
 /* In dmonitor.c */
 extern void *monitor_thread(void *arg);
@@ -129,16 +130,21 @@ main ( int argc, char *argv[] )
    /* fd for incoming multicast messages */
    if(! config.deaf )
       {
-         mcast_join_fd = mcast_join(config.mcast_channel, config.mcast_port, config.mcast_if);
-         if ( mcast_join_fd == SYNAPSE_FAILURE)
+         g_inet_addr * addr;
+
+         addr = (g_inet_addr *) g_inetaddr_new( config.mcast_channel, config.mcast_port );
+         mcast_join_socket = g_mcast_socket_new( addr );
+         g_inetaddr_delete(addr);
+
+         if (! mcast_join_socket )
             {
                perror("gmond could not join the multicast channel");
                return -1;
             }
-         debug_msg("mcast listening on %d %s %hu", mcast_join_fd, config.mcast_channel, config.mcast_port); 
+         debug_msg("mcast listening on %s %hu", config.mcast_channel, config.mcast_port); 
 
-         server_fd = tcp_listen( config.xml_port );
-         if ( server_fd <0 )
+         server_socket = g_tcp_socket_server_new( config.xml_port );
+         if (! server_socket )
             {
                perror("tcp_listen() on xml_port failed");
                return -1;
@@ -165,14 +171,20 @@ main ( int argc, char *argv[] )
    /* fd for outgoing multicast messages */
    if(! config.mute )
       {
-         mcast_fd = mcast_connect( config.mcast_channel, config.mcast_port, 
-                                   config.mcast_if, config.mcast_ttl);
-         if ( mcast_fd == SYNAPSE_FAILURE)
+         g_inet_addr *addr;
+ 
+         addr = g_inetaddr_new ( config.mcast_channel, config.mcast_port );
+         mcast_socket = g_mcast_socket_new( addr );
+         g_inetaddr_delete( addr );
+
+         if ( !mcast_socket )
             {
                perror("gmond could not connect to multicast channel");
                return -1;
             }
          debug_msg("multicasting on channel %s %d", config.mcast_channel, config.mcast_port);
+
+         g_mcast_socket_set_ttl(mcast_socket, config.mcast_ttl );
 
          /* in machine.c */
          initval = metric_init();
