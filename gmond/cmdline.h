@@ -28,7 +28,7 @@ struct gengetopt_args_info
   char * location_arg;	/* Location of this host in the cluster 'rack,rank,plane'. (default='0,0,0').  */
   int debug_arg;	/* Debug level. If greater than zero, daemon will stay in foreground. (default='0').  */
   int foreground_flag;	/* Run in foreground (don't daemonize) (default=off).  */
-  int default_config_flag;	/* Print the default configuration and exit (default=off).  */
+  int default_config_flag;	/* Print the default configuration to stdout and exit (default=off).  */
 
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */

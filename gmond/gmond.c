@@ -47,6 +47,38 @@ static void
 process_configuration_file(void)
 {
   config_file = cfg_init( gmond_opts, CFGF_NOCASE );
+  /*
+   *
+  CFG_BOOL( "absolute_minimum_given", 0, CFGF_NONE ),
+  CFG_FLOAT("absolute_minimum", 0, CFGF_NONE ),
+  CFG_BOOL( "absolute_minimum_alert_given", 0, CFGF_NONE ),
+  CFG_FLOAT("absolute_minimum_alert", 0, CFGF_NONE ),
+  CFG_BOOL( "absolute_minimum_warning_given", 0, CFGF_NONE ),
+  CFG_FLOAT("absolute_minimum_warning", 0, CFGF_NONE ),
+  CFG_BOOL( "absolute_maximum_warning_given", 0, CFGF_NONE ),
+  CFG_FLOAT("absolute_maximum_warning", 0, CFGF_NONE ),
+  CFG_BOOL( "absolute_maximum_alert_given", 0, CFGF_NONE ),
+  CFG_FLOAT("absolute_maximum_alert", 0, CFGF_NONE ),
+  CFG_BOOL( "absolute_maximum_given", 0, CFGF_NONE ),
+  CFG_FLOAT("absolute_maximum", 0, CFGF_NONE ),
+  CFG_BOOL( "relative_change_normal_given", 0, CFGF_NONE),
+  CFG_FLOAT("relative_change_normal", 0, CFGF_NONE),
+  CFG_BOOL( "relative_change_warning_given", 0, CFGF_NONE),
+  CFG_FLOAT("relative_change_warning", 0, CFGF_NONE),
+  CFG_BOOL( "relative_change_alert_given", 0, CFGF_NONE),
+  CFG_FLOAT("relative_change_alert", 0, CFGF_NONE),
+  */
+
+  cfg_set_validate_func( config_file, "collection_group|metric", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
+
   switch( cfg_parse( config_file, args_info.conf_arg ) )
     {
     case CFG_FILE_ERROR:
@@ -67,7 +99,7 @@ process_configuration_file(void)
     case CFG_SUCCESS:
       break;
     default:
-      /* I have no cluse whats goin' on here... */
+      /* I have no clue whats goin' on here... */
       exit(1);
     }
 }
@@ -177,8 +209,7 @@ setup_udp_recv_pollset( void )
 
       debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s protocol=%s\n",
 		  mcast_join? mcast_join:"NULL", 
-		  mcast_if? mcast_if:"NULL",
-		  port, 
+		  mcast_if? mcast_if:"NULL", port,
 		  bindaddr? bindaddr: "NULL",
 		  protocol? protocol:"NULL");
 
@@ -387,7 +418,8 @@ main ( int argc, char *argv[] )
 
   if(args_info.default_config_flag)
     {
-      fprintf(stderr, DEFAULT_CONFIGURATION);
+      fprintf(stdout, DEFAULT_CONFIGURATION);
+      fflush(stdout);
       exit(0);
     }
 
