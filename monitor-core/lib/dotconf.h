@@ -21,7 +21,7 @@ extern "C" {
 #define CFG_MAX_OPTION 32	/* max length of any option name */
 #define CFG_MAX_VALUE 4064	/* max length of any options value */
 #define CFG_MAX_FILENAME 256	/* max length of a filename */
-#define CFG_VALUES 16		/* max # of arguments an option takes */
+#define CFG_VALUES 64		/* max # of arguments an option takes */
 
 #define CFG_INCLUDEPATH_ENV "DC_INCLUDEPATH"
 #define WILDCARDS	"*?"		/* list of supported wild-card characters */
