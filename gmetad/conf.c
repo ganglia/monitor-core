@@ -10,6 +10,8 @@ extern int debug_level;
 extern int xml_port;
 extern int server_threads;
 extern char *rrd_rootdir;
+extern char *setuid_username;
+extern int should_setuid;
 
 static DOTCONF_CB(cb_trusted_hosts)
 {
@@ -129,8 +131,18 @@ static DOTCONF_CB(cb_server_threads)
 static DOTCONF_CB(cb_rrd_rootdir)
 {
    debug_msg("Setting the RRD Rootdir to %s", cmd->data.str);
-   free( rrd_rootdir );
    rrd_rootdir = strdup ( cmd->data.str );
+}
+
+static DOTCONF_CB(cb_setuid_username)
+{
+   debug_msg("Setting setuid username to %s", cmd->data.str);
+   setuid_username = strdup( cmd->data.str );
+}
+
+static DOTCONF_CB(cb_setuid)
+{
+   should_setuid = cmd->data.value;
 }
 
 static FUNC_ERRORHANDLER(errorhandler)
@@ -146,6 +158,8 @@ static configoption_t gmetad_options[] =
       {"xml_port",  ARG_INT, cb_xml_port, NULL, 0},
       {"server_threads", ARG_INT, cb_server_threads, NULL, 0},
       {"rrd_rootdir", ARG_STR, cb_rrd_rootdir, NULL, 0},
+      {"setuid", ARG_TOGGLE, cb_setuid, NULL, 0},
+      {"setuid_username", ARG_STR, cb_setuid_username, NULL, 0},
       LAST_OPTION
    };
 
@@ -166,4 +180,5 @@ parse_config_file ( char *config_file )
          dotconf_cleanup(configfile);
          err_quit("dotconf_command_loop error");
       }
+   return 0;
 }
