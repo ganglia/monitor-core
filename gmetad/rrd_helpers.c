@@ -65,12 +65,12 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
 
 /* Warning: RRD_create will overwrite a RRdb if it already exists */
 static int
-RRD_create( char *rrd, int summary, unsigned int step)
+RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time)
 {
    char *argv[15];
    int  argc=0;
    int heartbeat;
-   char s[16];
+   char s[16], start[64];
    char sum[64];
    char num[64];
 
@@ -82,6 +82,9 @@ RRD_create( char *rrd, int summary, unsigned int step)
    argv[argc++] = "--step";
    sprintf(s, "%u", step);
    argv[argc++] = s;
+   argv[argc++] = "--start";
+   sprintf(start, "%u", process_time-1);
+   argv[argc++] = start;
    sprintf(sum,"DS:sum:GAUGE:%d:U:U", heartbeat);
    argv[argc++] = sum;
    if (summary) {
@@ -127,7 +130,7 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
 
    if( stat(rrd, &st) )
       {
-         rval = RRD_create( rrd, summary, step );
+         rval = RRD_create( rrd, summary, step, process_time );
          if( rval )
             return rval;
       }
