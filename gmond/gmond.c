@@ -820,7 +820,7 @@ host_metric_type( Ganglia_value_types type)
 
 /* NOT THREAD SAFE */
 static char *
-host_metric_value( Ganglia_old_metric *metric, Ganglia_message *message )
+host_metric_value( Ganglia_25metric *metric, Ganglia_message *message )
 {
   static char value[1024];
   if(!metric||!message)
@@ -860,12 +860,12 @@ host_metric_value( Ganglia_old_metric *metric, Ganglia_message *message )
 static apr_status_t
 print_host_metric( apr_socket_t *client, Ganglia_metric_data *data )
 {
-  Ganglia_old_metric *metric;
+  Ganglia_25metric *metric;
   char metricxml[1024];
   apr_size_t len;
   apr_time_t now;
 
-  metric = Ganglia_old_metric_get( data->message.id );
+  metric = Ganglia_25metric_bykey( data->message.id );
   if(!metric)
     return APR_SUCCESS;
 
@@ -878,7 +878,7 @@ print_host_metric( apr_socket_t *client, Ganglia_metric_data *data )
 	  host_metric_type( metric->type ),
 	  metric->units? metric->units: "",
 	  (int)((now - data->last_heard_from) / APR_USEC_PER_SEC),
-	  metric->step,
+	  metric->tmax,
 	  metric->slope );
 
   return apr_send(client, metricxml, &len);
