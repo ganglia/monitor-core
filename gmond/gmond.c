@@ -321,6 +321,13 @@ main ( int argc, char *argv[] )
          debug_msg("sending messages on channel %s %s", 
 		    gmond_config.msg_channel, gmond_config.msg_port);
 
+         if(is_multicast( gmond_config.msg_channel ))
+           {
+             /* Set the TTL for the multicast channel.  In the future, this will have
+                meaning in the context of plain UDP channels too. */
+             Mcast_set_ttl( msg_out_socket, gmond_config.msg_ttl); 
+           }
+
          pthread_create(&tid, &attr, monitor_thread, NULL);
          debug_msg("created monitor thread");
       }
