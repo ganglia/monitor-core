@@ -305,7 +305,7 @@ dnl the definitions that we're looking for in some system headers.
 
 case "$host" in
 *linux*)
-      metric_source="linux.c";;
+      metric_source="linux.c"
       AC_DEFINE(LINUX);;
 *ia64*)     AC_DEFINE(IA64);;
 *aix*)		metric_source="aix.c"
