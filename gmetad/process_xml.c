@@ -890,7 +890,7 @@ process_xml(data_source_list_t *d, char *buf)
 
    if( gmetad_config.force_names )
      {
-       snprintf(now, 32, "%d", (int)time(NULL));
+       snprintf(now, 32, "%d", d->last_heard_from);
        XML_Parse(xml_parser, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\"?><GANGLIA_XML VERSION=\"0.0.0\" SOURCE=\"gmond\"><CLUSTER NAME=\"", 119, 0);
        XML_Parse(xml_parser, d->name, strlen(d->name), 0);  
        XML_Parse(xml_parser, "\" LOCALTIME=\"", 13, 0);
@@ -898,15 +898,18 @@ process_xml(data_source_list_t *d, char *buf)
        XML_Parse(xml_parser, "\" OWNER=\"unspecified\" LATLONG=\"unspecified\" URL=\"unspecified\">", 62, 0 );
      }
 
-   rval = XML_Parse( xml_parser, buf, strlen(buf), gmetad_config.force_names? 0: 1 );
-   if(! rval )
-      {
-         err_msg ("Process XML (%s): XML_ParseBuffer() error at line %d:\n%s\n",
-                         d->name,
-                         XML_GetCurrentLineNumber (xml_parser),
-                         XML_ErrorString (XML_GetErrorCode (xml_parser)));
-         xmldata.rval = 1;
-      }
+   if(buf)
+     {
+       rval= XML_Parse( xml_parser, buf, strlen(buf), gmetad_config.force_names? 0: 1 );
+       if(! rval )
+          {
+             err_msg ("Process XML (%s): XML_ParseBuffer() error at line %d:\n%s\n",
+                             d->name,
+                             XML_GetCurrentLineNumber (xml_parser),
+                             XML_ErrorString (XML_GetErrorCode (xml_parser)));
+             xmldata.rval = 1;
+          }
+     }
 
    if( gmetad_config.force_names )
      {
