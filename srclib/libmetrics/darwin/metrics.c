@@ -671,6 +671,7 @@ proc_run_func( void )
       if (error != KERN_SUCCESS) {
            sprintf(errmsg, "processor_set_tasks: %s\n", mach_error_string(error));
            err_msg(errmsg);
+           goto ret;
       }
 
 		
@@ -1131,6 +1132,7 @@ find_disk_space(double *total, double *tot_avail)
    struct statfs *mntbuf;
    /* const char *fstype; */
    const char **vfslist;
+   char *str;
    size_t i, mntsize;
    size_t used, availblks;
    const double reported_units = 1e9;
@@ -1143,7 +1145,13 @@ find_disk_space(double *total, double *tot_avail)
    
    /* fstype = "ufs"; */
    
-   vfslist = makevfslist(makenetvfslist());
+   /* fix memory leak 
+   vfslist = makevfslist(makenetvfslist()); */
+   
+   str = makenetvfslist();
+   vfslist = makevfslist(str);
+   free(str);
+   
    
    mntsize = getmntinfo(&mntbuf, MNT_NOWAIT);   
    mntsize = regetmntinfo(&mntbuf, mntsize, vfslist);
