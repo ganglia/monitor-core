@@ -167,7 +167,6 @@ dnl    if test "$ac_cv_lib_pthreads_pthread_create" = yes ; then
 dnl       CFLAGS="$CFLAGS -D_REENTRANT"
 dnl    fi
 dnl fi
-AC_CHECK_LIB(rpc, xdr_string)
 
 if test "$gmetad" = yes ; then
    AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.com/)"], [echo "rrd lib not found"], [-lm])
@@ -187,6 +186,7 @@ if test "$gmetad" = yes ; then
    fi
 fi
 
+AC_CHECK_LIB(rpc, xdr_string)
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, inet_addr)
 AC_CHECK_LIB(nsl, gethostbyaddr_r)
@@ -290,7 +290,6 @@ dnl the definitions that we're looking for in some system headers.
 
 case "$host" in
 *linux*)
-                metric_source="linux.c"
                 CFLAGS="$CFLAGS -D_REENTRANT"
                 AC_DEFINE(LINUX, 1, LINUX)
 dnl
@@ -299,15 +298,13 @@ dnl
                 AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
                 AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
                 ;;
-*ia64-*hpux*)		metric_source="hpux.c"
-		CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
-      LIBS="-lpthread $LIBS"
+*ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
+		LIBS="-lpthread $LIBS"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
-      AC_DEFINE(IA64,1,IA64)
-      AC_DEFINE(HPUX,1,HPUX);;
-*aix*)		metric_source="aix.c"
-                CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
-                AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		AC_DEFINE(IA64,1,IA64)
+		AC_DEFINE(HPUX,1,HPUX);;
+*aix*)		CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		if test "$ac_cv_lib_pmapi_pm_cycles" = yes ; then
 			CFLAGS="$CFLAGS -DHAVE_PMAPI" 
 		else
@@ -315,23 +312,19 @@ dnl
 			echo "For AIX 4.3, you can download PMAPI at http://alphaworks.ibm.com/tech/pmapi"
 			echo "AIX 5 has PMAPI installed in bos.pmapi"
 		fi
-                AC_DEFINE(AIX, 1, AIX);;
-*hpux*)		metric_source="hpux.c"
-		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
-      LIBS="-lpthread $LIBS"
+		AC_DEFINE(AIX, 1, AIX);;
+*hpux*)		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
+		LIBS="-lpthread $LIBS"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
-      AC_DEFINE(HPUX,1,HPUX);;
-*irix*)         metric_source="irix.c"
-		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		AC_DEFINE(HPUX,1,HPUX);;
+*irix*)         AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
                 CFLAGS="$CFLAGS -D_IRIX_SOURCE"
                 AC_DEFINE(IRIX,1,IRIX);;
 *osf*)	 	metric_source="osf.c"	
 		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
                 AC_DEFINE(OSF,1,OSF);;
-*darwin*) 	metric_source="darwin.c"	
-                AC_DEFINE(DARWIN,1,DARWIN);;
-*solaris*)	metric_source="solaris.c"	
-                echo " *** WARNING:  Please make sure you use a 64-bit compiler, linker and *** "
+*darwin*) 	AC_DEFINE(DARWIN,1,DARWIN);;
+*solaris*)	echo " *** WARNING:  Please make sure you use a 64-bit compiler, linker and *** "
                 echo " *** library set if you are running a 64-bit Solaris kernel!  This    *** "
                 echo " *** applies if you are running Solaris 7 or later!                   *** "
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
@@ -341,17 +334,12 @@ dnl
 		   CFLAGS="$CFLAGS -D__STDC__ -D_POSIX_C_SOURCE=199506L -DHAVE_STRERROR"
 		fi 
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
-*freebsd*)      metric_source="freebsd.c" 
-                CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
+*freebsd*)      CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
                 AC_DEFINE(FREEBSD, 1, FREEBSD);; 
-*cygwin*)      	metric_source="cygwin.c" 
-                LDFLAGS="-liphlpapi"
+*cygwin*)      	LDFLAGS="-liphlpapi"
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
-
-dnl Handled by libmetrics now...
-dnl AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
 AC_OUTPUT(Makefile srclib/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile)
 
