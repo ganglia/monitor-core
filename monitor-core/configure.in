@@ -68,7 +68,7 @@ else
 GANGLIA_VERSION=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION.$GANGLIA_MICRO_VERSION.$GANGLIA_SNAPSHOT_DATE
 fi
 
-AM_INIT_AUTOMAKE(ganglia-monitor-core, $GANGLIA_VERSION)
+AM_INIT_AUTOMAKE(ganglia, $GANGLIA_VERSION)
 
 AC_SUBST(GANGLIA_MAJOR_VERSION)
 AC_SUBST(GANGLIA_MINOR_VERSION)
@@ -99,8 +99,6 @@ AC_SUBST(LT_AGE)
 AC_DEFINE_UNQUOTED(GANGLIA_MAJOR_VERSION, $GANGLIA_MAJOR_VERSION, GANGLIA_MAJOR_VERSION)
 AC_DEFINE_UNQUOTED(GANGLIA_MINOR_VERSION, $GANGLIA_MINOR_VERSION, GANGLIA_MINOR_VERSION)
 AC_DEFINE_UNQUOTED(GANGLIA_MICRO_VERSION, $GANGLIA_MICRO_VERSION, GANGLIA_MICRO_VERSION)
-#AC_DEFINE_UNQUOTED(GANGLIA_INTERFACE_AGE, $GANGLIA_INTERFACE_AGE, GANGLIA_INTERFACE_AGE)
-#AC_DEFINE_UNQUOTED(GANGLIA_BINARY_AGE,    $GANGLIA_BINARY_AGE,    GANGLIA_BINARY_AGE)
 
 
 ########################
@@ -314,6 +312,10 @@ dnl Some system-specific stuff ...
 dnl Some operating systems require additional flags in order to get all
 dnl the definitions that we're looking for in some system headers.
 
+dnl default VARSTATEDIR to /var/lib since that's the traditional location.
+dnl
+varstatedir="/var/lib"
+
 case "$host" in
 *linux*)
                 CFLAGS="$CFLAGS -D_REENTRANT"
@@ -362,12 +364,23 @@ dnl
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
 *freebsd*)      CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		varstatedir="/var/db"
+                osreldate=`awk '/^\#define[[:space:]]*__FreeBSD_version/ { print $3 }' /usr/include/osreldate.h`
+                if test $osreldate -lt 502102; then
+                        CFLAGS="-pthread $CFLAGS -D_REENTRANT"
+                fi
                 AC_DEFINE(FREEBSD, 1, FREEBSD);; 
 *cygwin*)      	LDFLAGS="-liphlpapi"
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
 
-AC_OUTPUT(Makefile srclib/Makefile tests/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile web/conf.php)
+dnl Define VARSTATEDIR in config.h
+dnl
+AC_SUBST(varstatedir)
+AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
+
+
+AC_OUTPUT(Makefile srclib/Makefile tests/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile web/version.php)
 
 
 echo ""
