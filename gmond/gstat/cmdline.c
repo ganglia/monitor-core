@@ -47,7 +47,7 @@ cmdline_parser_print_help (void)
   printf("  -m, --mpifile          Print a load-balanced mpifile  (default=off)\n");
   printf("  -1, --single_line      Print host and information all on one line  (default=\n                           off)\n");
   printf("  -l, --list             Print ONLY the host list  (default=off)\n");
-  printf("  -i, --gmond_ip=STRING  Specify the ip address of the gmond to query  \n                           (default=`127.0.0.1')\n");
+  printf("  -i, --gmond_ip=STRING  Specify the ip address of the gmond to query  \n                           (default=`localhost')\n");
   printf("  -p, --gmond_port=INT   Specify the gmond port to query  (default=`8649')\n");
 }
 
@@ -87,7 +87,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->mpifile_flag = 0;\
   args_info->single_line_flag = 0;\
   args_info->list_flag = 0;\
-  args_info->gmond_ip_arg = gengetopt_strdup("127.0.0.1") ;\
+  args_info->gmond_ip_arg = gengetopt_strdup("localhost") ;\
   args_info->gmond_port_arg = 8649 ;\
 }
 

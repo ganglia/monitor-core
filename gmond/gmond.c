@@ -63,6 +63,26 @@ Ganglia_udp_send_channels udp_send_channels = NULL;
 /* TODO: The array for outgoing TCP message channels (later) */
 apr_array_header_t *tcp_send_array = NULL;
 
+enum Ganglia_action_types {
+  GANGLIA_ACCESS_DENY = 0,
+  GANGLIA_ACCESS_ALLOW = 1
+};
+typedef enum Ganglia_action_types Ganglia_action_types;
+
+/* This is the structure used for the access control lists */
+struct Ganglia_access {
+  apr_ipsubnet_t *ipsub;
+  Ganglia_action_types action;
+};
+typedef struct Ganglia_access Ganglia_access;
+
+struct Ganglia_acl {
+  apr_array_header_t *access_array;
+  Ganglia_action_types default_action;
+};
+typedef struct Ganglia_acl Ganglia_acl;
+
+/* This is the channel definitions */
 enum Ganglia_channel_types {
   TCP_ACCEPT_CHANNEL,
   UDP_RECV_CHANNEL
@@ -71,7 +91,7 @@ typedef enum Ganglia_channel_types Ganglia_channel_types;
 
 struct Ganglia_channel {
   Ganglia_channel_types type;
-  apr_ipsubnet_t *acl;
+  Ganglia_acl *acl;
   int timeout;
 };
 typedef struct Ganglia_channel Ganglia_channel;
@@ -223,6 +243,148 @@ process_deaf_mute_mode( void )
     }
 }
 
+static Ganglia_acl *
+Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
+{
+  apr_status_t status;
+  Ganglia_acl *acl = NULL;
+  cfg_t *acl_config;
+  char *default_action;
+  int num_access = 0;
+  int i;
+
+  if(!channel || !pool)
+    {
+      return acl;
+    }
+
+
+  acl_config = cfg_getsec(channel, "acl");
+  if(!acl_config)
+    {
+      return acl;
+    }
+
+  /* Find out the number of access entries */
+  num_access = cfg_size( acl_config, "access" );
+  if(!num_access)
+    {
+      return acl;
+    }
+
+  /* Create a new ACL from the pool */
+  acl = apr_pcalloc( pool, sizeof(Ganglia_acl));
+  if(!acl)
+    {
+      fprintf(stderr,"Unable to allocate memory for ACL. Exiting.\n");
+      exit(1);
+    }
+
+  default_action = cfg_getstr( acl_config, "default");
+  if(!apr_strnatcasecmp( default_action, "deny"))
+    {
+      acl->default_action = GANGLIA_ACCESS_DENY;
+    }
+  else if(!apr_strnatcasecmp( default_action, "allow"))
+    {
+      acl->default_action = GANGLIA_ACCESS_ALLOW;
+    }
+  else
+    {
+      fprintf(stderr,"Invalid default ACL '%s'. Exiting.\n", default_action);
+      exit(1);
+    }
+
+  /* Create an array to hold each of the access instructions */
+  acl->access_array  = apr_array_make( pool, num_access, sizeof(Ganglia_acl *));
+  if(!acl->access_array)
+    {
+      fprintf(stderr,"Unable to malloc access array. Exiting.\n");
+      exit(1);
+    }
+  for(i=0; i< num_access; i++)
+    {
+      cfg_t *access_config   = cfg_getnsec( acl_config, "access", i);
+      Ganglia_access *access = apr_pcalloc( pool, sizeof(Ganglia_access));
+      char *ip, *mask, *action;
+
+      if(!access_config)
+	{
+	  /* This shouldn't happen unless maybe acl is empty and
+	   * the safest thing to do it exit */
+	  fprintf(stderr,"Unable to process ACLs. Exiting.\n");
+	  exit(1);
+	}
+
+      ip     = cfg_getstr( access_config, "ip");
+      mask   = cfg_getstr( access_config, "mask");
+      action = cfg_getstr( access_config, "action");
+      if(!ip && !mask && !action)
+	{
+	  fprintf(stderr,"An access record requires an ip, mask and action. Exiting.\n");
+	  exit(1);
+	}
+
+      /* Process the action first */
+      if(!apr_strnatcasecmp( action, "deny" ))
+	{
+          access->action = GANGLIA_ACCESS_DENY;
+	}
+      else if(!apr_strnatcasecmp( action, "allow"))
+	{
+          access->action = GANGLIA_ACCESS_ALLOW;
+	}
+      else
+	{
+          fprintf(stderr,"ACL access entry has action '%s'. Must be deny|allow. Exiting.\n", action);
+          exit(1);
+	}	  
+
+      /* Create the subnet */
+      access->ipsub = NULL;
+      status = apr_ipsubnet_create( &(access->ipsub), ip, mask, pool);
+      if(status != APR_SUCCESS)
+	{
+	  fprintf(stderr,"ACL access entry has invalid ip('%s')/mask('%s'). Exiting.\n", ip, mask);
+	  exit(1);
+	}
+
+      /* Save this access entry to the acl */
+      *(Ganglia_access **)apr_array_push( acl->access_array ) = access;
+    }
+  return acl;
+}
+
+
+static int
+Ganglia_acl_action( Ganglia_acl *acl, apr_sockaddr_t *addr )
+{
+  int i;
+
+  if(!acl)
+    {
+      /* If no ACL is specified, we assume there is no access control */
+      return GANGLIA_ACCESS_ALLOW; 
+    }
+
+  for(i=0; i< acl->access_array->nelts; i++)
+    {
+      Ganglia_access *access = ((Ganglia_access **)(acl->access_array->elts))[i];
+      if(!apr_ipsubnet_test( access->ipsub, addr ))
+	{
+	  /* no action will occur because addr is not in this subnet */
+	  continue;
+	}
+      else
+	{
+          return access->action;
+	}
+    }
+
+  /* No matches in the access list so we return the default */
+  return acl->default_action;
+}
+
 static void
 setup_listen_channels_pollset( void )
 {
@@ -240,10 +402,9 @@ setup_listen_channels_pollset( void )
   for(i = 0; i< num_udp_recv_channels; i++)
     {
       cfg_t *udp_recv_channel;
-      char *mcast_join, *mcast_if, *bindaddr, *allow_ip, *allow_mask;
+      char *mcast_join, *mcast_if, *bindaddr;
       int port;
       apr_socket_t *socket = NULL;
-      apr_ipsubnet_t *ipsub = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
 
@@ -252,8 +413,6 @@ setup_listen_channels_pollset( void )
       mcast_if       = cfg_getstr( udp_recv_channel, "mcast_if" );
       port           = cfg_getint( udp_recv_channel, "port");
       bindaddr       = cfg_getstr( udp_recv_channel, "bind");
-      allow_ip       = cfg_getstr( udp_recv_channel, "allow_ip");
-      allow_mask     = cfg_getstr( udp_recv_channel, "allow_mask");
 
       debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s",
 		  mcast_join? mcast_join:"NULL", 
@@ -307,17 +466,7 @@ setup_listen_channels_pollset( void )
       apr_socket_timeout_set( socket, channel->timeout);
 
       /* Save the ACL information */
-      if(allow_ip)
-	{
-	  status = apr_ipsubnet_create(&ipsub, allow_ip, allow_mask, pool);
-	  if(status != APR_SUCCESS)
-	    {
-	      fprintf(stderr,"Unable to build ACL for ip=%s mask=%s. Exiting.\n",
-		      allow_ip, allow_mask);
-	      exit(1);
-	    }
-	}
-      channel->acl = ipsub;
+      channel->acl = Ganglia_acl_create ( udp_recv_channel, pool );
 
       /* Save the pointer to this socket specific data */
       socket_pollfd.client_data = channel;
@@ -335,17 +484,14 @@ setup_listen_channels_pollset( void )
   for(i=0; i< num_tcp_accept_channels; i++)
     {
       cfg_t *tcp_accept_channel = cfg_getnsec( config_file, "tcp_accept_channel", i);
-      char *bindaddr, *allow_ip, *allow_mask, *interface;
+      char *bindaddr, *interface;
       int port, timeout;
       apr_socket_t *socket = NULL;
-      apr_ipsubnet_t *ipsub = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
 
       port           = cfg_getint( tcp_accept_channel, "port");
       bindaddr       = cfg_getstr( tcp_accept_channel, "bind");
-      allow_ip       = cfg_getstr( tcp_accept_channel, "allow_ip");
-      allow_mask     = cfg_getstr( tcp_accept_channel, "allow_mask");
       interface      = cfg_getstr( tcp_accept_channel, "interface"); 
       timeout        = cfg_getint( tcp_accept_channel, "timeout");
 
@@ -381,17 +527,9 @@ setup_listen_channels_pollset( void )
       channel->timeout = timeout;
 
       /* Save the ACL information */
-      if(allow_ip)
-	{
-	  status = apr_ipsubnet_create(&ipsub, allow_ip, allow_mask, pool);
-	  if(status != APR_SUCCESS)
-	    {
-	      fprintf(stderr,"Unable to build ACL for ip=%s mask=%s. Exiting.\n",
-		      allow_ip, allow_mask);
-	      exit(1);
-	    }
-	}
-      channel->acl = ipsub;
+      channel->acl = Ganglia_acl_create( tcp_accept_channel, pool ); 
+
+      /* Save the pointer to this channel data */
       socket_pollfd.client_data = channel;
 
       /* Add the socket to the pollset */
@@ -666,15 +804,9 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
    * want to malloc memory evertime we call this */
   apr_sockaddr_ip_buffer_get(remoteip, 256, remotesa);
 
-  /* Check the ACL (we can make this better later) */
-  if(channel->acl)
-    {
-      if(!apr_ipsubnet_test( channel->acl, remotesa))
-	{
-	  debug_msg("Ignoring data from %s\n", remoteip);
-	  return;
-	}
-    }
+  /* Check the ACL */
+  if(Ganglia_acl_action( channel->acl, remotesa) != GANGLIA_ACCESS_ALLOW)
+    return;
 
   /* Create the XDR receive stream */
   xdrmem_create(&x, buf, max_udp_message_len, XDR_DECODE);
@@ -967,15 +1099,9 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
    * want to malloc memory evertime we call this */
   apr_sockaddr_ip_buffer_get(remoteip, 256, remotesa);
 
-  /* Check the ACL (we can make this better later) */
-  if(channel->acl)
-    {
-      if(!apr_ipsubnet_test( channel->acl, remotesa))
-	{
-	  debug_msg("Ignoring connection from %s\n", remoteip);
-	  goto close_accept_socket;
-	}
-    }
+  /* Check the ACL */
+  if(Ganglia_acl_action( channel->acl, remotesa ) != GANGLIA_ACCESS_ALLOW)
+    goto close_accept_socket;
 
   /* Print the DTD, GANGLIA_XML and CLUSTER tags */
   status = print_xml_header(client);
@@ -1572,11 +1698,11 @@ main ( int argc, char *argv[] )
   /* Mark the time this gmond started */
   started = apr_time_now();
 
-  /* Builds a default configuration based on platform */
-  build_default_gmond_configuration(global_context);
-
   if (cmdline_parser (argc, argv, &args_info) != 0)
     exit(1) ;
+
+  /* Builds a default configuration based on platform */
+  build_default_gmond_configuration(global_context);
 
   if(args_info.default_config_flag)
     {
@@ -1584,7 +1710,7 @@ main ( int argc, char *argv[] )
       fflush( stdout );
       exit(0);
     }
-  
+
   if(args_info.metrics_flag)
     {
       setup_metric_callbacks();
@@ -1611,7 +1737,11 @@ main ( int argc, char *argv[] )
 
   apr_signal( SIGPIPE, SIG_IGN );
 
-  setuid_if_necessary();
+  /* This must occur before we setuid_if_necessary() particularly on freebsd
+   * where we need to be root to access /dev/mem to initialize metric collection */
+  setup_metric_callbacks();
+
+  setuid_if_necessary(); 
 
   process_deaf_mute_mode();
 
@@ -1622,7 +1752,6 @@ main ( int argc, char *argv[] )
 
   if(!mute)
     {
-      setup_metric_callbacks();
       setup_collection_groups();
       udp_send_channels = Ganglia_udp_send_channels_create( global_context, config_file );
     }

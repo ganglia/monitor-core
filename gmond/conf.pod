@@ -63,13 +63,17 @@ into the following XML.
   ...
   </CLUSTER>
 
+B<NOTE>: Currently gmetad cannot process data sources that do not
+have a cluster tag.  This will be remedied in the future.  
+
 =head2 globals
 
 The B<globals> section controls general characteristics of gmond
 such as whether is should daemonize, what user it should run as,
 whether is should send/receive date and such.  The B<globals>
-section has seven attributes: B<daemonize>, B<setuid>, B<user>,
-B<debug_level>, B<mute>, B<deaf>, B<host_dmax>.
+section has the following attributes: B<daemonize>, B<setuid>, B<user>,
+B<debug_level>, B<mute>, B<deaf>, B<host_dmax>, B<cleanup_threshold>,
+and B<gexec>.
 
 For example,
 
@@ -104,6 +108,15 @@ a remote host has stopped responding.  If B<host_dmax> is set to a
 positive number then B<gmond> will flush a host after it has not heard
 from it for B<host_dmax> seconds.  By the way, dmax means "delete max".
 
+The B<cleanup_threshold> is the minimum about of time before gmond
+will cleanup and hosts or metrics where B<tn> > B<dmax> a.k.a. expired
+data.
+
+The B<gexec> boolean allows you to specify whether gmond will announce
+the hosts availability to run gexec jobs.  B<Note>: this requires
+the B<gexecd> is running on the host and the proper keys have been
+installed.  
+
 =head2 udp_send_channel
 
 You can define as many B<udp_send_channel> sections as you like within
@@ -111,7 +124,7 @@ the limitations of memory and file descriptors.  If B<gmond> is configured
 as B<mute> this section will be ignored.
 
 The B<udp_send_channel> has a total of five attributes: B<mcast_join>,
-B<mcast_if>, B<ip>, B<port> and B<protocol>.
+B<mcast_if>, B<host> and B<port>.
 
 For example, the 2.5.x version gmond would send on the following single channel
 by default...
@@ -119,31 +132,29 @@ by default...
   udp_send_channel {
     mcast_join = 239.2.11.71
     port       = 8649
-    protocol   = xdr
   }
 
 The B<mcast_join> and B<mcast_if> attributes are optional.  When specified
 B<gmond> will create the UDP socket and join the B<mcast_join> multicast group
 and send data out the interface specified by B<mcast_if>.
 
-If only a B<ip> and B<port> are specified then B<gmond> will send unicast UDP
+If only a B<host> and B<port> are specified then B<gmond> will send unicast UDP
 messages to the hosts specified.  You could specify multiple unicast hosts
 for redundancy as B<gmond> will send UDP messages to all UDP channels.
 
 For example...
 
   udp_send_channel {
-    ip = 192.168.3.4
+    host = 192.168.3.4
     port = 2344
   }
   udp_send_channel {
-    ip = 192.168.3.8
+    host = host.foo.com
     port = 2389
   }
  
-would configure gmond to send messages to two hosts.
-
-Currently, the only B<protocol> supported is B<xdr> which is the default.
+would configure gmond to send messages to two hosts.  The B<host> specification
+can be an IPv4/IPv6 address or a resolvable hostname.
 
 =head2 udp_recv_channel
 
@@ -152,7 +163,7 @@ limits of memory and file descriptors.  If B<gmond> is configured B<deaf>
 this attribute will be ignored.
 
 The B<udp_recv_channel> section has a total of seven attributes:
-B<mcast_join>, B<bind>, B<port>, B<mcast_if>, B<protocol>, B<allow_ip>
+B<mcast_join>, B<bind>, B<port>, B<mcast_if>, B<allow_ip>
 and B<allow_mask>.
 
 For example, the 2.5.x gmond ran with a single udp receive channel...
@@ -161,7 +172,6 @@ For example, the 2.5.x gmond ran with a single udp receive channel...
     mcast_join = 239.2.11.71
     bind       = 239.2.11.71
     port       = 8649
-    protocol   = xdr
   }
 
 The B<mcast_join> and B<mcast_if> should only be used if you want to 
@@ -183,7 +193,7 @@ within the limitations of memory and file descriptors.  If B<gmond>
 is configured to be B<mute>, then these sections are ignored.
 
 The B<tcp_accept_channel> has six attributes: B<bind>, B<port>, 
-B<interface>, B<protocol>, B<allow_ip> and B<allow_mask>.
+B<interface>, B<allow_ip> and B<allow_mask>.
 
 For example, 2.5.x gmond would accept connections on a single TCP
 channel.
@@ -202,7 +212,112 @@ The B<interface> is not implemented at this time (use B<bind>).
 
 =head2 collection_group
 
-...
+You can specify as many B<collection_group> section as you like
+within the limitations of memory.  A B<collection_group> has
+the following attributes: B<collect_once>, B<collect_every>
+and B<time_threshold>.  A B<collection_group> must also contain one
+or more B<metric> sections.
+
+The B<metric> section has the following attributes: B<name> and
+B<value_threshold>.  For a list of available metric names, run
+the following command:
+
+  % gmond -m
+
+Here is an example of a collection group for a static metric...
+
+  collection_group {
+    collect_once   = yes
+    time_threshold = 1800
+    metric {
+     name = "cpu_num"
+    }
+  }
+
+This B<collection_group> entry would cause gmond to collect the 
+B<cpu_num> metric once at startup (since the number of CPUs will not 
+change between reboots).  The metric B<cpu_num> would be send
+every 1/2 hour (1800 seconds).  The default value for the B<time_threshold>
+is 3600 seconds if no B<time_threshold> is specified.
+
+The B<time_threshold> is the maximum
+amount of time that can pass before gmond sends all B<metric>s specified in the
+B<collection_group> to all listed B<udp_send_channel>s.  A
+B<metric> may be sent before this B<time_threshold> is met if
+during collection the value surpasses the B<value_threshold> (explained
+below).
+
+Here is an example of a collection group for a volatile metric...
+
+  collection_group {
+    collect_every = 60
+    time_threshold = 300
+    metric {
+      name = "cpu_user"
+      value_threshold = 5.0
+    }
+    metric {
+      name = "cpu_idle"
+      value_threshold = 10.0
+    }
+  }
+
+This collection group would collect the B<cpu_user> and B<cpu_idle> metrics
+every 60 seconds (specified in B<collect_every>).  If B<cpu_user> varies by
+5.0% or B<cpu_idle> varies by 10.0%, then the entire B<collection_group>
+is sent.  If no B<value_threshold> is triggered within B<time_threshold>
+seconds (in this case 300), the entire B<collection_group> is sent.
+
+Each time the metric value
+is collected the new value is compared with the old value collected.  If
+the difference between the last value and current value is greater than
+the B<value_threshold>, the entire collection group is send to the 
+B<udp_send_channel>s defined.
+
+It's important to note that all metrics in a collection group are sent
+even when only a single B<value_threshold> is surpassed.
+
+=head1 ACCESS CONTROL
+
+The B<udp_recv_channel> and B<tcp_accept_channel> directives
+can contain an Access Control List (ACL).  This ACL allows you to specify
+exactly which hosts gmond process data from.
+
+An example of an B<acl> entry looks like
+
+  acl {
+    default = "deny"
+    access {
+      ip = 192.168.0.4
+      mask = 32
+      action = "allow"
+    }
+  }
+
+This ACL will by default reject all traffic that is not specifically from
+host 192.168.0.4 (the mask size for an IPv4 address is 32, the mask size
+for an IPv6 address is 128 to represent a single host).
+
+Here is another example
+
+  acl {
+    default = "allow"
+    access {
+      ip = 192.168.0.0
+      mask = 24
+      action = "deny"
+    }
+    access {
+      ip = ::ff:1.2.3.0
+      mask = 120
+      action = "deny"
+    }
+  }
+
+This ACL will by default allow all traffic unless it comes from the 
+two subnets specified with action = "deny".
+    
+
 
 =head1 EXAMPLE
 
@@ -221,13 +336,26 @@ The default behavior for a 2.5.x gmond would be specified as...
     port       = 8649
   }
 
+To see the complete default configuration for gmond simply run:
+
+  % gmond -t
+
+gmond will print out it default behavior in a configuration file
+and then exit.  Capturing this output to a file can serve as
+a useful starting point for creating your own custom configuration.
+
+  % gmond -t > custom.conf
+
+edit B<custom.conf> to taste and then
+
+  % gmond -c ./custom.conf
+
 =head1 NOTES
 
-The ganglia web site is at http://ganglia.info/
+The ganglia web site is at http://ganglia.info/.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004 The University of California, Berkeley
-
+Copyright (c) 2005 The University of California, Berkeley
 
 =cut
