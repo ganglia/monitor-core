@@ -326,10 +326,6 @@ if test $ac_cv_multicast = no ; then
    exit;
 fi
 
-dnl Trying to be a little funny... heheh
-AC_MSG_CHECKING(if you have beer in your frig)
-AC_MSG_RESULT(yes) 
-
 dnl ##################################################################
 dnl If the compiler is gcc, enable all warnings.  Main purpose is to
 dnl catch any function call where the function has not been prototyped.
@@ -406,7 +402,7 @@ esac
 
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
-AC_OUTPUT(Makefile ganglia.spec lib/Makefile gmond/Makefile gmond/gstat/Makefile  gmetric/Makefile)
+AC_OUTPUT(Makefile ganglia.spec lib/Makefile gmetad/Makefile gmond/Makefile gmond/gstat/Makefile  gmetric/Makefile)
 
 echo ""
 echo "-- Ganglia $VERSION --"
