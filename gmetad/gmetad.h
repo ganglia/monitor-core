@@ -15,8 +15,8 @@ struct ganglia_metric
       metric_type type;
    };
 
-/* This value is taken from the metric_hash.c file (MAX_HASH_VALUE) */
-#define MAX_METRIC_HASH_VALUE 63
+/* This value is taken from the metric_hash.c file (MAX_HASH_VALUE+1) */
+#define MAX_METRIC_HASH_VALUE 64
 
 /* For xml_hash */
 typedef enum {
@@ -38,8 +38,8 @@ struct xml_tag
       xml_tag_t tag;
    };
 
-/* This value is taken from the xml_hash.c file (MAX_HASH_VALUE) */
-#define MAX_XML_HASH_VALUE 19
+/* This value is taken from the xml_hash.c file (MAX_HASH_VALUE+1) */
+#define MAX_XML_HASH_VALUE 20
 
 typedef struct
    {
