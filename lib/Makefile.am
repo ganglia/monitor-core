@@ -1,14 +1,3 @@
-if BUILD_DOTCONF
-DOTCONF_INCLUDES = -I../dotconf-1.0.9/src
-DOTCONF_LIBS = ../dotconf-1.0.9/src/dotconf.lo 
-else
-DOTCONF_LIBS = -ldotconf
-endif
-
-#if BUILD_LIBDNET
-#LIBDNET_INCLUDES = -I../libdnet-1.4/include
-#endif
-
 AM_CFLAGS = -I. $(DOTCONF_INCLUDES) $(LIBDNET_INCLUDES)
 
 EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h getopt.h
@@ -18,7 +7,10 @@ libganglia_la_SOURCES = daemon_inetd.c daemon_init.c debug_msg.c error.c \
 ganglia.c getopt1.c getopt.c getopt_init.c hash.c llist.c my_inet_ntop.c \
 rdwr.c xmlparse.c xmlrole.c xmltok.c file.c gexec_funcs.c barrier.c \
 become_a_nobody.c gexec_process.c gexec_vnn_ip.c gmond_config.c inetaddr.c \
-mcast.c tcp.c fsusage.c
+mcast.c tcp.c fsusage.c dotconf.c readdir.c
+
+# Just for convenience
+noinst_HEADERS = dotconf.h readdir.h
 
 libganglia_la_LIBADD  = $(DOTCONF_LIBS)
 
