@@ -23,10 +23,10 @@
 hash_t *cluster;
 
 g3_thread_pool collect_send_pool = NULL;
-int send_sockets[MAX_NUM_CHANNELS];
+int **send_sockets;
 
 g3_thread_pool receive_pool = NULL;
-int receive_sockets[MAX_NUM_CHANNELS];
+int **receive_sockets;
 
 int server_socket;
 pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
@@ -176,6 +176,9 @@ main ( int argc, char *argv[] )
       {
          err_quit("failed to process %s. Exiting.", args_info.conf_arg);
       }
+  
+   print_conf(&gmond_config);
+   exit(0);
 
    /* If given, use command line directives over config file ones. */
    if (args_info.debug_given) {
@@ -215,6 +218,8 @@ main ( int argc, char *argv[] )
 
    /* Ignore any SIGPIPE signals */
    signal( SIGPIPE, SIG_IGN );    
+
+#if 0
 
    if(! gmond_config.deaf )
       {
@@ -301,5 +306,7 @@ main ( int argc, char *argv[] )
       {
          pause();
       }
+#endif
+
    return 0;
 }
