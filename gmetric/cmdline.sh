@@ -1,4 +1,4 @@
-#!/usr/local/bin/gengetopt --input
+#!/usr/bin/gengetopt --input
 # See http://www.gnu.org/software/gengetopt/gengetopt.html for details
 
 package "gmetric"
@@ -13,10 +13,14 @@ option "units" u "Unit of measure for the value e.g. Kilobytes, Celcius" string 
 option "slope" s "Either zero|positive|negative|both" string default="both"  no
 option "tmax" x "The maximum time in seconds between gmetric calls" int default="60" no
 option "dmax" d "The lifetime in seconds of this metric" int default="0" no
-option "mcast_channel" c "Multicast channel to send/receive on" string default="239.2.11.71" no
-option "mcast_port" p "Multicast port to send/receive on" int default="8649" no
-option "mcast_if" i "Network interface to multicast on e.g. 'eth1'" string default="kernel decides" no
-option "mcast_ttl" l "Multicast Time-To-Live (TTL)" int default="1" no
+option "msg_channel" c "Message channel" string default="239.2.11.71" no
+option "msg_port"    p "Message port" string default="8649" no
+option "msg_if"      i "Message interface e.g. 'eth1'" string default="kernel decides" no
+option "msg_ttl"     l "Message Time-To-Live (TTL)" int default="1" no
+option "mcast_channel" k "Multicast channel to send/receive on" string default="239.2.11.71" no
+option "mcast_port" o "Multicast port to send/receive on" string default="8649" no
+option "mcast_if" f "Multicast interface e.g. 'eth1'" string default="kernel decides" no
+option "mcast_ttl" j "Multicast Time-To-Live (TTL)" int default="1" no
 
 #Usage (a little tutorial)
 #
