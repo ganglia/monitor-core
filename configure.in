@@ -93,7 +93,7 @@ dnl Special parameters
 dnl
 
 AC_ARG_WITH( gmetad,
-[ --with-gmetad           compile and install the Ganglia Meta Daemon],
+[  --with-gmetad           compile and install the Ganglia Meta Daemon],
 if test "$withval" = yes; then gmetad=yes; fi)
 
 AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
@@ -101,9 +101,9 @@ AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
 AC_ARG_ENABLE(debug,
 [
   --enable-debug          turn on debugging output and compile options],
-[ CFLAGS="-ggdb"
+[ CFLAGS="$CFLAGS -ggdb"
   AC_DEFINE(DEBUG, 1, DEBUG)],
-[ CFLAGS="-O2" 
+[ CFLAGS="$CFLAGS -O2" 
   AC_DEFINE(DEBUG, 0, DEBUG)])
 
 AC_ARG_ENABLE(gexec,
@@ -118,10 +118,7 @@ AC_ARG_ENABLE(memcheck,
 [  --enable-memcheck       turn on memory checking during compile
                            note: requires mpatrol from
                            http://www.cbmamiga.demon.co.uk/mpatrol/],
-  [ LDFLAGS="$LDFLAGS -lmpatrol -lelf"
-    CFLAGS="$CFLAGS -fcheck-memory-usage" ],
-  AC_DEFINE(MEMCHECK,0,MEMCHECK))
-
+[ enable_memcheck="yes" ])
 
 dnl ##################################################################
 dnl Checks for libraries.
@@ -283,74 +280,6 @@ dnl   [AC_DEFINE(HAVE_PTHREAD_RWLOCK, 1)])
 dnl ##################################################################
 dnl Check for system services.
 
-dnl Let's see if the system really supports IPv4.
-AC_MSG_CHECKING(for IPv4 support)
-AC_CACHE_VAL(ac_cv_ipv4,
-AC_TRY_RUN([
-#	include <sys/types.h>
-#	include <sys/socket.h>
-#	include <netinet/in.h>
-   /* Make sure the definitions for AF_INET and struct sockaddr_in
-	 * are defined, and that we can actually create an IPv4 TCP socket.
- 	 */
- 	main()
- 	{
- 		int fd;
- 		struct sockaddr_in foo;
- 		fd = socket(AF_INET, SOCK_STREAM, 0);
- 		exit(fd >= 0 ? 0 : 1);
- 	}],
- 	ac_cv_ipv4=yes,
- 	ac_cv_ipv4=no,
- 	ac_cv_ipv4=no))
- AC_MSG_RESULT($ac_cv_ipv4)
-if test $ac_cv_ipv4 = yes ; then
-	AC_DEFINE(IPV4, 1, IPV4)
- 	AC_DEFINE(IPv4, 1, IPv4)
-fi
-dnl Stop here if we don't have IPv4 support
-
-if test $ac_cv_ipv4 = no ; then
-   echo "$PACKAGE $VERSION requires IPv4 support.";
-   exit;
-fi
-
-dnl Let's see if the system really supports multicasting.
-dnl
-AC_MSG_CHECKING(for multicast support)
-AC_CACHE_VAL(ac_cv_multicast,
-	AC_TRY_RUN([
-#	include <sys/types.h>
-#	include <sys/socket.h>
-#	include <netinet/in.h>
-	main()
-	{
-		int fd;
-		unsigned char flag = 1;
-		struct sockaddr_in foo;
-		struct ip_mreq mreq;
-		fd = socket(AF_INET, SOCK_DGRAM, 0);
-		if (fd < 0) exit(1);
-		if (setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP,
-			       (void*)&flag, sizeof(flag)) < 0)
-			exit(1);
-		exit(0);
-	}],
-	ac_cv_multicast=yes,
-	ac_cv_multicast=no,
-	ac_cv_multicast=no))
-AC_MSG_RESULT($ac_cv_multicast)
-if test $ac_cv_multicast = yes ; then
-	AC_DEFINE(MCAST, 1, MCAST)
-fi
-
-dnl Stop here if we don't have multicasting
-dnl
-if test $ac_cv_multicast = no ; then
-   echo "$PACKAGE $VERSION requires multicast support.";
-   exit;
-fi
-
 dnl ##################################################################
 dnl If the compiler is gcc, enable all warnings.  Main purpose is to
 dnl catch any function call where the function has not been prototyped.
@@ -359,10 +288,12 @@ dnl Add "-Wcast-qual again later"...
 dnl if test "$ac_cv_prog_gcc" = yes; then
 if test "$ac_cv_gcc" = yes; then
    CFLAGS="$CFLAGS -Wall -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes"
-   if test "$enable_memcheck" = yes; then
-      CFLAGS="$CFLAGS -fcheck-memory-usage "
-      LDFLAGS="$LDFLAGS -lmpatrol -lbfd -liberty "
-   fi
+fi
+
+if test "$enable_memcheck" = yes; then
+   echo "Setting up for memory checking via mpatrol"
+   CFLAGS="$CFLAGS -fcheck-memory-usage "
+   LDFLAGS="$LDFLAGS -lmpatrol -lbfd -liberty "
 fi
 
 dnl Some system-specific stuff ...
