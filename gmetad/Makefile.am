@@ -8,8 +8,9 @@
 AM_CFLAGS = -I../lib -I../gmond
 
 sbin_PROGRAMS = gmetad 
-gmetad_SOURCES =  gmetad.c cmdline.c cmdline.h gmetad_typedefs.h data_thread.c server.c save_to_rrd.c
-gmetad_LDADD   = ../lib/.libs/libganglia.a
+gmetad_SOURCES =  gmetad.c cmdline.c cmdline.h gmetad_typedefs.h data_thread.c server.c save_to_rrd.c \
+	rrd_helpers.c
+gmetad_LDADD   = ../lib/.libs/libganglia.a -lrrd
 # gmond_LDFLAGS =  -L../libdaemon -L../libhash
 # gmond_CFLAGS  = -fcheck-memory-usage
 
