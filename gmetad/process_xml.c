@@ -9,10 +9,10 @@
 #include <unistd.h>
 #include <gmetad.h>
 
-extern char *rrd_rootdir;
-
 int push_data_to_rrd( char *cluster, char *host, char *metric, char *value);
 int push_data_to_summary_rrd( char *cluster, char *metric, char *sum, char *num);
+
+extern char *rrd_rootdir;
 
 extern int RRD_update( char *rrd, char *value );
 extern int RRD_create( char *rrd, char *polling_interval);
@@ -39,12 +39,13 @@ xml_data_t;
 static void
 start (void *data, const char *el, const char **attr)
 {
+  register int i;
   xml_data_t *xml_data = (xml_data_t *)data;
-  int i, tn, tmax, index, is_volatile, is_numeric;
+  int tn, tmax, index, is_volatile, is_numeric, len;
   struct ganglia_metric *gm;
   struct xml_tag *xt;
 
-  if(! (xt = in_xml_list ( el, strlen( el ))) )
+  if(! (xt = in_xml_list ( (char *)el, strlen( el ))) )
      return;
 
   switch( xt->tag )
@@ -59,12 +60,12 @@ start (void *data, const char *el, const char **attr)
 
            for(i = 0; attr[i] ; i+=2)
               {
-                 if(!( xt = in_xml_list ( attr[i], strlen(attr[i]))) )
+                 /* Only process the XML tags that gmetad is interested in */
+                 if(!( xt = in_xml_list ( (char *)attr[i], strlen(attr[i]))) )
                     continue;
 
                  switch( xt->tag )
                     {
-
                        case NAME_TAG:
                           xml_data->metric = (char *)attr[i+1];
                           break;
@@ -92,7 +93,6 @@ start (void *data, const char *el, const char **attr)
                           if( strcmp( attr[i+1], "string" ))
                              is_numeric = 1;
                           break;
-
                     }
               }
  
@@ -114,17 +114,17 @@ start (void *data, const char *el, const char **attr)
                        case FLOAT:
                           xml_data->sum[hash_val].f +=  strtod( (const char *)(xml_data->metric_val), (char **)NULL);
                           xml_data->num[hash_val]++;
-                          debug_msg("sum = %f num = %d", xml_data->sum[hash_val].f, xml_data->num[hash_val] );
+                          debug_msg("%d sum = %f num = %d", hash_val, xml_data->sum[hash_val].f, xml_data->num[hash_val] );
                           break;
                        case UINT32:
                           xml_data->sum[hash_val].uint32 += strtoul(xml_data->metric_val, (char **)NULL, 10);
                           xml_data->num[hash_val]++;
-                          debug_msg("sum = %ld num = %d", xml_data->sum[hash_val].uint32, xml_data->num[hash_val]); 
+                          debug_msg("%d sum = %ld num = %d", hash_val, xml_data->sum[hash_val].uint32, xml_data->num[hash_val]); 
                           break;
                        case DOUBLE:
                           xml_data->sum[hash_val].d = strtod( (const char *)(xml_data->metric_val), (char **)NULL) ;
                           xml_data->num[hash_val]++;
-                          debug_msg("sum = %f num = %d", xml_data->sum[hash_val].d, xml_data->num[hash_val]);
+                          debug_msg("%d sum = %f num = %d", hash_val, xml_data->sum[hash_val].d, xml_data->num[hash_val]);
                           break;
                     }
               }
@@ -142,14 +142,18 @@ start (void *data, const char *el, const char **attr)
 
            for(i = 0; attr[i] ; i+=2)
               {
-                 if(! strcmp( attr[i], "NAME" ))
+                 if(!( xt = in_xml_list ( (char *)attr[i], strlen(attr[i]))) )
+                    continue;
+
+                 switch( xt->tag )
                     {
-                       xml_data->host = realloc( xml_data->host, strlen(attr[i+1])+1 );
-                       strcpy( xml_data->host, attr[i+1] ); 
+                       case NAME_TAG:
+                          xml_data->host = realloc( xml_data->host, strlen(attr[i+1])+1 );
+                          strcpy( xml_data->host, attr[i+1] ); 
+                          break;
                     }
               }
            break;
-
 
         case CLUSTER_TAG:
 
@@ -161,10 +165,16 @@ start (void *data, const char *el, const char **attr)
 
            for(i = 0; attr[i] ; i+=2)
               {
-                 if(! strcmp( attr[i], "NAME" ))
+                 /* Only process the XML tags that gmetad is interested in */
+                 if(!( xt = in_xml_list ( (char *)attr[i], strlen(attr[i]))) )
+                    continue;
+
+                 switch( xt->tag )
                     {
-                       xml_data->cluster = realloc ( xml_data->cluster, strlen(attr[i+1])+1 );
-                       strcpy( xml_data->cluster, attr[i+1] );
+                       case NAME_TAG:
+                          xml_data->cluster = realloc ( xml_data->cluster, strlen(attr[i+1])+1 );
+                          strcpy( xml_data->cluster, attr[i+1] );
+                          break;
                     }
               }
            break;
@@ -181,44 +191,54 @@ end (void *data, const char *el)
   register int i;
   struct ganglia_metric *gm;
   int len;
+  struct xml_tag *xt;
   char sum[64];
   char num[64];
 
-  if(! strcmp("CLUSTER", el) )
+  if(! (xt = in_xml_list ( (char *)el, strlen( el ))) )
+     return;
+
+  switch ( xt->tag )
      {
-        for ( i = 0; i < MAX_METRIC_HASH_VALUE; i++ )
-           {
-              len = strlen(metrics[i].name);
-              if( len )
-                 {
-                     gm  =  (struct ganglia_metric *)in_metric_list ((const char *)metrics[i].name, len);
 
-                     /* Skip it if we have no hosts reporting the data */
-                     if (! xml_data->num[i] )
-                        continue;
+        case CLUSTER_TAG:
+           for ( i = 0; i < MAX_METRIC_HASH_VALUE; i++ )
+              {
+                 len = strlen(metrics[i].name);
+                 if( len )
+                    {
+                        gm  =  (struct ganglia_metric *)in_metric_list ((char *)metrics[i].name, len);
+   
+                        /* Skip it if we have no hosts reporting the data */
+                        if (! xml_data->num[i] )
+                           continue;
 
-                     switch ( gm->type )
-                        {
-                           case FLOAT:
-                              sprintf( sum, "%f", xml_data->sum[i].f);
-                              sprintf( num, "%d", xml_data->num[i] );
-                              break;
-                           case DOUBLE:
-                              sprintf( sum, "%f", xml_data->sum[i].d); 
-                              sprintf( num, "%d", xml_data->num[i] ); 
-                              break;
-                           case UINT32:
-                              sprintf( sum, "%d", xml_data->sum[i].uint32);
-                              sprintf( num, "%d", xml_data->num[i] );
-                              break;
-                        }
+                        switch ( gm->type )
+                           {
+                              case FLOAT:
+                                 sprintf( sum, "%f", xml_data->sum[i].f);
+                                 sprintf( num, "%d", xml_data->num[i] );
+                                 break;
+                              case DOUBLE:
+                                 sprintf( sum, "%f", xml_data->sum[i].d); 
+                                 sprintf( num, "%d", xml_data->num[i] ); 
+                                 break;
+                              case UINT32:
+                                 sprintf( sum, "%d", xml_data->sum[i].uint32);
+                                 sprintf( num, "%d", xml_data->num[i] );
+                                 break;
+                           }
 
-                     /* Save the data to a round robin database */
-                     push_data_to_summary_rrd( xml_data->cluster, metrics[i].name, sum, num);
+                        /* Save the data to a round robin database */
+                        push_data_to_summary_rrd( (char *)(xml_data->cluster), (char *)metrics[i].name, sum, num);
 
-                     debug_msg("SAVE SUMMARY INFORMATION %s sum=%s num=%s", metrics[i].name, sum, num);
-                 }
-           }
+/*
+                        debug_msg("SAVE SUMMARY INFORMATION %s sum=%s num=%s", metrics[i].name, sum, num);
+ */
+                    }
+              }
+           break;
+
      }
   return;
 }
