@@ -325,6 +325,7 @@ dnl
                 AC_DEFINE(AIX, 1, AIX);;
 *hpux*)		metric_source="hpux.c"
 		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
+      LIBS="-lpthread $LIBS"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
       AC_DEFINE(HPUX,1,HPUX);;
 *irix*)         metric_source="irix.c"
