@@ -634,7 +634,22 @@ AM_CONDITIONAL(GEXEC_SUPPORTED, $GEXEC)
 
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
-AC_OUTPUT(Makefile ganglia.spec libunp/Makefile tests/Makefile gmetad/Makefile lib/Makefile libhttpd/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile web/Makefile web/conf.php libe/Makefile gexec/Makefile gexec/gexec_server gauthd/Makefile gauthd/gauthd.init)
+# Each directory appears on a line of its own (more if needed).
+# The lines should be sorted in the obvious manner.
+AC_OUTPUT(Makefile ganglia.spec \
+	gauthd/Makefile gauthd/gauthd.init \
+	gexec/Makefile gexec/gexec_server \
+	gmetad/Makefile \
+	gmetric/Makefile \
+	gmond/Makefile \
+	gmond/gstat/Makefile \
+	lib/Makefile \
+	libe/Makefile \
+	libhttpd/Makefile \
+	libunp/Makefile \
+	tests/Makefile \
+	web/Makefile web/conf.php \
+)
 
 
 echo ""
