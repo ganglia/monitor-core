@@ -56,6 +56,8 @@
    SRC="./graph.php?g=cpu_report&z=medium&c={cluster_url}&{graphargs}">
 <IMG HEIGHT="147" WIDTH="395" ALT="{cluster_url} NETWORK"
    SRC="./graph.php?g=network_report&z=medium&c={cluster_url}&{graphargs}">
+<IMG HEIGHT="147" WIDTH="395" ALT="{cluster_url} PACKETS"
+   SRC="./graph.php?g=packet_report&z=medium&c={cluster_url}&{graphargs}">
 </TD>
 </TR>
 </TABLE>
