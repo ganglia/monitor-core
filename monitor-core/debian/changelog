@@ -1,3 +1,10 @@
+ganglia-monitor-core (2.5.0-2) unstable; urgency=low
+
+  * Fixed a problematic build-depends: changed the dependency on any libgd-dev
+    package to libgd-gif1-dev, since that's what rrdtool explicitly depends on. 
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Mon, 23 Sep 2002 14:28:38 -0500
+
 ganglia-monitor-core (2.5.0-1) unstable; urgency=low
 
   * Intitial release of ganglia 2.5.0

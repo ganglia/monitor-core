@@ -2,7 +2,7 @@ Source: ganglia-monitor-core
 Section: net
 Priority: optional
 Maintainer: Preston Smith <psmith@foobird.net>
-Build-Depends: debhelper (>> 3.0.0), libpng2-dev, libgd-dev|libgd-noxpm-dev, librrd0-dev, cgilib
+Build-Depends: debhelper (>> 3.0.0), libpng-dev, libgd-gif1-dev, librrd0-dev, cgilib
 Standards-Version: 3.5.2
 
 Package: ganglia-monitor
