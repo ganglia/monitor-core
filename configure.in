@@ -61,11 +61,11 @@ AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 # Define version stuff
-AC_DEFINE_UNQUOTED(GANGLIA_MAJOR_VERSION, $GANGLIA_MAJOR_VERSION)
-AC_DEFINE_UNQUOTED(GANGLIA_MINOR_VERSION, $GANGLIA_MINOR_VERSION)
-AC_DEFINE_UNQUOTED(GANGLIA_MICRO_VERSION, $GANGLIA_MICRO_VERSION)
-AC_DEFINE_UNQUOTED(GANGLIA_INTERFACE_AGE, $GANGLIA_INTERFACE_AGE)
-AC_DEFINE_UNQUOTED(GANGLIA_BINARY_AGE,    $GANGLIA_BINARY_AGE)
+AC_DEFINE_UNQUOTED(GANGLIA_MAJOR_VERSION, $GANGLIA_MAJOR_VERSION, GANGLIA_MAJOR_VERSION)
+AC_DEFINE_UNQUOTED(GANGLIA_MINOR_VERSION, $GANGLIA_MINOR_VERSION, GANGLIA_MINOR_VERSION)
+AC_DEFINE_UNQUOTED(GANGLIA_MICRO_VERSION, $GANGLIA_MICRO_VERSION, GANGLIA_MICRO_VERSION)
+AC_DEFINE_UNQUOTED(GANGLIA_INTERFACE_AGE, $GANGLIA_INTERFACE_AGE, GANGLIA_INTERFACE_AGE)
+AC_DEFINE_UNQUOTED(GANGLIA_BINARY_AGE,    $GANGLIA_BINARY_AGE,    GANGLIA_BINARY_AGE)
 
 
 ########################
@@ -77,8 +77,8 @@ AC_PREFIX_DEFAULT(/usr)
 
 dnl The following cpu_vendor_os string goes into config.h.
 dnl
-AC_DEFINE_UNQUOTED(HOST_OS, "$host_os")
-AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host")
+AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
+AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
 
 dnl ##################################################################
 dnl Checks for programs.
@@ -97,13 +97,13 @@ AC_ARG_ENABLE(debug,
  ----------------------- 
   --enable-debug          turn on debugging output and compile options],
 [ CFLAGS="-ggdb"
-  AC_DEFINE(DEBUG, 1)],
+  AC_DEFINE(DEBUG, 1, DEBUG)],
 [ CFLAGS="-O2" 
-  AC_DEFINE(DEBUG, 0)])
+  AC_DEFINE(DEBUG, 0, DEBUG)])
 
 AC_ARG_ENABLE(gexec,
 [  --enable-gexec          turn on gexec support (platform-specific) ],
-AC_DEFINE(SUPPORT_GEXEC, 1), AC_DEFINE(SUPPORT_GEXEC, 0))
+AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC), AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC))
 
 AC_ARG_ENABLE(pedantic,   
 [  --enable-pedantic       turn on pedantic mode during compile],     
@@ -115,7 +115,7 @@ AC_ARG_ENABLE(memcheck,
                            http://www.cbmamiga.demon.co.uk/mpatrol/],
   [ LDFLAGS="$LDFLAGS -lmpatrol -lelf"
     CFLAGS="$CFLAGS -fcheck-memory-usage" ],
-  AC_DEFINE(MEMCHECK,0))
+  AC_DEFINE(MEMCHECK,0,MEMCHECK))
 
 dnl ##################################################################
 dnl Checks for libraries.
@@ -244,8 +244,8 @@ AC_TRY_RUN([
  	ac_cv_ipv4=no))
  AC_MSG_RESULT($ac_cv_ipv4)
 if test $ac_cv_ipv4 = yes ; then
-	AC_DEFINE(IPV4)
- 	AC_DEFINE(IPv4)
+	AC_DEFINE(IPV4, 1, IPV4)
+ 	AC_DEFINE(IPv4, 1, IPv4)
 fi
 dnl Stop here if we don't have IPv4 support
 
@@ -280,7 +280,7 @@ AC_CACHE_VAL(ac_cv_multicast,
 	ac_cv_multicast=no))
 AC_MSG_RESULT($ac_cv_multicast)
 if test $ac_cv_multicast = yes ; then
-	AC_DEFINE(MCAST)
+	AC_DEFINE(MCAST, 1, MCAST)
 fi
 
 dnl Stop here if we don't have multicasting
@@ -316,17 +316,17 @@ case "$host" in
 *linux*)
                 metric_source="linux.c"
                 CFLAGS="$CFLAGS -D_REENTRANT"
-                AC_DEFINE(LINUX)
+                AC_DEFINE(LINUX, 1, LINUX)
                 AC_DNET_LINUX_PROCFS   
 dnl
 dnl For fsusage.c - disk usage.
 dnl
-                AC_DEFINE(STAT_STATVFS)
+                AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
                 ;;
-*ia64*)         AC_DEFINE(IA64);;
+*ia64*)         AC_DEFINE(IA64,1,IA64);;
 *aix*)		metric_source="aix.c"
                 CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
-                AC_DEFINE(SUPPORT_GEXEC, 0)
+                AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		if test "$ac_cv_lib_pmapi_pm_cycles" = yes ; then
 			CFLAGS="$CFLAGS -DHAVE_PMAPI" 
 		else
@@ -334,38 +334,38 @@ dnl
 			echo "For AIX 4.3, you can download PMAPI at http://alphaworks.ibm.com/tech/pmapi"
 			echo "AIX 5 has PMAPI installed in bos.pmapi"
 		fi
-                AC_DEFINE(AIX);;
+                AC_DEFINE(AIX, 1, AIX);;
 *hpux*)		metric_source="hpux.c"
 		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
-		AC_DEFINE(SUPPORT_GEXEC, 0)
-                AC_DEFINE(HPUX);;
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+      AC_DEFINE(HPUX,1,HPUX);;
 *irix*)         metric_source="irix.c"
-		AC_DEFINE(SUPPORT_GEXEC, 0)
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
                 CFLAGS="$CFLAGS -D_IRIX_SOURCE"
-                AC_DEFINE(IRIX);;
+                AC_DEFINE(IRIX,1,IRIX);;
 *osf*)	 	metric_source="osf.c"	
 		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
-                AC_DEFINE(OSF);;
+                AC_DEFINE(OSF,1,OSF);;
 *solaris*)	metric_source="solaris.c"	
                 echo " *** WARNING:  Please make sure you use a 64-bit compiler, linker and *** "
                 echo " *** library set if you are running a 64-bit Solaris kernel!  This    *** "
                 echo " *** applies if you are running Solaris 7 or later!                   *** "
-		AC_DEFINE(SUPPORT_GEXEC, 0)
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		if test "$ac_cv_prog_gcc" = yes; then
 		   CFLAGS="$CFLAGS -D__EXTENSIONS__ -D_POSIX_C_SOURCE=199506L -DHAVE_STRERROR"
 		else
 		   CFLAGS="$CFLAGS -D__STDC__ -D_POSIX_C_SOURCE=199506L -DHAVE_STRERROR"
 		fi 
-                AC_DEFINE(SOLARIS);;
+                AC_DEFINE(SOLARIS,1,SOLARIS);;
 dnl
 dnl Why did BSD decide to do this?  Why not have a separate pthreads library?
 dnl
 *freebsd*)      metric_source="freebsd.c" 
                 CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
-		AC_DEFINE(SUPPORT_GEXEC, 0)
-                AC_DEFINE(BSD);; 
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+                AC_DEFINE(BSD,1,BSD);; 
 *cygwin*)      	metric_source="cygwin.c" 
-		AC_DEFINE(CYGWIN)
+		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
 
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
