@@ -3,6 +3,7 @@
 #include <ganglia/hash.h>
 #include <ganglia/llist.h>
 #include <gmetad.h>
+#include <ganglia.h>
 
 /* Variables that get filled in by configuration file */
 extern llist_entry *trusted_hosts;
@@ -36,11 +37,12 @@ static DOTCONF_CB(cb_data_source)
    data_source_list_t *dslist;
    g_inet_addr *ia;
    datum_t key, val, *find;
-   int port;
+   int port, rv;
    char *p, *str;
+   struct sockaddr_in sa;
 
    source_index++;
- 
+
    debug_msg("Datasource = [%s]", cmd->data.list[0]);
 
    dslist = (data_source_list_t *) malloc ( sizeof(data_source_list_t) );
@@ -61,18 +63,27 @@ static DOTCONF_CB(cb_data_source)
 
    for (i = 1; i< cmd->arg_count; i++)
       {
-         str = strdup ( cmd->data.list[i] );
+         str = cmd->data.list[i];
+
          p = strchr( str, ':' );
          if( p )
             {
                /* Port is specified */
                *p = '\0';
-               port = atoi ( p+1 ); 
+               port = atoi ( p+1 );
             }
          else
             {
                port = 8649;
             }
+
+         rv = g_gethostbyname( cmd->data.list[i], &sa, NULL);
+         if (!rv) {
+            err_msg("Warning: we failed to resolve data source name %s", cmd->data.list[i]);
+            continue;
+         }
+         str = (char*) malloc(MAXHOSTNAMELEN);
+         my_inet_ntop(AF_INET, &sa.sin_addr, str, MAXHOSTNAMELEN);
 
          debug_msg("Trying to connect to %s:%d for [%s]", str, port, dslist->name);
          dslist->sources[dslist->num_sources] = (g_inet_addr *) g_inetaddr_new ( str, port );
@@ -83,13 +94,13 @@ static DOTCONF_CB(cb_data_source)
          else
             {
                dslist->num_sources++;
-            } 
+            }
          free(str);
       }
 
    key.data = cmd->data.list[0];
    key.size = strlen ( key.data ) + 1;
- 
+
    val.data = &dslist;
    val.size = sizeof(dslist);
 
