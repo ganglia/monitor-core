@@ -1639,8 +1639,8 @@ process_collection_groups( apr_time_t now )
 	}
     }
 
-  /* The timestamp of the next event (default to 60 seconds) */
-  return next == 0? now + 60 * APR_USEC_PER_SEC: next;
+  /* make sure we don't schedule for the past */
+  return next < now ? now: next;
 }
 
 static void
@@ -1816,15 +1816,17 @@ main ( int argc, char *argv[] )
   /* Loop */
   for(;;)
     {
+      /* Make sure we never wait for negative seconds (shouldn't happen) */
+      apr_interval_time_t wait = next_collection >= now ? next_collection - now : 1;
       if(!deaf)
 	{
 	  /* Pull in incoming data */
-	  poll_listen_channels(next_collection - now, now);
+	  poll_listen_channels(wait, now);
 	}
       else
 	{
 	  /* Sleep until next collection */
-          apr_sleep( next_collection - now );
+          apr_sleep( wait );
 	}
 
       /* only continue if it's time to process our collection groups */
