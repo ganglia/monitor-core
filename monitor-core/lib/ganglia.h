@@ -1,7 +1,3 @@
-/**
- * @file ganglia.h Main Ganglia Cluster Toolkit Library Header File
- */
-
 #ifndef GANGLIA_H
 #define GANGLIA_H 1
 
@@ -10,8 +6,8 @@
 #endif
 
 #define GANGLIA_DEFAULT_MCAST_CHANNEL "239.2.11.71"
-#define GANGLIA_DEFAULT_MCAST_PORT 8649
-#define GANGLIA_DEFAULT_XML_PORT 8649
+#define GANGLIA_DEFAULT_MCAST_PORT    8649
+#define GANGLIA_DEFAULT_XML_PORT      8649
 
 #ifndef SYNAPSE_FAILURE
 #define SYNAPSE_FAILURE -1
@@ -19,7 +15,6 @@
 #ifndef SYNAPSE_SUCCESS
 #define SYNAPSE_SUCCESS 0
 #endif
-
 
 /* 
  * Max multicast message: 1500 bytes (Ethernet max frame size)
@@ -29,16 +24,7 @@
 #define MAX_MCAST_MSG 1472
 #endif
 
-#if 0
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
-#endif
-
-
-/* In order for C++ programs to be able to use my C library */
+/* For C++ */
 #ifdef __cplusplus
 #define BEGIN_C_DECLS extern "C" {
 #define END_C_DECLS }
@@ -47,12 +33,53 @@
 #define END_C_DECLS
 #endif
 
-#if 0
+extern int gexec_errno;
+
+#define GEXEC_TIMEOUT 60
+
+typedef struct
+   {
+      char ip[16];
+      char name[MAXHOSTNAMELEN];
+      char domain[MAXHOSTNAMELEN];
+      double load_one;
+      double load_five;
+      double load_fifteen;
+      double cpu_user;
+      double cpu_nice;
+      double cpu_system;
+      double cpu_idle;
+      unsigned int proc_run;
+      unsigned int proc_total;
+      unsigned int cpu_num;
+      unsigned long last_reported;
+      int gexec_on;
+      int name_resolved;
+   }
+gexec_host_t;
+
+typedef struct
+   {
+      char name[256];
+      unsigned long localtime;
+      unsigned int num_hosts;
+      void *hosts;
+      unsigned int num_gexec_hosts;
+      void *gexec_hosts;
+      unsigned int num_dead_hosts;
+      void *dead_hosts;
+
+      /* Used internally */
+      int malloc_error;
+      gexec_host_t *host;
+      int host_up;
+      int start;
+	}
+gexec_cluster_t;
+
 BEGIN_C_DECLS
-int ganglia_cluster_init(cluster_t *cluster, char *name, unsigned long num_nodes_in_cluster);
-int ganglia_add_datasource(cluster_t *cluster, char *group_name, char *ip, unsigned short port, int opts);
-int ganglia_cluster_print(cluster_t *cluster);
+int gexec_cluster_free ( gexec_cluster_t *cluster );
+int gexec_cluster (gexec_cluster_t *cluster, char *ip, unsigned short port);
 END_C_DECLS
-#endif
 
 #endif
