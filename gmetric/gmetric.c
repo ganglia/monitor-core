@@ -22,9 +22,10 @@ int main ( int argc, char **argv )
    int rval, len;
    XDR xhandle;
    char mcast_data[MAX_MCAST_MSG]; 
-   int mcastfd;
+   g_mcast_socket *mcast_socket;
    uint32_t key = 0; /* user-defined */
    char empty[] = "\0";
+   g_inet_addr *addr;
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
@@ -44,17 +45,28 @@ int main ( int argc, char **argv )
          exit(-1);
       }  
 
-   if(args_info.mcast_if_given)
-      mcastfd = mcast_connect(args_info.mcast_channel_arg, args_info.mcast_port_arg, 
-                              args_info.mcast_if_arg, args_info.mcast_ttl_arg);
-   else
-      mcastfd = mcast_connect(args_info.mcast_channel_arg, args_info.mcast_port_arg,
-                              NULL, args_info.mcast_ttl_arg);
-   if ( mcastfd == SYNAPSE_FAILURE )
+   addr = g_inetaddr_new ( args_info.mcast_channel_arg, args_info.mcast_port_arg );
+   mcast_socket = g_mcast_socket_new( addr );
+   g_inetaddr_delete( addr );
+   if ( !mcast_socket )
       {
-         err_msg("unable to connect to multicast %s:%d", args_info.mcast_channel_arg, args_info.mcast_port_arg);
-         return SYNAPSE_FAILURE;
+         perror("gmond could not connect to multicast channel");
+         return -1;
       }
+   debug_msg("multicasting on channel %s %d", args_info.mcast_channel_arg, args_info.mcast_port_arg );
+
+   if ( g_mcast_socket_set_ttl(mcast_socket, args_info.mcast_ttl_arg ) < 0)
+      {
+         perror("gmond could not set the ttl");
+         return -1;
+      }
+
+   rval = g_mcast_socket_connect ( mcast_socket );
+   if ( rval <0)
+      {
+         perror("mcast_connect() connect() error");
+         return -1;
+      } 
 
    name.data = args_info.name_arg;
    name.size = strlen( name.data )+1;
@@ -112,7 +124,7 @@ int main ( int argc, char **argv )
 
    len = xdr_getpos(&xhandle); 
 
-   rval = writen( mcastfd, mcast_data, len );
+   rval = writen( mcast_socket->sockfd, mcast_data, len );
    if ( rval <0)
       {
          err_ret("unable to send data on multicast channel");
