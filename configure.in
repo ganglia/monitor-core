@@ -22,7 +22,7 @@ dnl
 AC_INIT(gmond/gmond.c)
 AC_CONFIG_AUX_DIR(config)
 
-AM_INIT_AUTOMAKE(ganglia-monitor-core, 2.4.1)
+AM_INIT_AUTOMAKE(ganglia-monitor-core, 2.4.1b1)
 
 AC_CANONICAL_HOST
 AM_CONFIG_HEADER(config.h)
@@ -55,6 +55,10 @@ AC_ARG_ENABLE(debug,
   AC_DEFINE(DEBUG, 1)],
 [ CFLAGS="-O2 " 
   AC_DEFINE(DEBUG, 0)])
+
+AC_ARG_ENABLE(gexec,
+[  --enable-gexec          turn on gexec support (platform-specific) ],
+AC_DEFINE(SUPPORT_GEXEC, 1), AC_DEFINE(SUPPORT_GEXEC, 0))
 
 AC_ARG_ENABLE(pedantic,   
 [  --enable-pedantic       turn on pedantic mode during compile],     
@@ -241,7 +245,8 @@ dnl If the compiler is gcc, enable all warnings.  Main purpose is to
 dnl catch any function call where the function has not been prototyped.
 dnl
 dnl Add "-Wcast-qual again later"...
-if test "$ac_cv_prog_gcc" = yes; then
+dnl if test "$ac_cv_prog_gcc" = yes; then
+if test "$ac_cv_gcc" = yes; then
    CFLAGS="$CFLAGS -Wall -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes"
    if test "$enable_memcheck" = yes; then
       CFLAGS="$CFLAGS -fcheck-memory-usage "
@@ -265,17 +270,24 @@ case "$host" in
 *ia64*)     AC_DEFINE(IA64);;
 *aix*)		metric_source="aix.c"
       CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
+      AC_DEFINE(SUPPORT_GEXEC, 0)
                 AC_DEFINE(AIX);;
 *hpux*)		metric_source="hpux.c"
 		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
+		AC_DEFINE(SUPPORT_GEXEC, 0)
                 AC_DEFINE(HPUX);;
 *irix*)    metric_source="irix.c"
+		AC_DEFINE(SUPPORT_GEXEC, 0)
       CFLAGS="$CFLAGS -D_IRIX_SOURCE"
                 AC_DEFINE(IRIX);;
 *osf*)	 	metric_source="osf.c"	
 		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
                 AC_DEFINE(OSF);;
 *solaris*)	metric_source="solaris.c"	
+                echo " *** WARNING:  Please make sure you use a 64-bit compiler, linker and *** "
+                echo " *** library set if you are running a 64-bit Solaris kernel!  This    *** "
+                echo " *** applies if you are running Solaris 7 or later!                   *** "
+		AC_DEFINE(SUPPORT_GEXEC, 0)
 		if test "$ac_cv_prog_gcc" = yes; then
 		   CFLAGS="$CFLAGS -D__EXTENSIONS__ -DHAVE_STRERROR"
 		else
