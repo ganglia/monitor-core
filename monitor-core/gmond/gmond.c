@@ -244,7 +244,7 @@ main ( int argc, char *argv[] )
    if(debug_level)
      gmond_print_conf(&gmond_config);
 
-   if(! gmond_config.deaf )
+   if(!gmond_config.deaf && (gmond_config.num_receive_channels > 0))
       {
         /* We need to calculate how many channels we will be listening on */
         receive_pool = ganglia_thread_pool_create( gmond_config.num_receive_channels, 128, 1 );
@@ -327,7 +327,7 @@ main ( int argc, char *argv[] )
          debug_msg("cleanup thread has been started");
       }
 
-   if(! gmond_config.mute )
+   if(! gmond_config.mute && (gmond_config.num_send_channels > 0))
       {
          collect_send_pool = ganglia_thread_pool_create( 4, 128, 1);
 
