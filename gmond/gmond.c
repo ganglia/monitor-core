@@ -120,6 +120,7 @@ send_all_metric_data( void )
 g_val_t
 gexec_func ( void )
 {
+#if GEXEC_SUPPORTED == 1
   int rval;
   g_val_t val;
   struct stat info;
@@ -137,6 +138,9 @@ gexec_func ( void )
     {
       snprintf(val.str, MAX_G_STRING_SIZE, "ON");
     }
+#else
+   snprintf(val.str, MAX_G_STRING_SIZE, "OFF");
+#endif
 
    return val;
 }
