@@ -1,0 +1,17 @@
+ganglia for Debian
+------------------
+
+ Ganglia builds and runs on any Linux architecture, though it is certainly
+ less tested on non x86 archs. 
+
+ Version >= 2.4 now has support for the ganglia execution environment, which
+ I've disabled in the /etc/gmond.conf script (no_gexec), at 
+ least until I learn about the implications of having it enabled.
+
+ If you want it, edit /etc/gmond.conf.
+
+ If you're a pre-2.5.0 ganglia user, particularly if you use gmetad, you will
+ most likely need to remove any rrds that might be in /var/lib/ganglia/rrds,
+ as the RRD format has changed.
+ 
+ -- Preston Smith <psmith@foobird.net>, Fri Jul 26 15:46:34 EST 2002

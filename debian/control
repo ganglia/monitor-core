@@ -1,0 +1,49 @@
+Source: ganglia-monitor-core
+Section: net
+Priority: optional
+Maintainer: Preston Smith <psmith@foobird.net>
+Build-Depends: debhelper (>> 3.0.0), libpng2-dev, libgd-dev|libgd-noxpm-dev, librrd0-dev, cgilib
+Standards-Version: 3.5.2
+
+Package: ganglia-monitor
+Architecture: any
+Depends: libganglia1 (=${Source-Version}), ${shlibs:Depends}
+Description: A scalable, real-time cluster monitoring and execution environment 
+ Ganglia is a scalable, real-time cluster monitoring and execution 
+ environment with all execution requests and cluster statistics expressed 
+ in an open well-defined XML format. 
+ .
+ This package contains the monitor core program.
+
+Package: gmetad
+Architecture: any
+Depends: libganglia1 (=${Source-Version}), ${shlibs:Depends}
+Description: A scalable, real-time cluster monitoring and execution environment 
+ Ganglia is a scalable, real-time cluster monitoring and execution 
+ environment with all execution requests and cluster statistics expressed 
+ in an open well-defined XML format. 
+ .
+ This package contains the 'gmetad', which collects information from ganglia
+ monitor clients, and writes them to RRD databases.
+
+Package: libganglia1
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}
+Description: A cluster monitoring environment (shared libraries)
+ Ganglia is a scalable, real-time cluster monitoring and execution 
+ environment with all execution requests and cluster statistics expressed 
+ in an open well-defined XML format. 
+ .
+ This package contains shared libraries.
+
+Package: libganglia1-dev
+Architecture: any
+Section: devel
+Depends: libganglia1 (=${Source-Version}), ${shlibs:Depends}
+Description: A cluster monitoring environment (devel libraries)
+ Ganglia is a scalable, real-time cluster monitoring and execution 
+ environment with all execution requests and cluster statistics expressed 
+ in an open well-defined XML format. 
+ .
+ This package contains development libraries.
