@@ -1,0 +1,4 @@
+AIX Users:
+ run configure with --enable-static --disable-shared, or feel free
+ and submit some autoconf magic to make libtool do shared libraries
+ on AIX correctly.
