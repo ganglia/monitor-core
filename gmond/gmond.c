@@ -54,6 +54,8 @@ int max_udp_message_len = 1472;
 extern char *default_gmond_configuration;
 /* The number of seconds to hold "dead" hosts in the hosts hash */
 int host_dmax = 0;
+/* The amount of time between cleanups */
+int cleanup_threshold = 300;
 
 /* The array for outgoing UDP message channels */
 Ganglia_udp_send_channels udp_send_channels = NULL;
@@ -162,6 +164,8 @@ process_configuration_file(void)
   gexec_on            = cfg_getbool(tmp, "gexec");
   /* Get the host dmax ... */
   host_dmax           = cfg_getint( tmp, "host_dmax");
+  /* Get the cleanup threshold */
+  cleanup_threshold   = cfg_getint( tmp, "cleanup_threshold");
 }
 
 static void
@@ -1486,13 +1490,75 @@ print_metric_list( void )
     }
 }
 
+static void
+cleanup_data( Ganglia_pool pool, apr_time_t now)
+{
+  apr_hash_index_t *hi, *gmetric_hi;
+
+  /* Walk the host hash */
+  for(hi = apr_hash_first(pool, hosts);
+      hi;
+      hi = apr_hash_next(hi))
+    {
+      void *val;
+      Ganglia_host *host;
+      apr_hash_this(hi, NULL, NULL, &val);
+      host = val;
+
+      if( host_dmax && (now - host->last_heard_from) > (host_dmax * APR_USEC_PER_SEC) )
+	{
+	  /* this host is older than dmax... delete it */
+	  debug_msg("deleting old host '%s' from host hash'", host->hostname);
+	  /* remove it from the hash */
+	  apr_hash_set( hosts, host->ip, APR_HASH_KEY_STRING, NULL);
+	  /* free all its memory */
+	  apr_pool_destroy( host->pool);
+	} 
+      else
+	{
+	  /* this host isn't being deleted but it might have some stale gmetric data */
+	  for( gmetric_hi = apr_hash_first( pool, host->gmetrics );
+	       gmetric_hi;
+	       gmetric_hi = apr_hash_next( gmetric_hi ))
+	    {
+	      void *val;
+	      Ganglia_metric *gmetric;
+	      int dmax;
+
+	      apr_hash_this( gmetric_hi, NULL, NULL, &val );
+	      gmetric = val;
+
+	      if(!gmetric)
+		continue;  /* this shouldn't happen */
+
+	      dmax = gmetric->message.Ganglia_message_u.gmetric.dmax;
+	      if( dmax && (now - gmetric->last_heard_from) > (dmax * APR_USEC_PER_SEC) )
+	        {
+		  /* this is a stale gmetric */
+		  debug_msg("deleting old gmetric '%s' from host '%s'", gmetric->name, host->hostname);
+		  /* remove the metric from the gmetric hash */
+		  apr_hash_set( host->gmetrics, gmetric->name, APR_HASH_KEY_STRING, NULL);
+		  /* destroy any memory that was allocated for this gmetric */
+		  apr_pool_destroy( gmetric->pool );
+                }
+	    }
+	}
+    }
+
+  apr_pool_clear( pool );
+}
+
 int
 main ( int argc, char *argv[] )
 {
-  apr_time_t now, next_collection;
+  apr_time_t now, next_collection, last_cleanup;
+  Ganglia_pool cleanup_context;
 
   /* Create the global context */
   global_context = Ganglia_pool_create(NULL);
+
+  /* Create the cleanup context from the global context */
+  cleanup_context = Ganglia_pool_create(global_context);
 
   /* Mark the time this gmond started */
   started = apr_time_now();
@@ -1555,22 +1621,33 @@ main ( int argc, char *argv[] )
   /* Create the host hash table */
   hosts = apr_hash_make( global_context );
 
-  for(next_collection = 0;;)
+  next_collection =0;
+  last_cleanup    =0;
+  for(;;)
     {
       now = apr_time_now();
 
       /* Read data until we need to collect/write data */
       if(!deaf)
 	{
+	  /* collect data from listen channels */
           for(; mute || now < next_collection;)
 	    {
 	      poll_listen_channels(mute? 60 * APR_USEC_PER_SEC: next_collection - now, now);
 	      now = apr_time_now();
     	    }
+
+	  /* cleanup the data if the cleanup threshold has been met */
+	  if( (now - last_cleanup) > cleanup_threshold )
+	    {
+	      cleanup_data( cleanup_context, now );
+	      last_cleanup = now;
+	    }
 	}
 
       if(!mute)
 	{
+	  /* collect data from collection_groups */
 	  next_collection = process_collection_groups( now );
 	}
     }
