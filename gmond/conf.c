@@ -83,90 +83,6 @@ static DOTCONF_CB(cb_url)
    return NULL;
 }
 
-#if 0
-static DOTCONF_CB(cb_receive_channels)
-{
-  int i;
-  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-  char *p = NULL;
-
-  if(!c->receive_channels_given)
-    {
-      /* Reset the defaults */
-      c->receive_channels_given = 1;
-      c->num_receive_channels = 0;
-      free(c->receive_channels[0]);
-      free(c->receive_ports[0]);
-      c->receive_channels[0] = NULL;
-      c->receive_ports[0] = NULL;
-    }
-
-  for(i=0; i< cmd->arg_count; i++)
-    {
-      if(c->num_receive_channels < MAX_NUM_CHANNELS-1)
-        {
-          p = strchr( cmd->data.list[i], ':');
-          if(p)
-            {
-              /* they specified a host */
-              *p = '\0';
-              c->receive_channels[c->num_receive_channels] = conf_strdup( cmd->data.list[i] );
-              c->receive_ports[c->num_receive_channels]    = conf_strdup( p+1 );
-            } 
-          else
-            {
-              c->receive_channels[c->num_receive_channels] = NULL;  /* Any address */
-              c->receive_ports[c->num_receive_channels]    = conf_strdup( cmd->data.list[i] );
-            }
-          c->num_receive_channels++;
-        }
-    }
-
-  return NULL;
-}
-
-static DOTCONF_CB(cb_send_channels)
-{
-  int i;
-  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-  char *p = NULL;
-
-  if(!c->send_channels_given)
-    {
-      /* Reset the defaults */
-      c->send_channels_given = 1;
-      c->num_send_channels = 0;
-      free(c->send_channels[0]);
-      free(c->send_ports[0]);
-      c->send_channels[0] = NULL;
-      c->send_ports[0] = NULL;
-    }
-
-  for(i=0; i< cmd->arg_count; i++)
-    {
-      if(c->num_send_channels < MAX_NUM_CHANNELS-1)
-        {
-          p = strchr( cmd->data.list[i], ':');
-          if(p)
-            {
-              /* they specified a port */
-              *p = '\0';
-              c->send_channels[c->num_send_channels] = conf_strdup( cmd->data.list[i] );
-              c->send_ports   [c->num_send_channels] = conf_strdup( p+1 );
-            }
-          else 
-            {
-              c->send_channels[c->num_send_channels] = conf_strdup( cmd->data.list[i] );
-              c->send_ports   [c->num_send_channels] = conf_strdup( "8649" );
-            }
-          c->num_send_channels++;
-        }
-    }
-
-  return NULL;
-}
-#endif
-
 static DOTCONF_CB(cb_mcast_channel)
 {
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
@@ -467,58 +383,38 @@ static DOTCONF_CB(cb_compressed_xml_threads)
 }
 
 
-/* This function will disappear soon */
-static int
-g_gethostbyname(const char* hostname, struct sockaddr_in* sa, char** nicename)
-{
-  int rv = 0;
-  struct in_addr inaddr;
-  struct hostent* he;  
-
-  if (inet_aton(hostname, &inaddr) != 0)
-    {
-      sa->sin_family = AF_INET;
-      memcpy(&sa->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
-      if (nicename)
-         *nicename = (char *)strdup (hostname);
-      return 1;
-    }
-
-  he = (struct hostent*)gethostbyname(hostname);
-  if (he && he->h_addrtype==AF_INET && he->h_addr_list[0])
-    {
-     if (sa)
-        {
-           sa->sin_family = he->h_addrtype;
-           memcpy(&sa->sin_addr, he->h_addr_list[0], he->h_length);
-        }
-
-      if (nicename && he->h_name)
-         *nicename = (char *)strdup(he->h_name);
-
-      rv = 1;
-    }
-
-  return rv;
-}
-
 static DOTCONF_CB(cb_trusted_hosts)
 {
-   int i, rv;
+   int i;
    llist_entry *le;
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   struct sockaddr_in sa;
+   struct addrinfo *info;
+   void *addr;
 
    for (i = 0; i < cmd->arg_count; i++)
       {
          le = (llist_entry *)malloc(sizeof(llist_entry));
-         rv = g_gethostbyname(cmd->data.list[i], &sa, NULL);
-         if (!rv) {
-            err_msg("Warning: we failed to resolve trusted host name %s", cmd->data.list[i]);
-            continue;
-         }
-         le->val = (char*) malloc(MAXHOSTNAME);
-         inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAME);
+         info = host_serv( cmd->data.list[i], NULL, AF_UNSPEC, SOCK_STREAM);
+         if(!info || (info->ai_family != AF_INET && info->ai_family != AF_INET6))
+	   {
+	     err_msg("Warning: %s is not being added as a trusted host", 
+		     cmd->data.list[i]);
+	     continue;
+	   }
+
+         le->val = (char*) malloc(INET6_ADDRSTRLEN + 1);
+
+	 if( info->ai_family == AF_INET )
+	   {
+	     addr = &(((struct sockaddr_in *) info->ai_addr )->sin_addr);
+	   }
+	 else
+	   {
+	     addr = &(((struct sockaddr_in6 *)info->ai_addr )->sin6_addr);
+	   }
+
+         inet_ntop(info->ai_family, addr, le->val, INET6_ADDRSTRLEN);
+
          /* printf("Adding trusted host %s (IP %s)\n", cmd->data.list[i], le->val); */
          llist_add(&(c->trusted_hosts), le);
       }

@@ -3,7 +3,6 @@
 #include <pthread.h>
 #include <stdarg.h>
 
-#include "gmond/dtd.h"
 #include "gmetad.h"
 
 #include "lib/llist.h"
@@ -156,8 +155,11 @@ root_report_start(client_t *client)
 {
    int rc;
 
-   rc = ganglia_gzprintf(client->io, DTD);
-   if (rc <= 0) return 1;
+   rc = ganglia_gzprintf(client->io, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?>\n");
+   if( rc <= 0) return 1;
+
+   rc = ganglia_gzprintf(client->io, "<!DOCTYPE GANGLIA_XML SYSTEM \"http://ganglia.sourceforge.net/dtd/v2.dtd\">\n"); 
+   if( rc <= 0) return 1;
 
    rc = ganglia_gzprintf(client->io, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
       VERSION);
@@ -445,18 +447,20 @@ readline(int fd, char *buf, int maxlen)
 void *
 server_thread (void *arg)
 {
+  int rval;
    int interactive = (int) arg;
    int len;
    client_t client;
-   char remote_ip[16];
    char request[REQUESTLEN];
    llist_entry *le;
    datum_t rootdatum;
    char mode[32];
+   char clienthost[NI_MAXHOST];
+   char clientservice[NI_MAXSERV];
 
    for (;;)
       {
-         len = sizeof(client.addr);
+         len = CLIENT_ADDR_SIZE;
          client.valid = 0;
 
          if (interactive)
@@ -479,11 +483,21 @@ server_thread (void *arg)
                continue;
             }
 
-         inet_ntop( AF_INET, (void *)&(client.addr.sin_addr), remote_ip, 16 );
+	 rval = getnameinfo((struct sockaddr *)&(client.addr), len,
+		            clienthost, sizeof(clienthost),
+		            clientservice, sizeof(clientservice),
+		            NI_NUMERICHOST);
+	 if(rval != 0)
+	   {
+	     /* We got an error. Do the paranoid thing and close the client socket
+	      * since we can't determine if we trust the client or not. */
+	     close(client.fd);
+	     continue;
+	   }
 
-         if ( !strcmp(remote_ip, "127.0.0.1")
+         if ( !strcmp(clienthost, "127.0.0.1")
                || gmetad_config.all_trusted
-               || (llist_search(&(gmetad_config.trusted_hosts), (void *)remote_ip, strcmp, &le) == 0) )
+               || (llist_search(&(gmetad_config.trusted_hosts), (void *)clienthost, strcmp, &le) == 0) )
             {
                client.valid = 1;
             }
@@ -491,7 +505,7 @@ server_thread (void *arg)
          if(! client.valid )
             {
                debug_msg("server_thread() %s tried to connect and is not a trusted host",
-                  remote_ip);
+                  clienthost);
                close( client.fd );
                continue;
             }
@@ -503,15 +517,15 @@ server_thread (void *arg)
                len = readline(client.fd, request, REQUESTLEN);
                if (len<0)
                   {
-                     err_msg("server_thread() could not read request from %s", remote_ip);
+                     err_msg("server_thread() could not read request from %s", clienthost);
                      close(client.fd);
                      continue;
                   }
-               debug_msg("server_thread() received request \"%s\" from %s", request, remote_ip);
+               debug_msg("server_thread() received request \"%s\" from %s", request, clienthost);
 
                if (process_request(&client, request))
                   {
-                     err_msg("Got a malformed path request from %s", remote_ip);
+                     err_msg("Got a malformed path request from %s", clienthost);
                      /* Send them the entire tree to discourage attacks. */
                      strcpy(request, "/");
                   }
