@@ -2,7 +2,7 @@
  * @file ganglia.c The functions in this file perform the core functions of
  * retrieving XML data and saving it to internal data structures
  */
-
+/* $Id$ */
 #include "ganglia.h"
 
 #define TIMEOUT 60

@@ -1,7 +1,7 @@
 /**
  * @file file.c Some file functions
  */
-
+/* $Id$ */
 #include "gangliaconf.h"
 
 /**

@@ -1,6 +1,7 @@
 /**
  * @file debug_msg.c Debug Message function
  */
+/* $Id$ */
 #include "gangliaconf.h"
 
 int debug_level = 0;
