@@ -465,7 +465,14 @@ start (void *data, const char *el, const char **attr)
             hashkey.size =  strlen(name) + 1;
 
             hosts = xmldata->source.authority;
-            hash_datum = hash_lookup (&hashkey, hosts);
+            if(hosts)
+              {
+                hash_datum = hash_lookup (&hashkey, hosts);
+              }
+            else
+              {
+                hash_datum = NULL;
+              }
             if (!hash_datum)
                {
                   memset((void*) host, 0, sizeof(*source));
@@ -528,11 +535,14 @@ start (void *data, const char *el, const char **attr)
             hashval.data = host;
 
             /* We dont care if this is an insert or an update. */
-            rdatum = hash_insert(&hashkey, &hashval, hosts);
-            if (!rdatum)
-               {
-                  err_msg("Could not insert host %s", name);
-               }
+            if(hosts)
+              {
+                rdatum = hash_insert(&hashkey, &hashval, hosts);
+                if (!rdatum)
+                  {
+                     err_msg("Could not insert host %s", name);
+                  }
+              }
 
             break;
 
@@ -858,7 +868,7 @@ process_xml(data_source_list_t *d, char *buf)
    int rval;
    XML_Parser xml_parser;
    xmldata_t xmldata;
-   char tmp[4096];
+   char now[32];
 
    memset( &xmldata, 0, sizeof( xmldata ));
 
@@ -880,8 +890,12 @@ process_xml(data_source_list_t *d, char *buf)
 
    if( gmetad_config.force_names )
      {
-       snprintf(tmp, 4096, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%d\" OWNER=\"unspecified\" LATLONG=\"unspecified\" URL=\"unspecified\">", d->name, (int)time(NULL));
-       XML_Parse(xml_parser, tmp, strlen(tmp), 0);
+       snprintf(now, 32, "%d", (int)time(NULL));
+       XML_Parse(xml_parser, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\"?><GANGLIA_XML VERSION=\"0.0.0\" SOURCE=\"gmond\"><CLUSTER NAME=\"", 119, 0);
+       XML_Parse(xml_parser, d->name, strlen(d->name), 0);  
+       XML_Parse(xml_parser, "\" LOCALTIME=\"", 13, 0);
+       XML_Parse(xml_parser, now, strlen(now), 0);
+       XML_Parse(xml_parser, "\" OWNER=\"unspecified\" LATLONG=\"unspecified\" URL=\"unspecified\">", 62, 0 );
      }
 
    rval = XML_Parse( xml_parser, buf, strlen(buf), gmetad_config.force_names? 0: 1 );
@@ -896,8 +910,7 @@ process_xml(data_source_list_t *d, char *buf)
 
    if( gmetad_config.force_names )
      {
-       snprintf(tmp, 4096, "</CLUSTER>\n");
-       XML_Parse(xml_parser, tmp, 11, 1); 
+       XML_Parse(xml_parser, "</CLUSTER></GANGLIA_XML>",24, 1 );
      }
 
    /* Release lock again for good measure (required under certain errors). */

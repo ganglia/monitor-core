@@ -3,6 +3,7 @@
 
 #include <zlib.h>
 
+#include "lib/zio.h"
 #include "lib/hash.h"
 #include "lib/debug_msg.h"
 #include "libunp/unp.h"
@@ -100,8 +101,6 @@ typedef struct
       char **ports;
       long double timestamp;   /* added by swagner */
       int dead;
-      char *buf;
-      int len;
    }
 data_source_list_t;
 
@@ -122,14 +121,13 @@ typedef union
    }
 metric_val_t;
 
-#include "lib/zio.h"
 typedef struct
    {
-      int  fd;
       struct sockaddr_in addr;
-      int valid;
       filter_type_t filter;
       zio_t io;
+      int fd;
+      int valid;
    }
 client_t;
 
