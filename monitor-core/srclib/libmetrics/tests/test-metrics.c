@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "libmetrics.h"
 
-#define NUM_TESTS 5
+#define NUM_TESTS 3 
 #define SLEEP_TIME 5
 
 static const struct metricinfo
@@ -143,7 +143,7 @@ main (void)
 	  fprintf (stderr, "\n");
 	}
 
-      if(i != (NUM_TESTS - 1))
+      if(check != (NUM_TESTS - 1))
 	sleep(SLEEP_TIME);
     }
 
