@@ -27,7 +27,6 @@ extern g_val_t cpu_user_func(void);
 extern g_val_t cpu_nice_func(void);
 extern g_val_t cpu_system_func(void);
 extern g_val_t cpu_idle_func(void);
-extern g_val_t cpu_wio_func(void);
 extern g_val_t load_one_func(void);
 extern g_val_t load_five_func(void);
 extern g_val_t load_fifteen_func(void);
@@ -57,6 +56,7 @@ extern g_val_t phread_sec_func(void);
 extern g_val_t phwrite_sec_func(void);
 extern g_val_t rcache_func(void);
 extern g_val_t wcache_func(void);
+extern g_val_t cpu_wio_func(void);
         
 #endif  
      
@@ -107,7 +107,6 @@ KEY(cpu_user),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_nice),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_system),    1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_idle),      5,  15,   20,   60,   90, g_float, "%",   "%.1f"},
-KEY(cpu_wio),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
 KEY(load_one),      1,  15,   20,   50,   70, g_float, "",    "%.2f"},
 KEY(load_five),     1,  30,   40,  275,  325, g_float, "",    "%.2f"},
 KEY(load_fifteen),  1,  60,   80,  850,  950, g_float, "",    "%.2f"},
@@ -123,6 +122,7 @@ KEY(swap_free),  1024,  30,   40,  120,  180, g_uint32, "KBs", "%u" },
 KEY(gexec),        -1,  -1,   -1,  180,  300, g_string, "",    "%s"},
 
 #ifdef SOLARIS
+KEY(cpu_wio),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
 
 /* buffer reads and writes, adjusted per second */
 
