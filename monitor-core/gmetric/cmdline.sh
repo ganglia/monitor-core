@@ -10,9 +10,9 @@ option "name" n "Name of the metric" string yes
 option "value" v "Value of the metric" string yes
 option "type" t "Either string|int8|uint8|int16|uint16|int32|uint32|float|double" string yes
 option "units" u "Unit of measure for the value e.g. Kilobytes, Celcius" string no
-option "slope" s "Either zero|positive|negative|both" string no
+option "slope" s "Either zero|positive|negative|both" string default="both"  no
 option "tmax" x "The maximum time in seconds between gmetric calls" int default="60" no
-option "mcast_channel" c "Multicast channel to send/receive on" string default="239.2.11.71" no 
+option "mcast_channel" c "Multicast channel to send/receive on" string default="239.2.11.71" no
 option "mcast_port" p "Multicast port to send/receive on" int default="8649" no
 option "mcast_if" i "Network interface to multicast on e.g. 'eth1'" string default="kernel decides" no
 option "mcast_ttl" l "Multicast Time-To-Live (TTL)" int default="1" no
