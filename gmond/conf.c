@@ -11,6 +11,8 @@
 
 gmond_config_t gmond_config;
 
+struct ifi_info *all_interfaces;
+
 struct mycontext
 {
   int permissions;
@@ -306,22 +308,81 @@ static DOTCONF_CB(cb_port)
 
 static DOTCONF_CB(cb_interfaces)
 {
-  int i;
+  int i, found, want_all = 0;
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
   channel_t *channel;
+  struct ifi_info *n;
+  int num_interfaces;
+
+  /* Check that the interfaces are valid */
+  for(i=0; i< cmd->arg_count; i++)
+    {
+      if(!strcmp(cmd->data.list[i], "all"))
+	{
+	  want_all = 1;
+	  break;
+	}
+
+      found = 0;
+      for(n = all_interfaces; n; n = n->ifi_next)
+        {
+          /* Check if the interface exists on the machine */
+          if(!strcmp( n->ifi_name, cmd->data.list[i]))
+            {
+              found =1;
+              break;
+            }
+        }
+      if(!found)
+        {
+          fprintf(stderr,"The interface '%s' was not found. Check your config file.\n", cmd->data.list[i]);
+          exit(1);
+        }
+    }
 
   channel = c->channels[c->current_channel];
-  channel->interfaces = malloc( cmd->arg_count * sizeof(char *));
-  if(!channel->interfaces)
-    {
-      fprintf(stderr,"Unable to malloc space for interfaces\n");
-      exit(1);
-    }
-  channel->num_interfaces = cmd->arg_count;
 
-  for (i = 0; i < cmd->arg_count; i++)
+  if(want_all)
     {
-      channel->interfaces[i] = conf_strdup( cmd->data.list[i] );
+      /* Keyword "all" detected, therefore put all interfaces in the list */
+      num_interfaces = 0;
+      for( n = all_interfaces; n; n = n->ifi_next )
+	{
+	  /* We need to count the number of interfaces in the linked list */
+	  num_interfaces++;
+	}
+
+      channel->interfaces = malloc( num_interfaces * sizeof(char *));
+      if(!channel->interfaces)
+        {
+	  fprintf(stderr,"Unable to malloc space for interfaces\n");
+	  exit(1);
+	}
+
+      channel->num_interfaces = num_interfaces;
+
+      for( i = 0, n = all_interfaces; n; n = n->ifi_next, i++ )
+	{
+	  channel->interfaces[i] = conf_strdup( n->ifi_name );
+	}
+
+    }
+  else
+    {
+      /* Person doesn't want interfaces, so we'll just add the interfaces they specified */
+      channel->interfaces = malloc( cmd->arg_count * sizeof(char *));
+      if(!channel->interfaces)
+        {
+          fprintf(stderr,"Unable to malloc space for interfaces\n");
+          exit(1);
+        }
+
+      channel->num_interfaces = cmd->arg_count;
+
+      for (i = 0; i < cmd->arg_count; i++)
+        {
+          channel->interfaces[i] = conf_strdup( cmd->data.list[i] );
+        }
     }
 
   return NULL;
@@ -365,10 +426,13 @@ static DOTCONF_CB(cb_mcast_ttl)
    return NULL;
 }
 
+/* this is not used any more */
 static DOTCONF_CB(cb_mcast_threads)
 {
+  /*
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
    c->mcast_threads = cmd->data.value;
+   */
    return NULL;
 }
 
@@ -589,6 +653,10 @@ set_defaults(gmond_config_t *config )
    config->all_trusted = 0;
    config->host_dmax = 0;
    config->xml_compression_level = 6; /* Z_DEFAULT_COMPRESSION */
+
+
+   /* Intialize information about the interfaces on the machine */
+   all_interfaces = get_ifi_info( AF_INET, 0);
    return 0;
 }
 
@@ -622,7 +690,9 @@ print_conf( gmond_config_t *config )
        printf("\tThe TTL is set to %d\n", c->ttl);
        printf("\tAction is set to %s\n", c->action);
      }
+   /*
    printf("mcast_threads is %ld\n", config->mcast_threads);
+   */
    printf("xml_port is %s\n", config->xml_port);
    printf("compressed_xml_port is %s\n", config->compressed_xml_port);
    printf("xml_threads is %ld\n", config->xml_threads);
