@@ -42,6 +42,13 @@ cleanup_metric ( datum_t *key, datum_t *val, void *arg )
    int rc;
 
    born = metric->timestamp.tv_sec;
+   
+/*   if (metric->dmax) {
+      debug_msg("Attn Cleanup: considering metric \"%s\", tn %u, dmax %u.\n",
+         (char*) key->data,
+         tv->tv_sec - born,
+         metric->dmax);
+   }*/
 
    /* Never delete a metric if its DMAX=0 */
    if (metric->dmax && ((tv->tv_sec - born) > metric->dmax) ) {
@@ -90,7 +97,9 @@ cleanup_node ( datum_t *key, datum_t *val, void *arg )
    cleanup->key = 0;
    while ((rc=hash_foreach(node->user_hashp, cleanup_metric, (void*) cleanup))) {
       if (cleanup->key) {
-         debug_msg("Cleanup deleting user metric \"%s\"", (char*) cleanup->key->data);
+         debug_msg("Cleanup deleting user metric \"%s\" on host \"%s\"", 
+            (char*) cleanup->key->data,
+            (char*) key->data);
          rv=hash_delete(cleanup->key, node->user_hashp);
          if (rv) datum_free(rv);
          cleanup->key=0;
@@ -116,7 +125,7 @@ cleanup_thread(void *arg)
 
    for (;;) {
       /* Cleanup every 5 minutes */
-      sleep(300);
+      sleep(30);
 
       gettimeofday(&tv, NULL);
 
