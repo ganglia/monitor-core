@@ -83,7 +83,11 @@ static DOTCONF_CB(cb_trusted_hosts)
          le = (llist_entry *)malloc(sizeof(llist_entry));
 
 	 info = host_serv( cmd->data.list[i], NULL, AF_UNSPEC, SOCK_STREAM);
-	 if(!info || (info->ai_family != AF_INET && info->ai_family != AF_INET6))
+	 if(!info || (info->ai_family != AF_INET 
+#ifdef AF_INET6
+&& info->ai_family != AF_INET6
+#endif
+           ))
 	   {
 	     err_msg("Warning: %s is not being added as a trusted host",
 	                 cmd->data.list[i]);
@@ -98,7 +102,9 @@ static DOTCONF_CB(cb_trusted_hosts)
 	   }
 	 else
 	   {
+#ifdef AF_INET6
 	     addr = &(((struct sockaddr_in6 *)info->ai_addr )->sin6_addr);
+#endif
 	   }
 
          inet_ntop(info->ai_family, addr, le->val, INET6_ADDRSTRLEN);
