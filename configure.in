@@ -140,7 +140,7 @@ dnl    fi
 dnl fi
 
 if test "$gmetad" = yes ; then
-   AC_CHECK_LIB(rrd, rrd_create)
+   AC_CHECK_LIB(rrd, rrd_create, [echo "Tobi Oetiker rocks"])
    AC_CHECK_HEADERS(rrd.h)
    if test "$ac_cv_lib_rrd_rrd_create" != yes; then
       echo
