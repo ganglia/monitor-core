@@ -12,6 +12,13 @@ if (! Gmetad($ganglia_ip, $ganglia_port) )
       exit;
    }
 
+# If we have no child data sources, assume something is wrong.
+if (!count($grid))
+   {
+      print "<H4>Ganglia cannot find a data source. Is gmond running?</H4>";
+      exit;
+   }
+
 # If we only have one cluster source, suppress MetaCluster output.
 if (count($grid) == 2 and $context=="meta")
    {

@@ -10,9 +10,7 @@
 
 <IMG SRC="{node_image}" HEIGHT="60" WIDTH="30" ALT="{host}" BORDER="0">
 {node_msg}
-<!-- INCLUDE BLOCK : extra -->
-<BR>
-<BR>
+<P>
 
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
@@ -24,10 +22,9 @@
  <TD CLASS=footer WIDTH=30%>{name}</TD><TD>{value}</TD>
 </TR>
 <!-- END BLOCK : string_metric_info -->
-</TABLE>
 
-<BR><BR>
-<TABLE BORDER="0" WIDTH="100%">
+<TR><TD>&nbsp;</TD></TR>
+
 <TR>
   <TD COLSPAN=2 CLASS=title>Constant Metrics</TD>
 </TR>
@@ -37,7 +34,18 @@
  <TD CLASS=footer WIDTH=30%>{name}</TD><TD>{value}</TD>
 </TR>
 <!-- END BLOCK : const_metric_info -->
+
+<TR><TD>&nbsp;</TD></TR>
+
+<TR>
+ <TD COLSPAN=2 CLASS=title>
+ <a href="host_gmetrics.php?c={cluster_url}&h={host}">Gmetrics</a>
+ </TD>
+</TR>
 </TABLE>
+
+ <HR>
+<!-- INCLUDE BLOCK : extra -->
 
 </TD>
 
@@ -50,8 +58,6 @@
    SRC="./graph.php?g=cpu_report&z=medium&c={cluster_url}&{graphargs}">
 <IMG HEIGHT="147" WIDTH="395" ALT="{cluster_url} NETWORK"
    SRC="./graph.php?g=network_report&z=medium&c={cluster_url}&{graphargs}">
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster_url} PACKETS"
-   SRC="./graph.php?g=packet_report&z=medium&c={cluster_url}&{graphargs}">
 </TD>
 </TR>
 </TABLE>

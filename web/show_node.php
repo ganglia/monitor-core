@@ -39,7 +39,7 @@ $tpl->assign("location",$location);
 $tpl->assign("ip", $hostattrs[ip]);
 
 # The metrics we need for this node.
-$mem_total_mb = intval(intval($metrics[mem_total][VAL])/1024);
+$mem_total_gb = $metrics[mem_total][VAL]/1048576;
 $load_one=$metrics[load_one][VAL];
 $load_five=$metrics[load_five][VAL];
 $load_fifteen=$metrics[load_fifteen][VAL];
@@ -49,7 +49,7 @@ $cpu_idle=$metrics[cpu_idle][VAL];
 $cpu_num=$metrics[cpu_num][VAL];
 # Cannot be zero, since we use it as a divisor.
 if (!$cpu_num) { $cpu_num=1; }
-$cpu_speed=$metrics[cpu_speed][VAL];
+$cpu_speed=$metrics[cpu_speed][VAL]/1024;
 $disk_total=$metrics[disk_total][VAL];
 $disk_free=$metrics[disk_free][VAL];
 $disk_use = $disk_total - $disk_free;
@@ -73,8 +73,8 @@ if (!$up) {
 # The these hardware units should be more flexible.
 $s = ($cpu_num>1) ? "s" : "";
 $tpl->assign("s",$s);
-$tpl->assign("cpu","$cpu_num x $cpu_speed Mhz");
-$tpl->assign("mem","$mem_total_mb MB");
+$tpl->assign("cpu", sprintf("%s x %.2f Ghz", $cpu_num, $cpu_speed));
+$tpl->assign("mem", sprintf("%.2f GB", $mem_total_gb));
 $tpl->assign("disk","$disk");
 $tpl->assign("part_max_used", "$part_max");
 $tpl->assign("load_one",$load_one);

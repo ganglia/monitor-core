@@ -49,9 +49,10 @@ function uptime($uptimeS)
    $uptimeH=intval($uptimeS/3600);
    $uptimeS=$uptimeH ? $uptimeS % ($uptimeH*3600) : $uptimeS;
    $uptimeM=intval($uptimeS/60);
+   $uptimeS=$uptimeM ? $uptimeS % ($uptimeM*60) : $uptimeS;
 
    $s = ($uptimeD!=1) ? "s" : "";
-   return "$uptimeD day$s, $uptimeH:$uptimeM";
+   return sprintf("$uptimeD day$s, %d:%02d:%02d",$uptimeH,$uptimeM,$uptimeS);
 }
 
 #-------------------------------------------------------------------------------
@@ -249,11 +250,11 @@ function nodebox($hostname, $verbose, $title="", $extrarow="")
    $up = $hosts_up[$hostname] ? 1 : 0;
 
    # The metrics we need for this node.
-   # A megabyte of memory is 1024 KB. This differs from hard drives, where
-   # one MB = 1000 bytes. Everyone agree this is a bad double-standard?
-   $mem_total_mb = intval(intval($m[mem_total][VAL])/1024);
+
+   # Give memory in Gigabytes. 1GB = 2^20 bytes.
+   $mem_total_gb = $m[mem_total][VAL]/1048576;
    $load_one=$m[load_one][VAL];
-   $cpu_speed=$m[cpu_speed][VAL];
+   $cpu_speed=$m[cpu_speed][VAL]/1024;
    $cpu_num= $m[cpu_num][VAL];
    #
    # The nested tables are to get the formatting. Insane.
@@ -266,11 +267,14 @@ function nodebox($hostname, $verbose, $title="", $extrarow="")
    
    $row1 = "<tr><td class=$rowclass>\n".
       "<table width=100% cellpadding=1 cellspacing=0 border=0><tr>".
-      "<td><a href=\"$GHOME/?p=$verbose&c=$cluster_url&h=$host_url\">$title</a>&nbsp;<br>\n";
+      "<td><a href=\"$GHOME/?p=$verbose&c=$cluster_url&h=$host_url\">".
+      "$title</a>&nbsp;<br>\n";
 
    $cpus = $cpu_num > 1 ? "($cpu_num)" : "";
    if ($up)
-      $hardware = "<em>cpu: </em>${cpu_speed} $cpus<em> mem: </em>${mem_total_mb}";
+      $hardware = 
+         sprintf("<em>cpu: </em>%.2f<small>G</small> %s ", $cpu_speed, $cpus) .
+         sprintf("<em>mem: </em>%.2f<small>G</small>",$mem_total_gb);
    else $hardware = "&nbsp;";
 
    $row2 = "<tr><td colspan=2>";
@@ -279,7 +283,8 @@ function nodebox($hostname, $verbose, $title="", $extrarow="")
    else if ($verbose > 2) {
       $hostattrs = $up ? $hosts_up : $hosts_down;
       $last_heartbeat = $hostattrs[$hostname][TN];
-      $age = $last_heartbeat > 3600 ? uptime($last_heartbeat) : "${last_heartbeat}s";
+      $age = $last_heartbeat > 3600 ? uptime($last_heartbeat) : 
+         "${last_heartbeat}s";
       $row2 .= "<font size=-2>Last heartbeat $age</font>";
       $row3 = $hardware;
    }

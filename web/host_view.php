@@ -6,7 +6,7 @@ $tpl->assignInclude("extra", template("host_extra.tpl"));
 $tpl->prepare();
 
 $tpl->assign("cluster", $clustername);
-$tpl->assign("host", $host);
+$tpl->assign("host", $hostname);
 $tpl->assign("node_image", node_image($metrics));
 $tpl->assign("sort",$sort);
 $tpl->assign("range",$range);
@@ -21,7 +21,7 @@ $tpl->assign("cluster_url", $cluster_url);
 $tpl->assign("graphargs", "h=$hostname&$get_metric_string&st=$cluster[LOCALTIME]");
 
 # For the node view link.
-$tpl->assign("node_view","./?p=2&c=$cluster_url&h=$host");
+$tpl->assign("node_view","./?p=2&c=$cluster_url&h=$hostname");
 
 # No reason to go on if this node is down.
 if ($hosts_down)
@@ -61,6 +61,11 @@ foreach ($metrics as $name => $v)
 # since it requires a fully-parsed XML tree. The classic contructor problem.
 $s_metrics[uptime][TYPE] = "string";
 $s_metrics[uptime][VAL] = uptime($cluster[LOCALTIME] - $metrics[boottime][VAL]);
+
+# Add the gmond started timestamps & last reported time (in uptime format) from
+# the HOST tag:
+$s_metrics[last_reported][TYPE] = "string";
+$s_metrics[last_reported][VAL] = uptime($cluster[LOCALTIME] - $hosts_up[REPORTED]);
 
 # Show string metrics
 if (is_array($s_metrics))
