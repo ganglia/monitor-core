@@ -32,3 +32,7 @@ dist-local: README ganglia.html ChangeLog
 # This is a symbolic link that needs to be clean'd out
 dist-hook:
 	rm -f ${distdir}/gmond/machine.c
+
+rpm: dist
+	rpmbuild -ta --target noarch,i386 ganglia-monitor-core-@VERSION@.tar.gz
+	
