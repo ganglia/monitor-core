@@ -42,7 +42,7 @@ data_thread ( void *arg )
    buf = malloc( buf_size );
    if(!buf)
       {
-         err_quit("Unable to malloc initial buffer for [%s] data source\n", d->name);
+         err_quit("data_thread() unable to malloc initial buffer for [%s] data source\n", d->name);
       }
 
    /* Assume the best from the beginning */
@@ -59,7 +59,7 @@ data_thread ( void *arg )
 
          if(!sock)
             {
-               debug_msg("Unable to get any data from [%s] datasource", d->name);
+               debug_msg("data_thread() got not answer from any [%s] datasource", d->name);
                d->dead = 1;
                goto take_a_break;
             }
@@ -96,39 +96,40 @@ data_thread ( void *arg )
                                  buf = realloc( buf, buf_size+1024 );
                                  if(!buf)
                                     {
-                                       err_quit("Unable to malloc enough room for [%s] data source", d->name);
+                                       err_quit("data_thread() unable to malloc enough room for [%s] XML", d->name);
                                     }
                                  buf_size+=1024;
                               }
-                           SYS_CALL( bytes_read, read(sock->sockfd, buf+read_index, 1024));
+                           SYS_CALL( bytes_read, read(sock->sockfd, buf+read_index, 1023));
                            if (bytes_read < 0)
                               {
-                                 err_msg("Unable to read socket for [%s] data source", d->name);
+                                 err_msg("data_thread() unable to read() socket for [%s] data source", d->name);
                                  d->dead = 1;
                                  goto take_a_break;
                               }
                            else if(bytes_read == 0)
                               {
-                                 close( sock->sockfd );
                                  break;
                               }
-                           
                            read_index+= bytes_read;
                         }
                      if( struct_poll.revents & POLLHUP )
                         {
                            debug_msg("The remote machine closed connection");
-                           break;
+                           d->dead = 1;
+                           goto take_a_break;
                         }
                      if( struct_poll.revents & POLLERR )
                         {
                            debug_msg("POLLERR!");
-                           break;
+                           d->dead = 1;
+                           goto take_a_break;
                         }
                      if( struct_poll.revents & POLLNVAL )
                         {
                            debug_msg("POLLNVAL!");
-                           break;
+                           d->dead = 1;
+                           goto take_a_break;
                         }
                   }
             }
@@ -139,7 +140,7 @@ data_thread ( void *arg )
          rval = process_xml(d, buf );
          if(rval)
             {
-               debug_msg("save_to_rrd() couldn't parse the XML and data to RRD for [%s]", d->name);
+               debug_msg("data_thread() couldn't parse the XML and data to RRD for [%s]", d->name);
                d->dead = 1;
                goto take_a_break;
             }    
@@ -147,7 +148,7 @@ data_thread ( void *arg )
          p = strstr(buf, "<GANGLIA_XML");
          if(!p)
             {
-               err_msg("Unable to find the start of the GANGLIA_XML tag in output from [%s] data source", d->name);
+               err_msg("data_thread() unable to find the start of the GANGLIA_XML tag in output from [%s] data source", d->name);
                d->dead = 1;
                goto take_a_break;
             }
@@ -155,7 +156,7 @@ data_thread ( void *arg )
          p = strchr( p, '>' ); 
          if(!p)
             {
-               err_msg("Unable to find end of GANGLIA_XML tag in output from [%s] data source", d->name);
+               err_msg("data_thread() unable to find end of GANGLIA_XML tag in output from [%s] data source", d->name);
                d->dead = 1;
                goto take_a_break;
             }
@@ -171,7 +172,7 @@ data_thread ( void *arg )
          q = strstr(p, "</GANGLIA_XML>");
          if(!q)
             {
-               err_msg("Unable to find the closing GANGLIA_XML tag in output from [%s] data source", d->name);
+               err_msg("data_thread() unable to find the closing GANGLIA_XML tag in output from [%s] data source", d->name);
                d->dead = 1;
                goto take_a_break;
             } 
@@ -185,7 +186,7 @@ data_thread ( void *arg )
 
          if(! hash_insert (&key, &val, xml))
             {
-               err_msg("Unable to insert data for [%s] into XML hash", d->name);
+               err_msg("data_thread() unable to insert data for [%s] into XML hash", d->name);
                goto take_a_break;
             }
 
@@ -198,7 +199,5 @@ data_thread ( void *arg )
          sleep_time=10+(int) (20.0*rand()/(RAND_MAX+10.0));
          sleep(sleep_time);
       }
-   
-
    return NULL;
 }
