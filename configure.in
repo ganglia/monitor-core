@@ -27,9 +27,12 @@ AC_CONFIG_AUX_DIR(config)
 
 ### BEGIN RELEASE VARIABLES ############################
 # On making a release...
-# If this release is just a minor bug fix release, increment GANGLIA_MINOR_VERSION.
+# If this release is just a minor bug fix release, increment 
+# GANGLIA_MICRO_VERSION.
+#
 # If this release adds significant features or breaks backward compatibility,
 # increment GANGLIA_MINOR_VERSION and set GANGLIA_MICRO_VERSION to 0 (zero).
+#
 # If this release is a complete restructuring of
 # the overall architecture of ganglia,
 # increment GANGLIA_MAJOR_VERSION and set 
