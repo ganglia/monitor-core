@@ -6,45 +6,47 @@
 
 #include <signal.h>
 
-#include "lib/unpifi.h"
+/*
 #include "lib/interface.h"
+*/
 #include "lib/ganglia_private.h"
 #include "lib/dotconf.h"
-#include "lib/gmond_config.h"
 #include "lib/hash.h"
 #include "lib/barrier.h"
 #include "lib/become_a_nobody.h"
-#include "lib/net.h"
+#include "libunp/unp.h"
 #include "lib/debug_msg.h"
 
+#include "conf.h"
 #include "cmdline.h"
 #include "metric.h"
 
 /* The entire cluster this gmond knows about */
 hash_t *cluster;
 
-g_mcast_socket * mcast_socket;
-pthread_mutex_t  mcast_socket_mutex      = PTHREAD_MUTEX_INITIALIZER;
+int msg_out_socket;
+pthread_mutex_t  msg_out_socket_mutex    = PTHREAD_MUTEX_INITIALIZER;
 
-g_mcast_socket * mcast_join_socket;
-pthread_mutex_t  mcast_join_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
+int msg_in_socket_active = 0; 
+int msg_in_socket;
+pthread_mutex_t  msg_in_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
 
-g_tcp_socket *   server_socket;
+int server_socket;
 pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
 
-g_tcp_socket *   compressed_socket;
+int compressed_socket;
 pthread_mutex_t  compressed_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-barrier *mcast_listen_barrier, *server_barrier;
+barrier *msg_listen_barrier, *server_barrier;
 
-/* In dmonitor.c */
+/* In monitor.c */
 extern void *monitor_thread(void *arg);
-extern int mcast_value ( uint32_t key );
+extern int send_value ( uint32_t key );
 
-/* In dlisten.c */
-extern void *mcast_listen_thread(void *arg);  
+/* In listen.c */
+extern void *msg_listen_thread(void *arg);  
 
-/* In dserver.c */
+/* In server.c */
 extern void *server_thread(void *arg);
 
 /* In cleanup.c */
@@ -58,6 +60,24 @@ struct gengetopt_args_info args_info;
 extern gmond_config_t gmond_config;
 
 uint32_t start_time;
+
+/* This only works on IPv4 for right now */
+static int
+is_multicast (const char *ip)
+{
+  struct in_addr haddr;
+  unsigned int addr;
+
+  if(!inet_aton(ip, &haddr))
+    return -1;  /* not a valid address */
+
+  addr = htonl( haddr.s_addr );
+
+  if ((addr & 0xF0000000) == 0xE0000000)
+    return 1;
+
+  return 0;
+}
 
 void 
 send_all_metric_data( void )
@@ -74,12 +94,12 @@ send_all_metric_data( void )
          for (i=1; i< num_key_metrics; i++)
             {
                /* Will the next multicast be forced beyond the waiting period? */
-               if( metric[i].mcast_threshold > (now.tv_sec + waiting_period) )
+               if( metric[i].msg_threshold > (now.tv_sec + waiting_period) )
                   {
 
                      /* Make sure it multicasts in the 2 mins following the 
                         waiting period */
-                     metric[i].mcast_threshold = now.tv_sec + waiting_period +
+                     metric[i].msg_threshold = now.tv_sec + waiting_period +
                        1+ (int)(120.0*rand()/(RAND_MAX+1.0)); 
                   }
             }
@@ -88,7 +108,7 @@ send_all_metric_data( void )
       {
          for (i=1; i< num_key_metrics; i++)
             {
-               metric[i].mcast_threshold = 0;
+               metric[i].msg_threshold = 0;
             }
       }
 }
@@ -135,8 +155,10 @@ main ( int argc, char *argv[] )
    pthread_t tid;
    pthread_attr_t attr;
    struct timeval tv;
-   struct ifi_info *entry;
    int no_compression = 0;
+   struct sockaddr *sa;
+   socklen_t salen;
+   const int on = 1;
 
    gettimeofday(&tv, NULL);
    start_time = (uint32_t) tv.tv_sec;
@@ -197,63 +219,66 @@ main ( int argc, char *argv[] )
    /* Ignore any SIGPIPE signals */
    signal( SIGPIPE, SIG_IGN );    
 
-   if(! gmond_config.mcast_if_given )
-      {
-         entry = get_first_multicast_interface();
-         if(!entry) {
-            err_msg("Warning: Could not find a multicast-enabled interface, using anything we can find.\n");
-            entry = get_first_interface();
-            if (!entry)
-               err_quit("We don't have any interfaces besides loopback, exiting.\n");
-         }
-         debug_msg("Using interface %s", entry->ifi_name);
-      }
-   else
-      {
-         entry = get_interface ( gmond_config.mcast_if );
-         if(!entry)
-            err_quit("%s is not a valid multicast-enabled interface", gmond_config.mcast_if);
-         debug_msg("Using multicast-enabled interface %s", gmond_config.mcast_if);
-      }
-
-   /* fd for incoming multicast messages */
    if(! gmond_config.deaf )
       {
-         mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port,
-                             (struct in_addr *)&(((struct sockaddr_in *)entry->ifi_addr)->sin_addr));                                        
-         if (! mcast_join_socket )
-            {
-               perror("g_mcast_in() failed");
-               return -1;
-            }
-
-         debug_msg("mcast listening on %s %hu", gmond_config.mcast_channel, gmond_config.mcast_port);
-
-         server_socket = g_tcp_socket_server_new( gmond_config.xml_port );
-         if (! server_socket )
-            {
-               perror("tcp_listen() on xml_port failed");
-               return -1;
-            }
-         debug_msg("XML listening on port %d", gmond_config.xml_port);
-
-         compressed_socket = g_tcp_socket_server_new( gmond_config.compressed_xml_port);
-         if( ! compressed_socket)
+        /* We are not deaf .. we need to listen.
+           If the msg channel is a multicast channel, we need to listen to that channel.
+           If the msg channel is NOT multicast, we only listen if msg port is explicitly set
+             (meaning are going to collect the UDP messages).
+         */
+        if(is_multicast( gmond_config.msg_channel ))
            {
-             perror("tcp_listen() on xml_port failed");
-             return -1;
+             debug_msg("Msg channel is multicast");
+
+             /* Since we are not deaf, we need to join the multicast channel */
+             
+             msg_in_socket = Udp_client( gmond_config.msg_channel, gmond_config.msg_port,
+                                 (void **)&sa, &salen);
+             Setsockopt( msg_in_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+             Bind( msg_in_socket, sa, salen );
+             Mcast_join( msg_in_socket, sa, salen, 
+                       gmond_config.msg_if_given ? gmond_config.msg_if : NULL, 0);
+             msg_in_socket_active = 1;
+           }
+        else
+           {
+             debug_msg("Msg channel is NOT multicast");
+
+             /* Since the msg channel is NOT multicast, we will only listen for incoming
+                traffic if the msg port is explicitly set */
+ 
+             if( gmond_config.msg_port_given )
+               {
+                 /* Clients will be sending us data, we need to listen on the UDP port */
+
+                 msg_in_socket = Udp_server( gmond_config.msg_channel, gmond_config.msg_port,
+                                    &salen);
+                 Setsockopt( msg_in_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+                 msg_in_socket_active =1; 
+               }
+           }
+        
+         debug_msg("msg channel is %s %s", gmond_config.msg_channel, gmond_config.msg_port);
+
+         debug_msg("Starting socket to listen on XML port %s", gmond_config.xml_port);
+         server_socket = Tcp_listen(NULL, gmond_config.xml_port, &salen );
+
+         debug_msg("Starting socket to listen on compressed XML port %s", gmond_config.compressed_xml_port);
+         compressed_socket = Tcp_listen(NULL, gmond_config.compressed_xml_port, &salen);
+
+         /* thread(s) to listen to the incoming traffic (if necessary) */
+         if(msg_in_socket_active)
+           {
+             if(barrier_init(&msg_listen_barrier, gmond_config.msg_threads))
+               {
+                 perror("barrier_init() error");
+                 return -1;    
+               }
            }
 
-         /* thread(s) to listen to the multicast traffic */
-         if(barrier_init(&mcast_listen_barrier, gmond_config.mcast_threads))
+         for ( i = 0 ; i < gmond_config.msg_threads; i++ )
             {
-               perror("barrier_init() error");
-               return -1;    
-            }
-
-         for ( i = 0 ; i < gmond_config.mcast_threads; i++ )
-            {
-               pthread_create(&tid, &attr, mcast_listen_thread, (void *)mcast_listen_barrier);
+               pthread_create(&tid, &attr, msg_listen_thread, (void *)msg_listen_barrier);
             }
          debug_msg("listening thread(s) have been started");
 
@@ -288,16 +313,13 @@ main ( int argc, char *argv[] )
    /* fd for outgoing multicast messages */
    if(! gmond_config.mute )
       {
-         mcast_socket = g_mcast_out ( gmond_config.mcast_channel, gmond_config.mcast_port,  
-                       (struct in_addr *)&(((struct sockaddr_in *)entry->ifi_addr)->sin_addr), 
-                        gmond_config.mcast_ttl);
-         if ( !mcast_socket )
-            {
-               perror("gmond could not connect to multicast channel");
-               return -1;
-            }
-         debug_msg("multicasting on channel %s %d", 
-		    gmond_config.mcast_channel, gmond_config.mcast_port);
+         /* We are not mute, we need our data out on the msg channel.
+            It doesn't matter if the msg channel is multicast or not because
+            both are just simple UDP socket connections */
+ 
+         msg_out_socket = Udp_connect( gmond_config.msg_channel, gmond_config.msg_port );
+         debug_msg("sending messages on channel %s %s", 
+		    gmond_config.msg_channel, gmond_config.msg_port);
 
          pthread_create(&tid, &attr, monitor_thread, NULL);
          debug_msg("created monitor thread");

@@ -1,12 +1,13 @@
 /* $Id$ */
 #include <stdio.h>
-#include <dotconf.h>
 #include <netdb.h>
 
 #include "error.h"
-#include "gmond_config.h"
-#include "ganglia.h"
+#include "conf.h"
+
+#include "lib/ganglia.h"
 #include "libunp/unp.h"
+#include "lib/dotconf.h"
 
 gmond_config_t gmond_config;
 
@@ -66,55 +67,59 @@ static DOTCONF_CB(cb_url)
    return NULL;
 }
 
-static DOTCONF_CB(cb_mcast_channel)
+static DOTCONF_CB(cb_msg_channel)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   free(c->mcast_channel);
-   c->mcast_channel = conf_strdup(cmd->data.str);
+   free(c->msg_channel);
+   c->msg_channel = conf_strdup(cmd->data.str);
    return NULL;
 }
 
-static DOTCONF_CB(cb_mcast_port)
+static DOTCONF_CB(cb_msg_port)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   c->mcast_port = cmd->data.value;
+   free(c->msg_port);
+   c->msg_port_given = 1;
+   c->msg_port = conf_strdup(cmd->data.str);
    return NULL;
 }
 
-static DOTCONF_CB(cb_mcast_if)
+static DOTCONF_CB(cb_msg_if)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
    /* no free.. set to NULL by default */
-   c->mcast_if_given = 1;
-   c->mcast_if = conf_strdup(cmd->data.str);
+   c->msg_if_given = 1;
+   c->msg_if = conf_strdup(cmd->data.str);
    return NULL;
 }
 
-static DOTCONF_CB(cb_mcast_ttl)
+static DOTCONF_CB(cb_msg_ttl)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   c->mcast_ttl  = cmd->data.value;
+   c->msg_ttl  = cmd->data.value;
    return NULL;
 }
 
-static DOTCONF_CB(cb_mcast_threads)
+static DOTCONF_CB(cb_msg_threads)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   c->mcast_threads = cmd->data.value;
+   c->msg_threads = cmd->data.value;
    return NULL;
 }
 
 static DOTCONF_CB(cb_xml_port)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   c->xml_port = cmd->data.value;
+   free(c->xml_port);
+   c->xml_port = conf_strdup(cmd->data.str);
    return NULL;
 }
 
 static DOTCONF_CB(cb_compressed_xml_port)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   c->compressed_xml_port = cmd->data.value;
+   free(c->compressed_xml_port);
+   c->compressed_xml_port = conf_strdup(cmd->data.str);
    return NULL;
 }
 
@@ -277,13 +282,14 @@ set_defaults(gmond_config_t *config )
    config->latlong = conf_strdup("unspecified");
    config->url = conf_strdup("unspecified");
    config->location = conf_strdup("unspecified");
-   config->mcast_channel = conf_strdup("239.2.11.71");
-   config->mcast_port = 8649;
-   config->mcast_if_given = 0;
-   config->mcast_ttl = 1;
-   config->mcast_threads = 2;
-   config->xml_port = 8649;
-   config->compressed_xml_port = 8650;
+   config->msg_channel = conf_strdup("239.2.11.71");
+   config->msg_port = conf_strdup("8649");
+   config->msg_if_given = 0;
+   config->msg_port_given = 0;
+   config->msg_ttl = 1;
+   config->msg_threads = 2;
+   config->xml_port = conf_strdup("8649");
+   config->compressed_xml_port = conf_strdup("8650");
    config->xml_threads = 2;
    config->compressed_xml_threads = 2;
    config->trusted_hosts = NULL;
@@ -309,16 +315,16 @@ print_conf( gmond_config_t *config )
    printf("latlong is %s\n", config->latlong);
    printf("Cluster URL is %s\n", config->url);
    printf("Host location is (x,y,z): %s\n", config->location);
-   printf("mcast_channel is %s\n", config->mcast_channel);
-   printf("mcast_port is %d\n", config->mcast_port);
-   if(config->mcast_if_given)
-      printf("mcast_if is %s\n", config->mcast_if);
+   printf("msg_channel is %s\n", config->msg_channel);
+   printf("msg_port is %s\n", config->msg_port);
+   if(config->msg_if_given)
+      printf("msg_if is %s\n", config->msg_if);
    else
-      printf("mcast_if is chosen by the kernel\n");
-   printf("mcast_ttl is %ld\n", config->mcast_ttl);
-   printf("mcast_threads is %ld\n", config->mcast_threads);
-   printf("xml_port is %d\n", config->xml_port);
-   printf("compressed_xml_port is %d\n", config->compressed_xml_port);
+      printf("msg_if is chosen by the kernel\n");
+   printf("msg_ttl is %ld\n", config->msg_ttl);
+   printf("msg_threads is %ld\n", config->msg_threads);
+   printf("xml_port is %s\n", config->xml_port);
+   printf("compressed_xml_port is %s\n", config->compressed_xml_port);
    printf("xml_threads is %ld\n", config->xml_threads);
    printf("compressed_xml_threads is %ld\n", config->compressed_xml_threads);
    printf("trusted hosts are: ");
@@ -350,13 +356,18 @@ get_gmond_config( char *conffile )
          {"latlong", ARG_STR, cb_latlong, &gmond_config, 0},
          {"url", ARG_STR, cb_url, &gmond_config, 0},
          {"location", ARG_STR, cb_location, &gmond_config, 0},
-         {"mcast_channel", ARG_STR, cb_mcast_channel, &gmond_config, 0},
-         {"mcast_port", ARG_INT, cb_mcast_port, &gmond_config, 0},
-         {"mcast_if", ARG_STR, cb_mcast_if, &gmond_config, 0},
-         {"mcast_ttl", ARG_INT, cb_mcast_ttl, &gmond_config, 0},
-         {"mcast_threads", ARG_INT, cb_mcast_threads, &gmond_config, 0},
-         {"xml_port", ARG_INT, cb_xml_port, &gmond_config, 0},
-         {"compressed_xml_port", ARG_INT, cb_compressed_xml_port, &gmond_config, 0},
+         {"mcast_channel", ARG_STR, cb_msg_channel, &gmond_config, 0},
+         {"mcast_port", ARG_STR, cb_msg_port, &gmond_config, 0},
+         {"mcast_if", ARG_STR, cb_msg_if, &gmond_config, 0},
+         {"mcast_ttl", ARG_INT, cb_msg_ttl, &gmond_config, 0},
+         {"mcast_threads", ARG_INT, cb_msg_threads, &gmond_config, 0},
+         {"msg_channel", ARG_STR, cb_msg_channel, &gmond_config, 0},
+         {"msg_port", ARG_INT, cb_msg_port, &gmond_config, 0},
+         {"msg_if", ARG_STR, cb_msg_if, &gmond_config, 0},
+         {"msg_ttl", ARG_INT, cb_msg_ttl, &gmond_config, 0},
+         {"msg_threads", ARG_INT, cb_msg_threads, &gmond_config, 0},
+         {"xml_port", ARG_STR, cb_xml_port, &gmond_config, 0},
+         {"compressed_xml_port", ARG_STR, cb_compressed_xml_port, &gmond_config, 0},
          {"xml_threads", ARG_INT, cb_xml_threads, &gmond_config, 0},
          {"compressed_xml_threads", ARG_INT, cb_compressed_xml_threads, &gmond_config, 0},
          {"trusted_hosts", ARG_LIST, cb_trusted_hosts, &gmond_config, 0},
