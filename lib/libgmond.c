@@ -246,14 +246,6 @@ collection_group { \n\
     name = \"cpu_wio\" \n\
     value_threshold = \"1.0\" \n\
   } \n\
-  metric { \n\
-    name = \"cpu_intr\" \n\
-    value_threshold = \"1.0\" \n\
-  } \n\
-  metric { \n\
-    name = \"cpu_sintr\" \n\
-    value_threshold = \"1.0\" \n\
-  } \n\
 } \n\
 \n\
 collection_group { \n\
@@ -289,7 +281,7 @@ collection_group { \n\
 }\n\
 \n\
 /* This collection group grabs the volatile memory metrics every 40 secs and \n\
-   sends them at least every 80 secs.  This time_threshold can be increased \n\
+   sends them at least every 180 secs.  This time_threshold can be increased \n\
    significantly to reduce unneeded network traffic. */ \n\
 collection_group { \n\
   collect_every = 40 \n\
