@@ -1,15 +1,15 @@
 $Id$
 #!/bin/sh
-echo "make distclean"  
+echo "Running make distclean"  
 make distclean   
-echo "aclocal"  &&
+echo "Running aclocal"  &&
 aclocal   &&
-echo "autoheader"  &&
+echo "Running autoheader"  &&
 autoheader  &&
-echo "automake"  &&
+echo "Running automake"  &&
 automake --add-missing  &&
-echo "autoconf"  &&
+echo "Running autoconf"  &&
 autoconf  &&
 echo  &&
 echo  &&
-echo "ready for a configure now" 
+echo "To begin installation, run \"./configure\" now" 
