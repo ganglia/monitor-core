@@ -30,6 +30,7 @@ typedef enum {
    VAL_TAG,
    TYPE_TAG,
    SLOPE_TAG,
+   VERSION_TAG
 } xml_tag_t;
 
 struct xml_tag
@@ -39,7 +40,7 @@ struct xml_tag
    };
 
 /* This value is taken from the xml_hash.c file (MAX_HASH_VALUE+1) */
-#define MAX_XML_HASH_VALUE 20
+#define MAX_XML_HASH_VALUE 23
 
 typedef struct
    {
