@@ -12,6 +12,7 @@
 extern char *rrd_rootdir;
 
 int push_data_to_rrd( char *cluster, char *host, char *metric, char *value);
+int push_data_to_summary_rrd( char *cluster, char *metric, char *sum, char *num);
 
 extern int RRD_update( char *rrd, char *value );
 extern int RRD_create( char *rrd, char *polling_interval);
@@ -19,7 +20,7 @@ extern int summary_RRD_create( char *rrd, char *polling_interval);
 extern int summary_RRD_update( char *rrd, char *sum, char *num );
 
 extern unsigned int metric_hash (char *, unsigned int);
-extern const char *in_metric_list (char *, unsigned int);
+extern struct ganglia_metric *in_metric_list (char *, unsigned int);
 extern struct ganglia_metric metrics[];
 
 typedef struct
@@ -98,17 +99,17 @@ start (void *data, const char *el, const char **attr)
                     case FLOAT:
                        xml_data->sum[hash_val].f +=  strtod( (const char *)(xml_data->metric_val), (char **)NULL);
                        xml_data->num[hash_val]++;
-                       debug_msg("sum = %f num = %d", xml_data->sum[hash_val].f, xml_data->num[hash_val]++ );
+                       debug_msg("sum = %f num = %d", xml_data->sum[hash_val].f, xml_data->num[hash_val] );
                        break;
                     case UINT32:
                        xml_data->sum[hash_val].uint32 += strtoul(xml_data->metric_val, (char **)NULL, 10);
                        xml_data->num[hash_val]++;
-                       debug_msg("sum = %ld num = %d", xml_data->sum[hash_val].uint32, xml_data->num[hash_val]++); 
+                       debug_msg("sum = %ld num = %d", xml_data->sum[hash_val].uint32, xml_data->num[hash_val]); 
                        break;
                     case DOUBLE:
                        xml_data->sum[hash_val].d = strtod( (const char *)(xml_data->metric_val), (char **)NULL) ;
                        xml_data->num[hash_val]++;
-                       debug_msg("sum = %f num = %d", xml_data->sum[hash_val].d, xml_data->num[hash_val]++);
+                       debug_msg("sum = %f num = %d", xml_data->sum[hash_val].d, xml_data->num[hash_val]);
                        break;
                  }
            }
@@ -159,13 +160,44 @@ end (void *data, const char *el)
 {
   xml_data_t *xml_data = (xml_data_t *)data;
   register int i;
+  struct ganglia_metric *gm;
+  int len;
+  char sum[64];
+  char num[64];
+
   if(! strcmp("CLUSTER", el) )
      {
         for ( i = 0; i < MAX_HASH_VALUE; i++ )
            {
-              if( strlen(metrics[i].name) )
+              len = strlen(metrics[i].name);
+              if( len )
                  {
-                     debug_msg("SAVE SUMMARY INFORMATION %s", metrics[i].name);
+                     gm  =  (struct ganglia_metric *)in_metric_list ((const char *)metrics[i].name, len);
+
+                     /* Skip it if we have no hosts reporting the data */
+                     if (! xml_data->num[i] )
+                        continue;
+
+                     switch ( gm->type )
+                        {
+                           case FLOAT:
+                              sprintf( sum, "%f", xml_data->sum[i].f);
+                              sprintf( num, "%d", xml_data->num[i] );
+                              break;
+                           case DOUBLE:
+                              sprintf( sum, "%f", xml_data->sum[i].d); 
+                              sprintf( num, "%d", xml_data->num[i] ); 
+                              break;
+                           case UINT32:
+                              sprintf( sum, "%d", xml_data->sum[i].uint32);
+                              sprintf( num, "%d", xml_data->num[i] );
+                              break;
+                        }
+
+                     /* Save the data to a round robin database */
+                     push_data_to_summary_rrd( xml_data->cluster, metrics[i].name, sum, num);
+
+                     debug_msg("SAVE SUMMARY INFORMATION %s sum=%s num=%s", metrics[i].name, sum, num);
                  }
            }
      }
