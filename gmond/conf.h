@@ -10,10 +10,8 @@
 
 typedef struct
 {
-  char **addresses;
-  int num_addresses;
-  char **ports;
-  int num_ports;
+  char *address;
+  char *port;
   char **interfaces;
   int num_interfaces;
   char *direction;
