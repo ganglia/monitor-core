@@ -2,7 +2,7 @@ enum Ganglia_value_types {
   GANGLIA_VALUE_UNKNOWN,
   GANGLIA_VALUE_STRING, 
   GANGLIA_VALUE_UNSIGNED_SHORT,
-  GANGLIA_VALUE_SIGNED_SHORT,
+  GANGLIA_VALUE_SHORT,
   GANGLIA_VALUE_UNSIGNED_INT,
   GANGLIA_VALUE_INT,
   GANGLIA_VALUE_FLOAT,
@@ -12,10 +12,18 @@ enum Ganglia_value_types {
 typedef string varstring<>;
 
 union Ganglia_value switch(Ganglia_value_types type) {
+  case GANGLIA_VALUE_UNKNOWN:
+     void;
   case GANGLIA_VALUE_STRING:
      string str<>;
+  case GANGLIA_VALUE_UNSIGNED_SHORT:
+     unsigned short u_short;
+  case GANGLIA_VALUE_SHORT:
+     short s_short;
+  case GANGLIA_VALUE_UNSIGNED_INT:
+     unsigned int u_int;
   case GANGLIA_VALUE_INT:
-     int i;
+     int s_int;
   case GANGLIA_VALUE_FLOAT:
      float f;
   case GANGLIA_VALUE_DOUBLE:
@@ -50,12 +58,12 @@ enum Ganglia_data_state {
   GANGLIA_METRIC_UNKNOWN_OLD_FORMAT
 };
 
-struct Ganglia_message_header {
+struct Ganglia_message_header_26 {
   Ganglia_hostinfo *host;
   Ganglia_msginfo  *msg;
 };
 
-struct Ganglia_message_body {
+struct Ganglia_message_body_26 {
   unsigned int source_instance;
   Ganglia_data_state state;
   unsigned int age;
@@ -64,9 +72,9 @@ struct Ganglia_message_body {
   Ganglia_metric metrics<>;
 };
 
-struct Ganglia_format_1 {
-  Ganglia_message_header *hdr;
-  Ganglia_message_body   *bdy;
+struct Ganglia_format_26 {
+  Ganglia_message_header_26 *hdr;
+  Ganglia_message_body_26   *bdy;
 };
 
 /* 2.5.x compatibility..... */
@@ -119,7 +127,7 @@ enum Ganglia_message_formats {
    metric_part_max_used,
    GANGLIA_NUM_OLD_METRICS, /* this should always directly follow the last metric_* */
 
-   GANGLIA_FORMAT_1 = 2874789, /* give a little space for old metrics in case they are modified */
+   GANGLIA_FORMAT_26 = 2874789, /* give a little space for old metrics in case they are modified */
 
    /* insert new formats here. */
 
@@ -127,8 +135,8 @@ enum Ganglia_message_formats {
 };
 
 union Ganglia_message switch (Ganglia_message_formats format) {
-  case GANGLIA_FORMAT_1:
-    Ganglia_format_1 *format_1; 
+  case GANGLIA_FORMAT_26:
+    Ganglia_format_26 *format_26; 
 
   /* 2.5.x sources... */
   case metric_user_defined:

@@ -19,6 +19,9 @@ udp_recv_channel { \n\
   port = 8649 \n\
   bind = 239.2.11.71 \n\
 } \n\
+tcp_accept_channel { \n\
+  port = 8666 \n\
+} \n\
 collection_group { \n\
   name = \"cpu_stat\" \n\
   metric { \n\
@@ -51,11 +54,10 @@ static cfg_opt_t location_opts[] = {
   CFG_END()
 };
 
-static cfg_opt_t id_opts[] = {
-  CFG_STR("cluster", NULL, CFGF_NONE ),
+static cfg_opt_t cluster_opts[] = {
+  CFG_STR("name", NULL, CFGF_NONE ),
   CFG_STR("owner", NULL, CFGF_NONE ),
-  CFG_STR("latitude", NULL, CFGF_NONE ),
-  CFG_STR("longitude", NULL, CFGF_NONE ),
+  CFG_STR("latlong", NULL, CFGF_NONE ),
   CFG_STR("url", NULL, CFGF_NONE ),
   CFG_END()
 };
@@ -97,6 +99,8 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_STR("interface", NULL, CFGF_NONE),
   CFG_STR("protocol", "xml", CFGF_NONE),
+  CFG_STR("allow_ip", NULL, CFGF_NONE),
+  CFG_STR("allow_mask", NULL, CFGF_NONE),
   CFG_END()
 };
 
@@ -148,7 +152,7 @@ static cfg_opt_t collection_group_opts[] = {
 
 static cfg_opt_t gmond_opts[] = {
   CFG_SEC("location",  location_opts, CFGF_NONE),
-  CFG_SEC("identification",  id_opts, CFGF_NONE),
+  CFG_SEC("cluster",   cluster_opts, CFGF_NONE),
   CFG_SEC("behavior",     behavior_opts, CFGF_NONE), 
   CFG_SEC("udp_send_channel", udp_send_channel_opts, CFGF_MULTI),
   CFG_SEC("udp_recv_channel", udp_recv_channel_opts, CFGF_MULTI),

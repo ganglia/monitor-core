@@ -133,6 +133,8 @@ typedef union {
 #ifdef OSF
 #endif
 
+#if 0
+/* THIS IS NOT NECESSARY ANYMORE */
 enum {
    user_defined,
   /*
@@ -215,5 +217,6 @@ enum {
 #endif
    num_key_metrics
 }  key_metrics;
+#endif
 
 #endif /* LIBMETRICS_H */
