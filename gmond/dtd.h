@@ -4,7 +4,7 @@
 #define DTD "\
 <?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\"?>\n\
 <!DOCTYPE GANGLIA_XML [\n\
-   <!ELEMENT GANGLIA_XML (GRID)*>\n\
+   <!ELEMENT GANGLIA_XML (GRID|CLUSTER|HOST)*>\n\
       <!ATTLIST GANGLIA_XML VERSION CDATA #REQUIRED>\n\
       <!ATTLIST GANGLIA_XML SOURCE CDATA #REQUIRED>\n\
    <!ELEMENT GRID (CLUSTER | GRID | HOSTS | METRICS)*>\n\
