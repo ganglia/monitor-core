@@ -33,7 +33,7 @@ data_thread ( void *arg )
    data_source_list_t *d = (data_source_list_t *)arg;
    struct timeval start, end;
    gzFile gz = NULL;
-   char *output, *p;
+   char *output, *p = NULL;
    int output_index;
    int output_len;
    int count;
@@ -54,6 +54,7 @@ data_thread ( void *arg )
      {
        /* Assume the best from the beginning */
        d->dead = 0;
+       d->last_heard_from = 0;
     
        gettimeofday(&start, NULL);
     
@@ -70,9 +71,10 @@ data_thread ( void *arg )
          {
            err_msg("data_thread() got no answer from any [%s] datasource", d->name);
            d->dead = 1;
-/*
+	   d->last_heard_from = time(NULL);
+	   /*
            goto take_a_break;
-*/
+	   */
          }
        else
          {
