@@ -234,19 +234,10 @@ setup_udp_recv_pollset( void )
 		  bindaddr? bindaddr: "NULL",
 		  protocol? protocol:"NULL");
 
-      /* Create a standard UDP socket */
-      socket = create_udp_server( global_context, port, bindaddr );
-      if(!socket)
-        {
-          fprintf(stderr,"Error creating UDP server on port %d bind=%s. Exiting.\n",
-		      port, bindaddr? bindaddr: "unspecified");
-	  exit(1);
-	}
-
       if( mcast_join )
 	{
-	  /* Join the specified multicast channel */
-	  socket = NULL;  /* later */
+	  /* Listen on the specified multicast channel */
+	  socket = create_mcast_server(global_context, mcast_join, port, bindaddr, mcast_if );
 	  if(!socket)
 	    {
 	      fprintf(stderr,"Error creating multicast server mcast_join=%s port=%d mcast_if=%s. Exiting.\n",
@@ -254,6 +245,17 @@ setup_udp_recv_pollset( void )
 	      exit(1);
 	    }
 
+	}
+      else
+	{
+	  /* Create a standard UDP server */
+          socket = create_udp_server( global_context, port, bindaddr );
+          if(!socket)
+            {
+              fprintf(stderr,"Error creating UDP server on port %d bind=%s. Exiting.\n",
+		      port, bindaddr? bindaddr: "unspecified");
+	      exit(1);
+	    }
 	}
 
       /* Build the socket poll file descriptor structure */
