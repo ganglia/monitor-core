@@ -698,7 +698,7 @@ To get help with the commandline options, simply pass C<gstat> the C<--help> opt
 
 This table describes all the metrics that ganglia collects and
 shows what platforms the metric are supported on.  (The following table
-is not yet complete).
+is current as of ganglia 2.5.6).
 
   Metric Name    Description                             Platforms
   -----------------------------------------------------------------------
@@ -707,7 +707,7 @@ is not yet complete).
   bwrite_sec    Buffer writes per second                 s
   bytes_in      Number of bytes in per second            l,f,s
   bytes_out     Number of bytes out per second           l,f,s
-  cpu_aidle     Percent of time since boot idle CPU      l
+  cpu_aidle     Percent of time since boot idle CPU      l,h
   cpu_idle      Percent CPU idle                         e
   cpu_intr      Time spent processing interrupts         h
   cpu_nice      Percent CPU nice                         l,f,h,t
@@ -727,29 +727,29 @@ is not yet complete).
   lread_sec     Linear reads per second                  s
   lwrite_sec    Linear writes per second                 s
   machine_type  Type of machine hardward (uname -m)      e 
-  mem_arm                                                h
-  mem_avm                                                h
-  mem_buffers   Amount of buffered memory                l,f,i
-  mem_cached    Amount of cached memory                  l,f,h
+  mem_arm       Available real memory                    h
+  mem_avm       Available virtual memory                 h
+  mem_buffers   Amount of buffered memory                l,f,i,t
+  mem_cached    Amount of cached memory                  l,f,i,h
   mem_free      Amount of available memory               e
-  mem_rm                                                 h
-  mem_shared    Amount of shared memory                  l,f
-  mem_total     Amount of available memory               l,f
-  mem_vm                                                 h
-  mtu           Network maximum transmission unit        l,f
-  os_name       Operating system name                    l,f
-  os_release    Operating system release (version)       l,f
+  mem_rm        Total real memory                        h
+  mem_shared    Amount of shared memory                  l,f,i,h
+  mem_total     Amount of available memory               e 
+  mem_vm        Total virtual memory                     h
+  mtu           Network maximum transmission unit        e 
+  os_name       Operating system name                    e 
+  os_release    Operating system release (version)       e 
   part_max_used Maximum percent used for all partitions  l,f
   phread_sec    Physical reads per second                s
   phwrite_sec   Physical writes per second               s
-  pkts_in       Packets in per second                    l,f
-  pkts_out      Packets out per second                   l,f
-  proc_run      Total number of running processes        l,f
-  proc_total    Total number of processes                l,f
+  pkts_in       Packets in per second                    l,f,s
+  pkts_out      Packets out per second                   l,f,s
+  proc_run      Total number of running processes        l,f,s,m,i,h
+  proc_total    Total number of processes                l,f,s,m,i,h
   rcache        Read cache hit ratio                     s
-  swap_free     Amount of available swap memory          l,f
-  swap_total    Total amount of swap memory              l,f
-  sys_clock     Current time on host                     l,f
+  swap_free     Amount of available swap memory          l,f,s,a,i,h,t
+  swap_total    Total amount of swap memory              l,f,s,a,i,h,t
+  sys_clock     Current time on host                     e
   wcache        Write cache hit ratio                    s
 
   Platform key:
