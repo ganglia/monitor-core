@@ -218,7 +218,7 @@ static DOTCONF_CB(cb_open_channel)
     }
   else
     {
-      /* Make room for the new channel */
+      /* Make room for the next channel */
       c->current_channel++;
       c->channels = (channel_t **)realloc( c->channels, 
                     c->current_channel +1 * sizeof( channel_t *));
@@ -226,8 +226,6 @@ static DOTCONF_CB(cb_open_channel)
       c->channels[c->current_channel] = (channel_t *)malloc(sizeof(channel_t));
     }
 
-  fprintf(stderr,"Flushing channel %d\n", c->current_channel);
-  memset( c->channels[c->current_channel] , 0, sizeof(channel_t));
   return NULL;
 }
 
@@ -268,6 +266,24 @@ static DOTCONF_CB(cb_port)
 
 static DOTCONF_CB(cb_interfaces)
 {
+  int i;
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+  channel_t *channel;
+
+  channel = c->channels[c->current_channel];
+  channel->interfaces = malloc( cmd->arg_count * sizeof(char *));
+  if(!channel->interfaces)
+    {
+      fprintf(stderr,"Unable to malloc space for interfaces\n");
+      exit(1);
+    }
+  channel->num_interfaces = cmd->arg_count;
+
+  for (i = 0; i < cmd->arg_count; i++)
+    {
+      channel->interfaces[i] = conf_strdup( cmd->data.list[i] );
+    }
+
   return NULL;
 }
 
