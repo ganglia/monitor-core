@@ -321,6 +321,7 @@ dnl
 dnl For fsusage.c - disk usage.
 dnl
                 AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
+                AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
                 ;;
 *ia64-*hpux*)		metric_source="hpux.c"
 		CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
