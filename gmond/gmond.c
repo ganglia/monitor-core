@@ -134,14 +134,28 @@ main ( int argc, char *argv[] )
 
          addr = (g_inet_addr *) g_inetaddr_new( config.mcast_channel, config.mcast_port );
          mcast_join_socket = g_mcast_socket_new( addr );
-         g_inetaddr_delete(addr);
-
          if (! mcast_join_socket )
             {
+               g_inetaddr_delete(addr);
                perror("gmond could not join the multicast channel");
                return -1;
             }
          debug_msg("mcast listening on %s %hu", config.mcast_channel, config.mcast_port); 
+
+         /* Make sure we have loopback on */
+         if ( g_mcast_socket_set_loopback( mcast_join_socket, 1) != 0 )
+            {
+               g_inetaddr_delete(addr);
+               perror("gmond could not set loopback");
+               return -1;
+            }
+
+         if ( g_mcast_socket_join_group( mcast_join_socket, addr ) != 0 )
+            {
+               g_inetaddr_delete(addr);
+               perror("gmond could not join group");
+               return -1;
+            }
 
          server_socket = g_tcp_socket_server_new( config.xml_port );
          if (! server_socket )
@@ -176,7 +190,6 @@ main ( int argc, char *argv[] )
          addr = g_inetaddr_new ( config.mcast_channel, config.mcast_port );
          mcast_socket = g_mcast_socket_new( addr );
          g_inetaddr_delete( addr );
-
          if ( !mcast_socket )
             {
                perror("gmond could not connect to multicast channel");
@@ -184,7 +197,18 @@ main ( int argc, char *argv[] )
             }
          debug_msg("multicasting on channel %s %d", config.mcast_channel, config.mcast_port);
 
-         g_mcast_socket_set_ttl(mcast_socket, config.mcast_ttl );
+         if ( g_mcast_socket_set_ttl(mcast_socket, config.mcast_ttl ) < 0)
+            {
+               perror("gmond could not set the ttl");
+               return -1;
+            } 
+
+         rval = g_mcast_socket_connect ( mcast_socket );
+         if ( rval <0)
+            {
+               perror("mcast_connect() connect() error");
+               return -1;
+            }
 
          /* in machine.c */
          initval = metric_init();
