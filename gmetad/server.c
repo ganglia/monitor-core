@@ -92,7 +92,7 @@ server_thread ( void *arg)
                continue;
             }
 
-         SYS_CALL( rval, write( clifd, "</GANGLIA_XML>\n", 16));
+         SYS_CALL( rval, write( clifd, "</GANGLIA_XML>\n", 15));
          if(rval < 0)
             {
                debug_msg("server_thread() %d unable to write </GANGLIA_XML>", pthread_self() );
