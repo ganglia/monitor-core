@@ -185,7 +185,7 @@ mcast_set_ttl(apr_socket_t *socket, int val)
 						  &ttl, sizeof(ttl)));
 	}
 
-#ifdef	APR_HAVE_IPV6
+#if	APR_HAVE_IPV6
 	case APR_INET6: {
 		int		hop;
 
@@ -253,7 +253,7 @@ mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
 	    }
 	  break;
 	}
-#ifdef APR_HAVE_IPV6
+#if APR_HAVE_IPV6
     case APR_INET6:
 	{
 	  struct ipv6_mreq mreq[1];
@@ -298,7 +298,7 @@ create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int tt
 apr_socket_t *
 create_mcast_server(apr_pool_t *context, char *mcast_ip, apr_port_t port, char *bind, char *interface)
 {
-  apr_status_t status;
+  apr_status_t status = APR_SUCCESS;
   /* NOTE: If bind is set to mcast_ip in the configuration file, then we will bind the 
    * the multicast address to the socket as well as the port and prevent any 
    * datagrams that might be delivered to this port from being processed. Otherwise,

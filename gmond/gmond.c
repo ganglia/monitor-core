@@ -980,6 +980,8 @@ poll_tcp_accept_channels(apr_interval_time_t timeout)
 		    {
 		      void *metric;
 		      apr_hash_this(metric_hi, NULL, NULL, &metric);
+
+		      /* Print each of the metrics for a host ... */
 		      if(print_host_metric(client, metric) != APR_SUCCESS)
 			{
 			  goto close_accept_socket;
