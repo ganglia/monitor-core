@@ -41,7 +41,8 @@ int main ( int argc, char **argv )
        || !strcmp("int32", args_info.type_arg)
        || !strcmp("uint32", args_info.type_arg)
        || !strcmp("float", args_info.type_arg)
-       || !strcmp("double", args_info.type_arg)))
+       || !strcmp("double", args_info.type_arg)
+       || !strcmp("timestamp", args_info.type_arg)))
       {
          fprintf(stderr,"\nInvalid type: %s\n\n", args_info.type_arg);
          fprintf(stderr,"Run %s --help\n\n", argv[0]);
