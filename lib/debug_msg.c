@@ -2,7 +2,7 @@
  * @file debug_msg.c Debug Message function
  */
 /* $Id$ */
-#include "gangliaconf.h"
+#include "ganglia_private.h"
 
 int debug_level = 0;
 
