@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 <HEAD>
-<TITLE>Ganglia Cluster Toolkit:: {page_title}</TITLE>
+<TITLE>Ganglia:: {page_title}</TITLE>
 <META http-equiv="Content-type" content="text/html; charset=utf-8">
 <META http-equiv="refresh" content="{refresh}{redirect}" >
 <LINK rel="stylesheet" href="./styles.css" type="text/css">
@@ -13,8 +13,8 @@
 <TR>
   <TD ROWSPAN="2" WIDTH="150">
   <A HREF="http://ganglia.sourceforge.net/">
-  <IMG SRC="{images}/logo.jpg" HEIGHT="91" WIDTH="150" 
-      ALT="Ganglia Cluster Toolkit" BORDER="0"></A>
+  <IMG SRC="{images}/logo.jpg" HEIGHT="118" WIDTH="150" 
+      ALT="Ganglia" BORDER="0"></A>
   </TD>
   <TD VALIGN="TOP">
 
@@ -39,13 +39,16 @@
       <B>{alt_view}</B>
      </TD>
   </TR>
+  <tr>
+     <td colspan="1">
+       <FONT SIZE="+1">
+         {node_menu}
+       </FONT>
+     </td>
+  </tr> 
   </TABLE>
 
   </TD>
 </TR>
 </TABLE> 
-
-<FONT SIZE="+1">
-{node_menu}
-</FONT>
 <HR SIZE="1" NOSHADE>
