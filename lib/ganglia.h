@@ -38,6 +38,9 @@ typedef struct apr_pool_t *         Ganglia_pool;
 typedef struct cfg_t *              Ganglia_gmond_config;
 typedef struct apr_array_header_t * Ganglia_udp_send_channels;
 
+Ganglia_gmond_config
+Ganglia_gmond_config_new(char *path, int fallback_to_default);
+
 
 extern int gexec_errno;
 
