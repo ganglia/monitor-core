@@ -9,71 +9,53 @@
 #include <unistd.h>
 #include <gmetad.h>
 
-char *cluster = NULL;
-char *host = NULL;
-char *metric = NULL;
-char *metric_val = NULL;
-
 extern char *rrd_rootdir;
 
 int push_data_to_rrd( char *cluster, char *host, char *metric, char *value);
 
 extern int RRD_update( char *rrd, char *value );
 extern int RRD_create( char *rrd, char *polling_interval);
+
 extern unsigned int metric_hash (char *, unsigned int);
 extern const char *in_metric_list (char *, unsigned int);
+extern struct ganglia_metric metrics[];
+
 
 typedef struct
    {
       int rval;
       unsigned int index;
-      double   long sum[MAX_HASH_VALUE];
-      unsigned long num[MAX_HASH_VALUE];
+      val_t sum[MAX_HASH_VALUE];
+      unsigned int num[MAX_HASH_VALUE];
+      char *cluster;
+      char *host;
+      char *metric;
+      char *metric_val;
    }
-sum_num_t;
+xml_data_t;
 
 static void
 start (void *data, const char *el, const char **attr)
 {
-  sum_num_t *sum_num = (sum_num_t *)data;
-  int i, is_string, is_constant, is_stale, tn, tmax, index;
+  xml_data_t *xml_data = (xml_data_t *)data;
+  int i, tn, tmax, index;
   unsigned int len, hash_val;
-  char *metric_type;
-  char *p;
-                          float f;
+  val_t val;
 
   if(! strcmp("METRIC", el) )
      {
-        is_string   = 0;
-        is_constant = 0;
-        is_stale    = 1;
         tn          = 999;
         tmax        = 1;
 
         for(i = 0; attr[i] ; i+=2)
            {
-              if(! strcmp( attr[i], "TYPE" ))
+              if(! strcmp( attr[i], "NAME"))
                  {
-                    metric_type = (char *) attr[i+1];
-                    if(! strcmp( metric_type, "string" ))
-                       {
-                          is_string = 1;
-                       }
-                 }
-              else if(! strcmp( attr[i], "SLOPE"))
-                 {
-                    if(! strcmp( attr[i+1], "zero" ))
-                       {
-                          is_constant = 1;
-                       }
-                 }
-              else if(! strcmp( attr[i], "NAME"))
-                 {
-                    metric = (char *)attr[i+1];
+                    xml_data->metric = (char *)attr[i+1];
                  }
               else if(! strcmp( attr[i], "VAL"))
                  {
-                    metric_val = (char *)attr[i+1];
+                    xml_data->metric_val = (char *)attr[i+1];
                  }
               else if(! strcmp( attr[i], "TN"))
                  {
@@ -85,73 +67,41 @@ start (void *data, const char *el, const char **attr)
                  }
            }
 
+        if( in_metric_list( xml_data->metric, strlen( xml_data->metric ) ) 
+                      &&  (tn < tmax*4))
+           {
+              debug_msg("%s is in the metric hash (builtin)", xml_data->metric);
+              hash_val = metric_hash(xml_data->metric, len);
+              debug_msg("[%d][%d] will be incremented %s", xml_data->index , hash_val, xml_data->metric_val);
+
+              switch ( metrics[hash_val].type )
+                 {
+                    case FLOAT:
+                       xml_data->sum[hash_val].f +=  strtod( (const char *)(xml_data->metric_val), (char **)NULL);
+                       xml_data->num[hash_val]++;
+                       debug_msg("float = %f sum = %f", val.f, xml_data->sum[hash_val].f );
+                       break;
+                    case UINT32:
+                       val.uint32 = strtoul(xml_data->metric_val, (char **)NULL, 10);
+                       debug_msg("uint32 = %ld", val.uint32); 
+                       break;
+                    case DOUBLE:
+                       val.d = strtod( (const char *)(xml_data->metric_val), (char **)NULL) ;
+                       debug_msg("double = %f", val.d);
+                       break;
+                 }
+           }
+
+        /* Save the data to a round robin database */
         if( tn < tmax*4 )
            {
-              is_stale = 0;
-           }
-   
-        if(!(is_string || is_constant || is_stale))
-           {
-              /* Sum up this value (right now only builtin's are summed) */
-              len = strlen(metric);
-              if( in_metric_list( metric, len ) )
-                 {
-                    debug_msg("%s is in the metric hash (builtin)", metric);
-                    hash_val = metric_hash(metric, len);
-                    debug_msg("[%d][%d] will be incremented %s", sum_num->index , hash_val, metric_val);
-/*
-                    sum_num->sum[hash_val]+= strtold( metric_val, NULL );
-                    sum_num->num[hash_val]++;
-*/
-
-                    /* Put in order of most frequent to least */
-                    if(!strcmp(metric_type, "float"))
-                       {
-                          f = strtof( metric_val, &p );
-                          debug_msg("float = %f metric_val=%s p=%s", f, metric_val, p-1);
-/*
-                          sum_num->num[hash_val] ++;
-*/
-                       }
-                    else if(!strcmp(metric_type, "uint32"))
-                       {
-
-                       }
-                    else if(!strcmp(metric_type, "string"))
-                       {
-
-                       }
-                    else if(!strcmp(metric_type, "double"))
-                       {
-
-                       }
-                    else if(!strcmp(metric_type, "timestamp"))
-                       {
-
-                       }
-                    else if(!strcmp(metric_type, "uint16"))
-                       {
-
-                       }
-                    else
-                       {
-                          err_msg("Don't know what do to with type %s", metric_type);
-                       }
-                 }
-              else
-                 {
-                    debug_msg("%s is NOT in the metric hash (custom)", metric);
-                 }               
-
- 
-              /* Save the data to a round robin database */
-              if( push_data_to_rrd( cluster, host, metric, metric_val) )
+              if( push_data_to_rrd( xml_data->cluster, xml_data->host, xml_data->metric, xml_data->metric_val) )
                  {
                     /* Pass the error on to save_to_rrd */
-                    sum_num->rval = 1;
+                    xml_data->rval = 1;
                     return;
                  }
-           } 
+           }
      }
   else if(! strcmp("HOST", el) )
      {
@@ -159,8 +109,8 @@ start (void *data, const char *el, const char **attr)
            {
               if(! strcmp( attr[i], "NAME" ))
                  {
-                    if( host ) free ( host );
-                    host = strdup ( attr[i+1] );
+                    xml_data->host = realloc( xml_data->host, strlen(attr[i+1])+1 );
+                    strcpy( xml_data->host, attr[i+1] ); 
                  }
            }
 
@@ -168,17 +118,17 @@ start (void *data, const char *el, const char **attr)
   else if(! strcmp("CLUSTER", el) )
      {
         /* Flush the sums */
-        memset( sum_num->sum, 0, MAX_HASH_VALUE);
+        memset( xml_data->sum, 0, MAX_HASH_VALUE);
 
         /* Flush the nums */
-        memset( sum_num->num, 0, MAX_HASH_VALUE);
+        memset( xml_data->num, 0, MAX_HASH_VALUE);
 
         for(i = 0; attr[i] ; i+=2)
            {
               if(! strcmp( attr[i], "NAME" ))
                  {
-                    if( cluster ) free ( cluster );
-                    cluster = strdup ( attr[i+1] );
+                    xml_data->cluster = realloc ( xml_data->cluster, strlen(attr[i+1])+1 );
+                    strcpy( xml_data->cluster, attr[i+1] );
                  }
            }
      }
@@ -189,7 +139,7 @@ start (void *data, const char *el, const char **attr)
 static void
 end (void *data, const char *el)
 {
-  sum_num_t *sum_num = (sum_num_t *)data;
+  xml_data_t *xml_data = (xml_data_t *)data;
   if(! strcmp("CLUSTER", el) )
      {
 
@@ -222,11 +172,16 @@ process_xml(int index, char *name, char *buf)
 {
    int rval;
    XML_Parser xml_parser;
-   sum_num_t sum_num;
+   xml_data_t xml_data;
 
    /* No errors (yet) */
-   sum_num.rval  = 0;
-   sum_num.index = index;
+   xml_data.rval  = 0;
+   xml_data.index = index;
+
+   xml_data.cluster = NULL;
+   xml_data.host    = NULL;
+   xml_data.metric  = NULL;
+   xml_data.metric_val = NULL;
 
    xml_parser = XML_ParserCreate (NULL);
    if (! xml_parser)
@@ -236,7 +191,7 @@ process_xml(int index, char *name, char *buf)
       }
 
    XML_SetElementHandler (xml_parser, start, end);
-   XML_SetUserData       (xml_parser, &sum_num);
+   XML_SetUserData       (xml_parser, &xml_data);
 
    rval = XML_Parse( xml_parser, buf, strlen(buf), 1 );
    if(! rval )
@@ -248,5 +203,5 @@ process_xml(int index, char *name, char *buf)
       }
 
    XML_ParserFree(xml_parser);
-   return sum_num.rval;
+   return xml_data.rval;
 }
