@@ -472,7 +472,8 @@ esac
 
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
-AC_OUTPUT(Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile)
+AC_OUTPUT(Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile
+web/Makefile web/conf.php)
 
 
 echo ""

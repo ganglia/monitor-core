@@ -47,7 +47,6 @@ well-defined XML format.
 This gmond daemon provides the ganglia service within a single cluster or
 Multicast domain.
 
-
 %package lib
 Summary: Ganglia Toolkit Library http://ganglia.sourceforge.net/
 Group: System Environment/Base
@@ -55,6 +54,20 @@ Group: System Environment/Base
 %description lib
 The Ganglia Monitoring Core library provides a set of functions that programmers
 can use to build scalable cluster or grid applications
+
+%package web
+Summary: Ganglia PHP Web Interface http://ganglia.sourceforge.net/
+Group: System Environment/Base
+Obsoletes: ganglia-webfrontend
+%define web_prefixdir /var/www/html/ganglia
+Prefix: /var/www/html/ganglia
+
+%description web
+This package provides a web frontend to display the XML tree published by
+ganglia, and to provide historical graphs of collected metrics. This website is
+written in the PHP4 language.
+
+
 
 ##
 ## PREP
@@ -67,7 +80,7 @@ can use to build scalable cluster or grid applications
 ## BUILD
 ##
 %build
-./configure --with-gmetad --prefix=/usr
+./configure --prefix=/usr
 make
 
 ##
@@ -138,6 +151,12 @@ fi
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
 %__make install prefix=$RPM_BUILD_ROOT/usr
 
+# Web files
+%__mkdir -p $RPM_BUILD_ROOT/%{web_prefixdir}
+%__cp -rf %{_builddir}/%{name}-%{version}/* $RPM_BUILD_ROOT/%{web_prefixdir}
+
+%__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*spec
+
 ##
 ## FILES GMETA
 ##
@@ -164,6 +183,11 @@ fi
 /usr/include/ganglia
 /usr/lib/libganglia*
 
+%files web
+%defattr(-,root,root)
+%{web_prefixdir}
+%config(noreplace) %{web_prefixdir}/conf.php
+
 ##
 ## CLEAN
 ##
@@ -174,6 +198,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Web Feb 18 2004 Matt Massie <massie@cs.berkeley.edu>
+- Integrated the PHP web code into the monitor-core distribution
 * Mon Oct 14 2002 Federico Sacerdoti <fds@sdsc.edu>
 - Split package into -gmetad and -gmond subpackages for clarity,
   and separation of purpose/functionality.
