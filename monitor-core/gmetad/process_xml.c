@@ -35,7 +35,6 @@ typedef struct
       char *sourcename;
       char *hostname;
       data_source_list_t *ds;
-      unsigned int cluster_localtime;
       int grid_depth;   /* The number of nested grids at this point. Will begin at zero. */
       int host_alive;   /* True if the current host is alive. */
       Source_t source; /* The current source structure. */
@@ -73,9 +72,8 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
    if( xmldata->ds->dead )
       return 1;
 
-   /* Summarize all numeric metrics */
    tt = in_type_list(type, strlen(type));
-   if (!tt) return 1;
+   if (!tt) return 0;
 
    switch (tt->type)
       {
@@ -86,12 +84,11 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
             sprintf(sum, "%u", metric->val.uint32);
             break;
          case FLOAT:
-            sprintf(sum, "%.5f", metric->val.d);
+            sprintf(sum, "%.*f", (int) metric->precision, metric->val.d);
             break;
          default:
             break;
       }
-
    sprintf(num, "%u", metric->num);
 
    /* Save the data to a round robin database. Update both sum and num DSs. */
@@ -99,7 +96,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
       xmldata->sourcename, name);
 
    xmldata->rval = write_data_to_rrd(xmldata->sourcename, NULL, name,
-         sum, num, xmldata->ds->step, xmldata->cluster_localtime);
+         sum, num, xmldata->ds->step, xmldata->source.localtime);
 
    return xmldata->rval;
 }
@@ -110,7 +107,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
  * the metric value in the attribute list.
  */
 void
-fillmetric(const char** attr, Metric_t *metric, const char* type)
+fillmetric(const char** attr, Metric_t *metric, const char* type, const int old)
 {
    int i;
    /* INV: always points to the next free byte in metric.strings buffer. */
@@ -128,6 +125,7 @@ fillmetric(const char** attr, Metric_t *metric, const char* type)
 
          switch( xt->tag )
             {
+               case SUM_TAG:
                case VAL_TAG:
                   metricval = (char*) attr[i+1];
 
@@ -182,10 +180,17 @@ fillmetric(const char** attr, Metric_t *metric, const char* type)
                   strcpy(metric->strings + edge, attr[i+1]);
                   edge = edge + strlen(attr[i+1]) + 1;
                   break;
+               case NUM_TAG:
+                  metric->num = atoi(attr[i+1]) + 1;
+                  break;
                default:
                   break;
             }
       }
+      if (old)
+         {
+            metric->slope = -1;
+         }
       metric->stringslen = edge;
       
       /* We are ok with growing metric values b/c we write to a full-sized buffer in xmldata. */
@@ -206,6 +211,7 @@ start (void *data, const char *el, const char **attr)
    datum_t hashkey, hashval;
    const char *name = NULL;
    const char *metricval = NULL;
+   const char *metricnum = NULL;
    const char *type = NULL;
    int tn=0;
    int tmax=0;
@@ -269,8 +275,11 @@ start (void *data, const char *el, const char **attr)
                               err_msg("Could not create summary hash for cluster %s", name);
                               return;
                            }
-
                         source->ds = xmldata->ds;
+                        
+                        /* Initialize the partial sum lock */
+                        source->sum_finished = (pthread_mutex_t*) malloc(sizeof(pthread_mutex_t));
+                        pthread_mutex_init(source->sum_finished, NULL);
                      }
                   else
                      {
@@ -308,6 +317,9 @@ start (void *data, const char *el, const char **attr)
                            }
                      }
                   source->stringslen = edge;
+            
+                  /* Grab the "partial sum" mutex until we are finished summarizing. */
+                  pthread_mutex_lock(source->sum_finished);
                }
 
             /* Must happen after all processing of this tag. */
@@ -363,8 +375,11 @@ start (void *data, const char *el, const char **attr)
                         err_msg("Could not create summary hash for cluster %s", name);
                         return;
                      }
-
                   source->ds = xmldata->ds;
+                  
+                  /* Initialize the partial sum lock */
+                  source->sum_finished = (pthread_mutex_t*) malloc(sizeof(pthread_mutex_t));
+                  pthread_mutex_init(source->sum_finished, NULL);
                }
             else
                {
@@ -391,7 +406,6 @@ start (void *data, const char *el, const char **attr)
                      {
                         case LOCALTIME_TAG:
                            source->localtime = strtoul(attr[i+1], (char **)NULL, 10);
-                           xmldata->cluster_localtime = source->localtime;
                            break;
                         case OWNER_TAG:
                            source->owner = edge;
@@ -412,7 +426,16 @@ start (void *data, const char *el, const char **attr)
                            break;
                      }
                }
+            if (xmldata->old)
+               {
+                  source->owner = -1;
+                  source->latlong = -1;
+                  source->url = -1;
+               }
             source->stringslen = edge;
+
+            /* Grab the "partial sum" mutex until we are finished summarizing. */
+            pthread_mutex_lock(source->sum_finished);
 
             break;
 
@@ -436,7 +459,7 @@ start (void *data, const char *el, const char **attr)
             if ( xmldata->old )
                {
                   /* For pre-2.5.0, check if the host is up this way */
-                  if (abs(xmldata->cluster_localtime - host_reported) > 60 )
+                  if (abs(xmldata->source.localtime - host_reported) > 60 )
                      host_alive = 0;
                   else
                      host_alive = 1;
@@ -546,6 +569,10 @@ start (void *data, const char *el, const char **attr)
                            break;
                      }
                }
+            if (xmldata->old)
+               {
+                  host->location = -1;
+               }
             host->stringslen = edge;
 
             /* Trim structure to the correct length. */
@@ -563,6 +590,31 @@ start (void *data, const char *el, const char **attr)
 
             break;
 
+
+         case HOSTS_TAG:
+
+            /* Add up/down hosts to this grid summary */
+            for(i = 0; attr[i]; i+=2)
+               {
+                  xt = in_xml_list (attr[i], strlen(attr[i]));
+                  if (!xt)
+                     continue;
+
+                  switch( xt->tag )
+                     {
+                        case UP_TAG:
+                           xmldata->source.hosts_up = strtoul(attr[i+1], (char **)NULL, 10);
+                           break;
+                        case DOWN_TAG:
+                           xmldata->source.hosts_down = strtoul(attr[i+1], (char **)NULL, 10);
+                           break;
+                        default:
+                           break;
+                     }
+               }
+               
+               break;
+               
 
          case METRIC_TAG:
 
@@ -612,13 +664,13 @@ start (void *data, const char *el, const char **attr)
                            debug_msg("Updating host %s, metric %s", xmldata->hostname, name);
                            xmldata->rval = write_data_to_rrd(xmldata->sourcename,
                                  xmldata->hostname, name, metricval, NULL,
-                                 xmldata->ds->step, xmldata->cluster_localtime);
+                                 xmldata->ds->step, xmldata->source.localtime);
                      }
                   metric->id = METRIC_NODE;
                   metric->report_start = metric_report_start;
                   metric->report_end = metric_report_end;
 
-                  fillmetric(attr, metric, type);
+                  fillmetric(attr, metric, type, xmldata->old);
 
                   /* Trim metric structure to the correct length. */
                   hashval.size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
@@ -639,11 +691,11 @@ start (void *data, const char *el, const char **attr)
                   hash_datum = hash_lookup(&hashkey, summary);
                   if (!hash_datum)
                      {
-                        if (!authority_mode(xmldata)) 
+                        if (!authority_mode(xmldata))
                            {
                               metric = &(xmldata->metric);
                               memset((void*) metric, 0, sizeof(*metric));
-                              fillmetric(attr, metric, type);
+                              fillmetric(attr, metric, type, xmldata->old);
                            }
                         /* else we have already filled in the metric above. */
                      }
@@ -679,6 +731,78 @@ start (void *data, const char *el, const char **attr)
                   rdatum = hash_insert(&hashkey, &hashval, summary);
                   if (!rdatum) err_msg("Could not insert %s metric", name);
                }
+            break;
+
+
+         case METRICS_TAG:
+            
+            /* Get name for hash key, and val/type for summaries. */
+            for(i = 0; attr[i]; i+=2)
+               {
+                  xt = in_xml_list(attr[i], strlen(attr[i]));
+                  if (!xt) continue;
+
+                  switch (xt->tag)
+                     {
+                        case NAME_TAG:
+                           name = attr[i+1];
+                           hashkey.data = (void*) name;
+                           hashkey.size =  strlen(name) + 1;
+                           break;
+                        case TYPE_TAG:
+                           type = attr[i+1];
+                           break;
+                        case SUM_TAG:
+                           metricval = attr[i+1];
+                           break;
+                        case NUM_TAG:
+                           metricnum = attr[i+1];
+                        default:
+                           break;
+                     }
+               }
+
+            summary = xmldata->source.metric_summary;
+            hash_datum = hash_lookup(&hashkey, summary);
+            if (!hash_datum)
+               {
+                  metric = &(xmldata->metric);
+                  memset((void*) metric, 0, sizeof(*metric));
+                  fillmetric(attr, metric, type, xmldata->old);
+               }
+            else
+               {
+                  memcpy(&xmldata->metric, hash_datum->data, hash_datum->size);
+                  datum_free(hash_datum);
+                  metric = &(xmldata->metric);
+
+                  tt = in_type_list(type, strlen(type));
+                  if (!tt) return;
+                  switch (tt->type)
+                        {
+                           case INT:
+                              metric->val.int32 += (long) strtol(metricval, (char**) NULL, 10);
+                              break;
+                           case UINT:
+                              metric->val.uint32 += (unsigned long) strtoul(metricval, (char**) NULL, 10);
+                              break;
+                           case FLOAT:
+                              metric->val.d += (double) strtod(metricval, (char**) NULL);
+                              break;
+                           default:
+                              break;
+                        }
+                     metric->num += atoi(metricnum);
+                  }
+
+            /* Update metric in summary table. */
+            hashval.size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
+            hashval.data = (void*) metric;
+
+            summary = xmldata->source.metric_summary;
+            rdatum = hash_insert(&hashkey, &hashval, summary);
+            if (!rdatum) err_msg("Could not insert %s metric", name);
+
             break;
 
 
@@ -760,6 +884,9 @@ end (void *data, const char *el)
                      }
                   /* Write the metric summaries to the RRD. */
                   hash_foreach(summary, finish_processing_source, data);
+                  
+                  /* Release the partial sum mutex */
+                  pthread_mutex_unlock(source->sum_finished);
                }
 
             break;
@@ -801,7 +928,8 @@ process_xml(data_source_list_t *d, char *buf)
 
    if(! rval )
       {
-         err_msg ("Process XML: XML_ParseBuffer() error at line %d:\n%s\n",
+         err_msg ("Process XML (%s): XML_ParseBuffer() error at line %d:\n%s\n",
+                         d->name,
                          XML_GetCurrentLineNumber (xml_parser),
                          XML_ErrorString (XML_GetErrorCode (xml_parser)));
          xmldata.rval = 1;

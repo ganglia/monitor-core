@@ -244,7 +244,7 @@ static void
 set_defaults (gmetad_config_t *config)
 {
    /* Gmetad defaults */
-   config->gridname = "Unspecified";
+   config->gridname = "unspecified";
    config->xml_port = 8651;
    config->interactive_port = 8652;
    config->server_threads = 4;
