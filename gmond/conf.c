@@ -680,11 +680,11 @@ gmond_print_conf( gmond_config_t *config )
    int i,j;
    channel_t *c;
 
-   printf("name is %s\n", config->name);
-   printf("owner is %s\n", config->owner);
-   printf("latlong is %s\n", config->latlong);
-   printf("cluster URL is %s\n", config->url);
-   printf("host location is (x,y,z): %s\n", config->location);
+   printf("name is %s\n", config->name == NULL? "NULL": config->name);
+   printf("owner is %s\n", config->owner == NULL? "NULL" : config->owner);
+   printf("latlong is %s\n", config->latlong == NULL? "NULL" : config->latlong);
+   printf("cluster URL is %s\n", config->url == NULL? "NULL" : config->url);
+   printf("host location is (x,y,z): %s\n", config->location == NULL? "NULL": config->location);
 
    printf("There are %d channels (%d send %d receive)\n", 
 	  config->current_channel+1, config->num_send_channels, config->num_receive_channels);
@@ -694,15 +694,15 @@ gmond_print_conf( gmond_config_t *config )
        c = config->channels[i];
 
        printf("Info for channel #%d\n", i+1);
-       printf("\tAddress = %s\n", c->address);
-       printf("\t   Port = %s\n", c->port);
+       printf("\tAddress = %s\n", c->address == NULL? "NULL" : c->address);
+       printf("\t   Port = %s\n", c->port == NULL? "NULL" : c->port);
        printf("\tThere are %d interfaces\n", c->num_interfaces);
        for(j=0; j< c->num_interfaces; j++)
          {
            printf("\t\t%s\n", c->interfaces[j]);
          }
        printf("\tThe TTL is set to %d\n", c->ttl);
-       printf("\tAction is set to %s\n", c->action);
+       printf("\tAction is set to %s\n", c->action == NULL? "NULL" : c->action );
      }
    /*
    printf("mcast_threads is %ld\n", config->mcast_threads);
