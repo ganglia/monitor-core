@@ -567,7 +567,7 @@ dnl Some system-specific stuff ...
 dnl Some operating systems require additional flags in order to get all
 dnl the definitions that we're looking for in some system headers.
 
-dnl Currently only linux and freebsd support gexec
+dnl Currently only linux supports gexec
 
 dnl By default, no support for gexec
 GEXEC=false;
@@ -623,7 +623,6 @@ dnl
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
 *freebsd*)      metric_source="freebsd.c" 
                 CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
-                GEXEC=true
                 AC_DEFINE(FREEBSD, 1, FREEBSD);; 
 *cygwin*)      	metric_source="cygwin.c" 
                 LIBS="$LIBS -lrpc"
