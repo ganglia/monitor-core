@@ -1,6 +1,7 @@
 /* $Id$ */
 #include "gangliaconf.h"
 #include "dotconf.h"
+#include "interface.h"
 #include "dnet.h"
 #include <ganglia/gmond_config.h>
 #include <ganglia/hash.h>
@@ -80,57 +81,6 @@ heartbeat_func( void )
    return val;
 }
 
-static int
-print_intf(const struct intf_entry *entry, void *arg)
-{
-   struct addr bcast;
-   uint32_t mask;
-   int i;
-
-   /* We only want interfaces that are up and multicast-enabled */
-   if (!   (entry->intf_flags & INTF_FLAG_UP) ||
-       !   (entry->intf_flags & INTF_FLAG_MULTICAST) )
-      return (0);
-
-   printf("%s: UP and MULTICAST-ENABLED", entry->intf_name);
-
-   printf("\n");
-
-   if (entry->intf_addr.addr_type == ADDR_TYPE_IP) {
-      addr_btom(entry->intf_addr.addr_bits, &mask, IP_ADDR_LEN);
-      mask = ntohl(mask);
-      addr_bcast(&entry->intf_addr, &bcast);
-
-      if (entry->intf_dst_addr.addr_type == ADDR_TYPE_IP) {
-         printf("\tinet %s --> %s netmask 0x%x broadcast %s\n",
-             ip_ntoa(&entry->intf_addr.addr_ip),
-             addr_ntoa(&entry->intf_dst_addr),
-             mask, addr_ntoa(&bcast));
-      } else {
-         printf("\tinet %s netmask 0x%x broadcast %s\n",
-             ip_ntoa(&entry->intf_addr.addr_ip),
-             mask, addr_ntoa(&bcast));
-      }
-   }
-   if (entry->intf_link_addr.addr_type == ADDR_TYPE_ETH)
-      printf("\tlink %s\n", addr_ntoa(&entry->intf_link_addr));
-
-   for (i = 0; i < entry->intf_alias_num; i++)
-      printf("\talias %s\n", addr_ntoa(&entry->intf_alias_addrs[i]));
-
-   return (0);
-}
-
-void
-get_all_interfaces( void )
-{
-   intf_t *intf;
-
-   intf = intf_open();
-   intf_loop( intf, print_intf, NULL );
-   intf_close( intf );
-}
-
 int 
 main ( int argc, char *argv[] )
 {
@@ -142,11 +92,11 @@ main ( int argc, char *argv[] )
    struct timeval tv;
    llist_entry *interfaces = NULL;
    llist_entry *last_interface = NULL;
+   struct intf_entry *entry;
+   struct in_addr mcast_if_addr;
 
    gettimeofday(&tv, NULL);
    start_time = (uint32_t) tv.tv_sec;
-
-   get_all_interfaces();
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
@@ -184,23 +134,20 @@ main ( int argc, char *argv[] )
 
    srand(1);
 
-   interfaces = g_inetaddr_list_interfaces();
-   /* Go to the end */
-   for(;interfaces != NULL; interfaces = interfaces->next)
-      { 
-         last_interface = interfaces; 
-      }
-   /* Move backwards */
-   debug_msg("INTERFACES Discovered");
-   for(i=0, interfaces = last_interface; interfaces != NULL; interfaces = interfaces->prev, i++)
+   if(! gmond_config.mcast_if_given )
       {
-         debug_msg("\t%d %s", i, inet_ntoa( G_SOCKADDR_IN(((g_inet_addr *)(interfaces->val))->sa).sin_addr ));
+         entry = get_first_multicast_interface();
       }
+   else
+      {
+         entry = get_interface ( gmond_config.mcast_if );
+      } 
 
    /* fd for incoming multicast messages */
    if(! gmond_config.deaf )
       {
-         mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port, gmond_config.mcast_if );
+         mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port, 
+                                          (struct in_addr *)&(entry->intf_addr.addr_ip));
          if (! mcast_join_socket )
             {
                perror("g_mcast_in() failed");
@@ -238,7 +185,7 @@ main ( int argc, char *argv[] )
    if(! gmond_config.mute )
       {
          mcast_socket = g_mcast_out ( gmond_config.mcast_channel, gmond_config.mcast_port,  
-                                      gmond_config.mcast_if,      gmond_config.mcast_ttl);
+                                      (struct in_addr *)&(entry->intf_addr.addr_ip), gmond_config.mcast_ttl);
          if ( !mcast_socket )
             {
                perror("gmond could not connect to multicast channel");

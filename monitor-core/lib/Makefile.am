@@ -5,7 +5,11 @@ else
 DOTCONF_LIBS = -ldotconf
 endif
 
-AM_CFLAGS = -I. $(DOTCONF_INCLUDES)
+#if BUILD_LIBDNET
+#LIBDNET_INCLUDES = -I../libdnet-1.4/include
+#endif
+
+AM_CFLAGS = -I. $(DOTCONF_INCLUDES) $(LIBDNET_INCLUDES)
 
 EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h getopt.h
 

@@ -1,7 +1,9 @@
 /*
  * $Id$
+ *
  * This code was originally written by the authors below but
- * I rewrote it and took out all the glib dependencies.
+ * I rewrote it to take out all the glib dependencies and 
+ * added the functionality that I needed - Matt Massie
  *
  * GNet - Networking library
  * Copyright (C) 2000  David Helder
@@ -25,7 +27,7 @@
 #include <ganglia/net.h>
 
 g_mcast_socket *
-g_mcast_in ( char *channel, unsigned short port, const char* ifname )
+g_mcast_in ( char *channel, unsigned short port, struct in_addr *mcast_addr )
 {
    g_mcast_socket *ms;
    g_inet_addr *addr;
@@ -39,12 +41,16 @@ g_mcast_in ( char *channel, unsigned short port, const char* ifname )
    if (! ms )
       goto error;
 
+   /* Set the interface */
+   if( setsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_IF, (const void *)mcast_addr, sizeof(struct in_addr)))
+      goto error;
+
    /* Make sure we have loopback on */
    if ( g_mcast_socket_set_loopback( ms, 1) != 0 )
       goto error;
 
    /* Join the group */
-   if ( g_mcast_socket_join_group( ms, addr ) != 0 )
+   if ( g_mcast_socket_join_group( ms, addr, mcast_addr ) != 0 )
       goto error;
 
    /* Bind the socket */
@@ -59,7 +65,7 @@ g_mcast_in ( char *channel, unsigned short port, const char* ifname )
 }
 
 g_mcast_socket *
-g_mcast_out ( char *channel, unsigned short port, const char *ifname, unsigned char ttl )
+g_mcast_out ( char *channel, unsigned short port, struct in_addr *mcast_addr, unsigned char ttl )
 {
    g_mcast_socket *ms;
    g_inet_addr *addr;
@@ -68,6 +74,10 @@ g_mcast_out ( char *channel, unsigned short port, const char *ifname, unsigned c
    ms = g_mcast_socket_new( addr );
    g_inetaddr_delete( addr );
    if ( !ms )
+      goto error;
+
+   /* Set the interface */
+   if( setsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_IF, (const void *)mcast_addr, sizeof(struct in_addr)))
       goto error;
 
    if ( g_mcast_socket_set_ttl(ms, ttl ) < 0)
@@ -161,7 +171,7 @@ g_mcast_socket_bind ( g_mcast_socket *ms )
 }
 
 int
-g_mcast_socket_join_group (g_mcast_socket* ms, const g_inet_addr* ia)
+g_mcast_socket_join_group (g_mcast_socket* ms, const g_inet_addr* ia, struct in_addr *interface)
 {
   struct ip_mreq mreq;
 
@@ -170,6 +180,8 @@ g_mcast_socket_join_group (g_mcast_socket* ms, const g_inet_addr* ia)
          &((struct sockaddr_in*) &ia->sa)->sin_addr,
          sizeof(struct in_addr));
   mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+ 
+  memcpy(&mreq.imr_interface, interface, sizeof(struct in_addr));
 
   /* Join the group */
   return setsockopt(ms->sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
