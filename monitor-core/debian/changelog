@@ -1,0 +1,6 @@
+ganglia-monitor-core (2.5.0-1) unstable; urgency=low
+
+  * Intitial release of ganglia 2.5.0
+
+ -- Preston Smith <psmith@foobird.net>  Thu, 19 Sep 2002 20:07:48 -0500
+
