@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -96,16 +97,7 @@ metric_init(void)
          return rval;
       }  
 
-   rval.int32 = slurpfile( "/proc/sys/kernel/osrelease", 
-                       proc_sys_kernel_osrelease, BUFFSIZE);
-   if ( rval.int32 == SYNAPSE_FAILURE )
-      {
-         err_msg("kernel_func() got an error from slurpfile()");
-         return rval;
-      }  
-   
-   /* Get rid of pesky \n in osrelease */
-   proc_sys_kernel_osrelease[rval.int32-1] = '\0';
+   strcpy( proc_sys_kernel_osrelease, "cygwin" );
 
    rval.int32 = (int) update_file(&proc_net_dev);
    if ( rval.int32 == SYNAPSE_FAILURE )
