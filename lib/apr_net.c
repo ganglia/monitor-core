@@ -24,6 +24,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_buffer_get(char *addr, int len,
       return APR_EINVAL;
     }
   /* this function doesn't malloc memory from the sockaddr pool...
+   * old code...
    *addr = apr_palloc(sockaddr->pool, sockaddr->addr_str_len);
    */
     apr_inet_ntop(sockaddr->family,
@@ -39,8 +40,9 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_buffer_get(char *addr, int len,
          */
 
         /* use memmove since the memory areas overlap */
-        memmove( addr, addr+7, strlen(addr+7));
-	/*
+        memmove( addr, addr+7, strlen(addr+7) + 1);/* +1 for \0 */
+	
+	/* old code
         *addr += strlen("::ffff:");
 	*/
     }
@@ -48,8 +50,8 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_buffer_get(char *addr, int len,
     return APR_SUCCESS;
 }
 
-apr_socket_t *
-create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port)
+static apr_socket_t *
+create_net_client(apr_pool_t *context, int type, char *ipaddr, apr_port_t port)
 {
   apr_sockaddr_t *remotesa = NULL;
   apr_socket_t *sock = NULL;
@@ -64,7 +66,7 @@ create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port)
   family = remotesa->sa.sin.sin_family;
 
   /* Created the socket */
-  status = apr_socket_create(&sock, family, SOCK_DGRAM, context);
+  status = apr_socket_create(&sock, family, type, context);
   if(status != APR_SUCCESS)
     {
       return NULL;
@@ -79,6 +81,12 @@ create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port)
     }
 
   return sock;
+}
+
+apr_socket_t *
+create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port)
+{
+  return create_net_client(context, SOCK_DGRAM, ipaddr, port);
 }
 
 static apr_socket_t *
@@ -142,71 +150,18 @@ create_udp_server(apr_pool_t *context, apr_port_t port, char *bind)
   return create_net_server(context, SOCK_DGRAM, port, bind);
 }
 
-#if 0
 apr_socket_t *
-create_mcast_server_socket( apr_pool_t *context, char *mcastaddr, apr_port_t port, char *interface_name, apr_sockaddr_t **sa)
+create_tcp_server(apr_pool_t *context, apr_port_t port, char *bind)
 {
-  apr_socket_t *sock = create_udp_server( context, mcastaddr, port, sa );
-  apr_multicast_join( sock, sa, interface_name );
-  return sock;
-}
-#endif
-
-apr_socket_t *
-create_tcp_server_socket(apr_pool_t *context, char *ipaddr, apr_port_t port, apr_sockaddr_t **sa )
-{
-  apr_socket_t *sock = NULL;
-  apr_status_t stat;
-  char buf[128];
-
-  stat = apr_sockaddr_info_get(sa, ipaddr, APR_UNSPEC, port, 0, context);
-  if (stat != APR_SUCCESS) 
+  apr_socket_t *sock = create_net_server(context, SOCK_STREAM, port, bind);
+  if(!sock)
     {
-      fprintf(stderr, "Couldn't build the socket address correctly: %s\n", 
-	      apr_strerror(stat, buf, sizeof buf));
-      exit(-1);
+      return NULL;
     }
-
-  stat = apr_socket_create(&sock, (*sa)->sa.sin.sin_family , SOCK_STREAM, context);
-  if ( stat != APR_SUCCESS)
+  if(apr_listen(sock,5) != APR_SUCCESS) 
     {
-      fprintf(stderr, "Couldn't create socket\n");
-      exit(-1);
+      return NULL;
     }
-
-  /* Setup to be non-blocking */
-  stat = apr_setsocketopt(sock, APR_SO_NONBLOCK, 1);
-  if (stat != APR_SUCCESS) 
-    {
-      apr_socket_close(sock);
-      fprintf(stderr, "Couldn't set socket option non-blocking\n");
-      exit(-1);
-    }
-
-  stat = apr_setsocketopt(sock, APR_SO_REUSEADDR, 1);
-  if (stat != APR_SUCCESS)
-    {
-      apr_socket_close(sock);
-      fprintf(stderr, "Couldn't set socket option reuseaddr\n");
-      exit(-1);
-    }
-
-  stat = apr_bind(sock, *sa);
-  if( stat != APR_SUCCESS) 
-    {
-      apr_socket_close(sock);
-      fprintf(stderr, "Could not bind: %s\n", apr_strerror(stat, buf, sizeof buf));
-      exit(-1);
-    }
-          
-  stat = apr_listen(sock, 5);
-  if( stat != APR_SUCCESS) 
-    {
-      apr_socket_close(sock);
-      fprintf(stderr, "Could not listen\n"); 
-      exit(-1);
-    }
-
   return sock;
 }
 
@@ -290,19 +245,64 @@ set_interface( apr_socket_t *sock, struct ifreq *ifreq, char *ifname )
   return ioctl(sock->socketdes, SIOCGIFADDR, ifreq);
 }
 
-apr_status_t
-apr_multicast_join( apr_socket_t *sock, apr_sockaddr_t **sa, char *ifname )
+static int
+mcast_set_ttl(apr_socket_t *socket, int val)
 {
-  int rval;
+  apr_sockaddr_t *sa;
 
-  switch( (*sa)->sa.sin.sin_family )
+  apr_socket_addr_get(&sa, APR_LOCAL, socket);
+  if(!sa)
     {
-    case AF_INET:
+      return -1;
+    }
+  switch (sa->family)
+    {
+	case APR_INET: {
+		u_char		ttl;
+
+		ttl = val;
+		return(setsockopt(socket->socketdes, IPPROTO_IP, IP_MULTICAST_TTL,
+						  &ttl, sizeof(ttl)));
+	}
+
+#ifdef	APR_HAVE_IPV6
+	case APR_INET6: {
+		int		hop;
+
+		hop = val;
+		return(setsockopt(socket->socketdes, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+						  &hop, sizeof(hop)));
+	}
+#endif
+
+	default:
+		errno = EPROTONOSUPPORT;
+		return(-1);
+	}
+}
+
+static apr_status_t
+mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_port_t port, char *ifname )
+{
+  apr_status_t status;
+  int rval;
+  apr_sockaddr_t *sa;
+
+  status = apr_sockaddr_info_get(&sa, mcast_channel , APR_UNSPEC, port, 0, context);
+  if(status != APR_SUCCESS)
+    {
+      return status;
+    }
+
+  switch( sa->family ) /* (*sa)->sa.sin.sin_family */
+    {
+    case APR_INET:
 	{
 	  struct ip_mreq mreq[1];
 	  struct ifreq ifreq[1];
 
-	  memcpy(&mreq->imr_multiaddr, &((*sa)->sa.sin.sin_addr), 
+	  /* &((*sa)->sa.sin.sin_addr */
+	  memcpy(&mreq->imr_multiaddr, &(sa->sa.sin.sin_addr), 
 		 sizeof mreq->imr_multiaddr);
 
 	  memset(&ifreq,0, sizeof(ifreq));
@@ -310,7 +310,7 @@ apr_multicast_join( apr_socket_t *sock, apr_sockaddr_t **sa, char *ifname )
 	    {
 	      if(set_interface(sock, ifreq, ifname) == -1)
 		{
-		  /* error */
+		  return APR_EGENERAL;
 		}
 	    }
 	  else
@@ -326,17 +326,18 @@ apr_multicast_join( apr_socket_t *sock, apr_sockaddr_t **sa, char *ifname )
 			    mreq, sizeof mreq);
 	  if(rval<0)
 	    {
-	      /* handle error */
+	      return APR_EGENERAL;
 	    }
 	  break;
 	}
-#ifdef AF_INET6
-    case AF_INET6:
+#ifdef APR_HAVE_IPV6
+    case APR_INET6:
 	{
 	  struct ipv6_mreq mreq[1];
 	  struct ifreq ifreq[1];
 
-          memcpy(&mreq->ipv6mr_multiaddr, &((*sa)->sa.sin6.sin6_addr),
+	  /* &((*sa)->sa.sin6.sin6_addr)*/
+          memcpy(&mreq->ipv6mr_multiaddr, &(sa->sa.sin6.sin6_addr),
 		                  sizeof mreq->ipv6mr_multiaddr);
 
           memset(&ifreq,0, sizeof(ifreq));
@@ -349,7 +350,6 @@ apr_multicast_join( apr_socket_t *sock, apr_sockaddr_t **sa, char *ifname )
 	                return -1;
 
 	  rval = setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_JOIN_GROUP, mreq, sizeof mreq);
-
 	  break;
 	}
 #endif
@@ -361,8 +361,28 @@ apr_multicast_join( apr_socket_t *sock, apr_sockaddr_t **sa, char *ifname )
   return APR_SUCCESS;
 }
 
-apr_status_t
-apr_multicast_leave( apr_socket_t *sock, apr_sockaddr_t **sa )
+apr_socket_t *
+create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int ttl)
 {
-  return APR_SUCCESS;
+  apr_socket_t *socket = create_udp_client(context, mcast_ip, port);
+  if(!socket)
+    {
+      return NULL;
+    }
+  return socket;
+}
+
+apr_socket_t *
+create_mcast_server(apr_pool_t *context, char *mcast_ip, apr_port_t port, char *bind, char *interface)
+{
+  apr_status_t status;
+  /* i think we might want to check that bind and interface are sane later...
+   * might request to bind to an address that doesn't match the interface */
+  apr_socket_t *socket = create_udp_server(context, port, bind);
+  if(!socket)
+    {
+      return NULL;
+    }
+  status = mcast_join(context,  socket, mcast_ip, port, interface );
+  return status == APR_SUCCESS? socket : NULL;
 }
