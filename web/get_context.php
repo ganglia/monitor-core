@@ -120,7 +120,8 @@ $reports = array(
    "load_report" => "load_one",
    "cpu_report" => 1,
    "mem_report" => 1,
-   "network_report" => 1
+   "network_report" => 1,
+   "packet_report" => 1
 );
 
 ?>
