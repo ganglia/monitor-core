@@ -15,6 +15,8 @@ int push_data_to_rrd( char *cluster, char *host, char *metric, char *value);
 
 extern int RRD_update( char *rrd, char *value );
 extern int RRD_create( char *rrd, char *polling_interval);
+extern int summary_RRD_create( char *rrd, char *polling_interval);
+extern int summary_RRD_update( char *rrd, char *sum, char *num );
 
 extern unsigned int metric_hash (char *, unsigned int);
 extern const char *in_metric_list (char *, unsigned int);
@@ -156,11 +158,37 @@ static void
 end (void *data, const char *el)
 {
   xml_data_t *xml_data = (xml_data_t *)data;
+  register int i;
   if(! strcmp("CLUSTER", el) )
      {
-
+        for ( i = 0; i < MAX_HASH_VALUE; i++ )
+           {
+              if( strlen(metrics[i].name) )
+                 {
+                     debug_msg("SAVE SUMMARY INFORMATION %s", metrics[i].name);
+                 }
+           }
      }
   return;
+}
+
+int
+push_data_to_summary_rrd( char *cluster, char *metric, char *sum, char *num)
+{
+   int rval;
+   char rrd[2024];
+   char *polling_interval = "15"; /* secs .. constant for now */
+   struct stat st;
+
+   snprintf(rrd, 2024,"%s/%s_%s.rrd", rrd_rootdir, cluster, metric);
+
+   if( stat(rrd, &st) )
+      {
+         rval = summary_RRD_create( rrd, polling_interval );
+         if( rval )
+            return rval;
+      }
+   return summary_RRD_update( rrd, sum, num );
 }
 
 int
