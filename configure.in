@@ -116,8 +116,26 @@ dnl if test "$withval" = yes; then gmetad=yes; fi)
 
 dnl AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
 
+dnl #define AUTH_PUB_KEY    "/etc/auth_pub.pem"
+dnl #define AUTH_PRIV_KEY   "/etc/auth_priv.pem"
+
+AC_ARG_WITH( private-key,
+[ 
+  --with-private-key      full path to the gexec private key],
+[ PRIVATE_KEY="$withval" ],
+[ PRIVATE_KEY="/etc/auth_priv.pem" ])
+
+AC_ARG_WITH( public-key,
+[  --with-public-key       full path to the gexec public key],
+[ PUBLIC_KEY="$withval" ],
+[ PUBLIC_KEY="/etc/auth_pub.pem"])
+
+AC_DEFINE_UNQUOTED(GAUTHD_PRIVATE_KEY, "${PRIVATE_KEY}", The full path to the gauthd private key)
+AC_DEFINE_UNQUOTED(GAUTHD_PUBLIC_KEY,  "${PUBLIC_KEY}", The full path the gauthd public key)
+
+
 AC_ARG_ENABLE(debug,
-[
+[ 
   --enable-debug          turn on debugging output and compile options],
 [ CFLAGS="$CFLAGS -ggdb"
   AC_DEFINE(DEBUG, 1, DEBUG)])
