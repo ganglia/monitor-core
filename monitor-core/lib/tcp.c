@@ -159,7 +159,7 @@ g_tcp_socket_server_new_interface (const g_inet_addr* iface)
     }
 
   /* Set REUSEADDR so we can reuse the port */
-  setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, (void*) &on, sizeof(on));
+  rval = setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, (void*) &on, sizeof(on));
   if ( rval <0)
      {
         err_ret("tcp_listen() setsockopt() SO_REUSEADDR error");
