@@ -52,10 +52,36 @@ void
 send_all_metric_data( void )
 {
    uint32_t i;
- 
-   for (i=1; i< num_key_metrics; i++)
+   struct timeval now;
+   int waiting_period = 600;  /* secs .. 10 mins */
+
+   gettimeofday(&now, NULL);
+
+   /* Did this gmond just restart in the last "waiting_period" secs? */
+   if( (now.tv_sec - start_time) < waiting_period )
       {
-         metric[i].mcast_threshold = 0;
+         for (i=1; i< num_key_metrics; i++)
+            {
+               pthread_mutex_lock(&(metric[i].mutex));
+               /* Will the next multicast be forced beyond the waiting period? */
+               if( metric[i].mcast_max > waiting_period )
+                  {
+                     /* Make sure it multicasts in the 2 mins following the 
+                        waiting period */
+                     metric[i].mcast_threshold = now.tv_sec + waiting_period +
+                       1+ (int)(120.0*rand()/(RAND_MAX+1.0)); 
+                  }
+               pthread_mutex_unlock(&(metric[i].mutex));
+            }
+      }
+   else
+      {
+         for (i=1; i< num_key_metrics; i++)
+            {
+               pthread_mutex_lock(&(metric[i].mutex));
+               metric[i].mcast_threshold = 0;
+               pthread_mutex_unlock(&(metric[i].mutex));
+            }
       }
 }
 
@@ -143,6 +169,10 @@ main ( int argc, char *argv[] )
    debug_msg("gmond initialized cluster hash");
 
    srand(1);
+
+   /* Initialize mutexes */
+   for(i = 0; i < num_key_metrics; i++)
+      pthread_mutex_init(&(metric[i].mutex), NULL);
 
    if(! gmond_config.mcast_if_given )
       {
