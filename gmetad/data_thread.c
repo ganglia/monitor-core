@@ -85,21 +85,6 @@ data_thread ( void *arg )
                   }
                else
                   {
-                     if( struct_poll.revents & POLLHUP )
-                        {
-                           debug_msg("The remote machine closed connection");
-                           break;
-                        }
-                     if( struct_poll.revents & POLLERR )
-                        {
-                           debug_msg("POLLERR!");
-                           break;
-                        }
-                     if( struct_poll.revents & POLLNVAL )
-                        {
-                           debug_msg("POLLNVAL!");
-                           break;
-                        }
                      if( struct_poll.revents & POLLIN )
                         {
                            if( (read_index + 1024) > buf_size )
@@ -126,6 +111,21 @@ data_thread ( void *arg )
                            
                            read_index+= bytes_read;
                         }
+                     if( struct_poll.revents & POLLHUP )
+                        {
+                           debug_msg("The remote machine closed connection");
+                           break;
+                        }
+                     if( struct_poll.revents & POLLERR )
+                        {
+                           debug_msg("POLLERR!");
+                           break;
+                        }
+                     if( struct_poll.revents & POLLNVAL )
+                        {
+                           debug_msg("POLLNVAL!");
+                           break;
+                        }
                   }
             }
 
@@ -137,7 +137,7 @@ data_thread ( void *arg )
          if(rval)
             {
                debug_msg("save_to_rrd() couldn't parse the XML");
-               continue;
+               goto take_a_break;
             }    
 
          p = strstr(buf, "<GANGLIA_XML");
