@@ -1,8 +1,7 @@
 /* $Id$ */
+#include <ganglia/become_a_nobody.h>
+#include <ganglia/error.h>
 #include <stdio.h>
-
-#include "become_a_nobody.h"
-#include "libunp/unp.h"
 
 void
 become_a_nobody( const char *username )

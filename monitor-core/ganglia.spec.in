@@ -3,19 +3,11 @@
 #
 # @configure_input@
 #
-# IMPORTANT NOTE:
-# This spec file has a noarch section.  RPM is braindead in that it cannot
-# build mixed architecture packages.  As a workaround, you must build
-# the RPMs using the following commandline
-#
-# % rpmbuild -ba --target noarch,i386 ganglia-monitor-core-@VERSION@.tar.gz
-#
-Summary: Ganglia Distributed Monitoring and Execution System
+Summary: Ganglia Cluster Toolkit http://ganglia.sourceforge.net/
 Name: @PACKAGE@
 Version: @VERSION@
-URL: http://ganglia.sourceforge.net/
 Release: 1 
-License: BSD
+Copyright: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
@@ -27,54 +19,11 @@ Ganglia is a scalable, real-time monitoring and execution environment
 with all execution requests and statistics expressed in an open
 well-defined XML format.
 
-######################################################################
-################## noarch section ####################################
-######################################################################
-%ifarch noarch
-%package web
-Summary: Ganglia Web Frontend
-Group: System Environment/Base
-Obsoletes: ganglia-webfrontend
-Provides: ganglia-webfrontend
-# We should put rrdtool as a Requires too but rrdtool rpm support is very weak
-# so most people install from source
-Requires: ganglia-monitor-core-gmetad >= 2.5.4
-%define web_prefixdir /var/www/html/ganglia
-Prefix: %{web_prefixdir}
-
-%description web
-This package provides a web frontend to display the XML tree published by
-ganglia, and to provide historical graphs of collected metrics. This website is
-written in the PHP4 language.
-
-#######################################################################
-#######################################################################
-%else
-
-%package gexec-client
-Summary: The Ganglia Execution Client
-Group: System Environment/Base
-Obsoletes: gexec authd
-
-%description gexec-client
-GEXEC is a scalable cluster remote execution system which provides fast, RSA authenticated
-remote execution of parallel and distributed jobs.  
-
-%package gexec-server
-Summary: The Ganglia Execution Daemon (gexecd)
-Group: System Environment/Base
-Obsoletes: gexec
-Requires: xinetd
-
-%description gexec-server
-The Ganglia Execution Daemon is an (x)inetd daemon which executes gexec client requests
-after it is authentication using RSA keys.  Client requests must be signed by
-the Ganglia Authenication Daemom (gauthd) before they are sent to gexec servers.
 
 %package gmetad
 Summary: Ganglia Meta daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-gmetad ganglia-monitor-core
+Obsoletes: ganglia-monitor-core
 
 %description gmetad
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -84,11 +33,11 @@ well-defined XML format.
 This gmetad daemon can aggregate monitoring data from several clusters
 to form a monitoring grid. It also keeps metric history using the RRD tool.
 
+
 %package gmond
 Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-gmond ganglia-monitor-core
-
+Obsoletes: ganglia-monitor-core
 
 %description gmond
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -98,16 +47,14 @@ well-defined XML format.
 This gmond daemon provides the ganglia service within a single cluster or
 Multicast domain.
 
-%package devel
-Summary: Ganglia Library http://ganglia.sourceforge.net/
-Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-lib libe
 
-%description devel
+%package lib
+Summary: Ganglia Toolkit Library http://ganglia.sourceforge.net/
+Group: System Environment/Base
+
+%description lib
 The Ganglia Monitoring Core library provides a set of functions that programmers
 can use to build scalable cluster or grid applications
-
-%endif
 
 ##
 ## PREP
@@ -120,49 +67,13 @@ can use to build scalable cluster or grid applications
 ## BUILD
 ##
 %build
-./configure --prefix=/usr
+./configure --with-gmetad --prefix=/usr
 make
 
 ##
 ## PRE
 ##
 %pre
-
-%ifnarch noarch
-##
-## POST gexec-client
-##
-%post gexec-client
-chkconfig --add gauthd
-if [ "$1" == "1" ]; then
-   /etc/rc.d/init.d/gauthd start
-elif [ "$1" > "1" ]; then
-   /etc/rc.d/init.d/gauthd restart
-fi
-
-
-##
-## POST gexec-server
-##
-%post gexec-server
-svc="`grep 2875 /etc/services`"
-if [ "$svc" = "" ]; then
-    cp /etc/services /etc/services.ganglia
-    cat >>/etc/services<<EOF
-gexec             2875/tcp
-EOF
-    echo "/etc/services updated."
-    echo "Saved old /etc/services as /etc/services.ganglia."
-fi
-echo "Sending SIGUSR2 to xinetd (pid `cat /var/run/xinetd.pid`)"
-kill -USR2 `cat /var/run/xinetd.pid`
-
-##
-## POSTUN gexec-server
-##
-%postun gexec-server
-echo "Sending SIGUSR2 to xinetd (pid `cat /var/run/xinetd.pid`)"
-kill -USR2 `cat /var/run/xinetd.pid`
 
 ##
 ## POST GMETA
@@ -193,6 +104,7 @@ elif [ "$1" > "1" ]; then
    /etc/rc.d/init.d/gmond restart
 fi
 
+
 ##
 ## PREUN GMETA
 ##
@@ -213,66 +125,25 @@ then
    /sbin/chkconfig --del gmond
 fi
 
-#ifnarch noarch
-%endif
-
 ##
 ## INSTALL
 ##
 %install
-## Flush any old RPM build root
-%__rm -rf $RPM_BUILD_ROOT
-
-%ifarch noarch
-
-%__mkdir -p $RPM_BUILD_ROOT/%{web_prefixdir}
-%__cp -rf %{_builddir}/%{name}-%{version}/web/* $RPM_BUILD_ROOT/%{web_prefixdir}
-%__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*spec
-
-%else
-
-## Create the directory structure
 %__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
-%__mkdir -p $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
-%__mkdir -p $RPM_BUILD_ROOT/etc/xinetd.d
-
-## Move the files into the structure
+%__mkdir -p $RPM_BUILD_ROOT/usr/include/ganglia
+%__mkdir -p $RPM_BUILD_ROOT/var/lib/ganglia/rrds
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.conf $RPM_BUILD_ROOT/etc/gmond.conf
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
-%__cp -f %{_builddir}/%{name}-%{version}/gexec/gexec_server $RPM_BUILD_ROOT/etc/xinetd.d/gexec_server
-%__cp -f %{_builddir}/%{name}-%{version}/gauthd/gauthd.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gauthd
 %__make install prefix=$RPM_BUILD_ROOT/usr
-
-%endif
-
-%ifnarch noarch
-##
-## FILES GEXEC-CLIENT
-##
-%files gexec-client
-%defattr(0755, root, root)
-/usr/bin/gexec
-/usr/bin/gsh
-/usr/sbin/gauthd
-/etc/rc.d/init.d/gauthd
-
-##
-## FILES GEXEC-SERVER
-##
-%files gexec-server
-%defattr(0755, root, root)
-/etc/xinetd.d/gexec_server
-/usr/sbin/gexecd
 
 ##
 ## FILES GMETA
 ##
-
 %files gmetad
 %defattr(-,root,root)
-%attr(0755,nobody,nobody)@varstatedir@/ganglia/rrds
+%attr(0755,nobody,nobody)/var/lib/ganglia/rrds
 /usr/sbin/gmetad
 /etc/rc.d/init.d/gmetad
 %config(noreplace) /etc/gmetad.conf
@@ -288,24 +159,10 @@ fi
 /etc/rc.d/init.d/gmond
 %config(noreplace) /etc/gmond.conf
 
-##
-## FILES DEVEL
-##
-%files devel
+%files lib
 /usr/include/ganglia.h
+/usr/include/ganglia
 /usr/lib/libganglia*
-
-%else
-
-##
-## FILES WEB
-##
-%files web
-%defattr(-,root,root)
-%config(noreplace) %{web_prefixdir}/conf.php
-%{web_prefixdir}
-
-%endif
 
 ##
 ## CLEAN
@@ -317,11 +174,6 @@ fi
 ## CHANGELOG
 ##
 %changelog
-* Tue Apr 13 2004 Brooks Davis <brooks@one-eyed-alien.net>
-- Use the autoconf variable varstatedir instead of /var/lib for consistancy.
-* Thu Feb 19 2004 Matt Massie <massie@cs.berkeley.edu>
-- Removed the /usr/include/ganglia directory from the lib rpm and
-  changed the deprecated Copyright to License
 * Mon Oct 14 2002 Federico Sacerdoti <fds@sdsc.edu>
 - Split package into -gmetad and -gmond subpackages for clarity,
   and separation of purpose/functionality.

@@ -8,27 +8,18 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <time.h>
-
-#include "lib/tpool.h"
-#include "lib/llist.h"
-#include "lib/become_a_nobody.h"
-#include "libunp/unp.h"
-
-#include "gmetad.h"
-#include "cmdline.h"
+#include <gmetad.h>
+#include <cmdline.h>
+#include <ganglia/llist.h>
 
 /* Holds our data sources. */
 hash_t *sources;
 
-/*  Thread pools might not be the best idea...
-ganglia_thread_pool data_source_pool = NULL;
-*/
-
 /* The root of our local grid. Replaces the old "xml" hash table. */
 Source_t root;
 
-int server_socket;
-int interactive_socket;
+g_tcp_socket *server_socket;
+g_tcp_socket *interactive_socket;
 
 pthread_mutex_t  server_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  server_interactive_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -46,30 +37,22 @@ struct gengetopt_args_info args_info;
 extern gmetad_config_t gmetad_config;
 extern int debug_level;
 
+/* In cleanup.c */
+extern void *cleanup_thread(void *arg);
+
 static int
 print_sources ( datum_t *key, datum_t *val, void *arg )
 {
    int i;
-   data_source_list_t *d;
-
-   if(!key || !key->data)
-     {
-       err_quit("invalid key data in source hash");
-     }
-   debug_msg("Source: %s", key->data);
-
-   if(!val || !val->data)
-     {
-       err_quit("invalid value data in source hash");
-     }
-
-   d = *((data_source_list_t **)(val->data));
+   data_source_list_t *d = *((data_source_list_t **)(val->data));
+   g_inet_addr *addr;
 
    fprintf(stderr,"Source: [%s, step %d] has %d sources\n",
       (char*) key->data, d->step, d->num_sources);
    for(i = 0; i < d->num_sources; i++)
       {
-         fprintf(stderr, "\t%s:%s\n", d->names[i], d->ports[i]);
+         addr = d->sources[i];
+         fprintf(stderr, "\t%s\n", addr->name);
       }
 
    return 0;
@@ -78,9 +61,14 @@ print_sources ( datum_t *key, datum_t *val, void *arg )
 static int
 spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
 {
-   pthread_t tid;
    data_source_list_t *d = *((data_source_list_t **)(val->data));
-   pthread_create( &tid, NULL, data_thread, d );
+   pthread_t pid;
+   pthread_attr_t attr;
+
+   pthread_attr_init( &attr );
+   pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
+
+   pthread_create(&pid, &attr, data_thread, (void *)d);
    return 0;
 }
 
@@ -100,7 +88,7 @@ getfield(char* buf, short int index)
  * against memory overflows.
  */
 int
-addstring(char *strings, int *edge, char *s)
+addstring(char *strings, int *edge, const char *s)
 {
 	int e = *edge;
 	int end = e + strlen(s) + 1;
@@ -271,14 +259,12 @@ main ( int argc, char *argv[] )
    struct stat struct_stat;
    pthread_t pid;
    pthread_attr_t attr;
-   int i, sleep_time;
-   int num_sources;
+   int i, num_sources, sleep_time;
    uid_t gmetad_uid;
    char * gmetad_username;
    struct passwd *pw;
    char hostname[HOSTNAMESZ];
    gmetad_config_t *c = &gmetad_config;
-   char port[64];
 
    srand(52336789);
 
@@ -317,14 +303,12 @@ main ( int argc, char *argv[] )
       }
 
    parse_config_file ( args_info.conf_arg );
-
     /* If given, use command line directives over config file ones. */
    if (args_info.debug_given)
       {
          c->debug_level = args_info.debug_arg;
       }
    debug_level = c->debug_level;
-
 
    /* Setup our default authority pointer if the conf file hasnt yet.
     * Done in the style of hash node strings. */
@@ -377,7 +361,7 @@ main ( int argc, char *argv[] )
 
    if(debug_level)
       {
-         printf("Sources (%p) are ...\n", sources);
+         printf("Sources are ...\n");
          hash_foreach( sources, print_sources, NULL);
       }
 
@@ -387,13 +371,21 @@ main ( int argc, char *argv[] )
          daemon_init (argv[0], 0);
       }
 
-   sprintf(port, "%d", c->xml_port);
-   server_socket = Tcp_listen( NULL, port, NULL );
-   debug_msg("xml listening on port %s", port);
+   server_socket = g_tcp_socket_server_new( c->xml_port );
+   if (server_socket == NULL)
+      {
+         perror("tcp_listen() on xml_port failed");
+         exit(1);
+      }
+   debug_msg("xml listening on port %d", c->xml_port);
    
-   sprintf(port, "%d", c->interactive_port);
-   interactive_socket = Tcp_listen(NULL, port, NULL );
-   debug_msg("interactive xml listening on port %s", port);
+   interactive_socket = g_tcp_socket_server_new( c->interactive_port );
+   if (interactive_socket == NULL)
+      {
+         perror("tcp_listen() on interactive_port failed");
+         exit(1);
+      }
+   debug_msg("interactive xml listening on port %d", c->interactive_port);
 
    pthread_attr_init( &attr );
    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
@@ -406,15 +398,11 @@ main ( int argc, char *argv[] )
    for (i=0; i < c->server_threads; i++)
       pthread_create(&pid, &attr, server_thread, (void*) 1);
 
-   /* 4 workers, maximum queue of 256 and blocking (for now) */
-/*
-   data_source_pool = ganglia_thread_pool_create(4, 256, 0);
-   if(!data_source_pool)
-     {
-       err_quit("Unable to create data source thread pool\n");
-     }
-*/
    hash_foreach( sources, spin_off_the_data_threads, NULL );
+
+   /* A thread to cleanup old metrics and hosts */
+   pthread_create(&pid, &attr, cleanup_thread, (void *) NULL);
+   debug_msg("cleanup thread has been started");
 
     /* Meta data */
    for(;;)
@@ -437,3 +425,4 @@ main ( int argc, char *argv[] )
 
    return 0;
 }
+

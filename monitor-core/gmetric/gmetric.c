@@ -1,16 +1,11 @@
-#include <string.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
 
-#include "lib/interface.h"
-#include "lib/ganglia.h"
-#include "lib/hash.h"
-#include "libunp/unp.h"
-
-#include "gmond/metric_typedefs.h"
-#include "gmond/node_data_t.h"
-
+#include <interface.h>
+#include <ganglia.h>
+#include <ganglia/hash.h>
+#include "metric_typedefs.h"
+#include "node_data_t.h"
 #include "cmdline.h"
+#include <string.h>
 
 extern int optopt;
 extern int optind;
@@ -30,12 +25,12 @@ int main ( int argc, char **argv )
    int rval, len;
    XDR xhandle;
    char mcast_data[4096]; 
-   int msg_socket;
+   g_mcast_socket *mcast_socket;
    uint32_t key = 0; /* user-defined */
    char empty[] = "\0";
+   g_inet_addr *addr;
+   struct intf_entry *entry;
    unsigned int slope;
-   char *msg_channel;
-   char *msg_port;
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
@@ -93,40 +88,23 @@ int main ( int argc, char **argv )
          exit(1);
       }
 
-   /* Check if the person explicitly stated "mcast_channel" */
-   if( args_info.mcast_channel_given )
-     {
-       msg_channel = args_info.mcast_channel_arg;
-     }
+   if(! args_info.mcast_if_given )
+      {
+         entry = get_first_multicast_interface();
+      }
    else
-     {
-       msg_channel = args_info.msg_channel_arg;
-     }
-     
-   /* Check if the person explicitly stated "mcast_port" */
-   if( args_info.mcast_port_given )
-     {
-       msg_port = args_info.mcast_port_arg;
-     }
-   else
-     {
-       msg_port = args_info.msg_port_arg;
-     }
+      {
+         entry = get_interface ( args_info.mcast_if_arg );
+      }
 
-   /* Create a UDP socket */
-   msg_socket = Udp_connect( msg_channel, msg_port );
+   mcast_socket = g_mcast_out ( args_info.mcast_channel_arg, args_info.mcast_port_arg,
+                                (struct in_addr *)&(entry->intf_addr.addr_ip), args_info.mcast_ttl_arg);
+   if ( !mcast_socket )
+      {
+         perror("gmond could not connect to multicast channel");
+         return -1;
+      }
 
-   /* Check if the person explicitly stated "mcast_ttl" */
-   if( args_info.mcast_ttl_given )
-     {
-       Mcast_set_ttl( msg_socket, args_info.mcast_ttl_arg );
-     }
-
-   if( args_info.mcast_if_given )
-     {
-       Mcast_set_if( msg_socket, args_info.mcast_if_arg, 0 );
-     }
- 
    name.data = args_info.name_arg;
    name.size = strlen( name.data )+1;
       if (strcspn(name.data," \t") == 0)
@@ -203,7 +181,7 @@ int main ( int argc, char **argv )
 
    len = xdr_getpos(&xhandle);
 
-   rval = writen( msg_socket, mcast_data, len );
+   rval = writen( mcast_socket->sockfd, mcast_data, len );
    if ( rval <0)
       {
          err_ret("unable to send data on multicast channel");

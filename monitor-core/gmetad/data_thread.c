@@ -1,20 +1,11 @@
 /* $Id$ */
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/poll.h>
 #include <sys/time.h>
+#include <gmetad.h>
 #include <string.h>
-#include <assert.h>
-#include <zlib.h>
-
-#include "gmetad.h"
-#include "lib/gzio.h"
-#include "lib/tpool.h"
-
-/*
-extern ganglia_thread_pool data_source_pool;
-*/
+#include <gmetad.h>
 
 extern int debug_level;
 
@@ -24,160 +15,153 @@ extern hash_t *root;
 
 extern int process_xml(data_source_list_t *, char *);
 
-extern gmetad_config_t gmetad_config;
-
 void *
 data_thread ( void *arg )
 {
-   int i, sleep_time, rval, sock = -1;
+   int i, sleep_time, bytes_read, rval;
    data_source_list_t *d = (data_source_list_t *)arg;
+   g_inet_addr *addr;
+   g_tcp_socket *sock=0;
+   datum_t key;
+   char *buf;
+   /* This will grow as needed */
+   unsigned int buf_size = 1024, read_index;
+   struct pollfd struct_poll;
    struct timeval start, end;
-   gzFile gz = NULL;
-   char *output, *p = NULL;
-   int output_index;
-   int output_len;
-   int count;
-
+ 
    if(debug_level)
       {
          fprintf(stderr,"Data thread %d is monitoring [%s] data source\n", (int) pthread_self(), d->name);
          for(i = 0; i < d->num_sources; i++)
             {
-               fprintf(stderr, "\t%s : %s\n", d->names[i], d->ports[i]);
+               addr = d->sources[i];
+               fprintf(stderr, "\t%s\n", addr->name);
             }
       }
 
-   output = malloc( 2048);
-   output_len = 2048;
+   key.data = d->name;
+   key.size = strlen( key.data ) + 1;
 
-   for(;;)
-     {
-       /* Assume the best from the beginning */
-       d->dead = 0;
-       d->last_heard_from = 0;
-    
-       gettimeofday(&start, NULL);
-    
-       /* Find the first viable source in list */
-       sock = -1;
-       for(i=0; i < d->num_sources; i++)
-         {
-           sock = tcp_connect( d->names[i], d->ports[i]);
-           if(sock >= 0)
-             break; /* success */
-         }
-    
-       if(sock < 0)
-         {
-           err_msg("data_thread() got no answer from any [%s] datasource", d->name);
-           d->dead = 1;
-	   d->last_heard_from = time(NULL);
-	   /*
-           goto take_a_break;
-	   */
-         }
-       else
-         {
-           d->last_heard_from = time(NULL);
-           debug_msg("Successfully connected to [%s]", d->name);
+   buf = malloc( buf_size );
+   if(!buf)
+      {
+         err_quit("data_thread() unable to malloc initial buffer for [%s] data source\n", d->name);
+      }
 
-           /* Collect the data from the remote source */
-           gz = NULL;
-           gz = ganglia_gzdopen( sock, "r" );
-           if(!gz)
-             {
-               err_msg("data_thread() unable to gzdopen socket for [%s]", d->name);
+   /* Assume the best from the beginning */
+   d->dead = 0;
+
+   for (;;)
+      {
+         gettimeofday(&start, NULL);
+         for(i=0; i < d->num_sources; i++)
+            {
+               /* Find first viable source in list. */
+               sock = g_tcp_socket_new ( d->sources[i] );
+               if( sock )
+                  break;
+            }
+
+         if(!sock)
+            {
+               err_msg("data_thread() got not answer from any [%s] datasource", d->name);
                d->dead = 1;
                goto take_a_break;
-             }
- 
-           output_index = 0;
-           for(;;)
-             {
-               if( (output_len - output_index) < 2048 )
-                 {
-                   output_len += 2048;
-                   output = realloc( output, output_len );
-                   assert( output != NULL );
-                 } 
+            }
 
-               count = ganglia_gzread( gz, output+output_index, 2047 );
-               if( count < 0 )
-                 {
-                   err_msg("gzread error on %s", d->name);
-                   d->dead =1;
-                   goto take_a_break;
-                 }
-               if(count == 0)
-                 break;
+         struct_poll.fd = sock->sockfd;
+         struct_poll.events = POLLIN; 
 
-               output_index += count;
-             }
-           *(output + output_index) = '\0';
+         read_index = 0;
+         for(;;)
+            {
+               /* Timeout set to 10 seconds */
+               rval = poll( &struct_poll, 1, 10000);
+               if( rval < 0 )
+                  {
+                     /* Error */
+                     err_msg("poll() error in data_thread");
+                     d->dead = 1;
+                     goto take_a_break;
+                  }
+               else if (rval == 0)
+                  {
+                     /* No revents during timeout period */
+                     err_msg("poll() timeout");
+                     d->dead = 1;
+                     goto take_a_break; 
+                  }
+               else
+                  {
+                     if( struct_poll.revents & POLLIN )
+                        {
+                           if( (read_index + 1024) > buf_size )
+                              {
+                                 /* We need to malloc more space for the data */
+                                 buf = realloc( buf, buf_size+1024 );
+                                 if(!buf)
+                                    {
+                                       err_quit("data_thread() unable to malloc enough room for [%s] XML", d->name);
+                                    }
+                                 buf_size+=1024;
+                              }
+                           SYS_CALL( bytes_read, read(sock->sockfd, buf+read_index, 1023));
+                           if (bytes_read < 0)
+                              {
+                                 err_msg("data_thread() unable to read() socket for [%s] data source", d->name);
+                                 d->dead = 1;
+                                 goto take_a_break;
+                              }
+                           else if(bytes_read == 0)
+                              {
+                                 break;
+                              }
+                           read_index+= bytes_read;
+                        }
+                     if( struct_poll.revents & POLLHUP )
+                        {
+                           err_msg("The remote machine closed connection");
+                           d->dead = 1;
+                           goto take_a_break;
+                        }
+                     if( struct_poll.revents & POLLERR )
+                        {
+                           err_msg("POLLERR!");
+                           d->dead = 1;
+                           goto take_a_break;
+                        }
+                     if( struct_poll.revents & POLLNVAL )
+                        {
+                           err_msg("POLLNVAL!");
+                           d->dead = 1;
+                           goto take_a_break;
+                        }
+                  }
+            }
 
-           /* This is a hack.  It's ugly.  */
-           if( gmetad_config.force_names )
-             {
-               char *q;
-    
-               p = strstr(output, "<GANGLIA_XML");
-               if(!p)
-                 {
-                   d->dead = 1;
-                   goto take_a_break;
-                 }
-               while(*p && *p != '>'){ p++ ;}
-               p++;
-    
-               /* So p now points just after the open GANGLIA_XML .. we need to take
-                  off the last GANGLIA_XML */
-            
-               q = strstr(p, "GANGLIA_XML>");
-               if(!q)
-                 {
-                   d->dead = 1;
-                   goto take_a_break;
-                 }
-    
-               while(*q && *q != '<'){ q-- ;}
-               q--;
-               /* q points to just before the start of </GANGLIA_XML> */
-               *q = '\0';  /* strip off the GANGLIA_XML altogether */        
-             }
-           else
-             {
-               p = output;
-             }
-         }
-    
-       /* Parse the buffer */
-       rval = process_xml(d, d->dead? NULL: p);
-       if(rval)
-         {
-           /* We no longer consider the source dead if its XML parsing
-            * had an error - there may be other reasons for this (rrd issues, etc). 
-            */
-            goto take_a_break;
-         }
-   
-       /* We processed all the data.  Mark this source as alive */
-       d->dead = 0;
-    
-     take_a_break:
-       if(gz)
-         {
-           ganglia_gzclose(gz);
-           gz= NULL;
-         }
-     
-       gettimeofday(&end, NULL);
-    
-       /* Sleep somewhere between (step +/- 5sec.) */
-       sleep_time = (d->step - 5) + (10 * (rand()/(float)RAND_MAX)) - (end.tv_sec - start.tv_sec);
-   
-       if(sleep_time > 0)
-         {
-           sleep(sleep_time);
-         }
-    }
+         buf[read_index] = '\0';
+
+         /* Parse the buffer */
+         rval = process_xml(d, buf);
+         if(rval)
+            {
+               /* We no longer consider the source dead if its XML parsing
+                * had an error - there may be other reasons for this (rrd issues, etc). 
+                */
+               goto take_a_break;
+            }
+
+         /* We processed all the data.  Mark this source as alive */
+         d->dead = 0;
+
+       take_a_break:
+         g_tcp_socket_delete(sock);
+
+         gettimeofday(&end, NULL);
+         /* Sleep somewhere between (step +/- 5sec.) */
+         sleep_time = (d->step - 5) + (10 * (rand()/(float)RAND_MAX)) - (end.tv_sec - start.tv_sec);
+         if( sleep_time > 0 )
+            sleep(sleep_time);
+      }
+   return NULL;
 }
