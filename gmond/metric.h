@@ -1,6 +1,8 @@
 #ifndef METRIC_H
 #define METRIC_H 1
-#include <ganglia.h>
+
+#include "lib/ganglia.h"
+
 #include "metric_typedefs.h"
 #include "key_metrics.h"
 
