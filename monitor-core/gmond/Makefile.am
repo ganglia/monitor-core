@@ -1,12 +1,20 @@
 SUBDIRS = gstat
 
-EXTRA_DIST = gmond.init gmond.conf
+EXTRA_DIST = gmond.init gmond.conf gmond.conf.5 gmond.conf.html conf.pod
 
 AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/srclib/libmetrics/ -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/confuse/src/
 
 sbin_PROGRAMS = gmond
 # metric.h and dtd.h are for gmetad/gmetric for now....
 gmond_SOURCES = gmond.c cmdline.c cmdline.h conf.c conf.h dtd.h metric.h
+
+man_MANS  = gmond.conf.5
+
+gmond.conf.5: conf.pod gmond.conf.html
+	pod2man --name="gmond.conf" --section=5 conf.pod --center="Ganglia Monitoring System" --release="ganglia/@VERSION@" > gmond.conf.5
+
+gmond.conf.html: conf.pod
+	pod2html --noindex --title="gmond.conf @VERSION@" --infile=conf.pod --outfile=gmond.conf.html
 
 #monitor.c server.c listen.c cleanup.c \
 #metric.h dtd.h 

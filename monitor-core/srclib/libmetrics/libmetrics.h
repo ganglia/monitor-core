@@ -17,7 +17,7 @@ void libmetrics_init( void );
 #include <config.h>
 #endif
 
-typedef enum {
+enum g_type_t {
    g_string,  /* huh uh.. he said g string */
    g_int8,
    g_uint8,
@@ -28,7 +28,8 @@ typedef enum {
    g_float,
    g_double,
    g_timestamp    /* a uint32 */
-} g_type_t;
+};
+typedef enum g_type_t g_type_t;
  
 #define MAX_G_STRING_SIZE 32
  
@@ -103,12 +104,6 @@ typedef union {
         
 #endif  
 
-#ifdef LINUX
-#endif
-
-#ifdef CYGWIN
-#endif
-
 #ifdef HPUX
 
  g_val_t mem_rm_func(void);
@@ -116,107 +111,6 @@ typedef union {
  g_val_t mem_vm_func(void);
  g_val_t mem_avm_func(void);
 
-#endif
-
-#ifdef FREEBSD
-#endif
-
-#ifdef AIX
-#endif
-
-#ifdef DARWIN
-#endif
-
-#ifdef IRIX
-#endif
-
-#ifdef OSF
-#endif
-
-#if 0
-/* THIS IS NOT NECESSARY ANYMORE */
-enum {
-   user_defined,
-  /*
-   * These are my configuration metrics which don't change between reboots
-   */
-   cpu_num,
-   cpu_speed,
-   mem_total,
-   swap_total,
-   boottime,
-   sys_clock,
-   machine_type,
-   os_name,
-   os_release,
-  /*
-   * These are my state metrics which are always a changin' changin'
-   */
-   cpu_user,
-   cpu_nice,
-   cpu_system,
-   cpu_idle,
-   cpu_wio,
-   cpu_aidle,
-   cpu_intr,
-   cpu_sintr,
-   bytes_in,
-   bytes_out,
-   pkts_in,
-   pkts_out,
-   disk_total,
-   disk_free,
-   part_max_used,
-   load_one,
-   load_five,
-   load_fifteen,
-   proc_run,
-   proc_total,
-   mem_free,
-   mem_shared,
-   mem_buffers,
-   mem_cached,
-   swap_free,
-   /* internal.. ignore */
-   gexec,
-   heartbeat,
-   mtu,
-   location,
-   /*
-    * added by swagner for extended solaris monitoring.
-    */
-#ifdef SOLARIS
-   bread_sec,
-   bwrite_sec,
-   lread_sec,
-   lwrite_sec,
-   phread_sec,
-   phwrite_sec,
-   rcache,
-   wcache,
-#endif
-#ifdef LINUX
-#endif
-#ifdef CYGWIN
-#endif
-#ifdef HPUX
-   cpu_arm,
-   cpu_rm,
-   cpu_avm,
-   cpu_vm,
-#endif
-#ifdef FREEBSD
-#endif
-#ifdef IRIX
-#endif
-#ifdef AIX
-#endif
-#ifdef DARWIN
-#endif
-#ifdef OSF
-#endif
-   num_key_metrics
-}  key_metrics;
 #endif
 
 #endif /* LIBMETRICS_H */
