@@ -34,7 +34,6 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
    char val[128];
 
    /*  if process_time is undefined, we set it to the current time */
-
    if (!process_time)
       process_time = time(0);
 
