@@ -4,7 +4,7 @@
 <head>
  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
  <title>Example Documentation</title>
- <link rel="stylesheet" href="doxygen.css" type="text/css">
+ <link rel="stylesheet" href="tutorial.css" type="text/css">
 </head>
 <body>
 
@@ -18,27 +18,27 @@
 
 <span class="keywordtype">int</span> main(<span class="keywordtype">void</span>)
 {
-    <a class="code" href="confuse_8h.html#a130">cfg_bool_t</a> verbose = cfg_false;
+    <a class="code" href="confuse_8h.html#a133">cfg_bool_t</a> verbose = cfg_false;
     <span class="keywordtype">char</span> *server = NULL;
     <span class="keywordtype">double</span> delay = 1.356e-32;
     <span class="keywordtype">char</span> *username = NULL;
     <span class="keywordtype">int</span> debug = 1;
 
-    <a name="_a49"></a><a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> opts[] = {
-        <a name="a50"></a><a class="code" href="confuse_8h.html#a39">CFG_SIMPLE_BOOL</a>(<span class="stringliteral">"verbose"</span>, &amp;verbose),
-        <a name="a51"></a><a class="code" href="confuse_8h.html#a18">CFG_SIMPLE_STR</a>(<span class="stringliteral">"server"</span>, &amp;server),
-        <a class="code" href="confuse_8h.html#a18">CFG_SIMPLE_STR</a>(<span class="stringliteral">"user"</span>, &amp;username),
-        <a name="a52"></a><a class="code" href="confuse_8h.html#a25">CFG_SIMPLE_INT</a>(<span class="stringliteral">"debug"</span>, &amp;debug),
-        <a name="a53"></a><a class="code" href="confuse_8h.html#a32">CFG_SIMPLE_FLOAT</a>(<span class="stringliteral">"delay"</span>, &amp;delay),
-        <a name="a54"></a><a class="code" href="confuse_8h.html#a46">CFG_END</a>()
+    <a name="_a14"></a><a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> opts[] = {
+        <a name="a15"></a><a class="code" href="confuse_8h.html#a40">CFG_SIMPLE_BOOL</a>(<span class="stringliteral">"verbose"</span>, &amp;verbose),
+        <a name="a16"></a><a class="code" href="confuse_8h.html#a19">CFG_SIMPLE_STR</a>(<span class="stringliteral">"server"</span>, &amp;server),
+        <a class="code" href="confuse_8h.html#a19">CFG_SIMPLE_STR</a>(<span class="stringliteral">"user"</span>, &amp;username),
+        <a name="a17"></a><a class="code" href="confuse_8h.html#a26">CFG_SIMPLE_INT</a>(<span class="stringliteral">"debug"</span>, &amp;debug),
+        <a name="a18"></a><a class="code" href="confuse_8h.html#a33">CFG_SIMPLE_FLOAT</a>(<span class="stringliteral">"delay"</span>, &amp;delay),
+        <a name="a19"></a><a class="code" href="confuse_8h.html#a47">CFG_END</a>()
     };
-    <a name="_a55"></a><a class="code" href="structcfg__t.html">cfg_t</a> *cfg;
+    <a name="_a20"></a><a class="code" href="structcfg__t.html">cfg_t</a> *cfg;
 
     <span class="comment">/* set default value for the server option */</span>
     server = strdup(<span class="stringliteral">"gazonk"</span>);
 
-    cfg = <a name="a56"></a>cfg_init(opts, 0);
-    <a name="a57"></a>cfg_parse(cfg, <span class="stringliteral">"simple.conf"</span>);
+    cfg = <a name="a21"></a>cfg_init(opts, 0);
+    <a name="a22"></a>cfg_parse(cfg, <span class="stringliteral">"simple.conf"</span>);
 
     printf(<span class="stringliteral">"verbose: %s\n"</span>, verbose ? <span class="stringliteral">"true"</span> : <span class="stringliteral">"false"</span>);
     printf(<span class="stringliteral">"server: %s\n"</span>, server);
@@ -52,17 +52,17 @@
 <span class="comment">     *   free(username);</span>
 <span class="comment">     *   username = strdup("foo");</span>
 <span class="comment">     */</span>
-    <a name="a58"></a>cfg_setstr(cfg, <span class="stringliteral">"user"</span>, <span class="stringliteral">"foo"</span>);
+    <a name="a23"></a>cfg_setstr(cfg, <span class="stringliteral">"user"</span>, <span class="stringliteral">"foo"</span>);
     printf(<span class="stringliteral">"username: %s\n"</span>, username);
 
     <span class="comment">/* print the parsed values to another file */</span>
     {
         FILE *fp = fopen(<span class="stringliteral">"simple.conf.out"</span>, <span class="stringliteral">"w"</span>);
-        <a name="a59"></a>cfg_print(cfg, fp);
+        <a name="a24"></a>cfg_print(cfg, fp);
         fclose(fp);
     }
 
-    <a name="a60"></a>cfg_free(cfg);
+    <a name="a25"></a>cfg_free(cfg);
     <span class="keywordflow">return</span> 0;
 }
 </div></pre><pre><div class="fragment">00001 <span class="preprocessor">#include &lt;string.h&gt;</span>
@@ -70,19 +70,19 @@
 00003 
 00004 <span class="keywordtype">int</span> main(<span class="keywordtype">void</span>)
 00005 {
-00006     <a class="code" href="confuse_8h.html#a130">cfg_bool_t</a> verbose = cfg_false;
+00006     <a class="code" href="confuse_8h.html#a133">cfg_bool_t</a> verbose = cfg_false;
 00007     <span class="keywordtype">char</span> *server = NULL;
 00008     <span class="keywordtype">double</span> delay = 1.356e-32;
 00009     <span class="keywordtype">char</span> *username = NULL;
 00010     <span class="keywordtype">int</span> debug = 1;
 00011 
 00012     <a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> opts[] = {
-00013         <a class="code" href="confuse_8h.html#a39">CFG_SIMPLE_BOOL</a>(<span class="stringliteral">"verbose"</span>, &amp;verbose),
-00014         <a class="code" href="confuse_8h.html#a18">CFG_SIMPLE_STR</a>(<span class="stringliteral">"server"</span>, &amp;server),
-00015         <a class="code" href="confuse_8h.html#a18">CFG_SIMPLE_STR</a>(<span class="stringliteral">"user"</span>, &amp;username),
-00016         <a class="code" href="confuse_8h.html#a25">CFG_SIMPLE_INT</a>(<span class="stringliteral">"debug"</span>, &amp;debug),
-00017         <a class="code" href="confuse_8h.html#a32">CFG_SIMPLE_FLOAT</a>(<span class="stringliteral">"delay"</span>, &amp;delay),
-00018         <a class="code" href="confuse_8h.html#a46">CFG_END</a>()
+00013         <a class="code" href="confuse_8h.html#a40">CFG_SIMPLE_BOOL</a>(<span class="stringliteral">"verbose"</span>, &amp;verbose),
+00014         <a class="code" href="confuse_8h.html#a19">CFG_SIMPLE_STR</a>(<span class="stringliteral">"server"</span>, &amp;server),
+00015         <a class="code" href="confuse_8h.html#a19">CFG_SIMPLE_STR</a>(<span class="stringliteral">"user"</span>, &amp;username),
+00016         <a class="code" href="confuse_8h.html#a26">CFG_SIMPLE_INT</a>(<span class="stringliteral">"debug"</span>, &amp;debug),
+00017         <a class="code" href="confuse_8h.html#a33">CFG_SIMPLE_FLOAT</a>(<span class="stringliteral">"delay"</span>, &amp;delay),
+00018         <a class="code" href="confuse_8h.html#a47">CFG_END</a>()
 00019     };
 00020     <a class="code" href="structcfg__t.html">cfg_t</a> *cfg;
 00021 

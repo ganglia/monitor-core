@@ -497,7 +497,7 @@ char *yytext;
 #include "confuse.h"
 
 #include <errno.h>
-	
+
 #if defined(ENABLE_NLS) && defined(HAVE_GETTEXT)
 # include <libintl.h>
 # define _(str) dgettext(PACKAGE, str)
@@ -521,9 +521,9 @@ static void qputc(char ch);
 
 #define MAX_INCLUDE_DEPTH 10
 struct {
-	YY_BUFFER_STATE state;
-	char *filename;
-	unsigned int line;
+    YY_BUFFER_STATE state;
+    char *filename;
+    unsigned int line;
 } cfg_include_stack[MAX_INCLUDE_DEPTH];
 int cfg_include_stack_ptr = 0;
 
@@ -860,44 +860,44 @@ case 16:
 YY_RULE_SETUP
 #line 106 "lexer.l"
 {
-	qstring_index = 0;
-	BEGIN(dq_str);
+    qstring_index = 0;
+    BEGIN(dq_str);
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 110 "lexer.l"
 { /* saw closing quote - all done */
-	BEGIN(INITIAL);
-	qputc('\0');
-	cfg_yylval = cfg_qstring;
-	return CFGT_STR;
+    BEGIN(INITIAL);
+    qputc('\0');
+    cfg_yylval = cfg_qstring;
+    return CFGT_STR;
  }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 116 "lexer.l"
 { /* environment variable substitution */
-	char *var;
-	char *e;
-	yytext[strlen(yytext) - 1] = 0;
-	e = strchr(yytext+2, ':');
-	if(e && e[1] == '-')
-		*e = 0;
-	else
-		e = 0;
-	var = getenv(yytext+2);
-	if(!var && e)
-		var = e+2;
-	while(var && *var)
-		qputc(*var++);
+    char *var;
+    char *e;
+    yytext[strlen(yytext) - 1] = 0;
+    e = strchr(yytext+2, ':');
+    if(e && e[1] == '-')
+        *e = 0;
+    else
+        e = 0;
+    var = getenv(yytext+2);
+    if(!var && e)
+        var = e+2;
+    while(var && *var)
+        qputc(*var++);
 }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 131 "lexer.l"
 {
-	qputc('\n');
+    qputc('\n');
     cfg->line++;
 }
 	YY_BREAK
@@ -912,104 +912,104 @@ YY_RULE_SETUP
 case 21:
 YY_RULE_SETUP
 #line 139 "lexer.l"
-{	/* octal escape sequence */
-	int result;
-	sscanf(yytext + 1, "%o", &result);
-	if(result > 0xFF) {
-		cfg_error(cfg, _("invalid octal number '%s'"), yytext);
-		return 0;
-	}
-	qputc(result);
+{  /* octal escape sequence */
+    int result;
+    sscanf(yytext + 1, "%o", &result);
+    if(result > 0xFF) {
+        cfg_error(cfg, _("invalid octal number '%s'"), yytext);
+        return 0;
+    }
+    qputc(result);
  }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 148 "lexer.l"
 {
-	cfg_error(cfg, _("bad escape sequence '%s'"), yytext);
-	return 0;
+    cfg_error(cfg, _("bad escape sequence '%s'"), yytext);
+    return 0;
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 152 "lexer.l"
 { /* hexadecimal escape sequence */
-	int result;
-	sscanf(yytext + 2, "%x", &result);
-	qputc(result);
+    int result;
+    sscanf(yytext + 2, "%x", &result);
+    qputc(result);
 }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 157 "lexer.l"
 {
-	qputc('\n');
+    qputc('\n');
 }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 160 "lexer.l"
 {
-	qputc('\r');
+    qputc('\r');
 }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 163 "lexer.l"
 {
-	qputc('\b');
+    qputc('\b');
 }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 166 "lexer.l"
 {
-	qputc('\f');
+    qputc('\f');
 }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 169 "lexer.l"
 {
-	qputc('\007');
+    qputc('\007');
 }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 172 "lexer.l"
 {
-	qputc('\033');
+    qputc('\033');
 }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 175 "lexer.l"
 {
-	qputc('\t');
+    qputc('\t');
 }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 178 "lexer.l"
 {
-	qputc('\v');
+    qputc('\v');
 }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 181 "lexer.l"
 {
-	qputc(yytext[1]);
+    qputc(yytext[1]);
 }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 184 "lexer.l"
 {
-	char *yptr = yytext;
-	while(*yptr) {
-		qputc(*yptr++);
-	}
+    char *yptr = yytext;
+    while(*yptr) {
+        qputc(*yptr++);
+    }
 }
 	YY_BREAK
 /* single-quoted string ('...') */
@@ -1035,7 +1035,7 @@ case 36:
 YY_RULE_SETUP
 #line 202 "lexer.l"
 {
-	qputc('\n');
+    qputc('\n');
     cfg->line++;
 }
 	YY_BREAK
@@ -1051,15 +1051,15 @@ case 38:
 YY_RULE_SETUP
 #line 210 "lexer.l"
 {
-	qputc(yytext[1]);
+    qputc(yytext[1]);
 }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 213 "lexer.l"
 {
-	qputc(yytext[0]);
-	qputc(yytext[1]);
+    qputc(yytext[0]);
+    qputc(yytext[1]);
 }
 	YY_BREAK
 case 40:
@@ -1068,7 +1068,7 @@ YY_RULE_SETUP
 {
     char *cp = yytext;
     while(*cp != '\0') {
-		qputc(*cp++);
+        qputc(*cp++);
     }
 }
 	YY_BREAK
@@ -1092,8 +1092,8 @@ case YY_STATE_EOF(dq_str):
              else
                  {
                  yy_delete_buffer( YY_CURRENT_BUFFER );
-				 fclose(cfg_yyin);
-				 cfg_yyin = 0;
+                 fclose(cfg_yyin);
+                 cfg_yyin = 0;
                  --cfg_include_stack_ptr;
                  yy_switch_to_buffer(
                       cfg_include_stack[cfg_include_stack_ptr].state );
@@ -1107,21 +1107,21 @@ case 41:
 YY_RULE_SETUP
 #line 248 "lexer.l"
 {
-	char *var;
-	char *e;
-	yytext[strlen(yytext) - 1] = 0;
-	e = strchr(yytext+2, ':');
-	if(e && e[1] == '-')
-		*e = 0;
-	else
-		e = 0;
-	var = getenv(yytext+2);
-	if(!var && e)
-		var = e+2;
-	if(!var)
-		var = "";
-	cfg_yylval = var;
-	return CFGT_STR;
+    char *var;
+    char *e;
+    yytext[strlen(yytext) - 1] = 0;
+    e = strchr(yytext+2, ':');
+    if(e && e[1] == '-')
+        *e = 0;
+    else
+        e = 0;
+    var = getenv(yytext+2);
+    if(!var && e)
+        var = e+2;
+    if(!var)
+        var = "";
+    cfg_yylval = var;
+    return CFGT_STR;
 }
 	YY_BREAK
 /* an unquoted string
@@ -2030,41 +2030,41 @@ int main()
 
 void cfg_dummy_function(void)
 {
-	/* please compiler :-)
-	 * otherwise "defined but not used" warning
-	 */
-	yyunput(0, 0);
+    /* please compiler :-)
+     * otherwise "defined but not used" warning
+     */
+    yyunput(0, 0);
 }
 
 int cfg_lexer_include(cfg_t *cfg, const char *filename)
 {
-	char *xfilename;
+    char *xfilename;
 
-	if(cfg_include_stack_ptr >= MAX_INCLUDE_DEPTH) {
-		cfg_error(cfg, _("includes nested too deeply"));
-		return 1;
-	}
+    if(cfg_include_stack_ptr >= MAX_INCLUDE_DEPTH) {
+        cfg_error(cfg, _("includes nested too deeply"));
+        return 1;
+    }
 
-	cfg_include_stack[cfg_include_stack_ptr].state = YY_CURRENT_BUFFER;
-	cfg_include_stack[cfg_include_stack_ptr].filename = cfg->filename;
-	cfg_include_stack[cfg_include_stack_ptr].line = cfg->line;
-	cfg_include_stack_ptr++;
+    cfg_include_stack[cfg_include_stack_ptr].state = YY_CURRENT_BUFFER;
+    cfg_include_stack[cfg_include_stack_ptr].filename = cfg->filename;
+    cfg_include_stack[cfg_include_stack_ptr].line = cfg->line;
+    cfg_include_stack_ptr++;
 
-	xfilename = cfg_tilde_expand(filename);
+    xfilename = cfg_tilde_expand(filename);
 
-	cfg_yyin = fopen(xfilename, "r");
+    cfg_yyin = fopen(xfilename, "r");
 
-	if(!cfg_yyin) {
-		cfg_error(cfg, "%s: %s", xfilename, strerror(errno));
-		free(xfilename);
-		return 1;
-	}
+    if(!cfg_yyin) {
+        cfg_error(cfg, "%s: %s", xfilename, strerror(errno));
+        free(xfilename);
+        return 1;
+    }
 
-	cfg->filename = xfilename;
-	cfg->line = 1;
+    cfg->filename = xfilename;
+    cfg->line = 1;
 
     yy_switch_to_buffer(yy_create_buffer(cfg_yyin, YY_BUF_SIZE));
-	return 0;
+    return 0;
 }
 
 /* write a character to the quoted string buffer, and reallocate as
@@ -2072,34 +2072,34 @@ int cfg_lexer_include(cfg_t *cfg, const char *filename)
  */
 static void qputc(char ch)
 {
-	if(qstring_index >= qstring_len) {
-		qstring_len += CFG_QSTRING_BUFSIZ;
-		cfg_qstring = (char *)realloc(cfg_qstring, qstring_len);
-		assert(cfg_qstring);
-		memset(cfg_qstring + qstring_index, 0, CFG_QSTRING_BUFSIZ);
-	}
-	cfg_qstring[qstring_index++] = ch;
+    if(qstring_index >= qstring_len) {
+        qstring_len += CFG_QSTRING_BUFSIZ;
+        cfg_qstring = (char *)realloc(cfg_qstring, qstring_len);
+        assert(cfg_qstring);
+        memset(cfg_qstring + qstring_index, 0, CFG_QSTRING_BUFSIZ);
+    }
+    cfg_qstring[qstring_index++] = ch;
 }
 
 void cfg_scan_string_begin(const char *buf)
 {
-	pre_string_scan_state = YY_CURRENT_BUFFER;
+    pre_string_scan_state = YY_CURRENT_BUFFER;
 
-	/* yy_scan_string does a yy_switch_to_buffer call for us
-	 */
-	string_scan_state = yy_scan_string(buf);
+    /* yy_scan_string does a yy_switch_to_buffer call for us
+     */
+    string_scan_state = yy_scan_string(buf);
 }
 
 void cfg_scan_string_end(void)
 {
-	/* restore to previous state
-	 */
-	yy_delete_buffer(string_scan_state);
-	yy_switch_to_buffer(pre_string_scan_state);
-	free(cfg_qstring);
-	cfg_qstring = 0;
-	qstring_index = qstring_len = 0;
-	string_scan_state = 0;
+    /* restore to previous state
+     */
+    yy_delete_buffer(string_scan_state);
+    yy_switch_to_buffer(pre_string_scan_state);
+    free(cfg_qstring);
+    cfg_qstring = 0;
+    qstring_index = qstring_len = 0;
+    string_scan_state = 0;
 }
 
 static YY_BUFFER_STATE pre_fp_scan_state;
@@ -2107,19 +2107,19 @@ static YY_BUFFER_STATE fp_scan_state;
 
 void cfg_scan_fp_begin(FILE *fp)
 {
-	pre_fp_scan_state = YY_CURRENT_BUFFER;
-	fp_scan_state = yy_create_buffer(fp, YY_BUF_SIZE);
-	yy_switch_to_buffer(fp_scan_state);
+    pre_fp_scan_state = YY_CURRENT_BUFFER;
+    fp_scan_state = yy_create_buffer(fp, YY_BUF_SIZE);
+    yy_switch_to_buffer(fp_scan_state);
 }
 
 void cfg_scan_fp_end(void)
 {
-	/* restore to previous state
-	 */
-	yy_delete_buffer(fp_scan_state);
-	if(pre_fp_scan_state)
-		yy_switch_to_buffer(pre_fp_scan_state);
-	free(cfg_qstring);
-	cfg_qstring = 0;
-	qstring_index = qstring_len = 0;
+    /* restore to previous state
+     */
+    yy_delete_buffer(fp_scan_state);
+    if(pre_fp_scan_state)
+        yy_switch_to_buffer(pre_fp_scan_state);
+    free(cfg_qstring);
+    cfg_qstring = 0;
+    qstring_index = qstring_len = 0;
 }

@@ -4,7 +4,7 @@
 <head>
  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
  <title>Example Documentation</title>
- <link rel="stylesheet" href="doxygen.css" type="text/css">
+ <link rel="stylesheet" href="tutorial.css" type="text/css">
 </head>
 <body>
 
@@ -18,20 +18,20 @@
 <span class="preprocessor">#include &lt;signal.h&gt;</span>
 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
 
-<a name="_a35"></a><a class="code" href="structcfg__t.html">cfg_t</a> *cfg = 0;
+<a name="_a0"></a><a class="code" href="structcfg__t.html">cfg_t</a> *cfg = 0;
 <span class="keyword">const</span> <span class="keywordtype">char</span> *config_filename = <span class="stringliteral">"./reread.conf"</span>;
 
 <span class="keywordtype">void</span> read_config(<span class="keywordtype">void</span>)
 {
-    <span class="keyword">static</span> <a name="_a36"></a><a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> arg_opts[] = {
-        <a name="a37"></a><a class="code" href="confuse_8h.html#a14">CFG_STR</a>(<span class="stringliteral">"value"</span>, <span class="stringliteral">"default"</span>, CFGF_NONE),
-        <a name="a38"></a><a class="code" href="confuse_8h.html#a46">CFG_END</a>()
+    <a name="_a1"></a><a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> arg_opts[] = {
+        <a name="a2"></a><a class="code" href="confuse_8h.html#a15">CFG_STR</a>(<span class="stringliteral">"value"</span>, <span class="stringliteral">"default"</span>, CFGF_NONE),
+        <a name="a3"></a><a class="code" href="confuse_8h.html#a47">CFG_END</a>()
     };
-    <span class="keyword">static</span> <a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> opts[] = {
-        <a name="a39"></a><a class="code" href="confuse_8h.html#a21">CFG_INT</a>(<span class="stringliteral">"delay"</span>, 3, CFGF_NONE),
-        <a class="code" href="confuse_8h.html#a14">CFG_STR</a>(<span class="stringliteral">"message"</span>, <span class="stringliteral">"This is a message"</span>, CFGF_NONE),
-        <a name="a40"></a><a class="code" href="confuse_8h.html#a40">CFG_SEC</a>(<span class="stringliteral">"argument"</span>, arg_opts, CFGF_MULTI | CFGF_TITLE),
-        <a class="code" href="confuse_8h.html#a46">CFG_END</a>()
+    <a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> opts[] = {
+        <a name="a4"></a><a class="code" href="confuse_8h.html#a22">CFG_INT</a>(<span class="stringliteral">"delay"</span>, 3, CFGF_NONE),
+        <a class="code" href="confuse_8h.html#a15">CFG_STR</a>(<span class="stringliteral">"message"</span>, <span class="stringliteral">"This is a message"</span>, CFGF_NONE),
+        <a name="a5"></a><a class="code" href="confuse_8h.html#a41">CFG_SEC</a>(<span class="stringliteral">"argument"</span>, arg_opts, CFGF_MULTI | CFGF_TITLE),
+        <a class="code" href="confuse_8h.html#a47">CFG_END</a>()
     };
     <span class="keywordtype">int</span> ret;
 
@@ -41,11 +41,11 @@
         <span class="stringliteral">" argument one { value = 1 }\n"</span> \
         <span class="stringliteral">" argument two { value=foo}\n"</span>;
 
-    <a name="a41"></a>cfg_free(cfg);
+    <a name="a6"></a>cfg_free(cfg);
 
-    cfg = <a name="a42"></a>cfg_init(opts, 0);
-    ret = <a name="a43"></a>cfg_parse_buf(cfg, buf);
-    ret = <a name="a44"></a>cfg_parse(cfg, config_filename);
+    cfg = <a name="a7"></a>cfg_init(opts, 0);
+    ret = <a name="a8"></a>cfg_parse_buf(cfg, buf);
+    ret = <a name="a9"></a>cfg_parse(cfg, config_filename);
 }
 
 <span class="keywordtype">void</span> sighandler(<span class="keywordtype">int</span> sig)
@@ -69,15 +69,17 @@
     signal(SIGHUP, sighandler);
     signal(SIGUSR1, usr1handler);
 
-    <span class="keywordflow">while</span>(loop) {
-        printf(<span class="stringliteral">"Message: %s"</span>, <a name="a45"></a>cfg_getstr(cfg, <span class="stringliteral">"message"</span>));
-        <span class="keywordflow">for</span>(i = 0; i &lt; <a name="a46"></a>cfg_size(cfg, <span class="stringliteral">"argument"</span>); i++) {
-            <a class="code" href="structcfg__t.html">cfg_t</a> *arg = <a name="a47"></a>cfg_getnsec(cfg, <span class="stringliteral">"argument"</span>, i);
+    <span class="keywordflow">while</span>(loop)
+    {
+        printf(<span class="stringliteral">"Message: %s"</span>, <a name="a10"></a>cfg_getstr(cfg, <span class="stringliteral">"message"</span>));
+        <span class="keywordflow">for</span>(i = 0; i &lt; <a name="a11"></a>cfg_size(cfg, <span class="stringliteral">"argument"</span>); i++)
+        {
+            <a class="code" href="structcfg__t.html">cfg_t</a> *arg = <a name="a12"></a>cfg_getnsec(cfg, <span class="stringliteral">"argument"</span>, i);
             printf(<span class="stringliteral">", %s"</span>, cfg_getstr(arg, <span class="stringliteral">"value"</span>));
         }
         printf(<span class="stringliteral">"\n"</span>);
 
-        sleep(<a name="a48"></a>cfg_getint(cfg, <span class="stringliteral">"delay"</span>));
+        sleep(<a name="a13"></a>cfg_getint(cfg, <span class="stringliteral">"delay"</span>));
     }
 
     cfg_free(cfg);
@@ -95,15 +97,15 @@
 00008 
 00009 <span class="keywordtype">void</span> read_config(<span class="keywordtype">void</span>)
 00010 {
-00011     <span class="keyword">static</span> <a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> arg_opts[] = {
-00012         <a class="code" href="confuse_8h.html#a14">CFG_STR</a>(<span class="stringliteral">"value"</span>, <span class="stringliteral">"default"</span>, CFGF_NONE),
-00013         <a class="code" href="confuse_8h.html#a46">CFG_END</a>()
+00011     <a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> arg_opts[] = {
+00012         <a class="code" href="confuse_8h.html#a15">CFG_STR</a>(<span class="stringliteral">"value"</span>, <span class="stringliteral">"default"</span>, CFGF_NONE),
+00013         <a class="code" href="confuse_8h.html#a47">CFG_END</a>()
 00014     };
-00015     <span class="keyword">static</span> <a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> opts[] = {
-00016         <a class="code" href="confuse_8h.html#a21">CFG_INT</a>(<span class="stringliteral">"delay"</span>, 3, CFGF_NONE),
-00017         <a class="code" href="confuse_8h.html#a14">CFG_STR</a>(<span class="stringliteral">"message"</span>, <span class="stringliteral">"This is a message"</span>, CFGF_NONE),
-00018         <a class="code" href="confuse_8h.html#a40">CFG_SEC</a>(<span class="stringliteral">"argument"</span>, arg_opts, CFGF_MULTI | CFGF_TITLE),
-00019         <a class="code" href="confuse_8h.html#a46">CFG_END</a>()
+00015     <a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> opts[] = {
+00016         <a class="code" href="confuse_8h.html#a22">CFG_INT</a>(<span class="stringliteral">"delay"</span>, 3, CFGF_NONE),
+00017         <a class="code" href="confuse_8h.html#a15">CFG_STR</a>(<span class="stringliteral">"message"</span>, <span class="stringliteral">"This is a message"</span>, CFGF_NONE),
+00018         <a class="code" href="confuse_8h.html#a41">CFG_SEC</a>(<span class="stringliteral">"argument"</span>, arg_opts, CFGF_MULTI | CFGF_TITLE),
+00019         <a class="code" href="confuse_8h.html#a47">CFG_END</a>()
 00020     };
 00021     <span class="keywordtype">int</span> ret;
 00022 
@@ -141,22 +143,24 @@
 00054     signal(SIGHUP, sighandler);
 00055     signal(SIGUSR1, usr1handler);
 00056 
-00057     <span class="keywordflow">while</span>(loop) {
-00058         printf(<span class="stringliteral">"Message: %s"</span>, cfg_getstr(cfg, <span class="stringliteral">"message"</span>));
-00059         <span class="keywordflow">for</span>(i = 0; i &lt; cfg_size(cfg, <span class="stringliteral">"argument"</span>); i++) {
-00060             <a class="code" href="structcfg__t.html">cfg_t</a> *arg = cfg_getnsec(cfg, <span class="stringliteral">"argument"</span>, i);
-00061             printf(<span class="stringliteral">", %s"</span>, cfg_getstr(arg, <span class="stringliteral">"value"</span>));
-00062         }
-00063         printf(<span class="stringliteral">"\n"</span>);
-00064 
-00065         sleep(cfg_getint(cfg, <span class="stringliteral">"delay"</span>));
-00066     }
-00067 
-00068     cfg_free(cfg);
-00069     cfg = 0;
-00070 
-00071     <span class="keywordflow">return</span> 0;
-00072 }
+00057     <span class="keywordflow">while</span>(loop)
+00058     {
+00059         printf(<span class="stringliteral">"Message: %s"</span>, cfg_getstr(cfg, <span class="stringliteral">"message"</span>));
+00060         <span class="keywordflow">for</span>(i = 0; i &lt; cfg_size(cfg, <span class="stringliteral">"argument"</span>); i++)
+00061         {
+00062             <a class="code" href="structcfg__t.html">cfg_t</a> *arg = cfg_getnsec(cfg, <span class="stringliteral">"argument"</span>, i);
+00063             printf(<span class="stringliteral">", %s"</span>, cfg_getstr(arg, <span class="stringliteral">"value"</span>));
+00064         }
+00065         printf(<span class="stringliteral">"\n"</span>);
+00066 
+00067         sleep(cfg_getint(cfg, <span class="stringliteral">"delay"</span>));
+00068     }
+00069 
+00070     cfg_free(cfg);
+00071     cfg = 0;
+00072 
+00073     <span class="keywordflow">return</span> 0;
+00074 }
 </div></pre> <!-- doxygen-footer.html starts here -->
   </div>
  </body>

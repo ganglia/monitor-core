@@ -42,7 +42,8 @@ EXTRA_PROGRAMS = check_confuse$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/gettext.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ac_config_libconfig_in.m4 \
+	$(top_srcdir)/m4/check.m4 $(top_srcdir)/m4/gettext.m4 \
 	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/lib-ld.m4 \
 	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
 	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/po.m4 \
@@ -97,6 +98,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CHECK_CFLAGS = @CHECK_CFLAGS@
 CHECK_LIBS = @CHECK_LIBS@
+CONFUSE_CONFIG = @CONFUSE_CONFIG@
+CONFUSE_VERSION = @CONFUSE_VERSION@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -115,6 +118,8 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 GMSGFMT = @GMSGFMT@
+HAVE_PKGCONFIG_FALSE = @HAVE_PKGCONFIG_FALSE@
+HAVE_PKGCONFIG_TRUE = @HAVE_PKGCONFIG_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -145,6 +150,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKGCONFIG = @PKGCONFIG@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
@@ -173,6 +179,9 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 check_confuse = @check_confuse@
+confuse_cflags = @confuse_cflags@
+confuse_cppflags = @confuse_cppflags@
+confuse_libs = @confuse_libs@
 datadir = @datadir@
 exec_prefix = @exec_prefix@
 host = @host@
@@ -194,6 +203,7 @@ program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
+target = @target@
 target_alias = @target_alias@
 check_confuse_SOURCES = check_confuse.c suite_single.c suite_dup.c suite_list.c suite_validate.c \
 					  suite_func.c

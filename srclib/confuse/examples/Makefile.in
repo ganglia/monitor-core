@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-SOURCES = cfgtest.c reread.c simple.c
+SOURCES = ftpconf.c reread.c simple.c
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -37,11 +37,12 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
-noinst_PROGRAMS = cfgtest$(EXEEXT) simple$(EXEEXT) reread$(EXEEXT)
+noinst_PROGRAMS = simple$(EXEEXT) reread$(EXEEXT) ftpconf$(EXEEXT)
 subdir = examples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/gettext.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ac_config_libconfig_in.m4 \
+	$(top_srcdir)/m4/check.m4 $(top_srcdir)/m4/gettext.m4 \
 	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/lib-ld.m4 \
 	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
 	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/po.m4 \
@@ -52,9 +53,9 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/support/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-cfgtest_SOURCES = cfgtest.c
-cfgtest_OBJECTS = cfgtest.$(OBJEXT)
-cfgtest_DEPENDENCIES = ../src/libconfuse.la
+ftpconf_SOURCES = ftpconf.c
+ftpconf_OBJECTS = ftpconf.$(OBJEXT)
+ftpconf_DEPENDENCIES = ../src/libconfuse.la
 reread_SOURCES = reread.c
 reread_OBJECTS = reread.$(OBJEXT)
 reread_DEPENDENCIES = ../src/libconfuse.la
@@ -64,7 +65,7 @@ simple_DEPENDENCIES = ../src/libconfuse.la
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/support/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/cfgtest.Po ./$(DEPDIR)/reread.Po \
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/ftpconf.Po ./$(DEPDIR)/reread.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/simple.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -74,8 +75,8 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = cfgtest.c reread.c simple.c
-DIST_SOURCES = cfgtest.c reread.c simple.c
+SOURCES = ftpconf.c reread.c simple.c
+DIST_SOURCES = ftpconf.c reread.c simple.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -93,6 +94,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CHECK_CFLAGS = @CHECK_CFLAGS@
 CHECK_LIBS = @CHECK_LIBS@
+CONFUSE_CONFIG = @CONFUSE_CONFIG@
+CONFUSE_VERSION = @CONFUSE_VERSION@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -111,6 +114,8 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 GMSGFMT = @GMSGFMT@
+HAVE_PKGCONFIG_FALSE = @HAVE_PKGCONFIG_FALSE@
+HAVE_PKGCONFIG_TRUE = @HAVE_PKGCONFIG_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -141,6 +146,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKGCONFIG = @PKGCONFIG@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
@@ -169,6 +175,9 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 check_confuse = @check_confuse@
+confuse_cflags = @confuse_cflags@
+confuse_cppflags = @confuse_cppflags@
+confuse_libs = @confuse_libs@
 datadir = @datadir@
 exec_prefix = @exec_prefix@
 host = @host@
@@ -190,15 +199,16 @@ program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
+target = @target@
 target_alias = @target_alias@
-EXTRA_DIST = test.conf simple.conf reread.conf wincfgtest.conf \
- wincfgtest.c wincfgtest.dev inc.conf
+EXTRA_DIST = simple.conf reread.conf wincfgtest.conf \
+ wincfgtest.c wincfgtest.dev ftp.conf
 
 INCLUDES = -I$(top_srcdir)/src
 AM_LDFLAGS = -L../src/
-cfgtest_LDADD = ../src/libconfuse.la
 simple_LDADD = ../src/libconfuse.la
 reread_LDADD = ../src/libconfuse.la
+ftpconf_LDADD = ../src/libconfuse.la
 CLEANFILES = *~ \#*\#
 all: all-am
 
@@ -240,9 +250,9 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-cfgtest$(EXEEXT): $(cfgtest_OBJECTS) $(cfgtest_DEPENDENCIES) 
-	@rm -f cfgtest$(EXEEXT)
-	$(LINK) $(cfgtest_LDFLAGS) $(cfgtest_OBJECTS) $(cfgtest_LDADD) $(LIBS)
+ftpconf$(EXEEXT): $(ftpconf_OBJECTS) $(ftpconf_DEPENDENCIES) 
+	@rm -f ftpconf$(EXEEXT)
+	$(LINK) $(ftpconf_LDFLAGS) $(ftpconf_OBJECTS) $(ftpconf_LDADD) $(LIBS)
 reread$(EXEEXT): $(reread_OBJECTS) $(reread_DEPENDENCIES) 
 	@rm -f reread$(EXEEXT)
 	$(LINK) $(reread_LDFLAGS) $(reread_OBJECTS) $(reread_LDADD) $(LIBS)
@@ -256,7 +266,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cfgtest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ftpconf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Po@am__quote@
 

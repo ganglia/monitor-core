@@ -4,7 +4,7 @@
 <head>
  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
  <title>confuse.h Source File</title>
- <link rel="stylesheet" href="doxygen.css" type="text/css">
+ <link rel="stylesheet" href="tutorial.css" type="text/css">
 </head>
 <body>
 
@@ -69,15 +69,15 @@
 00073 <span class="preprocessor"></span><span class="preprocessor"># define __export</span>
 00074 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
 00075 <span class="preprocessor"></span>
-<a name="l00077"></a><a class="code" href="confuse_8h.html#a129">00077</a> <span class="keyword">enum</span> cfg_type_t {
+<a name="l00077"></a><a class="code" href="confuse_8h.html#a132">00077</a> <span class="keyword">enum</span> cfg_type_t {
 00078     CFGT_NONE,
-00079     <a class="code" href="confuse_8h.html#a129a63">CFGT_INT</a>,     
-00080     <a class="code" href="confuse_8h.html#a129a64">CFGT_FLOAT</a>,   
-00081     <a class="code" href="confuse_8h.html#a129a65">CFGT_STR</a>,     
-00082     <a class="code" href="confuse_8h.html#a129a66">CFGT_BOOL</a>,    
-00083     <a class="code" href="confuse_8h.html#a129a67">CFGT_SEC</a>,     
-00084     <a class="code" href="confuse_8h.html#a129a68">CFGT_FUNC</a>,    
-00085     <a class="code" href="confuse_8h.html#a129a69">CFGT_PTR</a>      
+00079     <a class="code" href="confuse_8h.html#a132a64">CFGT_INT</a>,     
+00080     <a class="code" href="confuse_8h.html#a132a65">CFGT_FLOAT</a>,   
+00081     <a class="code" href="confuse_8h.html#a132a66">CFGT_STR</a>,     
+00082     <a class="code" href="confuse_8h.html#a132a67">CFGT_BOOL</a>,    
+00083     <a class="code" href="confuse_8h.html#a132a68">CFGT_SEC</a>,     
+00084     <a class="code" href="confuse_8h.html#a132a69">CFGT_FUNC</a>,    
+00085     <a class="code" href="confuse_8h.html#a132a70">CFGT_PTR</a>      
 00086 };
 00087 <span class="keyword">typedef</span> <span class="keyword">enum</span> cfg_type_t cfg_type_t;
 00088 
@@ -86,346 +86,352 @@
 <a name="l00092"></a><a class="code" href="confuse_8h.html#a4">00092</a> <span class="preprocessor">#define CFGF_LIST 2        </span>
 <a name="l00093"></a><a class="code" href="confuse_8h.html#a5">00093</a> <span class="preprocessor">#define CFGF_NOCASE 4      </span>
 <a name="l00094"></a><a class="code" href="confuse_8h.html#a6">00094</a> <span class="preprocessor">#define CFGF_TITLE 8       </span>
-00095 <span class="preprocessor">#define CFGF_RESET 32</span>
-00096 <span class="preprocessor"></span><span class="preprocessor">#define CFGF_DEFINIT 64</span>
-00097 <span class="preprocessor"></span>
-<a name="l00099"></a><a class="code" href="confuse_8h.html#a9">00099</a> <span class="preprocessor">#define CFG_SUCCESS 0</span>
-00100 <span class="preprocessor"></span><span class="preprocessor">#define CFG_FILE_ERROR -1</span>
-00101 <span class="preprocessor"></span><span class="preprocessor">#define CFG_PARSE_ERROR 1</span>
-00102 <span class="preprocessor"></span>
-00103 <span class="keyword">typedef</span> <span class="keyword">union </span><a class="code" href="unioncfg__value__t.html">cfg_value_t</a> cfg_value_t;
-00104 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> cfg_opt_t;
-00105 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structcfg__t.html">cfg_t</a> cfg_t;
-00106 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structcfg__defvalue__t.html">cfg_defvalue_t</a> cfg_defvalue_t;
-00107 <span class="keyword">typedef</span> <span class="keywordtype">int</span> cfg_flag_t;
-00108 
-<a name="l00134"></a><a class="code" href="confuse_8h.html#a53">00134</a> <span class="keyword">typedef</span> int (*<a class="code" href="confuse_8h.html#a53">cfg_func_t</a>)(cfg_t *cfg, cfg_opt_t *opt,
-00135                           <span class="keywordtype">int</span> argc, <span class="keyword">const</span> <span class="keywordtype">char</span> **argv);
-00136 
-<a name="l00157"></a><a class="code" href="confuse_8h.html#a54">00157</a> <span class="keyword">typedef</span> void (*cfg_print_func_t)(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index, FILE *fp);
-00158     
-<a name="l00180"></a><a class="code" href="confuse_8h.html#a55">00180</a> <span class="keyword">typedef</span> int (*<a class="code" href="confuse_8h.html#a55">cfg_callback_t</a>)(cfg_t *cfg, cfg_opt_t *opt,
-00181                               <span class="keyword">const</span> <span class="keywordtype">char</span> *value, <span class="keywordtype">void</span> *result);
-00182 
-<a name="l00196"></a><a class="code" href="confuse_8h.html#a56">00196</a> <span class="keyword">typedef</span> int (*cfg_validate_callback_t)(cfg_t *cfg, cfg_opt_t *opt);
-00197 
-<a name="l00206"></a><a class="code" href="confuse_8h.html#a57">00206</a> <span class="keyword">typedef</span> void (*<a class="code" href="confuse_8h.html#a57">cfg_free_func_t</a>)(<span class="keywordtype">void</span> *value);
-00207 
-<a name="l00209"></a><a class="code" href="confuse_8h.html#a130">00209</a> <span class="keyword">typedef</span> <span class="keyword">enum</span> {cfg_false, cfg_true} <a class="code" href="confuse_8h.html#a130">cfg_bool_t</a>;
-00210 
-<a name="l00212"></a><a class="code" href="confuse_8h.html#a58">00212</a> <span class="keyword">typedef</span> void (*<a class="code" href="confuse_8h.html#a58">cfg_errfunc_t</a>)(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, va_list ap);
-00213 
-<a name="l00218"></a><a class="code" href="structcfg__t.html">00218</a> <span class="keyword">struct </span>cfg_t {
-<a name="l00219"></a><a class="code" href="structcfg__t.html#cfg__to0">00219</a>     cfg_flag_t <a class="code" href="structcfg__t.html#cfg__to0">flags</a>;       
-<a name="l00220"></a><a class="code" href="structcfg__t.html#cfg__to1">00220</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__t.html#cfg__to1">name</a>;             
-<a name="l00223"></a><a class="code" href="structcfg__t.html#cfg__to2">00223</a>     cfg_opt_t *<a class="code" href="structcfg__t.html#cfg__to2">opts</a>;        
-<a name="l00224"></a><a class="code" href="structcfg__t.html#cfg__to3">00224</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__t.html#cfg__to3">title</a>;            
-<a name="l00226"></a><a class="code" href="structcfg__t.html#cfg__to4">00226</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__t.html#cfg__to4">filename</a>;         
-<a name="l00227"></a><a class="code" href="structcfg__t.html#cfg__to5">00227</a>     <span class="keywordtype">int</span> <a class="code" href="structcfg__t.html#cfg__to5">line</a>;               
-<a name="l00228"></a><a class="code" href="structcfg__t.html#cfg__to6">00228</a>     <a class="code" href="confuse_8h.html#a58">cfg_errfunc_t</a> <a class="code" href="structcfg__t.html#cfg__to6">errfunc</a>;  
-00231 };
-00232 
-<a name="l00235"></a><a class="code" href="unioncfg__value__t.html">00235</a> <span class="keyword">union </span>cfg_value_t {
-<a name="l00236"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to0">00236</a>     <span class="keywordtype">long</span> <span class="keywordtype">int</span> <a class="code" href="unioncfg__value__t.html#cfg__value__to0">number</a>;        
-<a name="l00237"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to1">00237</a>     <span class="keywordtype">double</span> <a class="code" href="unioncfg__value__t.html#cfg__value__to1">fpnumber</a>;        
-<a name="l00238"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to2">00238</a>     <a class="code" href="confuse_8h.html#a130">cfg_bool_t</a> <span class="keywordtype">boolean</span>;     
-<a name="l00239"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to3">00239</a>     <span class="keywordtype">char</span> *<a class="code" href="unioncfg__value__t.html#cfg__value__to3">string</a>;           
-<a name="l00240"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to4">00240</a>     cfg_t *<a class="code" href="unioncfg__value__t.html#cfg__value__to4">section</a>;         
-<a name="l00241"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to5">00241</a>     <span class="keywordtype">void</span> *<a class="code" href="unioncfg__value__t.html#cfg__value__to5">ptr</a>;              
-00242 };
-00243 
-<a name="l00247"></a><a class="code" href="structcfg__defvalue__t.html">00247</a> <span class="keyword">struct </span>cfg_defvalue_t {
-<a name="l00248"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to0">00248</a>     <span class="keywordtype">long</span> <span class="keywordtype">int</span> <a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to0">number</a>;        
-<a name="l00249"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to1">00249</a>     <span class="keywordtype">double</span> <a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to1">fpnumber</a>;        
-<a name="l00250"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to2">00250</a>     <a class="code" href="confuse_8h.html#a130">cfg_bool_t</a> <span class="keywordtype">boolean</span>;     
-<a name="l00251"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to3">00251</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to3">string</a>;           
-<a name="l00252"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to4">00252</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to4">parsed</a>;           
-00255 };
-00256 
-<a name="l00261"></a><a class="code" href="structcfg__opt__t.html">00261</a> <span class="keyword">struct </span>cfg_opt_t {
-<a name="l00262"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to0">00262</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__opt__t.html#cfg__opt__to0">name</a>;             
-<a name="l00263"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to1">00263</a>     cfg_type_t <a class="code" href="structcfg__opt__t.html#cfg__opt__to1">type</a>;        
-<a name="l00264"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to2">00264</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structcfg__opt__t.html#cfg__opt__to2">nvalues</a>;   
-<a name="l00265"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to3">00265</a>     cfg_value_t **<a class="code" href="structcfg__opt__t.html#cfg__opt__to3">values</a>;   
-<a name="l00266"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to4">00266</a>     cfg_flag_t <a class="code" href="structcfg__opt__t.html#cfg__opt__to4">flags</a>;       
-<a name="l00267"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to5">00267</a>     cfg_opt_t *<a class="code" href="structcfg__opt__t.html#cfg__opt__to5">subopts</a>;     
-<a name="l00268"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to6">00268</a>     cfg_defvalue_t <a class="code" href="structcfg__opt__t.html#cfg__opt__to6">def</a>;     
-<a name="l00269"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to7">00269</a>     <a class="code" href="confuse_8h.html#a53">cfg_func_t</a> <a class="code" href="structcfg__opt__t.html#cfg__opt__to7">func</a>;        
-<a name="l00270"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to8">00270</a>     <span class="keywordtype">void</span> *<a class="code" href="structcfg__opt__t.html#cfg__opt__to8">simple_value</a>;     
-<a name="l00273"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to9">00273</a>     <a class="code" href="confuse_8h.html#a55">cfg_callback_t</a> <a class="code" href="structcfg__opt__t.html#cfg__opt__to9">parsecb</a>; 
-<a name="l00274"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to10">00274</a>     <a class="code" href="confuse_8h.html#a56">cfg_validate_callback_t</a> <a class="code" href="structcfg__opt__t.html#cfg__opt__to10">validcb</a>; 
-<a name="l00275"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to11">00275</a>     <a class="code" href="confuse_8h.html#a54">cfg_print_func_t</a> <a class="code" href="structcfg__opt__t.html#cfg__opt__to11">pf</a>;    
-00276     <a class="code" href="confuse_8h.html#a57">cfg_free_func_t</a> freecb; <span class="comment">/***&lt; user-defined memory release function */</span>
-00277 };
-00278 
-00279 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">char</span> __export confuse_copyright[];
-00280 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">char</span> __export confuse_version[];
-00281 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">char</span> __export confuse_author[];
-00282 
-00283 <span class="preprocessor">#define __CFG_STR(name, def, flags, svalue, cb) \</span>
-00284 <span class="preprocessor">  {name,CFGT_STR,0,0,flags,0,{0,0,cfg_false,def,0},0,svalue,cb,0,0,0}</span>
-00285 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_STR_LIST(name, def, flags, svalue, cb) \</span>
-00286 <span class="preprocessor">  {name,CFGT_STR,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,cb,0,0,0}</span>
-00287 <span class="preprocessor"></span>
-<a name="l00290"></a><a class="code" href="confuse_8h.html#a14">00290</a> <span class="preprocessor">#define CFG_STR(name, def, flags) \</span>
-00291 <span class="preprocessor">  __CFG_STR(name, def, flags, 0, 0)</span>
-00292 <span class="preprocessor"></span>
-<a name="l00295"></a><a class="code" href="confuse_8h.html#a15">00295</a> <span class="preprocessor">#define CFG_STR_LIST(name, def, flags) \</span>
-00296 <span class="preprocessor">  __CFG_STR_LIST(name, def, flags, 0, 0)</span>
-00297 <span class="preprocessor"></span>
-<a name="l00300"></a><a class="code" href="confuse_8h.html#a16">00300</a> <span class="preprocessor">#define CFG_STR_CB(name, def, flags, cb) \</span>
-00301 <span class="preprocessor">  __CFG_STR(name, def, flags, 0, cb)</span>
-00302 <span class="preprocessor"></span>
-<a name="l00305"></a><a class="code" href="confuse_8h.html#a17">00305</a> <span class="preprocessor">#define CFG_STR_LIST_CB(name, def, flags, cb) \</span>
-00306 <span class="preprocessor">  __CFG_STR_LIST(name, def, flags, 0, cb)</span>
-00307 <span class="preprocessor"></span>
-<a name="l00360"></a><a class="code" href="confuse_8h.html#a18">00360</a> <span class="preprocessor">#define CFG_SIMPLE_STR(name, svalue) \</span>
-00361 <span class="preprocessor">  __CFG_STR(name, 0, CFGF_NONE, svalue, 0)</span>
-00362 <span class="preprocessor"></span>
-00363 
-00364 <span class="preprocessor">#define __CFG_INT(name, def, flags, svalue, cb) \</span>
-00365 <span class="preprocessor">  {name,CFGT_INT,0,0,flags,0,{def,0,cfg_false,0,0},0,svalue,cb,0,0,0}</span>
-00366 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_INT_LIST(name, def, flags, svalue, cb) \</span>
-00367 <span class="preprocessor">  {name,CFGT_INT,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,cb,0,0,0}</span>
-00368 <span class="preprocessor"></span>
-<a name="l00371"></a><a class="code" href="confuse_8h.html#a21">00371</a> <span class="preprocessor">#define CFG_INT(name, def, flags) \</span>
-00372 <span class="preprocessor">  __CFG_INT(name, def, flags, 0, 0)</span>
-00373 <span class="preprocessor"></span>
-<a name="l00376"></a><a class="code" href="confuse_8h.html#a22">00376</a> <span class="preprocessor">#define CFG_INT_LIST(name, def, flags) \</span>
-00377 <span class="preprocessor">  __CFG_INT_LIST(name, def, flags, 0, 0)</span>
-00378 <span class="preprocessor"></span>
-<a name="l00381"></a><a class="code" href="confuse_8h.html#a23">00381</a> <span class="preprocessor">#define CFG_INT_CB(name, def, flags, cb) \</span>
-00382 <span class="preprocessor">  __CFG_INT(name, def, flags, 0, cb)</span>
-00383 <span class="preprocessor"></span>
-<a name="l00386"></a><a class="code" href="confuse_8h.html#a24">00386</a> <span class="preprocessor">#define CFG_INT_LIST_CB(name, def, flags, cb) \</span>
-00387 <span class="preprocessor">  __CFG_INT_LIST(name, def, flags, 0, cb)</span>
-00388 <span class="preprocessor"></span>
-<a name="l00392"></a><a class="code" href="confuse_8h.html#a25">00392</a> <span class="preprocessor">#define CFG_SIMPLE_INT(name, svalue) \</span>
-00393 <span class="preprocessor">  __CFG_INT(name, 0, CFGF_NONE, svalue, 0)</span>
-00394 <span class="preprocessor"></span>
-00395 
+<a name="l00095"></a><a class="code" href="confuse_8h.html#a7">00095</a> <span class="preprocessor">#define CFGF_NODEFAULT 16  </span>
+00096 <span class="preprocessor">#define CFGF_RESET 32</span>
+00097 <span class="preprocessor"></span><span class="preprocessor">#define CFGF_DEFINIT 64</span>
+00098 <span class="preprocessor"></span>
+<a name="l00100"></a><a class="code" href="confuse_8h.html#a10">00100</a> <span class="preprocessor">#define CFG_SUCCESS 0</span>
+00101 <span class="preprocessor"></span><span class="preprocessor">#define CFG_FILE_ERROR -1</span>
+00102 <span class="preprocessor"></span><span class="preprocessor">#define CFG_PARSE_ERROR 1</span>
+00103 <span class="preprocessor"></span>
+00104 <span class="keyword">typedef</span> <span class="keyword">union </span><a class="code" href="unioncfg__value__t.html">cfg_value_t</a> cfg_value_t;
+00105 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structcfg__opt__t.html">cfg_opt_t</a> cfg_opt_t;
+00106 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structcfg__t.html">cfg_t</a> cfg_t;
+00107 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structcfg__defvalue__t.html">cfg_defvalue_t</a> cfg_defvalue_t;
+00108 <span class="keyword">typedef</span> <span class="keywordtype">int</span> cfg_flag_t;
+00109 
+<a name="l00135"></a><a class="code" href="confuse_8h.html#a54">00135</a> <span class="keyword">typedef</span> int (*<a class="code" href="confuse_8h.html#a54">cfg_func_t</a>)(cfg_t *cfg, cfg_opt_t *opt,
+00136                           <span class="keywordtype">int</span> argc, <span class="keyword">const</span> <span class="keywordtype">char</span> **argv);
+00137 
+<a name="l00158"></a><a class="code" href="confuse_8h.html#a55">00158</a> <span class="keyword">typedef</span> void (*<a class="code" href="confuse_8h.html#a55">cfg_print_func_t</a>)(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index, FILE *fp);
+00159     
+<a name="l00181"></a><a class="code" href="confuse_8h.html#a56">00181</a> <span class="keyword">typedef</span> int (*<a class="code" href="confuse_8h.html#a56">cfg_callback_t</a>)(cfg_t *cfg, cfg_opt_t *opt,
+00182                               <span class="keyword">const</span> <span class="keywordtype">char</span> *value, <span class="keywordtype">void</span> *result);
+00183 
+<a name="l00197"></a><a class="code" href="confuse_8h.html#a57">00197</a> <span class="keyword">typedef</span> int (*<a class="code" href="confuse_8h.html#a57">cfg_validate_callback_t</a>)(cfg_t *cfg, cfg_opt_t *opt);
+00198 
+<a name="l00207"></a><a class="code" href="confuse_8h.html#a58">00207</a> <span class="keyword">typedef</span> void (*<a class="code" href="confuse_8h.html#a58">cfg_free_func_t</a>)(<span class="keywordtype">void</span> *value);
+00208 
+<a name="l00210"></a><a class="code" href="confuse_8h.html#a133">00210</a> <span class="keyword">typedef</span> <span class="keyword">enum</span> {cfg_false, cfg_true} <a class="code" href="confuse_8h.html#a133">cfg_bool_t</a>;
+00211 
+<a name="l00213"></a><a class="code" href="confuse_8h.html#a59">00213</a> <span class="keyword">typedef</span> void (*<a class="code" href="confuse_8h.html#a59">cfg_errfunc_t</a>)(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, va_list ap);
+00214 
+<a name="l00219"></a><a class="code" href="structcfg__t.html">00219</a> <span class="keyword">struct </span>cfg_t {
+<a name="l00220"></a><a class="code" href="structcfg__t.html#cfg__to0">00220</a>     cfg_flag_t <a class="code" href="structcfg__t.html#cfg__to0">flags</a>;       
+<a name="l00221"></a><a class="code" href="structcfg__t.html#cfg__to1">00221</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__t.html#cfg__to1">name</a>;             
+<a name="l00224"></a><a class="code" href="structcfg__t.html#cfg__to2">00224</a>     cfg_opt_t *<a class="code" href="structcfg__t.html#cfg__to2">opts</a>;        
+<a name="l00225"></a><a class="code" href="structcfg__t.html#cfg__to3">00225</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__t.html#cfg__to3">title</a>;            
+<a name="l00227"></a><a class="code" href="structcfg__t.html#cfg__to4">00227</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__t.html#cfg__to4">filename</a>;         
+<a name="l00228"></a><a class="code" href="structcfg__t.html#cfg__to5">00228</a>     <span class="keywordtype">int</span> <a class="code" href="structcfg__t.html#cfg__to5">line</a>;               
+<a name="l00229"></a><a class="code" href="structcfg__t.html#cfg__to6">00229</a>     <a class="code" href="confuse_8h.html#a59">cfg_errfunc_t</a> <a class="code" href="structcfg__t.html#cfg__to6">errfunc</a>;  
+00232 };
+00233 
+<a name="l00236"></a><a class="code" href="unioncfg__value__t.html">00236</a> <span class="keyword">union </span>cfg_value_t {
+<a name="l00237"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to0">00237</a>     <span class="keywordtype">long</span> <span class="keywordtype">int</span> <a class="code" href="unioncfg__value__t.html#cfg__value__to0">number</a>;        
+<a name="l00238"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to1">00238</a>     <span class="keywordtype">double</span> <a class="code" href="unioncfg__value__t.html#cfg__value__to1">fpnumber</a>;        
+<a name="l00239"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to2">00239</a>     <a class="code" href="confuse_8h.html#a133">cfg_bool_t</a> <span class="keywordtype">boolean</span>;     
+<a name="l00240"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to3">00240</a>     <span class="keywordtype">char</span> *<a class="code" href="unioncfg__value__t.html#cfg__value__to3">string</a>;           
+<a name="l00241"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to4">00241</a>     cfg_t *<a class="code" href="unioncfg__value__t.html#cfg__value__to4">section</a>;         
+<a name="l00242"></a><a class="code" href="unioncfg__value__t.html#cfg__value__to5">00242</a>     <span class="keywordtype">void</span> *<a class="code" href="unioncfg__value__t.html#cfg__value__to5">ptr</a>;              
+00243 };
+00244 
+<a name="l00248"></a><a class="code" href="structcfg__defvalue__t.html">00248</a> <span class="keyword">struct </span>cfg_defvalue_t {
+<a name="l00249"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to0">00249</a>     <span class="keywordtype">long</span> <span class="keywordtype">int</span> <a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to0">number</a>;        
+<a name="l00250"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to1">00250</a>     <span class="keywordtype">double</span> <a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to1">fpnumber</a>;        
+<a name="l00251"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to2">00251</a>     <a class="code" href="confuse_8h.html#a133">cfg_bool_t</a> <span class="keywordtype">boolean</span>;     
+<a name="l00252"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to3">00252</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to3">string</a>;           
+<a name="l00253"></a><a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to4">00253</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__defvalue__t.html#cfg__defvalue__to4">parsed</a>;           
+00256 };
+00257 
+<a name="l00262"></a><a class="code" href="structcfg__opt__t.html">00262</a> <span class="keyword">struct </span>cfg_opt_t {
+<a name="l00263"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to0">00263</a>     <span class="keywordtype">char</span> *<a class="code" href="structcfg__opt__t.html#cfg__opt__to0">name</a>;             
+<a name="l00264"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to1">00264</a>     cfg_type_t <a class="code" href="structcfg__opt__t.html#cfg__opt__to1">type</a>;        
+<a name="l00265"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to2">00265</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structcfg__opt__t.html#cfg__opt__to2">nvalues</a>;   
+<a name="l00266"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to3">00266</a>     cfg_value_t **<a class="code" href="structcfg__opt__t.html#cfg__opt__to3">values</a>;   
+<a name="l00267"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to4">00267</a>     cfg_flag_t <a class="code" href="structcfg__opt__t.html#cfg__opt__to4">flags</a>;       
+<a name="l00268"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to5">00268</a>     cfg_opt_t *<a class="code" href="structcfg__opt__t.html#cfg__opt__to5">subopts</a>;     
+<a name="l00269"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to6">00269</a>     cfg_defvalue_t <a class="code" href="structcfg__opt__t.html#cfg__opt__to6">def</a>;     
+<a name="l00270"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to7">00270</a>     <a class="code" href="confuse_8h.html#a54">cfg_func_t</a> <a class="code" href="structcfg__opt__t.html#cfg__opt__to7">func</a>;        
+<a name="l00271"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to8">00271</a>     <span class="keywordtype">void</span> *<a class="code" href="structcfg__opt__t.html#cfg__opt__to8">simple_value</a>;     
+<a name="l00274"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to9">00274</a>     <a class="code" href="confuse_8h.html#a56">cfg_callback_t</a> <a class="code" href="structcfg__opt__t.html#cfg__opt__to9">parsecb</a>; 
+<a name="l00275"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to10">00275</a>     <a class="code" href="confuse_8h.html#a57">cfg_validate_callback_t</a> <a class="code" href="structcfg__opt__t.html#cfg__opt__to10">validcb</a>; 
+<a name="l00276"></a><a class="code" href="structcfg__opt__t.html#cfg__opt__to11">00276</a>     <a class="code" href="confuse_8h.html#a55">cfg_print_func_t</a> <a class="code" href="structcfg__opt__t.html#cfg__opt__to11">pf</a>;    
+00277     <a class="code" href="confuse_8h.html#a58">cfg_free_func_t</a> freecb; <span class="comment">/***&lt; user-defined memory release function */</span>
+00278 };
+00279 
+00280 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">char</span> __export confuse_copyright[];
+00281 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">char</span> __export confuse_version[];
+00282 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">char</span> __export confuse_author[];
+00283 
+00284 <span class="preprocessor">#define __CFG_STR(name, def, flags, svalue, cb) \</span>
+00285 <span class="preprocessor">  {name,CFGT_STR,0,0,flags,0,{0,0,cfg_false,def,0},0,svalue,cb,0,0,0}</span>
+00286 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_STR_LIST(name, def, flags, svalue, cb) \</span>
+00287 <span class="preprocessor">  {name,CFGT_STR,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,cb,0,0,0}</span>
+00288 <span class="preprocessor"></span>
+<a name="l00291"></a><a class="code" href="confuse_8h.html#a15">00291</a> <span class="preprocessor">#define CFG_STR(name, def, flags) \</span>
+00292 <span class="preprocessor">  __CFG_STR(name, def, flags, 0, 0)</span>
+00293 <span class="preprocessor"></span>
+<a name="l00296"></a><a class="code" href="confuse_8h.html#a16">00296</a> <span class="preprocessor">#define CFG_STR_LIST(name, def, flags) \</span>
+00297 <span class="preprocessor">  __CFG_STR_LIST(name, def, flags, 0, 0)</span>
+00298 <span class="preprocessor"></span>
+<a name="l00301"></a><a class="code" href="confuse_8h.html#a17">00301</a> <span class="preprocessor">#define CFG_STR_CB(name, def, flags, cb) \</span>
+00302 <span class="preprocessor">  __CFG_STR(name, def, flags, 0, cb)</span>
+00303 <span class="preprocessor"></span>
+<a name="l00306"></a><a class="code" href="confuse_8h.html#a18">00306</a> <span class="preprocessor">#define CFG_STR_LIST_CB(name, def, flags, cb) \</span>
+00307 <span class="preprocessor">  __CFG_STR_LIST(name, def, flags, 0, cb)</span>
+00308 <span class="preprocessor"></span>
+<a name="l00361"></a><a class="code" href="confuse_8h.html#a19">00361</a> <span class="preprocessor">#define CFG_SIMPLE_STR(name, svalue) \</span>
+00362 <span class="preprocessor">  __CFG_STR(name, 0, CFGF_NONE, svalue, 0)</span>
+00363 <span class="preprocessor"></span>
+00364 
+00365 <span class="preprocessor">#define __CFG_INT(name, def, flags, svalue, cb) \</span>
+00366 <span class="preprocessor">  {name,CFGT_INT,0,0,flags,0,{def,0,cfg_false,0,0},0,svalue,cb,0,0,0}</span>
+00367 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_INT_LIST(name, def, flags, svalue, cb) \</span>
+00368 <span class="preprocessor">  {name,CFGT_INT,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,cb,0,0,0}</span>
+00369 <span class="preprocessor"></span>
+<a name="l00372"></a><a class="code" href="confuse_8h.html#a22">00372</a> <span class="preprocessor">#define CFG_INT(name, def, flags) \</span>
+00373 <span class="preprocessor">  __CFG_INT(name, def, flags, 0, 0)</span>
+00374 <span class="preprocessor"></span>
+<a name="l00377"></a><a class="code" href="confuse_8h.html#a23">00377</a> <span class="preprocessor">#define CFG_INT_LIST(name, def, flags) \</span>
+00378 <span class="preprocessor">  __CFG_INT_LIST(name, def, flags, 0, 0)</span>
+00379 <span class="preprocessor"></span>
+<a name="l00382"></a><a class="code" href="confuse_8h.html#a24">00382</a> <span class="preprocessor">#define CFG_INT_CB(name, def, flags, cb) \</span>
+00383 <span class="preprocessor">  __CFG_INT(name, def, flags, 0, cb)</span>
+00384 <span class="preprocessor"></span>
+<a name="l00387"></a><a class="code" href="confuse_8h.html#a25">00387</a> <span class="preprocessor">#define CFG_INT_LIST_CB(name, def, flags, cb) \</span>
+00388 <span class="preprocessor">  __CFG_INT_LIST(name, def, flags, 0, cb)</span>
+00389 <span class="preprocessor"></span>
+<a name="l00393"></a><a class="code" href="confuse_8h.html#a26">00393</a> <span class="preprocessor">#define CFG_SIMPLE_INT(name, svalue) \</span>
+00394 <span class="preprocessor">  __CFG_INT(name, 0, CFGF_NONE, svalue, 0)</span>
+00395 <span class="preprocessor"></span>
 00396 
-00397 <span class="preprocessor">#define __CFG_FLOAT(name, def, flags, svalue, cb) \</span>
-00398 <span class="preprocessor">  {name,CFGT_FLOAT,0,0,flags,0,{0,def,cfg_false,0,0},0,svalue,cb,0,0,0}</span>
-00399 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_FLOAT_LIST(name, def, flags, svalue, cb) \</span>
-00400 <span class="preprocessor">  {name,CFGT_FLOAT,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,cb,0,0,0}</span>
-00401 <span class="preprocessor"></span>
-<a name="l00404"></a><a class="code" href="confuse_8h.html#a28">00404</a> <span class="preprocessor">#define CFG_FLOAT(name, def, flags) \</span>
-00405 <span class="preprocessor">  __CFG_FLOAT(name, def, flags, 0, 0)</span>
-00406 <span class="preprocessor"></span>
-<a name="l00409"></a><a class="code" href="confuse_8h.html#a29">00409</a> <span class="preprocessor">#define CFG_FLOAT_LIST(name, def, flags) \</span>
-00410 <span class="preprocessor">  __CFG_FLOAT_LIST(name, def, flags, 0, 0)</span>
-00411 <span class="preprocessor"></span>
-<a name="l00414"></a><a class="code" href="confuse_8h.html#a30">00414</a> <span class="preprocessor">#define CFG_FLOAT_CB(name, def, flags, cb) \</span>
-00415 <span class="preprocessor">  __CFG_FLOAT(name, def, flags, 0, cb)</span>
-00416 <span class="preprocessor"></span>
-<a name="l00419"></a><a class="code" href="confuse_8h.html#a31">00419</a> <span class="preprocessor">#define CFG_FLOAT_LIST_CB(name, def, flags, cb) \</span>
-00420 <span class="preprocessor">  __CFG_FLOAT_LIST(name, def, flags, 0, cb)</span>
-00421 <span class="preprocessor"></span>
-<a name="l00425"></a><a class="code" href="confuse_8h.html#a32">00425</a> <span class="preprocessor">#define CFG_SIMPLE_FLOAT(name, svalue) \</span>
-00426 <span class="preprocessor">  __CFG_FLOAT(name, 0, CFGF_NONE, svalue, 0)</span>
-00427 <span class="preprocessor"></span>
-00428 
+00397 
+00398 <span class="preprocessor">#define __CFG_FLOAT(name, def, flags, svalue, cb) \</span>
+00399 <span class="preprocessor">  {name,CFGT_FLOAT,0,0,flags,0,{0,def,cfg_false,0,0},0,svalue,cb,0,0,0}</span>
+00400 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_FLOAT_LIST(name, def, flags, svalue, cb) \</span>
+00401 <span class="preprocessor">  {name,CFGT_FLOAT,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,cb,0,0,0}</span>
+00402 <span class="preprocessor"></span>
+<a name="l00405"></a><a class="code" href="confuse_8h.html#a29">00405</a> <span class="preprocessor">#define CFG_FLOAT(name, def, flags) \</span>
+00406 <span class="preprocessor">  __CFG_FLOAT(name, def, flags, 0, 0)</span>
+00407 <span class="preprocessor"></span>
+<a name="l00410"></a><a class="code" href="confuse_8h.html#a30">00410</a> <span class="preprocessor">#define CFG_FLOAT_LIST(name, def, flags) \</span>
+00411 <span class="preprocessor">  __CFG_FLOAT_LIST(name, def, flags, 0, 0)</span>
+00412 <span class="preprocessor"></span>
+<a name="l00415"></a><a class="code" href="confuse_8h.html#a31">00415</a> <span class="preprocessor">#define CFG_FLOAT_CB(name, def, flags, cb) \</span>
+00416 <span class="preprocessor">  __CFG_FLOAT(name, def, flags, 0, cb)</span>
+00417 <span class="preprocessor"></span>
+<a name="l00420"></a><a class="code" href="confuse_8h.html#a32">00420</a> <span class="preprocessor">#define CFG_FLOAT_LIST_CB(name, def, flags, cb) \</span>
+00421 <span class="preprocessor">  __CFG_FLOAT_LIST(name, def, flags, 0, cb)</span>
+00422 <span class="preprocessor"></span>
+<a name="l00426"></a><a class="code" href="confuse_8h.html#a33">00426</a> <span class="preprocessor">#define CFG_SIMPLE_FLOAT(name, svalue) \</span>
+00427 <span class="preprocessor">  __CFG_FLOAT(name, 0, CFGF_NONE, svalue, 0)</span>
+00428 <span class="preprocessor"></span>
 00429 
-00430 <span class="preprocessor">#define __CFG_BOOL(name, def, flags, svalue, cb) \</span>
-00431 <span class="preprocessor">  {name,CFGT_BOOL,0,0,flags,0,{0,0,def,0,0},0,svalue,cb,0,0,0}</span>
-00432 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_BOOL_LIST(name, def, flags, svalue, cb) \</span>
-00433 <span class="preprocessor">  {name,CFGT_BOOL,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,cb,0,0,0}</span>
-00434 <span class="preprocessor"></span>
-<a name="l00437"></a><a class="code" href="confuse_8h.html#a35">00437</a> <span class="preprocessor">#define CFG_BOOL(name, def, flags) \</span>
-00438 <span class="preprocessor">  __CFG_BOOL(name, def, flags, 0, 0)</span>
-00439 <span class="preprocessor"></span>
-<a name="l00442"></a><a class="code" href="confuse_8h.html#a36">00442</a> <span class="preprocessor">#define CFG_BOOL_LIST(name, def, flags) \</span>
-00443 <span class="preprocessor">  __CFG_BOOL_LIST(name, def, flags, 0, 0)</span>
-00444 <span class="preprocessor"></span>
-<a name="l00447"></a><a class="code" href="confuse_8h.html#a37">00447</a> <span class="preprocessor">#define CFG_BOOL_CB(name, def, flags, cb) \</span>
-00448 <span class="preprocessor">  __CFG_BOOL(name, def, flags, 0, cb)</span>
-00449 <span class="preprocessor"></span>
-<a name="l00452"></a><a class="code" href="confuse_8h.html#a38">00452</a> <span class="preprocessor">#define CFG_BOOL_LIST_CB(name, def, flags, cb) \</span>
-00453 <span class="preprocessor">  __CFG_BOOL_LIST(name, def, flags, 0, cb)</span>
-00454 <span class="preprocessor"></span>
-<a name="l00458"></a><a class="code" href="confuse_8h.html#a39">00458</a> <span class="preprocessor">#define CFG_SIMPLE_BOOL(name, svalue) \</span>
-00459 <span class="preprocessor">  __CFG_BOOL(name, cfg_false, CFGF_NONE, svalue, 0)</span>
-00460 <span class="preprocessor"></span>
-00461 
+00430 
+00431 <span class="preprocessor">#define __CFG_BOOL(name, def, flags, svalue, cb) \</span>
+00432 <span class="preprocessor">  {name,CFGT_BOOL,0,0,flags,0,{0,0,def,0,0},0,svalue,cb,0,0,0}</span>
+00433 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_BOOL_LIST(name, def, flags, svalue, cb) \</span>
+00434 <span class="preprocessor">  {name,CFGT_BOOL,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,cb,0,0,0}</span>
+00435 <span class="preprocessor"></span>
+<a name="l00438"></a><a class="code" href="confuse_8h.html#a36">00438</a> <span class="preprocessor">#define CFG_BOOL(name, def, flags) \</span>
+00439 <span class="preprocessor">  __CFG_BOOL(name, def, flags, 0, 0)</span>
+00440 <span class="preprocessor"></span>
+<a name="l00443"></a><a class="code" href="confuse_8h.html#a37">00443</a> <span class="preprocessor">#define CFG_BOOL_LIST(name, def, flags) \</span>
+00444 <span class="preprocessor">  __CFG_BOOL_LIST(name, def, flags, 0, 0)</span>
+00445 <span class="preprocessor"></span>
+<a name="l00448"></a><a class="code" href="confuse_8h.html#a38">00448</a> <span class="preprocessor">#define CFG_BOOL_CB(name, def, flags, cb) \</span>
+00449 <span class="preprocessor">  __CFG_BOOL(name, def, flags, 0, cb)</span>
+00450 <span class="preprocessor"></span>
+<a name="l00453"></a><a class="code" href="confuse_8h.html#a39">00453</a> <span class="preprocessor">#define CFG_BOOL_LIST_CB(name, def, flags, cb) \</span>
+00454 <span class="preprocessor">  __CFG_BOOL_LIST(name, def, flags, 0, cb)</span>
+00455 <span class="preprocessor"></span>
+<a name="l00459"></a><a class="code" href="confuse_8h.html#a40">00459</a> <span class="preprocessor">#define CFG_SIMPLE_BOOL(name, svalue) \</span>
+00460 <span class="preprocessor">  __CFG_BOOL(name, cfg_false, CFGF_NONE, svalue, 0)</span>
+00461 <span class="preprocessor"></span>
 00462 
-<a name="l00474"></a><a class="code" href="confuse_8h.html#a40">00474</a> <span class="preprocessor">#define CFG_SEC(name, opts, flags) \</span>
-00475 <span class="preprocessor">  {name,CFGT_SEC,0,0,flags,opts,{0,0,cfg_false,0,0},0,0,0,0,0,0}</span>
-00476 <span class="preprocessor"></span>
-00477 
+00463 
+<a name="l00475"></a><a class="code" href="confuse_8h.html#a41">00475</a> <span class="preprocessor">#define CFG_SEC(name, opts, flags) \</span>
+00476 <span class="preprocessor">  {name,CFGT_SEC,0,0,flags,opts,{0,0,cfg_false,0,0},0,0,0,0,0,0}</span>
+00477 <span class="preprocessor"></span>
 00478 
-<a name="l00485"></a><a class="code" href="confuse_8h.html#a41">00485</a> <span class="preprocessor">#define CFG_FUNC(name, func) \</span>
-00486 <span class="preprocessor">  {name,CFGT_FUNC,0,0,CFGF_NONE,0,{0,0,cfg_false,0,0},func,0,0,0,0,0}</span>
-00487 <span class="preprocessor"></span>
-00488 
-00489 <span class="preprocessor">#define __CFG_PTR(name, def, flags, svalue, parsecb, freecb) \</span>
-00490 <span class="preprocessor">  {name,CFGT_PTR,0,0,flags,0,{0,0,cfg_false,0,def},0,svalue,parsecb,0,0,freecb}</span>
-00491 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_PTR_LIST(name, def, flags, svalue, parsecb, freecb) \</span>
-00492 <span class="preprocessor">  {name,CFGT_PTR,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,parsecb,0,0,freecb}</span>
-00493 <span class="preprocessor"></span>
-<a name="l00497"></a><a class="code" href="confuse_8h.html#a44">00497</a> <span class="preprocessor">#define CFG_PTR_CB(name, def, flags, parsecb, freecb) \</span>
-00498 <span class="preprocessor">  __CFG_PTR(name, def, flags, 0, parsecb, freecb)</span>
-00499 <span class="preprocessor"></span>
-00500 <span class="preprocessor">#define CFG_PTR_LIST_CB(name, def, flags, parsecb, freecb) \</span>
-00501 <span class="preprocessor">  __CFG_PTR(name, def, flags | CFGF_LIST, 0, parsecb, freecb)</span>
-00502 <span class="preprocessor"></span>
-00503 <span class="comment">/*#define CFG_SIMPLE_PTR(name, svalue, cb) \</span>
-00504 <span class="comment">  __CFG_PTR(name, 0, 0, svalue, cb)*/</span>
-00505 
-00506 
-<a name="l00510"></a><a class="code" href="confuse_8h.html#a46">00510</a> <span class="preprocessor">#define CFG_END() \</span>
-00511 <span class="preprocessor">   {0,CFGT_NONE,0,0,CFGF_NONE,0,{0,0,cfg_false,0,0},0,0,0,0,0,0}</span>
-00512 <span class="preprocessor"></span>
-00513 
-00514 
-00531 DLLIMPORT cfg_t * __export cfg_init(cfg_opt_t *opts, cfg_flag_t flags);
-00532 
-00546 DLLIMPORT <span class="keywordtype">int</span> __export cfg_parse(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *filename);
-00547 
-00558 DLLIMPORT <span class="keywordtype">int</span> __export cfg_parse_fp(cfg_t *cfg, FILE *fp);
+00479 
+<a name="l00486"></a><a class="code" href="confuse_8h.html#a42">00486</a> <span class="preprocessor">#define CFG_FUNC(name, func) \</span>
+00487 <span class="preprocessor">  {name,CFGT_FUNC,0,0,CFGF_NONE,0,{0,0,cfg_false,0,0},func,0,0,0,0,0}</span>
+00488 <span class="preprocessor"></span>
+00489 
+00490 <span class="preprocessor">#define __CFG_PTR(name, def, flags, svalue, parsecb, freecb) \</span>
+00491 <span class="preprocessor">  {name,CFGT_PTR,0,0,flags,0,{0,0,cfg_false,0,def},0,svalue,parsecb,0,0,freecb}</span>
+00492 <span class="preprocessor"></span><span class="preprocessor">#define __CFG_PTR_LIST(name, def, flags, svalue, parsecb, freecb) \</span>
+00493 <span class="preprocessor">  {name,CFGT_PTR,0,0,flags | CFGF_LIST,0,{0,0,cfg_false,0,def},0,svalue,parsecb,0,0,freecb}</span>
+00494 <span class="preprocessor"></span>
+<a name="l00507"></a><a class="code" href="confuse_8h.html#a45">00507</a> <span class="preprocessor">#define CFG_PTR_CB(name, def, flags, parsecb, freecb) \</span>
+00508 <span class="preprocessor">  __CFG_PTR(name, def, flags, 0, parsecb, freecb)</span>
+00509 <span class="preprocessor"></span>
+<a name="l00512"></a><a class="code" href="confuse_8h.html#a46">00512</a> <span class="preprocessor">#define CFG_PTR_LIST_CB(name, def, flags, parsecb, freecb) \</span>
+00513 <span class="preprocessor">  __CFG_PTR(name, def, flags | CFGF_LIST, 0, parsecb, freecb)</span>
+00514 <span class="preprocessor"></span>
+00515 <span class="comment">/*#define CFG_SIMPLE_PTR(name, svalue, cb) \</span>
+00516 <span class="comment">  __CFG_PTR(name, 0, 0, svalue, cb)*/</span>
+00517 
+00518 
+<a name="l00522"></a><a class="code" href="confuse_8h.html#a47">00522</a> <span class="preprocessor">#define CFG_END() \</span>
+00523 <span class="preprocessor">   {0,CFGT_NONE,0,0,CFGF_NONE,0,{0,0,cfg_false,0,0},0,0,0,0,0,0}</span>
+00524 <span class="preprocessor"></span>
+00525 
+00526 
+00543 DLLIMPORT cfg_t * __export cfg_init(cfg_opt_t *opts, cfg_flag_t flags);
+00544 
+00558 DLLIMPORT <span class="keywordtype">int</span> __export cfg_parse(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *filename);
 00559 
-00568 DLLIMPORT <span class="keywordtype">int</span> __export cfg_parse_buf(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *buf);
-00569 
-00575 DLLIMPORT <span class="keywordtype">void</span> __export cfg_free_value(cfg_opt_t *opt);
-00576 
-00580 DLLIMPORT <span class="keywordtype">void</span> __export cfg_free(cfg_t *cfg);
+00570 DLLIMPORT <span class="keywordtype">int</span> __export cfg_parse_fp(cfg_t *cfg, FILE *fp);
+00571 
+00580 DLLIMPORT <span class="keywordtype">int</span> __export cfg_parse_buf(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *buf);
 00581 
-00585 DLLIMPORT <a class="code" href="confuse_8h.html#a58">cfg_errfunc_t</a> __export cfg_set_error_function(cfg_t *cfg,
-00586                                                         cfg_errfunc_t errfunc);
-00587 
-00591 DLLIMPORT <span class="keywordtype">void</span> __export cfg_error(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, ...);
-00592 
-00598 DLLIMPORT <span class="keywordtype">signed</span> <span class="keywordtype">long</span> cfg_opt_getnint(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00587 DLLIMPORT <span class="keywordtype">void</span> __export cfg_free_value(cfg_opt_t *opt);
+00588 
+00592 DLLIMPORT <span class="keywordtype">void</span> __export cfg_free(cfg_t *cfg);
+00593 
+00597 DLLIMPORT <a class="code" href="confuse_8h.html#a59">cfg_errfunc_t</a> __export cfg_set_error_function(cfg_t *cfg,
+00598                                                         cfg_errfunc_t errfunc);
 00599 
-00606 DLLIMPORT <span class="keywordtype">long</span> <span class="keywordtype">int</span> __export cfg_getnint(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00607                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00608 
-00618 DLLIMPORT <span class="keywordtype">long</span> <span class="keywordtype">int</span> __export cfg_getint(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
-00619 
-00625 DLLIMPORT <span class="keywordtype">double</span> cfg_opt_getnfloat(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00626 
-00633 DLLIMPORT <span class="keywordtype">double</span> __export cfg_getnfloat(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00634                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00635 
-00644 DLLIMPORT <span class="keywordtype">double</span> __export cfg_getfloat(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
-00645 
-00651 DLLIMPORT <span class="keywordtype">char</span> *cfg_opt_getnstr(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00652 
-00659 DLLIMPORT <span class="keywordtype">char</span> * __export cfg_getnstr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00660                                       <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00661 
-00670 DLLIMPORT <span class="keywordtype">char</span> * __export cfg_getstr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
-00671 
-00677 DLLIMPORT <a class="code" href="confuse_8h.html#a130">cfg_bool_t</a> cfg_opt_getnbool(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00678     
-00686 DLLIMPORT <a class="code" href="confuse_8h.html#a130">cfg_bool_t</a> __export cfg_getnbool(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00687                                            <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00688 
-00697 DLLIMPORT <a class="code" href="confuse_8h.html#a130">cfg_bool_t</a> __export cfg_getbool(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
-00698 
-00699 
-00700 DLLIMPORT <span class="keywordtype">void</span> *cfg_opt_getnptr(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00701 DLLIMPORT <span class="keywordtype">void</span> *cfg_getnptr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> indx);
-00702 DLLIMPORT <span class="keywordtype">void</span> *cfg_getptr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
-00703 
-00704 
-00710 DLLIMPORT cfg_t *cfg_opt_getnsec(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00603 DLLIMPORT <span class="keywordtype">void</span> __export cfg_error(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, ...);
+00604 
+00610 DLLIMPORT <span class="keywordtype">signed</span> <span class="keywordtype">long</span> cfg_opt_getnint(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00611 
+00618 DLLIMPORT <span class="keywordtype">long</span> <span class="keywordtype">int</span> __export cfg_getnint(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00619                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00620 
+00630 DLLIMPORT <span class="keywordtype">long</span> <span class="keywordtype">int</span> __export cfg_getint(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00631 
+00637 DLLIMPORT <span class="keywordtype">double</span> cfg_opt_getnfloat(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00638 
+00645 DLLIMPORT <span class="keywordtype">double</span> __export cfg_getnfloat(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00646                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00647 
+00656 DLLIMPORT <span class="keywordtype">double</span> __export cfg_getfloat(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00657 
+00663 DLLIMPORT <span class="keywordtype">char</span> *cfg_opt_getnstr(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00664 
+00671 DLLIMPORT <span class="keywordtype">char</span> * __export cfg_getnstr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00672                                       <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00673 
+00682 DLLIMPORT <span class="keywordtype">char</span> * __export cfg_getstr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00683 
+00689 DLLIMPORT <a class="code" href="confuse_8h.html#a133">cfg_bool_t</a> cfg_opt_getnbool(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00690     
+00698 DLLIMPORT <a class="code" href="confuse_8h.html#a133">cfg_bool_t</a> __export cfg_getnbool(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00699                                            <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00700 
+00709 DLLIMPORT <a class="code" href="confuse_8h.html#a133">cfg_bool_t</a> __export cfg_getbool(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00710 
 00711 
-00720 DLLIMPORT cfg_t * __export cfg_getnsec(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00721                                        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00722 
-00730 DLLIMPORT cfg_t *cfg_opt_gettsec(cfg_opt_t *opt, <span class="keyword">const</span> <span class="keywordtype">char</span> *title);
-00731 
-00741 DLLIMPORT cfg_t * __export cfg_gettsec(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00742                                        <span class="keyword">const</span> <span class="keywordtype">char</span> *title);
+00712 DLLIMPORT <span class="keywordtype">void</span> *cfg_opt_getnptr(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00713 DLLIMPORT <span class="keywordtype">void</span> *cfg_getnptr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> indx);
+00714 
+00723 DLLIMPORT <span class="keywordtype">void</span> *cfg_getptr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00724 
+00725 
+00731 DLLIMPORT cfg_t *cfg_opt_getnsec(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00732 
+00741 DLLIMPORT cfg_t * __export cfg_getnsec(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00742                                        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
 00743 
-00754 DLLIMPORT cfg_t * __export cfg_getsec(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
-00755 
-00761 DLLIMPORT <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cfg_opt_size(cfg_opt_t *opt);
-00762 
-00775 DLLIMPORT <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> __export cfg_size(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00751 DLLIMPORT cfg_t *cfg_opt_gettsec(cfg_opt_t *opt, <span class="keyword">const</span> <span class="keywordtype">char</span> *title);
+00752 
+00762 DLLIMPORT cfg_t * __export cfg_gettsec(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00763                                        <span class="keyword">const</span> <span class="keywordtype">char</span> *title);
+00764 
+00775 DLLIMPORT cfg_t * __export cfg_getsec(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
 00776 
-00783 DLLIMPORT <span class="keyword">const</span> <span class="keywordtype">char</span> * __export cfg_title(cfg_t *cfg);
-00784 
-00790 DLLIMPORT <span class="keywordtype">int</span> __export cfg_include(cfg_t *cfg, cfg_opt_t *opt, <span class="keywordtype">int</span> argc,
-00791                                    <span class="keyword">const</span> <span class="keywordtype">char</span> **argv);
-00792 
-00799 DLLIMPORT <span class="keywordtype">char</span> * __export cfg_tilde_expand(<span class="keyword">const</span> <span class="keywordtype">char</span> *filename);
-00800 
-00808 DLLIMPORT <span class="keywordtype">int</span> __export cfg_parse_boolean(<span class="keyword">const</span> <span class="keywordtype">char</span> *s);
-00809 
-00818 DLLIMPORT cfg_opt_t * __export cfg_getopt(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
-00819 
-00828 DLLIMPORT <span class="keywordtype">void</span> __export cfg_opt_setnint(cfg_opt_t *opt,
-00829                                         <span class="keywordtype">long</span> <span class="keywordtype">int</span> value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00830 
-00838 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setint(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00839                                    <span class="keywordtype">long</span> <span class="keywordtype">int</span> value);
-00840 
-00850 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setnint(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00851                                     <span class="keywordtype">long</span> <span class="keywordtype">int</span> value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00852 
-00861 DLLIMPORT <span class="keywordtype">void</span> __export cfg_opt_setnfloat(cfg_opt_t *opt,
-00862                                           <span class="keywordtype">double</span> value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00863 
-00871 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setfloat(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00872                                      <span class="keywordtype">double</span> value);
-00873 
-00883 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setnfloat(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00884                                       <span class="keywordtype">double</span> value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00885 
-00894 DLLIMPORT <span class="keywordtype">void</span> __export cfg_opt_setnbool(cfg_opt_t *opt,
-00895                                          cfg_bool_t value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00896 
-00904 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setbool(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00905                                     cfg_bool_t value);
-00906 
-00916 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setnbool(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00917                                      cfg_bool_t value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00918 
-00928 DLLIMPORT <span class="keywordtype">void</span> __export cfg_opt_setnstr(cfg_opt_t *opt,
-00929                                         <span class="keyword">const</span> <span class="keywordtype">char</span> *value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00930 
-00939 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setstr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00940                                    <span class="keyword">const</span> <span class="keywordtype">char</span> *value);
-00941 
-00952 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setnstr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00953                                     <span class="keyword">const</span> <span class="keywordtype">char</span> *value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
-00954 
-00965 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setlist(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00966                                     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> nvalues, ...);
+00782 DLLIMPORT <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cfg_opt_size(cfg_opt_t *opt);
+00783 
+00796 DLLIMPORT <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> __export cfg_size(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00797 
+00804 DLLIMPORT <span class="keyword">const</span> <span class="keywordtype">char</span> * __export cfg_title(cfg_t *cfg);
+00805 
+00812 DLLIMPORT <span class="keyword">const</span> <span class="keywordtype">char</span> *cfg_name(cfg_t *cfg);
+00813 
+00820 DLLIMPORT <span class="keyword">const</span> <span class="keywordtype">char</span> *cfg_opt_name(cfg_opt_t *opt);
+00821 
+00827 DLLIMPORT <span class="keywordtype">int</span> __export cfg_include(cfg_t *cfg, cfg_opt_t *opt, <span class="keywordtype">int</span> argc,
+00828                                    <span class="keyword">const</span> <span class="keywordtype">char</span> **argv);
+00829 
+00836 DLLIMPORT <span class="keywordtype">char</span> * __export cfg_tilde_expand(<span class="keyword">const</span> <span class="keywordtype">char</span> *filename);
+00837 
+00845 DLLIMPORT <span class="keywordtype">int</span> __export cfg_parse_boolean(<span class="keyword">const</span> <span class="keywordtype">char</span> *s);
+00846 
+00855 DLLIMPORT cfg_opt_t * __export cfg_getopt(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00856 
+00865 DLLIMPORT <span class="keywordtype">void</span> __export cfg_opt_setnint(cfg_opt_t *opt,
+00866                                         <span class="keywordtype">long</span> <span class="keywordtype">int</span> value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00867 
+00875 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setint(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00876                                    <span class="keywordtype">long</span> <span class="keywordtype">int</span> value);
+00877 
+00887 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setnint(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00888                                     <span class="keywordtype">long</span> <span class="keywordtype">int</span> value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00889 
+00898 DLLIMPORT <span class="keywordtype">void</span> __export cfg_opt_setnfloat(cfg_opt_t *opt,
+00899                                           <span class="keywordtype">double</span> value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00900 
+00908 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setfloat(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00909                                      <span class="keywordtype">double</span> value);
+00910 
+00920 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setnfloat(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00921                                       <span class="keywordtype">double</span> value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00922 
+00931 DLLIMPORT <span class="keywordtype">void</span> __export cfg_opt_setnbool(cfg_opt_t *opt,
+00932                                          cfg_bool_t value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00933 
+00941 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setbool(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00942                                     cfg_bool_t value);
+00943 
+00953 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setnbool(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00954                                      cfg_bool_t value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00955 
+00965 DLLIMPORT <span class="keywordtype">void</span> __export cfg_opt_setnstr(cfg_opt_t *opt,
+00966                                         <span class="keyword">const</span> <span class="keywordtype">char</span> *value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
 00967 
-00968 
-00979 DLLIMPORT <span class="keywordtype">void</span> __export cfg_addlist(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-00980                                     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> nvalues, ...);
-00981 
-00994 DLLIMPORT <span class="keywordtype">void</span> cfg_opt_nprint_var(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index,
-00995                                   FILE *fp);
-00996 
-01001 DLLIMPORT <span class="keywordtype">void</span> cfg_opt_print_indent(cfg_opt_t *opt, FILE *fp, <span class="keywordtype">int</span> indent);
-01002 
-01013 DLLIMPORT <span class="keywordtype">void</span> cfg_opt_print(cfg_opt_t *opt, FILE *fp);
-01014 
-01019 DLLIMPORT <span class="keywordtype">void</span> cfg_print_indent(cfg_t *cfg, FILE *fp, <span class="keywordtype">int</span> indent);
-01020 
-01034 DLLIMPORT <span class="keywordtype">void</span> cfg_print(cfg_t *cfg, FILE *fp);
-01035 
-01043 DLLIMPORT <a class="code" href="confuse_8h.html#a54">cfg_print_func_t</a> cfg_opt_set_print_func(cfg_opt_t *opt,
-01044                                                   cfg_print_func_t pf);
-01045 
-01054 DLLIMPORT <a class="code" href="confuse_8h.html#a54">cfg_print_func_t</a> cfg_set_print_func(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-01055                                               cfg_print_func_t pf);
-01056 
-01065 DLLIMPORT <a class="code" href="confuse_8h.html#a56">cfg_validate_callback_t</a> cfg_set_validate_func(cfg_t *cfg,
-01066                                                         <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
-01067                                                         cfg_validate_callback_t vf);
-01068 
-01069 <span class="preprocessor">#ifdef __cplusplus</span>
-01070 <span class="preprocessor"></span>}
-01071 <span class="preprocessor">#endif</span>
-01072 <span class="preprocessor"></span>
-01073 <span class="preprocessor">#endif</span>
-01074 <span class="preprocessor"></span>
+00976 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setstr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00977                                    <span class="keyword">const</span> <span class="keywordtype">char</span> *value);
+00978 
+00989 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setnstr(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+00990                                     <span class="keyword">const</span> <span class="keywordtype">char</span> *value, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index);
+00991 
+01002 DLLIMPORT <span class="keywordtype">void</span> __export cfg_setlist(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+01003                                     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> nvalues, ...);
+01004 
+01005 
+01016 DLLIMPORT <span class="keywordtype">void</span> __export cfg_addlist(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+01017                                     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> nvalues, ...);
+01018 
+01031 DLLIMPORT <span class="keywordtype">void</span> cfg_opt_nprint_var(cfg_opt_t *opt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index,
+01032                                   FILE *fp);
+01033 
+01038 DLLIMPORT <span class="keywordtype">void</span> cfg_opt_print_indent(cfg_opt_t *opt, FILE *fp, <span class="keywordtype">int</span> indent);
+01039 
+01050 DLLIMPORT <span class="keywordtype">void</span> cfg_opt_print(cfg_opt_t *opt, FILE *fp);
+01051 
+01056 DLLIMPORT <span class="keywordtype">void</span> cfg_print_indent(cfg_t *cfg, FILE *fp, <span class="keywordtype">int</span> indent);
+01057 
+01071 DLLIMPORT <span class="keywordtype">void</span> cfg_print(cfg_t *cfg, FILE *fp);
+01072 
+01080 DLLIMPORT <a class="code" href="confuse_8h.html#a55">cfg_print_func_t</a> cfg_opt_set_print_func(cfg_opt_t *opt,
+01081                                                   cfg_print_func_t pf);
+01082 
+01091 DLLIMPORT <a class="code" href="confuse_8h.html#a55">cfg_print_func_t</a> cfg_set_print_func(cfg_t *cfg, <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+01092                                               cfg_print_func_t pf);
+01093 
+01102 DLLIMPORT <a class="code" href="confuse_8h.html#a57">cfg_validate_callback_t</a> cfg_set_validate_func(cfg_t *cfg,
+01103                                                         <span class="keyword">const</span> <span class="keywordtype">char</span> *name,
+01104                                                         cfg_validate_callback_t vf);
+01105 
+01106 <span class="preprocessor">#ifdef __cplusplus</span>
+01107 <span class="preprocessor"></span>}
+01108 <span class="preprocessor">#endif</span>
+01109 <span class="preprocessor"></span>
+01110 <span class="preprocessor">#endif</span>
+01111 <span class="preprocessor"></span>
 </div></pre><!-- doxygen-footer.html starts here -->
   </div>
  </body>
