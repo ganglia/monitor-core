@@ -1,2 +1,2 @@
 dist-hook:
-	tar -cv --exclude="*CVS" -f - . | (cd $(distdir) && tar -xvf -)
+	tar -c --exclude="*CVS" -f - . | (cd $(distdir) && tar -xf -)
