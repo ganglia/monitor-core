@@ -181,7 +181,7 @@ fillmetric(const char** attr, Metric_t *metric, const char* type, const int old)
                   edge = edge + strlen(attr[i+1]) + 1;
                   break;
                case NUM_TAG:
-                  metric->num = atoi(attr[i+1]) + 1;
+                  metric->num = atoi(attr[i+1]);
                   break;
                default:
                   break;
@@ -319,6 +319,7 @@ start (void *data, const char *el, const char **attr)
                   source->stringslen = edge;
             
                   /* Grab the "partial sum" mutex until we are finished summarizing. */
+                  /*err_msg("%s grabbing lock", name);*/
                   pthread_mutex_lock(source->sum_finished);
                }
 
@@ -435,6 +436,7 @@ start (void *data, const char *el, const char **attr)
             source->stringslen = edge;
 
             /* Grab the "partial sum" mutex until we are finished summarizing. */
+            /*err_msg("%s grabbing lock", name);*/
             pthread_mutex_lock(source->sum_finished);
 
             break;
@@ -869,6 +871,10 @@ end (void *data, const char *el)
                   source = &xmldata->source;
                   summary = xmldata->source.metric_summary;
 
+                  /* Release the partial sum mutex */
+                  pthread_mutex_unlock(source->sum_finished);
+                  /*err_msg("%s releasing lock", xmldata->sourcename);*/
+
                   hashkey.data = (void*) xmldata->sourcename;
                   hashkey.size = strlen(xmldata->sourcename) + 1;
 
@@ -884,9 +890,6 @@ end (void *data, const char *el)
                      }
                   /* Write the metric summaries to the RRD. */
                   hash_foreach(summary, finish_processing_source, data);
-                  
-                  /* Release the partial sum mutex */
-                  pthread_mutex_unlock(source->sum_finished);
                }
 
             break;
@@ -925,7 +928,6 @@ process_xml(data_source_list_t *d, char *buf)
    XML_SetUserData (xml_parser, &xmldata);
 
    rval = XML_Parse( xml_parser, buf, strlen(buf), 1 );
-
    if(! rval )
       {
          err_msg ("Process XML (%s): XML_ParseBuffer() error at line %d:\n%s\n",
@@ -934,6 +936,11 @@ process_xml(data_source_list_t *d, char *buf)
                          XML_ErrorString (XML_GetErrorCode (xml_parser)));
          xmldata.rval = 1;
       }
+
+   /* Release lock again for good measure (required under certain errors). */
+   rval = pthread_mutex_unlock(xmldata.source.sum_finished);
+   if (rval!=0)
+      err_msg("Could not release summary lock for %s", d->name);
 
    /* Free memory that might have been allocated in xmldata */
    if (xmldata.sourcename)
