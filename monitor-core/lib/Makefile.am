@@ -11,8 +11,9 @@ dotconf.c readdir.c interface.c interface.h dotconf.h readdir.h \
 barrier.h become_a_nobody.h \
 debug_msg.h dotconf.h file.h fsusage.h ganglia.h ganglia_private.h \
 getopt.h hash.h interface.h llist.h \
-rdwr.h ganglia_private.h zio.c zio.h \
-heap.c heap.h tpool.c tpool.h memmanage.c memmanage.h faststack.c faststack.h
+rdwr.h ganglia_private.h \
+heap.c heap.h tpool.c tpool.h memmanage.c memmanage.h faststack.c faststack.h \
+gzio.c zutil.h gzio.h
 libganglia_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-release $(LT_RELEASE) \
