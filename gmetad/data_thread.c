@@ -58,8 +58,8 @@ data_thread ( void *arg )
             {
                /* Find first viable source in list. */
                sock = tcp_connect( d->names[i], d->ports[i]);
-               if( sock > 0 )
-                  break;
+               if(! (sock < 0) )
+                  break; /* success */
             }
 
          if(sock < 0)
@@ -164,8 +164,18 @@ data_thread ( void *arg )
 
        take_a_break:
          if(z)
-           gzclose(z);
-         close(sock);
+           {
+             gzclose(z);
+             z = NULL;
+           }
+         else
+           {
+             /* We didn't reach the point where the z stream was created.
+                gzclose closes the underlying file descriptor so we need
+                to close it ourself. */
+             if(sock>0)
+               close(sock);
+           }
 
          gettimeofday(&end, NULL);
          /* Sleep somewhere between (step +/- 5sec.) */
