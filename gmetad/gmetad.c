@@ -283,7 +283,7 @@ main ( int argc, char *argv[] )
       {
          gethostname(hostname, HOSTNAMESZ);
          root.authority_ptr = 0;
-         sprintf(root.strings, "http://%s/ganglia-webfrontend/", hostname);
+         sprintf(root.strings, "http://%s/ganglia/", hostname);
          root.stringslen += strlen(root.strings) + 1;
       }
 

@@ -382,7 +382,7 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
          strncpy(element, p, len);
          element[len] = '\0';
       
-         err_msg("Skipping to %s (%d)", element, len);
+         /* err_msg("Skipping to %s (%d)", element, len); */
       
          /* look for element in hash table. */
          findkey.data = element;
@@ -390,7 +390,7 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
          found = hash_lookup(&findkey, node->children);
          if (found)
             {
-               err_msg("Found %s", element);
+               /* err_msg("Found %s", element); */
                
                rc = process_path(client, q, found, &findkey);
                
