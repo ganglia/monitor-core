@@ -647,7 +647,6 @@ AC_OUTPUT(Makefile ganglia.spec \
 	gmond/Makefile \
 	gmond/gstat/Makefile \
 	lib/Makefile \
-	libe/Makefile \
 	libhttpd/Makefile \
 	libunp/Makefile \
 	tests/Makefile \
