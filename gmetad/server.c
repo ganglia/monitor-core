@@ -22,7 +22,7 @@ xml_print( client_t *client, const char *fmt, ... )
 {
    int rval, len;
    va_list ap;
-   char buf[2048];
+   char buf[4096];
 
    va_start (ap, fmt);
 
@@ -172,8 +172,9 @@ source_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
       }
    else
       {
-            rc=xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\">\n",
-               name, getfield(source->strings, source->authority_ptr));
+            rc=xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" "
+               "LOCALTIME=\"%u\">\n",
+               name, getfield(source->strings, source->authority_ptr), source->localtime);
       }
 
    return rc;
@@ -205,8 +206,8 @@ root_report_start(client_t *client)
 
    if (!gmetad_config.scalable_mode) return rc;
 
-   rc = xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\">\n",
-       gmetad_config.gridname, getfield(root.strings, root.authority_ptr));
+   rc = xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
+       gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0));
 
    return rc;
 }
