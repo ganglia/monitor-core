@@ -191,6 +191,8 @@ static DOTCONF_CB(cb_data_source)
          dslist->num_sources++;
       }
 
+   dslist->last_heard_from = 0;
+
    key.data = cmd->data.list[0];
    key.size = strlen(key.data) + 1;
 
