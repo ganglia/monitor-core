@@ -11,6 +11,7 @@
 
 /* Variables that get filled in by configuration file */
 extern Source_t root;
+
 extern hash_t *sources;
 
 gmetad_config_t gmetad_config;

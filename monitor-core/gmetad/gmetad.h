@@ -100,6 +100,8 @@ typedef struct
       char **ports;
       long double timestamp;   /* added by swagner */
       int dead;
+      char *buf;
+      int len;
    }
 data_source_list_t;
 

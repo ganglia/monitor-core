@@ -9,6 +9,7 @@
 #include <pwd.h>
 #include <time.h>
 
+#include "lib/tpool.h"
 #include "lib/llist.h"
 #include "lib/become_a_nobody.h"
 #include "libunp/unp.h"
@@ -19,6 +20,8 @@
 /* Holds our data sources. */
 hash_t *sources;
 
+g3_thread_pool data_source_pool = NULL;
+
 /* The root of our local grid. Replaces the old "xml" hash table. */
 Source_t root;
 
@@ -28,7 +31,7 @@ int interactive_socket;
 pthread_mutex_t  server_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  server_interactive_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-extern void *data_thread ( void *arg );
+extern void data_thread ( void *arg );
 extern void* server_thread(void *);
 extern int parse_config_file ( char *config_file );
 extern int number_of_datasources ( char *config_file );
@@ -40,7 +43,6 @@ struct gengetopt_args_info args_info;
 
 extern gmetad_config_t gmetad_config;
 extern int debug_level;
-
 
 static int
 print_sources ( datum_t *key, datum_t *val, void *arg )
@@ -75,13 +77,15 @@ static int
 spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
 {
    data_source_list_t *d = *((data_source_list_t **)(val->data));
-   pthread_t pid;
-   pthread_attr_t attr;
 
-   pthread_attr_init( &attr );
-   pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
+   /* Initialize the buffers of each data thread */
+   d->buf = malloc( 1024 );
+   if(!d->buf)
+     err_sys("Unable to malloc memory of data source buffer");
 
-   pthread_create(&pid, &attr, data_thread, (void *)d);
+   d->len = 1024;
+
+   g3_run( data_source_pool, data_thread, d );
    return 0;
 }
 
@@ -272,7 +276,8 @@ main ( int argc, char *argv[] )
    struct stat struct_stat;
    pthread_t pid;
    pthread_attr_t attr;
-   int i, num_sources, sleep_time;
+   int i, sleep_time;
+   int num_sources;
    uid_t gmetad_uid;
    char * gmetad_username;
    struct passwd *pw;
@@ -406,6 +411,12 @@ main ( int argc, char *argv[] )
    for (i=0; i < c->server_threads; i++)
       pthread_create(&pid, &attr, server_thread, (void*) 1);
 
+   /* 4 workers, maximum queue and 64 and blocking (for now) */
+   data_source_pool = g3_thread_pool_create(4, 64, 0);
+   if(!data_source_pool)
+     {
+       err_quit("Unable to create data source thread pool\n");
+     }
    hash_foreach( sources, spin_off_the_data_threads, NULL );
 
     /* Meta data */

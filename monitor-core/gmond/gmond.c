@@ -118,8 +118,8 @@ gexec_func ( void )
    if( gmond_config.no_gexec || ( SUPPORT_GEXEC == 0 ) )
       snprintf(val.str, MAX_G_STRING_SIZE, "%s", "OFF");
    else
-      snprintf(val.str, MAX_G_STRING_SIZE, "%s", "ON");
 #endif
+      snprintf(val.str, MAX_G_STRING_SIZE, "%s", "ON");
 
    return val;
 }
