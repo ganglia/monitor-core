@@ -3,9 +3,100 @@
 #endif
 
 #include <stdio.h>
-#include "conf.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include "ganglia.h"
+#include "confuse.h"
 #include <apr_pools.h>
 #include <apr_strings.h>
+
+/***** IMPORTANT ************
+Any changes that you make to this file need to be reconciled in ./conf.pod
+in order for the documentation to be in order with the code 
+****************************/
+
+void build_default_gmond_configuration(apr_pool_t *context);
+
+static cfg_opt_t cluster_opts[] = {
+  CFG_STR("name", NULL, CFGF_NONE ),
+  CFG_STR("owner", NULL, CFGF_NONE ),
+  CFG_STR("latlong", NULL, CFGF_NONE ),
+  CFG_STR("url", NULL, CFGF_NONE ),
+  CFG_END()
+};
+
+static cfg_opt_t host_opts[] = {
+  CFG_STR("location", "unspecified", CFGF_NONE ),
+  CFG_END()
+};
+
+static cfg_opt_t globals_opts[] = {
+  CFG_BOOL("daemonize", 1, CFGF_NONE),
+  CFG_BOOL("setuid", 1, CFGF_NONE),
+  CFG_STR("user", "nobody", CFGF_NONE),
+  /* later i guess we should add "group" as well */
+  CFG_INT("debug_level", 0, CFGF_NONE),
+  CFG_INT("max_udp_msg_len", 1472, CFGF_NONE),
+  CFG_BOOL("mute", 0, CFGF_NONE),
+  CFG_BOOL("deaf", 0, CFGF_NONE),
+  CFG_INT("host_dmax", 0, CFGF_NONE),
+  CFG_BOOL("gexec", 0, CFGF_NONE),
+  CFG_END()
+};
+
+static cfg_opt_t udp_send_channel_opts[] = {
+  CFG_STR("mcast_join", NULL, CFGF_NONE),
+  CFG_STR("mcast_if", NULL, CFGF_NONE),
+  CFG_STR("ip", NULL, CFGF_NONE ),
+  CFG_INT("port", -1, CFGF_NONE ),
+  CFG_END()
+};
+
+static cfg_opt_t udp_recv_channel_opts[] = {
+  CFG_STR("mcast_join", NULL, CFGF_NONE ),
+  CFG_STR("bind", NULL, CFGF_NONE ),
+  CFG_INT("port", -1, CFGF_NONE ),
+  CFG_STR("mcast_if", NULL, CFGF_NONE),
+  CFG_STR("allow_ip", NULL, CFGF_NONE),
+  CFG_STR("allow_mask", NULL, CFGF_NONE),
+  CFG_END()
+};
+
+static cfg_opt_t tcp_accept_channel_opts[] = {
+  CFG_STR("bind", NULL, CFGF_NONE ),
+  CFG_INT("port", -1, CFGF_NONE ),
+  CFG_STR("interface", NULL, CFGF_NONE),
+  CFG_STR("allow_ip", NULL, CFGF_NONE),
+  CFG_STR("allow_mask", NULL, CFGF_NONE),
+  CFG_END()
+};
+
+static cfg_opt_t metric_opts[] = {
+  CFG_STR("name", NULL, CFGF_NONE ),
+  CFG_FLOAT("value_threshold", -1, CFGF_NONE),
+  CFG_END()
+};
+
+static cfg_opt_t collection_group_opts[] = {
+  CFG_STR("name", NULL, CFGF_NONE),
+  CFG_SEC("metric", metric_opts, CFGF_MULTI),
+  CFG_BOOL("collect_once", 0, CFGF_NONE),  
+  CFG_INT("collect_every", 60, CFGF_NONE),    
+  CFG_INT("time_threshold", 3600, CFGF_NONE),    /* tmax */
+  CFG_INT("lifetime", 0, CFGF_NONE),             /* dmax */
+  CFG_END()
+};
+
+static cfg_opt_t gmond_opts[] = {
+  CFG_SEC("cluster",   cluster_opts, CFGF_NONE),
+  CFG_SEC("host",      host_opts, CFGF_NONE),
+  CFG_SEC("globals",     globals_opts, CFGF_NONE), 
+  CFG_SEC("udp_send_channel", udp_send_channel_opts, CFGF_MULTI),
+  CFG_SEC("udp_recv_channel", udp_recv_channel_opts, CFGF_MULTI),
+  CFG_SEC("tcp_accept_channel", tcp_accept_channel_opts, CFGF_MULTI),
+  CFG_SEC("collection_group",  collection_group_opts, CFGF_MULTI),
+  CFG_END()
+}; 
 
 char *default_gmond_configuration = NULL;
 
@@ -330,3 +421,55 @@ build_default_gmond_configuration(apr_pool_t *context)
 }
 
 
+#if 0
+static void
+cleanup_configuration_file(void)
+{
+  cfg_free( config_file );
+}
+#endif
+
+/* TODO: move to libgmond gmond_opts is needed... default_gmond_configuration is needed */
+Ganglia_gmond_config
+Ganglia_gmond_config_new(char *path, int fallback_to_default)
+{
+  Ganglia_gmond_config config = NULL;
+  /* Make sure we process ~ in the filename if the shell doesn't */
+  char *tilde_expanded = cfg_tilde_expand( path );
+  config = cfg_init( gmond_opts, CFGF_NOCASE );
+
+  switch( cfg_parse( config, tilde_expanded ) )
+    {
+    case CFG_FILE_ERROR:
+      /* Unable to open file so we'll go with the configuration defaults */
+      fprintf(stderr,"Configuration file '%s' not found.\n", tilde_expanded);
+      if(!fallback_to_default)
+	{
+	  /* Don't fallback to the default configuration.. just exit. */
+	  exit(1);
+	}
+      /* .. otherwise use our default configuration */
+      if(cfg_parse_buf(config, default_gmond_configuration) == CFG_PARSE_ERROR)
+	{
+	  fprintf(stderr,"Your default configuration buffer failed to parse. Exiting.\n");
+          exit(1);
+	}
+      break;
+    case CFG_PARSE_ERROR:
+      fprintf(stderr,"Parse error for '%s'\n", tilde_expanded );
+      exit(1);
+    case CFG_SUCCESS:
+      break;
+    default:
+      /* I have no clue whats goin' on here... */
+      exit(1);
+    }
+
+  if(tilde_expanded)
+    free(tilde_expanded);
+
+#if 0
+  atexit(cleanup_configuration_file);
+#endif
+  return config;
+}
