@@ -3,6 +3,8 @@
 #include <unistd.h>
 
 #include <apr.h>
+#include <apr_strings.h>
+#include <apr_hash.h>
 #include <apr_time.h>
 #include <apr_pools.h>
 #include <apr_poll.h>
@@ -18,7 +20,7 @@
 #include "libmetrics.h"/* libmetrics header in ./srclib/libmetrics */
 #include "apr_net.h"   /* our private network functions based on apr */
 #include "debug_msg.h" 
-#include "protocol.h"
+#include "protocol.h"  /* generated header from ./lib/protocol.x xdr definition file */
 
 /* When this gmond was started */
 apr_time_t started;
@@ -37,26 +39,42 @@ int deaf;
 /* Mute mode boolean */
 int mute;
 /* Maximum UDP message size.. TODO: allow tweakability */
-int max_udp_message_len = 1500;
+int max_udp_message_len = 1472; /* mtu 1500 - 28 bytes for IP/UDP headers */
 /* The pollset for incoming UDP messages */
 apr_pollset_t *udp_recv_pollset = NULL;
-/* The array for outgoing UDP message */
+/* The access control list for each of the UDP channels */
+apr_array_header_t *udp_recv_acl_array = NULL;
+/* The array for outgoing UDP message channels */
 apr_array_header_t *udp_send_array = NULL;
+
+/* The hash to hold the hosts (key = host IP) */
+apr_hash_t *hosts;
+/* The "hosts" hash contains values of type "hostdata" */
+struct hostdata_t {
+  /* Name of the host */
+  char *hostname;
+  /* Timestamp of when the remote host gmond started */
+  unsigned int gmond_started;
+  /* The pool used to malloc memory for this host */
+  apr_pool_t *pool;
+  /* A hash containing the data from the host */
+  apr_hash_t *metrics;
+  /* First heard from */
+  apr_time_t first_heard_from;
+  /* Last heard from */
+  apr_time_t last_heard_from;
+};
+typedef struct hostdata_t hostdata_t;
+
+/* This is a data structure for recvfrom calls */
+apr_sockaddr_t *remotesa = NULL;
 
 static void
 process_configuration_file(void)
 {
   config_file = cfg_init( gmond_opts, CFGF_NOCASE );
-  /* This is annoying but necessary.  I need to know if the value (a float) was set by the user. */
-  cfg_set_validate_func( config_file, "collection_group|metric|absolute_minimum", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group|metric|absolute_minimum_alert", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group|metric|absolute_minimum_warning", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group|metric|absolute_maximum_warning", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group|metric|absolute_maximum_alert", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group|metric|absolute_maximum", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group|metric|relative_change_normal", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group|metric|relative_change_warning", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group|metric|relative_change_alert", metric_validate_func);
+
+  init_validate_funcs();  /* in config.c */
 
   switch( cfg_parse( config_file, args_info.conf_arg ) )
     {
@@ -70,7 +88,11 @@ process_configuration_file(void)
 	}
       /* .. otherwise use our default configuration */
       fprintf(stderr,"Using defaults.\n");
-      cfg_parse_buf(config_file, DEFAULT_CONFIGURATION);
+      if(cfg_parse_buf(config_file, DEFAULT_CONFIGURATION) == CFG_PARSE_ERROR)
+	{
+	  fprintf(stderr,"Your default configuration buffer failed to parse. Exiting.\n");
+          exit(1);
+	}
       break;
     case CFG_PARSE_ERROR:
       fprintf(stderr,"Parse error for '%s'\n", args_info.conf_arg);
@@ -171,12 +193,20 @@ setup_udp_recv_pollset( void )
   /* Create my UDP recv pollset */
   apr_pollset_create(&udp_recv_pollset, num_udp_recv_channels, global_context, 0);
 
+  /* Create my UDP recv access control array */
+  udp_recv_acl_array = apr_array_make( global_context, num_udp_recv_channels,
+                                   sizeof(apr_ipsubnet_t *));
+
+  /* This just creates the remotesa data structure used in recvfrom */
+  apr_sockaddr_info_get(&remotesa, "127.0.0.1", APR_UNSPEC, 8649, 0, global_context);
+
   for(i = 0; i< num_udp_recv_channels; i++)
     {
       cfg_t *udp_recv_channel;
-      char *mcast_join, *mcast_if, *bindaddr, *protocol;
+      char *mcast_join, *mcast_if, *bindaddr, *protocol, *allow_ip, *allow_mask;
       int port;
       apr_socket_t *socket = NULL;
+      apr_ipsubnet_t *ipsub = NULL;
       apr_pollfd_t socket_pollfd;
 
       udp_recv_channel = cfg_getnsec( config_file, "udp_recv_channel", i);
@@ -185,6 +215,8 @@ setup_udp_recv_pollset( void )
       port           = cfg_getint( udp_recv_channel, "port");
       bindaddr       = cfg_getstr( udp_recv_channel, "bind");
       protocol       = cfg_getstr( udp_recv_channel, "protocol");
+      allow_ip       = cfg_getstr( udp_recv_channel, "allow_ip");
+      allow_mask     = cfg_getstr( udp_recv_channel, "allow_mask");
 
       debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s protocol=%s\n",
 		  mcast_join? mcast_join:"NULL", 
@@ -205,7 +237,6 @@ setup_udp_recv_pollset( void )
 	{
 	  /* Join the specified multicast channel */
 	  socket = NULL;  /* later */
-	  /*create_mcast_server( global_context, mcast_join, port, mcast_if );*/
 	  if(!socket)
 	    {
 	      fprintf(stderr,"Error creating multicast server mcast_join=%s port=%d mcast_if=%s. Exiting.\n",
@@ -228,7 +259,84 @@ setup_udp_recv_pollset( void )
 	  fprintf(stderr,"Failed to add socket to pollset. Exiting.\n");
 	  exit(1);
 	}
+
+      /* Save the ACL information */
+      if(allow_ip)
+	{
+	  status = apr_ipsubnet_create(&ipsub, allow_ip, allow_mask, global_context);
+	  if(status != APR_SUCCESS)
+	    {
+	      fprintf(stderr,"Unable to build ACL for ip=%s mask=%s. Exiting.\n",
+		      allow_ip, allow_mask);
+	      exit(1);
+	    }
+	}
+      /* ipsub of NULL means no acl in effect */
+      *(apr_ipsubnet_t **)apr_array_push(udp_recv_acl_array) = ipsub;
     }
+}
+
+/* TODO: This function needs to be updated later to handle proxy information */
+static hostdata_t *
+find_host_data( char *remoteip, apr_sockaddr_t *sa)
+{
+  apr_status_t status;
+  apr_pool_t *pool;
+  hostdata_t *hostdata;
+  char *hostname = NULL;
+
+  hostdata =  (hostdata_t *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
+  if(!hostdata)
+    {
+      /* Lookup the hostname */
+      status = apr_getnameinfo(&hostname, sa, 0);
+      if(status != APR_SUCCESS)
+	{
+	  hostname = remoteip;
+	}
+
+      /* This is the first time we've heard from this host.. create a new pool */
+      status = apr_pool_create( &pool, global_context );
+      if(status != APR_SUCCESS)
+	{
+	  return NULL;
+	}
+
+      /* Malloc the hostdata_t from the new pool */
+      hostdata = apr_pcalloc( pool, sizeof( hostdata_t ));
+      if(!hostdata)
+	{
+	  return NULL;
+	}
+
+      /* Save the pool address for later.. freeing this pool free everthing
+       * for this particular host */
+      hostdata->pool = pool;
+
+      /* Save the hostname */
+      hostdata->hostname = apr_pstrdup( pool, hostname );
+
+      /* Set the timestamps */
+      hostdata->first_heard_from = hostdata->last_heard_from = apr_time_now();
+
+      /* Create a hash for the metric data */
+      hostdata->metrics = apr_hash_make( pool );
+      if(!hostdata->metrics)
+	{
+	  apr_pool_destroy(pool);
+	  return NULL;
+	}
+
+      /* Save this host data to the "hosts" hash */
+      apr_hash_set( hosts, remoteip, APR_HASH_KEY_STRING, hostdata); 
+    }
+  else
+    {
+      /* We already have this host in our "hosts" array */
+      hostdata->last_heard_from = apr_time_now();
+    }
+
+  return hostdata;
 }
 
 static void
@@ -250,50 +358,86 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
       for(i=0; i< num; i++)
         {
 	  char buf[max_udp_message_len]; 
-	  apr_sockaddr_t from;
-	  apr_size_t len = 1500;
-	  char *protocol;
+	  apr_size_t len = max_udp_message_len;
+	  char  *protocol, *remoteip = NULL;
+	  apr_ipsubnet_t *ipsub;
+	  hostdata_t *hostdata = NULL;
 
-	  socket   = descs[i].desc.s;
-	  protocol = descs[i].client_data; 
+	  socket         = descs[i].desc.s;
+	  protocol       = descs[i].client_data;
 
-	  status = apr_socket_recvfrom(&from, socket, 0, buf, &len);
+	  /* Grab the data */
+	  status = apr_socket_recvfrom(remotesa, socket, 0, buf, &len);
 	  if(status != APR_SUCCESS)
 	    {
 	      continue;
 	    }	  
 
-	  /* TODO: Check the "from" apr_sockaddr_t to see if we trust 'em */
+	  /* Collect the remote address */
+	  status = apr_socket_addr_get(&remotesa, APR_REMOTE, socket);
+	  if(status != APR_SUCCESS)
+	    {
+	      continue;
+	    }
 
+	  apr_sockaddr_ip_get(&remoteip, remotesa);
+
+	  /* Check the ACL (we can make this better later) */
+	  ipsub = ((apr_ipsubnet_t **)(udp_recv_acl_array->elts))[i];
+	  if(ipsub)
+	    {
+	      if(!apr_ipsubnet_test( ipsub, remotesa))
+		{
+		  debug_msg("Ignoring data from %s\n", remoteip);
+		  continue; /* to the next channel that needs read */
+		}
+	    }
+
+	  /* Grab this host's data */
+	  hostdata = find_host_data( remoteip, remotesa );
+	  if(!hostdata)
+	    {
+	      continue;
+	    }
+
+	  fprintf(stderr,"Got a message from %s that is %d bytes long\n",
+		  hostdata->hostname, len);
+	    
+#if 0
 	  if(!strcasecmp(protocol, "xdr"))
 	    {
 	      XDR x;
-	      gangliaMessage message;
+	      gangliaMessage *msg = malloc(sizeof(gangliaMessage));
 
               /* Create the XDR receive stream */
 	      xdrmem_create(&x, buf, max_udp_message_len, XDR_DECODE);
 
               /* Flush the data in the (last) received gangliaMessage 
 	       * TODO: Free memory from xdr_string calls XDR_FREE */
-	      memset( &message, 0, sizeof(gangliaMessage));
+	      memset( &hdr, 0, sizeof(gangliaMessageHeader));
 
 	      /* Read the gangliaMessage from the stream */
-	      if(!xdr_gangliaMessage(&x, &message))
+	      if(!xdr_gangliaMessageHeader(&x, &hdr))
                 {	
 	          continue;
 	        }
 
-	      /* If I want to find out how much data I decoded 
-	      decoded = xdr_getpos(&x); */
-	      if(message.format < MAX_NUM_GANGLIA_FORMATS)
+	      fprintf(stderr,"hdr.index=%d ", hdr.index);
+	      if(hdr.index<1024)
 		{
-	          fprintf(stderr,"Got a complete ganglia message (format=%d) (len=%d)\n", message.format,len);
+		  /* This is a 2.5.x data source */
+                  fprintf(stderr,"2.5.x data source\n"); 
 		}
 	      else
 		{
-		  fprintf(stderr,"Format (%d) is out of range (len=%d).\n", message.format,len);
+		  fprintf(stderr,"new data source\n");
 		}
+
+
+	      /* If I want to find out how much data I decoded 
+	      decoded = xdr_getpos(&x); */
 	    }
+#endif
         } 
     }
 }
@@ -367,7 +511,8 @@ udp_send_message( char *buf, int len )
   int num_errors = 0;
   apr_size_t size;
 
-  if(!buf)
+  /* Return if we have no data or we're muted */
+  if(!buf || mute)
     return 1;
 
   for(i=0; i< udp_send_array->nelts; i++)
@@ -383,7 +528,7 @@ udp_send_message( char *buf, int len )
   return num_errors;
 }
  
-apr_interval_time_t
+int
 process_collection_groups( void )
 {
   int i, num_collection_groups = cfg_size( config_file, "collection_group" );
@@ -393,6 +538,7 @@ process_collection_groups( void )
       int j, num_metrics;
 
       cfg_t *group = cfg_getnsec( config_file, "collection_group", i);
+      char *name   = cfg_getstr( group, "name");
       num_metrics  = cfg_size( group, "metric" );
 
       for(j=0; j< num_metrics; j++)
@@ -404,14 +550,15 @@ process_collection_groups( void )
 
 	}
     }
+
+  return 2;
 }
 
 int
 main ( int argc, char *argv[] )
 {
-  apr_interval_time_t start, end;
-  apr_interval_time_t timeout = 0;
-  apr_interval_time_t next_collection;
+  apr_interval_time_t now, stop;
+  int next_collection;
 
   /* Mark the time this gmond started */
   started = apr_time_now();
@@ -422,7 +569,7 @@ main ( int argc, char *argv[] )
   if(args_info.default_config_flag)
     {
       fprintf(stdout, DEFAULT_CONFIGURATION);
-      fflush(stdout);
+      fflush( stdout );
       exit(0);
     }
 
@@ -439,7 +586,6 @@ main ( int argc, char *argv[] )
   /* Initialize the libmetrics library in ./srclib/libmetrics */
   libmetrics_init();
 
-  /* Ignore any SIGPIPE signals */
   apr_signal( SIGPIPE, SIG_IGN );
 
   setuid_if_necessary();
@@ -456,26 +602,36 @@ main ( int argc, char *argv[] )
       setup_udp_send_array();
     }
 
+  /* Create the host hash table */
+  hosts = apr_hash_make( global_context );
+
+  udp_send_message("This is a test remove me later", 15);
+
+  next_collection = 0;
   for(;;)
     {
-      timeout = 2 * APR_USEC_PER_SEC;
-      start = apr_time_now();
-      if(!deaf)
+      now  = apr_time_now();
+      stop = now + (next_collection* APR_USEC_PER_SEC);
+      /* Read data until we need to collect/write data */
+      for(; now < stop ; )
 	{
-          poll_udp_recv_channels(timeout);  
-	  /* accept_tcp_connections... */
+          if(!deaf)
+	    {
+              poll_udp_recv_channels(stop - now);  
+	      /* accept_tcp_connections... */
+	    }
+	  now = apr_time_now();
 	}
 
       if(!mute)
 	{
 	  next_collection = process_collection_groups();
-	  /*
-	  check_metric_values()... and if we need to...
-	  udp_send_message( "This is a test", 15);
-	  */
 	}
-
-      end = apr_time_now();
+      else
+	{
+	  next_collection = 3600; /* if we're mute.
+				  set the default timeout large...*/
+	}
     }
 
   return 0;

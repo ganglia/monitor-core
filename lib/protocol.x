@@ -1,4 +1,75 @@
+enum gangliaValueTypes {
+  GANGLIA_VALUE_STRING, 
+  GANGLIA_VALUE_INT,
+  GANGLIA_VALUE_FLOAT,
+  GANGLIA_VALUE_DOUBLE
+};
 
+typedef string varstring<>;
+
+union gangliaValue switch(gangliaValueTypes type) {
+  case GANGLIA_VALUE_STRING:
+     string str<>;
+  case GANGLIA_VALUE_INT:
+     int i;
+  case GANGLIA_VALUE_FLOAT:
+     float f;
+  case GANGLIA_VALUE_DOUBLE:
+     double d;
+  default:
+     void;
+};
+
+struct gangliaMetric {
+  string name<>;
+  gangliaValue value;
+};
+
+/* Necessary for source to act as proxy */
+struct gangliaHostinfo {
+  string hostname<>;
+  string ip<>;
+};
+
+/* Necessary for reliable UDP (later) */
+struct gangliaMsginfo {
+  unsigned int seq; 
+  unsigned int timestamp;
+};
+
+enum gangliaDataState {
+  GANGLIA_METRIC_CONSTANT,               /* slope == "zero" */
+  GANGLIA_METRIC_TIME_THRESHOLD,         /* slope != "zero" here down */
+  GANGLIA_METRIC_VALUE_THRESHOLD,
+  GANGLIA_METRIC_WARNING,
+  GANGLIA_METRIC_ALERT
+};
+
+struct gangliaNetinfo {
+  gangliaHostinfo *host;
+  gangliaMsginfo  *msg;
+};
+
+struct gangliaMessageHeader {
+  unsigned int index;
+};
+
+struct gangliaMessageBody {
+  unsigned int source_instance;
+  gangliaNetinfo *net;
+  gangliaDataState state;
+  unsigned int age;
+  unsigned int step;
+  string units<>;
+  gangliaMetric metrics<>;
+};
+
+struct gangliaMessage {
+  gangliaMessageHeader hdr;
+  gangliaMessageBody   bdy;
+};
+
+/* 2.5.x compatibility..... */
 const MAXSTRINGLEN = 1400;
 /* For gmetric messages */
 const MAXTYPELEN =  16;
@@ -10,8 +81,17 @@ const MAXMCASTMSG = 1472;
 const FRAMESIZE =   1400;
 const MAXUNITSLEN = 16;
 
-/* All format prefixed with metric are for 2.5 information */
-enum gangliaFormats {
+struct gmetricMessage {
+  opaque type<MAXTYPELEN>;
+  opaque name<MAXMCASTMSG>;
+  opaque values<FRAMESIZE>;
+  opaque units<MAXUNITSLEN>;
+  unsigned int slope;
+  unsigned int tmax;
+  unsigned int dmax;
+};
+
+enum gangliaMetricIndex {
    metric_user_defined,
    metric_cpu_num,
    metric_cpu_speed,
@@ -64,80 +144,10 @@ enum gangliaFormats {
    metric_mem_rm,
    metric_mem_avm,
    metric_mem_vm,
-   GANGLIA_METRIC_GROUP,
-/* Insert new message formats here */
-   
-   MAX_NUM_GANGLIA_FORMATS  /* Make sure this is always the last in the enum */
+   max_num_25_metric_keys
 };
 
-struct gmetricMessage {
-  opaque type<MAXTYPELEN>;
-  opaque name<MAXMCASTMSG>;
-  opaque values<FRAMESIZE>;
-  opaque units<MAXUNITSLEN>;
-  unsigned int slope;
-  unsigned int tmax;
-  unsigned int dmax;
-};
-
-/* Ganglia Message Format Version 1 */
-enum gangliaValueTypes_1 {
-  GANGLIA_VALUE_STRING_1,
-  GANGLIA_VALUE_INT_1,
-  GANGLIA_VALUE_FLOAT_1,
-  GANGLIA_VALUE_DOUBLE_1
-};
-
-typedef string varstring<>;
-
-union gangliaValue_1 switch(gangliaValueTypes_1 type) {
-  case GANGLIA_VALUE_STRING_1:
-     string str<>;
-  case GANGLIA_VALUE_INT_1:
-     int i;
-  case GANGLIA_VALUE_FLOAT_1:
-     float f;
-  case GANGLIA_VALUE_DOUBLE_1:
-     double d;
-  default:
-     void;
-};
-
-struct gangliaNamedValue_1 {
-  string name<>;
-  gangliaValue_1 value;
-};
-
-enum gangliaSlopeTypes_1 {
-  GANGLIA_SLOPE_ZERO_1,
-  GANGLIA_SLOPE_POSITIVE_1,
-  GANGLIA_SLOPE_NEGATIVE_1,
-  GANGLIA_SLOPE_BOTH_1,
-  GANGLIA_SLOPE_UNSPECIFIED_1
-};
-
-enum gangliaMetricQualities_1 {
-  GANGLIA_QUALITY_NORMAL_1,
-  GANGLIA_QUALITY_WARNING_1,
-  GANGLIA_QUALITY_ALERT_1
-};
-
-struct gangliaMetricGroup {
-  string units<>;
-  int collected;
-  unsigned int tn;
-  unsigned int tmax;
-  unsigned int dmax;
-  gangliaSlopeTypes_1 slope;
-  gangliaMetricQualities_1 quality;
-  gangliaNamedValue_1 data<>;
-};
-/* End Ganglia Message Format Version 1 */
-
-union gangliaMessage switch (gangliaFormats format) {
-  case GANGLIA_METRIC_GROUP:
-    gangliaMetricGroup *group;
- 
+union ganglia25Message switch (gangliaMetricIndex metric) {
   /* 2.5.x sources... */
   case metric_user_defined:
     gmetricMessage gmetric;
@@ -170,7 +180,7 @@ union gangliaMessage switch (gangliaFormats format) {
   case metric_os_release:    /* xdr_string */
   case metric_gexec:         /* xdr_string */
   case metric_location:      /* xdr_string */
-    string str<MAXSTRINGLEN>;
+    string str<>;
 
   case metric_cpu_user:      /* xdr_float */
   case metric_cpu_nice:      /* xdr_float */
@@ -205,5 +215,4 @@ union gangliaMessage switch (gangliaFormats format) {
 
   default:
     void;
-
 };
