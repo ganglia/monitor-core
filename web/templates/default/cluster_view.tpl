@@ -22,8 +22,6 @@
 <TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top>
 <IMG HEIGHT="147" WIDTH="395" ALT="{cluster} LOAD" 
    SRC="./graph.php?g=load_report&z=medium&{graph_args}">
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster} PACKETS" 
-   SRC="./graph.php?g=packet_report&z=medium&{graph_args}">
 <IMG HEIGHT="147" WIDTH="395" ALT="{cluster} CPU" 
    SRC="./graph.php?g=cpu_report&z=medium&{graph_args}">
 <IMG HEIGHT="147" WIDTH="395" ALT="{cluster} NETWORK" VALIGN=BOTTOM 
