@@ -1,4 +1,4 @@
-AM_CFLAGS = -I. $(DOTCONF_INCLUDES) $(LIBDNET_INCLUDES)
+AM_CFLAGS = -I. -I./dnet
 
 EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h getopt.h
 
@@ -7,10 +7,13 @@ libganglia_la_SOURCES = daemon_inetd.c daemon_init.c debug_msg.c error.c \
 ganglia.c getopt1.c getopt.c getopt_init.c hash.c llist.c my_inet_ntop.c \
 rdwr.c xmlparse.c xmlrole.c xmltok.c file.c gexec_funcs.c barrier.c \
 become_a_nobody.c gexec_process.c gexec_vnn_ip.c gmond_config.c inetaddr.c \
-mcast.c tcp.c fsusage.c dotconf.c readdir.c
+mcast.c tcp.c fsusage.c dotconf.c readdir.c intf.c
 
 # Just for convenience
-noinst_HEADERS = dotconf.h readdir.h
+noinst_HEADERS = dotconf.h readdir.h dnet.h ./dnet/addr.h ./dnet/arp.h \
+./dnet/blob.h ./dnet/eth.h ./dnet/fw.h ./dnet/icmp.h ./dnet/intf.h \
+./dnet/ip.h ./dnet/Makefile ./dnet/Makefile.am ./dnet/Makefile.in \
+./dnet/os.h ./dnet/rand.h ./dnet/route.h ./dnet/tcp.h ./dnet/udp.h
 
 libganglia_la_LIBADD  = $(DOTCONF_LIBS)
 
