@@ -58,6 +58,22 @@ enum Ganglia_message_formats {
    metric_disk_total,
    metric_disk_free,
    metric_part_max_used,
+   metric_cpu_wio,
+   metric_bread_sec,
+   metric_bwrite_sec,
+   metric_lread_sec,
+   metric_lwrite_sec,
+   metric_rcache,
+   metric_wcache,
+   metric_phread_sec,
+   metric_phwrite_sec,
+   metric_cpu_intr,
+   metric_cpu_ssys,
+   metric_cpu_wait,
+   metric_mem_arm,
+   metric_mem_rm,
+   metric_mem_avm,
+   metric_mem_vm,
    GANGLIA_NUM_25_METRICS /* this should always directly follow the last 25 metric_* */
 };
 
@@ -168,7 +184,23 @@ struct Ganglia_25metric
 %  {metric_pkts_out,     "pkts_out",    300,  GANGLIA_VALUE_FLOAT,          "packets/sec","both",  "%.2f",UDP_HEADER_SIZE+8},
 %  {metric_disk_total,   "disk_total", 1200,  GANGLIA_VALUE_DOUBLE,         "GB",         "both",  "%.3f",UDP_HEADER_SIZE+16},
 %  {metric_disk_free,    "disk_free",   180,  GANGLIA_VALUE_DOUBLE,         "GB",         "both",  "%.3f",UDP_HEADER_SIZE+16},
-%  {metric_part_max_used,"part_max_used",180, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8}
+%  {metric_part_max_used,"part_max_used",180, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_cpu_wio,      "cpu_wio",     3800, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_bread_sec,    "bread_sec",     90, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_bwrite_sec,   "bwrite_sec",    90, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_lread_sec,    "lread_sec",     90, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_lwrite_sec,   "lwrite_sec",    90, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_rcache,       "rcache",        90, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_wcache,       "wcache",        90, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_phread_sec,   "phread_sec",    90, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_phwrite_sec,  "phwrite_sec",   90, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_cpu_intr,     "cpu_intr",      90, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_cpu_ssys,     "cpu_ssys",      90, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_cpu_wait,     "cpu_wait",      90, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_mem_arm,      "mem_arm",      180, GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_mem_rm,       "mem_rm",       180, GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_mem_avm,      "mem_avm",      180, GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_mem_vm,       "mem_vm",       180, GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "both",  "%u",  UDP_HEADER_SIZE+8}
 % };
 %
 % Ganglia_25metric *
