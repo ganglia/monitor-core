@@ -1,6 +1,11 @@
 #ifndef CONF_H
 #define CONF_H 1
 
+/***** IMPORTANT ************
+Any changes that you make to this file need to be reconciled in ./conf.pod
+in order for the documentation to be in order with the code 
+****************************/
+
 #include "confuse.h"
 
 void init_validate_funcs(void);
@@ -46,13 +51,6 @@ collection_group { \n\
   } \n\
 } \n\
 "
-
-static cfg_opt_t location_opts[] = {
-  CFG_INT("rack", -1, CFGF_NONE ),
-  CFG_INT("rank", -1, CFGF_NONE ),
-  CFG_INT("plane", -1, CFGF_NONE ),
-  CFG_END()
-};
 
 static cfg_opt_t cluster_opts[] = {
   CFG_STR("name", NULL, CFGF_NONE ),
@@ -129,7 +127,6 @@ static cfg_opt_t metric_opts[] = {
   CFG_STR("units", NULL, CFGF_NONE ),
   CFG_STR("name", NULL, CFGF_NONE ),
   CFG_INT("current_state", 0, CFGF_NONE), /* high_alert, high_warning, normal, low_warning, low_alert */
-  CFG_END(),  /* hack.. this holds the value */
   CFG_END()
 };
 
@@ -151,7 +148,6 @@ static cfg_opt_t collection_group_opts[] = {
 
 
 static cfg_opt_t gmond_opts[] = {
-  CFG_SEC("location",  location_opts, CFGF_NONE),
   CFG_SEC("cluster",   cluster_opts, CFGF_NONE),
   CFG_SEC("behavior",     behavior_opts, CFGF_NONE), 
   CFG_SEC("udp_send_channel", udp_send_channel_opts, CFGF_MULTI),
