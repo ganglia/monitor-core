@@ -1,6 +1,6 @@
 # $Id$
 #
-SUBDIRS = lib gmetad gmond gmetric
+SUBDIRS = lib gmetad gmond gmetric @GEXEC_DIRS@
 
 DIST_SUBDIRS = gexec authd libe
 
