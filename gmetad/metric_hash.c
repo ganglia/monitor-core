@@ -1,6 +1,6 @@
 /* C code produced by gperf version 2.7.2 */
-/* Command-line: gperf -G -l -k 1,4,7 -H gmetad_hash -N in_metric_list -W metrics ./metric_list  */
-#include "gmetad.h"
+/* Command-line: gperf -G -l -k 1,4,7 -H metric_hash -N in_metric_list -W metrics ./metric_list  */
+#include <gmetad.h>
 
 #define TOTAL_KEYWORDS 43
 #define MIN_WORD_LENGTH 3
@@ -15,8 +15,8 @@ __inline
 inline
 #endif
 #endif
-static unsigned int
-gmetad_hash (str, len)
+unsigned int
+metric_hash (str, len)
      register const char *str;
      register unsigned int len;
 {
@@ -159,7 +159,7 @@ in_metric_list (str, len)
 {
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
     {
-      register int key = gmetad_hash (str, len);
+      register int key = metric_hash (str, len);
 
       if (key <= MAX_HASH_VALUE && key >= 0)
         if (len == lengthtable[key])
