@@ -154,7 +154,7 @@ dnl       CFLAGS="$CFLAGS -D_REENTRANT"
 dnl    fi
 dnl fi
 
-AC_CHECK_LIB(expat, XML_ParserCreate)
+AC_CHECK_LIB(expat, XML_ParserCreate, echo "Expat found", echo "Expat NOT found")
 
 if test "$ac_cv_lib_expat_XML_ParserCreate" != yes; then
 echo
@@ -181,7 +181,8 @@ exit;
 fi
 
 
-AC_CHECK_LIB(rrd, rrd_create)
+# Adding the echo statements prevents autoconf from changing LIBS
+AC_CHECK_LIB(rrd, rrd_create, echo "Rrdtool found", echo "Rrdtool NOT found!")
 
 if test "$ac_cv_lib_rrd_rrd_create" != yes; then
 echo
