@@ -178,6 +178,8 @@ AC_CHECK_LIB(c, freeaddrinfo)
 AC_CHECK_LIB(nsl, t_open)
 AC_CHECK_LIB(nsl, inet_addr)
 AC_CHECK_LIB(nsl, gethostbyaddr_r)
+AC_CHECK_LIB(nsl, inet_ntop)
+AC_CHECK_LIB(nsl, inet_pton)
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(resolv, inet_aton)
 
