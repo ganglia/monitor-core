@@ -297,7 +297,14 @@ function Gmetad ()
 
    while(!feof($fp))
       {
-         $data = fread($fp, 16384);
+         if(isset($use_compression))
+           {
+             $data = gzread($fp, 16384);
+           }
+         else
+           {
+             $data = fread($fp, 16384);
+           }
          if (!xml_parse($parser, $data, feof($fp)))
             {
                $error = sprintf("XML error: %s at %d",
