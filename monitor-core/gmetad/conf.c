@@ -209,6 +209,13 @@ static DOTCONF_CB(cb_setuid)
    return NULL;
 }
 
+static DOTCONF_CB(cb_xml_compression_level)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   c->xml_compression_level = cmd->data.value;
+   return NULL;
+}
+
 static DOTCONF_CB(cb_scalable)
 {  
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
@@ -239,6 +246,7 @@ static configoption_t gmetad_options[] =
       {"setuid", ARG_TOGGLE, cb_setuid, &gmetad_config, 0},
       {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
       {"scalable", ARG_STR, cb_scalable, &gmetad_config, 0},
+      {"xml_compression_level", ARG_INT, cb_xml_compression_level, &gmetad_config, 0},
       LAST_OPTION
    };
 
@@ -248,6 +256,7 @@ set_defaults (gmetad_config_t *config)
    /* Gmetad defaults */
    config->gridname = "unspecified";
    config->xml_port = 8651;
+   config->xml_compression_level = 0; /* no compression */
    config->interactive_port = 8652;
    config->server_threads = 4;
    config->trusted_hosts = NULL;
