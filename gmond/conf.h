@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "lib/llist.h"
+#include "libunp/unpifi.h"
 
 /* autoconf me later */
 #define DEFAULT_GMOND_CONFIG_FILE "/etc/gmond.conf"
@@ -29,7 +30,6 @@ typedef struct
    int  num_receive_channels;
    int  num_send_channels;
    channel_t **channels; 
-   long int mcast_threads;
    char *xml_port;
    char *compressed_xml_port;
    long int xml_threads;
