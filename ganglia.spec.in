@@ -1,4 +1,6 @@
 #
+# $Id$
+#
 # @configure_input@
 #
 Summary: Ganglia Cluster Toolkit http://ganglia.sourceforge.net/
