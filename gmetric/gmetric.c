@@ -4,6 +4,8 @@
 #include "node_data_t.h"
 #include "cmdline.h"
 #include <string.h>
+#include <dnet.h>
+#include <interface.h>
 
 extern int optopt;
 extern int optind;
@@ -26,6 +28,7 @@ int main ( int argc, char **argv )
    uint32_t key = 0; /* user-defined */
    char empty[] = "\0";
    g_inet_addr *addr;
+   struct intf_entry *entry;
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
@@ -45,28 +48,22 @@ int main ( int argc, char **argv )
          exit(-1);
       }  
 
-   addr = g_inetaddr_new ( args_info.mcast_channel_arg, args_info.mcast_port_arg );
-   mcast_socket = g_mcast_socket_new( addr );
-   g_inetaddr_delete( addr );
+   if(! args_info.mcast_if_given )
+      {
+         entry = get_first_multicast_interface();
+      }
+   else
+      {
+         entry = get_interface ( args_info.mcast_if_arg );
+      }
+
+   mcast_socket = g_mcast_out ( args_info.mcast_channel_arg, args_info.mcast_port_arg,
+                                (struct in_addr *)&(entry->intf_addr.addr_ip), args_info.mcast_ttl_arg);
    if ( !mcast_socket )
       {
          perror("gmond could not connect to multicast channel");
          return -1;
       }
-   debug_msg("multicasting on channel %s %d", args_info.mcast_channel_arg, args_info.mcast_port_arg );
-
-   if ( g_mcast_socket_set_ttl(mcast_socket, args_info.mcast_ttl_arg ) < 0)
-      {
-         perror("gmond could not set the ttl");
-         return -1;
-      }
-
-   rval = g_mcast_socket_connect ( mcast_socket );
-   if ( rval <0)
-      {
-         perror("mcast_connect() connect() error");
-         return -1;
-      } 
 
    name.data = args_info.name_arg;
    name.size = strlen( name.data )+1;
