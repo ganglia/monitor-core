@@ -8,6 +8,10 @@ extern "C" {
 
 #define SYNAPSE_SUCCESS 0
 #define SYNAPSE_FAILURE -1
+#define G3_SUCCESS 0
+#define G3_FAILURE -1
+#define G3_FALSE 0
+#define G3_TRUE 1
 
 /* Public GEXEC Functions and Structures */
 extern int gexec_errno;
