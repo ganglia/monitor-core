@@ -297,7 +297,7 @@ function Gmetad ()
 
    $start = gettimeofday();
 
-   if(isset($use_compression))
+   if($use_compression)
      {
        $temp_filename = tempnam("/tmp", "ganglia-web-");
        $temp = fopen( $temp_filename, "wb");
@@ -312,7 +312,7 @@ function Gmetad ()
       {
          $data = fread($fp, 16384);
          
-         if(isset($use_compression))
+         if($use_compression)
            {
              /* Save the input to a temporary file */
              fwrite($temp, $data);
@@ -332,7 +332,7 @@ function Gmetad ()
       }
    fclose($fp);
 
-   if(isset($use_compression))
+   if($use_compression)
      {
        fclose($temp);
        /* This really sucks.  PHP will not let me process compressed data on
