@@ -86,8 +86,13 @@ if ($graph)   /* Canned graph request */
                   ."CDEF:'ccpu_idle'=cpu_idle,num_nodes,/ "
                   ."AREA:'ccpu_user'#$cpu_user_color:'User CPU' "
                   ."STACK:'ccpu_nice'#$cpu_nice_color:'Nice CPU' "
-                  ."STACK:'ccpu_system'#$cpu_system_color:'System CPU' "
-                  ."STACK:'ccpu_idle'#$cpu_idle_color:'Idle CPU' ";
+                  ."STACK:'ccpu_system'#$cpu_system_color:'System CPU' ";
+                  if (file_exists("$rrd_dir/cpu_wio.rrd")) {
+                     $series .= "DEF:'cpu_wio'='${rrd_dir}/cpu_wio.rrd':'sum':AVERAGE "
+                     ."CDEF:'ccpu_wio'=cpu_wio,num_nodes,/ "
+                     ."STACK:'ccpu_wio'#$cpu_wio_color:'WAIT CPU' ";
+                  }
+                  $series .= "STACK:'ccpu_idle'#$cpu_idle_color:'Idle CPU' ";
                }
             else
                {
@@ -97,8 +102,12 @@ if ($graph)   /* Canned graph request */
                   ."DEF:'cpu_idle'='${rrd_dir}/cpu_idle.rrd':'sum':AVERAGE "
                   ."AREA:'cpu_user'#$cpu_user_color:'User CPU' "
                   ."STACK:'cpu_nice'#$cpu_nice_color:'Nice CPU' "
-                  ."STACK:'cpu_system'#$cpu_system_color:'System CPU' "
-                  ."STACK:'cpu_idle'#$cpu_idle_color:'Idle CPU' ";
+                  ."STACK:'cpu_system'#$cpu_system_color:'System CPU' ";
+                  if (file_exists("$rrd_dir/cpu_wio.rrd")) {
+                     $series .= "DEF:'cpu_wio'='${rrd_dir}/cpu_wio.rrd':'sum':AVERAGE "
+                     ."STACK:'cpu_wio'#$cpu_wio_color:'WAIT CPU' ";
+                  }
+                  $series .= "STACK:'cpu_idle'#$cpu_idle_color:'Idle CPU' ";
                }
          }
       else if ($graph == "mem_report")
@@ -164,6 +173,19 @@ if ($graph)   /* Canned graph request */
 
             $series = "DEF:'bytes_in'='${rrd_dir}/bytes_in.rrd':'sum':AVERAGE "
                ."DEF:'bytes_out'='${rrd_dir}/bytes_out.rrd':'sum':AVERAGE "
+               ."LINE2:'bytes_in'#$mem_cached_color:'In' "
+               ."LINE2:'bytes_out'#$mem_used_color:'Out' ";
+         }
+      else if ($graph == "packet_report")
+         {
+            $style = "Packets";
+
+            $lower_limit = "--lower-limit 0 --rigid";
+            $extras = "--base 1024";
+            $vertical_label = "--vertical-label 'Packets/sec'";
+
+            $series = "DEF:'bytes_in'='${rrd_dir}/pkts_in.rrd':'sum':AVERAGE "
+               ."DEF:'bytes_out'='${rrd_dir}/pkts_out.rrd':'sum':AVERAGE "
                ."LINE2:'bytes_in'#$mem_cached_color:'In' "
                ."LINE2:'bytes_out'#$mem_used_color:'Out' ";
          }

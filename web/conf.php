@@ -3,9 +3,9 @@
 #
 # Gmetad-webfrontend version. Used to check for updates.
 #
-$majorversion = 2;
-$minorversion = 5;
-$microversion = 7;
+$majorversion = 3;
+$minorversion = 0;
+$microversion = 0;
 
 $ganglia_version = "$majorversion.$minorversion.$microversion";
 
