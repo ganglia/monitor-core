@@ -69,6 +69,7 @@ static cfg_opt_t udp_send_channel_opts[] = {
   CFG_STR("mcast_if", NULL, CFGF_NONE),
   CFG_STR("host", NULL, CFGF_NONE ),
   CFG_INT("port", -1, CFGF_NONE ),
+  CFG_INT("ttl", 1, CFGF_NONE ),
   CFG_END()
 };
 
