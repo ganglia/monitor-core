@@ -315,7 +315,7 @@ set_defaults (gmetad_config_t *config)
    config->debug_level = 0;
    config->should_setuid = 1;
    config->setuid_username = "nobody";
-   config->rrd_rootdir = "/var/lib/ganglia/rrds";
+   config->rrd_rootdir = VARSTATEDIR"/ganglia/rrds";
    config->scalable_mode = 1;
    config->all_trusted = 0;
    /* round-robin archives */
