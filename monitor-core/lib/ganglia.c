@@ -9,8 +9,7 @@
 
 #include "ganglia_private.h"
 #include "net.h"
-#include "unp.h"
-#include "error.h"
+#include "libunp/unp.h"
 
 #define TIMEOUT 60
 #define NUM_METRICS 30
