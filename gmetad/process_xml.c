@@ -56,19 +56,20 @@ start (void *data, const char *el, const char **attr)
            is_volatile = 0;
            is_numeric  = 0;
            blessed     = 0;
+           gm          = NULL;
 
            for(i = 0; attr[i] ; i+=2)
               {
                  /* Only process the XML tags that gmetad is interested in */
                  if(!( xt = in_xml_list ( (char *)attr[i], strlen(attr[i]))) )
                     continue;
-                 else   
-                    blessed = 1;
 
                  switch( xt->tag )
                     {
                        case NAME_TAG:
                           xml_data->metric = (char *)attr[i+1];
+                          if( gm = in_metric_list( (char *)(xml_data->metric), strlen( xml_data->metric) ) )
+                             blessed = 1;
                           break;
                        
                        case VAL_TAG:
@@ -86,13 +87,17 @@ start (void *data, const char *el, const char **attr)
                        case SLOPE_TAG:
                           /* SLOPE != zero */
                           if( strcmp( attr[i+1], "zero" ))
-                             is_volatile = 1; 
+                             {
+                                is_volatile = 1; 
+                             }
                           break;
 
                        case TYPE_TAG:
                           /* TYPE != string */
                           if( strcmp( attr[i+1], "string" ))
-                             is_numeric = 1;
+                             {
+                                is_numeric = 1;
+                             }
                           break;
                     }
               }
@@ -108,7 +113,7 @@ start (void *data, const char *el, const char **attr)
            if( !( (is_volatile && is_numeric) || blessed))
               return;
 
-           if( gm = in_metric_list( xml_data->metric, strlen(xml_data->metric)) )
+           if( gm )
               {
                  unsigned int hash_val;
 
@@ -282,7 +287,6 @@ end (void *data, const char *el)
                         xml_data->overall_sum[i] +=  xml_data->sum[i];
                         xml_data->overall_num[i] +=  xml_data->num[i];
 
-                        debug_msg("OVERALL %s overall_sum = %Lf overall_num = %d", metrics[i].name, xml_data->overall_sum[i], xml_data->overall_num[i]);
                     }
               }
 
