@@ -5,7 +5,7 @@ dnl in more generic and allows for arbitrary headers to
 dnl be included in the search
 dnl
 dnl
-AC_DEFUN(AC_SEARCH_TYPE,
+AC_DEFUN([AC_SEARCH_TYPE],
         [AC_MSG_CHECKING(if $1 defined)
         AC_CACHE_VAL(ac_cv_type_$1,
                 AC_TRY_COMPILE(
@@ -91,7 +91,7 @@ AC_DEFUN(AC_SEARCH_TYPE,
 dnl ##################################################################
 dnl Our macro to check for a function prototype in a given header.
 dnl
-AC_DEFUN(AC_CHECK_FUNC_PROTO,
+AC_DEFUN([AC_CHECK_FUNC_PROTO],
 	[AC_CACHE_CHECK(for $1 function prototype in $2, ac_cv_have_$1_proto,
 		AC_EGREP_HEADER($1, $2,
 			ac_cv_have_$1_proto=yes,
@@ -115,7 +115,7 @@ dnl This macro should be invoked after all the header checks have been
 dnl performed, since we #include "confdefs.h" below, and then use the
 dnl HAVE_foo_H values that it can #define.
 dnl
-AC_DEFUN(AC_UNP_CHECK_TYPE,
+AC_DEFUN([AC_UNP_CHECK_TYPE],
 	[AC_MSG_CHECKING(if $1 defined)
 	AC_CACHE_VAL(ac_cv_type_$1,
 		AC_TRY_COMPILE(
@@ -203,7 +203,7 @@ dnl ##################################################################
 dnl The following checks for any typedefs for XTI programs.
 dnl We perform all the #includes that "libxti/unpxti.h" performs.
 dnl
-AC_DEFUN(AC_UNPXTI_CHECK_TYPE,
+AC_DEFUN([AC_UNPXTI_CHECK_TYPE],
 	[AC_MSG_CHECKING(if $1 defined)
 	AC_CACHE_VAL(ac_cv_type_$1,
 		AC_TRY_COMPILE(
