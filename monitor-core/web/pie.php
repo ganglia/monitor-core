@@ -1,8 +1,15 @@
 <?php /* -*- C -*- */
+
+   /* This is a public domain PHP class originally written
+      by Bjrn Borud <borud@guardian.no> and modified heavily
+      by Federico Sacerdoti <fds@sdsc.edu>
+    */
+
+
     /*
     ** $Id$
     **
-    ** PHP Class for creating pie charts using the GD library functions.
+    ** PHP Class for creating pie charts using the GD library functions
     **
     ** There is a bug in the GD library somewhere that seems to kick in
     ** when you try to return images that are larger than 4K. We probably
