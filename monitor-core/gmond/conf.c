@@ -170,8 +170,7 @@ static DOTCONF_CB(cb_mcast_channel)
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
 
   /* We are going to overwrite the first channel entry */
-  c->channels[0]->addresses[0] = conf_strdup(cmd->data.str);
-  c->channels[0]->num_addresses = 1;
+  c->channels[0]->address = conf_strdup(cmd->data.str);
   return NULL;
 }
 
@@ -250,45 +249,20 @@ static DOTCONF_CB(cb_close_channel)
       return buf;
     }
 
-  fprintf(stderr,"Closing channel\n");
-
   return context->current_end_token;
 }
 
-static DOTCONF_CB(cb_addresses)
+static DOTCONF_CB(cb_address)
 {
-  int i;
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-  channel_t *channel;
- 
-  fprintf(stderr,"Current addresses for %d\n", c->current_channel);
-  channel = c->channels[c->current_channel];
-  /* Malloc enough space for all the IPs in the list */
-  channel->addresses = (char **) malloc ( sizeof( char *) * cmd->arg_count );
-  channel->num_addresses = cmd->arg_count;
-  for (i = 0; i < cmd->arg_count; i++)
-    {
-      channel->addresses[i] = conf_strdup( cmd->data.list[i] );
-    } 
-
+  c->channels[c->current_channel]->address = conf_strdup( cmd->data.str );
   return NULL;
 }
 
-static DOTCONF_CB(cb_ports)
+static DOTCONF_CB(cb_port)
 {
-  int i;
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-  channel_t *channel;
-
-  channel = c->channels[c->current_channel];
-  /* Malloc enough space for all the ports in the list */
-  channel->ports = (char **) malloc ( sizeof( char *) * cmd->arg_count );
-  channel->num_ports = cmd->arg_count;
-  for (i = 0; i < cmd->arg_count; i++)
-    {
-      channel->ports[i] = conf_strdup( cmd->data.list[i] );
-    }
-
+  c->channels[c->current_channel]->port = conf_strdup( cmd->data.str );
   return NULL;
 }
 
@@ -310,10 +284,8 @@ static DOTCONF_CB(cb_ttl)
 static DOTCONF_CB(cb_mcast_port)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-
    /* We are going to overwrite the first channel with mcast_port info */
-   c->channels[0]->ports[0] = conf_strdup(cmd->data.str);
-   c->channels[0]->num_ports = 1;
+   c->channels[0]->port = conf_strdup(cmd->data.str);
    return NULL;
 }
 
@@ -536,13 +508,8 @@ set_defaults(gmond_config_t *config )
      }
 
    /* Start backward compatibility attempt */
-   config->channels[0]->addresses = (char **) malloc ( sizeof( char *) );
-   config->channels[0]->addresses[0] = conf_strdup("239.2.11.71");
-   config->channels[0]->num_addresses = 1;
-   
-   config->channels[0]->ports = (char **) malloc ( sizeof( char *) );
-   config->channels[0]->ports[0] = conf_strdup("8649");
-   config->channels[0]->num_ports = 1;
+   config->channels[0]->address = conf_strdup("239.2.11.71");
+   config->channels[0]->port = conf_strdup("8649");
   
    /* We don't explicitly set any interfaces */
    config->channels[0]->num_interfaces = 0;
@@ -585,22 +552,15 @@ print_conf( gmond_config_t *config )
        c = config->channels[i];
 
        printf("Info for channel #%d\n", i+1);
-       printf("\tThere are %d addresses\n", c->num_addresses);
-       for(j=0; j< c->num_addresses; j++)
-         {
-           printf("\t\t%s\n", c->addresses[j]);
-         }
-       printf("\tThere are %d ports\n", c->num_ports);
-       for(j=0; j< c->num_ports; j++)
-         {
-           printf("\t\t%s\n", c->ports[j]);
-         }
+       printf("\tAddress = %s\n", c->address);
+       printf("\t   Port = %s\n", c->port);
        printf("\tThere are %d interfaces\n", c->num_interfaces);
        for(j=0; j< c->num_interfaces; j++)
          {
            printf("\t\t%s\n", c->interfaces[j]);
          }
        printf("\tThe TTL is set to %d\n", c->ttl);
+       printf("\tDirection is set to %s\n", c->direction);
      }
    printf("mcast_threads is %ld\n", config->mcast_threads);
    printf("xml_port is %s\n", config->xml_port);
@@ -659,8 +619,8 @@ get_gmond_config( char *conffile )
       {
          {"<Channel>", ARG_NONE, cb_open_channel, &gmond_config, CTX_ALL},
          {end_ChannelSection, ARG_NONE, cb_close_channel, &gmond_config, CHANNEL_SECTION},
-         {"addresses", ARG_LIST, cb_addresses, &gmond_config, CHANNEL_SECTION},
-         {"ports", ARG_LIST, cb_ports, &gmond_config, CHANNEL_SECTION},
+         {"address", ARG_STR, cb_address, &gmond_config, CHANNEL_SECTION},
+         {"port", ARG_STR, cb_port, &gmond_config, CHANNEL_SECTION},
          {"interfaces", ARG_LIST, cb_interfaces, &gmond_config, CHANNEL_SECTION},
          {"direction", ARG_STR, cb_direction, &gmond_config, CHANNEL_SECTION},
          {"ttl", ARG_INT, cb_ttl, &gmond_config, CHANNEL_SECTION},
