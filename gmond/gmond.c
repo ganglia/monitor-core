@@ -226,8 +226,12 @@ setuid_if_necessary( void )
   setuid = cfg_getbool( tmp, "setuid" );
   if(setuid)
     {
+#ifdef CYGWIN
+      fprintf(stderr,"Windows does not support setuid.\n");
+#else
       user = cfg_getstr(tmp, "user" );
       become_a_nobody(user);
+#endif
     }
 }
 
