@@ -11,7 +11,7 @@
 
 #include "ganglia_private.h"
 #include "file.h"
-#include "error.h"
+#include "libunp/unp.h"
 
 /**
  * @fn int slurpfile ( char * filename, char *buffer, int buflen )

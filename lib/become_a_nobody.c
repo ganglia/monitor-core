@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include "become_a_nobody.h"
-#include "error.h"
+#include "libunp/unp.h"
 
 void
 become_a_nobody( const char *username )
