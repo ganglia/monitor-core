@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/poll.h>
-#include "gmetad.h"
+#include <gmetad.h>
 #include <string.h>
 #include <ganglia/hash.h>
 
@@ -10,7 +10,7 @@ extern int debug_level;
 
 extern hash_t *xml;
 
-extern save_to_rrd( char *, char *);
+extern process_xml(unsigned int, char *, char *);
 
 void *
 data_thread ( void *arg )
@@ -28,7 +28,7 @@ data_thread ( void *arg )
  
    if(debug_level)
       {
-         fprintf(stderr,"%d is monitoring [%s] data source\n", pthread_self(), d->name);
+         fprintf(stderr,"%d is monitoring [%s] data source index[%d]\n", pthread_self(), d->name, d->index);
          for(i = 0; i < d->num_sources; i++)
             {
                addr = d->sources[i];
@@ -133,7 +133,7 @@ data_thread ( void *arg )
 
 
          /* Parse the buffer */
-         rval = save_to_rrd( d->name, buf );
+         rval = process_xml(d->index, d->name, buf );
          if(rval)
             {
                debug_msg("save_to_rrd() couldn't parse the XML");

@@ -13,6 +13,8 @@ extern char *rrd_rootdir;
 extern char *setuid_username;
 extern int should_setuid;
 
+extern int source_index;
+
 static DOTCONF_CB(cb_trusted_hosts)
 {
    int i;
@@ -55,6 +57,8 @@ static DOTCONF_CB(cb_data_source)
                err_quit("Unable to malloc data source list");
             }
 
+         dslist->index = source_index;
+         source_index++;
          dslist->num_sources = 0;
          dslist->sources = NULL;
          dslist->name = strdup( cmd->data.list[0] );
