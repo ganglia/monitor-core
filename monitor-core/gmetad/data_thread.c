@@ -136,7 +136,7 @@ data_thread ( void *arg )
          rval = process_xml(d->index, d->name, buf );
          if(rval)
             {
-               debug_msg("save_to_rrd() couldn't parse the XML");
+               debug_msg("save_to_rrd() couldn't parse the XML for [%s]", d->name);
                goto take_a_break;
             }    
 
