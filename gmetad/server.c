@@ -1,3 +1,4 @@
+#include <zlib.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <stdarg.h>
@@ -18,7 +19,7 @@ extern gmetad_config_t gmetad_config;
 extern char* getfield(char *buf, short int index);
 extern struct type_tag* in_type_list (char *, unsigned int);
 
-
+#if 0
 static inline int
 xml_print( client_t *client, const char *fmt, ... )
 {
@@ -49,7 +50,7 @@ xml_print( client_t *client, const char *fmt, ... )
    va_end(ap);
    return 0;
 }
-
+#endif
 
 static int
 metric_summary(datum_t *key, datum_t *val, void *arg)
@@ -81,13 +82,13 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
             break;
       }
 
-   return xml_print(client, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
+   return gzprintf(client->z, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
       "TYPE=\"%s\" UNITS=\"%s\" SLOPE=\"%s\" SOURCE=\"%s\"/>\n",
       name, sum, metric->num,
       getfield(metric->strings, metric->type),
       getfield(metric->strings, metric->units),
       getfield(metric->strings, metric->slope),
-      getfield(metric->strings, metric->source));
+      getfield(metric->strings, metric->source)) ? 0: 1;
 }
 
 
@@ -96,9 +97,9 @@ source_summary(Source_t *source, client_t *client)
 {
    int rc;
 
-   rc=xml_print(client, "<HOSTS UP=\"%u\" DOWN=\"%u\" SOURCE=\"gmetad\"/>\n",
+   rc=gzprintf(client->z, "<HOSTS UP=\"%u\" DOWN=\"%u\" SOURCE=\"gmetad\"/>\n",
       source->hosts_up, source->hosts_down);
-   if (rc) return 1;
+   if (!rc) return 1;
 
    return hash_foreach(source->metric_summary, metric_summary, (void*) client);
 }
@@ -107,22 +108,18 @@ source_summary(Source_t *source, client_t *client)
 int
 metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 {
-   int rc;
    char *name = (char*) key->data;
    Metric_t *metric = (Metric_t*) self;
 
-   rc=xml_print(client, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
+   return gzprintf(client->z, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
       "UNITS=\"%s\" TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" SLOPE=\"%s\" "
       "SOURCE=\"%s\"/>\n",
       name, getfield(metric->strings, metric->valstr),
       getfield(metric->strings, metric->type),
       getfield(metric->strings, metric->units), metric->tn,
       metric->tmax, metric->dmax, getfield(metric->strings, metric->slope),
-      getfield(metric->strings, metric->source));
-      
-   return rc;
+      getfield(metric->strings, metric->source))? 0 : 1;
 }
-
 
 int
 metric_report_end(Generic_t *self, client_t *client, void *arg)
@@ -134,51 +131,43 @@ metric_report_end(Generic_t *self, client_t *client, void *arg)
 int
 host_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 {
-   int rc;
    char *name = (char*) key->data;
    Host_t *host = (Host_t*) self;
 
    /* Note the hash key is the host's IP address. */
-   rc = xml_print(client, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
+   return gzprintf(client->z, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
       "TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" LOCATION=\"%s\" GMOND_STARTED=\"%u\">\n",
       name, getfield(host->strings, host->ip), host->reported, host->tn,
       host->tmax, host->dmax, getfield(host->strings, host->location),
-      host->started);
-      
-   return rc;
+      host->started)? 0:1;
 }
 
 
 int
 host_report_end(Generic_t *self, client_t *client, void *arg)
 {
-   return xml_print(client, "</HOST>\n");
+   return gzprintf(client->z, "</HOST>\n")? 0: 1;
 }
 
 
 int
 source_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 {
-   int rc;
    char *name = (char*) key->data;
    Source_t *source = (Source_t*) self;
 
    if (self->id == CLUSTER_NODE)
       {
-            rc=xml_print(client, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%u\" OWNER=\"%s\" "
+            return gzprintf(client->z, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%u\" OWNER=\"%s\" "
                "LATLONG=\"%s\" URL=\"%s\">\n",
                name, source->localtime, getfield(source->strings, source->owner),
                getfield(source->strings, source->latlong),
-               getfield(source->strings, source->url));
-      }
-   else
-      {
-            rc=xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" "
-               "LOCALTIME=\"%u\">\n",
-               name, getfield(source->strings, source->authority_ptr), source->localtime);
+               getfield(source->strings, source->url))? 0: 1;
       }
 
-   return rc;
+   return gzprintf(client->z, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" "
+         "LOCALTIME=\"%u\">\n",
+          name, getfield(source->strings, source->authority_ptr), source->localtime)? 0: 1;
 }
 
 
@@ -187,9 +176,9 @@ source_report_end(Generic_t *self,  client_t *client, void *arg)
 {
 
    if (self->id == CLUSTER_NODE)
-      return xml_print(client, "</CLUSTER>\n");
-   else
-      return xml_print(client, "</GRID>\n");
+      return gzprintf(client->z, "</CLUSTER>\n")? 0: 1;
+
+   return gzprintf(client->z, "</GRID>\n")? 0: 1;
 }
 
 
@@ -199,23 +188,22 @@ root_report_start(client_t *client)
 {
    int rc;
 
-   rc = xml_print(client, DTD);
-   if (rc) return 1;
+   rc = gzprintf(client->z, DTD);
+   if (!rc) return 1;
 
-   rc = xml_print(client, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
+   rc = gzprintf(client->z, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
       VERSION);
+   if (!rc) return 1;
 
-   rc = xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
-       gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0));
-
-   return rc;
+   return gzprintf(client->z, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
+       gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0))? 0: 1;
 }
 
 
 int
 root_report_end(client_t *client)
 {
-    return xml_print(client, "</GRID>\n</GANGLIA_XML>\n");
+    return gzprintf(client->z, "</GRID>\n</GANGLIA_XML>\n")? 0: 1;
 }
 
 
@@ -496,6 +484,7 @@ server_thread (void *arg)
    char request[REQUESTLEN];
    llist_entry *le;
    datum_t rootdatum;
+   char gzdopen_param[32];
 
    for (;;)
       {
@@ -562,10 +551,20 @@ server_thread (void *arg)
          else
             strcpy(request, "/");
 
+         sprintf(gzdopen_param, "wb%d", gmetad_config.xml_compression_level);
+         client.z = gzdopen( client.fd, gzdopen_param );
+         if(!client.z)
+           {
+             err_msg("unable to create zlib stream");
+             close(client.fd);
+             continue;
+           } 
+
          if(root_report_start(&client))
             {
                err_msg("server_thread() %d unable to write root preamble (DTD, etc)",
                          pthread_self() );
+               gzclose(client.z);
                close(client.fd);
                continue;
             }
@@ -577,6 +576,7 @@ server_thread (void *arg)
          if (process_path(&client, request, &rootdatum, NULL))
             {
                err_msg("server_thread() %d unable to write XML tree info", pthread_self() );
+               gzclose(client.z);
                close(client.fd);
                continue;
             }
@@ -586,6 +586,7 @@ server_thread (void *arg)
                err_msg("server_thread() %d unable to write root epilog", pthread_self() );
             }
 
+         gzclose(client.z);
          close(client.fd);
       }
 }

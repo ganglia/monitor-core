@@ -7,6 +7,7 @@
 #include <gmetad.h>
 #include <string.h>
 #include <gmetad.h>
+#include <zlib.h>
 
 extern int debug_level;
 
@@ -29,6 +30,7 @@ data_thread ( void *arg )
    unsigned int buf_size = 1024, read_index;
    struct pollfd struct_poll;
    struct timeval start, end;
+   gzFile z = NULL;
  
    if(debug_level)
       {
@@ -72,6 +74,14 @@ data_thread ( void *arg )
 
          struct_poll.fd = sock->sockfd;
          struct_poll.events = POLLIN; 
+  
+         /* Create a zlib stream */
+         z = gzdopen( sock->sockfd, "rb" ); 
+         if(!z)
+           {
+             err_msg("unable to create zlib stream\n");
+             goto take_a_break;
+           }
 
          read_index = 0;
          for(;;)
@@ -106,7 +116,7 @@ data_thread ( void *arg )
                                     }
                                  buf_size+=1024;
                               }
-                           SYS_CALL( bytes_read, read(sock->sockfd, buf+read_index, 1023));
+                           bytes_read = gzread( z, buf+read_index, 1023 );
                            if (bytes_read < 0)
                               {
                                  err_msg("data_thread() unable to read() socket for [%s] data source", d->name);
@@ -156,6 +166,8 @@ data_thread ( void *arg )
          d->dead = 0;
 
        take_a_break:
+         if(z)
+           gzclose(z);
          g_tcp_socket_delete(sock);
 
          gettimeofday(&end, NULL);
