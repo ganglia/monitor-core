@@ -6,9 +6,14 @@ else
 GMETAD_SUBDIR = 
 endif
 
-SUBDIRS = lib $(GMETAD_SUBDIR) gmond gmetric
+GANGLIA_SUBDIRS = lib $(GMETAD_SUBDIR) gmond gmetric
 
-DIST_SUBDIRS = lib gmetad gmond gmetric
+# Make sure we run the srclib but don't distribute it.  That
+# is handled in the "dist-hook" below...
+SUBDIRS = srclib $(GANGLIA_SUBDIRS)
+# Make sure that no matter the setting for --with-gmetad
+# that the gmetad directory gets distributed
+DIST_SUBDIRS = $(GANGLIA_SUBDIRS) gmetad
 
 EXTRA_DIST = config ganglia.spec ganglia.pod ganglia.html mans
 
@@ -34,6 +39,14 @@ CLEANFILES = ganglia.sub pod2htm*
 
 dist-local: README ganglia.html ChangeLog
 
-# This is a symbolic link that needs to be clean'd out
+
+# We handle distributing the ./srclib directory here
+# since the packages in that directory might not
+# handle a "make dist" correctly
 dist-hook:
+	tar -c --exclude=".libs" --exclude "core.*" --exclude="*CVS" \
+	--exclude="*.o"  --exclude="*.lo" \
+	--exclude="*.la" --exclude=".deps" \
+	--exclude="*.tar.gz" \
+	-f - ./srclib | (cd $(distdir) && tar -xf -)
 	rm -f ${distdir}/gmond/machine.c
