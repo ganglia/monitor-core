@@ -4,7 +4,7 @@
 #include "lib/ganglia.h"
 #include "lib/hash.h"
 #include "lib/llist.h"
-#include "lib/my_inet_ntop.h"
+#include "libunp/unp.h"
 
 #include "gmetad.h"
 #include "conf.h"
@@ -14,6 +14,41 @@ extern Source_t root;
 extern hash_t *sources;
 
 gmetad_config_t gmetad_config;
+
+/* This function will disappear soon */
+static int
+g_gethostbyname(const char* hostname, struct sockaddr_in* sa, char** nicename)
+{
+  int rv = 0;
+  struct in_addr inaddr;
+  struct hostent* he;  
+
+  if (inet_aton(hostname, &inaddr) != 0)
+    {
+      sa->sin_family = AF_INET;
+      memcpy(&sa->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
+      if (nicename)
+         *nicename = (char *)strdup (hostname);
+      return 1;
+    }
+
+  he = (struct hostent*)gethostbyname(hostname);
+  if (he && he->h_addrtype==AF_INET && he->h_addr_list[0])
+    {
+     if (sa)
+        {
+           sa->sin_family = he->h_addrtype;
+           memcpy(&sa->sin_addr, he->h_addr_list[0], he->h_length);
+        }
+
+      if (nicename && he->h_name)
+         *nicename = (char *)strdup(he->h_name);
+
+      rv = 1;
+    }
+
+  return rv;
+}
 
 
 static DOTCONF_CB(cb_gridname)
@@ -58,7 +93,7 @@ static DOTCONF_CB(cb_trusted_hosts)
             continue;
          }
          le->val = (char*) malloc(MAXHOSTNAME);
-         my_inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAME);
+         inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAME);
          llist_add(&(c->trusted_hosts), le);
       }
    return NULL;
@@ -69,16 +104,11 @@ static DOTCONF_CB(cb_data_source)
    unsigned int i;
    data_source_list_t *dslist;
    datum_t key, val, *find;
-   int port, rv=0;
    unsigned long step;
-   unsigned int source_index=0;
-   char *p, *str;
+   char *p, *str, *port;
    char *endptr;
-   struct sockaddr_in sa;
 
-   source_index++;
-
-   debug_msg("Datasource = [%s]", cmd->data.list[0]);
+   fprintf(stderr, "Datasource = [%s]\n", cmd->data.list[0]);
 
    dslist = (data_source_list_t *) malloc ( sizeof(data_source_list_t) );
    if(!dslist)
@@ -102,43 +132,42 @@ static DOTCONF_CB(cb_data_source)
    else
       dslist->step = 15;
 
-   debug_msg("Polling interval for %s is %u sec.", dslist->name, dslist->step);
+   fprintf(stderr, "Polling interval for %s is %u sec.", dslist->name, dslist->step);
 
-   dslist->sources = (g_inet_addr **) malloc( (cmd->arg_count-i) * sizeof(g_inet_addr *) );
-   if (! dslist->sources )
-      err_quit("Unable to malloc sources array");
+   fprintf(stderr, "There are %d arguments\n", cmd->arg_count);
+
+   dslist->names = (char **) malloc( (cmd->arg_count - 1) * sizeof(char *) );
+   if (! dslist->names )
+      err_quit("Unable to malloc names array");
+
+   dslist->ports = (char **) malloc( (cmd->arg_count - 1) * sizeof(char *));
+   if (! dslist->ports )
+      err_quit("Unable to malloc ports array");
 
    dslist->num_sources = 0;
 
    for ( ; i< cmd->arg_count; i++)
       {
          str = cmd->data.list[i];
-
+   
          p = strchr( str, ':' );
          if( p )
             {
                /* Port is specified */
                *p = '\0';
-               port = atoi ( p+1 );
+               port = strdup( p+1 );
             }
          else
-            port = 8649;
+            {
+               port = strdup("8649");
+            }
 
-         rv = g_gethostbyname( cmd->data.list[i], &sa, NULL);
-         if (!rv) {
-            err_msg("Warning: we failed to resolve data source name %s", cmd->data.list[i]);
-            continue;
-         }
-         str = (char*) malloc(MAXHOSTNAME);
-         my_inet_ntop(AF_INET, &sa.sin_addr, str, MAXHOSTNAME);
+         fprintf(stderr,"name=%s port=%s\n", str, port); 
 
-         debug_msg("Trying to connect to %s:%d for [%s]", str, port, dslist->name);
-         dslist->sources[dslist->num_sources] = (g_inet_addr *) g_inetaddr_new ( str, port );
-         if(! dslist->sources[dslist->num_sources])
-               err_quit("Unable to create inetaddr [%s:%d] and save it to [%s]", str, port, dslist->name);
-         else
-               dslist->num_sources++;
-         free(str);
+         dslist->names[dslist->num_sources] = strdup(str);
+         dslist->ports[dslist->num_sources] = port;
+ 
+         dslist->num_sources++;
       }
 
    key.data = cmd->data.list[0];
@@ -229,7 +258,7 @@ static DOTCONF_CB(cb_scalable)
 static FUNC_ERRORHANDLER(errorhandler)
 {
    err_quit("gmetad config file error: %s\n", msg);
-   return NULL;
+   return 0;
 }
 
 static configoption_t gmetad_options[] =
@@ -282,6 +311,8 @@ parse_config_file ( char *config_file )
          err_quit("Unable to open config file: %s\n", config_file);
       }
 
+
+   debug_msg("processing contents of config file %s", config_file );
    configfile->errorhandler = (dotconf_errorhandler_t) errorhandler;
 
    if (dotconf_command_loop(configfile) == 0)

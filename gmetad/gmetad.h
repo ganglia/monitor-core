@@ -3,10 +3,9 @@
 
 #include <zlib.h>
 
-#include "lib/net.h"
 #include "lib/hash.h"
 #include "lib/debug_msg.h"
-#include "lib/error.h"
+#include "libunp/unp.h"
 
 #include "conf.h"
 
@@ -97,7 +96,8 @@ typedef struct
       char *name;
       unsigned int step;
       unsigned int num_sources;
-      g_inet_addr **sources;
+      char **names;
+      char **ports;
       long double timestamp;   /* added by swagner */
       int dead;
    }
