@@ -9,6 +9,10 @@
 #include <ganglia/llist.h>
 #include <ganglia/net.h>
 #include "gmetad_typedefs.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <pwd.h>
 
 hash_t *xml;
 hash_t *sources;
@@ -24,6 +28,8 @@ g_tcp_socket *   server_socket;
 pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
 int server_threads = 2;
 char *rrd_rootdir = "/var/lib/ganglia/rrds";
+char *setuid_username = "nobody";
+int should_setuid = 1;
 
 struct gengetopt_args_info args_info;
 
@@ -61,9 +67,13 @@ spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
 int
 main ( int argc, char *argv[] )
 {
+   struct stat struct_stat;
    pthread_t pid;
    pthread_attr_t attr;
    int i;
+   uid_t gmetad_uid;
+   char * gmetad_username;
+   struct passwd *pw;
 
    srand(1234567);
 
@@ -84,6 +94,43 @@ main ( int argc, char *argv[] )
       }
 
    parse_config_file ( args_info.conf_arg );
+
+   /* The rrd_rootdir must be writable by the gmetad process */
+   if( should_setuid )
+      {
+         if(! (pw = getpwnam(setuid_username)))
+            {
+               err_sys("Getpwnam error");
+            }
+         gmetad_uid = pw->pw_uid;
+         gmetad_username = setuid_username;
+      }
+   else
+      {
+         gmetad_uid = getuid();
+         if(! (pw = getpwuid(gmetad_uid)))
+            {
+               err_sys("Getpwnam error");
+            } 
+         gmetad_username = strdup(pw->pw_name);
+      }
+
+   debug_msg("Going to run as user %s", gmetad_username);
+
+   if( stat( rrd_rootdir, &struct_stat ) )
+      {
+          err_sys("Please make sure that %s exists", rrd_rootdir);
+      }
+          
+   if ( struct_stat.st_uid != gmetad_uid )
+      {
+          err_quit("Please make sure that %s is owned by %s", rrd_rootdir, gmetad_username);
+      }
+        
+   if (! (struct_stat.st_mode & S_IWUSR) )
+      {
+          err_quit("Please make sure %s has WRITE permission for %s", gmetad_username, rrd_rootdir);
+      }
 
    if(debug_level)
       {
