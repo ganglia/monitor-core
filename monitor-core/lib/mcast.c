@@ -99,6 +99,12 @@ g_mcast_socket_ref(g_mcast_socket* s)
 }
 
 int
+g_mcast_socket_connect ( g_mcast_socket *ms )
+{
+   return connect ( ms->sockfd, (struct sockaddr *)&(ms->sa), sizeof(struct sockaddr_in) );
+}
+
+int
 g_mcast_socket_join_group (g_mcast_socket* ms, const g_inet_addr* ia)
 {
   struct ip_mreq mreq;
@@ -107,7 +113,7 @@ g_mcast_socket_join_group (g_mcast_socket* ms, const g_inet_addr* ia)
   memcpy(&mreq.imr_multiaddr,
          &((struct sockaddr_in*) &ia->sa)->sin_addr,
          sizeof(struct in_addr));
-  mreq.imr_interface.s_addr = g_htonl(INADDR_ANY);
+  mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 
   /* Join the group */
   return setsockopt(ms->sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
@@ -123,7 +129,7 @@ g_mcast_socket_leave_group (g_mcast_socket* ms, const g_inet_addr* ia)
   memcpy(&mreq.imr_multiaddr,
          &((struct sockaddr_in*) &ia->sa)->sin_addr,
          sizeof(struct in_addr));
-  mreq.imr_interface.s_addr = g_htonl(INADDR_ANY);
+  mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 
   /* Leave the group */
   return setsockopt(ms->sockfd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
@@ -141,7 +147,8 @@ g_mcast_socket_is_loopback (const g_mcast_socket* ms)
   if (getsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, &flag, &flagSize) < 0)
     return(-1);
 
-  assert(flagSize <= sizeof(flag));
+  if(! (flagSize <= sizeof(flag) ))
+     exit(-1);
 
   return (int) flag;
 }
@@ -169,15 +176,17 @@ g_mcast_socket_get_ttl (const g_mcast_socket* ms)
                  (void*) &ttl, &ttlSize) < 0)
     return(-1);
 
-  assert(ttlSize <= sizeof(ttl));
+  if(! (ttlSize <= sizeof(ttl)))
+     exit(-1);
+
   return(ttl);
 }
 
 int
 g_mcast_socket_set_ttl(g_mcast_socket* ms, int val)
 {
-  int ttl;
+  unsigned char ttl;
 
   ttl = (unsigned char) val;
-  return setsockopt(ms->sockfd, IPPROTO_IP, IP_TTL, (void*) &ttl, sizeof(ttl));
+  return setsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, (void*) &ttl, sizeof(ttl));
 }
