@@ -64,7 +64,7 @@ send_all_metric_data( void )
             {
                pthread_mutex_lock(&(metric[i].mutex));
                /* Will the next multicast be forced beyond the waiting period? */
-               if( metric[i].mcast_max > waiting_period )
+               if( metric[i].mcast_threshold > (now.tv_sec + waiting_period) )
                   {
                      /* Make sure it multicasts in the 2 mins following the 
                         waiting period */
