@@ -39,6 +39,8 @@ apr_pool_t *global_context = NULL;
 int deaf;
 /* Mute mode boolean */
 int mute;
+/* Cluster tag boolean */
+int cluster_tag = 0;
 /* This is tweakable by globals{max_udp_msg_len=...} */
 int max_udp_message_len = 1472;
 
@@ -724,7 +726,7 @@ print_xml_header( apr_socket_t *client )
   apr_size_t len = strlen(DTD);
   char gangliaxml[128];
   char clusterxml[1024];
-  static int  clusterinit = 0;
+  static int clusterinit = 0;
   static char *name = NULL;
   static char *owner = NULL;
   static char *latlong = NULL;
@@ -743,15 +745,25 @@ print_xml_header( apr_socket_t *client )
 
   if(!clusterinit)
     {
+      /* We only run this on the first connection we process */
       cfg_t *cluster = cfg_getsec(config_file, "cluster");
-      name    = cfg_getstr( cluster, "name" );
-      owner   = cfg_getstr( cluster, "owner" );
-      latlong = cfg_getstr( cluster, "latlong" );
-      url     = cfg_getstr( cluster, "url" );
+      if(cluster)
+	{
+          name    = cfg_getstr( cluster, "name" );
+          owner   = cfg_getstr( cluster, "owner" );
+          latlong = cfg_getstr( cluster, "latlong" );
+          url     = cfg_getstr( cluster, "url" );
+	  if(name || owner || latlong || url)
+	    {
+	      cluster_tag =1;
+	    }
+	}
       clusterinit = 1;
     }
 
-  len = apr_snprintf( clusterxml, 1024, 
+  if(cluster_tag)
+    {
+      len = apr_snprintf( clusterxml, 1024, 
 	"<CLUSTER NAME=\"%s\" LOCALTIME=\"%d\" OWNER=\"%s\" LATLONG=\"%s\" URL=\"%s\">\n", 
 		      name?name:"unspecified", 
 		      (int)(now / APR_USEC_PER_SEC),
@@ -759,14 +771,28 @@ print_xml_header( apr_socket_t *client )
 		      latlong?latlong:"unspecified",
 		      url?url:"unspecified");
 
-  return apr_send( client, clusterxml, &len);
+      return apr_send( client, clusterxml, &len);
+    }
+
+  return APR_SUCCESS;
 }
 
 static apr_status_t
 print_xml_footer( apr_socket_t *client )
 {
-  apr_size_t len = 26; 
-  return apr_send( client, "</CLUSTER>\n</GANGLIA_XML>\n", &len);
+  apr_status_t status;
+  apr_size_t len; 
+  if(cluster_tag)
+    {
+      len = 11;
+      status = apr_send(client, "</CLUSTER>\n", &len);
+      if(status != APR_SUCCESS)
+	{
+	  return status;
+	}
+    }
+  len = 15;
+  return apr_send( client, "</GANGLIA_XML>\n", &len);
 }
 
 static apr_status_t
@@ -1187,8 +1213,17 @@ setup_collection_groups( void )
       group->collect_every = cfg_getint( group_conf, "collect_every");
       group->time_threshold = cfg_getint( group_conf, "time_threshold");
 
-      /* Set to collect and send immediately */
-      group->next_collect = 0;
+      if(group->once)
+        {
+          /* TODO: this isn't pretty but simplifies the code( next collect in a year)
+             since we will collect the value in this function */
+	  group->next_collect = apr_time_now() + (31536000 * APR_USEC_PER_SEC);
+	}
+      else
+        {
+          group->next_collect = 0;
+        }
+
       group->next_send    = 0;
 
       num_metrics = cfg_size( group_conf, "metric" );
@@ -1230,19 +1265,140 @@ setup_collection_groups( void )
 	    {
 	      /* If this metric will only be collected once, run it now at setup... */
 	      metric_cb->now = metric_cb->cb();
-	      memset( &(metric_cb->last), 0, sizeof(g_val_t));
 	    }
 	  else
 	    {
+	      /* ... otherwise set it to zero */
 	      memset( &(metric_cb->now), 0, sizeof(g_val_t));
-	      memset( &(metric_cb->last), 0, sizeof(g_val_t));
 	    }
+	  memset( &(metric_cb->last), 0, sizeof(g_val_t));
 
+	  /* Push this metric onto the metric_array for this group */
 	  *(Ganglia_metric_callback **)apr_array_push(group->metric_array) = metric_cb;
 	}
 
       /* Save the collection group the collection group array */
       *(Ganglia_collection_group **)apr_array_push(collection_groups) = group;
+    }
+}
+
+void
+Ganglia_collection_group_collect( Ganglia_collection_group *group, apr_time_t now)
+{
+  int i;
+
+  /* Collect data for all the metrics in the groups metric array */
+  for(i=0; i< group->metric_array->nelts; i++)
+    {
+      Ganglia_metric_callback *cb = ((Ganglia_metric_callback **)(group->metric_array->elts))[i];
+
+      debug_msg("\tmetric '%s' being collected now", cb->name);
+      cb->last = cb->now;
+      cb->now  = cb->cb();
+
+      /* Check the value threshold.  If passed.. set this group to send immediately. */
+      if( cb->value_threshold >= 0.0 )
+        {
+	  debug_msg("\tmetric '%s' has value_threshold %f", cb->name, cb->value_threshold);
+	  switch(cb->info->type)
+	    {
+	    case GANGLIA_VALUE_UNKNOWN:
+	    case GANGLIA_VALUE_STRING:
+	      /* do nothing for non-numeric data */
+	      break;
+	    case GANGLIA_VALUE_UNSIGNED_SHORT:
+	      if( abs( cb->last.uint16 - cb->now.uint16 ) >= cb->value_threshold )
+		group->next_send = 0; /* send immediately */
+	      break;
+	    case GANGLIA_VALUE_SHORT:
+              if( abs( cb->last.int16 - cb->now.int16 ) >= cb->value_threshold )
+		group->next_send = 0; /* send immediately */
+	      break;
+	    case GANGLIA_VALUE_UNSIGNED_INT:
+              if( abs( cb->last.uint32 - cb->now.uint32 ) >= cb->value_threshold )
+		group->next_send = 0; /* send immediately */
+	      break;
+	    case GANGLIA_VALUE_INT:
+              if( abs( cb->last.int32 - cb->now.int32 ) >= cb->value_threshold )
+		group->next_send = 0; /* send immediately */
+	      break;
+	    case GANGLIA_VALUE_FLOAT:
+              if( abs( cb->last.f - cb->now.f ) >= cb->value_threshold )
+		group->next_send = 0; /* send immediately */
+	      break;
+	    case GANGLIA_VALUE_DOUBLE:
+              if( abs( cb->last.d - cb->now.d ) >= cb->value_threshold )
+		group->next_send = 0; /* send immediately */
+	      break;
+	    default:
+	      break;
+	    }
+
+	}
+
+    }
+
+  /* Set the next time this group should be collected */
+  group->next_collect = now + (group->collect_every * APR_USEC_PER_SEC);
+}
+
+void
+Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
+{
+  int i;
+
+  /* This group needs to be sent */
+  for(i=0; i< group->metric_array->nelts; i++)
+    {
+      XDR x;
+      int len, errors;
+      char metricmsg[max_udp_message_len];
+      Ganglia_metric_callback *cb = ((Ganglia_metric_callback **)(group->metric_array->elts))[i];
+
+      /* Build the message */
+      switch(cb->info->type)
+        {
+	  case GANGLIA_VALUE_UNKNOWN:
+	    /* The 2.5.x protocol doesn't allow for unknown values. :(  Do nothing. */
+	    continue;
+	  case GANGLIA_VALUE_STRING:
+	    cb->msg.Ganglia_message_u.str = cb->now.str; 
+	    break;
+	  case GANGLIA_VALUE_UNSIGNED_SHORT:
+	    cb->msg.Ganglia_message_u.u_short = cb->now.uint16;
+	    break;
+	  case GANGLIA_VALUE_SHORT:
+	    /* TODO: currently there are no signed short values in protocol.x
+	     * As soon as we add one, we need to implement it here... */
+	    break;
+	  case GANGLIA_VALUE_UNSIGNED_INT:
+	    cb->msg.Ganglia_message_u.u_int = cb->now.uint32;
+	    break;
+	  case GANGLIA_VALUE_INT:
+	    /* TODO: currently there are no signed int value in protocol.x
+	     * As soon as we add one, we need to implement it here... */
+	    break;
+	  case GANGLIA_VALUE_FLOAT:
+	    cb->msg.Ganglia_message_u.f = cb->now.f;
+	    break;
+	  case GANGLIA_VALUE_DOUBLE:
+	    cb->msg.Ganglia_message_u.d = cb->now.d;
+	    break;
+	  default:
+	    continue;
+	}
+
+      /* Send the message */
+      xdrmem_create(&x, metricmsg, max_udp_message_len, XDR_ENCODE);
+      xdr_Ganglia_message(&x, &(cb->msg));
+      len = xdr_getpos(&x); 
+      errors = send_message( metricmsg, len );
+      debug_msg("\tsent message '%s' of length %d with %d errors", cb->name, len, errors);
+      if(!errors)
+	{
+	  /* If the message send ok. Schedule the next time threshold. */
+	  group->next_send = now + (group->time_threshold * APR_USEC_PER_SEC);
+	}
     }
 }
  
@@ -1251,174 +1407,50 @@ setup_collection_groups( void )
 apr_time_t
 process_collection_groups( apr_time_t now )
 {
-  int i,j;
+  int i;
   apr_time_t next = 0;
 
   /* Run through each collection group and collect any data that needs collecting... */
   for(i=0; i< collection_groups->nelts; i++)
     {
       Ganglia_collection_group *group = ((Ganglia_collection_group **)(collection_groups->elts))[i];
-
-      debug_msg("process_collection_group #%d", i);
-
-      if(group->once)
-	{
-	  /* This group is only collected once at setup time */
-	  debug_msg("\tgroup #%d is only collected once. skipping.", i);
-	  continue;
-	}
-
-      if( group->next_collect <= now )
-	{
-	  debug_msg("\tgroup #%d needs to be collected now", i);
-	  /* This group needs to be collected now */
-          for(j=0; j< group->metric_array->nelts; j++)
-	    {
-	      Ganglia_metric_callback *cb = ((Ganglia_metric_callback **)(group->metric_array->elts))[j];
-
-	      debug_msg("\tgroup #%d metric '%s' being collected now", i, cb->name);
-	      cb->last = cb->now;
-	      cb->now  = cb->cb();
-
-	      /* Check the value threshold.  If passed.. set this group to send immediately. */
-	      if( cb->value_threshold >= 0.0 )
-		{
-		  debug_msg("\tmetric '%s' has value_threshold %f", cb->name, cb->value_threshold);
-		  switch(cb->info->type)
-		    {
-		    case GANGLIA_VALUE_UNKNOWN:
-		    case GANGLIA_VALUE_STRING:
-		      /* do nothing for non-numeric data */
-		      break;
-		    case GANGLIA_VALUE_UNSIGNED_SHORT:
-		      if( abs( cb->last.uint16 - cb->now.uint16 ) >= cb->value_threshold )
-			group->next_send = 0; /* send immediately */
-		      break;
-		    case GANGLIA_VALUE_SHORT:
-                      if( abs( cb->last.int16 - cb->now.int16 ) >= cb->value_threshold )
-			group->next_send = 0; /* send immediately */
-		      break;
-		    case GANGLIA_VALUE_UNSIGNED_INT:
-                      if( abs( cb->last.uint32 - cb->now.uint32 ) >= cb->value_threshold )
-			group->next_send = 0; /* send immediately */
-		      break;
-		    case GANGLIA_VALUE_INT:
-                      if( abs( cb->last.int32 - cb->now.int32 ) >= cb->value_threshold )
-			group->next_send = 0; /* send immediately */
-		      break;
-		    case GANGLIA_VALUE_FLOAT:
-                      if( abs( cb->last.f - cb->now.f ) >= cb->value_threshold )
-			group->next_send = 0; /* send immediately */
-		      break;
-		    case GANGLIA_VALUE_DOUBLE:
-                      if( abs( cb->last.d - cb->now.d ) >= cb->value_threshold )
-			group->next_send = 0; /* send immediately */
-		      break;
-		    default:
-		      break;
-		    }
-
-		}
-
-	    }
-	  /* Set the next time this group should be collected */
-	  group->next_collect = now + (group->collect_every * APR_USEC_PER_SEC);
-	  if(debug_level)
-	    {
-	      char timestr[APR_CTIME_LEN];
-	      apr_ctime(timestr, group->next_collect);
-	      debug_msg("\tcollection_group #%d next collection at %s", i, timestr);
-            }
-	}
-      else
-	{
-	  debug_msg("\tcollection_group #%d does not need to be collected at this time.",i);
+      if(group->next_collect <= now)
+        {
+	  Ganglia_collection_group_collect(group, now);
 	}
     }
 
-
-  /* TODO: this would be done better with a heap...
-   * Send any groups that need to be sent and
-   * Find out exactly when we need to run process_collection_groups again */
+  /* Run through each collection group and send any data that needs sending... */
   for(i=0; i< collection_groups->nelts; i++)
     {
       Ganglia_collection_group *group = ((Ganglia_collection_group **)(collection_groups->elts))[i];
-
-      /* Send any groups that need to be sent now */
       if( group->next_send <= now )
 	{
-	  debug_msg("\tcollection_group #%d will send data", i);
-	  /* This group needs to be sent */
-	  for(j=0; j< group->metric_array->nelts; j++)
-	    {
-	      XDR x;
-	      int len, errors;
-	      char metricmsg[max_udp_message_len];
-	      Ganglia_metric_callback *cb = ((Ganglia_metric_callback **)(group->metric_array->elts))[j];
-
-	      /* Build the message */
-              switch(cb->info->type)
-                {
-		  case GANGLIA_VALUE_UNKNOWN:
-		    /* The 2.5.x protocol doesn't allow for unknown values. :(  Do nothing. */
-		    continue;
-		  case GANGLIA_VALUE_STRING:
-		    cb->msg.Ganglia_message_u.str = cb->now.str; 
-		    break;
-		  case GANGLIA_VALUE_UNSIGNED_SHORT:
-		    cb->msg.Ganglia_message_u.u_short = cb->now.uint16;
-		    break;
-		  case GANGLIA_VALUE_SHORT:
-		    /* TODO: currently there are no signed short values in protocol.x
-		     * As soon as we add one, we need to implement it here... */
-		    break;
-		  case GANGLIA_VALUE_UNSIGNED_INT:
-		    cb->msg.Ganglia_message_u.u_int = cb->now.uint32;
-		    break;
-		  case GANGLIA_VALUE_INT:
-		    /* TODO: currently there are no signed int value in protocol.x
-		     * As soon as we add one, we need to implement it here... */
-		    break;
-		  case GANGLIA_VALUE_FLOAT:
-		    cb->msg.Ganglia_message_u.f = cb->now.f;
-		    break;
-		  case GANGLIA_VALUE_DOUBLE:
-		    cb->msg.Ganglia_message_u.d = cb->now.d;
-		    break;
-		  default:
-		    continue;
-		}
-
-	      /* Send the message */
-	      xdrmem_create(&x, metricmsg, max_udp_message_len, XDR_ENCODE);
-	      xdr_Ganglia_message(&x, &(cb->msg));
-	      len = xdr_getpos(&x); 
-	      errors = send_message( metricmsg, len );
-	      debug_msg("\tsent message of length %d with %d errors", len, errors);
-	      if(!errors)
-		{
-		  /* If the message send ok. Schedule the next time threshold. */
-		  group->next_send = now + group->time_threshold * APR_USEC_PER_SEC;
-		}
-	    }
+	  Ganglia_collection_group_send(group, now);
 	}
+    }
 
-      /* Find the next time we need to run process_collection_group() */
+  /* Run through each collection group and find when our next event (collect|send) occurs */
+  for(i=0; i< collection_groups->nelts; i++)
+    {
+      apr_time_t min;
+      Ganglia_collection_group *group = ((Ganglia_collection_group **)(collection_groups->elts))[i];
+      min = group->next_send < group->next_collect? group->next_send : group->next_collect;
       if(!next)
 	{
-	  next = group->next_collect;
+	  next = min;
 	}
       else
 	{
-	  if(group->next_collect < next )
+	  if(min < next)
 	    {
-	      next = group->next_collect;
+	      next = min;
 	    }
 	}
     }
 
-  /* If next is 0... drop back in here in 60 seconds (no loops) */
-  return next? next: apr_time_now() + 60 * APR_USEC_PER_SEC;
+  /* The timestamp of the next event */
+  return next;
 }
 
 int
