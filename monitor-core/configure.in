@@ -380,7 +380,17 @@ AC_SUBST(varstatedir)
 AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
 
-AC_OUTPUT(Makefile srclib/Makefile tests/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile web/version.php)
+AC_OUTPUT(Makefile 
+          ganglia-config
+          srclib/Makefile 
+          tests/Makefile 
+          ganglia.spec 
+          gmetad/Makefile 
+          lib/Makefile 
+          gmond/Makefile 
+          gmond/gstat/Makefile 
+          gmetric/Makefile 
+          web/version.php)
 
 
 echo ""
