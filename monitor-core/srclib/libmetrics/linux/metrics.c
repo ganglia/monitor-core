@@ -134,7 +134,7 @@ pkts_in_func ( void )
                 last_pkts_in,
                 last_pkts_out;
    double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
-   unsigned long                diff;
+   double diff;
    p = update_file(&proc_net_dev);
    if (proc_net_dev.last_read != stamp) {
 
@@ -159,16 +159,14 @@ pkts_in_func ( void )
           }
           p = index (p, '\n') + 1;    // skips a line
        }
-       (unsigned long) diff = pkts_in - last_pkts_in;
-       if ( diff )
+
+       diff = pkts_in - last_pkts_in;
+       val.f = 0.;
+       if ( diff >= 1. )
          {
          t = proc_net_dev.last_read - stamp;
-         t = diff / t;
-         debug_msg("Returning value: %f\n",t);
+         val.f = diff / t;
          }
-       else
-         t = 0;
-       val.f = t;
 
        last_bytes_in  = bytes_in;
        last_pkts_in = pkts_in;
@@ -178,6 +176,7 @@ pkts_in_func ( void )
        stamp = proc_net_dev.last_read;
 
      }
+   debug_msg(" **********  PKTS_IN RETURN:  %f", val.f);
    return val;
 }
 
@@ -194,7 +193,7 @@ pkts_out_func ( void )
                 last_pkts_in,
                 last_pkts_out;
    double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
-   unsigned long                diff;
+   double diff;
    p = update_file(&proc_net_dev);
    if (proc_net_dev.last_read != stamp) {
 
@@ -219,15 +218,14 @@ pkts_out_func ( void )
           }
           p = index (p, '\n') + 1;    // skips a line
        }
-       (unsigned long) diff = pkts_out - last_pkts_out;
-       if ( diff )
+
+       diff = pkts_out - last_pkts_out;
+       val.f = 0.;
+       if ( diff >= 1. )
          {
          t = proc_net_dev.last_read - stamp;
-         t = diff / t;
+         val.f = diff / t;
          }
-       else
-         t = 0;
-       val.f = t;
 
        last_bytes_in  = bytes_in;
        last_pkts_in = pkts_in;
@@ -237,6 +235,7 @@ pkts_out_func ( void )
        stamp = proc_net_dev.last_read;
 
      }
+   debug_msg(" **********  PKTS_OUT RETURN:  %f", val.f);
    return val;
 }
 
@@ -253,7 +252,7 @@ bytes_out_func ( void )
                 last_pkts_in,
                 last_pkts_out;
    double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
-   unsigned long                diff;
+   double diff;
    p = update_file(&proc_net_dev);
    if (proc_net_dev.last_read != stamp) {
 
@@ -280,15 +279,14 @@ bytes_out_func ( void )
           }
           p = index (p, '\n') + 1;    // skips a line
        }
-       (unsigned long) diff = bytes_out - last_bytes_out;
-       if ( diff )
+
+       diff = bytes_out - last_bytes_out;
+       val.f = 0.;
+       if ( diff >= 1. )
          {
          t = proc_net_dev.last_read - stamp;
-         t = diff / t;
+         val.f = diff / t;
          }
-       else
-         t = 0;
-       val.f = t;
 
        last_bytes_in  = bytes_in;
        last_pkts_in = pkts_in;
@@ -315,7 +313,7 @@ bytes_in_func ( void )
      last_pkts_in,
      last_pkts_out;
    double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
-   unsigned long    diff;
+   double diff;
    p = update_file(&proc_net_dev);
    if (proc_net_dev.last_read != stamp) {
 
@@ -344,15 +342,14 @@ bytes_in_func ( void )
           }
           p = index (p, '\n') + 1;    // skips a line
        }
-       (unsigned long) diff = bytes_in - last_bytes_in;
-       if ( diff )
+
+       diff = bytes_in - last_bytes_in;
+       val.f = 0.;
+       if ( diff >= 1. )
          {
          t = proc_net_dev.last_read - stamp;
-         t = diff / t;
+         val.f = diff / t;
          }
-       else
-         t = 0;
-       val.f = t;
 
        last_bytes_in  = bytes_in;
        last_pkts_in = pkts_in;
@@ -362,6 +359,7 @@ bytes_in_func ( void )
        stamp = proc_net_dev.last_read;
 
      }
+   debug_msg(" **********  BYTES_IN RETURN:  %f", val.f);
    return val;
 }
 
