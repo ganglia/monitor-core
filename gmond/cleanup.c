@@ -43,12 +43,12 @@ cleanup_metric ( datum_t *key, datum_t *val, void *arg )
 
    born = metric->timestamp.tv_sec;
    
-/*   if (metric->dmax) {
+   /* if (metric->dmax) {
       debug_msg("Attn Cleanup: considering metric \"%s\", tn %u, dmax %u.\n",
          (char*) key->data,
          tv->tv_sec - born,
          metric->dmax);
-   }*/
+   } */
 
    /* Never delete a metric if its DMAX=0 */
    if (metric->dmax && ((tv->tv_sec - born) > metric->dmax) ) {
@@ -125,7 +125,7 @@ cleanup_thread(void *arg)
 
    for (;;) {
       /* Cleanup every 5 minutes */
-      sleep(30);
+      sleep(300);
 
       gettimeofday(&tv, NULL);
 
