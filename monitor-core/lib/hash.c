@@ -182,7 +182,7 @@ hashval ( datum_t *key, hash_t *hash )
       return 0;
 
    hash_val = ((unsigned char *)key->data)[0];
-   for ( i = 1; i < key->size ; i++ )
+   for ( i = 0; i < key->size ; i++ )
       hash_val = ( hash_val * 32 + ((unsigned char *)key->data)[i]) % hash->size;
 
    return hash_val;
