@@ -148,7 +148,7 @@ main ( int argc, char *argv[] )
             err_msg("Warning: Could not find a multicast-enabled interface, using anything we can find.\n");
             entry = get_first_interface();
             if (!entry)
-               err_quit("Libdnet says we don't have any interfaces besides loopback, exiting.\n");
+               err_quit("We don't have any interfaces besides loopback, exiting.\n");
          }
          debug_msg("Using interface %s", entry->intf_name);
       }
