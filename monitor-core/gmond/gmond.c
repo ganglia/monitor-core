@@ -7,6 +7,7 @@
 #include <ganglia/barrier.h>
 #include <ganglia/become_a_nobody.h>
 #include <ganglia/net.h>
+#include <signal.h>
 #include "metric.h"
 #include <pwd.h>
 #ifdef HAVE_SYS_TYPES_H
@@ -166,6 +167,9 @@ main ( int argc, char *argv[] )
    debug_msg("gmond initialized cluster hash");
 
    srand(1);
+
+   /* Ignore any SIGPIPE signals */
+   signal( SIGPIPE, SIG_IGN );    
 
    if(! gmond_config.mcast_if_given )
       {
