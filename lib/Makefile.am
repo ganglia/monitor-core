@@ -5,9 +5,8 @@ include_HEADERS = ganglia.h
 lib_LTLIBRARIES      = libganglia.la
 libganglia_la_SOURCES = barrier.c barrier.h become_a_nobody.c become_a_nobody.h \
 daemon_inetd.c daemon_init.c daemon_init.h debug_msg.c debug_msg.h \
-dotconf.c dotconf.h error.c error.h file.c file.h ganglia.c ganglia_priv.h \
-gexec_funcs.c gexec_funcs.h gexec_vnn_ip.c \
-gmond_config.c gmond_config.h hash.c hash.h inetaddr.c llist.c llist.h \
+dotconf.c dotconf.h error.c error.h file.c file.h ganglia_priv.h \
+ganglia.c gexec_vnn_ip.c gmond_config.c gmond_config.h hash.c hash.h inetaddr.c llist.c llist.h \
 mcast.c my_inet_ntop.c my_inet_ntop.h net.h rdwr.c rdwr.h readdir.c readdir.h tcp.c
 libganglia_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
