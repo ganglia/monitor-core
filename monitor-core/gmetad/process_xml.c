@@ -180,7 +180,25 @@ start (void *data, const char *el, const char **attr)
               }
            break;
 
-        }  /* end switch */
+        case GANGLIA_XML_TAG:
+
+           for(i = 0; attr[i] ; i+=2)
+              {
+                 /* Only process the XML tags that gmetad is interested in */
+                 if(!( xt = in_xml_list ( (char *)attr[i], strlen(attr[i]))) )
+                    continue;
+
+                 switch( xt->tag )
+                    {
+                       case VERSION_TAG:
+                          /* Process the version tag later */
+                          break;
+                    }
+              }
+         
+           break;     
+
+     }  /* end switch */
 
   return;
 }
