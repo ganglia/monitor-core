@@ -12,6 +12,7 @@ option "type" t "Either string|int8|uint8|int16|uint16|int32|uint32|float|double
 option "units" u "Unit of measure for the value e.g. Kilobytes, Celcius" string no
 option "slope" s "Either zero|positive|negative|both" string default="both"  no
 option "tmax" x "The maximum time in seconds between gmetric calls" int default="60" no
+option "dmax" d "The lifetime in seconds of this metric" int default="0" no
 option "mcast_channel" c "Multicast channel to send/receive on" string default="239.2.11.71" no
 option "mcast_port" p "Multicast port to send/receive on" int default="8649" no
 option "mcast_if" i "Network interface to multicast on e.g. 'eth1'" string default="kernel decides" no

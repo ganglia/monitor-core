@@ -26,6 +26,7 @@ struct gengetopt_args_info
   char * units_arg;	/* Unit of measure for the value e.g. Kilobytes, Celcius.  */
   char * slope_arg;	/* Either zero|positive|negative|both (default='both').  */
   int tmax_arg;	/* The maximum time in seconds between gmetric calls (default=60).  */
+  int dmax_arg;	/* The lifetime in seconds of this metric (default=0).  */
   char * mcast_channel_arg;	/* Multicast channel to send/receive on (default='239.2.11.71').  */
   int mcast_port_arg;	/* Multicast port to send/receive on (default=8649).  */
   char * mcast_if_arg;	/* Network interface to multicast on e.g. 'eth1' (default='kernel decides').  */
@@ -39,6 +40,7 @@ struct gengetopt_args_info
   int units_given ;	/* Whether units was given.  */
   int slope_given ;	/* Whether slope was given.  */
   int tmax_given ;	/* Whether tmax was given.  */
+  int dmax_given ;	/* Whether dmax was given.  */
   int mcast_channel_given ;	/* Whether mcast_channel was given.  */
   int mcast_port_given ;	/* Whether mcast_port was given.  */
   int mcast_if_given ;	/* Whether mcast_if was given.  */

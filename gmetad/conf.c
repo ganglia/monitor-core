@@ -53,7 +53,7 @@ static DOTCONF_CB(cb_data_source)
 
    dslist->num_sources = 0;
 
-   dslist->sources = malloc( (cmd->arg_count-1) * sizeof(g_inet_addr *) );
+   dslist->sources = (g_inet_addr **) malloc( (cmd->arg_count-1) * sizeof(g_inet_addr *) );
    if (! dslist->sources )
       {
          err_quit("Unable to malloc sources array");
