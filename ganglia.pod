@@ -14,8 +14,8 @@ B<ganglia> - distributed monitoring system
 B<ganglia> GANGLIA_VERSION
 
 The latest version of this software and document will always be found at 
-http://ganglia.sourceforge.net/.  You are currently reading version
-$$Revision$ of this document.
+http://ganglia.sourceforge.net/.  You are currently reading
+$Revision$ of this document.
 
 =head1 Synopsis
 
@@ -743,6 +743,9 @@ shows what platforms the metric are supported on.
   m = MacOS, i = IRIX, h = HPUX,  t = Tru64
   e = Every Platform
 
+If you are interested in B<how> the metrics are collected, just
+take a look in directory C<./gmond/machines> in the source distribution.
+There is a single source file in the directory for each platform that is supported.
 
 =item B<What does the error "Process XML (x): XML_ParseBuffer() error at line x: not well-formed">
 
