@@ -37,10 +37,10 @@ AC_CONFIG_AUX_DIR(config)
 # set GANGLIA_BINARY_AGE _and_ GANGLIA_INTERFACE_AGE to 0.
 GANGLIA_RELEASE_NAME="Kittyhawk"
 GANGLIA_MAJOR_VERSION=2
-GANGLIA_MINOR_VERSION=5
-GANGLIA_MICRO_VERSION=7
-GANGLIA_INTERFACE_AGE=7
-GANGLIA_BINARY_AGE=7
+GANGLIA_MINOR_VERSION=6
+GANGLIA_MICRO_VERSION=0
+GANGLIA_INTERFACE_AGE=0
+GANGLIA_BINARY_AGE=0
 ################################
 
 GANGLIA_VERSION=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION.$GANGLIA_MICRO_VERSION
@@ -97,11 +97,11 @@ dnl The following cpu_vendor_os string goes into config.h.
 dnl
 AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
 AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
-AC_CYGWIN
+dnl AC_CYGWIN
 
 dnl ##################################################################
 dnl Checks for programs.
-dnl
+
 AC_PROG_CC
 AC_PROG_RANLIB
 AM_PROG_LIBTOOL
@@ -146,14 +146,23 @@ dnl the LIBS variable that is constructed: each new one gets prepended,
 dnl not appended.
 dnl
 AC_CHECK_LIB(pthread, pthread_create)
-dnl if test "$ac_cv_lib_pthread_pthread_create" = yes ; then
-dnl    CFLAGS="$CFLAGS -D_REENTRANT"
-dnl else
-AC_CHECK_LIB(pthreads, pthread_create)
-dnl    if test "$ac_cv_lib_pthreads_pthread_create" = yes ; then
-dnl       CFLAGS="$CFLAGS -D_REENTRANT"
-dnl    fi
-dnl fi
+if test "$ac_cv_lib_pthread_pthread_create" = yes ; then
+   CFLAGS="$CFLAGS -D_REENTRANT"
+else
+   AC_CHECK_LIB(pthreads, pthread_create)
+   if test "$ac_cv_lib_pthreads_pthread_create" = yes ; then
+      CFLAGS="$CFLAGS -D_REENTRANT"
+   fi
+fi
+
+AC_CHECK_LIB(c, getaddrinfo)
+AC_CHECK_LIB(c, freeaddrinfo)
+AC_CHECK_LIB(nsl, t_open)
+AC_CHECK_LIB(nsl, inet_addr)
+AC_CHECK_LIB(nsl, gethostbyaddr_r)
+AC_CHECK_LIB(socket, socket)
+AC_CHECK_LIB(resolv, inet_aton)
+
 
 AC_CHECK_LIB(expat, XML_ParserCreate, EXPAT_FOUND="yes", EXPAT_FOUND="no")
 
@@ -181,8 +190,6 @@ echo "      anywhere except the machine you are compiling ganglia on."
 exit;
 fi
 
-
-# Adding the echo statements prevents autoconf from changing LIBS
 AC_CHECK_LIB(rrd, rrd_create, RRDTOOL_FOUND="yes", RRDTOOL_FOUND="no")
 
 if test "$RRDTOOL_FOUND" != yes; then
@@ -259,7 +266,7 @@ dnl
 dnl Check for stdlib.h stdarg.h string.h float.h
 AC_HEADER_STDC
 
-AC_CHECK_HEADERS(syslog.h pthread.h fcntl.h signal.h sys/time.h sys/types.h sys/stat.h sys/socket.h sys/ioctl.h netinet/in.h arpa/inet.h net/if.h netinet/tcp.h unistd.h stropts.h sys/sockio.h ctype.h errno.h netdb.h stdio.h sys/uio.h sys/wait.h sys/un.h sys/select.h sys/filio.h getopt.h net/if_dl.h net/raw.h poll.h)
+AC_CHECK_HEADERS(stdarg.h syslog.h pthread.h fcntl.h signal.h sys/time.h sys/types.h sys/stat.h sys/socket.h sys/ioctl.h netinet/in.h arpa/inet.h net/if.h netinet/tcp.h unistd.h stropts.h sys/sockio.h ctype.h errno.h netdb.h stdio.h sys/uio.h sys/wait.h sys/un.h sys/select.h sys/filio.h getopt.h net/if_dl.h net/raw.h poll.h)
 AC_CHECK_HEADERS(inttypes.h limits.h sys/param.h sys/mount.h sys/vfs.h sys/statfs.h sys/statvfs.h)
 
 dnl ##################################################################
@@ -284,10 +291,56 @@ dnl AC_CHECK_SIZEOF(short)
 dnl AC_CHECK_SIZEOF(int)
 dnl AC_CHECK_SIZEOF(long)
 dnl AC_CHECK_SIZEOF(void *)
+dnl
+dnl The SA_FAMILY_T in the following is #defined later, as its definition
+dnl depends on whether socket address structures have a length field or not.
+dnl
+AC_UNP_CHECK_TYPE(sa_family_t, SA_FAMILY_T)
+
 
 dnl ##################################################################
 dnl Check for structure definitions.
 dnl   
+
+
+dnl ##################################################################
+dnl Check if sockaddr{} has sa_len member.
+dnl
+AC_CACHE_CHECK(if sockaddr{} has sa_len member, ac_cv_sockaddr_has_sa_len,
+        AC_TRY_COMPILE([
+#               include <sys/types.h>
+#               include <sys/socket.h>],
+                [unsigned int i = sizeof(((struct sockaddr *)0)->sa_len)],
+        ac_cv_sockaddr_has_sa_len=yes,
+        ac_cv_sockaddr_has_sa_len=no))
+if test $ac_cv_sockaddr_has_sa_len = yes ; then
+        AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1, [We have a len attr in sockaddr])
+fi
+
+dnl Now we can complete the definition for sa_family_t, if needed.
+dnl The size of this datatype depends whether socket address structures
+dnl have a length field or not.
+dnl
+if test $ac_cv_type_sa_family_t = no ; then
+   if test $ac_cv_sockaddr_has_sa_len = yes ; then
+      AC_DEFINE(SA_FAMILY_T, uint8_t, [sizeof sa_family_t is uint8_t])
+   else
+      AC_DEFINE(SA_FAMILY_T, uint16_t, [sizeof sa_family_t is uint16_t])
+   fi
+fi
+
+dnl Check if msghdr{} has msg_control member.
+dnl
+AC_CACHE_CHECK(if msghdr{} has msg_control member, ac_cv_msghdr_has_msg_control,
+        AC_TRY_COMPILE([
+#               include <sys/types.h>
+#               include <sys/socket.h>],
+                [unsigned int i = sizeof(((struct msghdr *)0)->msg_control)],
+        ac_cv_msghdr_has_msg_control=yes,
+        ac_cv_msghdr_has_msg_control=no))
+if test $ac_cv_msghdr_has_msg_control = yes ; then
+        AC_DEFINE(HAVE_MSGHDR_MSG_CONTROL, 1, [msghdr has msg_control member])
+fi
 
 AC_CACHE_CHECK(for timespec{}, ac_cv_have_timespec_struct,
         AC_EGREP_HEADER(timespec, time.h,
@@ -334,7 +387,6 @@ dnl Checks for library functions.
 dnl
 dnl AC_FUNC_MEMCMP
 AC_CHECK_FUNCS(getopt_long inet_ntop)
-
 AC_CHECK_FUNCS(bzero)
 AC_CHECK_FUNCS(getaddrinfo)
 AC_CHECK_FUNCS(freeaddrinfo)
@@ -353,7 +405,6 @@ AC_CHECK_FUNCS(snprintf)
 AC_CHECK_FUNCS(sockatmark)
 AC_CHECK_FUNCS(vsnprintf)
 AC_CHECK_FUNCS(strdup)
-
 
 
 dnl ##################################################################
@@ -381,6 +432,117 @@ dnl   [AC_DEFINE(HAVE_PTHREAD_RWLOCK, 1)])
 
 dnl ##################################################################
 dnl Check for system services.
+
+
+dnl Let's see if the system really supports IPv4.
+dnl
+AC_MSG_CHECKING(for IPv4 support)
+AC_CACHE_VAL(ac_cv_ipv4,
+	AC_TRY_RUN([
+#	include <sys/types.h>
+#	include <sys/socket.h>
+#	include <netinet/in.h>
+	/* Make sure the definitions for AF_INET and struct sockaddr_in
+	 * are defined, and that we can actually create an IPv4 TCP socket.
+	 */
+	main()
+	{
+		int fd;
+		struct sockaddr_in foo;
+		fd = socket(AF_INET, SOCK_STREAM, 0);
+		exit(fd >= 0 ? 0 : 1);
+	}],
+	ac_cv_ipv4=yes,
+	ac_cv_ipv4=no,
+	ac_cv_ipv4=no))
+AC_MSG_RESULT($ac_cv_ipv4)
+if test $ac_cv_ipv4 = yes ; then
+	AC_DEFINE(IPV4, 1, [We have IP version 4])
+	AC_DEFINE(IPv4, 1, [We have IP version 4])
+fi
+
+dnl Let's see if the system really supports IPv6.
+dnl
+AC_MSG_CHECKING(for IPv6 support)
+AC_CACHE_VAL(ac_cv_ipv6,
+	AC_TRY_RUN([
+#	include <sys/types.h>
+#	include <sys/socket.h>
+#	include <netinet/in.h>
+	/* Make sure the definitions for AF_INET6 and struct sockaddr_in6
+	 * are defined, and that we can actually create an IPv6 TCP socket.
+	 */
+	main()
+	{
+		int fd;
+		struct sockaddr_in6 foo;
+		fd = socket(AF_INET6, SOCK_STREAM, 0);
+		exit(fd >= 0 ? 0 : 1);
+	}],
+	ac_cv_ipv6=yes,
+	ac_cv_ipv6=no,
+	ac_cv_ipv6=no))
+AC_MSG_RESULT($ac_cv_ipv6)
+if test $ac_cv_ipv6 = yes ; then
+	AC_DEFINE(IPV6, 1, [We have IP version 6])
+	AC_DEFINE(IPv6, 1, [We have IP version 6])
+fi
+
+dnl Let's see if the system really supports Unix domain sockets.
+dnl
+AC_MSG_CHECKING(for Unix domain sockets)
+AC_CACHE_VAL(ac_cv_unixdomain,
+	AC_TRY_RUN([
+#	include <sys/types.h>
+#	include <sys/socket.h>
+#	include <sys/un.h>
+	/* Make sure the definitions for AF_UNIX and struct sockaddr_un
+	 * are defined, and that we can actually create an IPv4 TCP socket.
+	 */
+	main()
+	{
+		int fd;
+		struct sockaddr_un foo;
+		fd = socket(AF_UNIX, SOCK_STREAM, 0);
+		exit(fd >= 0 ? 0 : 1);
+	}],
+	ac_cv_unixdomain=yes,
+	ac_cv_unixdomain=no,
+	ac_cv_unixdomain=no))
+AC_MSG_RESULT($ac_cv_unixdomain)
+if test $ac_cv_unixdomain = yes ; then
+	AC_DEFINE(UNIXDOMAIN, 1, [We have Unix domain sockets])
+	AC_DEFINE(UNIXdomain, 1, [We have Unix domain sockets])
+fi
+
+dnl Let's see if the system really supports multicasting.
+dnl
+AC_MSG_CHECKING(for multicast support)
+AC_CACHE_VAL(ac_cv_multicast,
+	AC_TRY_RUN([
+#	include <sys/types.h>
+#	include <sys/socket.h>
+#	include <netinet/in.h>
+	main()
+	{
+		int fd;
+		unsigned char flag = 1;
+		struct sockaddr_in foo;
+		struct ip_mreq mreq;
+		fd = socket(AF_INET, SOCK_DGRAM, 0);
+		if (fd < 0) exit(1);
+		if (setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP,
+			       (void*)&flag, sizeof(flag)) < 0)
+			exit(1);
+		exit(0);
+	}],
+	ac_cv_multicast=yes,
+	ac_cv_multicast=no,
+	ac_cv_multicast=no))
+AC_MSG_RESULT($ac_cv_multicast)
+if test $ac_cv_multicast = yes ; then
+	AC_DEFINE(MCAST, 1, [We have multicast support])
+fi
 
 dnl ##################################################################
 dnl If the compiler is gcc, enable all warnings.  Main purpose is to
@@ -410,7 +572,6 @@ dnl Currently only linux and freebsd support gexec
 case "$host" in
 *linux*)
                 metric_source="linux.c"
-                CFLAGS="$CFLAGS -D_REENTRANT"
                 AC_DEFINE(LINUX, 1, LINUX)
 dnl
 dnl For fsusage.c - disk usage.
@@ -472,7 +633,7 @@ esac
 
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
-AC_OUTPUT(Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile web/Makefile web/conf.php)
+AC_OUTPUT(Makefile ganglia.spec libunp/Makefile tests/Makefile gmetad/Makefile lib/Makefile libhttpd/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile web/Makefile web/conf.php)
 
 
 echo ""
