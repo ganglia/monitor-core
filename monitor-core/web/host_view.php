@@ -64,6 +64,8 @@ $s_metrics[uptime][VAL] = uptime($cluster[LOCALTIME] - $metrics[boottime][VAL]);
 
 # Add the gmond started timestamps & last reported time (in uptime format) from
 # the HOST tag:
+$s_metrics[gmond_started][TYPE] = "timestamp";
+$s_metrics[gmond_started][VAL] = $hosts_up[GMOND_STARTED];
 $s_metrics[last_reported][TYPE] = "string";
 $s_metrics[last_reported][VAL] = uptime($cluster[LOCALTIME] - $hosts_up[REPORTED]);
 
