@@ -40,6 +40,7 @@ typedef struct
       int host_alive;   /* True if the current host is alive. */
       Source_t source; /* The current source structure. */
       Host_t *host;  /* Ptr to the current host structure. */
+      Metric_t metric;  /* The current metric structure. */
       hash_t *root;     /* The root authority table (contains our data sources). */
    }
 xmldata_t;
@@ -117,10 +118,6 @@ fillmetric(const char** attr, Metric_t *metric, const char* type)
    struct type_tag *tt;
    struct xml_tag *xt;
    char *metricval, *p;
-   int maxlen;
-
-   /* Need to be aware that metrics can grow in size. */
-   maxlen = (metric->stringslen) ? metric->stringslen : FRAMESIZE;
 
    for(i = 0; attr[i] ; i+=2)
       {
@@ -189,16 +186,10 @@ fillmetric(const char** attr, Metric_t *metric, const char* type)
                   break;
             }
       }
-      /* Leave some padding for growing values. */
-      metric->stringslen = edge + 4;
+      metric->stringslen = edge;
       
-      if (edge > maxlen)
-         {
-            err_msg("Warning: metric with val %s has grown (%d->%d), we have spilled into new memory!",
-               getfield(metric->strings, metric->valstr), maxlen, edge);
-         }
+      /* We are ok with growing metric values b/c we write to a full-sized buffer in xmldata. */
 }
-
 
 
 /* Called when a start tag is encountered.
@@ -212,7 +203,7 @@ start (void *data, const char *el, const char **attr)
    struct type_tag *tt;
    datum_t *hash_datum = NULL;
    datum_t *rdatum;
-   datum_t hashkey;
+   datum_t hashkey, hashval;
    const char *name = NULL;
    const char *metricval = NULL;
    const char *type = NULL;
@@ -221,7 +212,6 @@ start (void *data, const char *el, const char **attr)
    int edge;
 
    Metric_t *metric;
-   Metric_t newmetric;
    int do_summary = 0;
 
    int host_alive;
@@ -232,7 +222,6 @@ start (void *data, const char *el, const char **attr)
    Source_t *source;
    hash_t *summary;
    hash_t *hosts; /* The current cluster-hosts table. */
-   hash_t *metrics;  /* The current host-metrics table. */
 
    xt = in_xml_list ((char *) el, strlen(el));
    if (!xt)
@@ -286,6 +275,7 @@ start (void *data, const char *el, const char **attr)
                   else
                      {
                         memcpy(&xmldata->source, hash_datum->data, hash_datum->size);
+                        datum_free(hash_datum);
                         source = &xmldata->source;
                         source->hosts_up = 0;
                         source->hosts_down = 0;
@@ -309,6 +299,9 @@ start (void *data, const char *el, const char **attr)
                                  source->authority_ptr = edge;
                                  strcpy(source->strings + edge, attr[i+1]);
                                  edge += strlen(attr[i+1]) + 1;
+                                 break;
+                              case LOCALTIME_TAG:
+                                 source->localtime = strtoul(attr[i+1], (char **)NULL, 10);
                                  break;
                               default:
                                  break;
@@ -376,6 +369,7 @@ start (void *data, const char *el, const char **attr)
             else
                {
                   memcpy(&xmldata->source, hash_datum->data, hash_datum->size);
+                  datum_free(hash_datum);
                   source = &xmldata->source;
                   source->hosts_up = 0;
                   source->hosts_down = 0;
@@ -598,6 +592,9 @@ start (void *data, const char *el, const char **attr)
                      }
                }
 
+            metric = &(xmldata->metric);
+            memset((void*) metric, 0, sizeof(*metric));
+
             /* Summarize all numeric metrics */
             do_summary = 0;
             tt = in_type_list(type, strlen(type));
@@ -606,23 +603,56 @@ start (void *data, const char *el, const char **attr)
             if (tt->type==INT || tt->type==UINT || tt->type==FLOAT)
                do_summary = 1;
 
-            /* Update summary for numeric metrics. */
+            /* Only keep metric details if we are the authority on this cluster. */
+            if (authority_mode(xmldata))
+               {
+                  /* Save the data to a round robin database if the data source is alive */
+                  if (do_summary && !xmldata->ds->dead && !xmldata->rval)
+                     {
+                           debug_msg("Updating host %s, metric %s", xmldata->hostname, name);
+                           xmldata->rval = write_data_to_rrd(xmldata->sourcename,
+                                 xmldata->hostname, name, metricval, NULL,
+                                 xmldata->ds->step, xmldata->cluster_localtime);
+                     }
+                  metric->id = METRIC_NODE;
+                  metric->report_start = metric_report_start;
+                  metric->report_end = metric_report_end;
+
+                  fillmetric(attr, metric, type);
+
+                  /* Trim metric structure to the correct length. */
+                  hashval.size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
+                  hashval.data = (void*) metric;
+
+                  /* Update full metric in cluster host table. */
+                  rdatum = hash_insert(&hashkey, &hashval, xmldata->host->metrics);
+                  if (!rdatum)
+                     {
+                        err_msg("Could not insert %s metric", name);
+                     }
+               }
+
+            /* Always update summary for numeric metrics. */
             if (do_summary)
                {
                   summary = xmldata->source.metric_summary;
                   hash_datum = hash_lookup(&hashkey, summary);
                   if (!hash_datum)
                      {
-                        memset(&newmetric, 0, sizeof(newmetric));
-                        hash_datum = datum_new((char*)&newmetric, sizeof(newmetric));
-                        metric = (Metric_t*) hash_datum->data;
-
-                        /* Only fill in the meta-data once. */
-                        fillmetric(attr, metric, type);
+                        if (!authority_mode(xmldata)) 
+                           {
+                              metric = &(xmldata->metric);
+                              memset((void*) metric, 0, sizeof(*metric));
+                              fillmetric(attr, metric, type);
+                           }
+                        /* else we have already filled in the metric above. */
                      }
                   else
                      {
-                        metric = (Metric_t*) hash_datum->data;
+                        memcpy(&xmldata->metric, hash_datum->data, hash_datum->size);
+                        datum_free(hash_datum);
+                        metric = &(xmldata->metric);
+
                         switch (tt->type)
                            {
                               case INT:
@@ -642,61 +672,13 @@ start (void *data, const char *el, const char **attr)
                   metric->num++;
 
                   /* Trim metric structure to the correct length. Tricky. */
-                  hash_datum->size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
+                  hashval.size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
+                  hashval.data = (void*) metric;
 
                   /* Update metric in summary table. */
-                  rdatum = hash_insert(&hashkey, hash_datum, summary);
-                  if (!rdatum)
-                     {
-                        err_msg("Could not insert %s metric", name);
-                     }
-                     
-                  datum_free(hash_datum);
+                  rdatum = hash_insert(&hashkey, &hashval, summary);
+                  if (!rdatum) err_msg("Could not insert %s metric", name);
                }
-
-
-            /* Only keep metric details if we are the authority on this cluster. */
-            if (!authority_mode(xmldata))
-               return;
-            
-            metrics = xmldata->host->metrics;
-
-            /* Save the data to a round robin database if the data source is alive */
-            if (do_summary && !xmldata->ds->dead && !xmldata->rval)
-               {
-                     debug_msg("Updating host %s, metric %s", xmldata->hostname, name);
-
-                     xmldata->rval = write_data_to_rrd(xmldata->sourcename,
-                           xmldata->hostname, name, metricval, NULL, 
-                           xmldata->ds->step, xmldata->cluster_localtime);
-               }
-
-            hash_datum = hash_lookup(&hashkey, metrics);
-            if (!hash_datum)
-               {
-                  memset(&newmetric, 0, sizeof(newmetric));
-                  hash_datum = datum_new((char*)&newmetric, sizeof(newmetric));
-               }
-            metric = (Metric_t*) hash_datum->data;
-
-            metric->id = METRIC_NODE;
-            metric->report_start = metric_report_start;
-            metric->report_end = metric_report_end;
-
-            fillmetric(attr, metric, type);
-
-            /* Trim metric structure to the correct length. */
-            hash_datum->size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
-
-            /* Update full metric in cluster host table. */
-            rdatum = hash_insert(&hashkey, hash_datum, metrics);
-            if (!rdatum)
-               {
-                  err_msg("Could not insert %s metric", name);
-               }
-
-            datum_free(hash_datum);
-
             break;
 
 
