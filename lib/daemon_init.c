@@ -1,6 +1,7 @@
 /**
  * @file daemon_init.c Functions for standalone daemons
  */ 
+/* $Id$ */
 #include	"gangliaconf.h"
 #include <ganglia/daemon_init.h>
 

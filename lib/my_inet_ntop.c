@@ -1,3 +1,4 @@
+/* $Id$ */
 #include "gangliaconf.h"
 
 const char *
