@@ -7,11 +7,11 @@ libganglia_la_SOURCES = daemon_inetd.c daemon_init.c debug_msg.c error.c \
 ganglia.c hash.c llist.c my_inet_ntop.c \
 rdwr.c xmlparse.c xmlrole.c xmltok.c file.c gexec_funcs.c barrier.c \
 become_a_nobody.c gexec_process.c gexec_vnn_ip.c gmond_config.c inetaddr.c \
-mcast.c tcp.c fsusage.c dotconf.c readdir.c
+mcast.c tcp.c fsusage.c dotconf.c readdir.c interface.c
 
 noinst_HEADERS = dotconf.h readdir.h dnet.h dnet/addr.h dnet/arp.h \
 dnet/blob.h dnet/eth.h dnet/fw.h dnet/icmp.h dnet/intf.h \
-dnet/ip.h dnet/os.h dnet/rand.h dnet/route.h dnet/tcp.h dnet/udp.h
+dnet/ip.h dnet/os.h dnet/rand.h dnet/route.h dnet/tcp.h dnet/udp.h interface.h
 
 noinst_LIBRARIES = libgetopthelper.a libdnet.a
 # A little helper for getopt functions
