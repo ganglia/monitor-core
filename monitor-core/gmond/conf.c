@@ -179,9 +179,9 @@ static DOTCONF_CB(cb_mcast_channel)
 static void
 set_channel_defaults( channel_t *channel )
 {
-  channel->address = conf_strdup("239.2.11.71");
-  channel->port = conf_strdup("8649");
-  channel->action = conf_strdup("send");
+  channel->address = NULL;
+  channel->port = NULL;
+  channel->action = NULL;
   channel->ttl  = 1;
   channel->num_interfaces = 0;
   channel->interfaces = NULL;
@@ -278,7 +278,7 @@ static DOTCONF_CB(cb_close_channel)
            c->num_send_channels += channel->num_interfaces;
 	 }
      }
-  if(strstr(c->channels[c->current_channel]->action, "receive"))
+  if(strstr(channel->action, "receive"))
     {
       c->num_receive_channels++;
       if(channel->num_interfaces)
@@ -639,8 +639,13 @@ set_defaults(gmond_config_t *config )
        exit(1);
      }
 
-   set_channel_defaults( config->channels[0] );
-   /* We want to send/receive on the default channel for backward compatibility */
+   /* We want to send/receive on the default multicast channel 
+    * for backward compatibility */
+   config->channels[0]->address = conf_strdup("239.2.11.71");
+   config->channels[0]->port = conf_strdup("8649");
+   config->channels[0]->ttl  = 1;
+   config->channels[0]->num_interfaces = 0;
+   config->channels[0]->interfaces = NULL;
    config->channels[0]->action = conf_strdup("send_receive");
 
    
