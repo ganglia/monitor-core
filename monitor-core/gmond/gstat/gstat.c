@@ -2,7 +2,7 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
-#include <ganglia/gexec_funcs.h>
+#include "gexec_funcs.h"
 #include <getopt.h>
 #include "cmdline.h"
 
