@@ -32,6 +32,11 @@ pthread_mutex_t  mcast_join_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 g_tcp_socket *   server_socket;
 pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
 
+g_tcp_socket *   compressed_socket;
+pthread_mutex_t  compressed_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+barrier *mcast_listen_barrier, *server_barrier;
+
 /* In dmonitor.c */
 extern void *monitor_thread(void *arg);
 extern int mcast_value ( uint32_t key );
@@ -129,12 +134,9 @@ main ( int argc, char *argv[] )
    g_val_t initval;
    pthread_t tid;
    pthread_attr_t attr;
-   barrier *mcast_listen_barrier, *server_barrier;
    struct timeval tv;
    struct ifi_info *entry;
-#if 0
-   struct in_addr mcast_if_addr;
-#endif
+   int no_compression = 0;
 
    gettimeofday(&tv, NULL);
    start_time = (uint32_t) tv.tv_sec;
@@ -166,9 +168,6 @@ main ( int argc, char *argv[] )
       gmond_config.location = strdup(args_info.location_arg);
    }
 
-   /*
-   print_gmond_config();
-   */
    /* in machine.c */
    initval = metric_init();
    if ( initval.int32 <0)
@@ -238,6 +237,13 @@ main ( int argc, char *argv[] )
             }
          debug_msg("XML listening on port %d", gmond_config.xml_port);
 
+         compressed_socket = g_tcp_socket_server_new( gmond_config.compressed_xml_port);
+         if( ! compressed_socket)
+           {
+             perror("tcp_listen() on xml_port failed");
+             return -1;
+           }
+
          /* thread(s) to listen to the multicast traffic */
          if(barrier_init(&mcast_listen_barrier, gmond_config.mcast_threads))
             {
@@ -252,16 +258,27 @@ main ( int argc, char *argv[] )
          debug_msg("listening thread(s) have been started");
 
          /* threads to answer requests for XML */
-         if(barrier_init(&server_barrier, (gmond_config.xml_threads)))
+         if(barrier_init(&server_barrier, gmond_config.xml_threads + 
+                                          gmond_config.compressed_xml_threads))
             {
                perror("barrier_init() error");
                return -1;
             }
+
+         /* Spin off the threads for raw XML */
          for ( i=0 ; i < gmond_config.xml_threads; i++ )
             {
-               pthread_create(&tid, &attr, server_thread, (void *)server_barrier);
+               pthread_create(&tid, &attr, server_thread, (void *)&no_compression);
             }
-         debug_msg("listening thread(s) have been started");
+         debug_msg("listening (uncompressed xml) thread(s) have been started");
+
+         /* Spin off the threads for compressed XML */
+         for ( i=0 ; i < gmond_config.compressed_xml_threads; i++ )
+            {
+               pthread_create(&tid, &attr, server_thread, 
+                             (void *)&(gmond_config.xml_compression_level));
+            }
+         debug_msg("listening (compressed xml) thread(s) have been started");
          
          /* A thread to cleanup old metrics and hosts */
          pthread_create(&tid, &attr, cleanup_thread, (void *) NULL);
