@@ -7,7 +7,7 @@ interface.c interface.h wrapunix.c wrapsock.c dotconf.h readdir.h \
 addrinfo.h barrier.h become_a_nobody.h daemon_inetd.h daemon_init.h \
 debug_msg.h dotconf.h error.h file.h fsusage.h ganglia.h ganglia_private.h \
 getopt.h gmond_config.h hash.h interface.h llist.h \
-my_inet_ntop.h net.h rdwr.h readdir.h unp.h unpifi.h ganglia_private.h
+my_inet_ntop.h net.h rdwr.h readdir.h unp.h unpifi.h ganglia_private.h zio.c zio.h
 libganglia_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-release $(LT_RELEASE) \
