@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Id$
+echo "Bootstrapping libmetrics"
+cd srclib/libmetrics && ./bootstrap
+
 echo "Running make distclean"  
 make distclean   
 echo "Running aclocal"  &&
