@@ -27,7 +27,7 @@ extern g_val_t cpu_user_func(void);
 extern g_val_t cpu_nice_func(void);
 extern g_val_t cpu_system_func(void);
 extern g_val_t cpu_idle_func(void);
-extern g_val_t cpu_aidle_func(void);
+extern g_val_t cpu_wio_func(void);
 extern g_val_t load_one_func(void);
 extern g_val_t load_five_func(void);
 extern g_val_t load_fifteen_func(void);
@@ -40,6 +40,32 @@ extern g_val_t mem_cached_func(void);
 extern g_val_t swap_free_func(void);        
 extern g_val_t gexec_func(void);
 extern g_val_t heartbeat_func(void);
+
+/* the following are additional internal metrics added by swagner
+ * what for the monitoring of buffer/linear read/writes on Solaris boxen.
+ * these are only valid on the solaris version of gmond v2.3.1b1,
+ * all others are untested.  caveat haxor. :P
+ */     
+        
+#ifdef SOLARIS
+        
+extern g_val_t bread_sec_func(void);
+extern g_val_t bwrite_sec_func(void);
+extern g_val_t lread_sec_func(void);
+extern g_val_t lwrite_sec_func(void);
+extern g_val_t phread_sec_func(void);
+extern g_val_t phwrite_sec_func(void);
+extern g_val_t rcache_func(void);
+extern g_val_t wcache_func(void);
+        
+#endif  
+     
+/* end of swagner modifications.
+ *      
+ */     
+   
+
+
 
 #define INIT 0, 0, {0}, {0}
 #define KEY(NAME) { #NAME, NAME ##_func, INIT
@@ -81,7 +107,7 @@ KEY(cpu_user),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_nice),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_system),    1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_idle),      5,  15,   20,   60,   90, g_float, "%",   "%.1f"},
-KEY(cpu_aidle),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
+KEY(cpu_wio),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
 KEY(load_one),      1,  15,   20,   50,   70, g_float, "",    "%.2f"},
 KEY(load_five),     1,  30,   40,  275,  325, g_float, "",    "%.2f"},
 KEY(load_fifteen),  1,  60,   80,  850,  950, g_float, "",    "%.2f"},
@@ -95,7 +121,33 @@ KEY(swap_free),  1024,  30,   40,  120,  180, g_uint32, "KBs", "%u" },
 
 /* gmond internals */
 KEY(gexec),        -1,  -1,   -1,  180,  300, g_string, "",    "%s"},
+
+#ifdef SOLARIS
+
+/* buffer reads and writes, adjusted per second */
+
+KEY(bread_sec),   1,  15,   20,  60,  90, g_float, "", "%.2f" },
+KEY(bwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" },
+
+/* linear reads/writes, adjusted per second */
+
+KEY(lread_sec),1,  15,   20,  60,  90, g_float, "", "%.2f" },
+KEY(lwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" },
+
+/* cache hit ratios, rcache = 1 - (bread/lread), wcache = 1 - (bwrite/lwrite) */
+
+KEY(rcache), 1,  15,   20,  60,  90, g_float, "%", "%.1f" },
+KEY(wcache), 1,  15,   20,  60,  90, g_float, "%", "%.1f" },
+
+/* physical reads/writes per second. */
+
+KEY(phread_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" },
+KEY(phwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" },
+
+#endif
+
 KEY(heartbeat),    -1,  -1,   -1,   10,   20, g_uint32, "",    "%u"}
+
 };
 
 #endif  /* METRIC_H */
