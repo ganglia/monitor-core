@@ -210,6 +210,30 @@ echo "      anywhere except the machine you are compiling ganglia on."
 exit;
 fi
 
+AC_CHECK_LIB(z, zlibVersion, echo "Zlib found", echo "Zlib NOT found!")
+
+if test "$ac_cv_lib_z_zlibVersion" != yes; then
+echo
+echo "The zlib library could not be found.  Zlib can be downloaded from"
+echo
+echo "                     http://www.gzip.org/zlib/"
+echo
+echo "Please download and install the latest version of zlib before continuing."
+echo
+echo "+======================================================================+"
+echo "| If this library is in a non-standard location (such as your home     |"
+echo "| directory).  You can add the path to the headers and libraries using |"
+echo "| the CFLAGS, CPPFLAGS and LDFLAGS environment variables.  For example |"
+echo "|                                                                      |"
+echo "| % CFLAGS=\"-I/home/me/pkg/include\" \\                                  |"
+echo "|   CPPFLAGS=\"-I/home/me/pkg/include\" \\                                |"
+echo "|   LDFLAGS=\"-L/home/me/pkg/lib\" \\                                     |"
+echo "|   ./configure ...                                                    |"
+echo "+======================================================================+"
+exit;
+fi
+
+
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, inet_addr)
 AC_CHECK_LIB(nsl, gethostbyaddr_r)
