@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
-#include <ganglia/barrier.h>
+#include "barrier.h"
 
 /*
  * barrier_init: allocates resources for a barrier for nthrs

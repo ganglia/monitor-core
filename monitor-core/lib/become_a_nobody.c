@@ -1,6 +1,6 @@
 /* $Id$ */
-#include <ganglia/become_a_nobody.h>
-#include <ganglia/error.h>
+#include "become_a_nobody.h"
+#include "error.h"
 #include <stdio.h>
 
 void

@@ -3,7 +3,7 @@
  */ 
 /* $Id$ */
 #include	"gangliaconf.h"
-#include <ganglia/daemon_init.h>
+#include "daemon_init.h"
 
 #define	MAXFD	64
 
