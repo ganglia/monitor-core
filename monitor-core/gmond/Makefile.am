@@ -9,12 +9,19 @@ else
 DOTCONF_LIBS = -ldotconf
 endif
 
-AM_CFLAGS = -I../lib $(DOTCONF_INCLUDES)
+if BUILD_LIBDNET
+LIBDNET_INCLUDES = -I../libdnet-1.4/src
+LIBDNET_LIBS = ../libdnet-1.4/src/libdnet.a
+else
+LIBDNET_LIBS = -ldnet
+endif
+
+AM_CFLAGS = -I../lib $(DOTCONF_INCLUDES) $(LIBDNET_INCLUDES)
 
 sbin_PROGRAMS = gmond
 gmond_SOURCES =  gmond.c monitor.c server.c listen.c node_data_t.h \
 	machine.c metric.h metric_typedefs.h key_metrics.h cmdline.c cmdline.h 
-gmond_LDADD   = ../lib/.libs/libganglia.a $(DOTCONF_LIBS)
+gmond_LDADD   = ../lib/.libs/libganglia.a $(DOTCONF_LIBS) $(LIBDNET_LIBS)
 # gmond_LDFLAGS =  -L../libdaemon -L../libhash
 # gmond_CFLAGS  = -fcheck-memory-usage
 

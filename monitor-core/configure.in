@@ -125,7 +125,16 @@ AC_ARG_WITH(system-dotconf,
 		if test "$withval" = yes;
                 then use_system_dotconf=yes; fi)
 
+AC_ARG_WITH(system-libdnet,
+[  --with-system-libdnet   build ganglia with an existing libdnet
+                           library, not the one included in the ganglia
+                           distribution (use only if libdnet is already
+                           installed on your system!)],
+      if test "$withval" = yes;
+                then use_system_libdnet=yes; fi)
+
 AM_CONDITIONAL(BUILD_DOTCONF, test x$use_system_dotconf != xyes)
+AM_CONDITIONAL(BUILD_LIBDNET, test x$use_system_libdnet != xyes)
 
 dnl ##################################################################
 dnl Checks for libraries.
@@ -161,6 +170,15 @@ if test "$use_system_dotconf" = yes; then
 		echo "library by not passing --with-system-dotconf to configure."
 		exit;
 	fi
+fi
+if test "$use_system_libdnet" = yes; then
+   AC_CHECK_LIB(dnet, intf_open)
+   if test "$ac_cv_lib_dnet_intf_open" = no; then
+      echo "You asked to build with the system libdnet, but it isn't installed!"
+      echo "Either install libdnet on the system or build the included libdnet"
+      echo "library by not passing --with-system-libdnet to configure."
+      exit;
+   fi
 fi
 
 dnl AC_CHECK_LIB(crypto, RSA_sign)
@@ -380,12 +398,25 @@ esac
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
 if test "$use_system_dotconf" != yes; then
+  echo ""
+  echo "Configuring dotconf-1.0.9"
+  echo ""
   cd dotconf-1.0.9
      ./configure --prefix=`pwd`/binary --cache-file=../config.cache
   cd ..
 fi
 
+if test "$use_system_libdnet" != yes; then
+  echo ""
+  echo "Configuring libdnet-1.4"
+  echo ""
+  cd libdnet-1.4
+     ./configure --prefix=`pwd`/binary --cache-file=../config.cache
+  cd ..
+fi 
+
 AC_OUTPUT(Makefile ganglia.spec lib/Makefile gmond/Makefile gmond/gstat/Makefile  gmetric/Makefile)
 
+echo ""
 echo "-- Ganglia $VERSION --"
 echo "Type \"make\" to compile."
