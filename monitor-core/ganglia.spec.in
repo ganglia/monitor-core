@@ -87,21 +87,27 @@ fi
 %install
 %__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 %__mkdir -p $RPM_BUILD_ROOT/usr/include/ganglia
+%__mkdir -p $RPM_BUILD_ROOT/var/lib/ganglia
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+%__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.conf $RPM_BUILD_ROOT/etc/gmond.conf
+%__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
 %__make install prefix=$RPM_BUILD_ROOT/usr
 
 ##
 ## FILES
 ##
-%files 
+%files
 %defattr(-,root,root)
 %attr(0500,root,root)/usr/bin/gmetric
 %attr(0555,root,root)/usr/bin/gstat
+%attr(0755,nobody,nobody)/var/lib/ganglia
 /usr/sbin/gmond
 /usr/sbin/gmetad
 /etc/rc.d/init.d/gmond
 /etc/rc.d/init.d/gmetad
+%config /etc/gmond.conf
+%config /etc/gmetad.conf
 
 %files lib
 /usr/include/ganglia.h
@@ -118,6 +124,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Thu Sep 19 2002 Federico Sacerdoti <fds@sdsc.edu>
+- Added config files, made /var/lib/ganglia for RRD storage.
 * Mon Mar 11 2002 Matt Massie <massie@cs.berkeley.edu>
 - Added support for libganglia, added Prefix: for RPM relocation
 * Wed Feb 27 2002 Matt Massie <massie@cs.berkeley.edu>
