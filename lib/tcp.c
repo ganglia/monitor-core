@@ -132,7 +132,7 @@ g_tcp_socket_server_new_interface (const g_inet_addr* iface)
   g_tcp_socket* s;
   struct sockaddr_in* sa_in;
   socklen_t socklen;
-  int flags;
+  int flags, rval;
   const int on = 1;
 
   /* Create socket */
@@ -160,6 +160,24 @@ g_tcp_socket_server_new_interface (const g_inet_addr* iface)
 
   /* Set REUSEADDR so we can reuse the port */
   setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, (void*) &on, sizeof(on));
+  if ( rval <0)
+     {
+        err_ret("tcp_listen() setsockopt() SO_REUSEADDR error");
+        goto error;
+     }
+
+  rval = setsockopt(s->sockfd, SOL_SOCKET, SO_KEEPALIVE, (void *)&on, sizeof(on));
+  if ( rval <0)
+     {
+        err_ret("tcp_listen() setsockopt() SO_KEEPALIVE error");
+        goto error;
+     }
+  rval = setsockopt(s->sockfd, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(on));
+  if ( rval <0)
+     {
+        err_ret("tcp_listen() setsockopt() TCP_NODELAY error");
+        goto error;
+     }
 
   /* Bind */
   if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
