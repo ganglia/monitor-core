@@ -2,10 +2,13 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdarg.h>
-#include "dtd.h"
+
+#include "gmond/dtd.h"
 #include "gmetad.h"
-#include "llist.h"
-#include "my_inet_ntop.h"
+
+#include "lib/llist.h"
+#include "lib/my_inet_ntop.h"
+#include "lib/zio.h"
 
 extern g_tcp_socket *server_socket;
 extern pthread_mutex_t  server_socket_mutex;
@@ -18,63 +21,6 @@ extern gmetad_config_t gmetad_config;
 
 extern char* getfield(char *buf, short int index);
 extern struct type_tag* in_type_list (char *, unsigned int);
-
-void
-client_close( client_t *client )
-{
-  if(gmetad_config.xml_compression_level)
-    {
-      gzclose(client->z);
-    }
-  else
-    {
-      close(client->fd);
-    }
-}
-
-static inline int
-xml_print( client_t *client, const char *fmt, ... )
-{
-   int rval, len;
-   va_list ap;
-   char buf[4096];
-
-   va_start (ap, fmt);
-
-   if(! client->valid ) 
-      {
-         va_end(ap);
-         return 1;
-      }
-
-   vsnprintf (buf, sizeof (buf), fmt, ap);  
-
-   len = strlen(buf);
-
-   if(gmetad_config.xml_compression_level)
-     {
-       rval = gzwrite( client->z, buf, len );
-       if(!rval)
-         {
-           va_end(ap);
-           client->valid = 0;
-           return 1;
-         }
-     }
-   else
-     {
-       SYS_CALL( rval, write( client->fd, buf, len)); 
-       if ( rval < 0 && rval != len ) 
-         {
-            va_end(ap);
-            client->valid = 0;
-            return 1;
-         }
-     }
-
-   va_end(ap);
-   return 0;
-}
 
 static int
 metric_summary(datum_t *key, datum_t *val, void *arg)
@@ -106,13 +52,13 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
             break;
       }
 
-   return xml_print(client, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
+   return zio_printf(client->io, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
       "TYPE=\"%s\" UNITS=\"%s\" SLOPE=\"%s\" SOURCE=\"%s\"/>\n",
       name, sum, metric->num,
       getfield(metric->strings, metric->type),
       getfield(metric->strings, metric->units),
       getfield(metric->strings, metric->slope),
-      getfield(metric->strings, metric->source));
+      getfield(metric->strings, metric->source)) <= 0? 1: 0;
 }
 
 
@@ -121,9 +67,9 @@ source_summary(Source_t *source, client_t *client)
 {
    int rc;
 
-   rc=xml_print(client, "<HOSTS UP=\"%u\" DOWN=\"%u\" SOURCE=\"gmetad\"/>\n",
+   rc=zio_printf(client->io, "<HOSTS UP=\"%u\" DOWN=\"%u\" SOURCE=\"gmetad\"/>\n",
       source->hosts_up, source->hosts_down);
-   if (rc) return 1;
+   if (rc<=0) return 1;
 
    return hash_foreach(source->metric_summary, metric_summary, (void*) client);
 }
@@ -134,14 +80,14 @@ metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
    char *name = (char*) key->data;
    Metric_t *metric = (Metric_t*) self;
 
-   return xml_print(client, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
+   return zio_printf(client->io, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
       "UNITS=\"%s\" TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" SLOPE=\"%s\" "
       "SOURCE=\"%s\"/>\n",
       name, getfield(metric->strings, metric->valstr),
       getfield(metric->strings, metric->type),
       getfield(metric->strings, metric->units), metric->tn,
       metric->tmax, metric->dmax, getfield(metric->strings, metric->slope),
-      getfield(metric->strings, metric->source));
+      getfield(metric->strings, metric->source)) <= 0? 1: 0;
 }
 
 int
@@ -157,18 +103,18 @@ host_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
    Host_t *host = (Host_t*) self;
 
    /* Note the hash key is the host's IP address. */
-   return xml_print(client, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
+   return zio_printf(client->io, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
       "TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" LOCATION=\"%s\" GMOND_STARTED=\"%u\">\n",
       name, getfield(host->strings, host->ip), host->reported, host->tn,
       host->tmax, host->dmax, getfield(host->strings, host->location),
-      host->started);
+      host->started) <= 0? 1: 0;
 }
 
 
 int
 host_report_end(Generic_t *self, client_t *client, void *arg)
 {
-   return xml_print(client, "</HOST>\n");
+   return zio_printf(client->io, "</HOST>\n") <= 0? 1: 0;
 }
 
 
@@ -180,16 +126,16 @@ source_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 
    if (self->id == CLUSTER_NODE)
       {
-            return xml_print(client, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%u\" OWNER=\"%s\" "
+            return zio_printf(client->io, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%u\" OWNER=\"%s\" "
                "LATLONG=\"%s\" URL=\"%s\">\n",
                name, source->localtime, getfield(source->strings, source->owner),
                getfield(source->strings, source->latlong),
-               getfield(source->strings, source->url));
+               getfield(source->strings, source->url)) <= 0? 1: 0;
       }
 
-   return xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" "
+   return zio_printf(client->io, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" "
          "LOCALTIME=\"%u\">\n",
-          name, getfield(source->strings, source->authority_ptr), source->localtime);
+          name, getfield(source->strings, source->authority_ptr), source->localtime) <= 0? 1:0;
 }
 
 
@@ -198,9 +144,9 @@ source_report_end(Generic_t *self,  client_t *client, void *arg)
 {
 
    if (self->id == CLUSTER_NODE)
-      return xml_print(client, "</CLUSTER>\n");
+      return zio_printf(client->io, "</CLUSTER>\n") <= 0? 1: 0;
 
-   return xml_print(client, "</GRID>\n");
+   return zio_printf(client->io, "</GRID>\n") <= 0? 1: 0;
 }
 
 
@@ -210,22 +156,22 @@ root_report_start(client_t *client)
 {
    int rc;
 
-   rc = xml_print(client, DTD);
-   if (rc) return 1;
+   rc = zio_printf(client->io, DTD);
+   if (rc <= 0) return 1;
 
-   rc = xml_print(client, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
+   rc = zio_printf(client->io, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
       VERSION);
-   if (rc) return 1;
+   if (rc <= 0) return 1;
 
-   return xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
-       gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0));
+   return zio_printf(client->io, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
+       gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0)) <= 0? 1: 0;
 }
 
 
 int
 root_report_end(client_t *client)
 {
-    return xml_print(client, "</GRID>\n</GANGLIA_XML>\n");
+    return zio_printf(client->io, "</GRID>\n</GANGLIA_XML>\n") <= 0? 1: 0;
 }
 
 
@@ -573,27 +519,19 @@ server_thread (void *arg)
          else
             strcpy(request, "/");
 
-         if(gmetad_config.xml_compression_level)
+         client.io = zio_fdopen( client.fd, "wb", gmetad_config.xml_compression_level);
+         if(!client.io)
            {
-             sprintf(gzdopen_param, "wb%d", gmetad_config.xml_compression_level);
-             client.z = gzdopen( client.fd, gzdopen_param );
-             if(!client.z)
-               {
-                 err_msg("unable to create zlib stream");
-                 close(client.fd);
-                 continue;
-               } 
-           }
-         else
-           {
-             client.z = NULL;
+             err_msg("unable to create zlib stream");
+             close(client.fd);
+             continue;
            }
 
          if(root_report_start(&client))
             {
                err_msg("server_thread() %d unable to write root preamble (DTD, etc)",
                          pthread_self() );
-               client_close(&client);
+               zio_close(client.io);
                continue;
             }
 
@@ -604,7 +542,7 @@ server_thread (void *arg)
          if (process_path(&client, request, &rootdatum, NULL))
             {
                err_msg("server_thread() %d unable to write XML tree info", pthread_self() );
-               client_close(&client);
+               zio_close(client.io);
                continue;
             }
 
@@ -613,6 +551,6 @@ server_thread (void *arg)
                err_msg("server_thread() %d unable to write root epilog", pthread_self() );
             }
 
-         client_close(&client);
+         zio_close(client.io);
       }
 }

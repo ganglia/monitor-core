@@ -2,12 +2,13 @@
  * @file error.c Error Handling Functions
  */
 /* $Id$ */
-#include	"ganglia_private.h"
 #include   <stdio.h>
 #include   <stdlib.h>
 #include   <stdarg.h>
 #include   <syslog.h>
 #include   <string.h>
+
+#include   "ganglia_private.h"
 
 int daemon_proc;		/* set nonzero by daemon_init() */
 

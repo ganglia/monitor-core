@@ -4,10 +4,10 @@
 #include <unistd.h>
 #include <sys/poll.h>
 #include <sys/time.h>
-#include <gmetad.h>
 #include <string.h>
-#include <gmetad.h>
 #include <zlib.h>
+
+#include "gmetad.h"
 
 extern int debug_level;
 

@@ -4,7 +4,8 @@
 #include <string.h>
 #include <expat.h>
 
-#include "hash.h"
+#include "lib/hash.h"
+
 #include "gmetad.h"
 
 extern int write_data_to_rrd( const char *source, const char *host, const char *metric,

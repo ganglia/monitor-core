@@ -1,7 +1,8 @@
 /* $Id$ */
+#include <stdio.h>
+
 #include "become_a_nobody.h"
 #include "error.h"
-#include <stdio.h>
 
 void
 become_a_nobody( const char *username )

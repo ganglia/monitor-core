@@ -4,13 +4,14 @@
 /* $Id$ */
 #include <stdio.h>
 #include <stdlib.h>
-#include "ganglia_private.h"
-#include "daemon_init.h"
 #include <syslog.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "ganglia_private.h"
+#include "daemon_init.h"
 
 #define	MAXFD	64
 
