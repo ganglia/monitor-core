@@ -11,12 +11,13 @@ behavior {                    \n\
   user = nobody               \n\
 } \n\
 udp_send_channel { \n\
-  ip = 239.2.11.71 \n\
+  ip = 127.0.0.1 \n\
   port = 8649 \n\
 } \n\
 udp_recv_channel { \n\
   mcast_join = 239.2.11.71 \n\
   port = 8649 \n\
+  bind = 239.2.11.71 \n\
 } \n\
 collection_group { \n\
   name = \"cpu_stat\" \n\
