@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/poll.h>
+#include <sys/time.h>
 #include <gmetad.h>
 #include <string.h>
 #include <ganglia/hash.h>
@@ -25,6 +26,7 @@ data_thread ( void *arg )
    unsigned int buf_size = 1024, read_index;
    char *p, *q;
    struct pollfd struct_poll;
+   struct timeval start, end;
  
    if(debug_level)
       {
@@ -50,6 +52,7 @@ data_thread ( void *arg )
 
    for (;;)
       {
+         gettimeofday(&start, NULL);
          for(i=0; i < d->num_sources; i++)
             {
                sock = g_tcp_socket_new ( d->sources[i] );
@@ -195,9 +198,12 @@ data_thread ( void *arg )
 
        take_a_break:
          g_tcp_socket_delete(sock);
+
+         gettimeofday(&end, NULL);
          /* 10 to 20 seconds... autoconf later */
-         sleep_time=10+(int) (20.0*rand()/(RAND_MAX+10.0));
-         sleep(sleep_time);
+         sleep_time=10+(int) (20.0*rand()/(RAND_MAX+10.0)) - (end.tv_sec - start.tv_sec);
+         if( sleep_time > 0 )
+            sleep(sleep_time);
       }
    return NULL;
 }
