@@ -1639,8 +1639,8 @@ process_collection_groups( apr_time_t now )
 	}
     }
 
-  /* The timestamp of the next event */
-  return next;
+  /* The timestamp of the next event (default to 60 seconds) */
+  return next == 0? now + 60 * APR_USEC_PER_SEC: next;
 }
 
 static void
