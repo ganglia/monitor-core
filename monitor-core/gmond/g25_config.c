@@ -1,6 +1,7 @@
 /* $Id$ */
 #include <stdio.h>
 #include <dotconf.h>
+#include "ganglia.h"
 #include "g25_config.h"
 
 gmond_config_t gmond_config;
@@ -283,10 +284,10 @@ print_config(char *path, gmond_config_t *config)
 	{
 	  fprintf(stdout, "  access {\n  ip=\"%s\"\n  mask = 24\n  action = \"allow\"\n  }\n", p);
 	}
+      fprintf(stdout,"}\n");/* close acl */
     }
-  fprintf(stdout,"}\n\n");
-
-
+  fprintf(stdout,"}\n\n"); /* close tcp_accept_channel */
+  fprintf(stdout,"%s\n", Ganglia_default_collection_groups());
   return 0;
 }
 

@@ -155,6 +155,9 @@ tcp_accept_channel { \n\
 } \n\
 \n\
 \n\
+"
+
+#define COLLECTION_GROUP_LIST "\
 /* The old internal 2.5.x metric array has been replaced by the following \n\
    collection_group directives.  What follows is the default behavior for \n\
    collecting and sending metrics that is as close to 2.5.x behavior as \n\
@@ -424,10 +427,17 @@ collection_group { \n\
 \n\
 "
 
+char *
+Ganglia_default_collection_groups(void)
+{
+  return COLLECTION_GROUP_LIST;
+}
+
 void
 build_default_gmond_configuration(apr_pool_t *context)
 {
   default_gmond_configuration = apr_pstrdup(context, BASE_GMOND_CONFIGURATION);
+  default_gmond_configuration = apr_pstrcat(context, default_gmond_configuration, COLLECTION_GROUP_LIST, NULL);
 #if SOLARIS
   default_gmond_configuration = apr_pstrcat(context, default_gmond_configuration, SOLARIS_SPECIFIC_CONFIGURATION, NULL);
 #endif
