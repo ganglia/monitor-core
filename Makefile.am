@@ -36,5 +36,6 @@ dist-local: README ganglia.html ChangeLog
 dist-hook:
 	rm -f ${distdir}/gmond/machine.c
 
-rpm: dist
-	rpmbuild -ta --target noarch,i386 ganglia-monitor-core-@VERSION@.tar.gz
+rpms: dist
+	CC="gcc296" rpmbuild -ta --target noarch ganglia-@VERSION@.tar.gz 
+	CC="gcc296" rpmbuild -ta ganglia-@VERSION@.tar.gz
