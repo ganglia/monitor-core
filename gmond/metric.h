@@ -155,10 +155,10 @@ KEY(phwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" }
 
 #ifdef LINUX
 ,
-KEY(bytes_out),  1, 30,   40,  50,  70, g_float, "Bs", "%.2f" },
-KEY(bytes_in),   1, 30,   40,  50,  70, g_float, "Bs", "%.2f" },
-KEY(pkts_in), 1, 30,   40,  50,  70, g_float, "s", "%.2f" },
-KEY(pkts_out),   1, 30,   40,  50,  70, g_float, "s", "%.2f" }
+KEY(bytes_out),  1, 30,   40,  50,  70, g_float, "bytes/sec", "%.2f" },
+KEY(bytes_in),   1, 30,   40,  50,  70, g_float, "bytes/sec", "%.2f" },
+KEY(pkts_in), 1, 30,   40,  50,  70, g_float, "packets/sec", "%.2f" },
+KEY(pkts_out),   1, 30,   40,  50,  70, g_float, "packets/sec", "%.2f" }
 
 #endif
 
