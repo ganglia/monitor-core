@@ -20,10 +20,13 @@ pthread_mutex_t rrd_mutex = PTHREAD_MUTEX_INITIALIZER;
 static void inline
 my_mkdir ( const char *dir )
 {
+   pthread_mutex_lock( &rrd_mutex );
    if ( mkdir ( dir, 0755 ) < 0 && errno != EEXIST)
       {
+	 pthread_mutex_unlock(&rrd_mutex);
          err_sys("Unable to mkdir(%s)",dir);
       }
+   pthread_mutex_unlock( &rrd_mutex );
 }
 
 static int
@@ -137,7 +140,6 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
    return RRD_update( rrd, sum, num, process_time );
 }
 
-
 /* Assumes num argument will be NULL for a host RRD. */
 int
 write_data_to_rrd ( const char *source, const char *host, const char *metric, 
@@ -171,8 +173,4 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
    strncat(rrd, ".rrd", PATHSIZE);
 
    return push_data_to_rrd( rrd, sum, num, step, process_time );
-
-   /* Shouldn't get here */
-   return 1;
 }
-
