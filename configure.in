@@ -580,7 +580,6 @@ dnl
 dnl For fsusage.c - disk usage.
 dnl
                 AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
-                GEXEC=true;
                 ;;
 *ia64-*hpux*)		metric_source="hpux.c"
 		CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
@@ -640,9 +639,9 @@ AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
 # Each directory appears on a line of its own (more if needed).
 # The lines should be sorted in the obvious manner.
+#
+# I really wanted gexec in the main dist... but...
 AC_OUTPUT(Makefile ganglia.spec \
-	gauthd/Makefile gauthd/gauthd.init \
-	gexec/Makefile gexec/gexec_server \
 	gmetad/Makefile \
 	gmetric/Makefile \
 	gmond/Makefile \
