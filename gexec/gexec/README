@@ -1,0 +1,38 @@
+gexec 
+  -v verbose
+  -d detatched (indep failures)
+  -n #procs
+  -p prefix_type
+  -P port (will have default, this is for testing)
+  -F tree fanout
+  a.out arg1 arg2 ...
+
+Examples:
+
+  # gexec -n 8 /bin/hostname -f
+  # gexec -d -f 0 -n 8 myob
+  # gexec -d -f 1 -n 8 pcpd
+
+-----------------------------------------------------------------
+
+gexecd
+  -i inetd
+  -P port (will have default, this is for testing)
+
+Examples:
+
+  # gexecd
+  # gexecd -i (run through xinetd)
+  # gexecd -P 3030 (for testing)
+
+-----------------------------------------------------------------
+
+Server selection
+
+API requires that caller pass in nhosts and an array of IPV4
+addresses.  Thus, the server selection policy is independent of the
+gexec system.  The parsing of a string a list of tokens (and total
+count of #tokens) is what token_array will do.  We will use this on
+the GEXEC_SVRS environment variable to get back a list of hostnames/IP
+addresses.  Then, we will run net_hosttoip on each to get 16 byte IPV4
+address as a char * so we can pass it to gexec_spawn.
