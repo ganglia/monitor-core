@@ -9,7 +9,7 @@ sbin_PROGRAMS = gmond
 gmond_SOURCES = gmond.c cmdline.c cmdline.h conf.c conf.h dtd.h metric.h
 
 #monitor.c server.c listen.c cleanup.c \
-#metric.h cmdline.c cmdline.h dtd.h conf.c conf.h
+#metric.h dtd.h 
 # Add -lintl??? for libconfuse on cygwin?
 gmond_LDADD   = $(top_builddir)/lib/libganglia.la \
 	        $(top_builddir)/lib/libgetopthelper.a \
