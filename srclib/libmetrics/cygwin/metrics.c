@@ -823,10 +823,8 @@ proc_run_func( void )
    p = skip_token(p);
    val.uint32 = strtol( p, (char **)NULL, 10 );
 
-   val.uint32--;
-   /* This shouldn't happen.. but it might */
-   if (val.uint32 <0)
-      val.uint32 = 0;
+   if(val.uint32)
+     val.uint32--;/* don't count ourselves? */ 
 
    return val;
 }
