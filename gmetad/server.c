@@ -61,7 +61,6 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
 
    type = getfield(metric->strings, metric->type);
 
-   /* Summarize all numeric metrics */
    tt = in_type_list(type, strlen(type));
    if (!tt) return 0;
 
