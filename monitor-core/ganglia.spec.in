@@ -145,9 +145,11 @@ make
 ## POST gexec-client
 ##
 %post gexec-client
-if [ "$1" = 1 ]; then
-   /etc/init.d/gauthd restart
-   chkconfig --add gauthd
+chkconfig --add gauthd
+if [ "$1" == "1" ]; then
+   /etc/rc.d/init.d/gauthd start
+elif [ "$1" > "1" ]; then
+   /etc/rc.d/init.d/gauthd restart
 fi
 
 
@@ -194,7 +196,6 @@ elif [ "$1" > "1" ]; then
    /etc/rc.d/init.d/gmond restart
 fi
 
-
 ##
 ## PREUN GMETA
 ##
@@ -231,7 +232,6 @@ fi
 %__cp -rf %{_builddir}/%{name}-%{version}/web/* $RPM_BUILD_ROOT/%{web_prefixdir}
 %__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*spec
 
-
 %else
 
 ## Create the directory structure
@@ -255,16 +255,16 @@ fi
 ## FILES GEXEC-CLIENT
 ##
 %files gexec-client
-%defattr(-, root, root)
+%defattr(0755, root, root)
 /usr/bin/gexec
 /usr/sbin/gauthd
-/etc/init.d/gauthd
+/etc/rc.d/init.d/gauthd
 
 ##
 ## FILES GEXEC-SERVER
 ##
 %files gexec-server
-%defattr(-, root, root)
+%defattr(0755, root, root)
 /etc/xinetd.d/gexec_server
 /usr/sbin/gexecd
 
