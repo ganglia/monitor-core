@@ -18,9 +18,9 @@ $tpl->assign("cpu_num", $cpu_num);
 $tpl->assign("localtime", date("Y-m-d H:i", $cluster[LOCALTIME]));
 
 if (!$cpu_num) $cpu_num = 1;
-$cluster_load15 = sprintf("%.0f", ((double) $load_one_sum / $cpu_num) * 100);
+$cluster_load15 = sprintf("%.0f", ((double) $load_fifteen_sum / $cpu_num) * 100);
 $cluster_load5 = sprintf("%.0f", ((double) $load_five_sum / $cpu_num) * 100);
-$cluster_load1 = sprintf("%.0f", ((double) $load_fifteen_sum / $cpu_num) * 100);
+$cluster_load1 = sprintf("%.0f", ((double) $load_one_sum / $cpu_num) * 100);
 $tpl->assign("cluster_load", "$cluster_load15%, $cluster_load5%, $cluster_load1%");
 
 $cluster_url=rawurlencode($clustername);
