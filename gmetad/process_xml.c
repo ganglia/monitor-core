@@ -369,14 +369,20 @@ start (void *data, const char *el, const char **attr)
                   /* Initialize the partial sum lock */
                   source->sum_finished = (pthread_mutex_t*) malloc(sizeof(pthread_mutex_t));
                   pthread_mutex_init(source->sum_finished, NULL);
+
+                  /* Grab the "partial sum" mutex until we are finished summarizing. */
+                  pthread_mutex_lock(source->sum_finished);
                }
             else
                {
                   memcpy(source, hash_datum->data, hash_datum->size);
                   datum_free(hash_datum);
+
                   source->hosts_up = 0;
                   source->hosts_down = 0;
 
+                  /* We need this lock before zeroing metric sums. */
+                  pthread_mutex_lock(source->sum_finished);
                   hash_foreach(source->metric_summary, zero_out_summary, NULL);
                }
 
@@ -410,9 +416,6 @@ start (void *data, const char *el, const char **attr)
                      }
                }
             source->stringslen = edge;
-
-            /* Grab the "partial sum" mutex until we are finished summarizing. */
-            pthread_mutex_lock(source->sum_finished);
 
             break;
 
