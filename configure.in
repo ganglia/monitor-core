@@ -297,6 +297,9 @@ if test "$enable_memcheck" = yes; then
    LDFLAGS="$LDFLAGS -lmpatrol -lbfd -liberty "
 fi
 
+dnl Always use -Wall, even though its annoying. Like eating your vegetables.
+CFLAGS="$CFLAGS -Wall"
+
 dnl Some system-specific stuff ...
 dnl Some operating systems require additional flags in order to get all
 dnl the definitions that we're looking for in some system headers.
