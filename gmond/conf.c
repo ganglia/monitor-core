@@ -287,8 +287,11 @@ static DOTCONF_CB(cb_interfaces)
   return NULL;
 }
 
-static DOTCONF_CB(cb_direction)
+static DOTCONF_CB(cb_action)
 {
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+
+  c->channels[c->current_channel]->action = conf_strdup( cmd->data.str );
   return NULL;
 }
 
@@ -576,7 +579,7 @@ print_conf( gmond_config_t *config )
            printf("\t\t%s\n", c->interfaces[j]);
          }
        printf("\tThe TTL is set to %d\n", c->ttl);
-       printf("\tDirection is set to %s\n", c->direction);
+       printf("\tAction is set to %s\n", c->action);
      }
    printf("mcast_threads is %ld\n", config->mcast_threads);
    printf("xml_port is %s\n", config->xml_port);
@@ -638,7 +641,7 @@ get_gmond_config( char *conffile )
          {"address", ARG_STR, cb_address, &gmond_config, CHANNEL_SECTION},
          {"port", ARG_STR, cb_port, &gmond_config, CHANNEL_SECTION},
          {"interfaces", ARG_LIST, cb_interfaces, &gmond_config, CHANNEL_SECTION},
-         {"direction", ARG_STR, cb_direction, &gmond_config, CHANNEL_SECTION},
+         {"action", ARG_STR, cb_action, &gmond_config, CHANNEL_SECTION},
          {"ttl", ARG_INT, cb_ttl, &gmond_config, CHANNEL_SECTION},
 
          {"name", ARG_STR, cb_name, &gmond_config, CTX_ALL},
