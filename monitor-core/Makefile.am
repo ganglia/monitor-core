@@ -1,12 +1,12 @@
 # $Id$
 #
-#if GEXEC_SUPPORTED
-#gexec_directories = gauthd gexec
-#libe_directory = libe
-#endif
+if GEXEC_SUPPORTED
+gexec_dirs = gauthd gexec
+libe_dir = libe
+endif
 
 # web is last since on 'make install' we echo a message
-SUBDIRS = libunp libhttpd lib tests gmetad gmond gmetric web
+SUBDIRS = libunp ${libe_dir} libhttpd lib ${gexec_dirs} tests gmetad gmond gmetric web
 
 EXTRA_DIST = config ganglia.spec ganglia.pod ganglia.html mans
 
