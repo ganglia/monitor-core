@@ -23,6 +23,7 @@ well-defined XML format.
 %package gmetad
 Summary: Ganglia Meta daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
+Obsoletes: ganglia-monitor-core
 
 %description gmetad
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -36,6 +37,7 @@ to form a monitoring grid. It also keeps metric history using the RRD tool.
 %package gmond
 Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
+Obsoletes: ganglia-monitor-core
 
 %description gmond
 Ganglia is a scalable, real-time monitoring and execution environment
