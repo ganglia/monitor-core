@@ -127,22 +127,26 @@ static DOTCONF_CB(cb_rrd_rootdir)
 {
    debug_msg("Setting the RRD Rootdir to %s", cmd->data.str);
    rrd_rootdir = strdup ( cmd->data.str );
+   return NULL;
 }
 
 static DOTCONF_CB(cb_setuid_username)
 {
    debug_msg("Setting setuid username to %s", cmd->data.str);
    setuid_username = strdup( cmd->data.str );
+   return NULL;
 }
 
 static DOTCONF_CB(cb_setuid)
 {
    should_setuid = cmd->data.value;
+   return NULL;
 }
 
 static FUNC_ERRORHANDLER(errorhandler)
 {
    err_quit("gmetad config file error: %s\n", msg);
+   return NULL;
 }
 
 static configoption_t gmetad_options[] =
@@ -194,5 +198,6 @@ number_of_datasources ( char *config_file )
                number_of_sources++;
             }
       }
+   dotconf_cleanup(configfile);
    return number_of_sources;
 }
