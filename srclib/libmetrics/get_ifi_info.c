@@ -1,3 +1,13 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_SYS_SOCKIO_H
+/* For older versions of Solaris... */
+#include <sys/sockio.h>
+#endif
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
