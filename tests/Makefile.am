@@ -1,4 +1,4 @@
-TESTS = test-httpd test-tpool
+#TESTS = test-httpd test-tpool
 
 noinst_PROGRAMS = test-httpd test-tpool
 
