@@ -680,6 +680,34 @@ To get help with the commandline options, simply pass C<gstat> the C<--help> opt
 
 =over 4
 
+=item B<Removing a host from the list>
+
+A common problem that people have is not being able to remove a host from the ganglia
+web frontend.  
+
+Here is a common scenario
+
+=over 4
+
+=item 1.
+All hosts in a cluster are multicasting on the ganglia channel.
+
+=item 2.
+One of the hosts fails or is moved for whatever reason.
+
+=item 3.
+All the hosts in the cluster report that the host is "dead" or "expired".
+
+=item 4.
+The sysadmin wants to removed this host from the "dead" list.
+
+=back
+
+Unfortunately there is currently no nice way to remove a single dead host from the list.
+All data in gmond is soft state so you will need to restart all gmond and gmetad processes.
+It is important to note that ALL dead hosts will be flushed from the record by restarting
+the processes (since they have to hear the host at least once to know it is expired).
+
 =item B<Solaris, IRIX, Tru64>
 
 Here is an email from Steve Wagner about the state of the ganglia on Solaris, 
