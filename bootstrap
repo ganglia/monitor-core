@@ -1,8 +1,5 @@
 #!/bin/sh
 # $Id$
-if [ -d ../autotools ]; then
-	PATH=../autotools/bin:${PATH}
-fi
 echo "Running make distclean"  
 make distclean   
 echo "Running aclocal"  &&

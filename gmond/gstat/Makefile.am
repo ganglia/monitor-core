@@ -1,4 +1,5 @@
+AM_CFLAGS = -I../../lib
+
 bin_PROGRAMS = gstat
 gstat_SOURCES =  gstat.c cmdline.c cmdline.h
-gstat_LDADD   = $(top_builddir)/lib/libganglia.la $(top_builddir)/lib/libgetopthelper.a -lexpat -lz
-gstat_LDFLAGS = -static
+gstat_LDADD   =  ../../lib/.libs/libganglia.a ../../lib/libgetopthelper.a

@@ -1,12 +1,14 @@
 # $Id$
 #
-if GEXEC_SUPPORTED
-gexec_dirs = gauthd gexec
-libe_dir = libe
+if BUILD_GMETAD
+GMETAD_SUBDIR = gmetad
+else
+GMETAD_SUBDIR = 
 endif
 
-# web is last since on 'make install' we echo a message
-SUBDIRS = libunp ${libe_dir} lib ${gexec_dirs} gmetad gmond gmetric web
+SUBDIRS = lib $(GMETAD_SUBDIR) gmond gmetric
+
+DIST_SUBDIRS = lib gmetad gmond gmetric
 
 EXTRA_DIST = config ganglia.spec ganglia.pod ganglia.html mans
 
@@ -35,7 +37,3 @@ dist-local: README ganglia.html ChangeLog
 # This is a symbolic link that needs to be clean'd out
 dist-hook:
 	rm -f ${distdir}/gmond/machine.c
-
-rpms: dist
-	CC="gcc296" rpmbuild -ta --target noarch ganglia-@VERSION@.tar.gz 
-	CC="gcc296" rpmbuild -ta ganglia-@VERSION@.tar.gz
