@@ -23,6 +23,7 @@ typedef struct
       char *host;
       char *metric;
       char *metric_val;
+      data_source_list_t *ds;
    }
 xml_data_t;
 
@@ -152,10 +153,10 @@ start (void *data, const char *el, const char **attr)
         case CLUSTER_TAG:
 
            /* Flush the sums */
-           memset( xml_data->sum, 0, MAX_METRIC_HASH_VALUE);
+           memset( xml_data->sum, 0, MAX_METRIC_HASH_VALUE * sizeof( long double));
 
            /* Flush the nums */
-           memset( xml_data->num, 0, MAX_METRIC_HASH_VALUE);
+           memset( xml_data->num, 0, MAX_METRIC_HASH_VALUE * sizeof( unsigned int));
 
            for(i = 0; attr[i] ; i+=2)
               {
@@ -186,8 +187,8 @@ end (void *data, const char *el)
   struct ganglia_metric *gm;
   int len;
   struct xml_tag *xt;
-  char sum[64];
-  char num[64];
+  char sum[512];
+  char num[512];
 
   if(! (xt = in_xml_list ( (char *)el, strlen( el ))) )
      return;
@@ -196,11 +197,16 @@ end (void *data, const char *el)
      {
         /* </GANGLIA_XML> */
         case GANGLIA_XML_TAG:
-           
+
+           /* Save to source */
+           memcpy( xml_data->ds->num, xml_data->overall_num, MAX_METRIC_HASH_VALUE * sizeof(unsigned int) );
+           memcpy( xml_data->ds->sum, xml_data->overall_sum, MAX_METRIC_HASH_VALUE * sizeof(long double) );        
+
            break;
 
         /* </CLUSTER> */
         case CLUSTER_TAG:
+
            for ( i = 0; i < MAX_METRIC_HASH_VALUE; i++ )
               {
                  len = strlen(metrics[i].name);
@@ -216,8 +222,18 @@ end (void *data, const char *el)
                         sprintf( num, "%d", xml_data->num[i] );
 
                         /* Save the data to a round robin database */
-                        write_data_to_rrd( (char *)(xml_data->cluster), NULL, (char *)metrics[i].name, sum, num, "15");
-                        debug_msg("SAVE CLUSTER SUMMARY INFORMATION %s sum=%s num=%s", metrics[i].name, sum, num);
+                        if(write_data_to_rrd( (char *)(xml_data->cluster), NULL, (char *)metrics[i].name, sum, num, "15"))
+                           {
+                              /* Pass the error on to save_to_rrd */
+                              xml_data->rval = 1;
+                              return;
+                           }
+
+                        /* Increment the overall sum and num */
+                        xml_data->overall_sum[i] +=  xml_data->sum[i];
+                        xml_data->overall_num[i] +=  xml_data->num[i];
+
+                        debug_msg("OVERALL %s overall_sum = %Lf overall_num = %d", metrics[i].name, xml_data->overall_sum[i], xml_data->overall_num[i]);
                     }
               }
            break;
@@ -234,6 +250,9 @@ process_xml(data_source_list_t *d, char *buf)
    xml_data_t xml_data;
 
    memset( &xml_data, 0, sizeof( xml_data ));
+
+   /* Set the pointer to the data source record */
+   xml_data.ds = d;
 
    xml_parser = XML_ParserCreate (NULL);
    if (! xml_parser)
