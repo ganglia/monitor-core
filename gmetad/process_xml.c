@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ganglia/hash.h>
-#include <ganglia/xmlparse.h>
+#include <sys/time.h>
+#include "expat.h"
 #include "gmetad.h"
+
 
 
 extern int write_data_to_rrd( const char *source, const char *host, 

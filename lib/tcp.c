@@ -22,6 +22,9 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
+#include <unistd.h>
+
+#include "error.h"
 #include "net.h"
 
 g_tcp_socket*
@@ -78,6 +81,7 @@ g_tcp_socket_new (const g_inet_addr* addr)
   return s;
 }
 
+#if 0
 static void
 g_tcp_socket_ref(g_tcp_socket* s)
 {
@@ -86,6 +90,7 @@ g_tcp_socket_ref(g_tcp_socket* s)
 
   ++s->ref_count;
 }
+#endif
 
 static void
 g_tcp_socket_unref(g_tcp_socket* s)
@@ -132,7 +137,7 @@ g_tcp_socket_server_new_interface (const g_inet_addr* iface)
   g_tcp_socket* s;
   struct sockaddr_in* sa_in;
   socklen_t socklen;
-  int flags, rval;
+  int rval;
   const int on = 1;
 
   /* Create socket */

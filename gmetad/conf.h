@@ -2,7 +2,7 @@
 #define CONFIG_H 1
 #include <stdlib.h>
 #include <string.h>
-#include <ganglia/llist.h>
+#include "llist.h"
 
 typedef struct
    {
