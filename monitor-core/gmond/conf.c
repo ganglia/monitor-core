@@ -402,7 +402,7 @@ set_defaults(gmond_config_t *config )
    return 0;
 }
 
-void
+static void
 print_conf( gmond_config_t *config )
 {
    int i;
