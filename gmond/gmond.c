@@ -369,10 +369,12 @@ main ( int argc, char *argv[] )
       gmond_config.location = strdup(args_info.location_arg);
    }
 
-   /*
-   print_gmond_config();
-   */
-   /* in machine.c */
+   debug_level = gmond_config.debug_level;
+   if(!args_info.foreground_flag && gmond_config.daemonize && !debug_level)
+     {
+       daemon_init ( argv[0], 0);
+     }
+
    initval = metric_init();
    if ( initval.int32 <0)
       {
@@ -381,12 +383,6 @@ main ( int argc, char *argv[] )
 
    if(!gmond_config.no_setuid)
       become_a_nobody(gmond_config.setuid);
-
-   debug_level = gmond_config.debug_level;
-   if(!args_info.foreground_flag && gmond_config.daemonize && !debug_level)
-     {
-       daemon_init ( argv[0], 0);
-     }
 
    debug_msg("pthread_attr_init");
    pthread_attr_init( &attr );
