@@ -51,10 +51,23 @@ static cfg_opt_t globals_opts[] = {
   CFG_END()
 };
 
+static cfg_opt_t access_opts[] = {
+  CFG_STR("action", NULL, CFGF_NONE),
+  CFG_STR("ip", NULL, CFGF_NONE),
+  CFG_STR("mask", NULL, CFGF_NONE),
+  CFG_END()
+};
+
+static cfg_opt_t acl_opts[] = {
+  CFG_STR("default","allow", CFGF_NONE),
+  CFG_SEC("access", access_opts, CFGF_MULTI ),
+  CFG_END()
+}; 
+
 static cfg_opt_t udp_send_channel_opts[] = {
   CFG_STR("mcast_join", NULL, CFGF_NONE),
   CFG_STR("mcast_if", NULL, CFGF_NONE),
-  CFG_STR("ip", NULL, CFGF_NONE ),
+  CFG_STR("host", NULL, CFGF_NONE ),
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_END()
 };
@@ -64,8 +77,7 @@ static cfg_opt_t udp_recv_channel_opts[] = {
   CFG_STR("bind", NULL, CFGF_NONE ),
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_STR("mcast_if", NULL, CFGF_NONE),
-  CFG_STR("allow_ip", NULL, CFGF_NONE),
-  CFG_STR("allow_mask", NULL, CFGF_NONE),
+  CFG_SEC("acl", acl_opts, CFGF_NONE), 
   CFG_END()
 };
 
@@ -73,8 +85,7 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
   CFG_STR("bind", NULL, CFGF_NONE ),
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_STR("interface", NULL, CFGF_NONE),
-  CFG_STR("allow_ip", NULL, CFGF_NONE),
-  CFG_STR("allow_mask", NULL, CFGF_NONE),
+  CFG_SEC("acl", acl_opts, CFGF_NONE),
   CFG_INT("timeout", 0, CFGF_NONE),
   CFG_END()
 };
@@ -86,12 +97,10 @@ static cfg_opt_t metric_opts[] = {
 };
 
 static cfg_opt_t collection_group_opts[] = {
-  CFG_STR("name", NULL, CFGF_NONE),
   CFG_SEC("metric", metric_opts, CFGF_MULTI),
   CFG_BOOL("collect_once", 0, CFGF_NONE),  
   CFG_INT("collect_every", 60, CFGF_NONE),    
   CFG_INT("time_threshold", 3600, CFGF_NONE),    /* tmax */
-  CFG_INT("lifetime", 0, CFGF_NONE),             /* dmax */
   CFG_END()
 };
 
@@ -526,21 +535,21 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
   for(i = 0; i< num_udp_send_channels; i++)
     {
       cfg_t *udp_send_channel;
-      char *mcast_join, *mcast_if, *ip;
+      char *mcast_join, *mcast_if, *host;
       int port;
       apr_socket_t *socket = NULL;
       apr_pool_t *pool = NULL;
 
       udp_send_channel = cfg_getnsec( config, "udp_send_channel", i);
-      ip             = cfg_getstr( udp_send_channel, "ip" );
+      host           = cfg_getstr( udp_send_channel, "host" );
       mcast_join     = cfg_getstr( udp_send_channel, "mcast_join" );
       mcast_if       = cfg_getstr( udp_send_channel, "mcast_if" );
       port           = cfg_getint( udp_send_channel, "port");
 
-      debug_msg("udp_send_channel mcast_join=%s mcast_if=%s ip=%s port=%d\n",
+      debug_msg("udp_send_channel mcast_join=%s mcast_if=%s host=%s port=%d\n",
 		  mcast_join? mcast_join:"NULL", 
 		  mcast_if? mcast_if:"NULL",
-		  ip,
+		  host,
 		  port);
 
       /* Create a subpool */
@@ -561,11 +570,11 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
       else
 	{
           /* Create a UDP socket */
-          socket = create_udp_client( pool, ip, port );
+          socket = create_udp_client( pool, host, port );
           if(!socket)
             {
               fprintf(stderr,"Unable to create UDP client for %s:%d. Exiting.\n",
-		      ip? ip: "NULL", port);
+		      host? host: "NULL", port);
 	      exit(1);
 	    }
 	}

@@ -36,7 +36,7 @@ CHANGE_LOG_GEN_FLAGS = -t -r -b --accum -I ChangeLog --gmt --prune
 
 ChangeLog::
 	touch ChangeLog
-	$(CHANGE_LOG_GEN_BIN) $(CHANGE_LOG_GEN_FLAGS)
+#	$(CHANGE_LOG_GEN_BIN) $(CHANGE_LOG_GEN_FLAGS)
 
 CLEANFILES = ganglia.sub pod2htm*
 
