@@ -32,7 +32,7 @@ start (void *data, const char *el, const char **attr)
 {
   register int i;
   xml_data_t *xml_data = (xml_data_t *)data;
-  int tn, tmax, index, is_volatile, is_numeric, len;
+  int tn, tmax, index, is_volatile, is_numeric, len, blessed;
   struct ganglia_metric *gm;
   struct xml_tag *xt;
 
@@ -48,16 +48,19 @@ start (void *data, const char *el, const char **attr)
 
         case METRIC_TAG:
 
-           tn          = 0;
+           tn          = 999999;
            tmax        = 0;
            is_volatile = 0;
            is_numeric  = 0;
+           blessed     = 0;
 
            for(i = 0; attr[i] ; i+=2)
               {
                  /* Only process the XML tags that gmetad is interested in */
                  if(!( xt = in_xml_list ( (char *)attr[i], strlen(attr[i]))) )
                     continue;
+                 else   
+                    blessed = 1;
 
                  switch( xt->tag )
                     {
@@ -91,8 +94,11 @@ start (void *data, const char *el, const char **attr)
                     }
               }
  
-           /* Only process fresh data, volatile, numeric data */
-           if(! ((tn < tmax *4) && is_volatile && is_numeric) )
+           /* Only process fresh data, volatile, numeric data (or blessed) */
+           if ( tn > tmax*4 )
+              return;
+
+           if( !( (is_volatile && is_numeric) || blessed))
               return;
 
            if( gm = in_metric_list( xml_data->metric, strlen(xml_data->metric)) )

@@ -4,7 +4,7 @@
 /* Included for the metric_tyep definition */
 #include <gmetad.h>
 
-#define TOTAL_KEYWORDS 30
+#define TOTAL_KEYWORDS 32
 #define MIN_WORD_LENGTH 6
 #define MAX_WORD_LENGTH 13
 #define MIN_HASH_VALUE 6
@@ -57,8 +57,8 @@ metric_hash (str, len)
 
 static unsigned char lengthtable[] =
   {
-     0,  0,  0,  0,  0,  0,  6,  0,  0,  9, 10,  0,  0,  0,
-     9, 10,  6,  0,  8,  9,  0, 11,  0,  8,  0,  0,  8,  0,
+     0,  0,  0,  0,  0,  0,  6,  7,  0,  9, 10,  0,  0,  0,
+     9, 10,  6,  0,  8,  9,  0, 11,  0,  8,  9,  0,  8,  0,
      8,  0, 10,  8,  9, 10,  9,  0, 13, 10, 11,  0,  7, 12,
      0, 10,  0,  0,  0,  8,  0,  0,  8,  0,  0,  0,  7,  0,
      0,  0,  0,  0, 10,  9,  8, 10
@@ -68,7 +68,8 @@ struct ganglia_metric metrics[] =
   {
     {"", 0}, {"", 0}, {"", 0}, {"", 0}, {"", 0}, {"", 0},
     {"wcache", FLOAT},
-    {"", 0}, {"", 0},
+    {"cpu_num", UINT32},
+    {"", 0},
     {"load_five", FLOAT},
     {"lwrite_sec", FLOAT},
     {"", 0}, {"", 0}, {"", 0},
@@ -82,7 +83,8 @@ struct ganglia_metric metrics[] =
     {"mem_buffers", UINT32},
     {"", 0},
     {"load_one", FLOAT},
-    {"", 0}, {"", 0},
+    {"mem_total", UINT32},
+    {"", 0},
     {"cpu_nice", FLOAT},
     {"", 0},
     {"cpu_user", FLOAT},

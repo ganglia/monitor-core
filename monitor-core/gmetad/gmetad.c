@@ -122,21 +122,19 @@ main ( int argc, char *argv[] )
       }
 
    /* Get the real number of data sources later */
-   sources = hash_create( num_sources + 5 );
+   sources = hash_create( num_sources + 10 );
    if (! sources )
       {
          err_quit("Unable to create sources hash\n");
       }
 
-   xml = hash_create( num_sources + 5 );
+   xml = hash_create( num_sources + 10 );
    if (! xml)
       {
          err_quit("Unable to create XML hash\n");
       }
 
    parse_config_file ( args_info.conf_arg );
-
-   debug_msg("THERE ARE %d sources", source_index );
 
    /* The rrd_rootdir must be writable by the gmetad process */
    if( should_setuid )
@@ -180,6 +178,11 @@ main ( int argc, char *argv[] )
          printf("Sources are ...\n");
          hash_foreach( sources, print_sources, NULL);
       }
+   else
+      {
+         daemon_init ( argv[0], 0);
+      }
+
 
    server_socket = g_tcp_socket_server_new( xml_port );
    if (server_socket == NULL)
