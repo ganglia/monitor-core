@@ -162,6 +162,12 @@ main ( int argc, char *argv[] )
    /*
    print_gmond_config();
    */
+   /* in machine.c */
+   initval = metric_init();
+   if ( initval.int32 <0)
+      {
+         err_quit("metric_init() returned an error");
+      }
 
    if(!gmond_config.no_setuid)
       become_a_nobody(gmond_config.setuid);
@@ -267,13 +273,6 @@ main ( int argc, char *argv[] )
             }
          debug_msg("multicasting on channel %s %d", 
 		    gmond_config.mcast_channel, gmond_config.mcast_port);
-
-         /* in machine.c */
-         initval = metric_init();
-         if ( initval.int32 <0)
-            {
-               err_quit("monitor_init() returned an error");
-            }
 
          pthread_create(&tid, &attr, monitor_thread, NULL);
          debug_msg("created monitor thread");
