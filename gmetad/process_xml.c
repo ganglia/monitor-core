@@ -150,19 +150,13 @@ fillmetric(const char** attr, Metric_t *metric, const char* type, const int old)
                            /* We store string values in the 'valstr' field. */
                            break;
                      }
-                  metric->valstr = edge;
-                  strcpy(metric->strings + edge, metricval);
-                  edge = edge + strlen(metricval) + 1;
+                  metric->valstr = addstring(metric->strings, &edge, metricval);
                   break;
                case TYPE_TAG:
-                  metric->type = edge;
-                  strcpy(metric->strings + edge, attr[i+1]);
-                  edge = edge + strlen(attr[i+1]) + 1;
+                  metric->type = addstring(metric->strings, &edge, attr[i+1]);
                   break;
                case UNITS_TAG:
-                  metric->units = edge;
-                  strcpy(metric->strings + edge, attr[i+1]);
-                  edge = edge + strlen(attr[i+1]) + 1;
+                  metric->units = addstring(metric->strings, &edge, attr[i+1]);
                   break;
                case TN_TAG:
                   metric->tn = atoi(attr[i+1]);
@@ -171,14 +165,10 @@ fillmetric(const char** attr, Metric_t *metric, const char* type, const int old)
                   metric->tmax = atoi(attr[i+1]);
                   break;
                case SLOPE_TAG:
-                  metric->slope = edge;
-                  strcpy(metric->strings + edge, attr[i+1]);
-                  edge = edge + strlen(attr[i+1]) + 1;
+                  metric->slope = addstring(metric->strings, &edge, attr[i+1]);
                   break;
                case SOURCE_TAG:
-                  metric->source = edge;
-                  strcpy(metric->strings + edge, attr[i+1]);
-                  edge = edge + strlen(attr[i+1]) + 1;
+                  metric->source = addstring(metric->strings, &edge, attr[i+1]);
                   break;
                case NUM_TAG:
                   metric->num = atoi(attr[i+1]);
@@ -305,9 +295,7 @@ start (void *data, const char *el, const char **attr)
                         switch( xt->tag )
                            {
                               case AUTHORITY_TAG:
-                                 source->authority_ptr = edge;
-                                 strcpy(source->strings + edge, attr[i+1]);
-                                 edge += strlen(attr[i+1]) + 1;
+                                 source->authority_ptr = addstring(source->strings, &edge, attr[i+1]);
                                  break;
                               case LOCALTIME_TAG:
                                  source->localtime = strtoul(attr[i+1], (char **)NULL, 10);
@@ -409,19 +397,13 @@ start (void *data, const char *el, const char **attr)
                            source->localtime = strtoul(attr[i+1], (char **)NULL, 10);
                            break;
                         case OWNER_TAG:
-                           source->owner = edge;
-                           strcpy(source->strings + edge, attr[i+1]);
-                           edge += strlen(attr[i+1]) + 1;
+                           source->owner = addstring(source->strings, &edge, attr[i+1]);
                            break;
                         case LATLONG_TAG:
-                           source->latlong = edge;
-                           strcpy(source->strings + edge, attr[i+1]);
-                           edge += strlen(attr[i+1]) + 1;
+                           source->latlong = addstring(source->strings, &edge, attr[i+1]);
                            break;
                         case URL_TAG:
-                           source->url = edge;
-                           strcpy(source->strings + edge, attr[i+1]);
-                           edge += strlen(attr[i+1]) + 1;
+                           source->url = addstring(source->strings, &edge, attr[i+1]);
                            break;
                         default:
                            break;
@@ -543,9 +525,7 @@ start (void *data, const char *el, const char **attr)
                   switch( xt->tag )
                      {
                         case IP_TAG:
-                           host->ip = edge;
-                           strcpy(host->strings + edge, attr[i+1]);
-                           edge += strlen(attr[i+1]) + 1;
+                           host->ip = addstring(host->strings, &edge, attr[i+1]);
                            break;
                         case TN_TAG:
                            host->tn = strtoul(attr[i+1], (char **)NULL, 10);
@@ -557,9 +537,7 @@ start (void *data, const char *el, const char **attr)
                            host->dmax = strtoul(attr[i+1], (char **)NULL, 10);
                            break;
                         case LOCATION_TAG:
-                           host->location = edge;
-                           strcpy(host->strings + edge, attr[i+1]);
-                           edge += strlen(attr[i+1]) + 1;
+                           host->location = addstring(host->strings, &edge, attr[i+1]);
                            break;
                         case REPORTED_TAG:
                            host->reported = strtoul(attr[i+1], (char **)NULL, 10);
@@ -605,10 +583,10 @@ start (void *data, const char *el, const char **attr)
                   switch( xt->tag )
                      {
                         case UP_TAG:
-                           xmldata->source.hosts_up = strtoul(attr[i+1], (char **)NULL, 10);
+                           xmldata->source.hosts_up += strtoul(attr[i+1], (char **)NULL, 10);
                            break;
                         case DOWN_TAG:
-                           xmldata->source.hosts_down = strtoul(attr[i+1], (char **)NULL, 10);
+                           xmldata->source.hosts_down += strtoul(attr[i+1], (char **)NULL, 10);
                            break;
                         default:
                            break;

@@ -82,6 +82,28 @@ getfield(char* buf, short int index)
    return (char*) buf+index;
 }
 
+/* A bit slower than doing things by hand, but much safer. Guards
+ * against memory overflows.
+ */
+int
+addstring(char *strings, int *edge, char *s)
+{
+	int e = *edge;
+	int end = e + strlen(s) + 1;
+
+	/* I wish C had real exceptions. */
+	if (e > FRAMESIZE || end > FRAMESIZE)
+	{
+		err_msg("Field is too big!!");
+		return -1;
+	}
+
+	strcpy(strings + e, s);
+	*edge = end;
+
+	return e;
+}
+
 
 /* Zeroes out every metric value in a summary hash table. */
 int
