@@ -148,9 +148,11 @@ cleanup_configuration_file(void)
 static void
 process_configuration_file(void)
 {
+  /* Make sure we process ~ in the filename if the shell doesn't */
+  char *tilde_expanded = cfg_tilde_expand( args_info.conf_arg );
   config_file = cfg_init( gmond_opts, CFGF_NOCASE );
 
-  switch( cfg_parse( config_file, args_info.conf_arg ) )
+  switch( cfg_parse( config_file, tilde_expanded ) )
     {
     case CFG_FILE_ERROR:
       /* Unable to open file so we'll go with the configuration defaults */
@@ -162,7 +164,7 @@ process_configuration_file(void)
 	}
       /* .. otherwise use our default configuration */
       fprintf(stderr,"Using defaults.\n");
-      if(cfg_parse_buf(config_file, DEFAULT_CONFIGURATION) == CFG_PARSE_ERROR)
+      if(cfg_parse_buf(config_file, DEFAULT_GMOND_CONFIGURATION) == CFG_PARSE_ERROR)
 	{
 	  fprintf(stderr,"Your default configuration buffer failed to parse. Exiting.\n");
           exit(1);
@@ -688,7 +690,7 @@ setup_udp_send_array( void )
       if( mcast_join )
 	{
 	  /* We'll be listening on a multicast channel */
-	  socket = NULL; /* create_mcast_client(...); */
+	  socket = create_mcast_client(pool, mcast_join, port, 0);
 	  if(!socket)
 	    {
 	      fprintf(stderr,"Unable to join multicast channel %s:%d. Exiting\n",
@@ -1430,7 +1432,7 @@ main ( int argc, char *argv[] )
 
   if(args_info.default_config_flag)
     {
-      fprintf(stdout, DEFAULT_CONFIGURATION);
+      fprintf(stdout, DEFAULT_GMOND_CONFIGURATION);
       fflush( stdout );
       exit(0);
     }
@@ -1475,8 +1477,7 @@ main ( int argc, char *argv[] )
 	{
           for(; mute || now < next_collection;)
 	    {
-	      /* TODO: merge all receive channels into one poll */
-	      poll_listen_channels(next_collection - now);
+	      poll_listen_channels(mute? -1: next_collection - now);
 	      now = apr_time_now();
     	    }
 	}
