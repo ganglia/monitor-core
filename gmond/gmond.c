@@ -360,10 +360,10 @@ main ( int argc, char *argv[] )
       become_a_nobody(gmond_config.setuid);
 
    debug_level = gmond_config.debug_level;
-   if (! debug_level )
-      {
-         daemon_init ( argv[0], 0);
-      }
+   if(!args_info.foreground_flag && gmond_config.daemonize && !debug_level)
+     {
+       daemon_init ( argv[0], 0);
+     }
 
    debug_msg("pthread_attr_init");
    pthread_attr_init( &attr );

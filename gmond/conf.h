@@ -35,6 +35,7 @@ typedef struct
       long int no_gexec;
       long int all_trusted;
       long int host_dmax;
+      long int daemonize;
 } gmond_config_t;
 
 int get_gmond_config( char *conffile);

@@ -188,6 +188,13 @@ static DOTCONF_CB(cb_debug_level)
    return NULL;
 }
 
+static DOTCONF_CB(cb_daemonize)
+{
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+  c->daemonize = cmd->data.value;
+  return NULL;
+}
+
 static DOTCONF_CB(cb_no_setuid)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
@@ -252,7 +259,7 @@ set_defaults(gmond_config_t *config )
    config->no_gexec = 0;
    config->all_trusted = 0;
    config->host_dmax = 0;
-
+   config->daemonize = 1;  /* by default we daemonize */
    return 0;
 }
 
@@ -323,6 +330,7 @@ get_gmond_config( char *conffile )
          {"setuid", ARG_STR, cb_setuid, &gmond_config, 0},
          {"no_gexec", ARG_TOGGLE, cb_no_gexec, &gmond_config, 0},
          {"all_trusted", ARG_TOGGLE, cb_all_trusted, &gmond_config, 0},
+	 {"daemonize", ARG_TOGGLE, cb_daemonize, &gmond_config, 0},
          {"host_dmax", ARG_INT, cb_host_dmax, &gmond_config, 0},
          LAST_OPTION
       };
