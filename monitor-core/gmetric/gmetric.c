@@ -139,10 +139,10 @@ int main ( int argc, char **argv )
          err_ret("xdr_bytes() for name failed");
          return SYNAPSE_FAILURE;
       }
-   rval = xdr_bytes(&xhandle, (char **)&(value.data), &(value.size), MAX_VAL_LEN);
+   rval = xdr_bytes(&xhandle, (char **)&(value.data), &(value.size), FRAMESIZE);
    if ( rval == 0 )
       {
-         err_ret("xdr_bytes() for value failed");
+         err_ret("xdr_bytes() for metric value failed. Perhaps value is longer than max of %d characters", FRAMESIZE);
          return SYNAPSE_FAILURE;
       }
    rval = xdr_bytes(&xhandle, (char **)&(units.data), &(units.size), MAX_UNITS_LEN);
