@@ -75,6 +75,7 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
   CFG_STR("interface", NULL, CFGF_NONE),
   CFG_STR("allow_ip", NULL, CFGF_NONE),
   CFG_STR("allow_mask", NULL, CFGF_NONE),
+  CFG_INT("timeout", 0, CFGF_NONE),
   CFG_END()
 };
 

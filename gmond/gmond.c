@@ -72,6 +72,7 @@ typedef enum Ganglia_channel_types Ganglia_channel_types;
 struct Ganglia_channel {
   Ganglia_channel_types type;
   apr_ipsubnet_t *acl;
+  int timeout;
 };
 typedef struct Ganglia_channel Ganglia_channel;
 
@@ -301,6 +302,10 @@ setup_listen_channels_pollset( void )
       /* Mark this channel as a udp_recv_channel */
       channel->type = UDP_RECV_CHANNEL;
 
+      /* Make sure this socket never blocks */
+      channel->timeout = 0;
+      apr_socket_timeout_set( socket, channel->timeout);
+
       /* Save the ACL information */
       if(allow_ip)
 	{
@@ -331,7 +336,7 @@ setup_listen_channels_pollset( void )
     {
       cfg_t *tcp_accept_channel = cfg_getnsec( config_file, "tcp_accept_channel", i);
       char *bindaddr, *allow_ip, *allow_mask, *interface;
-      int port;
+      int port, timeout;
       apr_socket_t *socket = NULL;
       apr_ipsubnet_t *ipsub = NULL;
       apr_pollfd_t socket_pollfd;
@@ -342,6 +347,7 @@ setup_listen_channels_pollset( void )
       allow_ip       = cfg_getstr( tcp_accept_channel, "allow_ip");
       allow_mask     = cfg_getstr( tcp_accept_channel, "allow_mask");
       interface      = cfg_getstr( tcp_accept_channel, "interface"); 
+      timeout        = cfg_getint( tcp_accept_channel, "timeout");
 
       debug_msg("tcp_accept_channel bind=%s port=%d",
 		  bindaddr? bindaddr: "NULL", port);
@@ -370,6 +376,9 @@ setup_listen_channels_pollset( void )
 	}
       
       channel->type = TCP_ACCEPT_CHANNEL;
+
+      /* Save the timeout for this socket */
+      channel->timeout = timeout;
 
       /* Save the ACL information */
       if(allow_ip)
@@ -948,6 +957,9 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
     {
       goto close_accept_socket;
     }
+
+  /* Set the timeout for writing to the client */
+  apr_socket_timeout_set( client, channel->timeout);
 
   apr_socket_addr_get(&remotesa, APR_REMOTE, client);
   /* This function is in ./lib/apr_net.c and not APR. The
