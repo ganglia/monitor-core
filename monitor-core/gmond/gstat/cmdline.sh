@@ -1,10 +1,10 @@
-#!/usr/local/bin/gengetopt --input
+#!/usr/bin/gengetopt --input
 # See http://www.gnu.org/software/gengetopt/gengetopt.html for details
 
 package "gstat"
 purpose "The Ganglia Status Client (gstat) connects with a 
-Ganglia Monitoring Daemon (gmond) and output a load-balanced list 
-of cluster hosts"
+Ganglia Monitoring Daemon (gmond) and outputs a load-balanced list 
+of hosts"
 
 option "all" a "List all hosts.  Not just hosts running gexec" flag off
 option "dead" d "Print only the hosts which are dead" flag off
