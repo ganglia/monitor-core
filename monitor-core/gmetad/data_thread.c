@@ -10,7 +10,7 @@ extern int debug_level;
 
 extern hash_t *xml;
 
-extern process_xml(unsigned int, char *, char *);
+extern process_xml(data_source_list_t *, char *);
 
 void *
 data_thread ( void *arg )
@@ -28,7 +28,7 @@ data_thread ( void *arg )
  
    if(debug_level)
       {
-         fprintf(stderr,"%d is monitoring [%s] data source index[%d]\n", pthread_self(), d->name, d->index);
+         fprintf(stderr,"%d is monitoring [%s] data source\n", pthread_self(), d->name);
          for(i = 0; i < d->num_sources; i++)
             {
                addr = d->sources[i];
@@ -133,7 +133,7 @@ data_thread ( void *arg )
 
 
          /* Parse the buffer */
-         rval = process_xml(d->index, d->name, buf );
+         rval = process_xml(d, buf );
          if(rval)
             {
                debug_msg("save_to_rrd() couldn't parse the XML and data to RRD for [%s]", d->name);

@@ -1,4 +1,5 @@
 #include <dotconf.h>
+#include <string.h>
 #include <ganglia/hash.h>
 #include <ganglia/llist.h>
 #include <gmetad.h>
@@ -34,74 +35,64 @@ static DOTCONF_CB(cb_data_source)
    unsigned int i, len;
    data_source_list_t *dslist;
    g_inet_addr *ia;
-   datum_t key;
-   datum_t *find;
-   datum_t val;
+   datum_t key, val, *find;
    int port;
+   char *p, *str;
+
+   source_index++;
  
-   debug_msg("[%s] [%s] [%s]", cmd->data.list[0], cmd->data.list[1], cmd->data.list[2]);
- 
+   debug_msg("Datasource = [%s]", cmd->data.list[0]);
+
+   dslist = (data_source_list_t *) malloc ( sizeof(data_source_list_t) );
+   if(!dslist)
+      {
+         err_quit("Unable to malloc data source list");
+      }
+
+   dslist->num_sources = 0;
+
+   dslist->sources = malloc( (cmd->arg_count-1) * sizeof(g_inet_addr *) );
+   if (! dslist->sources )
+      {
+         err_quit("Unable to malloc sources array");
+      }
+
+   dslist->name = strdup( cmd->data.list[0] );
+
+   for (i = 1; i< cmd->arg_count; i++)
+      {
+         str = strdup ( cmd->data.list[i] );
+         p = strchr( str, ':' );
+         if( p )
+            {
+               /* Port is specified */
+               *p = '\0';
+               port = atoi ( p+1 ); 
+            }
+         else
+            {
+               port = 8649;
+            }
+
+         debug_msg("Trying to connect to %s:%d for [%s]", str, port, dslist->name);
+         dslist->sources[dslist->num_sources] = (g_inet_addr *) g_inetaddr_new ( str, port );
+         if(! dslist->sources[dslist->num_sources])
+            {
+               err_quit("Unable to create inetaddr [%s:%d] and save it to [%s]", str, port, dslist->name);
+            }
+         else
+            {
+               dslist->num_sources++;
+            } 
+         free(str);
+      }
+
    key.data = cmd->data.list[0];
    key.size = strlen ( key.data ) + 1;
  
-   port = atoi( cmd->data.list[2] );
-
-   find = hash_lookup( &key, sources ); 
-   if (!find )
-      {
-         debug_msg("[%s] is a NEW data source tag", cmd->data.list[0]);
-
-         dslist = (data_source_list_t *) malloc ( sizeof(data_source_list_t) );
-         if(!dslist)
-            {
-               err_quit("Unable to malloc data source list");
-            }
-
-         dslist->index = source_index;
-         source_index++;
-         dslist->num_sources = 0;
-         dslist->sources = NULL;
-         dslist->name = strdup( cmd->data.list[0] );
-      }
-   else
-      {
-         debug_msg("[%s] is an OLD data source tag", cmd->data.list[0]);
-         dslist = *(data_source_list_t**)find->data;
-
-         datum_free(find);
-      }
-
-   debug_msg("***| dslist number is %d addr %p", dslist->num_sources, dslist);
-
-   /* Make space for the new entry */
-
-   len = (dslist->num_sources+1) * sizeof( g_inet_addr * );
-
-   debug_msg("Reallocating %d bytes of memory at %p", len, dslist->sources);
-
-   dslist->sources = realloc( (void *)(dslist->sources), len );
-
-   debug_msg("Realloc returned %p", dslist->sources);
-
-   if(!dslist->sources)
-      {
-         err_quit("Unable to realloc source list");
-      }
-
-   dslist->sources[dslist->num_sources] = (g_inet_addr *) g_inetaddr_new ( cmd->data.list[1], port );
-   if(! dslist->sources[dslist->num_sources])
-      {
-         err_quit("Unable to create inetaddr and save it");
-      } 
-   else
-      {
-         dslist->num_sources++;
-      }
-
    val.data = &dslist;
    val.size = sizeof(dslist);
 
-   debug_msg("Inserting data into the sources hash");
    find  = hash_insert( &key, &val, sources );
    if(!find)
       {
@@ -185,4 +176,23 @@ parse_config_file ( char *config_file )
          err_quit("dotconf_command_loop error");
       }
    return 0;
+}
+
+int
+number_of_datasources ( char *config_file )
+{
+   int number_of_sources = 0;
+   char buf[1024];
+   configfile_t *configfile;
+
+   configfile = dotconf_create( config_file, gmetad_options, 0, CASE_INSENSITIVE );
+
+   while (! dotconf_get_next_line( buf, 1024, configfile ))
+      {
+         if( strstr( buf, "data_source" ) )
+            {
+               number_of_sources++;
+            }
+      }
+   return number_of_sources;
 }
