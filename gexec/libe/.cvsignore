@@ -10,6 +10,7 @@ config.log
 config.status
 configure.lineno
 stamp-h1
+stamp-h
 depcomp
 install-sh
 missing
