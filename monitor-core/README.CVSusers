@@ -1,0 +1,12 @@
+Welcome to the Bleeding Edge of Ganglia Development
+
+The CVS source represents the latest snapshot of ganglia
+development.
+
+To prepare the distribution for compilation, run the 
+script "./bootstrap".
+
+You should have the following software installed...
+automake (GNU automake) 1.6.3
+autoconf (GNU Autoconf) 2.53
+ltmain.sh (GNU libtool) 1.4.2
