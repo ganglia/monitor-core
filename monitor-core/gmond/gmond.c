@@ -1,3 +1,4 @@
+/* $Id$ */
 #include "gangliaconf.h"
 #include "dotconf.h"
 #include <ganglia/gmond_config.h>
@@ -59,7 +60,7 @@ gexec_func ( void )
 {
    g_val_t val;
 
-   if( config.no_gexec )
+   if( config.no_gexec || ( SUPPORT_GEXEC == 0 ) )
       snprintf(val.str, MAX_G_STRING_SIZE, "%s", "OFF");
    else
       snprintf(val.str, MAX_G_STRING_SIZE, "%s", "ON");
