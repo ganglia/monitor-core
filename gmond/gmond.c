@@ -260,8 +260,6 @@ main ( int argc, char *argv[] )
                const int on = 1;
                struct sockaddr_in localaddr;
 
-               fprintf(stderr,"Running UDP server on port %d\n", gmond_config.mcast_port);
-
 	       mcast_join_socket = malloc(sizeof(g_mcast_socket));
                if(!mcast_join_socket)
                  {
@@ -306,8 +304,6 @@ main ( int argc, char *argv[] )
                    perror("unable to bind to local UDP server address\n");
                    return -1;
                  }
-
-               fprintf(stderr,"UDP SERVER RUNNING\n");
 	     }
 	      
          if (! mcast_join_socket )
