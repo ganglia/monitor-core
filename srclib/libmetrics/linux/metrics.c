@@ -1130,7 +1130,7 @@ int remote_mount(const char *device, const char *type)
    or if (it is of type smbfs and its Fs_name starts with `//'). */
    return ((strchr(device,':') != 0)
       || (!strcmp(type, "smbfs") && device[0]=='/' && device[1]=='/')
-      || (!strcmp(type, "autofs")));
+      || (!strcmp(type, "autofs")) || (!strcmp(type,"gfs")) || (!strcmp(type,"none")) );
 }
 
 /* --------------------------------------------------------------------------- */
