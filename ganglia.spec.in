@@ -175,14 +175,17 @@ fi
 ## Create the directory structure
 %__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 %__mkdir -p $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
+%__mkdir -p $RPM_BUILD_ROOT/usr/share/man/man5
 
 ## Move the files into the structure
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
 # We just output the default gmond.conf from gmond using the '-t' flag
-%__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/gmond.conf
+%{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/gmond.conf
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
+
 %__make install prefix=$RPM_BUILD_ROOT/usr
+%__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.conf.5 $RPM_BUILD_ROOT/usr/share/man/man5/gmond.conf.5
 
 %endif
 
@@ -207,6 +210,7 @@ fi
 %attr(0555,root,root)/usr/bin/gstat
 /usr/sbin/gmond
 /etc/rc.d/init.d/gmond
+%attr(0555,root,root)/usr/share/man/man5/gmond.conf.5.gz
 %config(noreplace) /etc/gmond.conf
 
 ##
@@ -215,6 +219,7 @@ fi
 %files devel
 /usr/include/ganglia.h
 /usr/lib/libganglia*
+/usr/bin/ganglia-config
 
 %else
 
