@@ -1,5 +1,6 @@
 #include <check.h>
 #include "../src/confuse.h"
+#include <string.h>
 
 static cfg_t *create_config(void)
 {
@@ -51,7 +52,7 @@ END_TEST
 
 Suite *dup_suite(void) 
 { 
-    Suite *s = suite_create("confuse_dup"); 
+    Suite *s = suite_create("dup"); 
 
     TCase *tc_dup = tcase_create("Duplicate schemas");
     suite_add_tcase(s, tc_dup);

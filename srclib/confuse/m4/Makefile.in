@@ -37,7 +37,8 @@ host_triplet = @host@
 subdir = m4
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in ChangeLog
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/gettext.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ac_config_libconfig_in.m4 \
+	$(top_srcdir)/m4/check.m4 $(top_srcdir)/m4/gettext.m4 \
 	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/lib-ld.m4 \
 	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
 	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/po.m4 \
@@ -64,6 +65,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CHECK_CFLAGS = @CHECK_CFLAGS@
 CHECK_LIBS = @CHECK_LIBS@
+CONFUSE_CONFIG = @CONFUSE_CONFIG@
+CONFUSE_VERSION = @CONFUSE_VERSION@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -82,6 +85,8 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 GMSGFMT = @GMSGFMT@
+HAVE_PKGCONFIG_FALSE = @HAVE_PKGCONFIG_FALSE@
+HAVE_PKGCONFIG_TRUE = @HAVE_PKGCONFIG_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -112,6 +117,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKGCONFIG = @PKGCONFIG@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
@@ -140,6 +146,9 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 check_confuse = @check_confuse@
+confuse_cflags = @confuse_cflags@
+confuse_cppflags = @confuse_cppflags@
+confuse_libs = @confuse_libs@
 datadir = @datadir@
 exec_prefix = @exec_prefix@
 host = @host@
@@ -161,8 +170,16 @@ program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
+target = @target@
 target_alias = @target_alias@
-EXTRA_DIST = intdiv0.m4 inttypes.m4 inttypes_h.m4 inttypes-pri.m4 nls.m4 po.m4 stdint_h.m4 uintmax_t.m4 ulonglong.m4  codeset.m4 gettext.m4 glibc21.m4 iconv.m4 isc-posix.m4 lcmessage.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 progtest.m4
+EXTRA_DIST = intdiv0.m4 inttypes.m4 inttypes_h.m4 inttypes-pri.m4 nls.m4 \
+             po.m4 stdint_h.m4 uintmax_t.m4 intmax.m4 ulonglong.m4 codeset.m4 \
+             gettext.m4 glibc21.m4 iconv.m4 isc-posix.m4 lcmessage.m4 \
+             lib-ld.m4 lib-link.m4 lib-prefix.m4 progtest.m4 \
+             ac_config_libconfig_in.m4 longdouble.m4 longlong.m4 \
+             printf-posix.m4 signed.m4 size_max.m4 wchar_t.m4 wint_t.m4 \
+             xsize.m4 check.m4
+
 all: all-am
 
 .SUFFIXES:
