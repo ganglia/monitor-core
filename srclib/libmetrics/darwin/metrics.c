@@ -8,18 +8,28 @@
 #include "interface.h"
 #include <kvm.h>
 #include <sys/sysctl.h>
+#include <mach/mach_init.h>
+#include <mach/mach_host.h>
+#include <mach/mach_error.h>
 #include "libmetrics.h"
 
 /* Function prototypes */
  
+/* static mach_port_t ganglia_port; */
+
+
+
 /*
  * This function is called only once by the gmond.  Use to 
  * initialize data structures, etc or just return SYNAPSE_SUCCESS;
  */
+
 g_val_t
 metric_init(void)
 {
    g_val_t val;
+
+   /* ganglia_port = mach_host_self(); */
    val.int32 = SYNAPSE_SUCCESS;
    return val;
 }
@@ -198,18 +208,69 @@ os_release_func ( void )
 g_val_t
 cpu_user_func ( void )
 {
+   static unsigned long long last_userticks, userticks, last_totalticks, totalticks, diff;
+   mach_msg_type_number_t count;
+   host_cpu_load_info_data_t cpuStats;
+   kern_return_t	ret;
    g_val_t val;
-
-   val.f = 0.0;
+   
+   count = HOST_CPU_LOAD_INFO_COUNT;
+   ret = host_statistics(mach_host_self(),HOST_CPU_LOAD_INFO,(host_info_t)&cpuStats,&count);
+   
+   if (ret != KERN_SUCCESS) {
+     err_msg("cpu_user_func() got an error from host_statistics()");
+     return val;
+   }
+   
+   userticks = cpuStats.cpu_ticks[CPU_STATE_USER];
+   totalticks = cpuStats.cpu_ticks[CPU_STATE_IDLE] + cpuStats.cpu_ticks[CPU_STATE_USER] +
+         cpuStats.cpu_ticks[CPU_STATE_NICE] + cpuStats.cpu_ticks[CPU_STATE_SYSTEM];
+   diff = userticks - last_userticks;
+   
+   if ( diff )
+       val.f = ((float)diff/(float)(totalticks - last_totalticks))*100;
+     else
+       val.f = 0.0;
+   
+   debug_msg("cpu_user_func() returning value: %f\n", val.f);
+   
+   last_userticks = userticks;
+   last_totalticks = totalticks;
+   
    return val;
 }
 
 g_val_t
 cpu_nice_func ( void )
 {
+   static unsigned long long last_niceticks, niceticks, last_totalticks, totalticks, diff;
+   mach_msg_type_number_t count;
+   host_cpu_load_info_data_t cpuStats;
+   kern_return_t	ret;
    g_val_t val;
-
-   val.f = 0.0;
+   
+   count = HOST_CPU_LOAD_INFO_COUNT;
+   ret = host_statistics(mach_host_self(),HOST_CPU_LOAD_INFO,(host_info_t)&cpuStats,&count);
+   
+   if (ret != KERN_SUCCESS) {
+     err_msg("cpu_nice_func() got an error from host_statistics()");
+     return val;
+   }
+   
+   niceticks = cpuStats.cpu_ticks[CPU_STATE_NICE];
+   totalticks = cpuStats.cpu_ticks[CPU_STATE_IDLE] + cpuStats.cpu_ticks[CPU_STATE_USER] +
+         cpuStats.cpu_ticks[CPU_STATE_NICE] + cpuStats.cpu_ticks[CPU_STATE_SYSTEM];
+   diff = niceticks - last_niceticks;
+   
+   if ( diff )
+       val.f = ((float)diff/(float)(totalticks - last_totalticks))*100;
+     else
+       val.f = 0.0;
+   
+   debug_msg("cpu_nice_func() returning value: %f\n", val.f);
+   
+   last_niceticks = niceticks;
+   last_totalticks = totalticks;
 
    return val;
 }
@@ -217,9 +278,34 @@ cpu_nice_func ( void )
 g_val_t 
 cpu_system_func ( void )
 {
+   static unsigned long long last_systemticks, systemticks, last_totalticks, totalticks, diff;
+   mach_msg_type_number_t count;
+   host_cpu_load_info_data_t cpuStats;
+   kern_return_t	ret;
    g_val_t val;
-
-   val.f = 0.0;
+   
+   count = HOST_CPU_LOAD_INFO_COUNT;
+   ret = host_statistics(mach_host_self(),HOST_CPU_LOAD_INFO,(host_info_t)&cpuStats,&count);
+   
+   if (ret != KERN_SUCCESS) {
+     err_msg("cpu_system_func() got an error from host_statistics()");
+     return val;
+   }
+   
+   systemticks = cpuStats.cpu_ticks[CPU_STATE_SYSTEM];
+   totalticks = cpuStats.cpu_ticks[CPU_STATE_IDLE] + cpuStats.cpu_ticks[CPU_STATE_USER] +
+         cpuStats.cpu_ticks[CPU_STATE_NICE] + cpuStats.cpu_ticks[CPU_STATE_SYSTEM];
+   diff = systemticks - last_systemticks;
+   
+   if ( diff )
+       val.f = ((float)diff/(float)(totalticks - last_totalticks))*100;
+     else
+       val.f = 0.0;
+   
+   debug_msg("cpu_system_func() returning value: %f\n", val.f);
+   
+   last_systemticks = systemticks;
+   last_totalticks = totalticks;
 
    return val;
 }
@@ -227,21 +313,68 @@ cpu_system_func ( void )
 g_val_t 
 cpu_idle_func ( void )
 {
+   static unsigned long long last_idleticks, idleticks, last_totalticks, totalticks, diff;
+   mach_msg_type_number_t count;
+   host_cpu_load_info_data_t cpuStats;
+   kern_return_t	ret;
    g_val_t val;
-   val.f = 0.0;
-
+   
+   count = HOST_CPU_LOAD_INFO_COUNT;
+   ret = host_statistics(mach_host_self(),HOST_CPU_LOAD_INFO,(host_info_t)&cpuStats,&count);
+   
+   if (ret != KERN_SUCCESS) {
+     err_msg("cpu_idle_func() got an error from host_statistics()");
+     return val;
+   }
+   
+   idleticks = cpuStats.cpu_ticks[CPU_STATE_IDLE];
+   totalticks = cpuStats.cpu_ticks[CPU_STATE_IDLE] + cpuStats.cpu_ticks[CPU_STATE_USER] +
+         cpuStats.cpu_ticks[CPU_STATE_NICE] + cpuStats.cpu_ticks[CPU_STATE_SYSTEM];
+   diff = idleticks - last_idleticks;
+   
+   if ( diff )
+       val.f = ((float)diff/(float)(totalticks - last_totalticks))*100;
+     else
+       val.f = 0.0;
+   
+   debug_msg("cpu_idle_func() returning value: %f\n", val.f);
+   
+   last_idleticks = idleticks;
+   last_totalticks = totalticks;
+   
    return val;
 }
 
 g_val_t 
 cpu_aidle_func ( void )
 {
+   static unsigned long long idleticks, totalticks;
+   mach_msg_type_number_t count;
+   host_cpu_load_info_data_t cpuStats;
+   kern_return_t	ret;
    g_val_t val;
    
-   val.f = 0.0;
+   count = HOST_CPU_LOAD_INFO_COUNT;
+   ret = host_statistics(mach_host_self(),HOST_CPU_LOAD_INFO,(host_info_t)&cpuStats,&count);
+   
+   if (ret != KERN_SUCCESS) {
+     err_msg("cpu_aidle_func() got an error from host_statistics()");
+     return val;
+   }
+   
+   idleticks = cpuStats.cpu_ticks[CPU_STATE_IDLE];
+   totalticks = cpuStats.cpu_ticks[CPU_STATE_IDLE] + cpuStats.cpu_ticks[CPU_STATE_USER] +
+         cpuStats.cpu_ticks[CPU_STATE_NICE] + cpuStats.cpu_ticks[CPU_STATE_SYSTEM];
+   
+   val.f = ((double)idleticks/(double)totalticks)*100;
+   
+   debug_msg("cpu_aidle_func() returning value: %f\n", val.f);
    return val;
 }
 
+/*
+** FIXME
+*/
 g_val_t 
 cpu_wio_func ( void )
 {
