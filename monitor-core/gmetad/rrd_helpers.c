@@ -1,8 +1,74 @@
 /* $Id$ */
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <rrd.h>
+#include <gmetad.h>
+
+extern char * rrd_rootdir;
+
+static int push_data_to_summary_rrd( char *rrd, char *sum, char *num);
+
+int
+push_data_to_meta_rrd ( char *metric, char *sum, char *num )
+{
+   int rval;
+   char rrd[2024];
+   char *polling_interval = "15"; /* secs .. constant for now */
+
+   snprintf(rrd, 2024,"%s/%s.rrd", rrd_rootdir, metric);
+   return push_data_to_summary_rrd( rrd, sum, num );
+}
+int
+push_data_to_cluster_rrd( char *cluster, char *metric, char *sum, char *num )
+{
+   int rval;
+   char rrd[2024];
+   char *polling_interval = "15"; /* secs .. constant for now */
+
+   snprintf(rrd, 2024,"%s/%s_%s.rrd", rrd_rootdir, cluster, metric);
+   return push_data_to_summary_rrd( rrd, sum, num );
+}
+
+/* A summary RRD has a "num" and a "sum" DS (datasource) whereas the
+   host rrds only have "sum" (since num is always 1) */
+static int
+push_data_to_summary_rrd( char *rrd, char *sum, char *num)
+{
+   int rval;
+   char *polling_interval = "15"; /* secs .. constant for now */
+   struct stat st;
+
+   if( stat(rrd, &st) )
+      {
+         rval = summary_RRD_create( rrd, polling_interval );
+         if( rval )
+            return rval;
+      }
+   return summary_RRD_update( rrd, sum, num );
+}
+
+int
+push_data_to_rrd( char *cluster, char *host, char *metric, char *value)
+{
+  int rval;
+  char rrd[2024];
+  char *polling_interval = "15"; /* secs .. constant for now */
+  struct stat st;
+
+  snprintf(rrd, 2024,"%s/%s_%s_%s.rrd", rrd_rootdir, cluster, host, metric);
+
+  if( stat(rrd, &st) )
+     {
+        rval = RRD_create( rrd, polling_interval );
+        if( rval )
+           return rval;
+     }
+
+  return RRD_update( rrd, value );
+}
 
 int
 RRD_update( char *rrd, char *value )

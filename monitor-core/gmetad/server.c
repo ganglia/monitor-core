@@ -45,6 +45,7 @@ server_thread ( void *arg)
          pthread_mutex_unlock( &server_socket_mutex );
          if ( clifd < 0 )
             {
+               err_ret("server_thread() error");
                debug_msg("server_thread() %d clientfd = %d errno=%d\n", pthread_self(), clifd, errno);
                continue;
             }
