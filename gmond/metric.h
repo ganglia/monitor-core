@@ -174,10 +174,14 @@ KEY(phwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" }
 
 #ifdef LINUX
 ,
-KEY(bytes_out),  1, 30,   40,  50,  70, g_float, "bytes/sec", "%.2f" },
-KEY(bytes_in),   1, 30,   40,  50,  70, g_float, "bytes/sec", "%.2f" },
-KEY(pkts_in), 1, 30,   40,  50,  70, g_float, "packets/sec", "%.2f" },
-KEY(pkts_out),   1, 30,   40,  50,  70, g_float, "packets/sec", "%.2f" },
+/* (sacerdoti) Experiments have shown gmon resting bandwidth is around 2KB/s for
+ * a 128-node cluster. We set the value thresh of these metrics to double that.
+ */
+KEY(bytes_out),  4096, 30,   40,  200,  300, g_float, "bytes/sec", "%.2f" },
+KEY(bytes_in),   4096, 30,   40,  200,  300, g_float, "bytes/sec", "%.2f" },
+KEY(pkts_in), 256, 30,   40,  200,  300, g_float, "packets/sec", "%.2f" },
+KEY(pkts_out),   256, 30,   40,  200,  300, g_float, "packets/sec", "%.2f" },
+
 /* The amount of disk space could change - hot-swap, mounts, etc. check: 30-60min. */
 KEY(disk_total), 1, 1800, 3600, 900, 1200, g_double, "GB", "%.3f" },
 KEY(disk_free), 1, 30, 40, 120, 180, g_double, "GB", "%.3f" },
