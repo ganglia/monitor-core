@@ -151,7 +151,7 @@ create_udp_server(apr_pool_t *context, apr_port_t port, char *bind)
 }
 
 apr_socket_t *
-create_tcp_server(apr_pool_t *context, apr_port_t port, char *bind)
+create_tcp_server(apr_pool_t *context, apr_port_t port, char *bind, char *interface)
 {
   apr_socket_t *sock = create_net_server(context, SOCK_STREAM, port, bind);
   if(!sock)
