@@ -20,7 +20,9 @@
 /* Holds our data sources. */
 hash_t *sources;
 
+/*  Thread pools might not be the best idea...
 ganglia_thread_pool data_source_pool = NULL;
+*/
 
 /* The root of our local grid. Replaces the old "xml" hash table. */
 Source_t root;
@@ -31,7 +33,7 @@ int interactive_socket;
 pthread_mutex_t  server_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t  server_interactive_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-extern void data_thread ( void *arg );
+extern void *data_thread ( void *arg );
 extern void* server_thread(void *);
 extern int parse_config_file ( char *config_file );
 extern int number_of_datasources ( char *config_file );
@@ -76,16 +78,9 @@ print_sources ( datum_t *key, datum_t *val, void *arg )
 static int
 spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
 {
+   pthread_t tid;
    data_source_list_t *d = *((data_source_list_t **)(val->data));
-
-   /* Initialize the buffers of each data thread */
-   d->buf = malloc( 1024 );
-   if(!d->buf)
-     err_sys("Unable to malloc memory of data source buffer");
-
-   d->len = 1024;
-
-   ganglia_run( data_source_pool, data_thread, d );
+   pthread_create( &tid, NULL, data_thread, d );
    return 0;
 }
 
@@ -412,11 +407,13 @@ main ( int argc, char *argv[] )
       pthread_create(&pid, &attr, server_thread, (void*) 1);
 
    /* 4 workers, maximum queue of 256 and blocking (for now) */
+/*
    data_source_pool = ganglia_thread_pool_create(4, 256, 0);
    if(!data_source_pool)
      {
        err_quit("Unable to create data source thread pool\n");
      }
+*/
    hash_foreach( sources, spin_off_the_data_threads, NULL );
 
     /* Meta data */
@@ -440,4 +437,3 @@ main ( int argc, char *argv[] )
 
    return 0;
 }
-
