@@ -46,6 +46,9 @@ dist-local: README ganglia.html ChangeLog
 # We handle distributing the ./srclib directory here
 # since the packages in that directory might not
 # handle a "make dist" correctly
+#
+# We also go through and make sure all the files have
+# the same timestamp with the last command here...
 dist-hook:
 	for subdir in "./srclib ./web"; do \
 	  tar -c --exclude=".libs" --exclude "core.*" --exclude="*CVS" \
@@ -54,5 +57,6 @@ dist-hook:
 	  --exclude="*.tar.gz" \
 	  -f - $$subdir | (cd $(distdir) && tar -xf -)\
 	done;
+	find $(distir) -exec touch -r $(distdir)/Makefile.am {} \;
 
 bin_SCRIPTS = ganglia-config
