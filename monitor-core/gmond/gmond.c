@@ -82,12 +82,14 @@ heartbeat_func( void )
 int 
 main ( int argc, char *argv[] )
 {
-   int rval, i;
+   int rval, i=0;
    g_val_t initval;
    pthread_t tid;
    pthread_attr_t attr;
    barrier *mcast_listen_barrier, *server_barrier;
    struct timeval tv;
+   llist_entry *interfaces = NULL;
+   llist_entry *last_interface = NULL;
 
    gettimeofday(&tv, NULL);
    start_time = (uint32_t) tv.tv_sec;
@@ -121,12 +123,25 @@ main ( int argc, char *argv[] )
    pthread_attr_init( &attr );
    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
-   debug_msg("creating cluster has for %d nodes", config.num_nodes);
+   debug_msg("creating cluster hash for %d nodes", config.num_nodes);
    cluster = hash_create(config.num_nodes);
    debug_msg("gmond initialized cluster hash");
 
    srand(1);
-   
+
+   interfaces = g_inetaddr_list_interfaces();
+   /* Go to the end */
+   for(;interfaces != NULL; interfaces = interfaces->next)
+      { 
+         last_interface = interfaces; 
+      }
+   /* Move backwards */
+   debug_msg("INTERFACES Discovered");
+   for(i=0, interfaces = last_interface; interfaces != NULL; interfaces = interfaces->prev, i++)
+      {
+         debug_msg("\t%d %s", i, inet_ntoa( G_SOCKADDR_IN(((g_inet_addr *)(interfaces->val))->sa).sin_addr ));
+      }
+
    /* fd for incoming multicast messages */
    if(! config.deaf )
       {
