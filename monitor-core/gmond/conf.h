@@ -71,6 +71,17 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
   CFG_END()
 };
 
+static cfg_opt_t static_metric_group_opts[] = {
+
+
+  CFG_END()
+};
+
+static cfg_opt_t metric_group_opts[] = {
+
+  CFG_END()
+};
+
 
 static cfg_opt_t gmond_opts[] = {
   CFG_SEC("location",  location_opts, CFGF_NONE),
@@ -79,6 +90,8 @@ static cfg_opt_t gmond_opts[] = {
   CFG_SEC("udp_send_channel", udp_send_channel_opts, CFGF_MULTI),
   CFG_SEC("udp_recv_channel", udp_recv_channel_opts, CFGF_MULTI),
   CFG_SEC("tcp_accept_channel", tcp_accept_channel_opts, CFGF_MULTI),
+  CFG_SEC("static_metric_group", static_metric_group_opts, CFGF_MULTI),
+  CFG_SEC("metric_group", metric_group_opts, CFGF_MULTI),
   CFG_END()
 }; 
 
