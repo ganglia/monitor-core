@@ -217,7 +217,7 @@ main ( int argc, char *argv[] )
    if(! gmond_config.deaf )
       {
          mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port,
-                                          (struct in_addr *)&(entry->ifi_addr));
+                             (struct in_addr *)&(((struct sockaddr_in *)entry->ifi_addr)->sin_addr));                                        
          if (! mcast_join_socket )
             {
                perror("g_mcast_in() failed");
@@ -268,7 +268,8 @@ main ( int argc, char *argv[] )
    if(! gmond_config.mute )
       {
          mcast_socket = g_mcast_out ( gmond_config.mcast_channel, gmond_config.mcast_port,  
-                             (struct in_addr *)&(entry->ifi_addr), gmond_config.mcast_ttl);
+                       (struct in_addr *)&(((struct sockaddr_in *)entry->ifi_addr)->sin_addr), 
+                        gmond_config.mcast_ttl);
          if ( !mcast_socket )
             {
                perror("gmond could not connect to multicast channel");
