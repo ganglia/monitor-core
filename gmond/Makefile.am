@@ -2,7 +2,7 @@ SUBDIRS = gstat
 
 EXTRA_DIST = gmond.init gmond.conf
 
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/srclib/libmetrics/
+AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/srclib/libmetrics/ -I$(top_builddir)/srclib/expat/lib/
 
 sbin_PROGRAMS = gmond
 gmond_SOURCES =  gmond.c monitor.c server.c listen.c cleanup.c \
