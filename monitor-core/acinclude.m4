@@ -127,6 +127,6 @@ AC_DEFUN(AC_SEARCH_TYPE,
                 ac_cv_type_$1=no))
         AC_MSG_RESULT($ac_cv_type_$1)
         if test $ac_cv_type_$1 = no ; then
-                AC_DEFINE($1, $2)
+                AC_DEFINE($1, $2, $1)
         fi
 ])       
