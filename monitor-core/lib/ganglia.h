@@ -14,7 +14,7 @@
 #define GANGLIA_DEFAULT_XML_PORT 8649
 
 #ifndef MAX_MCAST_MSG
-#define MAX_MCAST_MSG 1024
+#define MAX_MCAST_MSG 1500
 #endif
 
 #include <stdio.h>
