@@ -22,6 +22,5 @@ libganglia_la_LDFLAGS = \
 	-export-dynamic
 
 noinst_LIBRARIES = libgetopthelper.a
-# libdnet.a 
 # A little helper for getopt functions
 libgetopthelper_a_SOURCES = getopt1.c getopt.c getopt_init.c getopt.h
