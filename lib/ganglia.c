@@ -1,426 +1,336 @@
 /**
- * @file ganglia.c The functions in this file perform the core functions of
- * retrieving XML data and saving it to internal data structures
+ * @file gexec_funcs.c Functions to support gexec, gstat et al
  */
 /* $Id$ */
-
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 #include <unistd.h>
 
 
-#include "expat.h"
-#include "hash.h"
+#include "net.h"
 #include "llist.h"
+#include "hash.h"
 #include "ganglia.h"
 #include "ganglia_priv.h"
+#include "debug_msg.h"
 #include "error.h"
-#include "net.h"
+#include "expat.h"
 
-#define TIMEOUT 60
-#define NUM_METRICS 30
-#define NUM_GMETRIC_METRICS 10
-
+int gexec_errno = 0;
 
 static void
 start (void *data, const char *el, const char **attr)
 {
-  int i;
-  cluster_info_t *ci = (cluster_info_t *)data;
-  cluster_t *cluster;
-  datum_t key, val, *rval;
-  ghost_t working_host;
-  static char working_host_name[MAXHOSTNAMELEN];
-  static char working_host_ip[16];
-  static int  working_host_last_reported;
-  static int  working_host_dead;
-  hash_t *hashp;
+   int n;
+   gexec_cluster_t *cluster = (gexec_cluster_t *)data;
+   char *p;
 
-  cluster  = ci->cluster;
- 
-  if (! strcmp("GANGLIA_XML", el) )
-     {
-        ci->num_nodes=0;
-        ci->num_dead_nodes=0;
+   if (! strcmp("CLUSTER", el))
+      {
+         strncpy( cluster->name, attr[1], 256 );
+         for(n=0; attr[n] && strcmp(attr[n], "LOCALTIME"); n+=2){}
+         cluster->localtime = atol(attr[n+1]);
+      }
+   else if (! strcmp("HOST",el))
+      {
+         cluster->host = (gexec_host_t *)calloc(1, sizeof(gexec_host_t) );
+         if ( cluster->host == NULL )
+            {
+               /* We'll catch this error later */
+               cluster->malloc_error = 1;
+               gexec_errno = 1;
+               return;
+            } 
 
-        for(i=0; attr[i]; i+= 2)
-           {
-              if (! strcmp("VERSION", attr[i]))
-                 {
-                    strcpy(ci->gmond_version, attr[i+1]);
-                 }
-           }
-     }
-  else if (! strcmp("CLUSTER", el))
-     {
-        for(i=0; attr[i]; i+=2)
-           {
-              if(! strcmp("NAME", attr[i]))
-                 {
-                    strcpy(ci->name, attr[i+1]);
-                 }
-              else if(! strcmp("LOCALTIME", attr[i]))
-                 {
-                    ci->localtime = atoi(attr[i+1]);
-                 }
-           }
-     }
-  else if (! strcmp("HOST",el))
-     {
-        ci->num_nodes++;
-        cluster->num_nodes++;
+         if(! strcmp( attr[1], attr[3]))
+            {
+               /* The IP address did not resolve at all */
+               cluster->host->name_resolved = 0;
+               strcpy(cluster->host->name,   attr[1]);
+               strcpy(cluster->host->domain, "unresolved");
+            }
+         else
+            {
+               cluster->host->name_resolved = 1;
+               p = strchr( attr[1], '.' );
+               if( p )
+                  {
+                     /* The IP DID resolve AND we have a domainname */
+                     n = p - attr[1];
+                     strncpy(cluster->host->name, attr[1], n);
+                     cluster->host->name[n] = '\0';
+                     p++;
+                     strncpy(cluster->host->domain, p, MAXHOSTNAMELEN);
+                  }
+               else
+                  {
+                     /* The IP DID resolve BUT we DON'T have a domainname */
+                     strncpy(cluster->host->name, attr[1], MAXHOSTNAMELEN);
+                     strcpy(cluster->host->domain, "unspecified");
+                  }
+            }
 
-        for(i=0; attr[i]; i+=2)
-           {
-              if(! strcmp("NAME", attr[i]) )
-                 {
-                    strcpy(working_host_name, attr[i+1]);
-                 }
-              else if(! strcmp("IP", attr[i]))
-                 {
-                    strcpy(working_host_ip, attr[i+1]);
-                 }
-              else if(! strcmp("REPORTED", attr[i]))
-                 {
-                    working_host_last_reported = atoi(attr[i+1]);
- 
-                    if( (ci->localtime - working_host_last_reported) > TIMEOUT )
-                       working_host_dead = 1;
-                    else
-                       working_host_dead = 0;
-                 }
-           }
+         strcpy(cluster->host->ip, attr[3]);
+         cluster->host->last_reported = atol(attr[5]);
 
-        key.data = working_host_ip;
-        key.size = strlen(working_host_ip)+1;
-        val.data = working_host_name;
-        val.size = strlen(working_host_name)+1;
-
-        /* add this host to the host_cache .. dead or alive */
-        rval = hash_insert(&key, &val, cluster->host_cache);
-        if ( rval == NULL )
-           {
-              err_msg("hash_insert error in start()");
-              return;
-           }
-
-        /* setup data in the working_host structure */
-        strcpy(working_host.name, working_host_name);
-        working_host.last_reported = working_host_last_reported;
-        working_host.metrics = hash_create(NUM_METRICS);
-        if( working_host.metrics == NULL )
-           {
-              err_msg("hash_create() error in start()"); 
-              return;
-           }
-        working_host.gmetric_metrics = hash_create(NUM_GMETRIC_METRICS);
-        if ( working_host.gmetric_metrics == NULL )
-           {
-              err_msg("hash_create() error in start()");
-              return;
-           }
-
-        if(! working_host_dead )
-           {
-              hashp = cluster->nodes;
-           }
-        else
-           {  
-              ci->num_dead_nodes++;
-              cluster->num_dead_nodes++;
-              hashp = cluster->dead_nodes;
-           }
-
-        val.data = &working_host;
-        val.size = sizeof(working_host);
-        rval = hash_insert(&key, &val, hashp);
-        if ( rval == NULL )
-           {
-              err_msg("hash_insert error in start()");
-              return;       
-           }
-     }
-
-  else if (! strcmp("METRIC", el))
-     {
-
-
-     }
+         if( abs(cluster->localtime - cluster->host->last_reported) < GEXEC_TIMEOUT )
+            {
+               cluster->host_up = 1;
+            }
+         else
+            {
+               cluster->host_up = 0;
+            }
+      }
+   else if (! strcmp("METRIC", el))
+      {
+         if( cluster->malloc_error )
+            {
+               return;
+            } 
+         if(! strcmp( attr[1], "cpu_num" ))
+            {
+               cluster->host->cpu_num = atoi( attr[3] );
+            }
+         else if(! strcmp( attr[1], "load_one" ))
+            {
+               cluster->host->load_one = atof( attr[3] );
+            }
+         else if(! strcmp( attr[1], "load_five" ))
+            {
+               cluster->host->load_five = atof( attr[3] );
+            }
+         else if(! strcmp( attr[1], "load_fifteen" ))
+            {
+               cluster->host->load_fifteen = atof( attr[3] );
+            }
+         else if(! strcmp( attr[1], "proc_run" ))
+            {
+               cluster->host->proc_run = atoi( attr[3] );
+            }
+         else if(! strcmp( attr[1], "proc_total" ))
+            {
+               cluster->host->proc_total = atoi( attr[3] );
+            }
+         else if(! strcmp( attr[1], "cpu_user" ))
+            {
+               cluster->host->cpu_user = atof( attr[3] );
+            }
+         else if(! strcmp( attr[1], "cpu_nice" ))
+            {
+               cluster->host->cpu_nice = atof( attr[3] );
+            }
+         else if(! strcmp( attr[1], "cpu_system"))
+            {
+               cluster->host->cpu_system = atof( attr[3] );
+            }
+         else if(! strcmp( attr[1], "cpu_idle"))
+            {
+               cluster->host->cpu_idle = atof( attr[3] );
+            }
+         else if(! strcmp( attr[1], "gexec" ))
+            {
+               if(! strcmp( attr[3], "ON" ))
+                  cluster->host->gexec_on = 1;
+            }
+      }
 }				
 
 static void
 end (void *data, const char *el)
 {
-    /* Nothing to do (yet) */
+   gexec_cluster_t *cluster = (gexec_cluster_t *)data;
+   llist_entry *e, *e2;
+
+   if ( strcmp( "HOST", el ) )
+      return;
+
+   e = malloc( sizeof( llist_entry ) );
+   if ( e == NULL )
+      {
+         if( cluster->host )
+           free(cluster->host);
+         gexec_errno = 1; 
+         return;
+      }
+
+   e2 = malloc( sizeof( llist_entry ) );
+   if ( e == NULL )
+      {
+         if( cluster->host )
+           free(cluster->host);
+         gexec_errno = 1;
+         free(e);
+         return;
+      }
+
+   e->val  = e2->val =  cluster->host;
+
+   if(cluster->host_up)
+      {
+         cluster->num_hosts++;
+         llist_add((llist_entry **) &(cluster->hosts), e);
+
+         if(cluster->host->gexec_on)
+            {
+               cluster->num_gexec_hosts++;
+               llist_add((llist_entry **) &(cluster->gexec_hosts), e2);
+            }
+         else
+            {
+               free(e2);
+            }
+      }
+   else
+      {
+         cluster->num_dead_hosts++;
+         llist_add((llist_entry **) &(cluster->dead_hosts), e);
+      }
 }				
 
-/**
- * @fn int ganglia_cluster_init (cluster_t *cluster, char *name, unsigned long num_nodes_in_cluster)
- * Initialize a ganglia cluster datatype.
- * Before any ganglia cluster datatype can be used it must be initialized.
- * @param cluster A pointer to the ganglia cluster datatype
- * @param name A character string you wish to identify this cluster
- * @param num_nodes_in_cluster A best-guess of the total number of machines this cluster will contain
- * @return an integer
- * @retval 0 on success
- * @retval -1 on error
- * @see ganglia_add_datasource
- */
 int
-ganglia_cluster_init(cluster_t *cluster, char *name, unsigned long num_nodes_in_cluster)
+gexec_cluster_free ( gexec_cluster_t *cluster )
 {
-   if ( cluster == NULL )
+   llist_entry *ei, *next;
+
+   if(cluster == NULL)
       {
-         err_msg("ganglia_cluster_init() was passed a NULL pointer");
-         return -1;
+         gexec_errno = 2;
+         return gexec_errno;
       }
 
-   strncpy( cluster->name, name, 256);
-
-   cluster->num_sources = 0;
-
-   if (! num_nodes_in_cluster )
-      num_nodes_in_cluster = 1024;
-
-   cluster->host_cache = hash_create( num_nodes_in_cluster );
-   if ( cluster->host_cache == NULL )
+   for (ei = cluster->hosts; ei != NULL; ei = next )
       {
-         err_msg("ganglia_cluster_init() host_cache hash_create malloc error");
-         goto host_cache_error;
+         next = ei->next;
+         if(ei->val)
+            free(ei->val);
+         free(ei);
       }
-   cluster->nodes      = hash_create( num_nodes_in_cluster );
-   if ( cluster->nodes == NULL )
+   for (ei = cluster->gexec_hosts; ei != NULL; ei = next )
       {
-         err_msg("ganglia_cluster_init() nodes hash_create malloc error");
-         goto nodes_error;
+         next = ei->next;
+         /* Values were freed above */
+         free(ei);
       }
-   cluster->dead_nodes = hash_create( num_nodes_in_cluster * 0.10 );
-   if ( cluster->dead_nodes == NULL )
+   for (ei = cluster->dead_hosts; ei != NULL; ei = next)
       {
-         err_msg("ganglia_cluster_init() dead_nodes hash_create malloc error");
-         goto dead_nodes_error;
+         next = ei->next;
+         if(ei->val)
+            free(ei->val);
+         free(ei);
       }
 
-   cluster->source_list = malloc( sizeof(llist_entry) );
-   if ( cluster->source_list == NULL )
-      {
-         err_msg("ganglia_cluster_init() source_list malloc error");
-         goto source_list_error;
-      }
-   cluster->llist       = malloc( sizeof(llist_entry) );
-   if ( cluster->llist == NULL )
-      {
-         err_msg("ganglia_cluster_init() llist malloc error");
-         goto llist_error;
-      }
-
-   return 0;
-
- llist_error:
-   free(cluster->source_list);
- source_list_error:
-   hash_destroy(cluster->dead_nodes);
- dead_nodes_error:
-   hash_destroy(cluster->nodes);
- nodes_error:
-   hash_destroy(cluster->host_cache);
- host_cache_error:
-   return -1;
+   gexec_errno = 0;
+   return gexec_errno;
 }
 
-/**
- * @fn int ganglia_add_datasource ( cluster_t *cluster, char *group_name, char *ip, unsigned short port, int opts )
- * Add a ganglia data source to an initialized cluster type.  
- * The group name allows you to group datasources allowing for redundant sources for the same cluster.  It one
- * of the datasources (gmonds) is down then another datasource (gmond) is used to collect the data.
- * <BR>
- * \code
- * cluster_t cluster;
- * ganglia_cluster_init  (&cluster, "CS Department Clusters", 500);
- * ganglia_add_datasource(&cluster, "Cluster 1 in Room 505", "3.3.3.3", 8649, 0);
- * ganglia_add_datasource(&cluster, "Cluster 1 in Room 505", "3.3.3.4", 8649, 0);
- * ganglia_add_datasource(&cluster, "Cluster 2 in Room 345", "3.3.2.2", 8649, 0);
- * \endcode 
- * @param cluster A pointer to a cluster type cluster_a cluster type cluster_tt
- * @param group_name An arbitrary character string you wish to identify this datasource
- * @param ip The ip address of the datasource (gmond)
- * @param port The port of the datasource (gmond)
- * @param opts Options (not used at this time)
- * @return an integer
- * @retval -1 on error
- * @retval 0 on success
- * @see ganglia_cluster_init
- */
-int
-ganglia_add_datasource ( cluster_t *cluster, char *group_name, char *ip, unsigned short port, int opts )
+static int
+load_sort( llist_entry *a, llist_entry *b )
 {
-   llist_entry *li;
-   cluster_info_t *ci;
+   double ai, bi;
 
-   if (cluster == NULL || ip == NULL || !port)
-      {
-         err_msg("ganglia_add_datasource() was passed invalid parameters");
-         return -1;
-      }
+   ai = ((gexec_host_t*)(a->val))->load_one - ((gexec_host_t *)(a->val))->cpu_num;
+   bi = ((gexec_host_t*)(b->val))->load_one - ((gexec_host_t *)(b->val))->cpu_num;   
 
-   ci = malloc( sizeof(cluster_info_t) );
-   if ( ci == NULL )
-      {
-         err_msg("ganglia_add_datasource() ci malloc error");
-         return -1;
-      }
-
-   li = malloc( sizeof( llist_entry ) );
-   if ( li == NULL )
-      {
-         free(ci);
-         err_msg("ganglia_add_datasource() li malloc error");
-         return -1;
-      }
-
-   ci->cluster = cluster;
-   strcpy( ci->group, group_name );
-   strcpy( ci->gmond_ip, ip);
-   ci->gmond_port = port;
-
-   li->val = ci;
-
-   llist_add( &(cluster->source_list), li);
-
-   cluster->num_sources++;
+   if (ai>bi) return 1;
    return 0;
 }
 
 static int
-ganglia_sync_hash_with_xml (cluster_t *cluster )
+cluster_dead_hosts_sort( llist_entry *a, llist_entry *b )
 {
-   char buf[BUFSIZ];
-   cluster_info_t *ci;
-   llist_entry *li;
+   double ai, bi;
+
+   ai = ((gexec_host_t*)(a->val))->last_reported;
+   bi = ((gexec_host_t*)(b->val))->last_reported;
+
+   if (ai<bi) return 1;
+   return 0;
+}
+
+int
+gexec_cluster (gexec_cluster_t *cluster, char *ip, unsigned short port)
+{
    XML_Parser xml_parser;
+   g_tcp_socket *gmond_socket;
+#if 0
    int gmond_fd;
-   FILE *gmond_fp;
-   struct timeval tv;
+#endif
 
    if ( cluster == NULL )
       {
-         err_msg("ganglia_sync_hash_with_xml got a NULL cluster pointer");
-         return -1;
+         gexec_errno = 2;
+         return gexec_errno;
       }
 
-   /* Check if we even need to sync the hash */
-   gettimeofday(&tv, NULL);
-   if ( (tv.tv_sec - cluster->last_updated) < 30 )
+   gmond_socket = g_tcp_socket_connect( ip, port ); 
+   if (! gmond_socket->sockfd )
       {
-         return 0;
+         gexec_errno = 3;
+         return gexec_errno;
       }
 
-   /* Reset */
-   cluster->num_nodes = 0;
-
-   /* Collect data from all cluster sources */
-   for (li = cluster->source_list; li != NULL; li = li->next)
+   debug_msg("Connected to socket %s:%d", ip, port);
+ 
+   xml_parser = XML_ParserCreate (NULL);
+   if (! xml_parser)
       {
-         if(li->val == NULL)
-            continue;
-
-         ci = (cluster_info_t *)li->val;
-         gmond_fd = tcp_connect (ci->gmond_ip, ci->gmond_port);
-         if (gmond_fd < 0)
-            {
-               err_msg("ganglia_sync_hash_with_xml unable to connect with %s:%hd",
-                        ci->gmond_ip, ci->gmond_port);
-               return -1;
-            }
- 
-         gmond_fp = fdopen (gmond_fd, "r");
-         if (gmond_fp == NULL)
-            {
-               err_msg("ganglia_sync_hash_with_xml fdopen() error");
-               return -1;
-            }
- 
-         xml_parser = XML_ParserCreate (NULL);
-         if (! xml_parser)
-            {
-               err_msg ( "Couldn't allocate memory for parser");
-               return -1;
-            }
-
-         XML_SetElementHandler (xml_parser, start, end);
-         XML_SetUserData( xml_parser, ci); 
-
-         for (;;)
-            {
-               int done;
-               int len;
-
-               len = fread (buf, 1, BUFSIZ, gmond_fp);
-               if (ferror (gmond_fp))
-	               {
-                     err_msg("ganglia_sync_hash_with_xml fread error");
-	                  return -1;
-	               }
-               done = feof (gmond_fp);
-
-               if (!XML_Parse (xml_parser, buf, len, done))
-	               {
-	                  err_msg ("ganglia_sync_hash_with_xml() parse error at line %d:\n%s\n",
-		                         XML_GetCurrentLineNumber (xml_parser),
-		                         XML_ErrorString (XML_GetErrorCode (xml_parser)));
-                     return -1;
-	               }
-
-               if (done)
-	               break;
-            }
-         close(gmond_fd);
+         gexec_errno = 4;
+         return gexec_errno;
       }
-  gettimeofday(&tv, NULL);
-  cluster->last_updated = tv.tv_sec;
-  return 0;
-}
 
-static int
-print_foo ( datum_t *key, datum_t *val, void *data )
-{
-   cluster_t *cluster = (cluster_t *)data;
-   datum_t *name;
-   printf("%16.16s ", (char *)key->data);
-   name = hash_lookup( key, cluster->host_cache );
-   printf("%s\n", (char *)name->data); 
-   if(name)
-      datum_free(name);
-   return 0;
-}
+   debug_msg("Created the XML Parser");
 
-/**
- * @fn int ganglia_cluster_print (cluster_t *cluster)
- * Print details about the cluster data structure (cluster_t).
- * Used primarily for debugging.
- */
-int
-ganglia_cluster_print (cluster_t *cluster)
-{
-   struct timeval tv;
+   memset( cluster, 0, sizeof(gexec_cluster_t));
 
-   gettimeofday(&tv, NULL);
+   XML_SetElementHandler (xml_parser, start, end);
+   XML_SetUserData       (xml_parser, cluster); 
 
-   ganglia_sync_hash_with_xml(cluster);
+   for (;;) 
+      {
+         int bytes_read;
+         void *buff = XML_GetBuffer(xml_parser, BUFSIZ);
+         if (buff == NULL) 
+            {
+               gexec_errno = 5;
+               goto error;
+            }
 
-   printf("Summary report for Cluster [%s] at %s\n\n", cluster->name, ctime(&(tv.tv_sec)) );
+         debug_msg("Got the XML Buffer");
 
-   printf("There are %ld sources of data\n", cluster->num_sources);
-   printf("         Data Freshness: %s", ctime( &(cluster->last_updated) )  );
+         SYS_CALL( bytes_read, read(gmond_socket->sockfd, buff, BUFSIZ));
+         if (bytes_read < 0) 
+            {
+               gexec_errno = 6;
+               goto error;
+            }
 
-   printf("Number of Cluster Nodes: %d\n", cluster->num_nodes);
-   printf("   Number of Dead Nodes: %d\n\n", cluster->num_dead_nodes);
+        debug_msg("Read %d bytes of data", bytes_read);
 
-   printf("Healthy Nodes\n");
-   hash_foreach(cluster->nodes, print_foo, (void *)cluster);
-   printf("Dead Nodes\n");
-   hash_foreach(cluster->dead_nodes, print_foo, (void *)cluster);   
-   return 0;
+        if (! XML_ParseBuffer(xml_parser, bytes_read, bytes_read == 0)) 
+           {
+              gexec_errno = 7;
+              err_msg ("gexec_cluster() XML_ParseBuffer() error at line %d:\n%s\n",
+		                   XML_GetCurrentLineNumber (xml_parser),
+		                   XML_ErrorString (XML_GetErrorCode (xml_parser)));
+              goto error;
+           }
+
+        if (bytes_read == 0)
+           break;
+      }  
+
+   /* sort the list with least loaded on top */
+   llist_sort( cluster->hosts, load_sort);
+   /* sort the list with least loaded on top */
+   llist_sort( cluster->gexec_hosts, load_sort);
+   /* sort the list from latest crash to oldest */
+   llist_sort( cluster->dead_hosts, cluster_dead_hosts_sort);
+
+   gexec_errno = 0;
+
+  error:
+   XML_ParserFree(xml_parser);
+   g_tcp_socket_delete(gmond_socket);
+   return gexec_errno;
 }
