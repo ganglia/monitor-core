@@ -375,12 +375,11 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
       for(i=0; i< num; i++)
         {
 	  apr_socket_t *socket;
-	  char buf[max_udp_message_len]; 
-	  apr_size_t len = max_udp_message_len;
 	  apr_sockaddr_t *remotesa = NULL;
 	  char  *protocol, remoteip[256];
 	  apr_ipsubnet_t *ipsub;
-	  hostdata_t *hostdata = NULL;
+	  char buf[max_udp_message_len];
+	  apr_size_t len = max_udp_message_len;
 
 	  socket         = descs[i].desc.s;
 	  /* We could also use the apr_socket_data_get/set() functions
@@ -388,7 +387,6 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 	  protocol       = descs[i].client_data;
 
 	  apr_socket_addr_get(&remotesa, APR_REMOTE, socket);
-
 
 	  /* Grab the data */
 	  status = apr_socket_recvfrom(remotesa, socket, 0, buf, &len);
@@ -413,52 +411,36 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 		}
 	    }
 
-	  /* Grab this host's data */
-	  hostdata = find_host_data( remoteip, remotesa );
-	  if(!hostdata)
-	    {
-	      continue;
-	    }
-
-	  fprintf(stderr,"Got a message from %s that is %d bytes long\n",
-		  hostdata->hostname, len);
-	    
-#if 0
 	  if(!strcasecmp(protocol, "xdr"))
 	    {
 	      XDR x;
-	      gangliaMessage *msg = malloc(sizeof(gangliaMessage));
+	      gangliaMessage msg;
+	      hostdata_t *hostdata = NULL;
+	      gangliaOldMetric *old_metric;
 
               /* Create the XDR receive stream */
 	      xdrmem_create(&x, buf, max_udp_message_len, XDR_DECODE);
 
-              /* Flush the data in the (last) received gangliaMessage 
-	       * TODO: Free memory from xdr_string calls XDR_FREE */
-	      memset( &hdr, 0, sizeof(gangliaMessageHeader));
+              /* Flush the data */
+	      memset( &msg, 0, sizeof(gangliaMessage));
 
 	      /* Read the gangliaMessage from the stream */
-	      if(!xdr_gangliaMessageHeader(&x, &hdr))
+	      if(!xdr_gangliaMessage(&x, &msg))
                 {	
 	          continue;
 	        }
 
-	      fprintf(stderr,"hdr.index=%d ", hdr.index);
-	      if(hdr.index<1024)
+	      /* Check if this is an old metric format */
+	      old_metric = gangliaOldMetric_get( msg.format );
+	      if(old_metric)
 		{
-		  /* This is a 2.5.x data source */
-                  fprintf(stderr,"2.5.x data source\n"); 
+		  /* Move this data into a newer format (later) */
+		  fprintf(stderr,"Got a %s message from %s\n", old_metric->name, remoteip);
 		}
-	      else
-		{
-		  fprintf(stderr,"new data source\n");
-		}
-
-
+	      
 	      /* If I want to find out how much data I decoded 
 	      decoded = xdr_getpos(&x); */
 	    }
-#endif
-
         } 
     }
 }

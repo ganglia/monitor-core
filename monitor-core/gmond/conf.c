@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include "conf.h"
 
-#include "protocol.h"
-
-
 extern cfg_t *config_file;
 
 /* This function is necessary only because I need

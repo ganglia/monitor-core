@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <apr_strings.h>
 #include "apr_network_io.h"
 #include "apr_arch_networkio.h"
 
@@ -11,7 +12,6 @@
 #ifdef SOLARIS2
 #include <sys/sockio.h>  /* for SIOCGIFADDR */
 #endif
-
 
 /* This function is copied directly from the 
  * apr_sockaddr_ip_get() function and modified to take a static
@@ -165,86 +165,6 @@ create_tcp_server(apr_pool_t *context, apr_port_t port, char *bind)
   return sock;
 }
 
-#if 0
-#include <netinet/in.h>
-static int is_multicast(apr_sockaddr_t *address)
-{
-    switch (address->family)
-    {
-        case AF_INET:
-            return IN_MULTICAST(ntohl(*(long *)&addr->sin);
-
-#ifdef AF_INET6
-        case AF_INET6:
-            return IN6_IS_ADDR_MULTICAST(&addr->sin6);
-#endif
-    }
-
-    return 0;
-}
-#endif
-
-#if 0
-static int
-mcast_set_if(apr_socket_t *sock, apr_sockaddr_t **sa, const char *ifname)
-{
-	switch ( (*sa)->sa.sin.sin_family ) {
-	case AF_INET: {
-		struct in_addr		inaddr;
-		struct ifreq		ifreq;
-
-		if (ifname) 
-		  {
-	            strncpy(ifreq.ifr_name, ifname, IFNAMSIZ);
-		    if (ioctl(sock->socketdes, SIOCGIFADDR, &ifreq) < 0)
-		      return(-1);
-		    memcpy(&inaddr, 
-			   &((struct sockaddr_in *) &ifreq.ifr_addr)->sin_addr,
-			   sizeof(struct in_addr));
-                  } 
-		else
-		  {
-		    inaddr.s_addr = htonl(INADDR_ANY);	/* remove prev. set default */
-		  }
-
-		return(setsockopt(sock->socketdes, IPPROTO_IP, IP_MULTICAST_IF,
-                                  &inaddr, sizeof(struct in_addr)));
-	}
-
-#ifdef	AF_INET6
-	case AF_INET6: {
-		u_int	index;
-
-		if ( (index = ifindex) == 0) {
-			if (ifname == NULL) {
-				errno = EINVAL;	/* must supply either index or name */
-				return(-1);
-			}
-			if ( (index = if_nametoindex(ifname)) == 0) {
-				errno = ENXIO;	/* i/f name not found */
-				return(-1);
-			}
-		}
-		return(setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_MULTICAST_IF,
-						  &index, sizeof(index)));
-	}
-#endif
-
-	default:
-		errno = EPROTONOSUPPORT;
-		return(-1);
-	}
-}
-#endif
-
-static int
-set_interface( apr_socket_t *sock, struct ifreq *ifreq, char *ifname )
-{
-  memset(ifreq, 0, sizeof(struct ifreq));
-  strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
-  return ioctl(sock->socketdes, SIOCGIFADDR, ifreq);
-}
-
 static int
 mcast_set_ttl(apr_socket_t *socket, int val)
 {
@@ -308,13 +228,16 @@ mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
 	  memset(&ifreq,0, sizeof(ifreq));
 	  if(ifname)
 	    {
-	      if(set_interface(sock, ifreq, ifname) == -1)
+              memset(ifreq, 0, sizeof(struct ifreq));
+              strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
+              if(ioctl(sock->socketdes, SIOCGIFADDR, ifreq) == -1)
 		{
 		  return APR_EGENERAL;
 		}
 	    }
 	  else
 	    {
+	      /* wildcard address (let the kernel decide) */
 	      mreq->imr_interface.s_addr = htonl(INADDR_ANY);
 	    }
 
@@ -376,13 +299,32 @@ apr_socket_t *
 create_mcast_server(apr_pool_t *context, char *mcast_ip, apr_port_t port, char *bind, char *interface)
 {
   apr_status_t status;
-  /* i think we might want to check that bind and interface are sane later...
-   * might request to bind to an address that doesn't match the interface */
+  /* NOTE: If bind is set to mcast_ip in the configuration file, then we will bind the 
+   * the multicast address to the socket as well as the port and prevent any 
+   * datagrams that might be delivered to this port from being processed. Otherwise,
+   * packets destined to the same port (but a different multicast/unicast channel) will be
+   * processed. */
   apr_socket_t *socket = create_udp_server(context, port, bind);
   if(!socket)
     {
       return NULL;
     }
-  status = mcast_join(context,  socket, mcast_ip, port, interface );
-  return status == APR_SUCCESS? socket : NULL;
+
+  /* TODO: We can probe for a list of interfaces and perform multiple join calls for the same
+   * socket to have it listen for multicast traffic on all interfaces (important for
+   * multihomed machines). */
+  if(interface && !apr_strnatcasecmp(interface, "ALL"))
+    {
+      /* for(each interface)
+       * {
+       *   mcast_join(...);
+       * }
+       */
+    }
+  else
+    {
+      status = mcast_join(context,  socket, mcast_ip, port, interface );
+    }
+
+  return status == APR_SUCCESS? socket: NULL;
 }
