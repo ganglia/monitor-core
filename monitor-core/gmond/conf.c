@@ -174,6 +174,17 @@ static DOTCONF_CB(cb_mcast_channel)
   return NULL;
 }
 
+static void
+set_channel_defaults( channel_t *channel )
+{
+  channel->address = conf_strdup("239.2.11.71");
+  channel->port = conf_strdup("8649");
+  channel->action = conf_strdup("send");
+  channel->ttl  = 1;
+  channel->num_interfaces = 0;
+  channel->interfaces = NULL;
+}
+
 static DOTCONF_CB(cb_open_channel)
 {
   struct mycontext *context = (struct mycontext *)ctx;
@@ -182,8 +193,31 @@ static DOTCONF_CB(cb_open_channel)
   const char *err = 0;
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
 
+  fprintf(stderr,"<OPEN>\n");
+
   if(context->permissions & CHANNEL_SECTION)
     return "<Channel> cannot be nested";
+
+  if(!c->channel_given)
+    {
+      /* User has specified a channel but we're just going to overwrite
+         the first channel (which is set to the defaults) */
+      c->channel_given = 1;
+    }
+  else
+    {
+      /* Make room for the next channel */
+      c->current_channel++;
+      c->channels = (channel_t **)realloc( c->channels, (c->current_channel +1) * sizeof( channel_t *));
+      c->channels[c->current_channel] = (channel_t *)malloc(sizeof(channel_t));
+      if(!c->channels[c->current_channel])
+	{
+	  fprintf(stderr,"Unable to malloc space for new channel\n");
+	  exit(1);
+	}
+    }
+
+  set_channel_defaults( c->channels[c->current_channel] );
 
   context->permissions |= CHANNEL_SECTION;
   context->current_end_token = end_ChannelSection;
@@ -209,23 +243,6 @@ static DOTCONF_CB(cb_open_channel)
   if (err != end_ChannelSection)
     return err;
 
-  /* No errors, make room for a new channel */
-  if(!c->channel_given)
-    {
-      /* User has specified a channel but we're just going to overwrite
-         the defaults channel */
-      c->channel_given = 1; 
-    }
-  else
-    {
-      /* Make room for the next channel */
-      c->current_channel++;
-      c->channels = (channel_t **)realloc( c->channels, 
-                    c->current_channel +1 * sizeof( channel_t *));
-      
-      c->channels[c->current_channel] = (channel_t *)malloc(sizeof(channel_t));
-    }
-
   return NULL;
 }
 
@@ -233,7 +250,9 @@ static DOTCONF_CB(cb_open_channel)
 static DOTCONF_CB(cb_close_channel)
 {
   struct mycontext *context = (struct mycontext *)ctx;
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
   static char buf[1024];
+  channel_t *channel;
   
   if (!context->current_end_token)
     {
@@ -247,12 +266,33 @@ static DOTCONF_CB(cb_close_channel)
       return buf;
     }
 
+  fprintf(stderr,"</CLOSE>\n");
+  /* Count the number of actions required for the thread pools later */
+  channel = c->channels[c->current_channel];
+  if(strstr(channel->action, "send"))
+     {
+       c->num_send_channels++;
+       if(channel->num_interfaces)
+	 {
+           c->num_send_channels += channel->num_interfaces;
+	 }
+     }
+  if(strstr(c->channels[c->current_channel]->action, "receive"))
+    {
+      c->num_receive_channels++;
+      if(channel->num_interfaces)
+	{
+	  c->num_receive_channels += channel->num_interfaces;
+	}
+    }
+
   return context->current_end_token;
 }
 
 static DOTCONF_CB(cb_address)
 {
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+
   c->channels[c->current_channel]->address = conf_strdup( cmd->data.str );
   return NULL;
 }
@@ -260,6 +300,7 @@ static DOTCONF_CB(cb_address)
 static DOTCONF_CB(cb_port)
 {
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+
   c->channels[c->current_channel]->port = conf_strdup( cmd->data.str );
   return NULL;
 }
@@ -291,7 +332,7 @@ static DOTCONF_CB(cb_action)
 {
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
 
-  c->channels[c->current_channel]->action = conf_strdup( cmd->data.str );
+  c->channels[c->current_channel]->action = conf_strdup( cmd->data.str);
   return NULL;
 }
 
@@ -511,6 +552,8 @@ set_defaults(gmond_config_t *config )
    config->location = conf_strdup("unspecified");
 
    config->current_channel = 0; 
+   config->num_send_channels = 0;
+   config->num_receive_channels =0;
 
    /* Make room for the first channel */
    config->channels = (channel_t **) malloc ( sizeof(channel_t *));
@@ -526,14 +569,10 @@ set_defaults(gmond_config_t *config )
        exit(1);
      }
 
-   /* Start backward compatibility attempt */
-   config->channels[0]->address = conf_strdup("239.2.11.71");
-   config->channels[0]->port = conf_strdup("8649");
-  
-   /* We don't explicitly set any interfaces */
-   config->channels[0]->num_interfaces = 0;
-   config->channels[0]->ttl = 1 ;
-   /* End backward compatibility attempt */
+   set_channel_defaults( config->channels[0] );
+   /* We want to send/receive on the default channel for backward compatibility */
+   config->channels[0]->action = conf_strdup("send_receive");
+
    
    config->xml_port = conf_strdup("8649");
    config->compressed_xml_port = conf_strdup("8650");
@@ -565,7 +604,10 @@ print_conf( gmond_config_t *config )
    printf("latlong is %s\n", config->latlong);
    printf("cluster URL is %s\n", config->url);
    printf("host location is (x,y,z): %s\n", config->location);
-   printf("There are %d channels\n", config->current_channel+1);
+
+   printf("There are %d channels (%d send %d receive)\n", 
+	  config->current_channel+1, config->num_send_channels, config->num_receive_channels);
+
    for(i=0; i<= config->current_channel; i++)
      {
        c = config->channels[i];
