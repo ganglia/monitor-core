@@ -58,7 +58,7 @@ fi
 
 AM_INIT_AUTOMAKE(ganglia-monitor-core, $GANGLIA_VERSION)
 
-sinclude(config/apr_common.m4)
+#sinclude(config/apr_common.m4)
 
 AC_SUBST(GANGLIA_MAJOR_VERSION)
 AC_SUBST(GANGLIA_MINOR_VERSION)
@@ -97,15 +97,21 @@ AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
 AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
 AC_CYGWIN
 
-
+# Configuring the source in the ./srclib...
 nl='
 '
+ganglia_popdir=`pwd`
+
 echo $ac_n "${nl}Configuring libmetrics ...${nl}"
-APR_SUBDIR_CONFIG(srclib/libmetrics, [ --cache-file=../../config.cache ])
+cd srclib/libmetrics && ./configure --cache-file=$ganglia_popdir/config.cache
+cd $ganglia_popdir
+#APR_SUBDIR_CONFIG(srclib/libmetrics, [ --cache-file=../../config.cache ])
 
 echo $ac_n "${nl}Configuring expat ...${nl}"
-APR_SUBDIR_CONFIG(srclib/expat,
-[ --prefix=$prefix --cache-file=../../config.cache ])
+cd srclib/expat && ./configure --cache-file=$ganglia_popdir/config.cache
+cd $ganglia_popdir
+#APR_SUBDIR_CONFIG(srclib/expat,
+#[ --prefix=$prefix --cache-file=../../config.cache ])
 
 
 dnl ##################################################################
