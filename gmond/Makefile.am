@@ -22,6 +22,7 @@ gmond.conf.html: conf.pod
 gmond_LDADD   = $(top_builddir)/lib/libganglia.la \
 	        $(top_builddir)/lib/libgetopthelper.a \
                 $(top_builddir)/srclib/libmetrics/libmetrics.la \
-		$(top_builddir)/srclib/confuse/src/libconfuse.la
+		$(top_builddir)/srclib/confuse/src/libconfuse.la \
+		$(top_builddir)/srclib/apr/libapr-0.la
 gmond_LDFLAGS = -static
 gmond_DEPENDENCIES = $(gmond_LDADD)
