@@ -125,7 +125,7 @@ hash_create (size_t size)
 
    for (i = 0; i < hash->size; i++)
       {
-	      hash->node[i] = malloc( sizeof(node_t) );
+         hash->node[i] = malloc( sizeof(node_t) );
          if ( hash->node[i] == NULL )
             break;
          /* Initialize */
@@ -267,7 +267,7 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
   if (bucket == NULL)
      {
         WRITE_UNLOCK(hash, i);
-	     return NULL;
+        return NULL;
      }
   bucket->key = datum_dup (key);
   if ( bucket->key == NULL )
@@ -307,11 +307,11 @@ hash_lookup (datum_t *key, hash_t * hash)
   if ( bucket == NULL )
      {
         READ_UNLOCK(hash, i);
-	     return NULL;
+        return NULL;
      }
 
   for (; bucket != NULL; bucket = bucket->next)
-	 {
+    {
       if ( key->size != bucket->key->size )
          continue;
  
@@ -321,7 +321,7 @@ hash_lookup (datum_t *key, hash_t * hash)
             READ_UNLOCK(hash, i);
             return val;
          }
-	 }
+    }
 
   READ_UNLOCK(hash, i);
   return NULL;
@@ -341,39 +341,64 @@ hash_delete (datum_t *key, hash_t * hash)
   if ( hash->node[i]->bucket == NULL )
      {
         WRITE_UNLOCK(hash,i);
-	     return NULL;
+        return NULL;
      }
 
   for (last = NULL,  bucket = hash->node[i]->bucket;
-		 bucket != NULL; last = bucket, bucket = bucket->next)
-	 {
-		if (bucket->key->size == key->size 
+       bucket != NULL; last = bucket, bucket = bucket->next)
+    {
+      if (bucket->key->size == key->size 
           && !strncmp (key->data, bucket->key->data, key->size))
-		  {
-			 if (last != NULL)
-				{
-				  val = bucket->val;
-				  last->next = bucket->next;
+        {
+          if (last != NULL)
+            {
+              val = bucket->val;
+              last->next = bucket->next;
               datum_free(bucket->key);
-				  free (bucket);
+              free (bucket);
               WRITE_UNLOCK(hash,i);
-				  return val;
-				}
+              return val;
+            }
 
-			 else
-				{
-				  val = bucket->val;
-				  hash->node[i]->bucket = bucket->next;
-				  datum_free (bucket->key);
-				  free (bucket);
+          else
+            {
+              val = bucket->val;
+              hash->node[i]->bucket = bucket->next;
+              datum_free (bucket->key);
+              free (bucket);
               WRITE_UNLOCK(hash,i);
-				  return val;
-				}
-		  }
-	 }
+              return val;
+            }
+        }
+    }
 
   WRITE_UNLOCK(hash,i);
   return NULL;
+}
+
+/* Walk the hash table from hash index "from" until the end, or
+ * until stopped by walk function. Similar to hash_foreach, used by cleanup.
+ * Use of hint makes O(n^2) cleanup into O(n).
+ */
+int
+hash_walkfrom (hash_t * hash, size_t from,
+   int (*func)(datum_t *, datum_t *, void *), void *arg)
+{
+  int stop=0;
+  size_t i;
+  bucket_t *bucket;
+
+  for (i = from; i < hash->size && !stop; i++)
+    {
+       READ_LOCK(hash, i);
+       for (bucket = hash->node[i]->bucket; bucket != NULL; bucket = bucket->next)
+         {
+           stop = func(bucket->key, bucket->val, arg);
+           if (stop) break;
+         }
+       READ_UNLOCK(hash, i);
+    }
+   return stop;
 }
 
 int
@@ -384,13 +409,14 @@ hash_foreach (hash_t * hash, int (*func)(datum_t *, datum_t *, void *), void *ar
   bucket_t *bucket;
 
   for (i = 0; i < hash->size && !stop; i++)
-	 {
+    {
        READ_LOCK(hash, i);
        for (bucket = hash->node[i]->bucket; bucket != NULL; bucket = bucket->next)
          {
-			  stop = func(bucket->key, bucket->val, arg);
-			}
+           stop = func(bucket->key, bucket->val, arg);
+           if (stop) break;
+         }
        READ_UNLOCK(hash, i);
-	 }
+    }
    return stop;
 }
