@@ -246,6 +246,17 @@ collection_group { \n\
     name = \"cpu_wio\" \n\
     value_threshold = \"1.0\" \n\
   } \n\
+  /* The next two metrics are optional if you want more detail... \n\
+     ... since they are accounted for in cpu_system.  \n\
+  metric { \n\
+    name = \"cpu_intr\" \n\
+    value_threshold = \"1.0\" \n\
+  } \n\
+  metric { \n\
+    name = \"cpu_sintr\" \n\
+    value_threshold = \"1.0\" \n\
+  } \n\
+  */ \n\
 } \n\
 \n\
 collection_group { \n\

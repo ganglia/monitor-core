@@ -14,7 +14,7 @@ gmond.conf.5: conf.pod gmond.conf.html
 	pod2man --name="gmond.conf" --section=5 conf.pod --center="Ganglia Monitoring System" --release="ganglia/@VERSION@" > gmond.conf.5
 
 gmond.conf.html: conf.pod
-	pod2html --noindex --title="gmond.conf @VERSION@" --infile=conf.pod --outfile=gmond.conf.html
+	pod2html --title="Ganglia Monitoring Daemon v@VERSION@ Configuration" --header --infile=conf.pod --outfile=gmond.conf.html
 
 #monitor.c server.c listen.c cleanup.c \
 #metric.h dtd.h 
