@@ -661,7 +661,7 @@ set_defaults(gmond_config_t *config )
 }
 
 void
-print_conf( gmond_config_t *config )
+gmond_print_conf( gmond_config_t *config )
 {
    int i,j;
    channel_t *c;
@@ -816,12 +816,6 @@ get_gmond_config( char *conffile )
       {
          dotconf_cleanup(configfile);
          return -1;
-      }
-
-   if(gmond_config.debug_level)
-      {
-         fprintf(stderr,"%s configuration\n", conffile);
-         print_conf( &gmond_config );
       }
 
    dotconf_cleanup(configfile);
