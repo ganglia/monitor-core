@@ -1,8 +1,22 @@
 /* $Id$ */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <pwd.h>
+#include <signal.h>
+
+#include "libmetrics.h"
+
 #include "interface.h"
-#include "gangliaconf.h"
 #include "dotconf.h"
 
+#include "lib/debug_msg.h"
 #include "lib/error.h"
 #include "lib/hash.h"
 #include "lib/llist.h"
@@ -13,12 +27,9 @@
 #include "lib/barrier.h"
 #include "lib/become_a_nobody.h"
 #include "lib/net.h"
-#include <signal.h>
+/*
 #include "metric.h"
-#include <pwd.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+*/
 #include "cmdline.h"
 
 /* The entire cluster this gmond knows about */
