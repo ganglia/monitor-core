@@ -17,7 +17,7 @@ start (void *data, const char *el, const char **attr)
   cluster_info_t *ci = (cluster_info_t *)data;
   cluster_t *cluster;
   datum_t key, val, *rval;
-  host_t working_host;
+  ghost_t working_host;
   static char working_host_name[MAXHOSTNAMELEN];
   static char working_host_ip[16];
   static int  working_host_last_reported;

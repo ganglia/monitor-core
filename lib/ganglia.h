@@ -62,7 +62,7 @@ typedef struct
       hash_t *metrics; /**< All builtin metrics it has reported */
       hash_t *gmetric_metrics; /**< All custom metrics it has reported */
    }
-host_t;
+ghost_t;
 
 /**
  * Ganglia Cluster Datatype.
