@@ -109,8 +109,9 @@ slurpfile ( char * filename, char *buffer, int buflen )
          close(fd);
          return SYNAPSE_FAILURE;
       }
-
    close(fd);
+
+   buffer[read_len] = '\0';
    return read_len;
 }   
 
