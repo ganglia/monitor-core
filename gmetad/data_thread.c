@@ -71,8 +71,8 @@ data_thread ( void *arg )
          read_index = 0;
          for(;;)
             {
-               /* Timeout set to 5 seconds */
-               rval = poll( &struct_poll, 1, 5000);
+               /* Timeout set to 10 seconds */
+               rval = poll( &struct_poll, 1, 10000);
                if( rval < 0 )
                   {
                      /* Error */
