@@ -41,7 +41,6 @@ extern g_val_t mem_cached_func(void);
 extern g_val_t swap_free_func(void);
 extern g_val_t gexec_func(void);
 extern g_val_t heartbeat_func(void);
-extern g_val_t mtu_func(void);
 extern g_val_t location_func(void);
 
 /* the following are additional internal metrics added by swagner
@@ -52,6 +51,10 @@ extern g_val_t location_func(void);
         
 #ifdef SOLARIS
         
+extern g_val_t bytes_in_func(void);
+extern g_val_t bytes_out_func(void);
+extern g_val_t pkts_in_func(void);
+extern g_val_t pkts_out_func(void);
 extern g_val_t bread_sec_func(void);
 extern g_val_t bwrite_sec_func(void);
 extern g_val_t lread_sec_func(void);
@@ -161,7 +164,12 @@ KEY(location), -1, -1,  -1, 900, 1200, g_string, "(x,y,z)", "%s" }
 
 #ifdef SOLARIS
 ,
-KEY(cpu_wio),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
+KEY(bytes_out),  4096, 15,   20,  60,  90, g_float, "bytes/sec", "%.2f" },
+KEY(bytes_in),   4096, 15,   20,  60,  90, g_float, "bytes/sec", "%.2f" },
+KEY(pkts_in), 256, 15,   20,  50,  90, g_float, "packets/sec", "%.2f" },
+KEY(pkts_out),   256, 15,   20,  60,  90, g_float, "packets/sec", "%.2f" },
+
+KEY(cpu_wio),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 
 /* buffer reads and writes, adjusted per second */
 
