@@ -84,7 +84,7 @@ echo "Version: $GANGLIA_VERSION ($GANGLIA_RELEASE_NAME)"
 echo "Library: Release $LT_RELEASE $LT_CURRENT:$LT_REVISION:$LT_AGE"
 echo ""
 
-AM_INIT_AUTOMAKE(ganglia-monitor-core, $GANGLIA_VERSION)
+AM_INIT_AUTOMAKE(ganglia, $GANGLIA_VERSION)
 
 ########################
 AC_CANONICAL_HOST
