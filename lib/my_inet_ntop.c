@@ -1,5 +1,5 @@
 /* $Id$ */
-#include "gangliaconf.h"
+#include "ganglia_private.h"
 
 const char *
 my_inet_ntop( int af, void *src, char *dst, size_t cnt )
