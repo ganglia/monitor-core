@@ -1,0 +1,26 @@
+#
+# The server substitution assumes prefix and exec_prefix are same.
+# This is the default, unless the user requests otherwise.
+# 
+# 1. This file should be installed as /etc/xinetd.d/gexecd. 
+#
+# 2. Add the following line to /etc/services
+# 
+#      gexec             2875/tcp                      # Caltech gexec
+#
+# 3. Send a SIGUSR2 to xinetd to tell it to reread it's configuration 
+#    files after instal:l
+#
+#      kill -USR2 `cat /var/run/xinetd.pid`
+# 
+service gexec
+{
+    socket_type  = stream
+    protocol     = tcp
+    wait         = no
+    user         = root
+    server       = @prefix@/sbin/gexecd
+    server_args  = -i
+    disable      = no
+    port         = 2875
+}
