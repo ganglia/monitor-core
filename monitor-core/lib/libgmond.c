@@ -233,6 +233,18 @@ collection_group { \n\
     name = \"cpu_aidle\" \n\
     value_threshold = \"5.0\" \n\
   } \n\
+  metric { \n\
+    name = \"cpu_wio\" \n\
+    value_threshold = \"1.0\" \n\
+  } \n\
+  metric { \n\
+    name = \"cpu_intr\" \n\
+    value_threshold = \"1.0\" \n\
+  } \n\
+  metric { \n\
+    name = \"cpu_sintr\" \n\
+    value_threshold = \"1.0\" \n\
+  } \n\
   /* Load Averages */ \n\
   metric { \n\
     name = \"load_one\" \n\
@@ -290,43 +302,6 @@ collection_group { \n\
   } \n\
 } \n\
 \n\
-"
-
-#define SOLARIS_SPECIFIC_CONFIGURATION "\
-/* solaris specific metrics begin */ \n\
-collection_group { \n\
-  collect_every = 950 \n\
-  time_threshold = 3800 \n\
-  metric { \n\
-    name = \"cpu_wio\" \n\
-    value_threshold = \"5.0\" \n\
-  } \n\
-} \n\
-\n\
-collection_group { \n\
-  collect_every = 20 \n\
-  time_threshold = 90 \n\
-  metric { \n\
-   name = \"rcache\" \n\
-   value_threshold = 1.0 \n\
-  } \n\
-  metric { \n\
-   name = \"wcache\" \n\
-   value_threshold = 1.0 \n\
-  } \n\
-  metric { \n\
-    name = \"phread_sec\" \n\
-    value_threshold = 1.0 \n\
-  } \n\
-  metric { \n\
-    name = \"phwrite_sec\" \n\
-    value_threshold = 1.0 \n\
-  }\n\
-}\n\
-/* end solaris specific metrics */ \n\
-\n\
-"
-#define LINUX_FREEBSD_COMMON_CONFIG "\
 collection_group { \n\
   collect_every = 40 \n\
   time_threshold = 300 \n\
@@ -373,24 +348,41 @@ collection_group { \n\
 \n\
 "
 
-#define HPUX_SPECIFIC_CONFIGURATION "\n\
+#define SOLARIS_SPECIFIC_CONFIGURATION "\
+/* solaris specific metrics begin */ \n\
+collection_group { \n\
+  collect_every = 950 \n\
+  time_threshold = 3800 \n\
+  metric { \n\
+    name = \"cpu_wio\" \n\
+    value_threshold = \"5.0\" \n\
+  } \n\
+} \n\
+\n\
 collection_group { \n\
   collect_every = 20 \n\
   time_threshold = 90 \n\
   metric { \n\
-    name = \"cpu_intr\" \n\
+   name = \"rcache\" \n\
+   value_threshold = 1.0 \n\
+  } \n\
+  metric { \n\
+   name = \"wcache\" \n\
+   value_threshold = 1.0 \n\
+  } \n\
+  metric { \n\
+    name = \"phread_sec\" \n\
     value_threshold = 1.0 \n\
   } \n\
   metric { \n\
-    name = \"cpu_ssys\" \n\
+    name = \"phwrite_sec\" \n\
     value_threshold = 1.0 \n\
-  } \n\
-  metric { \n\
-    name = \"cpu_wait\" \n\
-    value_threshold = 1.0 \n\
-  } \n\
-} \n\
+  }\n\
+}\n\
+/* end solaris specific metrics */ \n\
 \n\
+"
+#define HPUX_SPECIFIC_CONFIGURATION "\n\
 collection_group { \n\
   collect_every = 40 \n\
   time_threshold = 90 \n\
@@ -420,9 +412,6 @@ build_default_gmond_configuration(apr_pool_t *context)
   default_gmond_configuration = apr_pstrdup(context, BASE_GMOND_CONFIGURATION);
 #if SOLARIS
   default_gmond_configuration = apr_pstrcat(context, default_gmond_configuration, SOLARIS_SPECIFIC_CONFIGURATION, NULL);
-#endif
-#if LINUX || FREEBSD
-  default_gmond_configuration = apr_pstrcat(context, default_gmond_configuration, LINUX_FREEBSD_COMMON_CONFIG, NULL);
 #endif
 #if HPUX
   default_gmond_configuration = apr_pstrcat(context, default_gmond_configuration, HPUX_SPECIFIC_CONFIGURATION, NULL);
