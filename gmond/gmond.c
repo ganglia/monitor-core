@@ -177,10 +177,6 @@ main ( int argc, char *argv[] )
          err_quit("failed to process %s. Exiting.", args_info.conf_arg);
       }
 
-/*
-   print_conf(&gmond_config);
-*/
-
    /* If given, use command line directives over config file ones. */
    if (args_info.debug_given) {
       gmond_config.debug_level = args_info.debug_arg;
@@ -255,16 +251,6 @@ main ( int argc, char *argv[] )
          debug_msg("Starting socket to listen on compressed XML port %s", gmond_config.compressed_xml_port);
          compressed_socket = Tcp_listen(NULL, gmond_config.compressed_xml_port, &salen);
 
-#if 0
-         /* threads to answer requests for XML */
-         if(barrier_init(&server_barrier, gmond_config.xml_threads + 
-                                          gmond_config.compressed_xml_threads))
-            {
-               perror("barrier_init() error");
-               return -1;
-            }
-#endif
-
          /* Spin off the threads for raw XML */
          for ( i=0 ; i < gmond_config.xml_threads; i++ )
             {
@@ -287,7 +273,7 @@ main ( int argc, char *argv[] )
 
    if(! gmond_config.mute )
       {
-         collect_send_pool = g3_thread_pool_create( gmond_config.num_send_channels + 1,128,1);
+         collect_send_pool = g3_thread_pool_create( 4, 128, 1);
          for(i = 0 ; i < gmond_config.num_send_channels; i++)
            {
              send_sockets[i] = Udp_connect( gmond_config.send_channels[i],
@@ -302,9 +288,14 @@ main ( int argc, char *argv[] )
                  Mcast_set_ttl( send_sockets[i], gmond_config.mcast_ttl); 
                }
            }
-        g3_run( collect_send_pool, monitor_thread, NULL);
-      }
 
+        /* Start up the threads for monitoring and sending metrics */
+        for( i = 1 ; i < num_key_metrics; i++ )
+          {
+            metric[i].key = i;
+            g3_run( collect_send_pool, monitor_thread, &metric[i]);
+          }
+      }
    
    for(;;)
       {
