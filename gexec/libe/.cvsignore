@@ -10,3 +10,7 @@ config.log
 config.status
 configure.lineno
 stamp-h1
+depcomp
+install-sh
+missing
+mkinstalldirs
