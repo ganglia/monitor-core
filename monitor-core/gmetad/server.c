@@ -7,7 +7,7 @@
 #include "gmetad.h"
 
 #include "lib/llist.h"
-#include "lib/zio.h"
+#include "lib/gzio.h"
 #include "libunp/unp.h"
 
 extern int server_socket;
@@ -52,7 +52,7 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
             break;
       }
 
-   return zio_printf(client->io, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
+   return ganglia_gzprintf(client->io, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
       "TYPE=\"%s\" UNITS=\"%s\" SLOPE=\"%s\" SOURCE=\"%s\"/>\n",
       name, sum, metric->num,
       getfield(metric->strings, metric->type),
@@ -67,7 +67,7 @@ source_summary(Source_t *source, client_t *client)
 {
    int rc;
 
-   rc=zio_printf(client->io, "<HOSTS UP=\"%u\" DOWN=\"%u\" SOURCE=\"gmetad\"/>\n",
+   rc=ganglia_gzprintf(client->io, "<HOSTS UP=\"%u\" DOWN=\"%u\" SOURCE=\"gmetad\"/>\n",
       source->hosts_up, source->hosts_down);
    if (rc<=0) return 1;
 
@@ -80,7 +80,7 @@ metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
    char *name = (char*) key->data;
    Metric_t *metric = (Metric_t*) self;
 
-   return zio_printf(client->io, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
+   return ganglia_gzprintf(client->io, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
       "UNITS=\"%s\" TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" SLOPE=\"%s\" "
       "SOURCE=\"%s\"/>\n",
       name, getfield(metric->strings, metric->valstr),
@@ -103,7 +103,7 @@ host_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
    Host_t *host = (Host_t*) self;
 
    /* Note the hash key is the host's IP address. */
-   return zio_printf(client->io, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
+   return ganglia_gzprintf(client->io, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
       "TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" LOCATION=\"%s\" GMOND_STARTED=\"%u\">\n",
       name, getfield(host->strings, host->ip), host->reported, host->tn,
       host->tmax, host->dmax, getfield(host->strings, host->location),
@@ -114,7 +114,7 @@ host_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 int
 host_report_end(Generic_t *self, client_t *client, void *arg)
 {
-   return zio_printf(client->io, "</HOST>\n") <= 0? 1: 0;
+   return ganglia_gzprintf(client->io, "</HOST>\n") <= 0? 1: 0;
 }
 
 
@@ -126,14 +126,14 @@ source_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 
    if (self->id == CLUSTER_NODE)
       {
-            return zio_printf(client->io, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%u\" OWNER=\"%s\" "
+            return ganglia_gzprintf(client->io, "<CLUSTER NAME=\"%s\" LOCALTIME=\"%u\" OWNER=\"%s\" "
                "LATLONG=\"%s\" URL=\"%s\">\n",
                name, source->localtime, getfield(source->strings, source->owner),
                getfield(source->strings, source->latlong),
                getfield(source->strings, source->url)) <= 0? 1: 0;
       }
 
-   return zio_printf(client->io, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" "
+   return ganglia_gzprintf(client->io, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" "
          "LOCALTIME=\"%u\">\n",
           name, getfield(source->strings, source->authority_ptr), source->localtime) <= 0? 1:0;
 }
@@ -144,9 +144,9 @@ source_report_end(Generic_t *self,  client_t *client, void *arg)
 {
 
    if (self->id == CLUSTER_NODE)
-      return zio_printf(client->io, "</CLUSTER>\n") <= 0? 1: 0;
+      return ganglia_gzprintf(client->io, "</CLUSTER>\n") <= 0? 1: 0;
 
-   return zio_printf(client->io, "</GRID>\n") <= 0? 1: 0;
+   return ganglia_gzprintf(client->io, "</GRID>\n") <= 0? 1: 0;
 }
 
 
@@ -156,14 +156,14 @@ root_report_start(client_t *client)
 {
    int rc;
 
-   rc = zio_printf(client->io, DTD);
+   rc = ganglia_gzprintf(client->io, DTD);
    if (rc <= 0) return 1;
 
-   rc = zio_printf(client->io, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
+   rc = ganglia_gzprintf(client->io, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
       VERSION);
    if (rc <= 0) return 1;
 
-   return zio_printf(client->io, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
+   return ganglia_gzprintf(client->io, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
        gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0)) <= 0? 1: 0;
 }
 
@@ -171,7 +171,7 @@ root_report_start(client_t *client)
 int
 root_report_end(client_t *client)
 {
-    return zio_printf(client->io, "</GRID>\n</GANGLIA_XML>\n") <= 0? 1: 0;
+    return ganglia_gzprintf(client->io, "</GRID>\n</GANGLIA_XML>\n") <= 0? 1: 0;
 }
 
 
@@ -519,8 +519,8 @@ server_thread (void *arg)
          else
             strcpy(request, "/");
 
-         client.io = zio_malloc();
-         zio_open( client.io, client.fd, "wb", gmetad_config.xml_compression_level);
+	 sprintf(mode, "wb%d", gmetad_config.xml_compression_level);
+         client.io = ganglia_gzdopen( client.fd, mode );
          if(!client.io)
            {
              err_msg("unable to create client stream");
@@ -552,7 +552,6 @@ server_thread (void *arg)
                err_msg("server_thread() %d unable to write root epilog", pthread_self() );
             }
 
-         zio_close( client.io);
-         zio_free( &(client.io) );
+         ganglia_gzclose( client.io);
       }
 }
