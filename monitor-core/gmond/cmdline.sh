@@ -3,7 +3,7 @@
 
 package "gmond"
 purpose "The Ganglia Monitoring Daemon (gmond) listens to the cluster
-multicast channel, stores the data in-memory and when requested
+message channel, stores the data in-memory and when requested
 will output an XML description of the state of the cluster"
 
 option "conf" c "Location of gmond configuration file" string default="/etc/gmond.conf" no

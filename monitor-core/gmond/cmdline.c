@@ -35,7 +35,7 @@ cmdline_parser_print_help (void)
   printf("\n"
   "Purpose:\n"
   "  The Ganglia Monitoring Daemon (gmond) listens to the cluster\n"
-  "  multicast channel, stores the data in-memory and when requested\n"
+  "  message channel, stores the data in-memory and when requested\n"
   "  will output an XML description of the state of the cluster\n"
   "\n"
   "Usage: %s [OPTIONS]...\n", CMDLINE_PARSER_PACKAGE);
