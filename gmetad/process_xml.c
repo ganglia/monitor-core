@@ -16,9 +16,9 @@ typedef struct
    {
       int rval;
       unsigned int index;
-      val_t        overall_sum[MAX_METRIC_HASH_VALUE];
+      long double  overall_sum[MAX_METRIC_HASH_VALUE];
       unsigned int overall_num[MAX_METRIC_HASH_VALUE];
-      val_t                sum[MAX_METRIC_HASH_VALUE];
+      long double          sum[MAX_METRIC_HASH_VALUE];
       unsigned int         num[MAX_METRIC_HASH_VALUE];
       char *cluster;
       char *host;
@@ -35,6 +35,10 @@ start (void *data, const char *el, const char **attr)
   int tn, tmax, index, is_volatile, is_numeric, len;
   struct ganglia_metric *gm;
   struct xml_tag *xt;
+
+  /* We got an error before */
+  if( xml_data->rval )
+     return;
 
   if(! (xt = in_xml_list ( (char *)el, strlen( el ))) )
      return;
@@ -103,19 +107,19 @@ start (void *data, const char *el, const char **attr)
                  switch ( gm->type )
                     {
                        case FLOAT:
-                          xml_data->sum[hash_val].f +=  strtod( (const char *)(xml_data->metric_val), (char **)NULL);
+                          xml_data->sum[hash_val] +=  (long double)(strtod( (const char *)(xml_data->metric_val), (char **)NULL));
                           xml_data->num[hash_val]++;
-                          debug_msg("%d sum = %f num = %d", hash_val, xml_data->sum[hash_val].f, xml_data->num[hash_val] );
+                          debug_msg("%d sum = %Lf num = %d", hash_val, xml_data->sum[hash_val], xml_data->num[hash_val] );
                           break;
                        case UINT32:
-                          xml_data->sum[hash_val].uint32 += strtoul(xml_data->metric_val, (char **)NULL, 10);
+                          xml_data->sum[hash_val] += (long double)(strtoul(xml_data->metric_val, (char **)NULL, 10));
                           xml_data->num[hash_val]++;
-                          debug_msg("%d sum = %ld num = %d", hash_val, xml_data->sum[hash_val].uint32, xml_data->num[hash_val]); 
+                          debug_msg("%d sum = %Lf num = %d", hash_val, xml_data->sum[hash_val], xml_data->num[hash_val]); 
                           break;
                        case DOUBLE:
-                          xml_data->sum[hash_val].d = strtod( (const char *)(xml_data->metric_val), (char **)NULL) ;
+                          xml_data->sum[hash_val] += (long double)(strtod( (const char *)(xml_data->metric_val), (char **)NULL));
                           xml_data->num[hash_val]++;
-                          debug_msg("%d sum = %f num = %d", hash_val, xml_data->sum[hash_val].d, xml_data->num[hash_val]);
+                          debug_msg("%d sum = %Lf num = %d", hash_val, xml_data->sum[hash_val], xml_data->num[hash_val]);
                           break;
                     }
               }
@@ -208,28 +212,9 @@ end (void *data, const char *el)
                         /* Skip it if we have no hosts reporting the data */
                         if (! xml_data->num[i] )
                            continue;
-
-                        switch ( gm->type )
-                           {
-                              case FLOAT:
-                                 sprintf( sum, "%f", xml_data->sum[i].f);
-                                 sprintf( num, "%d", xml_data->num[i] );
-                                 xml_data->overall_sum[i].f += xml_data->sum[i].f;
-                                 xml_data->overall_num[i]   += xml_data->num[i];                                  
-                                 break;
-                              case DOUBLE:
-                                 sprintf( sum, "%f", xml_data->sum[i].d); 
-                                 sprintf( num, "%d", xml_data->num[i] ); 
-                                 xml_data->overall_sum[i].d += xml_data->sum[i].d;
-                                 xml_data->overall_num[i]   += xml_data->num[i];
-                                 break;
-                              case UINT32:
-                                 sprintf( sum, "%d", xml_data->sum[i].uint32);
-                                 sprintf( num, "%d", xml_data->num[i] );
-                                 xml_data->overall_sum[i].uint32 += xml_data->sum[i].uint32;
-                                 xml_data->overall_num[i]        += xml_data->num[i];
-                                 break;
-                           }
+                     
+                        sprintf( sum, "%Lf", xml_data->sum[i] );
+                        sprintf( num, "%d", xml_data->num[i] );
 
                         /* Save the data to a round robin database */
                         write_data_to_rrd( (char *)(xml_data->cluster), NULL, (char *)metrics[i].name, sum, num, "15");

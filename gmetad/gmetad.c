@@ -16,6 +16,7 @@
 #include <pwd.h>
 
 hash_t *xml;
+
 hash_t *sources;
 
 extern void *data_thread ( void *arg );
