@@ -269,7 +269,7 @@ cpu_num_func ( void )
       cpu_num = get_nprocs();
    }
 #endif
-   val.uint16 = 0;
+   val.uint16 = 1;/**FIXME: assuming only one processor right now */
 
    return val;
 }

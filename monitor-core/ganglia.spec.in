@@ -135,6 +135,26 @@ elif [ "$1" > "1" ]; then
    /etc/rc.d/init.d/gmond restart
 fi
 
+`rpm -q ganglia-monitor-core-gmond| grep "is not installed" > /dev/null 2>&1`
+if [[ $? != 0 ]]; then
+  # They have an old configuration file format
+  echo "-----------------------------------------------------------"
+  echo "IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT"
+  echo "-----------------------------------------------------------"
+  echo "It appears that you are upgrading from ganglia gmond version"
+  echo "2.5.x.  The configuration file has changed and you need to "
+  echo "convert your old 2.5.x configuration file to the new format."
+  echo ""   
+  echo "To convert your old configuration file to the new format"
+  echo "simply run the command:"
+  echo ""
+  echo "% gmond --convert old.conf > new.conf"
+  echo ""
+  echo "This conversion was not made automatic to prevent unknowningly"
+  echo "altering your configuration without your notice."
+fi
+   
+
 ##
 ## PREUN GMETA
 ##
