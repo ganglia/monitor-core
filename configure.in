@@ -361,7 +361,7 @@ dnl
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
 
-AC_OUTPUT(Makefile srclib/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile)
+AC_OUTPUT(Makefile srclib/Makefile tests/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile)
 
 
 echo ""
