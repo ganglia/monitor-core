@@ -653,7 +653,7 @@ dnl
 		;;
 esac
 
-if test $GEXEC; then
+if test $GEXEC = 1; then
   AM_CONDITIONAL(GEXEC_SUPPORTED, true) 
 else
   AM_CONDITIONAL(GEXEC_SUPPORTED, false)
@@ -681,12 +681,12 @@ AC_OUTPUT(Makefile ganglia.spec \
 
 
 echo ""
-if test $GEXEC; then
+if test $GEXEC = 1; then
   echo "Your platform supports the ganglia execution environment."
 else
   echo "Your platform does _not_ support the ganglia execution environment at this time."
-  echo "If you are interesting working to port it to you platform, please contact us at"
-  echo "ganglia-developers@lists.sourceforge.net"
+  echo "If you are interested in working to port it to your platform,"
+  echo "please contact us at <ganglia-developers@lists.sourceforge.net>."
 fi
 echo ""
 echo "-- Ganglia $VERSION --"
