@@ -1,4 +1,19 @@
 /* $Id$ */
+/*
+ * cleanup.c - Enforces metric/host delete time. Helps keep
+ *    memory usage trim and fit by deleting expired metrics from hash.
+ *
+ * ChangeLog:
+ *
+ * 25sept2002 - Federico Sacerdoti <fds@sdsc.edu>
+ *    Original version.
+ *
+ * 16feb2003 - Federico Sacerdoti <fds@sdsc.edu>
+ *    Made more efficient: O(n) from O(n^2) in
+ *    worst case. Fixed bug in hash_foreach() that caused
+ *    immortal metrics.
+ *
+ */
 #include <ganglia.h>
 #include <ganglia/hash.h>
 #include <ganglia/barrier.h>
