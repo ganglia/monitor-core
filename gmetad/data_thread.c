@@ -59,8 +59,7 @@ data_thread ( void *arg )
 
          if(!sock)
             {
-               hash_delete (&key, xml);
-               debug_msg("Unable to get any data from [%s] datasource DELETING from XML", d->name);
+               debug_msg("Unable to get any data from [%s] datasource", d->name);
                d->dead = 1;
                goto take_a_break;
             }
@@ -77,7 +76,6 @@ data_thread ( void *arg )
                   {
                      /* Error */
                      debug_msg("poll() error in data_thread");
-                     hash_delete (&key, xml);
                      d->dead = 1;
                      goto take_a_break;
                   }
@@ -85,7 +83,6 @@ data_thread ( void *arg )
                   {
                      /* No revents during timeout period */
                      debug_msg("poll() timeout");
-                     hash_delete( &key, xml);
                      d->dead = 1;
                      goto take_a_break; 
                   }
@@ -107,7 +104,6 @@ data_thread ( void *arg )
                            if (bytes_read < 0)
                               {
                                  err_msg("Unable to read socket for [%s] data source", d->name);
-                                 hash_delete( &key, xml);
                                  d->dead = 1;
                                  goto take_a_break;
                               }
@@ -144,7 +140,6 @@ data_thread ( void *arg )
          if(rval)
             {
                debug_msg("save_to_rrd() couldn't parse the XML and data to RRD for [%s]", d->name);
-               hash_delete( &key, xml);
                d->dead = 1;
                goto take_a_break;
             }    
@@ -153,7 +148,6 @@ data_thread ( void *arg )
          if(!p)
             {
                err_msg("Unable to find the start of the GANGLIA_XML tag in output from [%s] data source", d->name);
-               hash_delete( &key, xml);
                d->dead = 1;
                goto take_a_break;
             }
@@ -162,7 +156,6 @@ data_thread ( void *arg )
          if(!p)
             {
                err_msg("Unable to find end of GANGLIA_XML tag in output from [%s] data source", d->name);
-               hash_delete( &key, xml);
                d->dead = 1;
                goto take_a_break;
             }
@@ -170,7 +163,6 @@ data_thread ( void *arg )
          p = strchr( p, '\n' );
          if(!p)
             {
-               hash_delete( &key, xml);
                d->dead = 1;
                goto take_a_break;
             }
@@ -180,7 +172,6 @@ data_thread ( void *arg )
          if(!q)
             {
                err_msg("Unable to find the closing GANGLIA_XML tag in output from [%s] data source", d->name);
-               hash_delete( &key, xml);
                d->dead = 1;
                goto take_a_break;
             } 
@@ -195,8 +186,6 @@ data_thread ( void *arg )
          if(! hash_insert (&key, &val, xml))
             {
                err_msg("Unable to insert data for [%s] into XML hash", d->name);
-               hash_delete( &key, xml);
-               d->dead = 1;
                goto take_a_break;
             }
 

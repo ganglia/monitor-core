@@ -137,7 +137,10 @@ start (void *data, const char *el, const char **attr)
                     }
               }
 
-           /* Save the data to a round robin database */
+           /* Save the data to a round robin database if the data source is alive */
+           if( xml_data->ds->dead )
+              return;
+           
            if( write_data_to_rrd( xml_data->cluster, xml_data->host, xml_data->metric, xml_data->metric_val, NULL, "15") )
               {
                  /* Pass the error on to save_to_rrd */
@@ -260,6 +263,9 @@ end (void *data, const char *el)
                         if (! xml_data->num[i] )
                            continue;
                      
+                        if( xml_data->ds->dead )
+                           continue;
+
                         sprintf( sum, "%Lf", xml_data->sum[i] );
                         sprintf( num, "%d", xml_data->num[i] );
 
