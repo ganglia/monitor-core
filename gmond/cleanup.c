@@ -96,9 +96,9 @@ cleanup_node ( datum_t *key, datum_t *val, void *arg )
          cleanup->key=0;
       }
       else  {
-	  	 debug_msg("Cleanup: exiting hash_foreach with an error %d", rc);
+         debug_msg("Cleanup: exiting hash_foreach with an error %d", rc);
          break;
-	  }
+     }
    }
 
    return 0;
