@@ -46,7 +46,7 @@ cmdline_parser_print_help (void)
   printf("  -l, --location=STRING  Location of this host in the cluster \n                           'rack,rank,plane'.  (default=`0,0,0')\n");
   printf("  -d, --debug=INT        Debug level. If greater than zero, daemon will stay \n                           in foreground.  (default=`0')\n");
   printf("  -f, --foreground       Run in foreground (don't daemonize)  (default=off)\n");
-  printf("  -t, --default_config   Print the default configuration and exit  (default=\n                           off)\n");
+  printf("  -t, --default_config   Print the default configuration to stdout and exit  \n                           (default=off)\n");
 }
 
 
@@ -173,7 +173,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           args_info->foreground_flag = !(args_info->foreground_flag);
           break;
 
-        case 't':	/* Print the default configuration and exit.  */
+        case 't':	/* Print the default configuration to stdout and exit.  */
           if (args_info->default_config_given)
             {
               fprintf (stderr, "%s: `--default_config' (`-t') option given more than once\n", CMDLINE_PARSER_PACKAGE);

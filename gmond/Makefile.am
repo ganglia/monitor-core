@@ -6,7 +6,7 @@ AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/srclib/libmetrics/ -I$(top_b
 
 sbin_PROGRAMS = gmond
 # metric.h and dtd.h are for gmetad/gmetric for now....
-gmond_SOURCES = gmond.c cmdline.c cmdline.h conf.h dtd.h metric.h
+gmond_SOURCES = gmond.c cmdline.c cmdline.h conf.c conf.h dtd.h metric.h
 
 #monitor.c server.c listen.c cleanup.c \
 #metric.h cmdline.c cmdline.h dtd.h conf.c conf.h
