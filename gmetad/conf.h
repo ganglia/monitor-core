@@ -19,6 +19,8 @@ typedef struct
       char *rrd_rootdir;
       int scalable_mode;
       int all_trusted;
+      int num_rras;
+      char **rras;
 } gmetad_config_t;
 
 int get_gmetad_config(char *conffile);
