@@ -8,7 +8,7 @@ Name: @PACKAGE@
 Version: @VERSION@
 Release: 1 
 Copyright: BSD
-Vendor: Matt Massie <massie@cs.berkeley.edu>
+Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
 Obsoletes: ganglia-monitor-core-gmond
 Obsoletes: ganglia-monitor-core-gmetric
@@ -19,12 +19,12 @@ Buildroot: /tmp/%{name}-%{version}-buildroot
 Prefix: /usr
 
 %package lib
-Summary: Ganglia Cluster Toolkit Library http://ganglia.sourceforge.net/
+Summary: Ganglia Toolkit Library http://ganglia.sourceforge.net/
 Group: System Environment/Base
 
 %description
-Ganglia is a scalable, real-time cluster monitoring and execution environment 
-with all execution requests and cluster statistics expressed in an open 
+Ganglia is a scalable, real-time monitoring and execution environment 
+with all execution requests and statistics expressed in an open 
 well-defined XML format.
 
 %description lib
@@ -42,7 +42,7 @@ can use to build scalable cluster or grid applications
 ## BUILD
 ##
 %build
-./configure -prefix=$RPM_BUILD_ROOT/usr
+./configure --with-gmetad --prefix=/usr
 make
 
 ##
@@ -67,7 +67,9 @@ fi
 if [ "$1" = 0 ]
 then
    /etc/rc.d/init.d/gmond stop
+   /etc/rc.d/init.d/gmetad stop
    /sbin/chkconfig --del gmond
+   /sbin/chkconfig --del gmetad
 fi
 
 ##
@@ -86,7 +88,8 @@ fi
 %__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 %__mkdir -p $RPM_BUILD_ROOT/usr/include/ganglia
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
-%__make install
+%__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+%__make install prefix=$RPM_BUILD_ROOT/usr
 
 ##
 ## FILES
@@ -96,7 +99,9 @@ fi
 %attr(0500,root,root)/usr/bin/gmetric
 %attr(0555,root,root)/usr/bin/gstat
 /usr/sbin/gmond
+/usr/sbin/gmetad
 /etc/rc.d/init.d/gmond
+/etc/rc.d/init.d/gmetad
 
 %files lib
 /usr/include/ganglia.h
