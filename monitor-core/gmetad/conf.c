@@ -78,6 +78,34 @@ static DOTCONF_CB(cb_all_trusted)
    return NULL;
 }
 
+static DOTCONF_CB(cb_rras)
+{
+  int i;
+  gmetad_config_t *c = (gmetad_config_t *)cmd->option->info;
+
+  /* free the old data */
+  for(i=0; i< c->num_rras; i++)
+    {
+      free(c->rras[i]);
+    }
+  free(c->rras);
+
+  c->num_rras = cmd->arg_count;
+  c->rras = (char **) malloc (sizeof(char *)* c->num_rras);
+  if(!c->rras)
+    {
+      fprintf(stderr,"Unable to malloc memory for round-robin archives\n");
+      exit(1);
+    }
+
+  for(i=0; i< c->num_rras; i++)
+    {
+      c->rras[i] = strdup( cmd->data.list[i] );
+    }
+
+  return NULL;
+}
+
 static DOTCONF_CB(cb_trusted_hosts)
 {
    int i,rv;
@@ -270,6 +298,7 @@ static configoption_t gmetad_options[] =
       {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
       {"scalable", ARG_STR, cb_scalable, &gmetad_config, 0},
       {"xml_compression_level", ARG_INT, cb_xml_compression_level, &gmetad_config, 0},
+      {"round_robin_archives", ARG_STR, cb_rras, &gmetad_config, 0},
       LAST_OPTION
    };
 
@@ -289,6 +318,13 @@ set_defaults (gmetad_config_t *config)
    config->rrd_rootdir = "/var/lib/ganglia/rrds";
    config->scalable_mode = 1;
    config->all_trusted = 0;
+   /* round-robin archives */
+   config->num_rras = 4;
+   config->rras = (char **) malloc (sizeof(char *) * config->num_rras);
+   config->rras[0] = strdup("RRA:AVERAGE:0.5:15:240");  /* 1 hour of 15 sec samples */
+   config->rras[1] = strdup("RRA:AVERAGE:0.5:360:240"); /* 1 day of 6 minute samples */
+   config->rras[2] = strdup("RRA:AVERAGE:0.5:3600:744");/* 1 month of hourly samples */
+   config->rras[3] = strdup("RRA:AVERAGE:0.5:86400:365");/* 1 year of daily samples */
 }
 
 int

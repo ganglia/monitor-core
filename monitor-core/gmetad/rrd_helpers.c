@@ -63,23 +63,20 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
 
 /* Warning: RRD_create will overwrite a RRdb if it already exists */
 static int
-RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time)
+RRD_create( char *rrd, int summary, unsigned int process_time)
 {
-   char *argv[15];
-   int  argc=0;
-   int heartbeat;
-   char s[16], start[64];
+#define MAX_CREATE_ARGS 64
+   char *argv[MAX_CREATE_ARGS];
+   int  argc=0, i;
+   char start[64];
    char sum[64];
    char num[64];
-
-   /* Our heartbeat is twice the step interval. */
-   heartbeat = 8*step;
+   int heartbeat = 315360000; /* 1 decade */
 
    argv[argc++] = "dummy";
    argv[argc++] = rrd;
    argv[argc++] = "--step";
-   sprintf(s, "%u", step);
-   argv[argc++] = s;
+   argv[argc++] = "1";
    argv[argc++] = "--start";
    sprintf(start, "%u", process_time-1);
    argv[argc++] = start;
@@ -89,11 +86,24 @@ RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time
       sprintf(num,"DS:num:GAUGE:%d:U:U", heartbeat);
       argv[argc++] = num;
    }
+
+   for(i = 0; i< gmetad_config.num_rras; i++)
+     {
+       argv[argc++] = gmetad_config.rras[i];
+       if(argc>=MAX_CREATE_ARGS)
+	 {
+	   fprintf(stderr,"Too many round-robin archives.  Check config file.\n");
+	   exit(1);
+	 }
+     }
+
+   /* This is the pre-2.6.0 format
    argv[argc++] = "RRA:AVERAGE:0.5:1:240";
    argv[argc++] = "RRA:AVERAGE:0.5:24:240";
    argv[argc++] = "RRA:AVERAGE:0.5:168:240";
    argv[argc++] = "RRA:AVERAGE:0.5:672:240";
    argv[argc++] = "RRA:AVERAGE:0.5:5760:370";
+   */
 
    pthread_mutex_lock( &rrd_mutex );
    optind=0; opterr=0;
@@ -114,8 +124,7 @@ RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time
 /* A summary RRD has a "num" and a "sum" DS (datasource) whereas the
    host rrds only have "sum" (since num is always 1) */
 static int
-push_data_to_rrd( char *rrd, const char *sum, const char *num, 
-   unsigned int step, unsigned int process_time)
+push_data_to_rrd( char *rrd, const char *sum, const char *num, unsigned int process_time)
 {
    int rval;
    int summary;
@@ -132,7 +141,7 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
 
    if( stat(rrd, &st) )
       {
-         rval = RRD_create( rrd, summary, step, process_time );
+         rval = RRD_create( rrd, summary, process_time );
          if( rval )
             return rval;
       }
@@ -195,5 +204,5 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
    strncat(rrd, ".rrd", PATHSIZE);
    p = lowercase_it ( p );
 
-   return push_data_to_rrd( rrd, sum, num, step, process_time );
+   return push_data_to_rrd( rrd, sum, num, process_time );
 }
