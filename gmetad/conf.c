@@ -10,6 +10,7 @@ extern hash_t *sources;
 
 gmetad_config_t gmetad_config;
 
+#define GANGLIA_HOSTNAME_LEN  128
 
 static DOTCONF_CB(cb_gridname)
 {
@@ -52,8 +53,8 @@ static DOTCONF_CB(cb_trusted_hosts)
             err_msg("Warning: we failed to resolve trusted host name %s", cmd->data.list[i]);
             continue;
          }
-         le->val = (char*) malloc(MAXHOSTNAMELEN);
-         my_inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAMELEN);
+         le->val = (char*) malloc(GANGLIA_HOSTNAME_LEN);
+         my_inet_ntop(AF_INET, &sa.sin_addr, le->val, GANGLIA_HOSTNAME_LEN);
          llist_add(&(c->trusted_hosts), le);
       }
    return NULL;
@@ -124,8 +125,8 @@ static DOTCONF_CB(cb_data_source)
             err_msg("Warning: we failed to resolve data source name %s", cmd->data.list[i]);
             continue;
          }
-         str = (char*) malloc(MAXHOSTNAMELEN);
-         my_inet_ntop(AF_INET, &sa.sin_addr, str, MAXHOSTNAMELEN);
+         str = (char*) malloc(GANGLIA_HOSTNAME_LEN);
+         my_inet_ntop(AF_INET, &sa.sin_addr, str, GANGLIA_HOSTNAME_LEN);
 
          debug_msg("Trying to connect to %s:%d for [%s]", str, port, dslist->name);
          dslist->sources[dslist->num_sources] = (g_inet_addr *) g_inetaddr_new ( str, port );
