@@ -30,7 +30,7 @@ data_thread ( void *arg )
  
    if(debug_level)
       {
-         fprintf(stderr,"%d is monitoring [%s] data source\n", pthread_self(), d->name);
+         fprintf(stderr,"Data thread %d is monitoring [%s] data source\n", pthread_self(), d->name);
          for(i = 0; i < d->num_sources; i++)
             {
                addr = d->sources[i];
@@ -200,8 +200,8 @@ data_thread ( void *arg )
          g_tcp_socket_delete(sock);
 
          gettimeofday(&end, NULL);
-         /* 10 to 20 seconds... autoconf later */
-         sleep_time=10+(int) (20.0*rand()/(RAND_MAX+10.0)) - (end.tv_sec - start.tv_sec);
+         /* Sleep somewhere between (step +/- 5sec.) */
+         sleep_time = (d->step - 5) + (10 * (rand()/(float)RAND_MAX)) - (end.tv_sec - start.tv_sec);
          if( sleep_time > 0 )
             sleep(sleep_time);
       }

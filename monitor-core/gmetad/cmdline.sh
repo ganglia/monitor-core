@@ -8,6 +8,7 @@ round-robin databases, and exports XML which is the concatentation of
 all data sources"
 
 option "conf" c "Location of gmetad configuration file" string default="/etc/gmetad.conf" no
+option "debug" d "Debug level. If greater than zero, daemon will stay in foreground." int default="0" no
 
 #Usage (a little tutorial)
 #

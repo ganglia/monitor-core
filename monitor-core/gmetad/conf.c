@@ -6,6 +6,8 @@
 #include <ganglia.h>
 
 /* Variables that get filled in by configuration file */
+extern char *gridname;
+extern char *authority;
 extern llist_entry *trusted_hosts;
 extern hash_t *sources;
 extern int debug_level;
@@ -17,15 +19,36 @@ extern int should_setuid;
 
 extern int source_index;
 
+static DOTCONF_CB(cb_gridname)
+{
+    debug_msg("Grid name %s", cmd->data.str);
+    gridname = strdup(cmd->data.str);
+    return NULL;
+}
+
+static DOTCONF_CB(cb_authority)
+{
+    debug_msg("Grid authority %s", cmd->data.str);
+    authority = strdup(cmd->data.str);
+    return NULL;
+}
+
 static DOTCONF_CB(cb_trusted_hosts)
 {
-   int i;
+   int i,rv;
    llist_entry *le;
+   struct sockaddr_in sa;
 
    for (i = 0; i < cmd->arg_count; i++)
       {
          le = (llist_entry *)malloc(sizeof(llist_entry));
-         le->val = strdup ( cmd->data.list[i] );
+         rv = g_gethostbyname( cmd->data.list[i], &sa, NULL);
+         if (!rv) {
+            err_msg("Warning: we failed to resolve trusted host name %s", cmd->data.list[i]);
+            continue;
+         }
+         le->val = (char*) malloc(MAXHOSTNAMELEN);
+         my_inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAMELEN);
          llist_add(&(trusted_hosts), le);
       }
    return NULL;
@@ -61,7 +84,20 @@ static DOTCONF_CB(cb_data_source)
 
    dslist->name = strdup( cmd->data.list[0] );
 
-   for (i = 1; i< cmd->arg_count; i++)
+  /* Set data source step (avg polling interval). Default is 15s. */
+  i=1;
+  rv=atoi(cmd->data.list[i]);
+   if (rv) {
+      dslist->step = rv;
+      i++;
+   }
+   else {
+      dslist->step = 15;
+   }
+
+   debug_msg("Polling interval for %s is %u sec.", dslist->name, dslist->step);
+
+   for (i = i; i< cmd->arg_count; i++)
       {
          str = cmd->data.list[i];
 
@@ -116,7 +152,7 @@ static DOTCONF_CB(cb_data_source)
 static DOTCONF_CB(cb_debug_level)
 {
    debug_level = cmd->data.value;
-   debug_msg("Setting debug level to %d", cmd->data.value);
+   debug_msg("Setting the debug level to %d", cmd->data.value);
    return NULL;
 }
 
@@ -163,6 +199,8 @@ static FUNC_ERRORHANDLER(errorhandler)
 static configoption_t gmetad_options[] =
    {
       {"data_source", ARG_LIST, cb_data_source, NULL, 0},
+      {"gridname", ARG_STR, cb_gridname, NULL, 0},
+      {"authority", ARG_STR, cb_authority, NULL, 0},
       {"trusted_hosts", ARG_LIST, cb_trusted_hosts, NULL, 0},
       {"debug_level",  ARG_INT,  cb_debug_level, NULL, 0},
       {"xml_port",  ARG_INT, cb_xml_port, NULL, 0},
