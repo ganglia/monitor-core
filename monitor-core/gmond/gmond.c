@@ -62,8 +62,6 @@ send_all_metric_data( void )
       {
          for (i=1; i< num_key_metrics; i++)
             {
-               pthread_mutex_lock(&(metric[i].mutex));
-
                /* Will the next multicast be forced beyond the waiting period? */
                if( metric[i].mcast_threshold > (now.tv_sec + waiting_period) )
                   {
@@ -73,17 +71,13 @@ send_all_metric_data( void )
                      metric[i].mcast_threshold = now.tv_sec + waiting_period +
                        1+ (int)(120.0*rand()/(RAND_MAX+1.0)); 
                   }
-
-               pthread_mutex_unlock(&(metric[i].mutex));
             }
       }
    else /* Gmond has been running at least "waiting_period" secs. */
       {
          for (i=1; i< num_key_metrics; i++)
             {
-               pthread_mutex_lock(&(metric[i].mutex));
                metric[i].mcast_threshold = 0;
-               pthread_mutex_unlock(&(metric[i].mutex));
             }
       }
 }
@@ -172,10 +166,6 @@ main ( int argc, char *argv[] )
    debug_msg("gmond initialized cluster hash");
 
    srand(1);
-
-   /* Initialize mutexes */
-   for(i = 0; i < num_key_metrics; i++)
-      pthread_mutex_init(&(metric[i].mutex), NULL);
 
    if(! gmond_config.mcast_if_given )
       {
