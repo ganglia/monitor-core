@@ -1037,10 +1037,9 @@ The ganglia source tree incorporated great source code from other projects as we
 
 =head1 Authors
 
-  Matt Massie <massie@CS.Berkeley.EDU>
+The B<Ganglia Development Team>...
 
-and the B<Ganglia Development Team>...
-
+ Matt Massie            massie          Project Lead    massie at users.sourceforge.net
  Bas van der Vlies  	basv  	           Developer  	basv at users.sourceforge.net 
  Neil T. Spring 	bluehal	           Developer 	bluehal at users.sourceforge.net
  Brooks Davis 	        brooks_en_davis    Developer 	brooks_en_davis at users.sourceforge.net
