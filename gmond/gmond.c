@@ -134,10 +134,16 @@ main ( int argc, char *argv[] )
    if(! gmond_config.mcast_if_given )
       {
          entry = get_first_multicast_interface();
+         if(!entry)
+            err_quit("Could not find the first multicast interface");
+         debug_msg("The first multicast-enabled interface is %s", entry->intf_name);
       }
    else
       {
          entry = get_interface ( gmond_config.mcast_if );
+         if(!entry)
+            err_quit("%s is not a valid multicast-enabled interface", gmond_config.mcast_if);
+         debug_msg("Using multicast-enabled interface %s", gmond_config.mcast_if);
       } 
 
    /* fd for incoming multicast messages */
