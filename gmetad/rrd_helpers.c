@@ -17,7 +17,7 @@ static int RRD_create( char *rrd, char *polling_interval);
 static int RRD_update( char *rrd, char *sum );
 static int summary_RRD_create( char *rrd, char *polling_interval);
 static int summary_RRD_update( char *rrd, char *sum, char *num );
-static void my_mkdir ( char *dir );
+static void inline my_mkdir ( char *dir );
 
 int
 write_data_to_rrd ( char *cluster, char *host, char *metric, char *sum, char *num, char *polling_interval )
@@ -66,20 +66,14 @@ write_data_to_rrd ( char *cluster, char *host, char *metric, char *sum, char *nu
    return 1;
 }
 
-static void
+static void inline
 my_mkdir ( char *dir )
 {
-   int rval;
-   rval = mkdir ( dir, 0755 );
-   if ( rval < 0 )
+   if ( mkdir ( dir, 0755 ) < 0 && errno != EEXIST)
       {
-         if( errno != EEXIST )
-            {
-               err_sys("Unable to mkdir(%s)",dir);
-            }
+         err_sys("Unable to mkdir(%s)",dir);
       }
 }
-
 
 /* A summary RRD has a "num" and a "sum" DS (datasource) whereas the
    host rrds only have "sum" (since num is always 1) */
@@ -124,12 +118,6 @@ RRD_update( char *rrd, char *value )
    argv[1] = rrd;
    argv[2] = val; 
 
-   if( strchr( value, ':' ) )
-      {
-         err_msg("RRD_update() got a value with a ':' in it");
-         return 1;
-      }
-
    sprintf(val, "N:%s", value); 
   
    optind=0; opterr=0;
@@ -154,12 +142,6 @@ summary_RRD_update( char *rrd, char *sum, char *num )
    argv[0] = "dummy";
    argv[1] = rrd;
    argv[2] = val;
-
-   if( strchr( sum, ':' ) || strchr( num, ':' ) )
-      {
-         err_msg("summary_RRD_update() got a sum or num with a ':' in it");
-         return 1;
-      }
 
    sprintf(val, "N:%s:%s", sum, num);
 

@@ -66,6 +66,9 @@ spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
    pthread_t pid;
    pthread_attr_t attr;
 
+   /* Set the stack size to 1 mb */
+   pthread_attr_setstacksize( &attr, 524288 );
+
    pthread_attr_init( &attr );
    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
