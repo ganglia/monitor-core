@@ -326,7 +326,6 @@ C</etc/gmond.conf> is not required as its absence will only cause gmond to start
 in a default configuration. Here is a sample of a gmond.conf configuration file
 with comment to help you configure gmond
 
-   # $Id$
    # This is the configuration file for the Ganglia Monitor Daemon (gmond)
    # Documentation can be found at http://ganglia.sourceforge.net/docs/
    #
@@ -684,7 +683,8 @@ To get help with the commandline options, simply pass C<gstat> the C<--help> opt
 =item B<What metrics does ganglia collect on platform x?>
 
 This table describes all the metrics that ganglia collects and
-shows what platforms the metric are supported on.  
+shows what platforms the metric are supported on.  (The following table
+is not yet complete).
 
   Metric Name    Description                             Platforms
   -----------------------------------------------------------------------
