@@ -59,13 +59,16 @@ extern g_val_t wcache_func(void);
 extern g_val_t cpu_wio_func(void);
         
 #endif  
+
+#ifdef LINUX
+
+extern g_val_t bytes_in_func(void);
+extern g_val_t bytes_out_func(void);
+extern g_val_t pkts_in_func(void);
+extern g_val_t pkts_out_func(void);
+
+#endif
      
-/* end of swagner modifications.
- *      
- */     
-   
-
-
 
 #define INIT 0, 0, {0}, {0}
 #define KEY(NAME) { #NAME, NAME ##_func, INIT
@@ -147,6 +150,16 @@ KEY(phread_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" },
 KEY(phwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" }
 
 #endif
+
+#ifdef LINUX
+,
+KEY(bytes_out),  1, 30,   40,  50,  70, g_float, "Bs", "%.2f" },
+KEY(bytes_in),   1, 30,   40,  50,  70, g_float, "Bs", "%.2f" },
+KEY(pkts_in), 1, 30,   40,  50,  70, g_float, "s", "%.2f" },
+KEY(pkts_out),   1, 30,   40,  50,  70, g_float, "s", "%.2f" }
+
+#endif
+
 };
 
 #endif  /* METRIC_H */
