@@ -28,6 +28,7 @@ extern g_val_t cpu_user_func(void);
 extern g_val_t cpu_nice_func(void);
 extern g_val_t cpu_system_func(void);
 extern g_val_t cpu_idle_func(void);
+extern g_val_t cpu_aidle_func(void);
 extern g_val_t load_one_func(void);
 extern g_val_t load_five_func(void);
 extern g_val_t load_fifteen_func(void);
@@ -116,6 +117,7 @@ KEY(cpu_user),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_nice),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_system),    1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_idle),      5,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_aidle),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
 KEY(load_one),      1,  15,   20,   50,   70, g_float, "",    "%.2f"},
 KEY(load_five),     1,  30,   40,  275,  325, g_float, "",    "%.2f"},
 KEY(load_fifteen),  1,  60,   80,  850,  950, g_float, "",    "%.2f"},
