@@ -2,7 +2,7 @@
  * @file file.c Some file functions
  */
 /* $Id$ */
-#include "gangliaconf.h"
+#include "ganglia_private.h"
 
 /**
  * @fn ssize_t readn (int fd, void *vptr, size_t n)

@@ -2,7 +2,7 @@
  * @file daemon_inetd.c Functions for inetd daemons
  */
 /* $Id$ */
-#include	"gangliaconf.h"
+#include	"ganglia_private.h"
 
 extern int daemon_proc;		/* defined in error.c */
 

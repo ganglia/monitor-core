@@ -2,8 +2,8 @@
  * @file daemon_init.c Functions for standalone daemons
  */ 
 /* $Id$ */
-#include	"gangliaconf.h"
-#include <ganglia/daemon_init.h>
+#include "ganglia_private.h"
+#include "daemon_init.h"
 
 #define	MAXFD	64
 
