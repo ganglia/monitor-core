@@ -1025,21 +1025,10 @@ already been asked and answered.
 =head1 Copyright
 
   Copyright (C) 2002,2003 University of California, Berkeley
- 
-The ganglia source tree incorporated great source code from other projects as well.
-
-  Copyright (c) 2000 Dug Song <dugsong@monkey.org>
-  Copyright (C) 1999,2000,2001,2002 Lukas Schroeder <lukas@azzit.de>,
-   and others.
-  Copyright (C) 1991, 1992, 1996, 1998, 1999 Free Software Foundation, Inc.
-  Copyright (C) 2000  David Helder
-  Copyright (C) 2000  Andrew Lanoix
 
 =head1 Authors
 
-  Matt Massie <massie@CS.Berkeley.EDU>
-
-and the B<Ganglia Development Team>...
+The B<Ganglia Development Team>...
 
  Bas van der Vlies  	basv  	           Developer  	basv at users.sourceforge.net 
  Neil T. Spring 	bluehal	           Developer 	bluehal at users.sourceforge.net
@@ -1050,6 +1039,7 @@ and the B<Ganglia Development Team>...
  Doc Schneider 	        maddocbuddha 	Developer 	maddocbuddha at users.sourceforge.net 
  Mason Katz 	        masonkatz 	Developer 	masonkatz at users.sourceforge.net 	
  Mike Howard 	        mhoward 	Developer 	mhoward at users.sourceforge.net 	
+ Matt Massie            massie          Project Admin   massie at users.sourceforge.net
  Oliver Mössinger 	olivpass 	Developer 	olivpass at users.sourceforge.net 	
  Preston Smith 	        pmsmith 	Developer 	pmsmith at users.sourceforge.net 	
  Federico David Sacerdoti sacerdoti 	Developer 	sacerdoti at users.sourceforge.net 	
