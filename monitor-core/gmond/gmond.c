@@ -134,6 +134,15 @@ KEY(part_max_used), 1, 30, 40, 120, 180, g_float, "%", "%.1f" }
 
 #endif
 
+#ifdef CYGWIN
+,
+KEY(bytes_out),  4096, 30,   40,  200,  300, g_float, "bytes/sec", "%.2f" },
+KEY(bytes_in),   4096, 30,   40,  200,  300, g_float, "bytes/sec", "%.2f" },
+KEY(pkts_in), 256, 30,   40,  200,  300, g_float, "packets/sec", "%.2f" },
+KEY(pkts_out),   256, 30,   40,  200,  300, g_float, "packets/sec", "%.2f" }
+
+#endif
+
 #ifdef HPUX
 ,
 KEY(cpu_intr),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},

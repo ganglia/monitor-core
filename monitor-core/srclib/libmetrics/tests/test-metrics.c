@@ -64,6 +64,16 @@ static const struct metricinfo
   "swap_free", swap_free_func, g_uint32},
   {
   "mtu", mtu_func, g_uint32},
+#ifdef CYGWIN
+  {
+  "bytes_out", bytes_out_func, g_float},
+  {
+  "bytes_in", bytes_in_func, g_float},
+  {
+  "pkts_in", pkts_in_func, g_float},
+  {
+  "pkts_out", pkts_out_func, g_float},
+#endif
   {
   "", NULL}
 };

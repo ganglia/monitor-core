@@ -4,6 +4,9 @@
 #include <time.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <windows.h>
+#include <iphlpapi.h>
+#include <sys/timeb.h>
 
 /* From old ganglia 2.5.x... */
 #include "file.h"
@@ -27,7 +30,55 @@ typedef struct {
 timely_file proc_stat    = { 0, 15, "/proc/stat" };
 timely_file proc_loadavg = { 0, 15, "/proc/loadavg" };
 timely_file proc_meminfo = { 0, 30, "/proc/meminfo" };
-timely_file proc_net_dev = { 0, 30, "/proc/net/dev" };
+
+static time_t
+get_netbw(double *in_bytes, double *out_bytes,
+    double *in_pkts, double *out_pkts)
+{
+  PMIB_IFTABLE iftable;
+  double bytes_in = 0, bytes_out = 0, pkts_in = 0, pkts_out = 0;
+  static DWORD dwSize;
+  DWORD ret, dwInterface;
+  struct timeb timebuffer;
+  PMIB_IFROW ifrow;
+
+  dwSize = sizeof(MIB_IFTABLE);
+  
+  iftable = (PMIB_IFTABLE) malloc (dwSize);
+  while (ret = GetIfTable(iftable, &dwSize, 1) == ERROR_INSUFFICIENT_BUFFER) {
+     iftable = (PMIB_IFTABLE) realloc (iftable, dwSize);
+  }
+ 
+  if (ret == NO_ERROR) { 
+
+    _ftime ( &timebuffer );
+
+    /* scan the interface table */
+    for (dwInterface = 0; dwInterface < (iftable -> dwNumEntries); dwInterface++) {
+      ifrow = &(iftable -> table[dwInterface]);
+    
+    /* exclude loopback */
+      if ( (ifrow -> dwType != MIB_IF_TYPE_LOOPBACK ) && (ifrow -> dwOperStatus ==MIB_IF_OPER_STATUS_OPERATIONAL ) ) {
+        bytes_in += ifrow -> dwInOctets;
+        bytes_out += ifrow -> dwOutOctets;
+      
+        /* does not include multicast traffic (dw{In,Out}NUcastPkts) */
+        pkts_in += ifrow -> dwInUcastPkts;
+        pkts_out += ifrow -> dwOutUcastPkts;
+      }
+    }
+    free (iftable);
+  } else {
+    err_msg("get_netbw() got an error from GetIfTable()");
+  }
+
+  if (in_bytes) *in_bytes = bytes_in;
+  if (out_bytes) *out_bytes = bytes_out;
+  if (in_pkts) *in_pkts = pkts_in;
+  if (out_pkts) *out_pkts = pkts_out;
+
+  return timebuffer.time;
+}
 
 char *update_file(timely_file *tf)
 {
@@ -99,13 +150,6 @@ metric_init(void)
 
    strcpy( proc_sys_kernel_osrelease, "cygwin" );
 
-   rval.int32 = (int) update_file(&proc_net_dev);
-   if ( rval.int32 == SYNAPSE_FAILURE )
-      {
-         err_msg("net_dev_func() got an error from slurpfile()");
-         return rval;
-      } 
-
    rval.int32 = SYNAPSE_SUCCESS;
    return rval;
 }
@@ -113,244 +157,100 @@ metric_init(void)
 g_val_t
 pkts_in_func ( void )
 {
-   char *p;
-   register int i;
-   static g_val_t val;
-   int size;
-   static int stamp;
-   static double        last_bytes_in,
-                last_bytes_out,
-                last_pkts_in,
-                last_pkts_out;
-   double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
-   unsigned long                diff;
-   p = update_file(&proc_net_dev);
-   if (proc_net_dev.last_read != stamp) {
+   double in_pkts=0, t=0;
+   time_t stamp;
+   static time_t last_stamp;
+   static double last_pkts_in;
+   g_val_t val;
+   unsigned long diff;
 
-     size = ( index (p, 0x00) ) - p;
-   /*  skip past the two-line header ... */
-     p = index (p, '\n')+1;
-     p = index (p, '\n')+1;
-     p = index (p, '\n')+1;  // and skip loopback, which is always the first one
-     while (*p != 0x00 )
-       {
-       p = index(p, ':')+1; /*  skip past the interface tag portion of this line */
-       if ( (*p-1 != 'o') && (*p-2 != 'l') )
-          {
-          t = strtod( p, &p );
-          bytes_in += t;
-          t = strtod( p, &p );
-          pkts_in += t;
-          for (i = 0; i < 6; i++) strtol(p, &p, 10);
-          t = strtod( p, &p );
-          bytes_out += t;
-         pkts_out += strtod( p, &p );
-          }
-          p = index (p, '\n') + 1;    // skips a line
-       }
-       (unsigned long) diff = pkts_in - last_pkts_in;
-       if ( diff )
-         {
-         t = proc_net_dev.last_read - stamp;
-         t = diff / t;
-         debug_msg("Returning value: %f\n",t);
-         }
-       else
-         t = 0;
-       val.f = t;
+   stamp = get_netbw(NULL, NULL, &in_pkts, NULL);
+   (unsigned long) diff = in_pkts - last_pkts_in;
+   if ( diff && last_stamp ) {
+     t = stamp - last_stamp;
+     t = diff / t;
+     debug_msg("Returning value: %f\n", t);     
+   } else t = 0;
 
-       last_bytes_in  = bytes_in;
-       last_pkts_in = pkts_in;
-       last_pkts_out = pkts_out;
-       last_bytes_out = bytes_out;
+   val.f = t;
+   last_pkts_in = in_pkts;
+   last_stamp = stamp;
 
-       stamp = proc_net_dev.last_read;
-
-     }
    return val;
 }
 
 g_val_t
 pkts_out_func ( void )
 {
-   char *p;
-   register int i;
-   static g_val_t val;
-   int size;
-   static int stamp;
-   static double        last_bytes_in,
-                last_bytes_out,
-                last_pkts_in,
-                last_pkts_out;
-   double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
-   unsigned long                diff;
-   p = update_file(&proc_net_dev);
-   if (proc_net_dev.last_read != stamp) {
+   double out_pkts=0, t=0;
+   time_t stamp;
+   static time_t last_stamp;
+   static double last_pkts_out;
+   g_val_t val;
+   unsigned long diff;
 
-     size = ( index (p, 0x00) ) - p;
-   /*  skip past the two-line header ... */
-     p = index (p, '\n')+1;
-     p = index (p, '\n')+1;
-     p = index (p, '\n')+1;  // and skip loopback, which is always the first one
-     while (*p != 0x00 )
-       {
-       p = index(p, ':')+1; /*  skip past the interface tag portion of this line */
-       if ( (*p-1 != 'o') && (*p-2 != 'l') )
-          {
-          t = strtod( p, &p );
-          bytes_in += t;
-          t = strtod( p, &p );
-          pkts_in += t;
-          for (i = 0; i < 6; i++) strtol(p, &p, 10);
-          t = strtod( p, &p );
-          bytes_out += t;
-         pkts_out += strtod( p, &p );
-          }
-          p = index (p, '\n') + 1;    // skips a line
-       }
-       (unsigned long) diff = pkts_out - last_pkts_out;
-       if ( diff )
-         {
-         t = proc_net_dev.last_read - stamp;
-         t = diff / t;
-         }
-       else
-         t = 0;
-       val.f = t;
+   stamp = get_netbw(NULL, NULL, NULL, &out_pkts);
+   (unsigned long) diff = out_pkts - last_pkts_out;
+   if ( diff && last_stamp ) {
+     t = stamp - last_stamp;
+     t = diff / t;
+     debug_msg("Returning value: %f\n", t);     
+   } else t = 0;
 
-       last_bytes_in  = bytes_in;
-       last_pkts_in = pkts_in;
-       last_pkts_out = pkts_out;
-       last_bytes_out = bytes_out;
+   val.f = t;
+   last_pkts_out = out_pkts;
+   last_stamp = stamp;
 
-       stamp = proc_net_dev.last_read;
-
-     }
    return val;
 }
 
 g_val_t
 bytes_out_func ( void )
 {
-   char *p;
-   register int i;
-   static g_val_t val;
-   int size;
-   static int stamp;
-   static double        last_bytes_in,
-                last_bytes_out,
-                last_pkts_in,
-                last_pkts_out;
-   double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
-   unsigned long                diff;
-   p = update_file(&proc_net_dev);
-   if (proc_net_dev.last_read != stamp) {
+   double out_bytes=0, t=0;
+   time_t stamp;
+   static time_t last_stamp;
+   static double last_bytes_out;
+   g_val_t val;
+   unsigned long diff;
 
-     size = ( index (p, 0x00) ) - p;
-   /*  skip past the two-line header ... */
-     p = index (p, '\n')+1;
-     p = index (p, '\n')+1;
-     p = index (p, '\n')+1;  // and skip loopback, which is always the first one
-     while (*p != 0x00 )
-       {
-       p = index(p, ':')+1; /*  skip past the interface tag portion of this line */
-       if ( (*p-1 != 'o') && (*p-2 != 'l') )
-          {
-          t = strtod( p, &p );
-          bytes_in += t;
-          t = strtod( p, &p );
-          pkts_in += t;
-          for (i = 0; i < 6; i++) strtol(p, &p, 10);
-          /* Fixed 2003 by Dr Michael Wirtz <m.wirtz@tinnit.de>
-            and Phil Radden <P.Radden@rl.ac.uk> */
-          t = strtod( p, &p );
-          bytes_out += t;
-         pkts_out += strtod( p, &p );
-          }
-          p = index (p, '\n') + 1;    // skips a line
-       }
-       (unsigned long) diff = bytes_out - last_bytes_out;
-       if ( diff )
-         {
-         t = proc_net_dev.last_read - stamp;
-         t = diff / t;
-         }
-       else
-         t = 0;
-       val.f = t;
+   stamp = get_netbw(NULL, &out_bytes, NULL, NULL);
+   (unsigned long) diff = out_bytes - last_bytes_out;
+   if ( diff && last_stamp ) {
+     t = stamp - last_stamp;
+     t = diff / t;
+     debug_msg("Returning value: %f\n", t);     
+   } else t = 0;
 
-       last_bytes_in  = bytes_in;
-       last_pkts_in = pkts_in;
-       last_pkts_out = pkts_out;
-       last_bytes_out = bytes_out;
+   val.f = t;
+   last_bytes_out = out_bytes;
+   last_stamp = stamp;
 
-       stamp = proc_net_dev.last_read;
-
-     }
-   debug_msg(" **********  BYTES_OUT RETURN:  %f", val.f);
    return val;
 }
 
 g_val_t
 bytes_in_func ( void )
 {
-   char *p;
-   register int i;
-   static g_val_t val;
-   int size;
-   static int stamp;
-   static double last_bytes_in,
-     last_bytes_out,
-     last_pkts_in,
-     last_pkts_out;
-   double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
-   unsigned long    diff;
-   p = update_file(&proc_net_dev);
-   if (proc_net_dev.last_read != stamp) {
+   double in_bytes=0, t=0;
+   time_t stamp;
+   static time_t last_stamp;
+   static double last_bytes_in;
+   g_val_t val;
+   unsigned long diff;
 
-     size = ( index (p, 0x00) ) - p;
-   /*  skip past the two-line header ... */
-     p = index (p, '\n')+1;
-     p = index (p, '\n')+1;
-     p = index (p, '\n')+1;  // and skip loopback, which is always the first one
-     while (*p != 0x00 )
-       {
-       p = index(p, ':')+1; /*  skip past the interface tag portion of this line */
-       debug_msg(" Last two chars: %c%c\n", *p-2, *p-1 );
-       if ( (*p-1 != 'o') && (*p-2 != 'l') )
-          {
-          debug_msg(" Last two chars: %c%c\n", *p-2, *p-1 );
-          t = strtod( p, &p );
-          bytes_in += t;
-          t = strtod( p, &p );
-          pkts_in += t;
-          for (i = 0; i < 6; i++) strtol(p, &p, 10);
-          /* Fixed 2003 by Dr Michael Wirtz <m.wirtz@tinnit.de>
-            and Phil Radden <P.Radden@rl.ac.uk>. */
-          t = strtod( p, &p );
-          bytes_out += t;
-          pkts_out += strtod( p, &p );
-          }
-          p = index (p, '\n') + 1;    // skips a line
-       }
-       (unsigned long) diff = bytes_in - last_bytes_in;
-       if ( diff )
-         {
-         t = proc_net_dev.last_read - stamp;
-         t = diff / t;
-         }
-       else
-         t = 0;
-       val.f = t;
+   stamp = get_netbw(&in_bytes, NULL, NULL, NULL);
+   (unsigned long) diff = in_bytes - last_bytes_in;
+   if ( diff && last_stamp ) {
+     t = stamp - last_stamp;
+     t = diff / t;
+     debug_msg("Returning value: %f\n", t);     
+   } else t = 0;
 
-       last_bytes_in  = bytes_in;
-       last_pkts_in = pkts_in;
-       last_pkts_out = pkts_out;
-       last_bytes_out = bytes_out;
+   val.f = t;
+   last_bytes_in = in_bytes;
+   last_stamp = stamp;
 
-       stamp = proc_net_dev.last_read;
-
-     }
    return val;
 }
 
