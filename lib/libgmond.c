@@ -9,6 +9,8 @@
 #include "confuse.h"
 #include <apr_pools.h>
 #include <apr_strings.h>
+#include <apr_tables.h>
+#include <apr_net.h>
 
 /***** IMPORTANT ************
 Any changes that you make to this file need to be reconciled in ./conf.pod
@@ -429,7 +431,6 @@ cleanup_configuration_file(void)
 }
 #endif
 
-/* TODO: move to libgmond gmond_opts is needed... default_gmond_configuration is needed */
 Ganglia_gmond_config
 Ganglia_gmond_config_new(char *path, int fallback_to_default)
 {
@@ -472,4 +473,73 @@ Ganglia_gmond_config_new(char *path, int fallback_to_default)
   atexit(cleanup_configuration_file);
 #endif
   return config;
+}
+
+
+Ganglia_udp_send_channels
+Ganglia_udp_send_channels_new( Ganglia_pool context, Ganglia_gmond_config config )
+{
+  Ganglia_udp_send_channels send_channels = NULL;
+  int i, num_udp_send_channels = cfg_size( config, "udp_send_channel");
+
+  /* Return null if there are no send channels specified */
+  if(num_udp_send_channels <= 0)
+    return send_channels;
+
+  /* Create my UDP send array */
+  send_channels = apr_array_make( context, num_udp_send_channels, 
+				   sizeof(apr_socket_t *));
+
+  for(i = 0; i< num_udp_send_channels; i++)
+    {
+      cfg_t *udp_send_channel;
+      char *mcast_join, *mcast_if, *ip;
+      int port;
+      apr_socket_t *socket = NULL;
+      apr_pool_t *pool = NULL;
+
+      udp_send_channel = cfg_getnsec( config, "udp_send_channel", i);
+      ip             = cfg_getstr( udp_send_channel, "ip" );
+      mcast_join     = cfg_getstr( udp_send_channel, "mcast_join" );
+      mcast_if       = cfg_getstr( udp_send_channel, "mcast_if" );
+      port           = cfg_getint( udp_send_channel, "port");
+
+      debug_msg("udp_send_channel mcast_join=%s mcast_if=%s ip=%s port=%d\n",
+		  mcast_join? mcast_join:"NULL", 
+		  mcast_if? mcast_if:"NULL",
+		  ip,
+		  port);
+
+      /* Create a subpool */
+      apr_pool_create(&pool, context);
+
+      /* Join the specified multicast channel */
+      if( mcast_join )
+	{
+	  /* We'll be listening on a multicast channel */
+	  socket = create_mcast_client(pool, mcast_join, port, 0);
+	  if(!socket)
+	    {
+	      fprintf(stderr,"Unable to join multicast channel %s:%d. Exiting\n",
+		      mcast_join, port);
+	      exit(1);
+	    }
+	}
+      else
+	{
+          /* Create a UDP socket */
+          socket = create_udp_client( pool, ip, port );
+          if(!socket)
+            {
+              fprintf(stderr,"Unable to create UDP client for %s:%d. Exiting.\n",
+		      ip? ip: "NULL", port);
+	      exit(1);
+	    }
+	}
+
+      /* Add the socket to the array */
+      *(apr_socket_t **)apr_array_push(send_channels) = socket;
+    }
+
+  return send_channels;
 }
