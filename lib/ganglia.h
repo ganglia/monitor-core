@@ -16,6 +16,8 @@ extern "C" {
 /* Public GEXEC Functions and Structures */
 extern int gexec_errno;
 
+#define GEXEC_GANGLIA_PORT    8649
+
 #define GEXEC_TIMEOUT 60
 #define MAXHOSTNAME 128
 
