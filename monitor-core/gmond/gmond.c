@@ -13,6 +13,7 @@
 #include "lib/become_a_nobody.h"
 #include "libunp/unp.h"
 #include "lib/debug_msg.h"
+#include "lib/tpool.h"
 
 #include "conf.h"
 #include "cmdline.h"
@@ -21,12 +22,11 @@
 /* The entire cluster this gmond knows about */
 hash_t *cluster;
 
-int msg_out_socket;
-pthread_mutex_t  msg_out_socket_mutex    = PTHREAD_MUTEX_INITIALIZER;
+g3_thread_pool collect_send_pool = NULL;
+int send_sockets[MAX_NUM_CHANNELS];
 
-int msg_in_socket_active = 0; 
-int msg_in_socket;
-pthread_mutex_t  msg_in_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
+g3_thread_pool receive_pool = NULL;
+int receive_sockets[MAX_NUM_CHANNELS];
 
 int server_socket;
 pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
@@ -34,14 +34,12 @@ pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
 int compressed_socket;
 pthread_mutex_t  compressed_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-barrier *msg_listen_barrier, *server_barrier;
-
 /* In monitor.c */
-extern void *monitor_thread(void *arg);
+extern void monitor_thread(void *arg);
 extern int send_value ( uint32_t key );
 
 /* In listen.c */
-extern void *msg_listen_thread(void *arg);  
+extern void msg_listen_thread(void *arg);  
 
 /* In server.c */
 extern void *server_thread(void *arg);
@@ -179,6 +177,10 @@ main ( int argc, char *argv[] )
          err_quit("failed to process %s. Exiting.", args_info.conf_arg);
       }
 
+/*
+   print_conf(&gmond_config);
+*/
+
    /* If given, use command line directives over config file ones. */
    if (args_info.debug_given) {
       gmond_config.debug_level = args_info.debug_arg;
@@ -220,68 +222,40 @@ main ( int argc, char *argv[] )
 
    if(! gmond_config.deaf )
       {
-        /* We are not deaf .. we need to listen.
-           If the msg channel is a multicast channel, we need to listen to that channel.
-           If the msg channel is NOT multicast, we only listen if msg port is explicitly set
-             (meaning are going to collect the UDP messages).
-         */
-        if(is_multicast( gmond_config.msg_channel ))
-           {
-             debug_msg("Msg channel is multicast");
+        receive_pool = g3_thread_pool_create( gmond_config.num_receive_channels, 128, 1 );
 
-             /* Since we are not deaf, we need to join the multicast channel */
-             
-             msg_in_socket = Udp_client( gmond_config.msg_channel, gmond_config.msg_port,
-                                 (void **)&sa, &salen);
-             Setsockopt( msg_in_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-             Bind( msg_in_socket, sa, salen );
-             Mcast_join( msg_in_socket, sa, salen, 
-                       gmond_config.msg_if_given ? gmond_config.msg_if : NULL, 0);
-             msg_in_socket_active = 1;
-           }
-        else
-           {
-             debug_msg("Msg channel is NOT multicast");
+        for(i=0; i< gmond_config.num_receive_channels; i++)
+          {
+            if(gmond_config.receive_channels[i] && is_multicast(gmond_config.receive_channels[i]))
+              {
+                /* Multicast channels.. we need to join a Multicast group */
+                receive_sockets[i] = Udp_client( gmond_config.receive_channels[i], 
+                                                 gmond_config.receive_ports[i],
+                                                 (void **)&sa, &salen);
+                Setsockopt( receive_sockets[i], SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+                Bind( receive_sockets[i], sa, salen );
+                Mcast_join( receive_sockets[i], sa, salen, 
+                       gmond_config.mcast_if_given ? gmond_config.mcast_if : NULL, 0);
+              }
+            else
+              {
+                /* Non-multicast channels */
+                receive_sockets[i] = Udp_server( gmond_config.receive_channels[i], 
+                                             gmond_config.receive_ports[i],
+                                             &salen);
+                Setsockopt( receive_sockets[i], SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+              }
 
-             /* Since the msg channel is NOT multicast, we will only listen for incoming
-                traffic if the msg port is explicitly set */
- 
-             if( gmond_config.msg_port_given )
-               {
-                 /* Clients will be sending us data, we need to listen on the UDP port */
-
-                 msg_in_socket = Udp_server( gmond_config.msg_channel, gmond_config.msg_port,
-                                    &salen);
-                 Setsockopt( msg_in_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-                 msg_in_socket_active =1; 
-               }
+             g3_run( receive_pool, msg_listen_thread, (void *)&receive_sockets[i]); 
            }
         
-         debug_msg("msg channel is %s %s", gmond_config.msg_channel, gmond_config.msg_port);
-
          debug_msg("Starting socket to listen on XML port %s", gmond_config.xml_port);
          server_socket = Tcp_listen(NULL, gmond_config.xml_port, &salen );
 
          debug_msg("Starting socket to listen on compressed XML port %s", gmond_config.compressed_xml_port);
          compressed_socket = Tcp_listen(NULL, gmond_config.compressed_xml_port, &salen);
 
-         /* thread(s) to listen to the incoming traffic (if necessary) */
-         if(msg_in_socket_active)
-           {
-             if(barrier_init(&msg_listen_barrier, gmond_config.msg_threads))
-               {
-                 perror("barrier_init() error");
-                 return -1;    
-               }
-
-             for ( i = 0 ; i < gmond_config.msg_threads; i++ )
-               {
-                 pthread_create(&tid, &attr, msg_listen_thread, (void *)msg_listen_barrier);
-               }
-             debug_msg("listening thread(s) have been started");
-           }
-
-
+#if 0
          /* threads to answer requests for XML */
          if(barrier_init(&server_barrier, gmond_config.xml_threads + 
                                           gmond_config.compressed_xml_threads))
@@ -289,6 +263,7 @@ main ( int argc, char *argv[] )
                perror("barrier_init() error");
                return -1;
             }
+#endif
 
          /* Spin off the threads for raw XML */
          for ( i=0 ; i < gmond_config.xml_threads; i++ )
@@ -310,26 +285,24 @@ main ( int argc, char *argv[] )
          debug_msg("cleanup thread has been started");
       }
 
-   /* fd for outgoing multicast messages */
    if(! gmond_config.mute )
       {
-         /* We are not mute, we need our data out on the msg channel.
-            It doesn't matter if the msg channel is multicast or not because
-            both are just simple UDP socket connections */
- 
-         msg_out_socket = Udp_connect( gmond_config.msg_channel, gmond_config.msg_port );
-         debug_msg("sending messages on channel %s %s", 
-		    gmond_config.msg_channel, gmond_config.msg_port);
-
-         if(is_multicast( gmond_config.msg_channel ))
+         collect_send_pool = g3_thread_pool_create( gmond_config.num_send_channels + 1,128,1);
+         for(i = 0 ; i < gmond_config.num_send_channels; i++)
            {
-             /* Set the TTL for the multicast channel.  In the future, this will have
-                meaning in the context of plain UDP channels too. */
-             Mcast_set_ttl( msg_out_socket, gmond_config.msg_ttl); 
-           }
+             send_sockets[i] = Udp_connect( gmond_config.send_channels[i],
+                                               gmond_config.send_ports[i]);
+             debug_msg("sending messages on channel %s %s", 
+		    gmond_config.send_channels[i], gmond_config.send_ports[i]);
 
-         pthread_create(&tid, &attr, monitor_thread, NULL);
-         debug_msg("created monitor thread");
+             if(is_multicast( gmond_config.send_channels[i] ))
+               {
+                 /* Set the TTL for the multicast channel.  In the future, this will have
+                    meaning in the context of plain UDP channels too. */
+                 Mcast_set_ttl( send_sockets[i], gmond_config.mcast_ttl); 
+               }
+           }
+        g3_run( collect_send_pool, monitor_thread, NULL);
       }
 
    
