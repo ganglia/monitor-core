@@ -1,4 +1,12 @@
-AM_CFLAGS = -I. -I../dotconf-1.0.9/src
+if BUILD_DOTCONF 
+DOTCONF_INCLUDES = -I../dotconf-1.0.9/src
+DOTCONF_LIBS = ../dotconf-1.0.9/src/dotconf.lo 
+else
+DOTCONF_LIBS = -ldotconf
+endif
+
+
+AM_CFLAGS = -I. $(DOTCONF_INCLUDES)
 
 EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h getopt.h
 
@@ -9,7 +17,7 @@ rdwr.c xmlparse.c xmlrole.c xmltok.c file.c gexec_funcs.c barrier.c \
 become_a_nobody.c gexec_process.c gexec_vnn_ip.c gmond_config.c inetaddr.c \
 mcast.c tcp.c
 
-libganglia_la_LIBADD  = ../dotconf-1.0.9/src/dotconf.lo
+libganglia_la_LIBADD  = $(DOTCONF_LIBS)
 
 libganglia_la_LDFLAGS = -version-info 2:0:1
 

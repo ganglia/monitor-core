@@ -117,6 +117,16 @@ AC_ARG_ENABLE(memcheck,
     CFLAGS="$CFLAGS -fcheck-memory-usage" ],
   AC_DEFINE(MEMCHECK,0))
 
+AC_ARG_WITH(system-dotconf,
+[  --with-system-dotconf   build ganglia with an existing dotconf
+                           library, not the one included in the ganglia
+                           distribution (use only if dotconf is already
+                           installed on your system!)],
+		if test "$withval" = yes;
+                then use_system_dotconf=yes; fi)
+
+AM_CONDITIONAL(BUILD_DOTCONF, test x$use_system_dotconf != xyes)
+
 dnl ##################################################################
 dnl Checks for libraries.
 dnl The order of these tests is the *reverse* order of the libraries in
@@ -143,6 +153,15 @@ AC_CHECK_LIB(odm, odm_initialize)
 AC_CHECK_LIB(cfg, _system_configuration)
 AC_CHECK_LIB(pmapi, pm_cycles)
 AC_CHECK_LIB(dl, dlopen)
+if test "$use_system_dotconf" = yes; then
+	AC_CHECK_LIB(dotconf, dotconf_create)
+	if test "$ac_cv_lib_dotconf_dotconf_create" = no; then
+		echo "You asked to build with the system dotconf, but it isn't installed!"
+		echo "Either install dotconf on the system or build the included dotconf"
+		echo "library by not passing --with-system-dotconf to configure."
+		exit;
+	fi
+fi
 
 dnl AC_CHECK_LIB(crypto, RSA_sign)
 dnl if test "$ac_cv_lib_crypto_RSA_sign" = no; then
@@ -360,9 +379,11 @@ esac
 
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
-cd dotconf-1.0.9
-./configure --prefix=`pwd`/binary --cache-file=../config.cache
-cd ..
+if test "$use_system_dotconf" != yes; then
+  cd dotconf-1.0.9
+     ./configure --prefix=`pwd`/binary --cache-file=../config.cache
+  cd ..
+fi
 
 AC_OUTPUT(Makefile ganglia.spec lib/Makefile gmond/Makefile gmond/gstat/Makefile  gmetric/Makefile)
 
