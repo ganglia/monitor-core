@@ -47,6 +47,7 @@ typedef struct
    long int host_dmax;
    int xml_compression_level;
    int channel_given;
+   int cluster_tag;
 } gmond_config_t;
 
 int get_gmond_config( char *conffile);
