@@ -53,6 +53,8 @@ cmdline_parser_print_help (void)
   printf("   -vSTRING   --value=STRING          Value of the metric\n");
   printf("   -tSTRING   --type=STRING           Either string|int8|uint8|int16|uint16|int32|uint32|float|double\n");
   printf("   -uSTRING   --units=STRING          Unit of measure for the value e.g. Kilobytes, Celcius\n");
+  printf("   -sSTRING   --slope=STRING          Either zero|positive|negative|both\n");
+  printf("   -xINT      --tmax=INT              The maximum time in seconds between gmetric calls (default=60)\n");
   printf("   -cSTRING   --mcast_channel=STRING  Multicast channel to send/receive on (default='239.2.11.71')\n");
   printf("   -pINT      --mcast_port=INT        Multicast port to send/receive on (default=8649)\n");
   printf("   -iSTRING   --mcast_if=STRING       Network interface to multicast on e.g. 'eth1' (default='kernel decides')\n");
@@ -84,6 +86,8 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->value_given = 0 ;
   args_info->type_given = 0 ;
   args_info->units_given = 0 ;
+  args_info->slope_given = 0 ;
+  args_info->tmax_given = 0 ;
   args_info->mcast_channel_given = 0 ;
   args_info->mcast_port_given = 0 ;
   args_info->mcast_if_given = 0 ;
@@ -93,6 +97,8 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->value_arg = NULL; \
   args_info->type_arg = NULL; \
   args_info->units_arg = NULL; \
+  args_info->slope_arg = NULL; \
+  args_info->tmax_arg = 60;\
   args_info->mcast_channel_arg = strdup("239.2.11.71") ;\
   args_info->mcast_port_arg = 8649;\
   args_info->mcast_if_arg = strdup("kernel decides") ;\
@@ -116,6 +122,8 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "value",	1, NULL, 'v' },
         { "type",	1, NULL, 't' },
         { "units",	1, NULL, 'u' },
+        { "slope",	1, NULL, 's' },
+        { "tmax",	1, NULL, 'x' },
         { "mcast_channel",	1, NULL, 'c' },
         { "mcast_port",	1, NULL, 'p' },
         { "mcast_if",	1, NULL, 'i' },
@@ -123,7 +131,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { NULL,	0, NULL, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVn:v:t:u:c:p:i:l:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVn:v:t:u:s:x:c:p:i:l:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -181,6 +189,28 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             }
           args_info->units_given = 1;
           args_info->units_arg = strdup (optarg);
+          break;
+
+        case 's':	/* Either zero|positive|negative|both.  */
+          if (args_info->slope_given)
+            {
+              fprintf (stderr, "%s: `--slope' (`-s') option given more than once\n", PACKAGE);
+              clear_args ();
+              exit (EXIT_FAILURE);
+            }
+          args_info->slope_given = 1;
+          args_info->slope_arg = strdup (optarg);
+          break;
+
+        case 'x':	/* The maximum time in seconds between gmetric calls.  */
+          if (args_info->tmax_given)
+            {
+              fprintf (stderr, "%s: `--tmax' (`-x') option given more than once\n", PACKAGE);
+              clear_args ();
+              exit (EXIT_FAILURE);
+            }
+          args_info->tmax_given = 1;
+          args_info->tmax_arg = atoi (optarg);
           break;
 
         case 'c':	/* Multicast channel to send/receive on.  */
