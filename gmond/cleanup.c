@@ -26,10 +26,9 @@
 #include "lib/ganglia.h"
 #include "lib/hash.h"
 #include "lib/barrier.h"
-#include "lib/gmond_config.h"
-#include "lib/net.h"
 #include "lib/debug_msg.h"
 
+#include "conf.h"
 #include "cmdline.h"
 #include "key_metrics.h"
 #include "metric_typedefs.h"
@@ -44,8 +43,8 @@ extern int h_errno;
 
 extern metric_t metric[];
 
-extern g_mcast_socket * mcast_join_socket;
-extern pthread_mutex_t mcast_join_socket_mutex;
+extern int msg_out_socket;
+extern pthread_mutex_t msg_out_socket_mutex;
 
 /* The root hash table pointer. */
 extern hash_t *cluster;

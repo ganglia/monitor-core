@@ -2,7 +2,8 @@
 #define GMOND_CONFIG_H 1
 #include <stdlib.h>
 #include <string.h>
-#include "llist.h"
+
+#include "lib/llist.h"
 
 /* autoconf me later */
 #define DEFAULT_GMOND_CONFIG_FILE "/etc/gmond.conf"
@@ -14,14 +15,15 @@ typedef struct
       char *latlong;
       char *url;
       char *location;
-      char *mcast_channel;
-      unsigned short mcast_port;
-      long int mcast_if_given;
-      char *mcast_if;
-      long int mcast_ttl;
-      long int mcast_threads;
-      unsigned short xml_port;
-      unsigned short compressed_xml_port;
+      char *msg_channel;
+      char *msg_port;
+      int msg_port_given;
+      int msg_if_given;
+      char *msg_if;
+      long int msg_ttl;
+      long int msg_threads;
+      char *xml_port;
+      char *compressed_xml_port;
       long int xml_threads;
       long int compressed_xml_threads;
       llist_entry *trusted_hosts;
