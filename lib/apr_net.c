@@ -165,7 +165,7 @@ create_tcp_server(apr_pool_t *context, apr_port_t port, char *bind, char *interf
   return sock;
 }
 
-static int
+int
 mcast_set_ttl(apr_socket_t *socket, int val)
 {
   apr_sockaddr_t *sa;

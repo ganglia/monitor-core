@@ -433,7 +433,6 @@ setup_listen_channels_pollset( void )
 		      mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL");
 	      exit(1);
 	    }
-
 	}
       else
 	{

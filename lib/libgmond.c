@@ -550,7 +550,7 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
     {
       cfg_t *udp_send_channel;
       char *mcast_join, *mcast_if, *host;
-      int port;
+      int port, ttl;
       apr_socket_t *socket = NULL;
       apr_pool_t *pool = NULL;
 
@@ -559,6 +559,7 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
       mcast_join     = cfg_getstr( udp_send_channel, "mcast_join" );
       mcast_if       = cfg_getstr( udp_send_channel, "mcast_if" );
       port           = cfg_getint( udp_send_channel, "port");
+      ttl            = cfg_getint( udp_send_channel, "ttl");
 
       debug_msg("udp_send_channel mcast_join=%s mcast_if=%s host=%s port=%d\n",
 		  mcast_join? mcast_join:"NULL", 
@@ -580,6 +581,8 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
 		      mcast_join, port);
 	      exit(1);
 	    }
+
+	  mcast_set_ttl(socket, ttl);
 	}
       else
 	{

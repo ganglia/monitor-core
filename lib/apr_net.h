@@ -16,11 +16,14 @@ apr_sockaddr_ip_buffer_get(char *addr, int len, apr_sockaddr_t *sockaddr);
 apr_socket_t *
 create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int ttl);
 
+int mcast_set_ttl(apr_socket_t *socket, int val);
+
 apr_socket_t *
 create_mcast_server(apr_pool_t *context, char *mcast_ip, apr_port_t port, char *bind, char *interface);
 
 apr_socket_t *
 create_tcp_server(apr_pool_t *context, apr_port_t port, char *bind, char *interface);
+
 
 
 #endif
