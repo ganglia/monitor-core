@@ -7,53 +7,20 @@ in order for the documentation to be in order with the code
 ****************************/
 
 #include "confuse.h"
+#include "apr_pools.h"
 
-#define DEFAULT_GMOND_CONFIGURATION "\
-globals {                    \n\
-  setuid = no                \n\
-  user = nobody              \n\
-} \n\
-udp_send_channel { \n\
-  mcast_join = 239.2.11.71 \n\
-  port = 8649 \n\
-} \n\
-udp_recv_channel { \n\
-  mcast_join = 239.2.11.71 \n\
-  port = 8649 \n\
-  bind = 239.2.11.71 \n\
-} \n\
-tcp_accept_channel { \n\
-  port = 8649 \n\
-} \n\
-collection_group { \n\
-  collect_once = yes \n\
-  time_threshold = 20 \n\
-  metric { \n\
-    name = \"heartbeat\" \n\
-  } \n\
-} \n\
-collection_group { \n\
-  collect_every = 60 \n\
-  metric { \n\
-    name = \"cpu_user\"  \n\
-  } \n\
-  metric { \n\
-    name = \"cpu_system\"   \n\
-  } \n\
-  metric { \n\
-    name = \"cpu_idle\"  \n\
-  } \n\
-  metric { \n\
-    name = \"cpu_nice\"  \n\
-  } \n\
-} \n\
-"
+void build_default_gmond_configuration(apr_pool_t *context);
 
 static cfg_opt_t cluster_opts[] = {
   CFG_STR("name", NULL, CFGF_NONE ),
   CFG_STR("owner", NULL, CFGF_NONE ),
   CFG_STR("latlong", NULL, CFGF_NONE ),
   CFG_STR("url", NULL, CFGF_NONE ),
+  CFG_END()
+};
+
+static cfg_opt_t host_opts[] = {
+  CFG_STR("location", "unspecified", CFGF_NONE ),
   CFG_END()
 };
 
@@ -67,6 +34,7 @@ static cfg_opt_t globals_opts[] = {
   CFG_BOOL("mute", 0, CFGF_NONE),
   CFG_BOOL("deaf", 0, CFGF_NONE),
   CFG_INT("host_dmax", 0, CFGF_NONE),
+  CFG_BOOL("gexec", 0, CFGF_NONE),
   CFG_END()
 };
 
@@ -115,6 +83,7 @@ static cfg_opt_t collection_group_opts[] = {
 
 static cfg_opt_t gmond_opts[] = {
   CFG_SEC("cluster",   cluster_opts, CFGF_NONE),
+  CFG_SEC("host",      host_opts, CFGF_NONE),
   CFG_SEC("globals",     globals_opts, CFGF_NONE), 
   CFG_SEC("udp_send_channel", udp_send_channel_opts, CFGF_MULTI),
   CFG_SEC("udp_recv_channel", udp_recv_channel_opts, CFGF_MULTI),

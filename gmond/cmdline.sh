@@ -11,6 +11,8 @@ option "location" l "Location of this host in the cluster 'rack,rank,plane'." st
 option "debug" d "Debug level. If greater than zero, daemon will stay in foreground." int default="0" no
 option "foreground" f "Run in foreground (don't daemonize)" flag off 
 option "default_config" t "Print the default configuration to stdout and exit" flag off
+option "metrics" m "Print the list of metrics this gmond supports" flag off
+option "bandwidth" b "Calculate minimum bandwidth use for configuration" flag off
 
 #Usage (a little tutorial)
 #

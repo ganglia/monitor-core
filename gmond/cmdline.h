@@ -29,6 +29,8 @@ struct gengetopt_args_info
   int debug_arg;	/* Debug level. If greater than zero, daemon will stay in foreground. (default='0').  */
   int foreground_flag;	/* Run in foreground (don't daemonize) (default=off).  */
   int default_config_flag;	/* Print the default configuration to stdout and exit (default=off).  */
+  int metrics_flag;	/* Print the list of metrics this gmond supports (default=off).  */
+  int bandwidth_flag;	/* Calculate minimum bandwidth use for configuration (default=off).  */
 
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
@@ -37,6 +39,8 @@ struct gengetopt_args_info
   int debug_given ;	/* Whether debug was given.  */
   int foreground_given ;	/* Whether foreground was given.  */
   int default_config_given ;	/* Whether default_config was given.  */
+  int metrics_given ;	/* Whether metrics was given.  */
+  int bandwidth_given ;	/* Whether bandwidth was given.  */
 
 } ;
 
