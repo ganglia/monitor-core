@@ -114,12 +114,12 @@ RRD_update( char *rrd, char *value )
    int   argc = 3;
    char val[128];
 
+   sprintf(val, "N:%s", value);
+
    argv[0] = "dummy";
    argv[1] = rrd;
    argv[2] = val; 
 
-   sprintf(val, "N:%s", value); 
-  
    optind=0; opterr=0;
    rrd_clear_error();
    rrd_update(argc, argv);
@@ -139,11 +139,11 @@ summary_RRD_update( char *rrd, char *sum, char *num )
    int   argc = 3;
    char val[128];
 
+   sprintf(val, "N:%s:%s", sum, num);
+
    argv[0] = "dummy";
    argv[1] = rrd;
    argv[2] = val;
-
-   sprintf(val, "N:%s:%s", sum, num);
 
    optind=0; opterr=0;
    rrd_clear_error();
