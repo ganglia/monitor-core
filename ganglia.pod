@@ -680,6 +680,65 @@ To get help with the commandline options, simply pass C<gstat> the C<--help> opt
 
 =over 4
 
+=item B<Process XML (x): XML_ParseBuffer() error at line x: not well-formed>
+
+This is an error that occurs when a ganglia components reads data from another ganglia component
+and finds that the XML is not well-formed.  The most common time this is a problem is when the PHP
+web frontend tries to read the XML stream from gmetad.
+
+To troubleshoot this problem, capture an XML from the ganglia component in question (gmetad/gmond).
+This is easy to do if you have telnet installed.  Simply login to the machine running the 
+component and run.
+
+  % telnet localhost 8651
+
+By default, gmetad exports its XML on port 8651 and gmond exports its XML on port 8649.  Modify
+the port number above to suite your configuration.
+
+When you connect to the port you should get an XML stream.  If not, look in the process table on
+the machine to ensure that the component is actually running.
+
+Once you are getting an XML stream, capture it to a file by running.
+
+  % telnet localhost 8651 > XML.txt
+  Connection closed by foreign host.
+
+If you open the file C<XML.txt>, you will see the captured XML stream.  You will need to remove
+the first three lines of the C<XML.txt> which will read...
+
+  Trying 127.0.0.1...
+  Connected to localhost.
+  Escape character is '^]'.
+
+Those lines are output from C<telnet> and not the ganglia component (I wish telnet would send
+those messages to C<stderr> but they are send to C<stdout>).
+
+There are many ways that XML can be misformed.  The great tool for validating XML is C<xmllint>.
+C<xmllint> will read the file and find the line containing the error.  
+
+  % xmllint --valid XML.txt
+
+will read your captured XML stream, validate it against the ganglia DTD and check that it is 
+well-formed XML.  C<xmllint> will print the entire XML stream if there are no errors.  If 
+there are errors they will be reported with line numbers.  For example...
+
+  /tmp/XML.txt:3393: error: Opening and ending tag mismatch: HOST and CLUSTER
+  </CLUSTER>
+         ^
+  /tmp/XML.txt:3394: error: Opening and ending tag mismatch: CLUSTER and GANGLIA_XML
+  </GANGLIA_XML>
+             ^
+  /tmp/XML.txt:3395: error: Premature end of data in tag GANGLIA_XML
+
+If you get errors, open C<XML.txt> and go to the line numbers in question.  See if you can
+understand based on your configuration how these errors could occur.  If you cannot fix the
+problem yourself, please email your C<XML.txt> and output from C<xmllint> to
+C<ganglia-developers@lists.sourceforge.net>.  Please include information about the version
+of each component in question along with the operating system they are running on.  The
+more details we have about your configuration the more likely it is we will be able to help
+you.  Also, all mailing to C<ganglia-developers> is archiving and available to read on the
+web.  You may want to modify C<XML.txt> to remove any sensitive information.
+
 =item B<Removing a host from the list>
 
 A common problem that people have is not being able to remove a host from the ganglia
