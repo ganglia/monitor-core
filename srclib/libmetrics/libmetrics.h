@@ -146,6 +146,21 @@ typedef union {
 
 #endif
 
+#ifdef AIX
+#endif
+
+#ifdef DARWIN
+#endif
+
+#ifdef IRIX
+
+ g_val_t cpu_intr_func(void);
+
+#endif
+
+#ifdef OSF
+#endif
+
 enum {
    user_defined,
   /*
@@ -202,8 +217,6 @@ enum {
    wcache,
 #endif
 #ifdef LINUX
-   cpu_intr,
-   cpu_sintr,
    bytes_in,
    bytes_out,
    pkts_in,
@@ -211,14 +224,16 @@ enum {
    disk_total,
    disk_free,
    part_max_used,
-#endif
-#ifdef CYGWIN
    cpu_intr,
    cpu_sintr,
+#endif
+#ifdef CYGWIN
    bytes_in,
    bytes_out,
    pkts_in,
    pkgs_out,
+   cpu_intr,
+   cpu_sintr,
 #endif
 #ifdef HPUX
    cpu_intr,
@@ -239,6 +254,12 @@ enum {
 #endif
 #ifdef IRIX
    cpu_intr,
+#endif
+#ifdef AIX
+#endif
+#ifdef DARWIN
+#endif
+#ifdef OSF
 #endif
    num_key_metrics
 }  key_metrics;
