@@ -37,9 +37,9 @@ AC_CONFIG_AUX_DIR(config)
 # set GANGLIA_BINARY_AGE _and_ GANGLIA_INTERFACE_AGE to 0.
 GANGLIA_MAJOR_VERSION=2
 GANGLIA_MINOR_VERSION=5
-GANGLIA_MICRO_VERSION=6
-GANGLIA_INTERFACE_AGE=6
-GANGLIA_BINARY_AGE=6
+GANGLIA_MICRO_VERSION=7
+GANGLIA_INTERFACE_AGE=7
+GANGLIA_BINARY_AGE=7
 GANGLIA_VERSION=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION.$GANGLIA_MICRO_VERSION
 
 echo
@@ -190,24 +190,6 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS(syslog.h pthread.h fcntl.h signal.h sys/time.h sys/types.h sys/stat.h sys/socket.h sys/ioctl.h netinet/in.h arpa/inet.h net/if.h netinet/tcp.h unistd.h stropts.h sys/sockio.h ctype.h errno.h netdb.h stdio.h sys/uio.h sys/wait.h sys/un.h sys/select.h sys/filio.h getopt.h net/if_dl.h net/raw.h poll.h)
 AC_CHECK_HEADERS(inttypes.h limits.h sys/param.h sys/mount.h sys/vfs.h sys/statfs.h sys/statvfs.h)
 
-
-
-# For libdnet
-if test "$CYGWIN" = yes ; then
-   AC_CHECK_HEADERS(Iphlpapi.h winsock2.h)
-else
-   AC_CHECK_HEADERS(fcntl.h unistd.h)
-   AC_CHECK_HEADERS(sys/bufmod.h sys/dlpi.h sys/dlpihdr.h sys/dlpi_ext.h \
-       sys/ioctl.h sys/mib.h sys/ndd_var.h sys/socket.h sys/sockio.h \
-       sys/sysctl.h sys/time.h)
-   AC_CHECK_HEADERS(net/bpf.h net/if.h net/if_arp.h net/if_dl.h \
-       net/pfvar.h netinet/ip_fw.h )
-   AC_CHECK_HEADERS(ip_fil_compat.h netinet/ip_fil_compat.h ip_compat.h \
-       netinet/ip_compat.h ip_fil.h netinet/ip_fil.h)
-   AC_CHECK_HEADERS(hpsecurity.h)
-fi
-
-
 dnl ##################################################################
 dnl Checks for typedefs.
 dnl
@@ -234,53 +216,92 @@ dnl AC_CHECK_SIZEOF(void *)
 dnl ##################################################################
 dnl Check for structure definitions.
 dnl   
-if test "$ac_cv_header_sys_socket_h" = yes ; then
-   AC_DNET_SOCKADDR_SA_LEN
+
+AC_CACHE_CHECK(for timespec{}, ac_cv_have_timespec_struct,
+        AC_EGREP_HEADER(timespec, time.h,
+                ac_cv_have_timespec_struct=yes,
+                ac_cv_have_timespec_struct=no))
+if test $ac_cv_have_timespec_struct = yes ; then
+        AC_DEFINE(HAVE_TIMESPEC_STRUCT, 1, [we have timespec struct])
 fi
 
-dnl Check for Ethernet interface.
-if test "$ac_cv_header_Iphlpapi_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-win32.o"
-elif test "$ac_cv_dnet_bsd_bpf" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-bsd.o"
-elif test "$ac_cv_dnet_linux_pf_packet" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-linux.o"
-elif test "$ac_cv_header_net_raw_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-snoop.o"
-elif test "$ac_cv_header_sys_ndd_var_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-ndd.o"
-elif test "$ac_cv_header_sys_dlpi_h" = yes || \
-     test "$ac_cv_header_sys_dlpihdr_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS eth-dlpi.o"
-else
-   DNET_OBJS="$DNET_OBJS eth-none.o"
+
+AC_CACHE_CHECK(for addrinfo{}, ac_cv_have_addrinfo_struct,
+        AC_EGREP_HEADER(addrinfo, netdb.h,
+                ac_cv_have_addrinfo_struct=yes,
+                ac_cv_have_addrinfo_struct=no))
+if test $ac_cv_have_addrinfo_struct = yes ; then
+        AC_DEFINE(HAVE_ADDRINFO_STRUCT, 1, [we have addrinfo struct])
 fi
 
-dnl Check for network interface interface.
-if test "$ac_cv_header_Iphlpapi_h" = yes ; then
-   DNET_OBJS="$DNET_OBJS intf-win32.o"
-else
-   DNET_OBJS="$DNET_OBJS intf.o"
+AC_CACHE_CHECK(for if_nameindex{}, ac_cv_have_if_nameindex_struct,
+        AC_EGREP_HEADER(if_nameindex, net/if.h,
+                ac_cv_have_if_nameindex_struct=yes,
+                ac_cv_have_if_nameindex_struct=no))
+if test $ac_cv_have_if_nameindex_struct = yes ; then
+        AC_DEFINE(HAVE_IF_NAMEINDEX_STRUCT, 1, [we have if_nameinded])
 fi
 
-AC_SUBST(DNET_OBJS)
+AC_CACHE_CHECK(for in_pktinfo{}, ac_cv_have_in_pktinfo_struct,
+       AC_EGREP_HEADER(in_pktinfo, netinet/in.h,
+                ac_cv_have_in_pktinfo_struct=yes,
+                ac_cv_have_in_pktinfo_struct=no))
+if test $ac_cv_have_in_pktinfo_struct = yes; then
+       AC_DEFINE(HAVE_IN_PKTINFO_STRUCT, 1, [we have in_pktinfo])
+fi
 
 
 dnl ##################################################################
 dnl Check the compiler characteristics
 dnl
 dnl Don't need this now that all data is send in XDR
-AC_C_BIGENDIAN
+dnl AC_C_BIGENDIAN
 
 dnl ##################################################################
 dnl Checks for library functions.
 dnl
 dnl AC_FUNC_MEMCMP
+AC_CHECK_FUNCS(getopt_long inet_ntop)
+
+AC_CHECK_FUNCS(bzero)
+AC_CHECK_FUNCS(getaddrinfo)
+AC_CHECK_FUNCS(freeaddrinfo)
+AC_CHECK_FUNCS(gethostname)
+AC_CHECK_FUNCS(gethostbyname2)
+AC_CHECK_FUNCS(gethostbyname_r)
+AC_CHECK_FUNCS(getnameinfo)
+AC_CHECK_FUNCS(hstrerror)
+AC_CHECK_FUNCS(if_nametoindex)
+AC_CHECK_FUNCS(inet_aton)
+AC_CHECK_FUNCS(inet_pton)
+AC_CHECK_FUNCS(isfdtype)
+AC_CHECK_FUNCS(poll)
+AC_CHECK_FUNCS(pselect)
+AC_CHECK_FUNCS(snprintf)
+AC_CHECK_FUNCS(sockatmark)
+AC_CHECK_FUNCS(vsnprintf)
+
+
 
 dnl ##################################################################
 dnl Check for function prototypes in headers.
 dnl
-AC_CHECK_FUNCS(getopt_long inet_ntop)
+AC_CHECK_FUNC_PROTO(getaddrinfo, netdb.h)
+AC_CHECK_FUNC_PROTO(freeaddrinfo, netdb.h)
+AC_CHECK_FUNC_PROTO(getnameinfo, netdb.h)
+AC_CHECK_FUNC_PROTO(gethostname, unistd.h)
+AC_CHECK_FUNC_PROTO(getrusage, sys/resource.h)
+AC_CHECK_FUNC_PROTO(hstrerror, netdb.h)
+AC_CHECK_FUNC_PROTO(if_nametoindex, net/if.h)
+AC_CHECK_FUNC_PROTO(inet_aton, arpa/inet.h)
+AC_CHECK_FUNC_PROTO(inet_pton, arpa/inet.h)
+AC_CHECK_FUNC_PROTO(isfdtype, sys/stat.h)
+AC_CHECK_FUNC_PROTO(pselect, sys/select.h)
+AC_CHECK_FUNC_PROTO(snprintf, stdio.h)
+AC_CHECK_FUNC_PROTO(vsnprintf, stdarg.h)
+AC_CHECK_FUNC_PROTO(sockatmark, sys/socket.h)
+
+
 dnl AC_CHECK_FUNC(getopt_long)
 dnl AC_CHECK_FUNC(pthread_rwlock_rdlock,
 dnl   [AC_DEFINE(HAVE_PTHREAD_RWLOCK, 1)])
@@ -316,7 +337,6 @@ case "$host" in
                 metric_source="linux.c"
                 CFLAGS="$CFLAGS -D_REENTRANT"
                 AC_DEFINE(LINUX, 1, LINUX)
-                AC_DNET_LINUX_PROCFS   
 dnl
 dnl For fsusage.c - disk usage.
 dnl
