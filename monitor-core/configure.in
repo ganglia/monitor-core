@@ -382,7 +382,6 @@ dnl Some operating systems require additional flags in order to get all
 dnl the definitions that we're looking for in some system headers.
 
 dnl Currently only linux and freebsd support gexec
-GEXEC_DIRS=""
 
 case "$host" in
 *linux*)
@@ -393,7 +392,6 @@ dnl
 dnl For fsusage.c - disk usage.
 dnl
                 AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
-                GEXEC_DIRS="libe authd gexec"
                 AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
                 ;;
 *ia64-*hpux*)		metric_source="hpux.c"
@@ -440,7 +438,6 @@ dnl
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
 *freebsd*)      metric_source="freebsd.c" 
                 CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
-                GEXEC_DIRS="libe authd gexec"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
                 AC_DEFINE(FREEBSD, 1, FREEBSD);; 
                 AC_SUBST(GEXEC_DIRS)
@@ -448,8 +445,6 @@ dnl
                 LIBS="$LIBS -lrpc"
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
-
-AC_SUBST(GEXEC_DIRS)
 
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
