@@ -212,7 +212,12 @@ main ( int argc, char *argv[] )
          debug_msg("XML listening on port %d", gmond_config.xml_port);
 
          /* thread(s) to listen to the multicast traffic */
-         barrier_init(&mcast_listen_barrier, gmond_config.mcast_threads);
+         if(barrier_init(&mcast_listen_barrier, gmond_config.mcast_threads))
+            {
+               perror("barrier_init() error");
+               return -1;    
+            }
+
          for ( i = 0 ; i < gmond_config.mcast_threads; i++ )
             {
                pthread_create(&tid, &attr, mcast_listen_thread, (void *)mcast_listen_barrier);
@@ -220,7 +225,11 @@ main ( int argc, char *argv[] )
          debug_msg("listening thread(s) have been started");
 
          /* threads to answer requests for XML */
-         barrier_init(&server_barrier, (gmond_config.xml_threads));
+         if(barrier_init(&server_barrier, (gmond_config.xml_threads)))
+            {
+               perror("barrier_init() error");
+               return -1;
+            }
          for ( i=0 ; i < gmond_config.xml_threads; i++ )
             {
                pthread_create(&tid, &attr, server_thread, (void *)server_barrier);
