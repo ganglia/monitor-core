@@ -13,7 +13,7 @@ if (! Gmetad($ganglia_ip, $ganglia_port) )
    }
 
 # If we have no child data sources, assume something is wrong.
-if (!count($grid))
+if (!count($grid) and !count($cluster))
    {
       print "<H4>Ganglia cannot find a data source. Is gmond running?</H4>";
       exit;
