@@ -3,11 +3,7 @@
 #
 # Gmetad-webfrontend version. Used to check for updates.
 #
-$majorversion = 3;
-$minorversion = 0;
-$microversion = 0;
-
-$ganglia_version = "$majorversion.$minorversion.$microversion";
+include_once "./version.php";
 
 #
 # The name of the directory in "./templates" which contains the
