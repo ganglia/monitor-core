@@ -22,7 +22,7 @@ dnl
 AC_INIT(gmond/gmond.c)
 AC_CONFIG_AUX_DIR(config)
 
-AM_INIT_AUTOMAKE(ganglia-monitor-core, 2.4.1b1)
+AM_INIT_AUTOMAKE(ganglia-monitor-core, 2.4.2b1)
 
 AC_CANONICAL_HOST
 AM_CONFIG_HEADER(config.h)
