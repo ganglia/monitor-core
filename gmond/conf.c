@@ -553,6 +553,13 @@ static DOTCONF_CB(cb_deaf)
    return NULL;
 }
 
+static DOTCONF_CB(cb_cluster_tag)
+{
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+  c->cluster_tag = cmd->data.value;
+  return NULL;
+}
+
 static DOTCONF_CB(cb_debug_level)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
@@ -657,6 +664,8 @@ set_defaults(gmond_config_t *config )
 
    /* Intialize information about the interfaces on the machine */
    all_interfaces = get_ifi_info( AF_INET, 0);
+    
+   config->cluster_tag = 1;
    return 0;
 }
 
@@ -754,6 +763,8 @@ get_gmond_config( char *conffile )
          {"interfaces", ARG_LIST, cb_interfaces, &gmond_config, CHANNEL_SECTION},
          {"action", ARG_STR, cb_action, &gmond_config, CHANNEL_SECTION},
          {"ttl", ARG_INT, cb_ttl, &gmond_config, CHANNEL_SECTION},
+
+         {"cluster_tag", ARG_TOGGLE, cb_cluster_tag, &gmond_config, CTX_ALL},
 
          {"name", ARG_STR, cb_name, &gmond_config, CTX_ALL},
          {"owner", ARG_STR, cb_owner, &gmond_config, CTX_ALL},

@@ -10,7 +10,7 @@
 #include "gmetad.h"
 #include "lib/tpool.h"
 
-extern g3_thread_pool data_source_pool;
+extern ganglia_thread_pool data_source_pool;
 
 extern int debug_level;
 
@@ -138,11 +138,11 @@ data_thread ( void *arg )
 
    if(sleep_time > 0)
      {
-       g3_run_later( data_source_pool, data_thread, arg, sleep_time, 0 );
+       ganglia_run_later( data_source_pool, data_thread, arg, sleep_time, 0 );
      }
    else
      {
-       g3_run( data_source_pool, data_thread, arg);
+       ganglia_run( data_source_pool, data_thread, arg);
      }
 
 }
