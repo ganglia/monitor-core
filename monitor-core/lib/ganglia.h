@@ -33,11 +33,15 @@
 #define END_C_DECLS
 #endif
 
-
 typedef struct apr_pool_t *         Ganglia_pool;
 typedef struct cfg_t *              Ganglia_gmond_config;
 typedef struct apr_array_header_t * Ganglia_udp_send_channels;
-typedef struct Ganglia_gmetric_message * Ganglia_gmetric;
+
+struct Ganglia_gmetric {
+   Ganglia_pool pool;
+   struct Ganglia_gmetric_message *msg; /* defined in ./lib/protocol.x */
+};
+typedef struct Ganglia_gmetric * Ganglia_gmetric;
 
 Ganglia_gmond_config
 Ganglia_gmond_config_create(char *path, int fallback_to_default);
@@ -51,7 +55,11 @@ Ganglia_pool Ganglia_pool_create( Ganglia_pool parent );
 void Ganglia_pool_destroy( Ganglia_pool pool );
 
 int Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len );
-int Ganglia_send_gmetric(Ganglia_gmetric gmetric, Ganglia_udp_send_channels channels );
+
+Ganglia_gmetric Ganglia_gmetric_create( Ganglia_pool parent_pool );
+int Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *type, char *units, unsigned int slope, unsigned int tmax, unsigned int dmax);
+int Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_channels );
+void Ganglia_gmetric_destroy( Ganglia_gmetric gmetric );
 
 
 extern int gexec_errno;
