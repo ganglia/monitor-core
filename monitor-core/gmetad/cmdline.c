@@ -18,7 +18,7 @@
 #endif
 /* Check for configure's getopt check result.  */
 #ifndef HAVE_GETOPT_LONG
-#include "getopt.h"
+#include "lib/getopt.h"
 #else
 #include <getopt.h>
 #endif
