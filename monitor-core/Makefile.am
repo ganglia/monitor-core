@@ -1,5 +1,6 @@
 # $Id$
 #
+# It's nice to have web last since on 'make install' we echo a message
 SUBDIRS = lib gmetad gmond gmetric web
 
 #DIST_SUBDIRS = lib gmetad gmond gmetric
