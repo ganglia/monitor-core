@@ -3,7 +3,7 @@
 
 #include <zlib.h>
 
-#include "lib/zio.h"
+#include "lib/gzio.h"
 #include "lib/hash.h"
 #include "lib/debug_msg.h"
 #include "libunp/unp.h"
@@ -126,9 +126,9 @@ typedef struct
    {
       struct sockaddr_in addr;
       filter_type_t filter;
-      zio_t io;
       int fd;
       int valid;
+      gzFile io;
    }
 client_t;
 

@@ -29,7 +29,7 @@ extern gmetad_config_t gmetad_config;
 void *
 data_thread ( void *arg )
 {
-   int i, sleep_time, bytes_read, rval, sock = -1;
+   int i, sleep_time, rval, sock = -1;
    data_source_list_t *d = (data_source_list_t *)arg;
    struct timeval start, end;
    gzFile gz = NULL;
