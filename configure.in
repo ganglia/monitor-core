@@ -574,6 +574,7 @@ GEXEC=false;
 
 case "$host" in
 *linux*)
+		GEXEC=true
                 metric_source="linux.c"
                 AC_DEFINE(LINUX, 1, LINUX)
 dnl
@@ -642,6 +643,9 @@ AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 #
 # I really wanted gexec in the main dist... but...
 AC_OUTPUT(Makefile ganglia.spec \
+        libe/Makefile \
+        gauthd/Makefile gauthd/gauthd.init \
+        gexec/Makefile  gexec/gexec_server \
 	gmetad/Makefile \
 	gmetric/Makefile \
 	gmond/Makefile \
