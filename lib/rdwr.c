@@ -11,7 +11,7 @@
  * Library of functions implementing reader/writer locks
  */
 #include <pthread.h>
-#include <ganglia/rdwr.h>
+#include "rdwr.h"
 
 int
 pthread_rdwr_init_np (pthread_rdwr_t * rdwrp)
