@@ -16,6 +16,7 @@ datum_t type;
 datum_t name;
 datum_t value;
 datum_t units;
+datum_t slope;
 
 struct gengetopt_args_info args_info;
 
@@ -23,12 +24,13 @@ int main ( int argc, char **argv )
 {
    int rval, len;
    XDR xhandle;
-   char mcast_data[MAX_MCAST_MSG]; 
+   char mcast_data[4096]; 
    g_mcast_socket *mcast_socket;
    uint32_t key = 0; /* user-defined */
    char empty[] = "\0";
    g_inet_addr *addr;
    struct intf_entry *entry;
+   unsigned int slope;
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
@@ -46,8 +48,38 @@ int main ( int argc, char **argv )
       {
          fprintf(stderr,"\nInvalid type: %s\n\n", args_info.type_arg);
          fprintf(stderr,"Run %s --help\n\n", argv[0]);
-         exit(-1);
+         exit(1);
       }  
+ 
+   if(! strcmp("zero", args_info.slope_arg ))
+      {
+         slope = 0;
+      }
+   else if( !strcmp("positive", args_info.slope_arg) )
+      {
+         slope = 1;
+      }
+   else if( !strcmp("negative", args_info.slope_arg) )
+      { 
+         slope = 2;
+      }
+   else if( !strcmp("both", args_info.slope_arg) )
+      {
+         slope = 3;
+      }
+   else
+      {
+         fprintf(stderr,"\nInvalid slope: %s\n\n", args_info.slope_arg);
+         fprintf(stderr,"Run %s --help\n\n", argv[0]);
+         exit(1);
+      }
+
+   if( args_info.tmax_arg <= 0 )
+      {
+         fprintf(stderr,"\nTMAX must be greater than zero\n\n");
+         fprintf(stderr,"Run %s --help\n\n", argv[0]);
+         exit(1);
+      }
 
    if(! args_info.mcast_if_given )
       {
@@ -117,6 +149,20 @@ int main ( int argc, char **argv )
    if ( rval == 0 )
       {
          err_ret("xdr_bytes() for units failed");
+         return SYNAPSE_FAILURE;
+      }
+
+   rval = xdr_u_int(&xhandle, &slope);
+   if ( rval == 0 )
+      {
+         err_ret("xdr_u_int for slope failed");
+         return SYNAPSE_FAILURE;
+      }
+
+   rval = xdr_u_int(&xhandle, &(args_info.tmax_arg));
+   if ( rval == 0 )
+      {
+         err_ret("xdr_u_int for tmax failed");
          return SYNAPSE_FAILURE;
       }
 
