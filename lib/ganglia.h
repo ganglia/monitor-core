@@ -26,11 +26,6 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <ganglia/error.h>
-#include <ganglia/hash.h>
-#include <ganglia/llist.h>
-#include <ganglia/net.h>
-#include <ganglia/xmlparse.h>
 
 #ifndef SYS_CALL
 #define SYS_CALL(RC,SYSCALL) \
