@@ -4,33 +4,39 @@
 #include <ganglia/llist.h>
 #include <gmetad.h>
 #include <ganglia.h>
+#include "conf.h"
 
 /* Variables that get filled in by configuration file */
-extern char *gridname;
-extern char *authority;
-extern llist_entry *trusted_hosts;
+extern Source_t root;
 extern hash_t *sources;
-extern int debug_level;
-extern int xml_port;
-extern int server_threads;
-extern char *rrd_rootdir;
-extern char *setuid_username;
-extern int should_setuid;
 
-extern int source_index;
+gmetad_config_t gmetad_config;
+
 
 static DOTCONF_CB(cb_gridname)
 {
+    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
     debug_msg("Grid name %s", cmd->data.str);
-    gridname = strdup(cmd->data.str);
+    c->gridname = strdup(cmd->data.str);
     return NULL;
 }
 
 static DOTCONF_CB(cb_authority)
 {
+   /* See gmetad.h for why we record strings this way. */
     debug_msg("Grid authority %s", cmd->data.str);
-    authority = strdup(cmd->data.str);
+    root.authority_ptr = 0;
+    strcpy(root.strings, cmd->data.str);
+    root.stringslen += strlen(root.strings) + 1;
     return NULL;
+}
+
+static DOTCONF_CB(cb_all_trusted)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("All hosts are trusted!");
+   c->all_trusted = 1;
+   return NULL;
 }
 
 static DOTCONF_CB(cb_trusted_hosts)
@@ -38,6 +44,7 @@ static DOTCONF_CB(cb_trusted_hosts)
    int i,rv;
    llist_entry *le;
    struct sockaddr_in sa;
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
 
    for (i = 0; i < cmd->arg_count; i++)
       {
@@ -49,7 +56,7 @@ static DOTCONF_CB(cb_trusted_hosts)
          }
          le->val = (char*) malloc(MAXHOSTNAMELEN);
          my_inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAMELEN);
-         llist_add(&(trusted_hosts), le);
+         llist_add(&(c->trusted_hosts), le);
       }
    return NULL;
 }
@@ -59,8 +66,11 @@ static DOTCONF_CB(cb_data_source)
    unsigned int i;
    data_source_list_t *dslist;
    datum_t key, val, *find;
-   int port, rv;
+   int port, rv=0;
+   unsigned long step;
+   unsigned int source_index=0;
    char *p, *str;
+   char *endptr;
    struct sockaddr_in sa;
 
    source_index++;
@@ -73,30 +83,31 @@ static DOTCONF_CB(cb_data_source)
          err_quit("Unable to malloc data source list");
       }
 
-   dslist->num_sources = 0;
-
-   dslist->sources = (g_inet_addr **) malloc( (cmd->arg_count-1) * sizeof(g_inet_addr *) );
-   if (! dslist->sources )
-      {
-         err_quit("Unable to malloc sources array");
-      }
-
    dslist->name = strdup( cmd->data.list[0] );
 
-  /* Set data source step (avg polling interval). Default is 15s. */
+  /* Set data source step (avg polling interval). Default is 15s.
+   * Be careful of the case where the source is an ip address,
+   * in which case endptr = '.'
+   */
   i=1;
-  rv=atoi(cmd->data.list[i]);
-   if (rv) {
-      dslist->step = rv;
-      i++;
-   }
-   else {
+  step=strtoul(cmd->data.list[i], &endptr, 10);
+   if (step && *endptr == '\0')
+      {
+         dslist->step = step;
+         i++;
+      }
+   else
       dslist->step = 15;
-   }
 
    debug_msg("Polling interval for %s is %u sec.", dslist->name, dslist->step);
 
-   for (i = i; i< cmd->arg_count; i++)
+   dslist->sources = (g_inet_addr **) malloc( (cmd->arg_count-i) * sizeof(g_inet_addr *) );
+   if (! dslist->sources )
+      err_quit("Unable to malloc sources array");
+
+   dslist->num_sources = 0;
+
+   for ( ; i< cmd->arg_count; i++)
       {
          str = cmd->data.list[i];
 
@@ -108,9 +119,7 @@ static DOTCONF_CB(cb_data_source)
                port = atoi ( p+1 );
             }
          else
-            {
-               port = 8649;
-            }
+            port = 8649;
 
          rv = g_gethostbyname( cmd->data.list[i], &sa, NULL);
          if (!rv) {
@@ -123,69 +132,87 @@ static DOTCONF_CB(cb_data_source)
          debug_msg("Trying to connect to %s:%d for [%s]", str, port, dslist->name);
          dslist->sources[dslist->num_sources] = (g_inet_addr *) g_inetaddr_new ( str, port );
          if(! dslist->sources[dslist->num_sources])
-            {
                err_quit("Unable to create inetaddr [%s:%d] and save it to [%s]", str, port, dslist->name);
-            }
          else
-            {
                dslist->num_sources++;
-            }
          free(str);
       }
 
    key.data = cmd->data.list[0];
-   key.size = strlen ( key.data ) + 1;
+   key.size = strlen(key.data) + 1;
 
    val.data = &dslist;
    val.size = sizeof(dslist);
 
    find  = hash_insert( &key, &val, sources );
    if(!find)
-      {
          err_quit("Unable to insert list pointer into source hash\n");
-      }
+   
    debug_msg("Data inserted for [%s] into sources hash", key.data);
    return NULL;
 }
 
 static DOTCONF_CB(cb_debug_level)
 {
-   debug_level = cmd->data.value;
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   c->debug_level = cmd->data.value;
    debug_msg("Setting the debug level to %d", cmd->data.value);
    return NULL;
 }
 
 static DOTCONF_CB(cb_xml_port)
 {
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
    debug_msg("Setting xml port to %d", cmd->data.value);
-   xml_port = cmd->data.value;
+   c->xml_port = cmd->data.value;
+   return NULL;
+}
+
+static DOTCONF_CB(cb_interactive_port)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Setting interactive port to %d", cmd->data.value);
+   c->interactive_port = cmd->data.value;
    return NULL;
 }
 
 static DOTCONF_CB(cb_server_threads)
 {
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
    debug_msg("Setting number of xml server threads to %d", cmd->data.value);
-   server_threads = cmd->data.value;
+   c->server_threads = cmd->data.value;
    return NULL;
 }
 
 static DOTCONF_CB(cb_rrd_rootdir)
 {
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
    debug_msg("Setting the RRD Rootdir to %s", cmd->data.str);
-   rrd_rootdir = strdup ( cmd->data.str );
+   c->rrd_rootdir = strdup (cmd->data.str);
    return NULL;
 }
 
 static DOTCONF_CB(cb_setuid_username)
 {
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
    debug_msg("Setting setuid username to %s", cmd->data.str);
-   setuid_username = strdup( cmd->data.str );
+   c->setuid_username = strdup(cmd->data.str);
    return NULL;
 }
 
 static DOTCONF_CB(cb_setuid)
 {
-   should_setuid = cmd->data.value;
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   c->should_setuid = cmd->data.value;
+   return NULL;
+}
+
+static DOTCONF_CB(cb_scalable)
+{  
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Setting scalable = %s", cmd->data.str);
+   if (!strcmp(cmd->data.str, "off"))
+      c->scalable_mode = 0;
    return NULL;
 }
 
@@ -197,23 +224,46 @@ static FUNC_ERRORHANDLER(errorhandler)
 
 static configoption_t gmetad_options[] =
    {
-      {"data_source", ARG_LIST, cb_data_source, NULL, 0},
-      {"gridname", ARG_STR, cb_gridname, NULL, 0},
-      {"authority", ARG_STR, cb_authority, NULL, 0},
-      {"trusted_hosts", ARG_LIST, cb_trusted_hosts, NULL, 0},
-      {"debug_level",  ARG_INT,  cb_debug_level, NULL, 0},
-      {"xml_port",  ARG_INT, cb_xml_port, NULL, 0},
-      {"server_threads", ARG_INT, cb_server_threads, NULL, 0},
-      {"rrd_rootdir", ARG_STR, cb_rrd_rootdir, NULL, 0},
-      {"setuid", ARG_TOGGLE, cb_setuid, NULL, 0},
-      {"setuid_username", ARG_STR, cb_setuid_username, NULL, 0},
+      {"data_source", ARG_LIST, cb_data_source, &gmetad_config, 0},
+      {"gridname", ARG_STR, cb_gridname, &gmetad_config, 0},
+      {"authority", ARG_STR, cb_authority, &gmetad_config, 0},
+      {"trusted_hosts", ARG_LIST, cb_trusted_hosts, &gmetad_config, 0},
+      {"all_trusted", ARG_INT, cb_all_trusted, &gmetad_config, 0},
+      {"debug_level",  ARG_INT,  cb_debug_level, &gmetad_config, 0},
+      {"xml_port",  ARG_INT, cb_xml_port, &gmetad_config, 0},
+      {"interactive_port", ARG_INT, cb_interactive_port, &gmetad_config, 0},
+      {"server_threads", ARG_INT, cb_server_threads, &gmetad_config, 0},
+      {"rrd_rootdir", ARG_STR, cb_rrd_rootdir, &gmetad_config, 0},
+      {"setuid", ARG_TOGGLE, cb_setuid, &gmetad_config, 0},
+      {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
+      {"scalable", ARG_STR, cb_scalable, &gmetad_config, 0},
       LAST_OPTION
    };
+
+static void
+set_defaults (gmetad_config_t *config)
+{
+   /* Gmetad defaults */
+   config->gridname = "Unspecified";
+   config->xml_port = 8651;
+   config->interactive_port = 8652;
+   config->server_threads = 4;
+   config->trusted_hosts = NULL;
+   config->debug_level = 0;
+   config->should_setuid = 1;
+   config->setuid_username = "nobody";
+   config->rrd_rootdir = "/var/lib/ganglia/rrds";
+   config->scalable_mode = 1;
+   config->all_trusted = 0;
+}
 
 int
 parse_config_file ( char *config_file )
 {
    configfile_t *configfile;
+
+   set_defaults(&gmetad_config);
+
    configfile = dotconf_create( config_file, gmetad_options, 0, CASE_INSENSITIVE );
    if (!configfile)
       {
