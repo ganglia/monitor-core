@@ -3,71 +3,60 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <pthread.h>
-#include <cmdline.h>
-#include <ganglia/error.h>
-#include <ganglia/debug_msg.h>
-#include <ganglia/hash.h>
-#include <ganglia/llist.h>
-#include <ganglia/net.h>
-#include <ganglia/barrier.h>
-#include "gmetad.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <time.h>
+#include <gmetad.h>
+#include <cmdline.h>
+#include <ganglia/llist.h>
 
-hash_t *xml;
-
+/* Holds our data sources. */
 hash_t *sources;
+
+/* The root of our local grid. Replaces the old "xml" hash table. */
+Source_t root;
+
+g_tcp_socket *server_socket;
+g_tcp_socket *interactive_socket;
+
+pthread_mutex_t  server_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  server_interactive_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 extern void *data_thread ( void *arg );
 extern void* server_thread(void *);
 extern int parse_config_file ( char *config_file );
 extern int number_of_datasources ( char *config_file );
-
-extern struct ganglia_metric metrics[];
-
-/* The name of this grid. Will encompass all our data sources. */
-char *gridname = "Unspecified";
-/* The authority on this level of the grid, for obtaining the RRDs.
-   Default is set to http://hostname/ganglia-webfrontend/. */
-char *authority;
-
-llist_entry *trusted_hosts = NULL;
-extern int debug_level;
-int xml_port = 8651;
-g_tcp_socket *   server_socket;
-pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
-int server_threads = 2;
-char *rrd_rootdir =  "/var/lib/ganglia/rrds";
-char *setuid_username = "nobody";
-int should_setuid = 1;
-unsigned int source_index = 0;
+extern struct type_tag* in_type_list (char *, unsigned int);
+extern int write_data_to_rrd( const char *source, const char *host, const char *metric,
+   const char *sum, const char *num, unsigned int step, unsigned int time_polled);
 
 struct gengetopt_args_info args_info;
 
-long double  sum_of_sums[MAX_METRIC_HASH_VALUE];
-unsigned int sum_of_nums[MAX_METRIC_HASH_VALUE];
+extern gmetad_config_t gmetad_config;
+extern int debug_level;
 
-int
+
+static int
 print_sources ( datum_t *key, datum_t *val, void *arg )
 {
    int i;
    data_source_list_t *d = *((data_source_list_t **)(val->data));
    g_inet_addr *addr;
 
-   fprintf(stderr,"Source: [%s] has %d sources\n", (char*) key->data, d->num_sources);
+   fprintf(stderr,"Source: [%s, step %d] has %d sources\n",
+      (char*) key->data, d->step, d->num_sources);
    for(i = 0; i < d->num_sources; i++)
       {
          addr = d->sources[i];
          fprintf(stderr, "\t%s\n", addr->name);
       }
-  
+
    return 0;
 }
 
-int
+static int
 spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
 {
    data_source_list_t *d = *((data_source_list_t **)(val->data));
@@ -81,27 +70,155 @@ spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
    return 0;
 }
 
-int
-save_sums_n_nums( datum_t *key, datum_t *val, void *arg )
-{
-   data_source_list_t *ds =  *(data_source_list_t **)val->data;
-   register int i;
 
-   /* Ignore dead data sources */
-   if( ds->dead )
-      {
-         debug_msg("[%s] is a dead source", ds->name);
-         return 0;
-      }
- 
-   for ( i = 0; i < MAX_METRIC_HASH_VALUE; i++ )
-      {
-         sum_of_sums[i] += ds->sum[i];
-         sum_of_nums[i] += ds->num[i];
-      }
+/* The string fields in Metric_t are actually offsets into the value buffer field.
+ * This function returns a regular char* pointer. Tricky, but efficient.
+ */
+char *
+getfield(char* buf, short int index)
+{
+   return (char*) buf+index;
+}
+
+
+/* Zeroes out every metric value in a summary hash table. */
+int
+zero_out_summary(datum_t *key, datum_t *val, void *arg)
+{
+   Metric_t *metric;
+
+   /* Note that we get the actual value bytes here, not a copy. */
+   metric = (Metric_t*) val->data;
+   memset(&metric->val, 0, sizeof(metric->val));
+   metric->num = 0;
 
    return 0;
 }
+
+
+/* Sums the metric summaries from all data sources. */
+static int
+sum_metrics(datum_t *key, datum_t *val, void *arg)
+{
+   datum_t *hash_datum, *rdatum;
+   Metric_t *rootmetric, *metric;
+   char *type;
+   struct type_tag *tt;
+   int do_sum = 1;
+
+   metric = (Metric_t *) val->data;
+   type = getfield(metric->strings, metric->type);
+
+   hash_datum = hash_lookup(key, root.metric_summary);
+   if (!hash_datum)
+      {
+         hash_datum = datum_new((char*) metric, val->size);
+         do_sum = 0;
+      }
+   rootmetric = (Metric_t*) hash_datum->data;
+
+   if (do_sum)
+      {
+         tt = in_type_list(type, strlen(type));
+         if (!tt) return 0;
+
+         switch (tt->type)
+            {
+               case INT:
+                  rootmetric->val.int32 += metric->val.int32;
+                  break;
+               case UINT:
+                  rootmetric->val.uint32 += metric->val.uint32;
+                  break;
+               case FLOAT:
+                  rootmetric->val.d += metric->val.d;
+                  break;
+               default:
+                  break;
+            }
+         rootmetric->num += metric->num;
+      }
+
+   rdatum = hash_insert(key, hash_datum, root.metric_summary);
+
+   datum_free(hash_datum);
+
+   if (!rdatum)
+      return 1;
+   else
+      return 0;
+}
+
+
+/* Sums the metric summaries from all data sources. */
+static int
+do_root_summary( datum_t *key, datum_t *val, void *arg )
+{
+   Source_t *source = (Source_t*) val->data;
+   int rc;
+
+   /* We skip dead sources. */
+   if (source->ds->dead)
+      return 0;
+
+   /* We know that all these metrics are numeric. */
+   rc = hash_foreach(source->metric_summary, sum_metrics, arg);
+
+   /* Update the top level root source */
+   root.hosts_up += source->hosts_up;
+   root.hosts_down += source->hosts_down;
+
+   return rc;
+}
+
+
+static int
+write_root_summary(datum_t *key, datum_t *val, void *arg)
+{
+   char *name, *type;
+   char sum[256];
+   char num[256];
+   Metric_t *metric;
+   int rc;
+   struct type_tag *tt;
+
+   name = (char*) key->data;
+   metric = (Metric_t*) val->data;
+   type = getfield(metric->strings, metric->type);
+
+   /* Summarize all numeric metrics */
+   tt = in_type_list(type, strlen(type));
+   if (!tt) return 0;
+
+   switch (tt->type)
+      {
+         case INT:
+            sprintf(sum, "%d", metric->val.int32);
+            break;
+         case UINT:
+            sprintf(sum, "%u", metric->val.uint32);
+            break;
+         case FLOAT:
+            sprintf(sum, "%.5f", metric->val.d);
+            break;
+         default:
+            break;
+      }
+
+   sprintf(num, "%u", metric->num);
+
+   debug_msg("Writing Overall Summary for metric %s", name);
+
+   /* Save the data to a round robin database */
+   rc = write_data_to_rrd( NULL, NULL, name, sum, num, 15, time(0));
+   if (rc)
+      {
+         err_msg("Unable to write meta data for metric %s to RRD", name);
+      }
+   return 0;
+}
+
+#define HOSTNAMESZ 64
 
 int
 main ( int argc, char *argv[] )
@@ -113,16 +230,15 @@ main ( int argc, char *argv[] )
    uid_t gmetad_uid;
    char * gmetad_username;
    struct passwd *pw;
-   char sum[512];
-   char num[512];  
-   char hostname[64];
+   char hostname[HOSTNAMESZ];
+   gmetad_config_t *c = &gmetad_config;
 
    srand(52336789);
 
    /* Ignore SIGPIPE */
    signal( SIGPIPE, SIG_IGN );
 
-   if (cmdline_parser (argc, argv, &args_info) != 0)
+   if (cmdline_parser(argc, argv, &args_info) != 0)
       err_quit("command-line parser error");
 
    num_sources = number_of_datasources( args_info.conf_arg );
@@ -131,6 +247,9 @@ main ( int argc, char *argv[] )
          err_quit("%s doesn't have any data sources specified", args_info.conf_arg);
       }
 
+   memset(&root, 0, sizeof(root));
+   root.id = ROOT_NODE;
+
    /* Get the real number of data sources later */
    sources = hash_create( num_sources + 10 );
    if (! sources )
@@ -138,32 +257,45 @@ main ( int argc, char *argv[] )
          err_quit("Unable to create sources hash\n");
       }
 
-   xml = hash_create( num_sources + 10 );
-   if (! xml)
+   root.authority = hash_create( num_sources + 10 );
+   if (!root.authority)
       {
-         err_quit("Unable to create XML hash\n");
+         err_quit("Unable to create root authority (our grids and clusters) hash\n");
       }
 
-   gethostname(hostname,64);
-   authority = (char*) malloc(100);
-   if (authority) 
-      sprintf(authority, "http://%s/ganglia-webfrontend/", hostname);
+   root.metric_summary = hash_create (DEFAULT_METRICSIZE);
+   if (!root.metric_summary)
+      {
+         err_quit("Unable to create root summary hash");
+      }
 
    parse_config_file ( args_info.conf_arg );
     /* If given, use command line directives over config file ones. */
-   if (args_info.debug_given) {
-      debug_level = args_info.debug_arg;
-   }
+   if (args_info.debug_given)
+      {
+         c->debug_level = args_info.debug_arg;
+      }
+   debug_level = c->debug_level;
+
+   /* Setup our default authority pointer if the conf file hasnt yet.
+    * Done in the style of hash node strings. */
+   if (!root.stringslen)
+      {
+         gethostname(hostname, HOSTNAMESZ);
+         root.authority_ptr = 0;
+         sprintf(root.strings, "http://%s/ganglia-webfrontend/", hostname);
+         root.stringslen += strlen(root.strings) + 1;
+      }
 
    /* The rrd_rootdir must be writable by the gmetad process */
-   if( should_setuid )
+   if( c->should_setuid )
       {
-         if(! (pw = getpwnam(setuid_username)))
+         if(! (pw = getpwnam(c->setuid_username)))
             {
                err_sys("Getpwnam error");
             }
          gmetad_uid = pw->pw_uid;
-         gmetad_username = setuid_username;
+         gmetad_username = c->setuid_username;
       }
    else
       {
@@ -176,24 +308,22 @@ main ( int argc, char *argv[] )
       }
 
    debug_msg("Going to run as user %s", gmetad_username);
-   if( should_setuid )
+   if( c->should_setuid )
       {
-         become_a_nobody(setuid_username);
+         become_a_nobody(c->setuid_username);
       }
 
-   if( stat( rrd_rootdir, &struct_stat ) )
+   if( stat( c->rrd_rootdir, &struct_stat ) )
       {
-          err_sys("Please make sure that %s exists", rrd_rootdir);
+          err_sys("Please make sure that %s exists", c->rrd_rootdir);
       }
-          
    if ( struct_stat.st_uid != gmetad_uid )
       {
-          err_quit("Please make sure that %s is owned by %s", rrd_rootdir, gmetad_username);
+          err_quit("Please make sure that %s is owned by %s", c->rrd_rootdir, gmetad_username);
       }
-
    if (! (struct_stat.st_mode & S_IWUSR) )
       {
-          err_quit("Please make sure %s has WRITE permission for %s", gmetad_username, rrd_rootdir);
+          err_quit("Please make sure %s has WRITE permission for %s", gmetad_username, c->rrd_rootdir);
       }
 
    if(debug_level)
@@ -201,55 +331,61 @@ main ( int argc, char *argv[] )
          printf("Sources are ...\n");
          hash_foreach( sources, print_sources, NULL);
       }
-   else
+
+   /* Debug level 1 is error output only, and no daemonizing. */
+   if (!debug_level)
       {
-         daemon_init ( argv[0], 0);
+         daemon_init (argv[0], 0);
       }
 
-   server_socket = g_tcp_socket_server_new( xml_port );
+   server_socket = g_tcp_socket_server_new( c->xml_port );
    if (server_socket == NULL)
       {
          perror("tcp_listen() on xml_port failed");
          exit(1);
       }
-   debug_msg("listening on port %d", xml_port);  
+   debug_msg("xml listening on port %d", c->xml_port);
+   
+   interactive_socket = g_tcp_socket_server_new( c->interactive_port );
+   if (interactive_socket == NULL)
+      {
+         perror("tcp_listen() on interactive_port failed");
+         exit(1);
+      }
+   debug_msg("interactive xml listening on port %d", c->interactive_port);
 
    pthread_attr_init( &attr );
    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
-   for(i=0; i< server_threads; i++)
-      pthread_create(&pid, &attr, server_thread, NULL);   
+   /* Spin off the non-interactive server threads. (Half as many as interactive). */
+   for (i=0; i < c->server_threads/2; i++)
+      pthread_create(&pid, &attr, server_thread, (void*) 0);
+
+   /* Spin off the interactive server threads. */
+   for (i=0; i < c->server_threads; i++)
+      pthread_create(&pid, &attr, server_thread, (void*) 1);
 
    hash_foreach( sources, spin_off_the_data_threads, NULL );
 
-   /* Meta data */
+    /* Meta data */
    for(;;)
       {
-         sleep_time=10+(int) (20.0*rand()/(RAND_MAX+10.0));
+         /* Do at a random interval between 10 and 30 sec. */
+         sleep_time = 10 + ((30-10)*1.0) * rand()/(RAND_MAX + 1.0);
          sleep(sleep_time);
 
          /* Flush the old values */
-         memset( &sum_of_sums, 0, MAX_METRIC_HASH_VALUE * sizeof( long double ));
-         memset( &sum_of_nums, 0, MAX_METRIC_HASH_VALUE * sizeof( unsigned int));
+         hash_foreach(root.metric_summary, zero_out_summary, NULL);
+         root.hosts_up = 0;
+         root.hosts_down = 0;
 
          /* Sum the new values */
-         hash_foreach ( sources, save_sums_n_nums, NULL );
+         hash_foreach(root.authority, do_root_summary, NULL );
 
          /* Save them to RRD */
-         for ( i = 0; i < MAX_METRIC_HASH_VALUE; i++ )
-            {
-               if( strlen(metrics[i].name) && sum_of_nums[i] )
-                  {
-                     sprintf(num, "%d",  sum_of_nums[i]);
-                     sprintf(sum, "%Lf", sum_of_sums[i]);
-
-                     /* Save the data to a round robin database */
-                     if( write_data_to_rrd( NULL, NULL, (char *)metrics[i].name, sum, num, 15, time(0)) )
-                        {
-                           err_msg("Unable to write meta data to RRDbs");
-                        }
-                  }
-            }
+         hash_foreach(root.metric_summary, write_root_summary, NULL);
       }
+
    return 0;
 }
+

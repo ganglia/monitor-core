@@ -5,13 +5,15 @@
 #include <sys/time.h>
 #include <gmetad.h>
 #include <string.h>
-#include <ganglia/hash.h>
+#include <gmetad.h>
 
 extern int debug_level;
 
 extern hash_t *xml;
 
-extern process_xml(data_source_list_t *, char *);
+extern hash_t *root;
+
+extern int process_xml(data_source_list_t *, char *);
 
 void *
 data_thread ( void *arg )
@@ -19,18 +21,17 @@ data_thread ( void *arg )
    int i, sleep_time, bytes_read, rval;
    data_source_list_t *d = (data_source_list_t *)arg;
    g_inet_addr *addr;
-   g_tcp_socket *sock;
-   datum_t key, val;
+   g_tcp_socket *sock=0;
+   datum_t key;
    char *buf;
    /* This will grow as needed */
    unsigned int buf_size = 1024, read_index;
-   char *p, *q;
    struct pollfd struct_poll;
    struct timeval start, end;
  
    if(debug_level)
       {
-         fprintf(stderr,"Data thread %d is monitoring [%s] data source\n", pthread_self(), d->name);
+         fprintf(stderr,"Data thread %d is monitoring [%s] data source\n", (int) pthread_self(), d->name);
          for(i = 0; i < d->num_sources; i++)
             {
                addr = d->sources[i];
@@ -55,6 +56,7 @@ data_thread ( void *arg )
          gettimeofday(&start, NULL);
          for(i=0; i < d->num_sources; i++)
             {
+               /* Find first viable source in list. */
                sock = g_tcp_socket_new ( d->sources[i] );
                if( sock )
                   break;
@@ -140,56 +142,11 @@ data_thread ( void *arg )
          buf[read_index] = '\0';
 
          /* Parse the buffer */
-         rval = process_xml(d, buf );
+         rval = process_xml(d, buf);
          if(rval)
             {
-               debug_msg("data_thread() couldn't parse the XML and data to RRD for [%s]", d->name);
+               debug_msg("data_thread() couldn't parse the XML for [%s]", d->name);
                d->dead = 1;
-               goto take_a_break;
-            }    
-
-         p = strstr(buf, "<GANGLIA_XML");
-         if(!p)
-            {
-               err_msg("data_thread() unable to find the start of the GANGLIA_XML tag in output from [%s] data source", d->name);
-               d->dead = 1;
-               goto take_a_break;
-            }
-
-         p = strchr( p, '>' ); 
-         if(!p)
-            {
-               err_msg("data_thread() unable to find end of GANGLIA_XML tag in output from [%s] data source", d->name);
-               d->dead = 1;
-               goto take_a_break;
-            }
-
-         p = strchr( p, '\n' );
-         if(!p)
-            {
-               d->dead = 1;
-               goto take_a_break;
-            }
-         p++;
-
-         q = strstr(p, "</GANGLIA_XML>");
-         if(!q)
-            {
-               err_msg("data_thread() unable to find the closing GANGLIA_XML tag in output from [%s] data source", d->name);
-               d->dead = 1;
-               goto take_a_break;
-            } 
-         else
-            {
-               *q = '\0';
-            }
-
-         val.data = p;
-         val.size = strlen(val.data);
-
-         if(! hash_insert (&key, &val, xml))
-            {
-               err_msg("data_thread() unable to insert data for [%s] into XML hash", d->name);
                goto take_a_break;
             }
 

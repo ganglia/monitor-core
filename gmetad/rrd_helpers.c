@@ -12,13 +12,13 @@
 #include <time.h>
 
 #define PATHSIZE 4096
-extern char * rrd_rootdir;
+extern gmetad_config_t gmetad_config;
 
 
 pthread_mutex_t rrd_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void inline
-my_mkdir ( char *dir )
+my_mkdir ( const char *dir )
 {
    if ( mkdir ( dir, 0755 ) < 0 && errno != EEXIST)
       {
@@ -27,7 +27,7 @@ my_mkdir ( char *dir )
 }
 
 static int
-RRD_update( char *rrd, char *sum, char *num, unsigned int process_time )
+RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_time )
 {
    char *argv[3];
    int   argc = 3;
@@ -58,7 +58,7 @@ RRD_update( char *rrd, char *sum, char *num, unsigned int process_time )
          pthread_mutex_unlock( &rrd_mutex );
          return 1;
       } 
-   debug_msg("Updated rrd %s with value %s", rrd, val);
+   /* debug_msg("Updated rrd %s with value %s", rrd, val); */
    pthread_mutex_unlock( &rrd_mutex );
    return 0;
 }
@@ -114,7 +114,8 @@ RRD_create( char *rrd, int summary, unsigned int step)
 /* A summary RRD has a "num" and a "sum" DS (datasource) whereas the
    host rrds only have "sum" (since num is always 1) */
 static int
-push_data_to_rrd( char *rrd, char *sum, char *num, unsigned int step, unsigned int process_time)
+push_data_to_rrd( char *rrd, const char *sum, const char *num, 
+   unsigned int step, unsigned int process_time)
 {
    int rval;
    int summary;
@@ -137,13 +138,14 @@ push_data_to_rrd( char *rrd, char *sum, char *num, unsigned int step, unsigned i
 
 /* Assumes num argument will be NULL for a host RRD. */
 int
-write_data_to_rrd ( char *source, char *host, char *metric, char *sum, char *num, unsigned int step, unsigned int process_time )
+write_data_to_rrd ( const char *source, const char *host, const char *metric, 
+   const char *sum, const char *num, unsigned int step, unsigned int process_time )
 {
    char rrd[ PATHSIZE ];
    char *summary_dir = "__SummaryInfo__";
 
    /* Build the path to our desired RRD file. Assume the rootdir exists. */
-   strcpy(rrd, rrd_rootdir);
+   strcpy(rrd, gmetad_config.rrd_rootdir);
 
    if (source) {
       strncat(rrd, "/", PATHSIZE);

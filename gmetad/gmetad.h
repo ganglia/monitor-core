@@ -1,40 +1,82 @@
 #ifndef GMETAD_H
 #define GMETAD_H 1 
 #include <ganglia/net.h>
+#include <ganglia/hash.h>
+#include <ganglia/debug_msg.h>
+#include <ganglia/error.h>
+#include "conf.h"
 
 /* For metric_hash */
 typedef enum {
-   UINT32,
+   INT,
+   UINT,
    FLOAT,
-   DOUBLE,
-} metric_type;
+   TIMESTAMP,
+   STRING
+} metric_type_t;
 
-struct ganglia_metric
+struct type_tag
    {
       const char *name;
-      metric_type type;
+      metric_type_t type;
    };
 
-/* This value is taken from the metric_hash.c file (MAX_HASH_VALUE+1) */
-#define MAX_METRIC_HASH_VALUE 73
+/* The default number of nodes in a cluster */
+#define DEFAULT_CLUSTERSIZE 1024
+
+/* The default number of metrics per node */
+#define DEFAULT_METRICSIZE 50
 
 /* For xml_hash */
-typedef enum {
-   GANGLIA_XML_TAG,
-   GRID_TAG,
-   CLUSTER_TAG,
-   HOST_TAG,
-   NAME_TAG,
-   METRIC_TAG,
-   TN_TAG,
-   TMAX_TAG,
-   VAL_TAG,
-   TYPE_TAG,
-   SLOPE_TAG,
-   VERSION_TAG,
-   REPORTED_TAG,
-   LOCALTIME_TAG
-} xml_tag_t;
+typedef enum 
+   {
+      GANGLIA_XML_TAG,
+      GRID_TAG,
+      CLUSTER_TAG,
+      HOST_TAG,
+      NAME_TAG,
+      METRIC_TAG,
+      TN_TAG,
+      TMAX_TAG,
+      DMAX_TAG,
+      VAL_TAG,
+      TYPE_TAG,
+      SLOPE_TAG,
+      SOURCE_TAG,
+      VERSION_TAG,
+      REPORTED_TAG,
+      LOCALTIME_TAG,
+      OWNER_TAG,
+      LATLONG_TAG,
+      URL_TAG,
+      AUTHORITY_TAG,
+      IP_TAG,
+      LOCATION_TAG,
+      STARTED_TAG,
+      UNITS_TAG,
+      HOSTS_TAG,
+      METRICS_TAG
+   }
+xml_tag_t;
+
+/* To identify hash tree nodes. */
+typedef enum
+   {
+      ROOT_NODE,
+      GRID_NODE,
+      CLUSTER_NODE,
+      HOST_NODE,
+      METRIC_NODE
+   }
+node_type_t;
+
+/* The types of filters we support. */
+typedef enum
+   {
+      NO_FILTER,
+      SUMMARY
+   }
+filter_type_t;
 
 struct xml_tag
    {
@@ -42,21 +84,132 @@ struct xml_tag
       xml_tag_t tag;
    };
 
-/* This value is taken from the xml_hash.c file (MAX_HASH_VALUE+1) */
-#define MAX_XML_HASH_VALUE 23
-
 typedef struct
    {
       char *name;
       unsigned int step;
       unsigned int num_sources;
       g_inet_addr **sources;
-      long double  sum[MAX_METRIC_HASH_VALUE];
-      unsigned int num[MAX_METRIC_HASH_VALUE];
       long double timestamp;   /* added by swagner */
       int dead;
    }
 data_source_list_t;
+
+/* The size of an ethernet frame, minus IP/UDP headers (1472)
+ * plus a bit since gmond sends meta data in binary format, while
+ * we get everything in ascii.
+ */
+#define FRAMESIZE 1572
+
+/* We convert numeric types to binary so we can use the
+ * metric_t to compute summaries. */
+typedef union
+   {
+      int32_t int32;
+      uint32_t uint32;
+      double d;
+      int str;
+   }
+metric_val_t;
+
+typedef struct
+   {
+      int  fd;
+      struct sockaddr_in addr;
+      int valid;
+      filter_type_t filter;
+   }
+client_t;
+
+
+/* sacerdoti: The base class for a hash node.
+ * Any hash node type can be cast to this (OO style). */
+typedef struct Generic_type
+   {
+      node_type_t id;
+      int (*report_start)(struct Generic_type *self, datum_t *key, client_t *client, void *arg);
+      int (*report_end)(struct Generic_type *self, client_t *client, void *arg);
+      hash_t *children;
+      char *therest;
+   }
+Generic_t;
+
+
+/* The reporting functions for all node types. */
+typedef int (*report_start_func)(Generic_t *self, datum_t *key, client_t *client, void *arg);
+typedef int (*report_end_func)(Generic_t *self, client_t *client, void *arg);
+
+
+/* See Metric_t struct below for an explanation of the strings buffer.
+ * The hash key is the node's name for easier subtree addressing. */
+typedef struct
+   {
+      node_type_t id;
+      report_start_func report_start;
+      report_end_func report_end;
+      hash_t *metrics;
+      short int ip;
+      uint32_t tn;
+      uint32_t tmax;
+      uint32_t dmax;
+      short int location;
+      uint32_t reported;
+      uint32_t started;
+      short int stringslen;
+      char strings[FRAMESIZE];
+   }
+Host_t;
+
+/* sacerdoti: these are used for root, clusters, and grids. */
+typedef struct
+   {
+      node_type_t id;
+      report_start_func report_start;
+      report_end_func report_end;
+      hash_t *authority; /* Null for a grid. */
+      short int authority_ptr;   /* An authority URL. */
+      hash_t *metric_summary;
+      data_source_list_t *ds;
+      uint32_t hosts_up;
+      uint32_t hosts_down;
+      uint32_t localtime;
+      short int owner;
+      short int latlong;
+      short int url;
+      short int stringslen;
+      char strings[FRAMESIZE];
+   }
+Source_t;
+
+
+/* sacerdoti: Since we don't know the length of the string fields,
+ * we place them sequentially in the strings buffer. The
+ * order of strings in the buffer is usually:
+ * "val, type, units, slope, source"  (name is hash key). 
+ * The value of these fields are offsets into the strings buffer.
+ */
+typedef struct
+   {
+      node_type_t id;
+      report_start_func report_start;
+      report_end_func report_end;
+      hash_t *leaf;  /* Always NULL. */
+      metric_val_t val;
+      short int valstr;    /* An optimization to speed queries. */
+      short int precision;    /* Number of decimal places for floats. */
+      uint32_t num;
+      short int type;
+      short int units;
+      uint32_t tn;
+      uint32_t tmax;
+      uint32_t dmax;
+      short int slope;
+      short int source;
+      short int stringslen;
+      char strings[FRAMESIZE];
+   }
+Metric_t;
+
 
 #ifndef SYS_CALL
 #define SYS_CALL(RC,SYSCALL) \
