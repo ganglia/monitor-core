@@ -2,8 +2,6 @@ SUBDIRS = gstat
 
 EXTRA_DIST = machines gmond.init gmond.conf
 
-AM_CFLAGS = -I$(top_builddir)/lib
-
 sbin_PROGRAMS = gmond
 
 gmond_SOURCES =  gmond.c monitor.c server.c listen.c cleanup.c node_data_t.h \

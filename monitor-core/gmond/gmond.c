@@ -4,19 +4,21 @@
 #include <sys/types.h>
 #endif
 
-#include "unpifi.h"
-#include "interface.h"
-#include "ganglia_private.h"
-#include "dotconf.h"
-#include "gmond_config.h"
-#include "hash.h"
-#include "barrier.h"
-#include "become_a_nobody.h"
-#include "net.h"
-#include "signal.h"
-#include "metric.h"
-#include "debug_msg.h"
+#include <signal.h>
+
+#include "lib/unpifi.h"
+#include "lib/interface.h"
+#include "lib/ganglia_private.h"
+#include "lib/dotconf.h"
+#include "lib/gmond_config.h"
+#include "lib/hash.h"
+#include "lib/barrier.h"
+#include "lib/become_a_nobody.h"
+#include "lib/net.h"
+#include "lib/debug_msg.h"
+
 #include "cmdline.h"
+#include "metric.h"
 
 /* The entire cluster this gmond knows about */
 hash_t *cluster;

@@ -2,8 +2,10 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
-#include "ganglia.h"
-#include "llist.h"
+
+#include "../../lib/ganglia.h"
+#include "../../lib/llist.h"
+
 #include <getopt.h>
 #include "cmdline.h"
 #include <stdio.h>

@@ -7,10 +7,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <rrd.h>
-#include <gmetad.h>
 #include <errno.h>
 #include <pthread.h>
 #include <time.h>
+
+#include "gmetad.h"
 
 #define PATHSIZE 4096
 extern gmetad_config_t gmetad_config;

@@ -2,13 +2,15 @@
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 
-#include "interface.h"
-#include "ganglia.h"
-#include "hash.h"
-#include "metric_typedefs.h"
-#include "node_data_t.h"
+#include "lib/interface.h"
+#include "lib/ganglia.h"
+#include "lib/hash.h"
+#include "lib/net.h"
+
+#include "gmond/metric_typedefs.h"
+#include "gmond/node_data_t.h"
+
 #include "cmdline.h"
-#include "net.h"
 
 extern int optopt;
 extern int optind;
