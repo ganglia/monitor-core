@@ -141,6 +141,7 @@ AC_CHECK_LIB(kstat, kstat_open)
 AC_CHECK_LIB(kvm, kvm_open)
 AC_CHECK_LIB(odm, odm_initialize)
 AC_CHECK_LIB(cfg, _system_configuration)
+AC_CHECK_LIB(pmapi, pm_cycles)
 AC_CHECK_LIB(dl, dlopen)
 
 dnl AC_CHECK_LIB(crypto, RSA_sign)
@@ -316,6 +317,13 @@ case "$host" in
 *aix*)		metric_source="aix.c"
                 CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
                 AC_DEFINE(SUPPORT_GEXEC, 0)
+		if test "$ac_cv_lib_pmapi_pm_cycles" = yes ; then
+			CFLAGS="$CFLAGS -DHAVE_PMAPI" 
+		else
+			echo "PMAPI not detected."
+			echo "For AIX 4.3, you can download PMAPI at http://alphaworks.ibm.com/tech/pmapi"
+			echo "AIX 5 has PMAPI installed in bos.pmapi"
+		fi
                 AC_DEFINE(AIX);;
 *hpux*)		metric_source="hpux.c"
 		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
