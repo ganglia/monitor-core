@@ -259,13 +259,14 @@ main ( int argc, char *argv[] )
    if(! gmond_config.mute )
       {
          mcast_socket = g_mcast_out ( gmond_config.mcast_channel, gmond_config.mcast_port,  
-                                      (struct in_addr *)&(entry->intf_addr.addr_ip), gmond_config.mcast_ttl);
+                             (struct in_addr *)&(entry->intf_addr.addr_ip), gmond_config.mcast_ttl);
          if ( !mcast_socket )
             {
                perror("gmond could not connect to multicast channel");
                return -1;
             }
-         debug_msg("multicasting on channel %s %d", gmond_config.mcast_channel, gmond_config.mcast_port);
+         debug_msg("multicasting on channel %s %d", 
+		    gmond_config.mcast_channel, gmond_config.mcast_port);
 
          /* in machine.c */
          initval = metric_init();
