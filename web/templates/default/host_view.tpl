@@ -18,13 +18,10 @@
 <TR>
   <TD COLSPAN="2" CLASS=title>Time and String Metrics</TD>
 </TR>
-<TR>
- <TD><B>Name</B></TD><TD><B>Value</B></TD>
-</TR>
 
 <!-- START BLOCK : string_metric_info -->
 <TR>
- <TD>{name}</TD><TD>{value}</TD>
+ <TD CLASS=footer WIDTH=30%>{name}</TD><TD>{value}</TD>
 </TR>
 <!-- END BLOCK : string_metric_info -->
 </TABLE>
@@ -34,13 +31,10 @@
 <TR>
   <TD COLSPAN=2 CLASS=title>Constant Metrics</TD>
 </TR>
-<TR>
- <TD><B>Name</B></TD><TD><B>Value</B></TD>
-</TR>
 
 <!-- START BLOCK : const_metric_info -->
 <TR>
- <TD>{name}</TD><TD>{value}</TD>
+ <TD CLASS=footer WIDTH=30%>{name}</TD><TD>{value}</TD>
 </TR>
 <!-- END BLOCK : const_metric_info -->
 </TABLE>
