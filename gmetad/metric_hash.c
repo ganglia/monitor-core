@@ -1,7 +1,15 @@
 /* C code produced by gperf version 2.7.2 */
-/* Command-line: gperf -G -l -H metric_hash -t -F ', 0' -N in_metric_list -k '1,6,$' -W metrics ./metric_list  */
+/* Command-line: gperf -G -l -H metric_hash -t -F ', 0' -N in_metric_list -k '1,6,$' -W metrics ./metric_hash.gperf  */
 /* $Id$ */
+/* Included for the metric_tyep definition */
 #include <gmetad.h>
+
+#define TOTAL_KEYWORDS 30
+#define MIN_WORD_LENGTH 6
+#define MAX_WORD_LENGTH 13
+#define MIN_HASH_VALUE 6
+#define MAX_HASH_VALUE 63
+/* maximum key range = 58, duplicates = 0 */
 
 #ifdef __GNUC__
 __inline

@@ -22,7 +22,7 @@ extern void *data_thread ( void *arg );
 extern void* server_thread(void *);
 extern int parse_config_file ( char *config_file );
 
-long double summary_array[64][MAX_HASH_VALUE];
+long double summary_array[64][MAX_METRIC_HASH_VALUE];
 
 llist_entry *trusted_hosts = NULL;
 extern int debug_level;
