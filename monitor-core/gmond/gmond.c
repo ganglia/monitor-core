@@ -714,13 +714,13 @@ print_xml_header( apr_socket_t *client )
   static char *url = NULL;
   apr_time_t now = apr_time_now();
 
-  status = apr_send( client, DTD, &len );
+  status = apr_socket_send( client, DTD, &len );
   if(status != APR_SUCCESS)
     return status;
 
   len = apr_snprintf( gangliaxml, 128, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmond\">\n",
 		      VERSION);
-  status = apr_send( client, gangliaxml, &len);
+  status = apr_socket_send( client, gangliaxml, &len);
   if(status != APR_SUCCESS)
     return status;
 
@@ -752,7 +752,7 @@ print_xml_header( apr_socket_t *client )
 		      latlong?latlong:"unspecified",
 		      url?url:"unspecified");
 
-      return apr_send( client, clusterxml, &len);
+      return apr_socket_send( client, clusterxml, &len);
     }
 
   return APR_SUCCESS;
@@ -766,14 +766,14 @@ print_xml_footer( apr_socket_t *client )
   if(cluster_tag)
     {
       len = 11;
-      status = apr_send(client, "</CLUSTER>\n", &len);
+      status = apr_socket_send(client, "</CLUSTER>\n", &len);
       if(status != APR_SUCCESS)
 	{
 	  return status;
 	}
     }
   len = 15;
-  return apr_send( client, "</GANGLIA_XML>\n", &len);
+  return apr_socket_send( client, "</GANGLIA_XML>\n", &len);
 }
 
 static apr_status_t
@@ -795,7 +795,7 @@ print_host_start( apr_socket_t *client, Ganglia_host *hostinfo)
 		     hostinfo->location? hostinfo->location: "unspecified", 
 		     hostinfo->gmond_started);
 
-  return apr_send(client, hostxml, &len);
+  return apr_socket_send(client, hostxml, &len);
 }
 
 /* NOT THREAD SAFE */
@@ -897,7 +897,7 @@ print_host_gmetric( apr_socket_t *client, Ganglia_metric *metric, apr_time_t now
 	   msg->dmax,
 	   msg->slope? "both": "zero");
 
-  return apr_send(client, metricxml, &len );
+  return apr_socket_send(client, metricxml, &len );
 }
 
 static apr_status_t
@@ -921,14 +921,14 @@ print_host_metric( apr_socket_t *client, Ganglia_metric *data, apr_time_t now )
 	  metric->tmax,
 	  metric->slope );
 
-  return apr_send(client, metricxml, &len);
+  return apr_socket_send(client, metricxml, &len);
 }
 
 static apr_status_t
 print_host_end( apr_socket_t *client)
 {
   apr_size_t len = 8;
-  return apr_send(client, "</HOST>\n", &len); 
+  return apr_socket_send(client, "</HOST>\n", &len); 
 }
 
 static void
