@@ -32,7 +32,7 @@ README: ganglia.sub
 	pod2text ganglia.sub README
 
 CHANGE_LOG_GEN_BIN = scripts/cvs2cl.pl
-CHANGE_LOG_GEN_FLAGS = -t -r -b --accum -I ChangeLog --gmt --prune
+CHANGE_LOG_GEN_FLAGS = -r --accum -I ChangeLog --gmt --prune
 
 ChangeLog::
 	touch ChangeLog
