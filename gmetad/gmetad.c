@@ -9,11 +9,12 @@
 #include <pwd.h>
 #include <time.h>
 
+#include "lib/llist.h"
+#include "lib/become_a_nobody.h"
+#include "lib/daemon_init.h"
+
 #include "gmetad.h"
 #include "cmdline.h"
-#include "llist.h"
-#include "become_a_nobody.h"
-#include "daemon_init.h"
 
 /* Holds our data sources. */
 hash_t *sources;

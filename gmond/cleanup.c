@@ -23,18 +23,17 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
-#include "ganglia.h"
-#include "hash.h"
-#include "barrier.h"
-#include "gmond_config.h"
+#include "lib/ganglia.h"
+#include "lib/hash.h"
+#include "lib/barrier.h"
+#include "lib/gmond_config.h"
+#include "lib/net.h"
+#include "lib/debug_msg.h"
+
 #include "cmdline.h"
 #include "key_metrics.h"
 #include "metric_typedefs.h"
 #include "node_data_t.h"
-#include "net.h"
-#include "debug_msg.h"
-
-
 
 #ifdef AIX
 extern void *h_errno_which(void);

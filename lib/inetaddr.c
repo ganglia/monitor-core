@@ -22,12 +22,13 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
-#include "llist.h"
-#include "net.h"
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#include "llist.h"
+#include "net.h"
 
 pthread_mutex_t gethostbyname_mutex = PTHREAD_MUTEX_INITIALIZER;
 

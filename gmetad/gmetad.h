@@ -3,11 +3,12 @@
 
 #include <zlib.h>
 
+#include "lib/net.h"
+#include "lib/hash.h"
+#include "lib/debug_msg.h"
+#include "lib/error.h"
+
 #include "conf.h"
-#include "net.h"
-#include "hash.h"
-#include "debug_msg.h"
-#include "error.h"
 
 /* For metric_hash */
 typedef enum {
@@ -119,13 +120,14 @@ typedef union
    }
 metric_val_t;
 
+#include "lib/zio.h"
 typedef struct
    {
       int  fd;
       struct sockaddr_in addr;
       int valid;
       filter_type_t filter;
-      gzFile z;
+      zio_t io;
    }
 client_t;
 

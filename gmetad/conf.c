@@ -1,12 +1,13 @@
-#include <dotconf.h>
 #include <string.h>
 
+#include "lib/dotconf.h"
+#include "lib/ganglia.h"
+#include "lib/hash.h"
+#include "lib/llist.h"
+#include "lib/my_inet_ntop.h"
+
 #include "gmetad.h"
-#include <ganglia.h>
 #include "conf.h"
-#include "hash.h"
-#include "llist.h"
-#include "my_inet_ntop.h"
 
 /* Variables that get filled in by configuration file */
 extern Source_t root;
