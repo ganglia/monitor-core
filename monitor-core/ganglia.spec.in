@@ -130,7 +130,6 @@ fi
 ##
 %install
 %__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
-%__mkdir -p $RPM_BUILD_ROOT/usr/include/ganglia
 %__mkdir -p $RPM_BUILD_ROOT/var/lib/ganglia/rrds
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
@@ -161,7 +160,6 @@ fi
 
 %files lib
 /usr/include/ganglia.h
-/usr/include/ganglia
 /usr/lib/libganglia*
 
 ##
@@ -174,6 +172,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Thu Nov 18 2004 Matt Massie <massie@cs.berkeley.edu>
+- Updated the lib section for ganglia v2.5.8
 * Mon Oct 14 2002 Federico Sacerdoti <fds@sdsc.edu>
 - Split package into -gmetad and -gmond subpackages for clarity,
   and separation of purpose/functionality.
