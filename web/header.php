@@ -204,11 +204,6 @@ $tpl->assign("node_menu", $node_menu);
 
 if( $context == "cluster" )
    {
-   if (!count($metrics)) {
-      echo "<h4>Cannot find any metrics for selected cluster \"$clustername\", exiting.</h4>\n";
-      echo "Check ganglia XML tree (telnet $ganglia_ip $ganglia_port)\n";
-      exit;
-   }
    $firsthost = key($metrics);
    foreach ($metrics[$firsthost] as $m => $foo)
          $context_metrics[] = $m;

@@ -7,8 +7,8 @@
 #include "gmetad.h"
 
 #include "lib/llist.h"
-#include "libunp/unp.h"
 #include "lib/zio.h"
+#include "libunp/unp.h"
 
 extern int server_socket;
 extern pthread_mutex_t  server_socket_mutex;
@@ -452,12 +452,12 @@ server_thread (void *arg)
    char request[REQUESTLEN];
    llist_entry *le;
    datum_t rootdatum;
-   char gzdopen_param[32];
+   char mode[32];
 
    for (;;)
       {
-         client.valid = 0;
          len = sizeof(client.addr);
+         client.valid = 0;
 
          if (interactive)
             {
@@ -519,10 +519,11 @@ server_thread (void *arg)
          else
             strcpy(request, "/");
 
-         client.io = zio_fdopen( client.fd, "wb", gmetad_config.xml_compression_level);
+         client.io = zio_malloc();
+         zio_open( client.io, client.fd, "wb", gmetad_config.xml_compression_level);
          if(!client.io)
            {
-             err_msg("unable to create zlib stream");
+             err_msg("unable to create client stream");
              close(client.fd);
              continue;
            }
@@ -531,7 +532,7 @@ server_thread (void *arg)
             {
                err_msg("server_thread() %d unable to write root preamble (DTD, etc)",
                          pthread_self() );
-               zio_close(client.io);
+               ganglia_gzclose(client.io);
                continue;
             }
 
@@ -542,7 +543,7 @@ server_thread (void *arg)
          if (process_path(&client, request, &rootdatum, NULL))
             {
                err_msg("server_thread() %d unable to write XML tree info", pthread_self() );
-               zio_close(client.io);
+               ganglia_gzclose(client.io);
                continue;
             }
 
@@ -551,6 +552,7 @@ server_thread (void *arg)
                err_msg("server_thread() %d unable to write root epilog", pthread_self() );
             }
 
-         zio_close(client.io);
+         zio_close( client.io);
+         zio_free( &(client.io) );
       }
 }

@@ -1,3 +1,5 @@
+CFLAGS = -ggdb 
+
 sbin_PROGRAMS = gmetad 
 
 gmetad_SOURCES =  gmetad.c cmdline.c cmdline.h data_thread.c gmetad.h server.c process_xml.c \
