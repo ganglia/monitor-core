@@ -6,7 +6,7 @@ else
 GMETAD_SUBDIR = 
 endif
 
-GANGLIA_SUBDIRS = lib $(GMETAD_SUBDIR) gmond gmetric
+GANGLIA_SUBDIRS = lib tests $(GMETAD_SUBDIR) gmond gmetric
 
 # Make sure we run the srclib but don't distribute it.  That
 # is handled in the "dist-hook" below...
