@@ -50,5 +50,7 @@ typedef struct
 } gmond_config_t;
 
 int get_gmond_config( char *conffile);
+void gmond_print_conf( gmond_config_t *config );
+
 
 #endif
