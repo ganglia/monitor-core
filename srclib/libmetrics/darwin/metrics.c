@@ -72,6 +72,7 @@ g_val_t
 mem_total_func ( void )
 {
    g_val_t val;
+#if HW_MEMSIZE
    unsigned long long physmem;
    size_t len = sizeof (physmem);
    int mib[2];
@@ -82,6 +83,9 @@ mem_total_func ( void )
    sysctl(mib, 2, &physmem, &len, NULL, 0);
 
    val.uint32 = (unsigned long) (physmem / 1024);
+#else
+   val.uint32 = 0;
+#endif
 
    return val;
 }
