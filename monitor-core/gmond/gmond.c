@@ -127,7 +127,7 @@ main ( int argc, char *argv[] )
    pthread_attr_t attr;
    barrier *mcast_listen_barrier, *server_barrier;
    struct timeval tv;
-   struct intf_entry *entry;
+   struct ifi_info *entry;
 #if 0
    struct in_addr mcast_if_addr;
 #endif
@@ -203,7 +203,7 @@ main ( int argc, char *argv[] )
             if (!entry)
                err_quit("We don't have any interfaces besides loopback, exiting.\n");
          }
-         debug_msg("Using interface %s", entry->intf_name);
+         debug_msg("Using interface %s", entry->ifi_name);
       }
    else
       {
@@ -217,7 +217,7 @@ main ( int argc, char *argv[] )
    if(! gmond_config.deaf )
       {
          mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port,
-                                          (struct in_addr *)&(entry->intf_addr.addr_ip));
+                                          (struct in_addr *)&(entry->ifi_addr));
          if (! mcast_join_socket )
             {
                perror("g_mcast_in() failed");
@@ -268,7 +268,7 @@ main ( int argc, char *argv[] )
    if(! gmond_config.mute )
       {
          mcast_socket = g_mcast_out ( gmond_config.mcast_channel, gmond_config.mcast_port,  
-                             (struct in_addr *)&(entry->intf_addr.addr_ip), gmond_config.mcast_ttl);
+                             (struct in_addr *)&(entry->ifi_addr), gmond_config.mcast_ttl);
          if ( !mcast_socket )
             {
                perror("gmond could not connect to multicast channel");
