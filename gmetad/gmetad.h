@@ -30,7 +30,9 @@ typedef enum {
    VAL_TAG,
    TYPE_TAG,
    SLOPE_TAG,
-   VERSION_TAG
+   VERSION_TAG,
+   REPORTED_TAG,
+   LOCALTIME_TAG
 } xml_tag_t;
 
 struct xml_tag
