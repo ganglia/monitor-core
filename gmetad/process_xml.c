@@ -38,7 +38,7 @@ typedef struct
       int grid_depth;   /* The number of nested grids at this point. Will begin at zero. */
       int host_alive;   /* True if the current host is alive. */
       Source_t source; /* The current source structure. */
-      Host_t *host;  /* Ptr to the current host structure. */
+      Host_t host;  /* The current host structure. */
       Metric_t metric;  /* The current metric structure. */
       hash_t *root;     /* The root authority table (contains our data sources). */
    }
@@ -106,7 +106,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
  * We need the type string here because we cannot be sure it comes before
  * the metric value in the attribute list.
  */
-void
+static void
 fillmetric(const char** attr, Metric_t *metric, const char* type, const int old)
 {
    int i;
@@ -210,14 +210,12 @@ start (void *data, const char *el, const char **attr)
    Metric_t *metric;
    int do_summary = 0;
 
-   int host_alive;
    int host_reported = 0;
    Host_t *host;
-   Host_t newhost;
 
    Source_t *source;
    hash_t *summary;
-   hash_t *hosts; /* The current cluster-hosts table. */
+   hash_t *hosts;  /* The current cluster-hosts table. */
 
    xt = in_xml_list ((char *) el, strlen(el));
    if (!xt)
@@ -249,12 +247,13 @@ start (void *data, const char *el, const char **attr)
                            }
                      }
 
+                  source = &(xmldata->source);
+
                   hash_datum = hash_lookup(&hashkey, xmldata->root);
                   if (!hash_datum)
                      {
-                        source = &(xmldata->source);
                         memset((void*) source, 0, sizeof(*source));
-                        
+
                         source->id = GRID_NODE;
                         source->report_start = source_report_start;
                         source->report_end = source_report_end;
@@ -266,16 +265,16 @@ start (void *data, const char *el, const char **attr)
                               return;
                            }
                         source->ds = xmldata->ds;
-                        
+
                         /* Initialize the partial sum lock */
                         source->sum_finished = (pthread_mutex_t*) malloc(sizeof(pthread_mutex_t));
                         pthread_mutex_init(source->sum_finished, NULL);
                      }
                   else
                      {
-                        memcpy(&xmldata->source, hash_datum->data, hash_datum->size);
+                        /* Copy the stored grid data into our Source buffer in xmldata. */
+                        memcpy(source, hash_datum->data, hash_datum->size);
                         datum_free(hash_datum);
-                        source = &xmldata->source;
                         source->hosts_up = 0;
                         source->hosts_down = 0;
 
@@ -305,7 +304,7 @@ start (void *data, const char *el, const char **attr)
                            }
                      }
                   source->stringslen = edge;
-            
+
                   /* Grab the "partial sum" mutex until we are finished summarizing. */
                   /*err_msg("%s grabbing lock", name);*/
                   pthread_mutex_lock(source->sum_finished);
@@ -340,10 +339,11 @@ start (void *data, const char *el, const char **attr)
                      }
                }
 
+            source = &(xmldata->source);
+
             hash_datum = hash_lookup(&hashkey, xmldata->root);
             if (!hash_datum)
                {
-                  source = &(xmldata->source);
                   memset((void*) source, 0, sizeof(*source));
                   
                   /* Set the identity of this host. */
@@ -372,9 +372,8 @@ start (void *data, const char *el, const char **attr)
                }
             else
                {
-                  memcpy(&xmldata->source, hash_datum->data, hash_datum->size);
+                  memcpy(source, hash_datum->data, hash_datum->size);
                   datum_free(hash_datum);
-                  source = &xmldata->source;
                   source->hosts_up = 0;
                   source->hosts_down = 0;
 
@@ -438,79 +437,60 @@ start (void *data, const char *el, const char **attr)
                      tn = atoi(attr[i+1]);
                   else if (xt->tag == TMAX_TAG)
                      tmax = atoi(attr[i+1]);
+                  else if (xt->tag == NAME_TAG)
+                     name = attr[i+1];
                }
 
-            if ( xmldata->old )
-               {
-                  /* For pre-2.5.0, check if the host is up this way */
-                  if (abs(xmldata->source.localtime - host_reported) > 60 )
-                     host_alive = 0;
-                  else
-                     host_alive = 1;
-               }
-            else
-               {
-                  if (tn > tmax*4)
-                     host_alive = 0;
-                  else
-                     host_alive = 1;
-               }
+            /* Is this host alive? For pre-2.5.0, we use the 60-second 
+             * method, otherwise we use the host's TN and TMAX attrs.
+             */
+            xmldata->host_alive = xmldata->old ?
+               abs(xmldata->source.localtime - host_reported) < 60 :
+               tn < tmax * 4;
 
-            if (host_alive)
+            if (xmldata->host_alive)
                xmldata->source.hosts_up++;
             else
                xmldata->source.hosts_down++;
 
-            xmldata->host_alive = host_alive;
-
             /* Only keep metric details if we are the authority on this cluster. */
             if (!authority_mode(xmldata))
                return;
-                  
-            edge = 0;
 
-            /* Get IP addr for hash key */
-            for(i = 0; attr[i]; i+=2)
-               {
-                  xt = in_xml_list (attr[i], strlen(attr[i]));
-                  if (!xt) continue;
+            /* Use node Name for hash key (Query processing 
+             * requires a name key).
+             */
+            xmldata->hostname = realloc(xmldata->hostname, strlen(name)+1);
+            strcpy(xmldata->hostname, name);
+            hashkey.data = (void*) name;
+            hashkey.size =  strlen(name) + 1;
 
-                  if (xt->tag == NAME_TAG)
-                     {
-                        name = attr[i+1];
-                        xmldata->hostname = realloc(xmldata->hostname, strlen(name)+1);
-                        strcpy(xmldata->hostname, name);
-
-                        hashkey.data = (void*) name;
-                        hashkey.size =  strlen(name) + 1;
-                     }
-               }
-
+            host = &(xmldata->host);
+            
             hosts = xmldata->source.authority;
             hash_datum = hash_lookup (&hashkey, hosts);
             if (!hash_datum)
                {
-                  /* We have never seen this host before. */
-                  debug_msg("Creating space for new host %s in cluster %s", name,
-                     xmldata->sourcename);
+                  memset((void*) host, 0, sizeof(*source));
 
-                  memset(&newhost, 0, sizeof(newhost));
+                  host->id = HOST_NODE;
+                  host->report_start = host_report_start;
+                  host->report_end = host_report_end;
 
                   /* Only create one hash table for the host's metrics. Not user/builtin like gmond. */
-                  newhost.metrics = hash_create(DEFAULT_METRICSIZE);
-                  if (!newhost.metrics)
+                  host->metrics = hash_create(DEFAULT_METRICSIZE);
+                  if (!host->metrics)
                      {
                         err_msg("Could not create metric hash for host %s", name);
                         return;
                      }
-
-                  hash_datum = datum_new((char*)&newhost, sizeof(newhost));
                }
-            host = (Host_t*) hash_datum->data;
-            
-            host->id = HOST_NODE;
-            host->report_start = host_report_start;
-            host->report_end = host_report_end;
+            else
+               {
+                  /* Copy the stored host data into our Host buffer in xmldata. */
+                  memcpy(host, hash_datum->data, hash_datum->size);
+                  datum_free(hash_datum);
+               }
 
             /* Edge has the same invariant as in fillmetric(). */
             edge = 0;
@@ -519,8 +499,7 @@ start (void *data, const char *el, const char **attr)
             for(i = 0; attr[i]; i+=2)
                {
                   xt = in_xml_list (attr[i], strlen(attr[i]));
-                  if (!xt)
-                     continue;
+                  if (!xt) continue;
 
                   switch( xt->tag )
                      {
@@ -556,17 +535,15 @@ start (void *data, const char *el, const char **attr)
             host->stringslen = edge;
 
             /* Trim structure to the correct length. */
-            hash_datum->size = sizeof(*host) - FRAMESIZE + host->stringslen;
+            hashval.size = sizeof(*host) - FRAMESIZE + host->stringslen;
+            hashval.data = host;
 
             /* We dont care if this is an insert or an update. */
-            rdatum = hash_insert(&hashkey, hash_datum, hosts);
+            rdatum = hash_insert(&hashkey, &hashval, hosts);
             if (!rdatum)
                {
                   err_msg("Could not insert host %s", name);
                }
-            xmldata->host = (Host_t*) rdatum->data;
-
-            datum_free(hash_datum);
 
             break;
 
@@ -657,7 +634,7 @@ start (void *data, const char *el, const char **attr)
                   hashval.data = (void*) metric;
 
                   /* Update full metric in cluster host table. */
-                  rdatum = hash_insert(&hashkey, &hashval, xmldata->host->metrics);
+                  rdatum = hash_insert(&hashkey, &hashval, xmldata->host.metrics);
                   if (!rdatum)
                      {
                         err_msg("Could not insert %s metric", name);
