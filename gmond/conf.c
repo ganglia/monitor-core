@@ -17,6 +17,13 @@ globals {                    \n\
   user = nobody              \n\
 } \n\
 \n\
+/* If a cluster attribute is specified, then all gmond hosts are wrapped inside \n\
+ * of a <CLUSTER> tag.  If you do not specify a cluster tag, then all <HOSTS> will \n\
+ * NOT be wrapped inside of a <CLUSTER> tag. */ \n\
+cluster { \n\
+  name = \"unspecified\" \n\
+} \n\
+\n\
 /* Feel free to specify as many udp_send_channels as you like.  Gmond \n\
    used to only support having a single channel */ \n\
 udp_send_channel { \n\
