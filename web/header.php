@@ -87,6 +87,9 @@ if ($jobrange and $jobstart)
 $cluster_url=rawurlencode($clustername);
 $node_url=rawurlencode($hostname);
 
+# Make some information available to templates.
+$tpl->assign("cluster_url", $cluster_url);
+
 if ($context=="cluster")
    {
       $tpl->assign("alt_view", "<a href=\"./?p=2&c=$cluster_url\">Physical View</a>");
