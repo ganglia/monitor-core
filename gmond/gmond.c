@@ -1641,22 +1641,30 @@ main ( int argc, char *argv[] )
   /* Create the host hash table */
   hosts = apr_hash_make( global_context );
 
-  next_collection =0;
-  last_cleanup    =0;
+  /* Initialize time variables */
+  last_cleanup = next_collection = now = apr_time_now();
+
+  /* Loop */
   for(;;)
     {
-      now = apr_time_now();
-
-      /* Read data until we need to collect/write data */
       if(!deaf)
 	{
-	  /* collect data from listen channels */
-          for(; mute || now < next_collection;)
-	    {
-	      poll_listen_channels(mute? 60 * APR_USEC_PER_SEC: next_collection - now, now);
-	      now = apr_time_now();
-    	    }
+	  /* Pull in incoming data */
+	  poll_listen_channels(next_collection - now, now);
+	}
+      else
+	{
+	  /* Sleep until next collection */
+          apr_sleep( next_collection - now );
+	}
 
+      /* only continue if it's time to process our collection groups */
+      now = apr_time_now();
+      if(now < next_collection)
+	continue;
+
+      if(!deaf)
+	{
 	  /* cleanup the data if the cleanup threshold has been met */
 	  if( (now - last_cleanup) > cleanup_threshold )
 	    {
@@ -1669,6 +1677,11 @@ main ( int argc, char *argv[] )
 	{
 	  /* collect data from collection_groups */
 	  next_collection = process_collection_groups( now );
+	}
+      else
+	{
+	  /* we're mute. nothing to collect and send. */
+	  next_collection = now + 60 * APR_USEC_PER_SEC;
 	}
     }
 

@@ -206,7 +206,7 @@ collection_group { \n\
   } \n\
 } \n\
 \n\
-/* This collection group will collect the CPU and load status info every 20 secs. \n\
+/* This collection group will collect the CPU status info every 20 secs. \n\
    The time threshold is set to 90 seconds.  In honesty, this time_threshold could be \n\
    set significantly higher to reduce unneccessary network chatter. */ \n\
 collection_group { \n\
@@ -245,6 +245,11 @@ collection_group { \n\
     name = \"cpu_sintr\" \n\
     value_threshold = \"1.0\" \n\
   } \n\
+} \n\
+\n\
+collection_group { \n\
+  collect_every = 20 \n\
+  time_threshold = 90 \n\
   /* Load Averages */ \n\
   metric { \n\
     name = \"load_one\" \n\
