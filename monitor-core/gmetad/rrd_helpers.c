@@ -66,7 +66,7 @@ RRD_create( char *rrd, char *polling_interval)
    argv[1] = rrd;
    argv[2] = "--step";
    argv[3] = polling_interval;
-   argv[4] = "DS:ganglia:GAUGE:30:U:U";
+   argv[4] = "DS:sum:GAUGE:30:U:U";
    argv[5] = "RRA:AVERAGE:0.5:1:240";
    argv[6] = "RRA:AVERAGE:0.5:24:240";
    argv[7] = "RRA:AVERAGE:0.5:168:240";
