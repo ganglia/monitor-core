@@ -37,6 +37,8 @@ struct gengetopt_args_info args_info;
 extern gmetad_config_t gmetad_config;
 extern int debug_level;
 
+/* In cleanup.c */
+extern void *cleanup_thread(void *arg);
 
 static int
 print_sources ( datum_t *key, datum_t *val, void *arg )
@@ -86,7 +88,7 @@ getfield(char* buf, short int index)
  * against memory overflows.
  */
 int
-addstring(char *strings, int *edge, char *s)
+addstring(char *strings, int *edge, const char *s)
 {
 	int e = *edge;
 	int end = e + strlen(s) + 1;
@@ -397,6 +399,10 @@ main ( int argc, char *argv[] )
       pthread_create(&pid, &attr, server_thread, (void*) 1);
 
    hash_foreach( sources, spin_off_the_data_threads, NULL );
+
+   /* A thread to cleanup old metrics and hosts */
+   pthread_create(&pid, &attr, cleanup_thread, (void *) NULL);
+   debug_msg("cleanup thread has been started");
 
     /* Meta data */
    for(;;)

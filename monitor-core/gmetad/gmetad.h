@@ -1,5 +1,6 @@
 #ifndef GMETAD_H
 #define GMETAD_H 1 
+
 #include <ganglia/net.h>
 #include <ganglia/hash.h>
 #include <ganglia/debug_msg.h>
@@ -94,10 +95,9 @@ typedef struct
       unsigned int step;
       unsigned int num_sources;
       g_inet_addr **sources;
-      long double timestamp;   /* added by swagner */
       int dead;
    }
-data_source_list_t;
+data_source_list_t;;
 
 /* The size of an ethernet frame, minus IP/UDP headers (1472)
  * plus a bit since gmond sends meta data in binary format, while
@@ -122,6 +122,7 @@ typedef struct
       struct sockaddr_in addr;
       int valid;
       filter_type_t filter;
+      struct timeval now;
    }
 client_t;
 
@@ -131,7 +132,8 @@ client_t;
 typedef struct Generic_type
    {
       node_type_t id;
-      int (*report_start)(struct Generic_type *self, datum_t *key, client_t *client, void *arg);
+      int (*report_start)(struct Generic_type *self, datum_t *key, 
+                      client_t *client, void *arg);
       int (*report_end)(struct Generic_type *self, client_t *client, void *arg);
       hash_t *children;
       char *therest;
@@ -140,29 +142,11 @@ Generic_t;
 
 
 /* The reporting functions for all node types. */
-typedef int (*report_start_func)(Generic_t *self, datum_t *key, client_t *client, void *arg);
+typedef int (*report_start_func)(Generic_t *self, datum_t *key, 
+                client_t *client, void *arg);
 typedef int (*report_end_func)(Generic_t *self, client_t *client, void *arg);
 
 
-/* See Metric_t struct below for an explanation of the strings buffer.
- * The hash key is the node's name for easier subtree addressing. */
-typedef struct
-   {
-      node_type_t id;
-      report_start_func report_start;
-      report_end_func report_end;
-      hash_t *metrics;
-      short int ip;
-      uint32_t tn;
-      uint32_t tmax;
-      uint32_t dmax;
-      short int location;
-      uint32_t reported;
-      uint32_t started;
-      short int stringslen;
-      char strings[FRAMESIZE];
-   }
-Host_t;
 
 /* sacerdoti: these are used for root, clusters, and grids. */
 typedef struct
@@ -187,6 +171,28 @@ typedef struct
 Source_t;
 
 
+/* See Metric_t struct below for an explanation of the strings buffer.
+ * The hash key is the node's name for easier subtree addressing. */
+typedef struct
+   {
+      node_type_t id;
+      report_start_func report_start;
+      report_end_func report_end;
+      hash_t *metrics;
+      struct timeval t0;	/* A local timestamp, for TN */
+      short int ip;
+      uint32_t tn;
+      uint32_t tmax;
+      uint32_t dmax;
+      short int location;
+      uint32_t reported;
+      uint32_t started;
+      short int stringslen;
+      char strings[FRAMESIZE];
+   }
+Host_t;
+
+
 /* sacerdoti: Since we don't know the length of the string fields,
  * we place them sequentially in the strings buffer. The
  * order of strings in the buffer is usually:
@@ -199,6 +205,7 @@ typedef struct
       report_start_func report_start;
       report_end_func report_end;
       hash_t *leaf;  /* Always NULL. */
+      struct timeval t0;
       metric_val_t val;
       short int valstr;    /* An optimization to speed queries. */
       short int precision;    /* Number of decimal places for floats. */

@@ -108,13 +108,17 @@ metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
    int rc;
    char *name = (char*) key->data;
    Metric_t *metric = (Metric_t*) self;
+   long tn = 0;
+
+   tn = client->now.tv_sec - metric->t0.tv_sec;
+   if (tn<0) tn = 0;
 
    rc=xml_print(client, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
       "UNITS=\"%s\" TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" SLOPE=\"%s\" "
       "SOURCE=\"%s\"/>\n",
       name, getfield(metric->strings, metric->valstr),
       getfield(metric->strings, metric->type),
-      getfield(metric->strings, metric->units), metric->tn,
+      getfield(metric->strings, metric->units), tn,
       metric->tmax, metric->dmax, getfield(metric->strings, metric->slope),
       getfield(metric->strings, metric->source));
       
@@ -135,14 +139,18 @@ host_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
    int rc;
    char *name = (char*) key->data;
    Host_t *host = (Host_t*) self;
+   long tn = 0;
+
+   tn = client->now.tv_sec - host->t0.tv_sec;
+   if (tn<0) tn = 0;
 
    /* Note the hash key is the host's IP address. */
    rc = xml_print(client, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
       "TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" LOCATION=\"%s\" GMOND_STARTED=\"%u\">\n",
-      name, getfield(host->strings, host->ip), host->reported, host->tn,
+      name, getfield(host->strings, host->ip), host->reported, tn,
       host->tmax, host->dmax, getfield(host->strings, host->location),
       host->started);
-      
+
    return rc;
 }
 
@@ -538,6 +546,7 @@ server_thread (void *arg)
             }
          
          client.filter=0;
+         gettimeofday(&client.now, NULL);
 
          if (interactive)
             {
