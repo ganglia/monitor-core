@@ -21,6 +21,7 @@ typedef struct
       int all_trusted;
       int num_rras;
       char **rras;
+      int force_names;
 } gmetad_config_t;
 
 int get_gmetad_config(char *conffile);
