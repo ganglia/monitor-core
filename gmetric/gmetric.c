@@ -1,7 +1,7 @@
 
-#include <interface.h>
+#include "interface.h"
 #include <ganglia.h>
-#include <ganglia/hash.h>
+#include "hash.h"
 #include "metric_typedefs.h"
 #include "node_data_t.h"
 #include "cmdline.h"
@@ -29,7 +29,7 @@ int main ( int argc, char **argv )
    uint32_t key = 0; /* user-defined */
    char empty[] = "\0";
    g_inet_addr *addr;
-   struct intf_entry *entry;
+   struct ifi_info *entry;
    unsigned int slope;
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
@@ -98,7 +98,7 @@ int main ( int argc, char **argv )
       }
 
    mcast_socket = g_mcast_out ( args_info.mcast_channel_arg, args_info.mcast_port_arg,
-                                (struct in_addr *)&(entry->intf_addr.addr_ip), args_info.mcast_ttl_arg);
+                                (struct in_addr *)&(entry->ifi_addr), args_info.mcast_ttl_arg);
    if ( !mcast_socket )
       {
          perror("gmond could not connect to multicast channel");

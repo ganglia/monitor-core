@@ -5,7 +5,8 @@ libganglia_la_SOURCES = daemon_inetd.c daemon_init.c debug_msg.c error.c \
 ganglia.c hash.c llist.c my_inet_ntop.c \
 rdwr.c xmlparse.c xmlrole.c xmltok.c file.c gexec_funcs.c barrier.c \
 become_a_nobody.c gmond_config.c inetaddr.c \
-mcast.c tcp.c fsusage.c dotconf.c readdir.c get_ifi_info.c unpifi.h unp.h addrinfo.h
+mcast.c tcp.c fsusage.c dotconf.c readdir.c get_ifi_info.c unpifi.h unp.h addrinfo.h \
+interface.c interface.h wrapunix.c wrapsock.c
 
 noinst_HEADERS = dotconf.h readdir.h 
 
