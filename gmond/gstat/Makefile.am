@@ -2,4 +2,7 @@ AM_CFLAGS = -I../../lib
 
 bin_PROGRAMS = gstat
 gstat_SOURCES =  gstat.c cmdline.c cmdline.h
-gstat_LDADD   =  ../../lib/.libs/libganglia.a ../../lib/libgetopthelper.a
+gstat_LDADD   = $(top_builddir)/lib/libganglia.la \
+                $(top_builddir)/lib/libgetopthelper.a \
+                $(top_builddir)/srclib/expat/lib/libexpat.la
+gstat_LDFLAGS = -static
