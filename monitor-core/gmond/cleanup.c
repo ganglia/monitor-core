@@ -44,7 +44,6 @@ cleanup_metric ( datum_t *key, datum_t *val, void *arg )
    struct timeval *tv = cleanup->tv;
    metric_data_t * metric = (metric_data_t *) val->data;
    unsigned int born;
-   int rc;
 
    born = metric->timestamp.tv_sec;
 
@@ -67,7 +66,6 @@ cleanup_node ( datum_t *key, datum_t *val, void *arg )
    node_data_t * node = (node_data_t *) val->data;
    datum_t *rv;
    unsigned int born;
-   int rc;
 
    born = node->timestamp.tv_sec;
 
@@ -107,10 +105,7 @@ cleanup_node ( datum_t *key, datum_t *val, void *arg )
          if (rv) datum_free(rv);
          cleanup.key=0;
       }
-      else  {
-         debug_msg("Cleanup: exiting hash_foreach with an error %d", rc);
-         break;
-     }
+      else break;
    }
 
    /* We have not deleted this node */
@@ -125,7 +120,6 @@ cleanup_thread(void *arg)
    struct cleanup_arg cleanup;
    node_data_t * node;
    datum_t *rv;
-   int rc;
 
    for (;;) {
       /* Cleanup every 3 minutes. */
