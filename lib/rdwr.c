@@ -49,9 +49,9 @@ pthread_rdwr_runlock_np (pthread_rdwr_t * rdwrp)
     {
       rdwrp->readers_reading--;
       if (rdwrp->readers_reading == 0)
-         {
-	         pthread_cond_signal (&(rdwrp->lock_free));
-         }
+	{
+	  pthread_cond_signal (&(rdwrp->lock_free));
+	}
       pthread_mutex_unlock (&(rdwrp->mutex));
       return 0;
     }
