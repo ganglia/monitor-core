@@ -2,6 +2,8 @@
 #
 SUBDIRS = lib gmetad gmond gmetric
 
+DIST_SUBDIRS = web
+
 #DIST_SUBDIRS = lib gmetad gmond gmetric
 
 EXTRA_DIST = config ganglia.spec ganglia.pod ganglia.html mans
