@@ -1,10 +1,12 @@
 #include <dotconf.h>
 #include <string.h>
-#include <ganglia/hash.h>
-#include <ganglia/llist.h>
-#include <gmetad.h>
+
+#include "gmetad.h"
 #include <ganglia.h>
 #include "conf.h"
+#include "hash.h"
+#include "llist.h"
+#include "my_inet_ntop.h"
 
 /* Variables that get filled in by configuration file */
 extern Source_t root;
@@ -54,8 +56,8 @@ static DOTCONF_CB(cb_trusted_hosts)
             err_msg("Warning: we failed to resolve trusted host name %s", cmd->data.list[i]);
             continue;
          }
-         le->val = (char*) malloc(MAXHOSTNAMELEN);
-         my_inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAMELEN);
+         le->val = (char*) malloc(MAXHOSTNAME);
+         my_inet_ntop(AF_INET, &sa.sin_addr, le->val, MAXHOSTNAME);
          llist_add(&(c->trusted_hosts), le);
       }
    return NULL;
@@ -126,8 +128,8 @@ static DOTCONF_CB(cb_data_source)
             err_msg("Warning: we failed to resolve data source name %s", cmd->data.list[i]);
             continue;
          }
-         str = (char*) malloc(MAXHOSTNAMELEN);
-         my_inet_ntop(AF_INET, &sa.sin_addr, str, MAXHOSTNAMELEN);
+         str = (char*) malloc(MAXHOSTNAME);
+         my_inet_ntop(AF_INET, &sa.sin_addr, str, MAXHOSTNAME);
 
          debug_msg("Trying to connect to %s:%d for [%s]", str, port, dslist->name);
          dslist->sources[dslist->num_sources] = (g_inet_addr *) g_inetaddr_new ( str, port );

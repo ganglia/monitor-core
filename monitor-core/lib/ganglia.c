@@ -3,13 +3,20 @@
  * retrieving XML data and saving it to internal data structures
  */
 /* $Id$ */
-#include "ganglia.h"
+
+#include <expat.h>
+#include <unistd.h>
+#include "ganglia_private.h"
+#include "net.h"
+#include "unp.h"
+#include "error.h"
 
 #define TIMEOUT 60
 #define NUM_METRICS 30
 #define NUM_GMETRIC_METRICS 10
 
 
+#if 0
 static void
 start (void *data, const char *el, const char **attr)
 {
@@ -18,7 +25,7 @@ start (void *data, const char *el, const char **attr)
   cluster_t *cluster;
   datum_t key, val, *rval;
   ghost_t working_host;
-  static char working_host_name[MAXHOSTNAMELEN];
+  static char working_host_name[MAXHOSTNAME];
   static char working_host_ip[16];
   static int  working_host_last_reported;
   static int  working_host_dead;
@@ -141,6 +148,7 @@ end (void *data, const char *el)
 {
     /* Nothing to do (yet) */
 }				
+#endif
 
 /**
  * @fn int ganglia_cluster_init (cluster_t *cluster, char *name, unsigned long num_nodes_in_cluster)
@@ -239,6 +247,7 @@ ganglia_cluster_init(cluster_t *cluster, char *name, unsigned long num_nodes_in_
  * @retval 0 on success
  * @see ganglia_cluster_init
  */
+#if 0
 int
 ganglia_add_datasource ( cluster_t *cluster, char *group_name, char *ip, unsigned short port, int opts )
 {
@@ -289,6 +298,7 @@ ganglia_sync_hash_with_xml (cluster_t *cluster )
    int gmond_fd;
    FILE *gmond_fp;
    struct timeval tv;
+   char portstr[64];
 
    if ( cluster == NULL )
       {
@@ -313,7 +323,8 @@ ganglia_sync_hash_with_xml (cluster_t *cluster )
             continue;
 
          ci = (cluster_info_t *)li->val;
-         gmond_fd = tcp_connect (ci->gmond_ip, ci->gmond_port);
+         sprintf(portstr, "%d", ci->gmond_port);
+         gmond_fd = tcp_connect (ci->gmond_ip, portstr);
          if (gmond_fd < 0)
             {
                err_msg("ganglia_sync_hash_with_xml unable to connect with %s:%hd",
@@ -368,6 +379,7 @@ ganglia_sync_hash_with_xml (cluster_t *cluster )
   cluster->last_updated = tv.tv_sec;
   return 0;
 }
+#endif
 
 static int
 print_foo ( datum_t *key, datum_t *val, void *data )

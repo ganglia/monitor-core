@@ -1,8 +1,10 @@
+#include <unistd.h>
 #include <pthread.h>
-#include <ganglia/llist.h>
 #include <stdarg.h>
 #include "dtd.h"
 #include "gmetad.h"
+#include "llist.h"
+#include "my_inet_ntop.h"
 
 extern g_tcp_socket *server_socket;
 extern pthread_mutex_t  server_socket_mutex;

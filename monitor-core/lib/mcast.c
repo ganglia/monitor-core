@@ -25,6 +25,8 @@
  * Boston, MA  02111-1307, USA.
  */
 #include "net.h"
+#include "error.h"
+#include <unistd.h>
 
 g_mcast_socket *
 g_mcast_in ( char *channel, unsigned short port, struct in_addr *mcast_addr )

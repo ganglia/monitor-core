@@ -3,6 +3,8 @@
  */
 /* $Id$ */
 #include "ganglia_private.h"
+#include <stdio.h>
+#include <stdarg.h>
 
 int debug_level = 0;
 

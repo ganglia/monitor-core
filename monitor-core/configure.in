@@ -35,21 +35,15 @@ AC_CONFIG_AUX_DIR(config)
 # if any functions have been added, set GANGLIA_INTERFACE_AGE to 0.
 # if backwards compatibility has been broken,
 # set GANGLIA_BINARY_AGE _and_ GANGLIA_INTERFACE_AGE to 0.
+GANGLIA_RELEASE_NAME="Kittyhawk"
 GANGLIA_MAJOR_VERSION=2
 GANGLIA_MINOR_VERSION=5
 GANGLIA_MICRO_VERSION=7
 GANGLIA_INTERFACE_AGE=7
 GANGLIA_BINARY_AGE=7
+################################
+
 GANGLIA_VERSION=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION.$GANGLIA_MICRO_VERSION
-
-echo
-echo "---------------------------------------------------------------------"
-echo " Welcome to Ganglia $GANGLIA_VERSION"
-echo " Copyright (c) 2003 University of California, Berkeley"
-echo "====================================================================="
-echo
-
-AM_INIT_AUTOMAKE(ganglia-monitor-core, $GANGLIA_VERSION)
 
 AC_SUBST(GANGLIA_MAJOR_VERSION)
 AC_SUBST(GANGLIA_MINOR_VERSION)
@@ -74,6 +68,22 @@ AC_DEFINE_UNQUOTED(GANGLIA_MICRO_VERSION, $GANGLIA_MICRO_VERSION, GANGLIA_MICRO_
 AC_DEFINE_UNQUOTED(GANGLIA_INTERFACE_AGE, $GANGLIA_INTERFACE_AGE, GANGLIA_INTERFACE_AGE)
 AC_DEFINE_UNQUOTED(GANGLIA_BINARY_AGE,    $GANGLIA_BINARY_AGE,    GANGLIA_BINARY_AGE)
 
+echo ""
+echo "Welcome to.."
+echo "     ______                  ___"
+echo "    / ____/___ _____  ____ _/ (_)___ _"
+echo "   / / __/ __ \`/ __ \/ __ \`/ / / __ \`/"
+echo "  / /_/ / /_/ / / / / /_/ / / / /_/ /"
+echo "  \____/\__,_/_/ /_/\__, /_/_/\__,_/"
+echo "                   /____/"
+echo ""
+echo "Copyright (c) 2004 University of California, Berkeley"
+echo ""
+echo "Version: $GANGLIA_VERSION ($GANGLIA_RELEASE_NAME)"
+echo "Library: Release $LT_RELEASE $LT_CURRENT:$LT_REVISION:$LT_AGE"
+echo ""
+
+AM_INIT_AUTOMAKE(ganglia-monitor-core, $GANGLIA_VERSION)
 
 ########################
 AC_CANONICAL_HOST
@@ -99,11 +109,11 @@ dnl ##################################################################
 dnl Special parameters
 dnl
 
-AC_ARG_WITH( gmetad,
-[  --with-gmetad           compile and install the Ganglia Meta Daemon],
-if test "$withval" = yes; then gmetad=yes; fi)
+dnl AC_ARG_WITH( gmetad,
+dnl [  --with-gmetad           compile and install the Ganglia Meta Daemon],
+dnl if test "$withval" = yes; then gmetad=yes; fi)
 
-AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
+dnl AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
 
 AC_ARG_ENABLE(debug,
 [
@@ -144,22 +154,59 @@ dnl       CFLAGS="$CFLAGS -D_REENTRANT"
 dnl    fi
 dnl fi
 
-if test "$gmetad" = yes ; then
-   AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.com/)"], [echo "rrd lib not found"], [-lm])
-   AC_CHECK_HEADERS(rrd.h)
-   if test "$ac_cv_lib_rrd_rrd_create" != yes; then
-      echo
-      echo "The Ganglia Meta Daemon uses the Round-Robin Database Tool (rrdtool)"
-      echo "for storing historical information.  You have chosen to compile the "
-      echo "monitoring core with gmetad but librrd.a could not be found.  Please"
-      echo "visit http://www.rrdtool.com/, download rrdtool and then try again"
-      echo
-      echo "NOTE: the rrdtool library (librrd) will NOT need to be installed on "
-      echo "every machine running gmetad only the machine you are compiling gmetad"
-      echo "on since librrd is statically linked."
-      echo
-      exit;
-   fi
+AC_CHECK_LIB(expat, XML_ParserCreate)
+
+if test "$ac_cv_lib_expat_XML_ParserCreate" != yes; then
+echo
+echo "The expat library could not be found.  Expat can be downloaded from"
+echo
+echo "               http://expat.sourceforge.net/"
+echo
+echo "Please download and install the latest version of expat before continuing."
+echo
+echo "+======================================================================+"
+echo "| If this library is in a non-standard location (such as your home     |"
+echo "| directory).  You can add the path to the headers and libraries using |"
+echo "| the CFLAGS, CPPFLAGS and LDFLAGS environment variables.  For example |"
+echo "|                                                                      |"
+echo "| % CFLAGS=\"-I/home/me/pkg/include\" \\                                  |"
+echo "|   CPPFLAGS=\"-I/home/me/pkg/include\" \\                                |"
+echo "|   LDFLAGS=\"-L/home/me/pkg/lib\" \\                                     |"
+echo "|   ./configure ...                                                    |"
+echo "+======================================================================+"
+echo
+echo "Note: This library will be statically linked and doesn't need to be installed"
+echo "      anywhere except the machine you are compiling ganglia on."
+exit;
+fi
+
+
+AC_CHECK_LIB(rrd, rrd_create)
+
+if test "$ac_cv_lib_rrd_rrd_create" != yes; then
+echo
+echo "The Round-Robin Database Tool (rrdtool) cound not be found.  Rrdtool can be found at"
+echo
+echo "             http://www.rrdtool.com/"
+echo
+echo "Please download and install the latest version of RRDtool."
+echo
+echo "NOTE: Cygwin users will want to add '-DALL_STATIC -g' to your CFLAGS "
+echo
+echo "+======================================================================+"
+echo "| If this library is in a non-standard location (such as your home     |"
+echo "| directory).  You can add the path to the headers and libraries using |"
+echo "| the CFLAGS, CPPFLAGS and LDFLAGS environment variables.  For example |"
+echo "|                                                                      |"
+echo "| % CFLAGS=\"-I/home/me/pkg/include\" \\                                  |"
+echo "|   CPPFLAGS=\"-I/home/me/pkg/include\" \\                                |"
+echo "|   LDFLAGS=\"-L/home/me/pkg/lib\" \\                                     |"
+echo "|   ./configure ...                                                    |"
+echo "+======================================================================+"
+echo
+echo "Note: This library will be statically linked and doesn't need to be installed"
+echo "      anywhere except the machine you are compiling ganglia on."
+exit;
 fi
 
 AC_CHECK_LIB(socket, socket)
@@ -280,6 +327,7 @@ AC_CHECK_FUNCS(pselect)
 AC_CHECK_FUNCS(snprintf)
 AC_CHECK_FUNCS(sockatmark)
 AC_CHECK_FUNCS(vsnprintf)
+AC_CHECK_FUNCS(strdup)
 
 
 
