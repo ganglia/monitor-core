@@ -233,7 +233,7 @@ fi
 
 ## Create the directory structure
 %__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
-%__mkdir -p $RPM_BUILD_ROOT/var/lib/ganglia/rrds
+%__mkdir -p $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
 %__mkdir -p $RPM_BUILD_ROOT/etc/xinetd.d
 
 ## Move the files into the structure
@@ -272,7 +272,7 @@ fi
 
 %files gmetad
 %defattr(-,root,root)
-%attr(0755,nobody,nobody)/var/lib/ganglia/rrds
+%attr(0755,nobody,nobody)@varstatedir@/ganglia/rrds
 /usr/sbin/gmetad
 /etc/rc.d/init.d/gmetad
 %config(noreplace) /etc/gmetad.conf
@@ -317,6 +317,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Tue Apr 13 2004 Brooks Davis <brooks@one-eyed-alien.net>
+- Use the autoconf variable varstatedir instead of /var/lib for consistancy.
 * Thu Feb 19 2004 Matt Massie <massie@cs.berkeley.edu>
 - Removed the /usr/include/ganglia directory from the lib rpm and
   changed the deprecated Copyright to License
