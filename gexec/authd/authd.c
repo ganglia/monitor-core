@@ -73,7 +73,7 @@ static int gen_signature(credentials *cred, signature *cred_sig)
         error = AUTH_RSA_ERROR;
         goto cleanup;
     }
-    if (RSA_sign(0, (unsigned char *)cred, sizeof(credentials), 
+    if (RSA_sign(NID_sha1, (unsigned char *)cred, sizeof(credentials), 
                  cred_sig->data, &sig_len, priv_key) == 0) {
         error = AUTH_RSA_ERROR;
         goto cleanup;

@@ -79,7 +79,7 @@ int auth_verify_signature(credentials *creds, signature *creds_sig)
         goto cleanup;
     }
     ERR_load_crypto_strings();
-    if (RSA_verify(0, (unsigned char *)creds, sizeof(credentials), 
+    if (RSA_verify(NID_sha1, (unsigned char *)creds, sizeof(credentials), 
                    creds_sig->data, AUTH_RSA_SIGLEN, pub_key) == 0) {
         error = AUTH_RSA_ERROR;
         goto cleanup;
