@@ -51,14 +51,14 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_buffer_get(char *addr, int len,
 }
 
 static apr_socket_t *
-create_net_client(apr_pool_t *context, int type, char *ipaddr, apr_port_t port)
+create_net_client(apr_pool_t *context, int type, char *host, apr_port_t port)
 {
   apr_sockaddr_t *remotesa = NULL;
   apr_socket_t *sock = NULL;
   apr_status_t status;
   int family = APR_UNSPEC;
 
-  status = apr_sockaddr_info_get(&remotesa, ipaddr, APR_UNSPEC, port, 0, context);
+  status = apr_sockaddr_info_get(&remotesa, host, APR_UNSPEC, port, 0, context);
   if(status!= APR_SUCCESS)
     {
       return NULL;
@@ -84,9 +84,9 @@ create_net_client(apr_pool_t *context, int type, char *ipaddr, apr_port_t port)
 }
 
 apr_socket_t *
-create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port)
+create_udp_client(apr_pool_t *context, char *host, apr_port_t port)
 {
-  return create_net_client(context, SOCK_DGRAM, ipaddr, port);
+  return create_net_client(context, SOCK_DGRAM, host, port);
 }
 
 static apr_socket_t *
