@@ -1,13 +1,14 @@
 /* $Id$ */
+#include "unpifi.h"
 #include "interface.h"
-#include "gangliaconf.h"
+#include "ganglia_private.h"
 #include "dotconf.h"
-#include <ganglia/gmond_config.h>
-#include <ganglia/hash.h>
-#include <ganglia/barrier.h>
-#include <ganglia/become_a_nobody.h>
-#include <ganglia/net.h>
-#include <signal.h>
+#include "gmond_config.h"
+#include "hash.h"
+#include "barrier.h"
+#include "become_a_nobody.h"
+#include "net.h"
+#include "signal.h"
 #include "metric.h"
 #include <pwd.h>
 #ifdef HAVE_SYS_TYPES_H
@@ -127,7 +128,9 @@ main ( int argc, char *argv[] )
    barrier *mcast_listen_barrier, *server_barrier;
    struct timeval tv;
    struct intf_entry *entry;
+#if 0
    struct in_addr mcast_if_addr;
+#endif
 
    gettimeofday(&tv, NULL);
    start_time = (uint32_t) tv.tv_sec;
