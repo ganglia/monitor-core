@@ -26,7 +26,19 @@ $tpl->assign("cluster_load", "$cluster_load15%, $cluster_load5%, $cluster_load1%
 $cluster_url=rawurlencode($clustername);
 
 $tpl->assign("cluster", $clustername);
-$tpl->assign("graph_args", "c=$cluster_url&$get_metric_string&st=$cluster[LOCALTIME]");
+#
+# Summary graphs
+#
+$graph_args = "c=$cluster_url&$get_metric_string&st=$cluster[LOCALTIME]";
+$tpl->assign("graph_args", $graph_args);
+if (!isset($optional_graphs))
+	$optional_graphs = array();
+foreach ($optional_graphs as $g) {
+	$tpl->newBlock('optional_graphs');
+	$tpl->assign('name',$g);
+	$tpl->assign('graph_args',$graph_args);
+	
+}
 
 $units=$units ? "($units)" : "";
 $tpl->assign("metric","$metricname $units");
@@ -36,6 +48,8 @@ $tpl->assign("range", $range);
 $tpl->assign("cols_menu", $cols_menu);
 $tpl->assign("checked$showhosts", "checked");
 
+$sorted_hosts = array();
+$down_hosts = array();
 if ($showhosts)
    {
       foreach ($hosts_up as $host => $val)

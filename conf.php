@@ -117,4 +117,9 @@ $default_range = "hour";
 #
 $default_metric = "load_one";
 
+#
+# Optional summary graphs
+#
+#$optional_graphs = array('packet');
+
 ?>
