@@ -19,11 +19,11 @@
 APR_DECLARE(apr_status_t) apr_sockaddr_ip_buffer_get(char *addr, int len,
                                          apr_sockaddr_t *sockaddr)
 {
-  if(len< sockaddr->addr_str_len)
+  if(!sockaddr || !addr || len < sockaddr->addr_str_len)
     {
       return APR_EINVAL;
     }
-  /*
+  /* this function doesn't malloc memory from the sockaddr pool...
    *addr = apr_palloc(sockaddr->pool, sockaddr->addr_str_len);
    */
     apr_inet_ntop(sockaddr->family,
@@ -37,7 +37,8 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_buffer_get(char *addr, int len,
          * part of the address string so we're left with the familiar
          * IPv4 format.
          */
-        /* strlen("::ffff:") == 7 */
+
+        /* use memmove since the memory areas overlap */
         memmove( addr, addr+7, strlen(addr+7));
 	/*
         *addr += strlen("::ffff:");
@@ -80,8 +81,8 @@ create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port)
   return sock;
 }
 
-apr_socket_t *
-create_udp_server(apr_pool_t *context, apr_port_t port, char *bind)
+static apr_socket_t *
+create_net_server(apr_pool_t *context, int type, apr_port_t port, char *bind)
 {
   apr_sockaddr_t *localsa = NULL;
   apr_socket_t *sock = NULL;
@@ -97,7 +98,7 @@ create_udp_server(apr_pool_t *context, apr_port_t port, char *bind)
       family = localsa->sa.sin.sin_family;
     }
 
-  stat = apr_socket_create(&sock, family, SOCK_DGRAM, context);
+  stat = apr_socket_create(&sock, family, type, context);
   if( stat != APR_SUCCESS )
     return NULL;
 
@@ -133,6 +134,12 @@ create_udp_server(apr_pool_t *context, apr_port_t port, char *bind)
     }
 
   return sock;
+}
+
+apr_socket_t *
+create_udp_server(apr_pool_t *context, apr_port_t port, char *bind)
+{
+  return create_net_server(context, SOCK_DGRAM, port, bind);
 }
 
 #if 0
