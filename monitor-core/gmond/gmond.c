@@ -163,49 +163,46 @@ setup_udp_recv_pollset( void )
   for(i = 0; i< num_udp_recv_channels; i++)
     {
       cfg_t *udp_recv_channel;
-      char *mcast_ip, *mcast_if, *bindaddr, *protocol;
+      char *mcast_join, *mcast_if, *bindaddr, *protocol;
       int port;
       apr_socket_t *socket = NULL;
       apr_pollfd_t socket_pollfd;
 
       udp_recv_channel = cfg_getnsec( config_file, "udp_recv_channel", i);
-      mcast_ip       = cfg_getstr( udp_recv_channel, "mcast_ip" );
+      mcast_join     = cfg_getstr( udp_recv_channel, "mcast_join" );
       mcast_if       = cfg_getstr( udp_recv_channel, "mcast_if" );
       port           = cfg_getint( udp_recv_channel, "port");
       bindaddr       = cfg_getstr( udp_recv_channel, "bind");
       protocol       = cfg_getstr( udp_recv_channel, "protocol");
 
-      debug_msg("udp_recv_channel mcast_ip=%s mcast_if=%s port=%d bind=%s protocol=%s\n",
-		  mcast_ip? mcast_ip:"NULL", 
+      debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s protocol=%s\n",
+		  mcast_join? mcast_join:"NULL", 
 		  mcast_if? mcast_if:"NULL",
 		  port, 
 		  bindaddr? bindaddr: "NULL",
 		  protocol? protocol:"NULL");
 
-      /* Create the socket */
-      if( mcast_ip )
+      /* Create a standard UDP socket */
+      socket = create_udp_server( global_context, port, bindaddr );
+      if(!socket)
+        {
+          fprintf(stderr,"Error creating UDP server on port %d bind=%s. Exiting.\n",
+		      port, bindaddr? bindaddr: "unspecified");
+	  exit(1);
+	}
+
+      if( mcast_join )
 	{
-	  /* We'll be listening on a multicast channel */
-	  socket = NULL;
-	  /*create_mcast_server( global_context, mcast_ip, port, mcast_if );*/
+	  /* Join the specified multicast channel */
+	  socket = NULL;  /* later */
+	  /*create_mcast_server( global_context, mcast_join, port, mcast_if );*/
 	  if(!socket)
 	    {
-	      fprintf(stderr,"Error creating multicast server mcast_ip=%s port=%d mcast_if=%s. Exiting.\n",
-		      mcast_ip? mcast_ip: "NULL", port, mcast_if? mcast_if:"NULL");
+	      fprintf(stderr,"Error creating multicast server mcast_join=%s port=%d mcast_if=%s. Exiting.\n",
+		      mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL");
 	      exit(1);
 	    }
 
-	}
-      else
-	{
-	  /* We'll be listening on a standard UDP channel */
-	  socket = create_udp_server( global_context, port, bindaddr );
-	  if(!socket)
-	    {
-	      fprintf(stderr,"Error creating UDP server on port %d bind=%s. Exiting.\n",
-		      port, bindaddr? bindaddr: "unspecified");
-	      exit(1);
-	    }
 	}
 
       /* Build the socket poll file descriptor structure */
@@ -229,11 +226,14 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 {
   apr_status_t status;
   const apr_pollfd_t *descs = NULL;
-  apr_int32_t i, num;
+  apr_int32_t i, num = 0;
   apr_socket_t *socket = NULL;
 
   /* Poll for data with given timeout */
-  apr_pollset_poll(udp_recv_pollset, timeout, &num, &descs);
+  status = apr_pollset_poll(udp_recv_pollset, timeout, &num, &descs);
+  if(status != APR_SUCCESS)
+    return;
+
   if(num>0)
     {
       /* We have data to read */
@@ -264,7 +264,7 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 	      xdrmem_create(&x, buf, max_udp_message_len, XDR_DECODE);
 
               /* Flush the data in the (last) received gangliaMessage 
-	       * TODO: Free memory from xdr_string calls */
+	       * TODO: Free memory from xdr_string calls XDR_FREE */
 	      memset( &message, 0, sizeof(gangliaMessage));
 
 	      /* Read the gangliaMessage from the stream */
@@ -275,7 +275,14 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 
 	      /* If I want to find out how much data I decoded 
 	      decoded = xdr_getpos(&x); */
-	      fprintf(stderr,"Got a complete ganglia message (format=%d) (len=%d)\n", message.format,len);
+	      if(message.format < MAX_NUM_GANGLIA_FORMATS)
+		{
+	          fprintf(stderr,"Got a complete ganglia message (format=%d) (len=%d)\n", message.format,len);
+		}
+	      else
+		{
+		  fprintf(stderr,"Format (%d) is out of range (len=%d).\n", message.format,len);
+		}
 	    }
         } 
     }
@@ -296,44 +303,42 @@ setup_udp_send_array( void )
   for(i = 0; i< num_udp_send_channels; i++)
     {
       cfg_t *udp_send_channel;
-      char *mcast_ip, *mcast_if, *protocol, *ip;
+      char *mcast_join, *mcast_if, *protocol, *ip;
       int port;
       apr_socket_t *socket = NULL;
 
       udp_send_channel = cfg_getnsec( config_file, "udp_send_channel", i);
       ip             = cfg_getstr( udp_send_channel, "ip" );
-      mcast_ip       = cfg_getstr( udp_send_channel, "mcast_ip" );
+      mcast_join     = cfg_getstr( udp_send_channel, "mcast_join" );
       mcast_if       = cfg_getstr( udp_send_channel, "mcast_if" );
       port           = cfg_getint( udp_send_channel, "port");
       protocol       = cfg_getstr( udp_send_channel, "protocol");
 
-      debug_msg("udp_send_channel mcast_ip=%s mcast_if=%s ip=%s port=%d protocol=%s\n",
-		  mcast_ip? mcast_ip:"NULL", 
+      debug_msg("udp_send_channel mcast_join=%s mcast_if=%s ip=%s port=%d protocol=%s\n",
+		  mcast_join? mcast_join:"NULL", 
 		  mcast_if? mcast_if:"NULL",
 		  ip,
 		  port, 
 		  protocol? protocol:"NULL");
 
-      /* Create the socket */
-      if( mcast_ip )
+      /* Create a standard UDP socket */
+      socket = create_udp_client( global_context, ip, port );
+      if(!socket)
+        {
+          fprintf(stderr,"Unable to create UDP client for %s:%d. Exiting.\n",
+		      ip? ip: "NULL", port);
+	  exit(1);
+	}
+
+      /* Join the specified multicast channel */
+      if( mcast_join )
 	{
 	  /* We'll be listening on a multicast channel */
 	  socket = NULL;
 	  if(!socket)
 	    {
-	      fprintf(stderr,"Unable to multicast client for %s:%d. Exiting\n",
-		      mcast_ip, port);
-	      exit(1);
-	    }
-	}
-      else
-	{
-	  /* We'll be listening on a standard UDP channel */
-	  socket = create_udp_client( global_context, ip, port );
-	  if(!socket)
-	    {
-	      fprintf(stderr,"Unable to create UDP client for %s:%d. Exiting.\n",
-		      ip? ip: "NULL", port);
+	      fprintf(stderr,"Unable to join multicast channel %s:%d. Exiting\n",
+		      mcast_join, port);
 	      exit(1);
 	    }
 	}
@@ -418,20 +423,22 @@ main ( int argc, char *argv[] )
 
   for(;;)
     {
+      timeout = 2 * APR_USEC_PER_SEC;
       start = apr_time_now();
       if(!deaf)
 	{
           poll_udp_recv_channels(timeout);  
+	  /* accept_tcp_connections... */
 	}
 
       if(!mute)
 	{
+	  /*
+	  check_metric_values()... and if we need to...
 	  udp_send_message( "This is a test", 15);
+	  */
 	}
-      timeout = 999999999;
-      /*
-      timeout = check_local_metrics();
-      */
+
       end = apr_time_now();
     }
 
