@@ -4,20 +4,11 @@
 #include <string.h>
 #include <ganglia/hash.h>
 #include <ganglia/xmlparse.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <gmetad.h>
 
-int push_data_to_rrd( char *cluster, char *host, char *metric, char *value);
-int push_data_to_summary_rrd( char *cluster, char *metric, char *sum, char *num);
-
-extern char *rrd_rootdir;
-
-extern int RRD_update( char *rrd, char *value );
-extern int RRD_create( char *rrd, char *polling_interval);
-extern int summary_RRD_create( char *rrd, char *polling_interval);
-extern int summary_RRD_update( char *rrd, char *sum, char *num );
+extern int push_data_to_rrd( char *cluster, char *host, char *metric, char *value);
+extern int push_data_to_cluster_rrd( char *cluster, char *metric, char *sum, char *num);
+extern int push_data_to_meta_rrd( char *metric, char *sum, char *num);
 
 extern struct xml_tag *in_xml_list (char *, unsigned int);
 extern struct ganglia_metric *in_metric_list (char *, unsigned int);
@@ -27,8 +18,10 @@ typedef struct
    {
       int rval;
       unsigned int index;
-      val_t sum[MAX_METRIC_HASH_VALUE];
-      unsigned int num[MAX_METRIC_HASH_VALUE];
+      val_t        overall_sum[MAX_METRIC_HASH_VALUE];
+      unsigned int overall_num[MAX_METRIC_HASH_VALUE];
+      val_t                sum[MAX_METRIC_HASH_VALUE];
+      unsigned int         num[MAX_METRIC_HASH_VALUE];
       char *cluster;
       char *host;
       char *metric;
@@ -200,7 +193,12 @@ end (void *data, const char *el)
 
   switch ( xt->tag )
      {
+        /* </GANGLIA_XML> */
+        case GANGLIA_XML_TAG:
+           
+           break;
 
+        /* </CLUSTER> */
         case CLUSTER_TAG:
            for ( i = 0; i < MAX_METRIC_HASH_VALUE; i++ )
               {
@@ -218,68 +216,32 @@ end (void *data, const char *el)
                               case FLOAT:
                                  sprintf( sum, "%f", xml_data->sum[i].f);
                                  sprintf( num, "%d", xml_data->num[i] );
+                                 xml_data->overall_sum[i].f += xml_data->sum[i].f;
+                                 xml_data->overall_num[i]   += xml_data->num[i];                                  
                                  break;
                               case DOUBLE:
                                  sprintf( sum, "%f", xml_data->sum[i].d); 
                                  sprintf( num, "%d", xml_data->num[i] ); 
+                                 xml_data->overall_sum[i].d += xml_data->sum[i].d;
+                                 xml_data->overall_num[i]   += xml_data->num[i];
                                  break;
                               case UINT32:
                                  sprintf( sum, "%d", xml_data->sum[i].uint32);
                                  sprintf( num, "%d", xml_data->num[i] );
+                                 xml_data->overall_sum[i].uint32 += xml_data->sum[i].uint32;
+                                 xml_data->overall_num[i]        += xml_data->num[i];
                                  break;
                            }
 
                         /* Save the data to a round robin database */
-                        push_data_to_summary_rrd( (char *)(xml_data->cluster), (char *)metrics[i].name, sum, num);
-
-/*
-                        debug_msg("SAVE SUMMARY INFORMATION %s sum=%s num=%s", metrics[i].name, sum, num);
- */
+                        push_data_to_cluster_rrd( (char *)(xml_data->cluster), (char *)metrics[i].name, sum, num);
+                        debug_msg("SAVE CLUSTER SUMMARY INFORMATION %s sum=%s num=%s", metrics[i].name, sum, num);
                     }
               }
            break;
 
      }
   return;
-}
-
-int
-push_data_to_summary_rrd( char *cluster, char *metric, char *sum, char *num)
-{
-   int rval;
-   char rrd[2024];
-   char *polling_interval = "15"; /* secs .. constant for now */
-   struct stat st;
-
-   snprintf(rrd, 2024,"%s/%s_%s.rrd", rrd_rootdir, cluster, metric);
-
-   if( stat(rrd, &st) )
-      {
-         rval = summary_RRD_create( rrd, polling_interval );
-         if( rval )
-            return rval;
-      }
-   return summary_RRD_update( rrd, sum, num );
-}
-
-int
-push_data_to_rrd( char *cluster, char *host, char *metric, char *value)
-{
-  int rval;
-  char rrd[2024];
-  char *polling_interval = "15"; /* secs .. constant for now */
-  struct stat st;
-
-  snprintf(rrd, 2024,"%s/%s_%s_%s.rrd", rrd_rootdir, cluster, host, metric);
-
-  if( stat(rrd, &st) )
-     {
-        rval = RRD_create( rrd, polling_interval );
-        if( rval )
-           return rval;
-     } 
-
-  return RRD_update( rrd, value );
 }
 
 int
