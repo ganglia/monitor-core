@@ -102,9 +102,9 @@ flavours of Unix (primarily Linux) with the Apache webserver and the PHP 4.1 mod
 The latest version of all ganglia software can always be downloaded from 
 http://ganglia.sourceforge.net/downloads.php
 
-The monitoring core allows you to monitor any number of host metrics in real-time. 
-At present, the monitoring core runs on Linux, FreeBSD, Solaris, AIX, Tru64 and IRIX. 
-There is a Windows port as well which is in beta.
+Ganglia runs on Linux (i386, ia64, sparc, alpha, powerpc, m68k, mips, arm, hppa, s390), 
+Solaris, FreeBSD, AIX, IRIX, Tru64, HPUX, MacOS X and Windows (cygwin beta) making it as 
+portable as it is scalable.
 
 =head2 Monitoring Core Installation
 
