@@ -145,55 +145,6 @@ typedef struct Ganglia_collection_group Ganglia_collection_group;
 /* This is the array of collection groups that we are processing... */
 apr_array_header_t *collection_groups = NULL;
 
-static void
-cleanup_configuration_file(void)
-{
-  cfg_free( config_file );
-}
-
-/* TODO: move to libgmond gmond_opts is needed... default_gmond_configuration is needed */
-Ganglia_gmond_config
-Ganglia_gmond_config_new(char *path, int fallback_to_default)
-{
-  Ganglia_gmond_config config = NULL;
-  /* Make sure we process ~ in the filename if the shell doesn't */
-  char *tilde_expanded = cfg_tilde_expand( path );
-  config = cfg_init( gmond_opts, CFGF_NOCASE );
-
-  switch( cfg_parse( config, tilde_expanded ) )
-    {
-    case CFG_FILE_ERROR:
-      /* Unable to open file so we'll go with the configuration defaults */
-      fprintf(stderr,"Configuration file '%s' not found.\n", tilde_expanded);
-      if(!fallback_to_default)
-	{
-	  /* Don't fallback to the default configuration.. just exit. */
-	  exit(1);
-	}
-      /* .. otherwise use our default configuration */
-      if(cfg_parse_buf(config, default_gmond_configuration) == CFG_PARSE_ERROR)
-	{
-	  fprintf(stderr,"Your default configuration buffer failed to parse. Exiting.\n");
-          exit(1);
-	}
-      break;
-    case CFG_PARSE_ERROR:
-      fprintf(stderr,"Parse error for '%s'\n", tilde_expanded );
-      exit(1);
-    case CFG_SUCCESS:
-      break;
-    default:
-      /* I have no clue whats goin' on here... */
-      exit(1);
-    }
-
-  if(tilde_expanded)
-    free(tilde_expanded);
-
-  atexit(cleanup_configuration_file);
-  return config;
-}
-
 /* this is just a temporary function */
 void
 process_configuration_file(void)
