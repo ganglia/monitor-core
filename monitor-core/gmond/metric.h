@@ -103,6 +103,7 @@ extern g_val_t part_max_used_func(void);
 #define INIT 0, 0, {0}, {0}
 #define KEY(NAME) { #NAME, NAME ##_func, INIT
 
+#ifndef CYGWIN_MODULE
 /*
  * All behavior of the gmond is tweak'd by this array..
  *
@@ -238,5 +239,7 @@ KEY(part_max_used), 1, 30, 40, 120, 180, g_float, "%", "%.1f" }
 
 #endif
 };
+
+#endif
 
 #endif  /* METRIC_H */
