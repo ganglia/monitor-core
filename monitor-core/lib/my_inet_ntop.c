@@ -1,5 +1,11 @@
 /* $Id$ */
-#include "gangliaconf.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 const char *
 my_inet_ntop( int af, void *src, char *dst, size_t cnt )

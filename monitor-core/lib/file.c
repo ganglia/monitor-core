@@ -2,7 +2,19 @@
  * @file file.c Some file functions
  */
 /* $Id$ */
-#include "gangliaconf.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <ctype.h>
+
+#include "error.h"
+#include "ganglia.h"
+
 
 /**
  * @fn ssize_t readn (int fd, void *vptr, size_t n)

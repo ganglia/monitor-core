@@ -1,13 +1,15 @@
+#include <string.h>
+#include <rpc/rpc.h>
 
 #include "interface.h"
 #include "hash.h"
 #include "net.h"
 #include "error.h"
 #include "ganglia.h"
-#include "metric_typedefs.h"
-#include "node_data_t.h"
 #include "cmdline.h"
-#include <string.h>
+
+#include "ganglia_priv.h"
+#include "metric.h"
 
 extern int optopt;
 extern int optind;

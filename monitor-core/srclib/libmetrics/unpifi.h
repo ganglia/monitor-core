@@ -4,16 +4,9 @@
 #ifndef	__unp_ifi_h
 #define	__unp_ifi_h
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
-#ifdef HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
-#endif
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <netinet/in.h>

@@ -1,10 +1,6 @@
 #ifndef LIBMETRICS_H
 #define LIBMETRICS_H 1
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 void libmetrics_init( void );
 
 #ifndef SYNAPSE_SUCCESS
@@ -134,5 +130,86 @@ typedef union {
  g_val_t part_max_used_func(void);
 
 #endif
+
+enum {
+   user_defined,
+  /*
+   * These are my configuration metrics which don't change between reboots
+   */
+   cpu_num,
+   cpu_speed,
+   mem_total,
+   swap_total,
+   boottime,
+   sys_clock,
+   machine_type,
+   os_name,
+   os_release,
+  /*
+   * These are my state metrics which are always a changin' changin'
+   */
+   cpu_user,
+   cpu_nice,
+   cpu_system,
+   cpu_idle,
+   cpu_aidle,
+   load_one,
+   load_five,
+   load_fifteen,
+   proc_run,
+   proc_total,
+   mem_free,
+   mem_shared,
+   mem_buffers,
+   mem_cached,
+   swap_free,
+   /* internal.. ignore */
+   gexec,
+   heartbeat,
+   mtu,
+   location,
+   /*
+    * added by swagner for extended solaris monitoring.
+    */
+#ifdef SOLARIS
+   cpu_wio,
+   bread_sec,
+   bwrite_sec,
+   lread_sec,
+   lwrite_sec,
+   phread_sec,
+   phwrite_sec,
+   rcache,
+   wcache,
+#endif
+#ifdef LINUX
+   bytes_in,
+   bytes_out,
+   pkts_in,
+   pkts_out,
+   disk_total,
+   disk_free,
+   part_max_used,
+#endif
+#ifdef HPUX
+   cpu_intr,
+   cpu_ssys,
+   cpu_wait,
+   cpu_arm,
+   cpu_rm,
+   cpu_avm,
+   cpu_vm,
+#endif
+#ifdef FREEBSD
+   bytes_in,
+   bytes_out,
+   pkts_in,
+   pkts_out,
+   disk_total,
+   disk_free,
+   part_max_used,
+#endif
+   num_key_metrics
+}  key_metrics;
 
 #endif /* LIBMETRICS_H */

@@ -3,10 +3,21 @@
  * retrieving XML data and saving it to internal data structures
  */
 /* $Id$ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <unistd.h>
+
+
 #include "expat.h"
 #include "hash.h"
 #include "llist.h"
 #include "ganglia.h"
+#include "ganglia_priv.h"
+#include "error.h"
+#include "net.h"
 
 #define TIMEOUT 60
 #define NUM_METRICS 30
