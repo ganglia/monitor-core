@@ -2,7 +2,16 @@
  * @file file.c Some file functions
  */
 /* $Id$ */
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <ctype.h>
+
 #include "ganglia_private.h"
+#include "file.h"
+#include "error.h"
 
 /**
  * @fn ssize_t readn (int fd, void *vptr, size_t n)

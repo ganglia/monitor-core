@@ -1,11 +1,14 @@
+#include <string.h>
+#include <rpc/types.h>
+#include <rpc/xdr.h>
 
 #include "interface.h"
-#include <ganglia.h>
+#include "ganglia.h"
 #include "hash.h"
 #include "metric_typedefs.h"
 #include "node_data_t.h"
 #include "cmdline.h"
-#include <string.h>
+#include "net.h"
 
 extern int optopt;
 extern int optind;
@@ -28,7 +31,6 @@ int main ( int argc, char **argv )
    g_mcast_socket *mcast_socket;
    uint32_t key = 0; /* user-defined */
    char empty[] = "\0";
-   g_inet_addr *addr;
    struct ifi_info *entry;
    unsigned int slope;
 

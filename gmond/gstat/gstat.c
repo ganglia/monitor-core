@@ -2,9 +2,14 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
-#include "gexec_funcs.h"
+#include "ganglia.h"
+#include "llist.h"
 #include <getopt.h>
 #include "cmdline.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 char cluster_ip[16];
 unsigned short cluster_port;

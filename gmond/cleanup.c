@@ -14,7 +14,16 @@
  *    immortal metrics.
  *
  */
-#include <ganglia.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <string.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+
+#include "ganglia.h"
 #include "hash.h"
 #include "barrier.h"
 #include "gmond_config.h"
@@ -22,11 +31,10 @@
 #include "key_metrics.h"
 #include "metric_typedefs.h"
 #include "node_data_t.h"
-#include <string.h>
+#include "net.h"
+#include "debug_msg.h"
 
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <unistd.h>
+
 
 #ifdef AIX
 extern void *h_errno_which(void);

@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ganglia/hash.h>
-#include <ganglia/xmlparse.h>
-#include <gmetad.h>
+#include <expat.h>
+
+#include "hash.h"
+#include "gmetad.h"
 
 extern int write_data_to_rrd( const char *source, const char *host, const char *metric,
    const char *sum, const char *num, unsigned int step, unsigned int time_polled);

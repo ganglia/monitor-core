@@ -3,6 +3,7 @@
  */
 /* $Id$ */
 #include	"ganglia_private.h"
+#include        <syslog.h>
 
 extern int daemon_proc;		/* defined in error.c */
 
