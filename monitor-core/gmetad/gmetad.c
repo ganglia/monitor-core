@@ -32,7 +32,7 @@ int xml_port = 8651;
 g_tcp_socket *   server_socket;
 pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
 int server_threads = 2;
-char *rrd_rootdir = "/var/lib/ganglia/rrds";
+char *rrd_rootdir =  "/var/lib/ganglia/rrds";
 char *setuid_username = "nobody";
 int should_setuid = 1;
 unsigned int source_index = 0;
