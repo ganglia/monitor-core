@@ -1,4 +1,6 @@
 /*
+ * $Id$
+ * 
  * "Copyright (c) 1999 by Matt Massie and The Regents of the University 
  * of California.  All rights reserved."
  *

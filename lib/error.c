@@ -1,6 +1,7 @@
 /**
  * @file error.c Error Handling Functions
  */
+/* $Id$ */
 #include	"gangliaconf.h"
 
 int daemon_proc;		/* set nonzero by daemon_init() */
