@@ -1,5 +1,10 @@
 =pod
 
+=for comment The ganglia documentation is written in POD (Plain Old Documentation) 
+format.  If you want to edit this file but don't know the POD format, it is very
+easy to learn.  Visit http://www.linuxgazette.com/issue73/spiel.html for a nice intro
+or read the http://www.perldoc.com/perl5.6.1/pod/perlpod.html perl pod documentation.
+
 =head1 Name
 
 B<ganglia> - distributed monitoring system
