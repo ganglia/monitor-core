@@ -63,17 +63,17 @@ into the following XML.
   ...
   </CLUSTER>
 
-=head2 behavior
+=head2 globals
 
-The B<behavior> section controls general characteristics of gmond
+The B<globals> section controls general characteristics of gmond
 such as whether is should daemonize, what user it should run as,
-whether is should send/receive date and such.  The B<behavior>
+whether is should send/receive date and such.  The B<globals>
 section has seven attributes: B<daemonize>, B<setuid>, B<user>,
 B<debug_level>, B<mute>, B<deaf>, B<host_dmax>.
 
 For example,
 
-  behavior {
+  globals {
     daemonize = true
     setuid = true
     user = nobody

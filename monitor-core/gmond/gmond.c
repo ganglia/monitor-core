@@ -39,19 +39,12 @@ apr_pool_t *global_context = NULL;
 int deaf;
 /* Mute mode boolean */
 int mute;
-/* Maximum UDP message size.. TODO: allow tweakability */
-int max_udp_message_len = 1472; /* mtu 1500 - 28 bytes for IP/UDP headers */
-
-#if 0
-/* The pollset for incoming UDP messages */
-apr_pollset_t *udp_recv_pollset = NULL;
-/* The access control list for each of the UDP channels */
-apr_array_header_t *udp_recv_acl_array = NULL;
-#endif
+/* This is tweakable by globals{max_udp_msg_len=...} */
+int max_udp_message_len = 1472;
 
 /* The array for outgoing UDP message channels */
 apr_array_header_t *udp_send_array = NULL;
-/* The array for outgoing TCP message channels (later) */
+/* TODO: The array for outgoing TCP message channels (later) */
 apr_array_header_t *tcp_send_array = NULL;
 
 enum Ganglia_channel_types {
@@ -69,13 +62,6 @@ typedef struct Ganglia_channel Ganglia_channel;
 /* This pollset holds the tcp_accept and udp_recv channels */
 apr_pollset_t *listen_channels = NULL;
 
-#if 0
-/* The pollset for incoming TCP requests */
-apr_pollset_t *tcp_accept_pollset = NULL;
-/* The access control list for each of the TCP accept channels */
-apr_array_header_t *tcp_accept_acl_array = NULL;
-#endif
-
 /* The hash to hold the hosts (key = host IP) */
 apr_hash_t *hosts = NULL;
 
@@ -85,6 +71,8 @@ struct Ganglia_host_data {
   char *hostname;
   /* The IP of this host */
   char *ip;
+  /* The location of this host */
+  char *location;
   /* Timestamp of when the remote host gmond started */
   unsigned int gmond_started;
   /* The pool used to malloc memory for this host */
@@ -151,6 +139,7 @@ process_configuration_file(void)
   /* Make sure we process ~ in the filename if the shell doesn't */
   char *tilde_expanded = cfg_tilde_expand( args_info.conf_arg );
   config_file = cfg_init( gmond_opts, CFGF_NOCASE );
+  cfg_t *tmp;
 
   switch( cfg_parse( config_file, tilde_expanded ) )
     {
@@ -179,7 +168,14 @@ process_configuration_file(void)
       /* I have no clue whats goin' on here... */
       exit(1);
     }
+
+  /* Get the maximum UDP message size */
+  tmp = cfg_getsec( config_file, "globals");
+  max_udp_message_len = cfg_getint( tmp, "max_udp_msg_len");
+
   /* Free memory for this configuration file at exit */
+  if(tilde_expanded) 
+    free(tilde_expanded);
   atexit(cleanup_configuration_file);
 }
 
@@ -219,7 +215,7 @@ daemonize_if_necessary( char *argv[] )
 {
   int should_daemonize;
   cfg_t *tmp;
-  tmp = cfg_getsec( config_file, "behavior");
+  tmp = cfg_getsec( config_file, "globals");
   should_daemonize = cfg_getbool( tmp, "daemonize");
 
   /* Commandline for debug_level trumps configuration file behaviour ... */
@@ -246,7 +242,7 @@ setuid_if_necessary( void )
   int setuid;
   char *user;
 
-  tmp    = cfg_getsec( config_file, "behavior");
+  tmp    = cfg_getsec( config_file, "globals");
   setuid = cfg_getbool( tmp, "setuid" );
   if(setuid)
     {
@@ -258,7 +254,7 @@ setuid_if_necessary( void )
 static void
 process_deaf_mute_mode( void )
 {
-  cfg_t *tmp = cfg_getsec( config_file, "behavior");
+  cfg_t *tmp = cfg_getsec( config_file, "globals");
   deaf =       cfg_getbool( tmp, "deaf");
   mute =       cfg_getbool( tmp, "mute");
   if(deaf && mute)
@@ -300,7 +296,7 @@ setup_listen_channels_pollset( void )
       allow_ip       = cfg_getstr( udp_recv_channel, "allow_ip");
       allow_mask     = cfg_getstr( udp_recv_channel, "allow_mask");
 
-      debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s\n",
+      debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s",
 		  mcast_join? mcast_join:"NULL", 
 		  mcast_if? mcast_if:"NULL", port,
 		  bindaddr? bindaddr: "NULL");
@@ -389,7 +385,7 @@ setup_listen_channels_pollset( void )
       allow_mask     = cfg_getstr( tcp_accept_channel, "allow_mask");
       interface      = cfg_getstr( tcp_accept_channel, "interface"); 
 
-      debug_msg("tcp_accept_channel bind=%s port=%d\n",
+      debug_msg("tcp_accept_channel bind=%s port=%d",
 		  bindaddr? bindaddr: "NULL", port);
 
       /* Create a subpool context */
@@ -493,6 +489,9 @@ Ganglia_host_data_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *full
       /* Dup the remoteip (it will be freed later) */
       hostdata->ip =  apr_pstrdup( pool, remoteip);
 
+      /* We don't know the location yet */
+      hostdata->location = NULL;
+
       /* Set the timestamps */
       hostdata->first_heard_from = hostdata->last_heard_from = apr_time_now();
 
@@ -521,15 +520,18 @@ Ganglia_host_data_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *full
       hostdata->last_heard_from = apr_time_now();
     }
 
+  fprintf(stderr,"Processing a Ganglia_message from %s\n", hostdata->hostname);
 
-  /* TODO: Capture special metrics here */
   if(fullmsg->id == metric_location)
     {
+      hostdata->location = fullmsg->Ganglia_message_u.str;
       return NULL;
     }
   if(fullmsg->id == metric_heartbeat)
     {
       /* nothing more needs to be done. we handled the timestamps above. */
+      hostdata->gmond_started = fullmsg->Ganglia_message_u.u_int;
+      fprintf(stderr,"Got a heartbeat message %d\n", hostdata->gmond_started);
       return NULL;
     }
   if(fullmsg->id == metric_gexec)
@@ -783,8 +785,8 @@ print_host_start( apr_socket_t *client, Ganglia_host_data *hostinfo)
 		     tn,
 		     20, /*tmax for now is always 20 */
 		     0 /* TODO: (config option) dmax*/,
-		     "unspecified", /* TODO: (location) location*/
-		     0 /*TODO: (heartbeat) gmond_started*/);
+		     hostinfo->location? hostinfo->location: "unspecified", 
+		     hostinfo->gmond_started);
 
   return apr_send(client, hostxml, &len);
 }

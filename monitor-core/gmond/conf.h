@@ -9,9 +9,9 @@ in order for the documentation to be in order with the code
 #include "confuse.h"
 
 #define DEFAULT_GMOND_CONFIGURATION "\
-behavior {                    \n\
-  setuid = no                 \n\
-  user = nobody               \n\
+globals {                    \n\
+  setuid = no                \n\
+  user = nobody              \n\
 } \n\
 udp_send_channel { \n\
   mcast_join = 239.2.11.71 \n\
@@ -23,7 +23,14 @@ udp_recv_channel { \n\
   bind = 239.2.11.71 \n\
 } \n\
 tcp_accept_channel { \n\
-  port = 8666 \n\
+  port = 8649 \n\
+} \n\
+collection_group { \n\
+  collect_once = yes \n\
+  time_threshold = 20 \n\
+  metric { \n\
+    name = \"heartbeat\" \n\
+  } \n\
 } \n\
 collection_group { \n\
   collect_every = 60 \n\
@@ -50,12 +57,13 @@ static cfg_opt_t cluster_opts[] = {
   CFG_END()
 };
 
-static cfg_opt_t behavior_opts[] = {
+static cfg_opt_t globals_opts[] = {
   CFG_BOOL("daemonize", 1, CFGF_NONE),
   CFG_BOOL("setuid", 1, CFGF_NONE),
   CFG_STR("user", "nobody", CFGF_NONE),
   /* later i guess we should add "group" as well */
   CFG_INT("debug_level", 0, CFGF_NONE),
+  CFG_INT("max_udp_msg_len", 1472, CFGF_NONE),
   CFG_BOOL("mute", 0, CFGF_NONE),
   CFG_BOOL("deaf", 0, CFGF_NONE),
   CFG_INT("host_dmax", 0, CFGF_NONE),
@@ -107,7 +115,7 @@ static cfg_opt_t collection_group_opts[] = {
 
 static cfg_opt_t gmond_opts[] = {
   CFG_SEC("cluster",   cluster_opts, CFGF_NONE),
-  CFG_SEC("behavior",     behavior_opts, CFGF_NONE), 
+  CFG_SEC("globals",     globals_opts, CFGF_NONE), 
   CFG_SEC("udp_send_channel", udp_send_channel_opts, CFGF_MULTI),
   CFG_SEC("udp_recv_channel", udp_recv_channel_opts, CFGF_MULTI),
   CFG_SEC("tcp_accept_channel", tcp_accept_channel_opts, CFGF_MULTI),
