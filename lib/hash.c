@@ -100,24 +100,30 @@ hash_create (size_t size)
    size_t i;
    hash_t *hash;
 
+   debug_msg("hash_create size = %d", size);
+
    hash = (hash_t *) malloc ( sizeof(hash_t) );
    if( hash == NULL )
       {
+         debug_msg("hash malloc error in hash_create()");
          return NULL;
       } 
 
    hash->size = hash_prime(size);
 
+   debug_msg("hash->size is %d", hash->size);
+
    hash->node = (node_t * *) malloc (sizeof (node_t *) * hash->size);
    if (hash->node == NULL)
       {
+         debug_msg("hash->node malloc error. freeing hash.");
          free(hash);
-		   return NULL;
-	   }
+	 return NULL;
+      }
 
    for (i = 0; i < hash->size; i++)
       {
-	      hash->node[i] = malloc( sizeof(node_t) );
+	 hash->node[i] = malloc( sizeof(node_t) );
          if ( hash->node[i] == NULL )
             break;
          /* Initialize */
@@ -128,6 +134,7 @@ hash_create (size_t size)
    /* Was there an error initializing the hash nodes? */
    if ( i != hash->size )
       {
+         debug_msg("hash->node[i] malloc error");
          /* Rewind */
          for (hash->size = i; hash->size >= 0; hash->size--)
             {

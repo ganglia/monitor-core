@@ -98,7 +98,7 @@ AC_ARG_ENABLE(debug,
   --enable-debug          turn on debugging output and compile options],
 [ CFLAGS="-ggdb"
   AC_DEFINE(DEBUG, 1)],
-[ CFLAGS="-O2 " 
+[ CFLAGS="-O2" 
   AC_DEFINE(DEBUG, 0)])
 
 AC_ARG_ENABLE(gexec,
@@ -113,7 +113,9 @@ AC_ARG_ENABLE(memcheck,
 [  --enable-memcheck       turn on memory checking during compile
                            note: requires mpatrol from
                            http://www.cbmamiga.demon.co.uk/mpatrol/],
-  AC_DEFINE(MEMCHECK, 1), AC_DEFINE(MEMCHECK,0))
+  [ LDFLAGS="$LDFLAGS -lmpatrol -lelf"
+    CFLAGS="$CFLAGS -fcheck-memory-usage" ],
+  AC_DEFINE(MEMCHECK,0))
 
 dnl ##################################################################
 dnl Checks for libraries.
@@ -122,17 +124,18 @@ dnl the LIBS variable that is constructed: each new one gets prepended,
 dnl not appended.
 dnl
 AC_CHECK_LIB(pthread, pthread_create)
-if test "$ac_cv_lib_pthread_pthread_create" = yes ; then
-   CFLAGS="$CFLAGS -D_REENTRANT"
-else
-   AC_CHECK_LIB(pthreads, pthread_create)
-   if test "$ac_cv_lib_pthreads_pthread_create" = yes ; then
-      CFLAGS="$CFLAGS -D_REENTRANT"
-   fi
-fi
+dnl if test "$ac_cv_lib_pthread_pthread_create" = yes ; then
+dnl    CFLAGS="$CFLAGS -D_REENTRANT"
+dnl else
+AC_CHECK_LIB(pthreads, pthread_create)
+dnl    if test "$ac_cv_lib_pthreads_pthread_create" = yes ; then
+dnl       CFLAGS="$CFLAGS -D_REENTRANT"
+dnl    fi
+dnl fi
 
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, inet_addr)
+AC_CHECK_LIB(nsl, gethostbyaddr_r)
 AC_CHECK_LIB(resolv, inet_aton)
 AC_CHECK_LIB(kstat, kstat_open)
 AC_CHECK_LIB(kvm, kvm_open)
@@ -182,11 +185,11 @@ AC_SEARCH_TYPE(size_t,    unsigned int)
 AC_SEARCH_TYPE(ssize_t,   signed int)
 AC_SEARCH_TYPE(socklen_t, unsigned int)
 
-AC_CHECK_SIZEOF(char)
-AC_CHECK_SIZEOF(short)
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(long)
-AC_CHECK_SIZEOF(void *)
+dnl AC_CHECK_SIZEOF(char)
+dnl AC_CHECK_SIZEOF(short)
+dnl AC_CHECK_SIZEOF(int)
+dnl AC_CHECK_SIZEOF(long)
+dnl AC_CHECK_SIZEOF(void *)
 
 dnl ##################################################################
 dnl Check for structure definitions.
@@ -306,20 +309,21 @@ dnl the definitions that we're looking for in some system headers.
 
 case "$host" in
 *linux*)
-      metric_source="linux.c"
-      AC_DEFINE(LINUX);;
-*ia64*)     AC_DEFINE(IA64);;
+                metric_source="linux.c"
+                CFLAGS="$CFLAGS -D_REENTRANT" 
+                AC_DEFINE(LINUX);;
+*ia64*)         AC_DEFINE(IA64);;
 *aix*)		metric_source="aix.c"
-      CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
-      AC_DEFINE(SUPPORT_GEXEC, 0)
+                CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
+                AC_DEFINE(SUPPORT_GEXEC, 0)
                 AC_DEFINE(AIX);;
 *hpux*)		metric_source="hpux.c"
 		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
 		AC_DEFINE(SUPPORT_GEXEC, 0)
                 AC_DEFINE(HPUX);;
-*irix*)    metric_source="irix.c"
+*irix*)         metric_source="irix.c"
 		AC_DEFINE(SUPPORT_GEXEC, 0)
-      CFLAGS="$CFLAGS -D_IRIX_SOURCE"
+                CFLAGS="$CFLAGS -D_IRIX_SOURCE"
                 AC_DEFINE(IRIX);;
 *osf*)	 	metric_source="osf.c"	
 		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
@@ -330,9 +334,9 @@ case "$host" in
                 echo " *** applies if you are running Solaris 7 or later!                   *** "
 		AC_DEFINE(SUPPORT_GEXEC, 0)
 		if test "$ac_cv_prog_gcc" = yes; then
-		   CFLAGS="$CFLAGS -D__EXTENSIONS__ -DHAVE_STRERROR"
+		   CFLAGS="$CFLAGS -D__EXTENSIONS__ -D_POSIX_C_SOURCE=199506L -DHAVE_STRERROR"
 		else
-		   CFLAGS="$CFLAGS -D__STDC__ -DHAVE_STRERROR"
+		   CFLAGS="$CFLAGS -D__STDC__ -D_POSIX_C_SOURCE=199506L -DHAVE_STRERROR"
 		fi 
                 AC_DEFINE(SOLARIS);;
 dnl
