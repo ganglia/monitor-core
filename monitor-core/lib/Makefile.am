@@ -5,8 +5,9 @@ EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h getopt.h
 lib_LTLIBRARIES      = libganglia.la
 libganglia_la_SOURCES = daemon_inetd.c daemon_init.c debug_msg.c error.c \
 ganglia.c getopt1.c getopt.c getopt_init.c hash.c llist.c my_inet_ntop.c \
-net.c rdwr.c xmlparse.c xmlrole.c xmltok.c file.c gexec_funcs.c barrier.c \
-become_a_nobody.c gexec_process.c gexec_vnn_ip.c gmond_config.c
+rdwr.c xmlparse.c xmlrole.c xmltok.c file.c gexec_funcs.c barrier.c \
+become_a_nobody.c gexec_process.c gexec_vnn_ip.c gmond_config.c inetaddr.c \
+mcast.c tcp.c
 
 libganglia_la_LIBADD  = ../dotconf-1.0.9/src/dotconf.lo
 
