@@ -301,6 +301,7 @@ dnl Why did BSD decide to do this?  Why not have a separate pthreads library?
 dnl
 *freebsd*)      metric_source="freebsd.c" 
                 CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
+		AC_DEFINE(SUPPORT_GEXEC, 0)
                 AC_DEFINE(BSD);; 
 *cygwin*)      	metric_source="cygwin.c" 
 		AC_DEFINE(CYGWIN)
