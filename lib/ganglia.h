@@ -13,8 +13,12 @@
 #define GANGLIA_DEFAULT_MCAST_PORT 8649
 #define GANGLIA_DEFAULT_XML_PORT 8649
 
+/* 
+ * Max multicast message: 1500 bytes (Ethernet max frame size)
+ * minus 20 bytes for IPv4 header, minus 8 bytes for UDP header.
+ */
 #ifndef MAX_MCAST_MSG
-#define MAX_MCAST_MSG 1500
+#define MAX_MCAST_MSG 1472
 #endif
 
 #include <stdio.h>
