@@ -6,7 +6,7 @@
 Summary: Ganglia Cluster Toolkit http://ganglia.sourceforge.net/
 Name: @PACKAGE@
 Version: @VERSION@
-Release: 1 
+Release: 3 
 Copyright: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
@@ -79,21 +79,31 @@ make
 ## POST GMETA
 ##
 %post gmetad
-if [ "$1" = 1 ]
-then
+/sbin/chkconfig --add gmetad
+
+if [ "$1" == "1" ]; then
+   # Installing new package - start gmond
+   /etc/rc.d/init.d/gmetad start
+elif [ "$1" > "1" ]; then
+   # Upgrading ganglia package - restart gmond
    /etc/rc.d/init.d/gmetad restart
-   /sbin/chkconfig --add gmetad
 fi
+
 
 ##
 ## POST GMON
 ##
 %post gmond
-if [ "$1" = 1 ]
-then
+/sbin/chkconfig --add gmond
+
+if [ "$1" == "1" ]; then
+   # Installing new package - start gmond
+   /etc/rc.d/init.d/gmond start
+elif [ "$1" > "1" ]; then
+   # Upgrading ganglia package - restart gmond
    /etc/rc.d/init.d/gmond restart
-   /sbin/chkconfig --add gmond
 fi
+
 
 ##
 ## PREUN GMETA
@@ -113,24 +123,6 @@ if [ "$1" = 0 ]
 then
    /etc/rc.d/init.d/gmond stop
    /sbin/chkconfig --del gmond
-fi
-
-##
-## POSTUN GMETA
-##
-%postun gmetad
-if [ "$1" = 1 ]
-then
-   /etc/rc.d/init.d/gmetad restart
-fi
-
-##
-## POSTUN GMON
-##
-%postun gmond
-if [ "$1" = 1 ]
-then
-   /etc/rc.d/init.d/gmond restart
 fi
 
 ##
@@ -154,7 +146,7 @@ fi
 %attr(0755,nobody,nobody)/var/lib/ganglia/rrds
 /usr/sbin/gmetad
 /etc/rc.d/init.d/gmetad
-%config /etc/gmetad.conf
+%config(noreplace) /etc/gmetad.conf
 
 ##
 ## FILES GMON
@@ -165,7 +157,7 @@ fi
 %attr(0555,root,root)/usr/bin/gstat
 /usr/sbin/gmond
 /etc/rc.d/init.d/gmond
-%config /etc/gmond.conf
+%config(noreplace) /etc/gmond.conf
 
 %files lib
 /usr/include/ganglia.h
