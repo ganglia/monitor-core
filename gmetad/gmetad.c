@@ -144,10 +144,8 @@ main ( int argc, char *argv[] )
          hash_foreach( sources, print_sources, NULL);
       }
 
-   hash_foreach( sources, spin_off_the_data_threads, NULL );
-
    server_socket = g_tcp_socket_server_new( xml_port );
-   if (! server_socket )
+   if (server_socket == NULL)
       {
          perror("tcp_listen() on xml_port failed");
          exit(1);
@@ -159,6 +157,8 @@ main ( int argc, char *argv[] )
 
    for(i=0; i< server_threads; i++)
       pthread_create(&pid, &attr, server_thread, NULL);   
+
+   hash_foreach( sources, spin_off_the_data_threads, NULL );
 
    /* Put in RRD processing here */
    for(;;)

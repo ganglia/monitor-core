@@ -1,9 +1,14 @@
 # $Id$
 #
+if BUILD_GMETAD
+GMETAD_SUBDIR = gmetad
+else
+GMETAD_SUBDIR = 
+endif
 
-SUBDIRS = lib gmetad gmond gmetric
+SUBDIRS = lib $(GMETAD_SUBDIR) gmond gmetric
 
-DIST_SUBDIRS = lib gmond gmetric
+DIST_SUBDIRS = lib gmetad gmond gmetric
 
 EXTRA_DIST = config gmond.init ganglia.spec gmond.init.SuSE mans lib/ganglia 
 
