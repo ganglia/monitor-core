@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <apr_strings.h>
@@ -90,16 +94,20 @@ create_udp_client(apr_pool_t *context, char *host, apr_port_t port)
 }
 
 static apr_socket_t *
-create_net_server(apr_pool_t *context, int type, apr_port_t port, char *bind)
+create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t port, char *bind_addr)
 {
   apr_sockaddr_t *localsa = NULL;
   apr_socket_t *sock = NULL;
   apr_status_t stat;
-  int family = APR_UNSPEC;
+  int32_t family = ofamily;
 
-  if(bind)
+  /* We set family to the family specified in the option.  If however a bind address
+   * is also specified, it's family will take precedence.
+   * e.g. ofamily = APR_INET6 but the bind address is "127.0.0.1" which is IPv4 
+   * the family will be set to the bind address family */
+  if(bind_addr)
     {
-      stat = apr_sockaddr_info_get(&localsa, bind, APR_UNSPEC, port, 0, context);
+      stat = apr_sockaddr_info_get(&localsa, bind_addr, APR_UNSPEC, port, 0, context);
       if (stat != APR_SUCCESS)
         return NULL;
 
@@ -131,13 +139,24 @@ create_net_server(apr_pool_t *context, int type, apr_port_t port, char *bind)
       apr_sockaddr_port_set(localsa, port);
     }
 
+#if APR_HAVE_IPV6
+   if (localsa->family == APR_INET6) 
+     {
+       int one = 1;
+       /* Don't accept IPv4 connections on an IPv6 listening socket */
+       stat = apr_socket_opt_set(sock, APR_IPV6_V6ONLY, one);
+       if (stat != APR_SUCCESS && stat != APR_ENOTIMPL) 
+	 {
+	   apr_socket_close(sock);
+	   return NULL;
+	 }
+     }
+#endif
+
   stat = apr_bind(sock, localsa);
   if( stat != APR_SUCCESS)
     {
        apr_socket_close(sock);
-       /*
-       fprintf(stderr, "Could not bind: %s\n", apr_strerror(stat, buf, sizeof buf));
-       */
        return NULL;
     }
 
@@ -145,20 +164,20 @@ create_net_server(apr_pool_t *context, int type, apr_port_t port, char *bind)
 }
 
 apr_socket_t *
-create_udp_server(apr_pool_t *context, apr_port_t port, char *bind)
+create_udp_server(apr_pool_t *context, int32_t family, apr_port_t port, char *bind_addr)
 {
-  return create_net_server(context, SOCK_DGRAM, port, bind);
+  return create_net_server(context, family, SOCK_DGRAM, port, bind_addr);
 }
 
 apr_socket_t *
-create_tcp_server(apr_pool_t *context, apr_port_t port, char *bind, char *interface)
+create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port, char *bind_addr, char *interface)
 {
-  apr_socket_t *sock = create_net_server(context, SOCK_STREAM, port, bind);
+  apr_socket_t *sock = create_net_server(context, family, SOCK_STREAM, port, bind_addr);
   if(!sock)
     {
       return NULL;
     }
-  if(apr_listen(sock,5) != APR_SUCCESS) 
+  if(apr_listen(sock, 5) != APR_SUCCESS) 
     {
       return NULL;
     }
@@ -292,11 +311,12 @@ create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int tt
     {
       return NULL;
     }
+  mcast_set_ttl(socket, ttl);
   return socket;
 }
 
 apr_socket_t *
-create_mcast_server(apr_pool_t *context, char *mcast_ip, apr_port_t port, char *bind, char *interface)
+create_mcast_server(apr_pool_t *context, int32_t family, char *mcast_ip, apr_port_t port, char *bind_addr, char *interface)
 {
   apr_status_t status = APR_SUCCESS;
   /* NOTE: If bind is set to mcast_ip in the configuration file, then we will bind the 
@@ -304,7 +324,7 @@ create_mcast_server(apr_pool_t *context, char *mcast_ip, apr_port_t port, char *
    * datagrams that might be delivered to this port from being processed. Otherwise,
    * packets destined to the same port (but a different multicast/unicast channel) will be
    * processed. */
-  apr_socket_t *socket = create_udp_server(context, port, bind);
+  apr_socket_t *socket = create_udp_server(context, family, port, bind_addr);
   if(!socket)
     {
       return NULL;

@@ -386,6 +386,29 @@ Ganglia_acl_action( Ganglia_acl *acl, apr_sockaddr_t *addr )
   return acl->default_action;
 }
 
+static int32_t
+get_sock_family( char *family )
+{
+  if( strchr( family, '4' ))
+    {
+      return APR_INET;
+    }
+  else if( strchr( family, '6'))
+    {
+#if APR_INET6
+      return APR_INET6;
+#else
+      fprintf(stderr,"IPv6 is not supported on this host. Exiting.\n");
+      exit(1);
+#endif
+    }
+
+  fprintf(stderr,"Unknown family '%s'. Try inet4|inet6. Exiting.\n", family);
+  exit(1);
+  /* shouldn't get here */
+  return APR_UNSPEC;
+}
+
 static void
 setup_listen_channels_pollset( void )
 {
@@ -403,17 +426,19 @@ setup_listen_channels_pollset( void )
   for(i = 0; i< num_udp_recv_channels; i++)
     {
       cfg_t *udp_recv_channel;
-      char *mcast_join, *mcast_if, *bindaddr;
+      char *mcast_join, *mcast_if, *bindaddr, *family;
       int port;
       apr_socket_t *socket = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
+      int32_t sock_family = APR_INET;
 
       udp_recv_channel = cfg_getnsec( config_file, "udp_recv_channel", i);
       mcast_join     = cfg_getstr( udp_recv_channel, "mcast_join" );
       mcast_if       = cfg_getstr( udp_recv_channel, "mcast_if" );
       port           = cfg_getint( udp_recv_channel, "port");
       bindaddr       = cfg_getstr( udp_recv_channel, "bind");
+      family         = cfg_getstr( udp_recv_channel, "family");
 
       debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s",
 		  mcast_join? mcast_join:"NULL", 
@@ -423,21 +448,23 @@ setup_listen_channels_pollset( void )
       /* Create a sub-pool for this channel */
       apr_pool_create(&pool, global_context);
 
+      sock_family = get_sock_family(family);
+
       if( mcast_join )
 	{
 	  /* Listen on the specified multicast channel */
-	  socket = create_mcast_server(pool, mcast_join, port, bindaddr, mcast_if );
+	  socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
 	  if(!socket)
 	    {
-	      fprintf(stderr,"Error creating multicast server mcast_join=%s port=%d mcast_if=%s. Exiting.\n",
-		      mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL");
+	      fprintf(stderr,"Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Exiting.\n",
+		      mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
 	      exit(1);
 	    }
 	}
       else
 	{
 	  /* Create a UDP server */
-          socket = create_udp_server( pool, port, bindaddr );
+          socket = create_udp_server( pool, sock_family, port, bindaddr );
           if(!socket)
             {
               fprintf(stderr,"Error creating UDP server on port %d bind=%s. Exiting.\n",
@@ -484,16 +511,18 @@ setup_listen_channels_pollset( void )
   for(i=0; i< num_tcp_accept_channels; i++)
     {
       cfg_t *tcp_accept_channel = cfg_getnsec( config_file, "tcp_accept_channel", i);
-      char *bindaddr, *interface;
+      char *bindaddr, *interface, *family;
       int port, timeout;
       apr_socket_t *socket = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
+      int32_t sock_family;
 
       port           = cfg_getint( tcp_accept_channel, "port");
       bindaddr       = cfg_getstr( tcp_accept_channel, "bind");
       interface      = cfg_getstr( tcp_accept_channel, "interface"); 
       timeout        = cfg_getint( tcp_accept_channel, "timeout");
+      family         = cfg_getstr( tcp_accept_channel, "family");
 
       debug_msg("tcp_accept_channel bind=%s port=%d",
 		  bindaddr? bindaddr: "NULL", port);
@@ -501,8 +530,10 @@ setup_listen_channels_pollset( void )
       /* Create a subpool context */
       apr_pool_create(&pool, global_context);
 
+      sock_family = get_sock_family(family);
+
       /* Create the socket for the channel */
-      socket = create_tcp_server(pool, port, bindaddr, interface);
+      socket = create_tcp_server(pool, sock_family, port, bindaddr, interface);
       if(!socket)
 	{
 	  fprintf(stderr,"Unable to create tcp_accept_channel. Exiting.\n");

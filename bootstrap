@@ -1,5 +1,7 @@
 #!/bin/sh
 # $Id$
+echo "Setting timestamps"
+find . -exec touch -r Makefile.am {} \;
 echo "Bootstrapping libmetrics"
 cd srclib/libmetrics && ./bootstrap
 cd ../..

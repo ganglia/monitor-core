@@ -162,9 +162,10 @@ You can specify as many B<udp_recv_channel> sections as you like within the
 limits of memory and file descriptors.  If B<gmond> is configured B<deaf>
 this attribute will be ignored.
 
-The B<udp_recv_channel> section has a total of seven attributes:
-B<mcast_join>, B<bind>, B<port>, B<mcast_if>, B<allow_ip>
-and B<allow_mask>.
+The B<udp_recv_channel> section has following attributes:
+B<mcast_join>, B<bind>, B<port>, B<mcast_if>, B<family>.  The 
+B<udp_recv_channel> can also have an B<acl> definition (see
+ACCESS CONTROL LISTS below).
 
 For example, the 2.5.x gmond ran with a single udp receive channel...
 
@@ -182,7 +183,24 @@ on the specified B<port>.
 
 You can use the B<bind> attribute to bind to a particular local address.
 
-Note: for multicast, specifying a B<bind> address that equals the B<mcast_join>
+The family address is set to B<inet4> by default.  If you want to bind
+the port to an B<inet6> port, you need to specify that in the family
+attribute.  Ganglia will not allow IPV6=>IPV4 mapping (for portability
+and security reasons).  If you want to listen on both B<inet4> and
+B<inet6> for a particular port, explicitly state it with the following:
+
+  udp_recv_channel {
+    port = 8666
+    family = inet4
+  }
+  udp_recv_channel {
+    port = 8666
+    family = inet6
+  }
+
+If you specify a bind address, the family of that address takes precedence.
+
+Multicast Note: for multicast, specifying a B<bind> address that equals the B<mcast_join>
 address will prevent unicast UDP messages to the same B<port> from being 
 processed.
 
@@ -192,8 +210,9 @@ You can specify as many B<tcp_accept_channel> sections as you like
 within the limitations of memory and file descriptors.  If B<gmond>
 is configured to be B<mute>, then these sections are ignored.
 
-The B<tcp_accept_channel> has six attributes: B<bind>, B<port>, 
-B<interface>, B<allow_ip> and B<allow_mask>.
+The B<tcp_accept_channel> has the following attributes: B<bind>, B<port>, 
+B<interface>, and B<family>.  A B<tcp_accept_channel> may also have
+an B<acl> section specified (see ACCESS CONTROL LISTS below).
 
 For example, 2.5.x gmond would accept connections on a single TCP
 channel.
@@ -207,6 +226,23 @@ local address B<gmond> will bind to for this channel.
 
 The B<port> is an integer than specifies which port to answer 
 requests for data.
+
+The B<family> address is set to B<inet4> by default.  If you want to bind
+the port to an B<inet6> port, you need to specify that in the family
+attribute.  Ganglia will not allow IPV6=>IPV4 mapping (for portability
+and security reasons).  If you want to listen on both B<inet4> and
+B<inet6> for a particular port, explicitly state it with the following:
+
+  udp_recv_channel {
+    port = 8666
+    family = inet4
+  }
+  udp_recv_channel {
+    port = 8666
+    family = inet6
+  }
+
+If you specify a bind address, the family of that address takes precedence.
 
 The B<interface> is not implemented at this time (use B<bind>).
 
