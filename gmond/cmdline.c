@@ -46,6 +46,7 @@ cmdline_parser_print_help (void)
   printf("  -l, --location=STRING  Location of this host in the cluster \n                           'rack,rank,plane'.  (default=`0,0,0')\n");
   printf("  -d, --debug=INT        Debug level. If greater than zero, daemon will stay \n                           in foreground.  (default=`0')\n");
   printf("  -f, --foreground       Run in foreground (don't daemonize)  (default=off)\n");
+  printf("  -t, --default_config   Print the default configuration and exit  (default=\n                           off)\n");
 }
 
 
@@ -75,11 +76,13 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->location_given = 0 ;
   args_info->debug_given = 0 ;
   args_info->foreground_given = 0 ;
+  args_info->default_config_given = 0 ;
 #define clear_args() { \
   args_info->conf_arg = gengetopt_strdup("/etc/gmond.conf") ;\
   args_info->location_arg = gengetopt_strdup("0,0,0") ;\
   args_info->debug_arg = 0 ;\
   args_info->foreground_flag = 0;\
+  args_info->default_config_flag = 0;\
 }
 
   clear_args();
@@ -101,11 +104,12 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "location",	1, NULL, 'l' },
         { "debug",	1, NULL, 'd' },
         { "foreground",	0, NULL, 'f' },
+        { "default_config",	0, NULL, 't' },
         { NULL,	0, NULL, 0 }
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVc:l:d:f", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVc:l:d:ft", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -167,6 +171,17 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             }
           args_info->foreground_given = 1;
           args_info->foreground_flag = !(args_info->foreground_flag);
+          break;
+
+        case 't':	/* Print the default configuration and exit.  */
+          if (args_info->default_config_given)
+            {
+              fprintf (stderr, "%s: `--default_config' (`-t') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              clear_args ();
+              exit (EXIT_FAILURE);
+            }
+          args_info->default_config_given = 1;
+          args_info->default_config_flag = !(args_info->default_config_flag);
           break;
 
 
