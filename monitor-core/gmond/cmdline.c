@@ -47,6 +47,8 @@ cmdline_parser_print_help (void)
   printf("  -d, --debug=INT        Debug level. If greater than zero, daemon will stay \n                           in foreground.  (default=`0')\n");
   printf("  -f, --foreground       Run in foreground (don't daemonize)  (default=off)\n");
   printf("  -t, --default_config   Print the default configuration to stdout and exit  \n                           (default=off)\n");
+  printf("  -m, --metrics          Print the list of metrics this gmond supports  \n                           (default=off)\n");
+  printf("  -b, --bandwidth        Calculate minimum bandwidth use for configuration  \n                           (default=off)\n");
 }
 
 
@@ -77,12 +79,16 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->debug_given = 0 ;
   args_info->foreground_given = 0 ;
   args_info->default_config_given = 0 ;
+  args_info->metrics_given = 0 ;
+  args_info->bandwidth_given = 0 ;
 #define clear_args() { \
   args_info->conf_arg = gengetopt_strdup("/etc/gmond.conf") ;\
   args_info->location_arg = gengetopt_strdup("0,0,0") ;\
   args_info->debug_arg = 0 ;\
   args_info->foreground_flag = 0;\
   args_info->default_config_flag = 0;\
+  args_info->metrics_flag = 0;\
+  args_info->bandwidth_flag = 0;\
 }
 
   clear_args();
@@ -105,11 +111,13 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "debug",	1, NULL, 'd' },
         { "foreground",	0, NULL, 'f' },
         { "default_config",	0, NULL, 't' },
+        { "metrics",	0, NULL, 'm' },
+        { "bandwidth",	0, NULL, 'b' },
         { NULL,	0, NULL, 0 }
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVc:l:d:ft", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVc:l:d:ftmb", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -182,6 +190,28 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             }
           args_info->default_config_given = 1;
           args_info->default_config_flag = !(args_info->default_config_flag);
+          break;
+
+        case 'm':	/* Print the list of metrics this gmond supports.  */
+          if (args_info->metrics_given)
+            {
+              fprintf (stderr, "%s: `--metrics' (`-m') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              clear_args ();
+              exit (EXIT_FAILURE);
+            }
+          args_info->metrics_given = 1;
+          args_info->metrics_flag = !(args_info->metrics_flag);
+          break;
+
+        case 'b':	/* Calculate minimum bandwidth use for configuration.  */
+          if (args_info->bandwidth_given)
+            {
+              fprintf (stderr, "%s: `--bandwidth' (`-b') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              clear_args ();
+              exit (EXIT_FAILURE);
+            }
+          args_info->bandwidth_given = 1;
+          args_info->bandwidth_flag = !(args_info->bandwidth_flag);
           break;
 
 
