@@ -265,7 +265,7 @@ Repeat this step with gmetad.
 Unzip the webfrontend distribution in your website tree. This is often under the directory 
 C</var/www/html>, however look for the variable C<DocumentRoot> in your Apache configuration 
 files to be sure. All the PHP script files use relative URLs in their links, so you may 
-place the C<gmetad-webfrontend/> directory anywhere convenient. I like to unzip *tar.gz 
+place the C<ganglia/> directory anywhere convenient. I like to unzip *tar.gz 
 files with one tar command:
 
   % cd /var/www/html
@@ -303,7 +303,7 @@ you may use NFS to simulate the local existance of the rrds.
 
 Test your installation. Visit the URL:
 
-  http://localhost/gmetad-webfrontend/
+  http://localhost/ganglia/
 
 With a web-browser, where localhost is the address of your webserver.
 
@@ -579,7 +579,7 @@ C<gmetad> has a C<--conf> option to allow you to specify alternate configuration
 
 =head2 PHP Web Frontend Configuration
 
-Most configuration parameters reside in the C<gmetad-webfrontend/conf.php> file. Here you 
+Most configuration parameters reside in the C<ganglia/conf.php> file. Here you 
 may alter the template, gmetad location, RRDtool location, and set the default time range 
 and metrics for graphs.
 
