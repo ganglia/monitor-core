@@ -1,11 +1,11 @@
-#!/usr/local/bin/gengetopt --input
+#!/usr/bin/gengetopt --input
 # See http://www.gnu.org/software/gengetopt/gengetopt.html for details
 
 package "gmetric"
 purpose "The Ganglia Metric Client (gmetric) announces a metric
-value to all Ganglia Monitoring Daemons (gmonds) that are listening
-on the cluster multicast channel."
+on the list of defined send channels defined in a configuration file"
 
+option "conf" c "The configuration file to use for find send channels" string default="/etc/gmond.conf" no
 option "name" n "Name of the metric" string yes
 option "value" v "Value of the metric" string yes
 option "type" t "Either string|int8|uint8|int16|uint16|int32|uint32|float|double" string yes
@@ -13,10 +13,12 @@ option "units" u "Unit of measure for the value e.g. Kilobytes, Celcius" string 
 option "slope" s "Either zero|positive|negative|both" string default="both"  no
 option "tmax" x "The maximum time in seconds between gmetric calls" int default="60" no
 option "dmax" d "The lifetime in seconds of this metric" int default="0" no
-option "mcast_channel" c "Multicast channel to send/receive on" string default="239.2.11.71" no
-option "mcast_port" p "Multicast port to send/receive on" int default="8649" no
-option "mcast_if" i "Network interface to multicast on e.g. 'eth1'" string default="kernel decides" no
-option "mcast_ttl" l "Multicast Time-To-Live (TTL)" int default="1" no
+
+
+#option "mcast_channel" c "Multicast channel to send/receive on" string default="239.2.11.71" no
+#option "mcast_port" p "Multicast port to send/receive on" int default="8649" no
+#option "mcast_if" i "Network interface to multicast on e.g. 'eth1'" string default="kernel decides" no
+#option "mcast_ttl" l "Multicast Time-To-Live (TTL)" int default="1" no
 
 #Usage (a little tutorial)
 #

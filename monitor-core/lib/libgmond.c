@@ -12,6 +12,8 @@
 #include <apr_tables.h>
 #include <apr_net.h>
 
+#include "protocol.h"  /* generated from ./lib/protocol.x */
+
 /***** IMPORTANT ************
 Any changes that you make to this file need to be reconciled in ./conf.pod
 in order for the documentation to be in order with the code 
@@ -431,8 +433,41 @@ cleanup_configuration_file(void)
 }
 #endif
 
+int libgmond_apr_lib_initialized = 0;
+
+Ganglia_pool
+Ganglia_pool_create( Ganglia_pool parent )
+{
+  apr_status_t status;
+  Ganglia_pool pool = NULL;
+
+  if(!libgmond_apr_lib_initialized)
+    {
+      status = apr_initialize();
+      if(status != APR_SUCCESS)
+	{
+	  return NULL;
+	}
+      libgmond_apr_lib_initialized = 1;
+      atexit(apr_terminate);
+    }
+
+  status = apr_pool_create( &pool, parent );
+  if(status != APR_SUCCESS)
+    {
+      return NULL;
+    }
+  return pool;
+}
+
+void
+Ganglia_pool_destroy( Ganglia_pool pool )
+{
+  apr_pool_destroy(pool);
+}
+
 Ganglia_gmond_config
-Ganglia_gmond_config_new(char *path, int fallback_to_default)
+Ganglia_gmond_config_create(char *path, int fallback_to_default)
 {
   Ganglia_gmond_config config = NULL;
   /* Make sure we process ~ in the filename if the shell doesn't */
@@ -477,7 +512,7 @@ Ganglia_gmond_config_new(char *path, int fallback_to_default)
 
 
 Ganglia_udp_send_channels
-Ganglia_udp_send_channels_new( Ganglia_pool context, Ganglia_gmond_config config )
+Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config config )
 {
   Ganglia_udp_send_channels send_channels = NULL;
   int i, num_udp_send_channels = cfg_size( config, "udp_send_channel");
@@ -542,4 +577,36 @@ Ganglia_udp_send_channels_new( Ganglia_pool context, Ganglia_gmond_config config
     }
 
   return send_channels;
+}
+
+
+/* This function will send a datagram to every udp_send_channel specified */
+int
+Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len )
+{
+  apr_status_t status;
+  int i;
+  int num_errors = 0;
+  apr_size_t size;
+
+  if(!buf || len<=0)
+    return 1;
+
+  for(i=0; i< channels->nelts; i++)
+    {
+      apr_socket_t *socket = ((apr_socket_t **)(channels->elts))[i];
+      size   = len;
+      status = apr_socket_send( socket, buf, &size );
+      if(status != APR_SUCCESS)
+	{
+	  num_errors++;
+	}
+    }
+  return num_errors;
+}
+
+int
+Ganglia_send_gmetric(Ganglia_gmetric_message *msg, Ganglia_udp_send_channels channels )
+{
+  return 0;
 }
