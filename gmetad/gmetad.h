@@ -9,6 +9,7 @@
 
 typedef struct
    {
+      unsigned int index;
       char *name;
       unsigned int num_sources;
       g_inet_addr **sources;
@@ -21,48 +22,5 @@ data_source_list_t;
        RC = SYSCALL;         \
    } while (RC < 0 && errno == EINTR);
 #endif
-
-enum data_type
-   {
-      Unknown,
-      String,
-      Int8,
-      Uint8,
-      Int16,
-      Uint16, 
-      Int32,
-      Uint32,
-      Float,
-      Double,
-      Timestamp
-   };
-
-typedef struct
-   {
-      enum data_type Type;
-      union
-         {
-            char *String;
-            char Int8;
-            unsigned char Uint8;
-            short Int16;
-            unsigned short Uint16;
-            long  Int32;
-            unsigned long Uint32;
-            float Float;
-            double Double;
-            unsigned long Timestamp;
-         } data;
-      /* Either Text or data.String
-         is returned depending on the 
-         Type.
-       */
-      char Text[16];
-   }  Value;
-
- 
-          
-           
-
 
 #endif

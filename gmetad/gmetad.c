@@ -8,6 +8,7 @@
 #include <ganglia/hash.h>
 #include <ganglia/llist.h>
 #include <ganglia/net.h>
+#include <ganglia/barrier.h>
 #include "gmetad.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -21,6 +22,8 @@ extern void *data_thread ( void *arg );
 extern void* server_thread(void *);
 extern int parse_config_file ( char *config_file );
 
+long double summary_array[64][MAX_HASH_VALUE];
+
 llist_entry *trusted_hosts = NULL;
 extern int debug_level;
 int xml_port = 8651;
@@ -30,6 +33,7 @@ int server_threads = 2;
 char *rrd_rootdir = "/var/lib/ganglia/rrds";
 char *setuid_username = "nobody";
 int should_setuid = 1;
+unsigned int source_index = 0;
 
 struct gengetopt_args_info args_info;
 
@@ -89,11 +93,13 @@ main ( int argc, char *argv[] )
 
    xml = hash_create( 64 );
    if (! xml)
-      { 
+      {
          err_quit("Unable to create XML hash\n");
       }
 
    parse_config_file ( args_info.conf_arg );
+
+   debug_msg("THERE ARE %d sources", source_index);
 
    /* The rrd_rootdir must be writable by the gmetad process */
    if( should_setuid )
