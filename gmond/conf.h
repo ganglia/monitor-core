@@ -20,15 +20,22 @@ collection_group { \n\
   metric { \n\
     name = \"cpu_user\"  \n\
     absolute_minimum = 0 \n\
+    absolute_maximum = 100 \n\
   } \n\
   metric { \n\
     name = \"cpu_sys\"   \n\
+    absolute_minimum = 0 \n\
+    absolute_maximum = 100 \n\
   } \n\
   metric { \n\
     name = \"cpu_idle\"  \n\
+    absolute_minimum = 0 \n\
+    absolute_maximum = 100 \n\
   } \n\
   metric { \n\
     name = \"cpu_nice\"  \n\
+    absolute_minimum = 0 \n\
+    absolute_maximum = 100 \n\
   } \n\
 } \n\
 "
