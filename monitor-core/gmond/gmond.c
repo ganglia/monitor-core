@@ -47,37 +47,16 @@ static void
 process_configuration_file(void)
 {
   config_file = cfg_init( gmond_opts, CFGF_NOCASE );
-  /*
-   *
-  CFG_BOOL( "absolute_minimum_given", 0, CFGF_NONE ),
-  CFG_FLOAT("absolute_minimum", 0, CFGF_NONE ),
-  CFG_BOOL( "absolute_minimum_alert_given", 0, CFGF_NONE ),
-  CFG_FLOAT("absolute_minimum_alert", 0, CFGF_NONE ),
-  CFG_BOOL( "absolute_minimum_warning_given", 0, CFGF_NONE ),
-  CFG_FLOAT("absolute_minimum_warning", 0, CFGF_NONE ),
-  CFG_BOOL( "absolute_maximum_warning_given", 0, CFGF_NONE ),
-  CFG_FLOAT("absolute_maximum_warning", 0, CFGF_NONE ),
-  CFG_BOOL( "absolute_maximum_alert_given", 0, CFGF_NONE ),
-  CFG_FLOAT("absolute_maximum_alert", 0, CFGF_NONE ),
-  CFG_BOOL( "absolute_maximum_given", 0, CFGF_NONE ),
-  CFG_FLOAT("absolute_maximum", 0, CFGF_NONE ),
-  CFG_BOOL( "relative_change_normal_given", 0, CFGF_NONE),
-  CFG_FLOAT("relative_change_normal", 0, CFGF_NONE),
-  CFG_BOOL( "relative_change_warning_given", 0, CFGF_NONE),
-  CFG_FLOAT("relative_change_warning", 0, CFGF_NONE),
-  CFG_BOOL( "relative_change_alert_given", 0, CFGF_NONE),
-  CFG_FLOAT("relative_change_alert", 0, CFGF_NONE),
-  */
-
-  cfg_set_validate_func( config_file, "collection_group|metric", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
-  cfg_set_validate_func( config_file, "collection_group", metric_validate_func);
+  /* This is annoying but necessary.  I need to know if the value (a float) was set by the user. */
+  cfg_set_validate_func( config_file, "collection_group|metric|absolute_minimum", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group|metric|absolute_minimum_alert", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group|metric|absolute_minimum_warning", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group|metric|absolute_maximum_warning", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group|metric|absolute_maximum_alert", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group|metric|absolute_maximum", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group|metric|relative_change_normal", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group|metric|relative_change_warning", metric_validate_func);
+  cfg_set_validate_func( config_file, "collection_group|metric|relative_change_alert", metric_validate_func);
 
   switch( cfg_parse( config_file, args_info.conf_arg ) )
     {
@@ -403,12 +382,36 @@ udp_send_message( char *buf, int len )
     }
   return num_errors;
 }
+ 
+apr_interval_time_t
+process_collection_groups( void )
+{
+  int i, num_collection_groups = cfg_size( config_file, "collection_group" );
+
+  for(i=0; i< num_collection_groups; i++)
+    {
+      int j, num_metrics;
+
+      cfg_t *group = cfg_getnsec( config_file, "collection_group", i);
+      num_metrics  = cfg_size( group, "metric" );
+
+      for(j=0; j< num_metrics; j++)
+	{
+          cfg_t *metric = cfg_getnsec( group, "metric", j );
+
+	  /* Process the data for this metric */
+	  
+
+	}
+    }
+}
 
 int
 main ( int argc, char *argv[] )
 {
   apr_interval_time_t start, end;
   apr_interval_time_t timeout = 0;
+  apr_interval_time_t next_collection;
 
   /* Mark the time this gmond started */
   started = apr_time_now();
@@ -465,6 +468,7 @@ main ( int argc, char *argv[] )
 
       if(!mute)
 	{
+	  next_collection = process_collection_groups();
 	  /*
 	  check_metric_values()... and if we need to...
 	  udp_send_message( "This is a test", 15);
