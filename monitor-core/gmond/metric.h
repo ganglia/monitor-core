@@ -30,6 +30,7 @@ extern g_val_t cpu_user_func(void);
 extern g_val_t cpu_nice_func(void);
 extern g_val_t cpu_system_func(void);
 extern g_val_t cpu_idle_func(void);
+extern g_val_t cpu_wio_func(void);
 extern g_val_t cpu_aidle_func(void);
 extern g_val_t load_one_func(void);
 extern g_val_t load_five_func(void);
@@ -65,12 +66,13 @@ extern g_val_t phread_sec_func(void);
 extern g_val_t phwrite_sec_func(void);
 extern g_val_t rcache_func(void);
 extern g_val_t wcache_func(void);
-extern g_val_t cpu_wio_func(void);
         
 #endif  
 
 #ifdef LINUX
 
+extern g_val_t cpu_intr_func(void);
+extern g_val_t cpu_sintr_func(void);
 extern g_val_t bytes_in_func(void);
 extern g_val_t bytes_out_func(void);
 extern g_val_t pkts_in_func(void);
@@ -83,9 +85,8 @@ extern g_val_t part_max_used_func(void);
 
 #ifdef HPUX
 
-extern g_val_t cpu_wait_func(void);
 extern g_val_t cpu_intr_func(void);
-extern g_val_t cpu_ssys_func(void);
+extern g_val_t cpu_sintr_func(void);
 extern g_val_t mem_rm_func(void);
 extern g_val_t mem_arm_func(void);
 extern g_val_t mem_vm_func(void);
@@ -146,6 +147,7 @@ KEY(cpu_user),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_nice),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_system),    1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_idle),      5,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_wio),       1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_aidle),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
 KEY(load_one),      1,  15,   20,   50,   70, g_float, "",    "%.2f"},
 KEY(load_five),     1,  30,   40,  275,  325, g_float, "",    "%.2f"},
@@ -171,8 +173,6 @@ KEY(bytes_in),   4096, 15,   20,  60,  90, g_float, "bytes/sec", "%.2f" },
 KEY(pkts_in), 256, 15,   20,  50,  90, g_float, "packets/sec", "%.2f" },
 KEY(pkts_out),   256, 15,   20,  60,  90, g_float, "packets/sec", "%.2f" },
 
-KEY(cpu_wio),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
-
 /* buffer reads and writes, adjusted per second */
 
 KEY(bread_sec),   1,  15,   20,  60,  90, g_float, "", "%.2f" },
@@ -197,6 +197,8 @@ KEY(phwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" }
 
 #ifdef LINUX
 ,
+KEY(cpu_intr),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_sintr),     1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 /* (sacerdoti) Experiments have shown gmon resting bandwidth is around 2KB/s for
  * a 128-node cluster. We set the value thresh of these metrics to double that.
  */
@@ -216,8 +218,7 @@ KEY(part_max_used), 1, 30, 40, 120, 180, g_float, "%", "%.1f" }
 #ifdef HPUX
 ,
 KEY(cpu_intr),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
-KEY(cpu_ssys),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
-KEY(cpu_wait),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_sintr),     1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(mem_arm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
 KEY(mem_rm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
 KEY(mem_avm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
