@@ -15,7 +15,7 @@ daemon_inetd.c daemon_init.c daemon_init.h debug_msg.c debug_msg.h \
 dotconf.c dotconf.h error.c error.h file.c file.h ganglia_priv.h \
 ganglia.c hash.c hash.h inetaddr.c llist.c llist.h \
 mcast.c my_inet_ntop.c my_inet_ntop.h net.h rdwr.c rdwr.h readdir.c readdir.h tcp.c \
-protocol_xdr.c apr_net.c
+protocol_xdr.c protocol.h apr_net.c
 libganglia_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-release $(LT_RELEASE) \
