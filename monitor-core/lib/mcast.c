@@ -99,9 +99,15 @@ g_mcast_socket_ref(g_mcast_socket* s)
 }
 
 int
-g_mcast_socket_connect ( g_mcast_socket *ms )
+g_mcast_socket_connect ( g_mcast_socket *ms, const char*name, int port)
 {
-   return connect ( ms->sockfd, (struct sockaddr *)&(ms->sa), sizeof(struct sockaddr_in) );
+   g_inet_addr *inet_addr;
+
+   inet_addr = g_inetaddr_new( name, port );
+   if ( inet_addr == NULL )
+      return -1;
+
+   return connect ( ms->sockfd, (struct sockaddr *)&(inet_addr->sa), sizeof(struct sockaddr_in) );
 }
 
 int
