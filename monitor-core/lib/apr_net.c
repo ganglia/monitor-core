@@ -199,7 +199,7 @@ mcast_set_if(apr_socket_t *sock, apr_sockaddr_t **sa, const char *ifname)
 }
 #endif
 
-static
+static int
 set_interface( apr_socket_t *sock, struct ifreq *ifreq, char *ifname )
 {
   memset(ifreq, 0, sizeof(struct ifreq));
@@ -210,7 +210,6 @@ set_interface( apr_socket_t *sock, struct ifreq *ifreq, char *ifname )
 apr_status_t
 apr_multicast_join( apr_socket_t *sock, apr_sockaddr_t **sa, char *ifname )
 {
-  apr_status_t status;
   int rval;
 
   switch( (*sa)->sa.sin.sin_family )
@@ -276,6 +275,7 @@ apr_multicast_join( apr_socket_t *sock, apr_sockaddr_t **sa, char *ifname )
       return -1;
     }
 
+  return APR_SUCCESS;
 }
 
 apr_status_t
@@ -284,4 +284,5 @@ apr_multicast_leave( apr_socket_t *sock, apr_sockaddr_t **sa )
   apr_status_t status;
 
   
+  return APR_SUCCESS;
 }
