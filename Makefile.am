@@ -10,9 +10,7 @@ SUBDIRS = lib $(GMETAD_SUBDIR) gmond gmetric
 
 DIST_SUBDIRS = lib gmetad gmond gmetric
 
-EXTRA_DIST = config ganglia.spec ganglia.pod ganglia.man ganglia.html
-
-man3_MANS = ganglia.man
+EXTRA_DIST = config ganglia.spec ganglia.pod ganglia.html mans
 
 ganglia.sub: ganglia.pod
 	sed -e 's/GANGLIA_VERSION/@VERSION@/' < $(srcdir)/ganglia.pod > ganglia.sub
@@ -34,7 +32,7 @@ ChangeLog::
 
 CLEANFILES = ganglia.sub pod2htm*
 
-dist-local: man_create README ganglia.html ChangeLog
+dist-local: README ganglia.html ChangeLog
 
 # This is a symbolic link that needs to be clean'd out
 dist-hook:
