@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ganglia/hash.h>
-#include <ganglia/debug_msg.h>
+#include "hash.h"
+#include "debug_msg.h"
 
 datum_t *
 datum_new ( void *data, size_t size )

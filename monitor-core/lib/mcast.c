@@ -24,7 +24,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
-#include <ganglia/net.h>
+#include "net.h"
 
 g_mcast_socket *
 g_mcast_in ( char *channel, unsigned short port, struct in_addr *mcast_addr )
