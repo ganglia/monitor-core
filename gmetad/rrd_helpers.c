@@ -53,7 +53,7 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
    rrd_update(argc, argv);
    if(rrd_test_error())
       {
-         err_msg("RRD_update: %s", rrd_get_error());
+         err_msg("RRD_update (%s): %s", rrd, rrd_get_error());
          pthread_mutex_unlock( &rrd_mutex );
          return 1;
       } 

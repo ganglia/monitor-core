@@ -55,7 +55,11 @@ typedef enum
       STARTED_TAG,
       UNITS_TAG,
       HOSTS_TAG,
-      METRICS_TAG
+      UP_TAG,
+      DOWN_TAG,
+      METRICS_TAG,
+      SUM_TAG,
+      NUM_TAG
    }
 xml_tag_t;
 
@@ -169,6 +173,7 @@ typedef struct
       hash_t *authority; /* Null for a grid. */
       short int authority_ptr;   /* An authority URL. */
       hash_t *metric_summary;
+      pthread_mutex_t *sum_finished; /* A lock held during summarization. */
       data_source_list_t *ds;
       uint32_t hosts_up;
       uint32_t hosts_down;

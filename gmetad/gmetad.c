@@ -66,7 +66,7 @@ spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
    pthread_attr_init( &attr );
    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
-   pthread_create(&pid, &attr, data_thread, (void *)d);        
+   pthread_create(&pid, &attr, data_thread, (void *)d);
    return 0;
 }
 
@@ -77,6 +77,8 @@ spin_off_the_data_threads( datum_t *key, datum_t *val, void *arg )
 char *
 getfield(char* buf, short int index)
 {
+   if (index<0) return "unspecified";
+
    return (char*) buf+index;
 }
 
@@ -161,12 +163,19 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    if (source->ds->dead)
       return 0;
 
+   /* Need to be sure the source has a complete sum for its metrics. */
+   pthread_mutex_lock(source->sum_finished);
+
+   /*err_msg("Doing root summary for source %s", source->ds->name);*/
+
    /* We know that all these metrics are numeric. */
    rc = hash_foreach(source->metric_summary, sum_metrics, arg);
 
    /* Update the top level root source */
    root.hosts_up += source->hosts_up;
    root.hosts_down += source->hosts_down;
+
+   pthread_mutex_unlock(source->sum_finished);
 
    return rc;
 }
@@ -207,10 +216,10 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
 
    sprintf(num, "%u", metric->num);
 
-   debug_msg("Writing Overall Summary for metric %s", name);
+   /*err_msg("Writing Overall Summary for metric %s (%s)", name, sum);*/
 
    /* Save the data to a round robin database */
-   rc = write_data_to_rrd( NULL, NULL, name, sum, num, 15, time(0));
+   rc = write_data_to_rrd( NULL, NULL, name, sum, num, 15, 0);
    if (rc)
       {
          err_msg("Unable to write meta data for metric %s to RRD", name);
