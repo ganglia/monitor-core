@@ -316,7 +316,6 @@ main ( int argc, char *argv[] )
          err_quit("Unable to create root summary hash");
       }
 
-   fprintf(stderr,"parsing %s\n", args_info.conf_arg);
    parse_config_file ( args_info.conf_arg );
 
     /* If given, use command line directives over config file ones. */
