@@ -15,7 +15,7 @@ B<ganglia> GANGLIA_VERSION
 
 The latest version of this software and document will always be found at 
 http://ganglia.sourceforge.net/.  You are currently reading version
-$Version$ of this document.
+$$Revision$ of this document.
 
 =head1 Synopsis
 
