@@ -22,7 +22,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
-#include <ganglia/net.h>
+#include "net.h"
 
 g_tcp_socket*
 g_tcp_socket_connect (const char* hostname, int port)
