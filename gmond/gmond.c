@@ -71,6 +71,9 @@ is_multicast (const char *ip)
   struct in_addr haddr;
   unsigned int addr;
 
+  if(!ip)
+    return -1;
+
   if(!inet_aton(ip, &haddr))
     return -1;  /* not a valid address */
 
