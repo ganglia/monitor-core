@@ -8,7 +8,7 @@ in order for the documentation to be in order with the code
 
 #include "confuse.h"
 
-#define DEFAULT_CONFIGURATION "\
+#define DEFAULT_GMOND_CONFIGURATION "\
 behavior {                    \n\
   setuid = no                 \n\
   user = nobody               \n\
