@@ -1,4 +1,4 @@
-.TH "confuse.h" 3 "24 May 2004" "Version 2.4" "confuse" \" -*- nroff -*-
+.TH "confuse.h" 3 "17 Oct 2004" "Version 2.5" "confuse" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -55,6 +55,10 @@ confuse.h \- A configuration file parser library.
 .RI "#define \fBCFGF_TITLE\fP   8       /**< option has a title (only applies to section) */"
 .br
 .RI "\fIoption has a title (only applies to section) \fP"
+.ti -1c
+.RI "#define \fBCFGF_NODEFAULT\fP   16  /**< option has no default value */"
+.br
+.RI "\fIoption has no default value \fP"
 .ti -1c
 .RI "#define \fBCFG_SUCCESS\fP   0"
 .br
@@ -151,6 +155,10 @@ confuse.h \- A configuration file parser library.
 .RI "#define \fBCFG_PTR_CB\fP(name, def, flags, parsecb, freecb)   __CFG_PTR(name, def, flags, 0, parsecb, freecb)"
 .br
 .RI "\fIInitialize a user-defined option. \fP"
+.ti -1c
+.RI "#define \fBCFG_PTR_LIST_CB\fP(name, def, flags, parsecb, freecb)   __CFG_PTR(name, def, flags | CFGF_LIST, 0, parsecb, freecb)"
+.br
+.RI "\fIInitialize a list of user-defined options. \fP"
 .ti -1c
 .RI "#define \fBCFG_END\fP()   {0,CFGT_NONE,0,0,CFGF_NONE,0,{0,0,cfg_false,0,0},0,0,0,0,0,0}"
 .br
@@ -280,6 +288,10 @@ confuse.h \- A configuration file parser library.
 .br
 .RI "\fIReturns the value of a boolean option. \fP"
 .ti -1c
+.RI "DLLIMPORT void * \fBcfg_getptr\fP (\fBcfg_t\fP *cfg, const char *name)"
+.br
+.RI "\fIReturns the value of a user-defined option (void pointer). \fP"
+.ti -1c
 .RI "DLLIMPORT \fBcfg_t\fP * \fBcfg_opt_getnsec\fP (\fBcfg_opt_t\fP *opt, unsigned int index)"
 .br
 .RI "\fIReturns the value of a section option, given a \fBcfg_opt_t\fP pointer. \fP"
@@ -311,6 +323,14 @@ confuse.h \- A configuration file parser library.
 .RI "DLLIMPORT const char *__export \fBcfg_title\fP (\fBcfg_t\fP *cfg)"
 .br
 .RI "\fIReturn the title of a section. \fP"
+.ti -1c
+.RI "DLLIMPORT const char * \fBcfg_name\fP (\fBcfg_t\fP *cfg)"
+.br
+.RI "\fIReturn the name of a section. \fP"
+.ti -1c
+.RI "DLLIMPORT const char * \fBcfg_opt_name\fP (\fBcfg_opt_t\fP *opt)"
+.br
+.RI "\fIReturn the name of an option. \fP"
 .ti -1c
 .RI "DLLIMPORT int __export \fBcfg_include\fP (\fBcfg_t\fP *cfg, \fBcfg_opt_t\fP *opt, int argc, const char **argv)"
 .br
@@ -429,7 +449,7 @@ Terminate list of options. This must be the last initializer in the option list.
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, \fBreread.c\fP, and \fBsimple.c\fP.
+\fBreread.c\fP, and \fBsimple.c\fP.
 .SS "#define CFG_FUNC(name, func)   {name,CFGT_FUNC,0,0,CFGF_NONE,0,{0,0,cfg_false,0,0},func,0,0,0,0,0}"
 .PP
 Initialize a function. \fBParameters:\fP
@@ -445,10 +465,29 @@ Initialize a function. \fBParameters:\fP
 .RE
 .PP
 
+.SS "#define CFG_PTR_CB(name, def, flags, parsecb, freecb)   __CFG_PTR(name, def, flags, 0, parsecb, freecb)"
 .PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
+Initialize a user-defined option. CFG_PTR options can only be used together with a value parsing callback.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIname\fP The name of the option 
+.br
+\fIdef\fP Default value 
+.br
+\fIflags\fP Flags 
+.br
+\fIparsecb\fP Value parsing callback 
+.br
+\fIfreecb\fP Memory release function
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBcfg_callback_t\fP, \fBcfg_free_func_t\fP 
+.RE
+.PP
+
 .SS "#define CFG_SEC(name, opts, flags)   {name,CFGT_SEC,0,0,flags,opts,{0,0,cfg_false,0,0},0,0,0,0,0,0}"
 .PP
 Initialize a section. \fBParameters:\fP
@@ -464,7 +503,7 @@ Initialize a section. \fBParameters:\fP
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, and \fBreread.c\fP.
+\fBreread.c\fP.
 .SS "#define CFG_SIMPLE_STR(name, svalue)   __CFG_STR(name, 0, CFGF_NONE, svalue, 0)"
 .PP
 Initialize a 'simple' string option. 'Simple' options (in lack of a better expression) does not support lists of values or multiple sections. LibConfuse will store the value of a simple option in the user-defined location specified by the value parameter in the initializer. Simple options are not stored in the \fBcfg_t\fP context, only a pointer. Sections can not be initialized as a 'simple' option.
@@ -658,10 +697,6 @@ Add values for a list option. The new values are appended to any current values 
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT void __export cfg_error (\fBcfg_t\fP * cfg, const char * fmt,  ...)"
 .PP
 Show a parser error. Any user-defined error reporting function is called. 
@@ -672,17 +707,13 @@ Show a parser error. Any user-defined error reporting function is called.
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT void __export cfg_free (\fBcfg_t\fP * cfg)"
 .PP
 Free a \fBcfg_t\fP context. All memory allocated by the \fBcfg_t\fP context structure are freed, and can't be used in any further cfg_* calls. 
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, \fBreread.c\fP, and \fBsimple.c\fP.
+\fBreread.c\fP, and \fBsimple.c\fP.
 .SS "DLLIMPORT void __export cfg_free_value (\fBcfg_opt_t\fP * opt)"
 .PP
 Free the memory allocated for the values of a given option. Only the values are freed, not the option itself (it is freed by \fBcfg_free()\fP).
@@ -708,10 +739,6 @@ The requested value is returned. If the option was not set in the configuration 
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT double __export cfg_getfloat (\fBcfg_t\fP * cfg, const char * name)"
 .PP
 Returns the value of a floating point option. \fBParameters:\fP
@@ -747,7 +774,7 @@ The requested value is returned. If the option was not set in the configuration 
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, and \fBreread.c\fP.
+\fBreread.c\fP.
 .SS "DLLIMPORT \fBcfg_bool_t\fP __export cfg_getnbool (\fBcfg_t\fP * cfg, const char * name, unsigned int index)"
 .PP
 Indexed version of \fBcfg_getbool()\fP, used for lists. \fBParameters:\fP
@@ -782,10 +809,6 @@ Indexed version of \fBcfg_getfloat()\fP, used for lists. \fBParameters:\fP
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT long int __export cfg_getnint (\fBcfg_t\fP * cfg, const char * name, unsigned int index)"
 .PP
 Indexed version of \fBcfg_getint()\fP, used for lists. \fBParameters:\fP
@@ -803,10 +826,6 @@ Indexed version of \fBcfg_getint()\fP, used for lists. \fBParameters:\fP
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT \fBcfg_t\fP* __export cfg_getnsec (\fBcfg_t\fP * cfg, const char * name, unsigned int index)"
 .PP
 Indexed version of \fBcfg_getsec()\fP, used for sections with the CFGF_MULTI flag set. \fBParameters:\fP
@@ -827,7 +846,7 @@ Indexed version of \fBcfg_getsec()\fP, used for sections with the CFGF_MULTI fla
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, and \fBreread.c\fP.
+\fBreread.c\fP.
 .SS "DLLIMPORT char* __export cfg_getnstr (\fBcfg_t\fP * cfg, const char * name, unsigned int index)"
 .PP
 Indexed version of \fBcfg_getstr()\fP, used for lists. \fBParameters:\fP
@@ -845,10 +864,6 @@ Indexed version of \fBcfg_getstr()\fP, used for lists. \fBParameters:\fP
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT \fBcfg_opt_t\fP* __export cfg_getopt (\fBcfg_t\fP * cfg, const char * name)"
 .PP
 Return an option given it's name. \fBParameters:\fP
@@ -861,6 +876,21 @@ Return an option given it's name. \fBParameters:\fP
 \fBReturns:\fP
 .RS 4
 Returns a pointer to the option. If the option isn't declared, libConfuse will print an error message and return 0. 
+.RE
+.PP
+
+.SS "DLLIMPORT void* cfg_getptr (\fBcfg_t\fP * cfg, const char * name)"
+.PP
+Returns the value of a user-defined option (void pointer). \fBParameters:\fP
+.RS 4
+\fIcfg\fP The configuration file context. 
+.br
+\fIname\fP The name of the option. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+The requested value is returned. If the option was not set in the configuration file, the default value given in the corresponding \fBcfg_opt_t\fP structure is returned. It is an error to try to get an option that isn't declared. 
 .RE
 .PP
 
@@ -881,10 +911,6 @@ The requested section is returned. If no section is found with that name, 0 is r
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT char* __export cfg_getstr (\fBcfg_t\fP * cfg, const char * name)"
 .PP
 Returns the value of a string option. \fBParameters:\fP
@@ -903,7 +929,7 @@ The requested value is returned. If the option was not set in the configuration 
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, and \fBreread.c\fP.
+\fBreread.c\fP.
 .SS "DLLIMPORT \fBcfg_t\fP* __export cfg_gettsec (\fBcfg_t\fP * cfg, const char * name, const char * title)"
 .PP
 Return a section given the title, used for section with the CFGF_TITLE flag set. \fBParameters:\fP
@@ -946,7 +972,20 @@ A configuration context structure. This pointer is passed to almost all other fu
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, \fBreread.c\fP, and \fBsimple.c\fP.
+\fBreread.c\fP, and \fBsimple.c\fP.
+.SS "DLLIMPORT const char* cfg_name (\fBcfg_t\fP * cfg)"
+.PP
+Return the name of a section. \fBParameters:\fP
+.RS 4
+\fIcfg\fP The configuration file context. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Returns the title, or 0 if there is no title. This string should not be modified. 
+.RE
+.PP
+
 .SS "DLLIMPORT \fBcfg_bool_t\fP cfg_opt_getnbool (\fBcfg_opt_t\fP * opt, unsigned int index)"
 .PP
 Returns the value of a boolean option, given a \fBcfg_opt_t\fP pointer. \fBParameters:\fP
@@ -992,10 +1031,6 @@ Returns the value of an integer option, given a \fBcfg_opt_t\fP pointer. \fBPara
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT \fBcfg_t\fP* cfg_opt_getnsec (\fBcfg_opt_t\fP * opt, unsigned int index)"
 .PP
 Returns the value of a section option, given a \fBcfg_opt_t\fP pointer. \fBParameters:\fP
@@ -1011,10 +1046,6 @@ Returns the value of a section option, given a \fBcfg_opt_t\fP pointer. \fBParam
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT char* cfg_opt_getnstr (\fBcfg_opt_t\fP * opt, unsigned int index)"
 .PP
 Returns the value of a string option, given a \fBcfg_opt_t\fP pointer. \fBParameters:\fP
@@ -1042,6 +1073,19 @@ Returns the value of a section option, given a \fBcfg_opt_t\fP pointer and the t
 \fBSee also:\fP
 .RS 4
 \fBcfg_gettsec\fP 
+.RE
+.PP
+
+.SS "DLLIMPORT const char* cfg_opt_name (\fBcfg_opt_t\fP * opt)"
+.PP
+Return the name of an option. \fBParameters:\fP
+.RS 4
+\fIopt\fP The option structure (eg, as returned from \fBcfg_getopt()\fP) 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Returns the title, or 0 if there is no title. This string should not be modified. 
 .RE
 .PP
 
@@ -1164,10 +1208,6 @@ Return the number of values this option has. If no default value is given for th
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT int __export cfg_parse (\fBcfg_t\fP * cfg, const char * filename)"
 .PP
 Parse a configuration file. Tilde expansion is performed on the filename before it is opened. After a configuration file has been initialized (with \fBcfg_init()\fP) and parsed (with \fBcfg_parse()\fP), the values can be read with the cfg_getXXX functions.
@@ -1188,7 +1228,7 @@ On success, CFG_SUCCESS is returned. If the file couldn't be opened for reading,
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, \fBreread.c\fP, and \fBsimple.c\fP.
+\fBreread.c\fP, and \fBsimple.c\fP.
 .SS "DLLIMPORT int __export cfg_parse_boolean (const char * s)"
 .PP
 Parse a boolean option string. Accepted 'true' values are 'true', 'on' and 'yes', and accepted 'false' values are 'false', 'off' and 'no'.
@@ -1255,7 +1295,7 @@ Print the options and values to a file. Note that options in any included file a
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, and \fBsimple.c\fP.
+\fBsimple.c\fP.
 .SS "DLLIMPORT void cfg_print_indent (\fBcfg_t\fP * cfg, FILE * fp, int indent)"
 .PP
 Print the options and values to a file. Same as cfg_print, but with the indentation level specified. 
@@ -1291,10 +1331,6 @@ Set a print callback function for an option given its name. \fBParameters:\fP
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT \fBcfg_validate_callback_t\fP cfg_set_validate_func (\fBcfg_t\fP * cfg, const char * name, \fBcfg_validate_callback_t\fP vf)"
 .PP
 Register a validating callback function for an option. \fBParameters:\fP
@@ -1312,10 +1348,6 @@ Register a validating callback function for an option. \fBParameters:\fP
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SS "DLLIMPORT void __export cfg_setbool (\fBcfg_t\fP * cfg, const char * name, \fBcfg_bool_t\fP value)"
 .PP
 Set the value of a boolean option given its name. \fBParameters:\fP
@@ -1439,7 +1471,7 @@ Set the value of a string option given its name. \fBParameters:\fP
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, and \fBsimple.c\fP.
+\fBsimple.c\fP.
 .SS "DLLIMPORT unsigned int __export cfg_size (\fBcfg_t\fP * cfg, const char * name)"
 .PP
 Return the number of values this option has. If no default value is given for the option and no value was found in the config file, 0 will be returned (ie, the option value is not set at all).
@@ -1457,7 +1489,7 @@ Note that there is no way to *not* specify a default value for integers, floats 
 .PP
 \fBExamples: \fP
 .in +1c
-\fBcfgtest.c\fP, and \fBreread.c\fP.
+\fBreread.c\fP.
 .SS "DLLIMPORT char* __export cfg_tilde_expand (const char * filename)"
 .PP
 Does tilde expansion (~ -> $HOME) on the filename. \fBReturns:\fP
@@ -1479,10 +1511,6 @@ Returns the title, or 0 if there is no title. This string should not be modified
 .RE
 .PP
 
-.PP
-\fBExamples: \fP
-.in +1c
-\fBcfgtest.c\fP.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for confuse from the source code.
