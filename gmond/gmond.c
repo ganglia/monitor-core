@@ -1,6 +1,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "ganglia.h" /* for the libgmond messaging */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -56,7 +57,7 @@ extern char *default_gmond_configuration;
 int host_dmax = 0;
 
 /* The array for outgoing UDP message channels */
-apr_array_header_t *udp_send_array = NULL;
+apr_array_header_t *udp_send_channels = NULL;
 /* TODO: The array for outgoing TCP message channels (later) */
 apr_array_header_t *tcp_send_array = NULL;
 
@@ -150,34 +151,34 @@ cleanup_configuration_file(void)
   cfg_free( config_file );
 }
 
-static void
-process_configuration_file(void)
+/* TODO: move to libgmond gmond_opts is needed... default_gmond_configuration is needed */
+Ganglia_gmond_config
+Ganglia_gmond_config_new(char *path, int fallback_to_default)
 {
+  Ganglia_gmond_config config = NULL;
   /* Make sure we process ~ in the filename if the shell doesn't */
-  char *tilde_expanded = cfg_tilde_expand( args_info.conf_arg );
-  config_file = cfg_init( gmond_opts, CFGF_NOCASE );
-  cfg_t *tmp;
+  char *tilde_expanded = cfg_tilde_expand( path );
+  config = cfg_init( gmond_opts, CFGF_NOCASE );
 
-  switch( cfg_parse( config_file, tilde_expanded ) )
+  switch( cfg_parse( config, tilde_expanded ) )
     {
     case CFG_FILE_ERROR:
       /* Unable to open file so we'll go with the configuration defaults */
-      fprintf(stderr,"Configuration file '%s' not found.\n", args_info.conf_arg);
-      if(args_info.conf_given)
+      fprintf(stderr,"Configuration file '%s' not found.\n", tilde_expanded);
+      if(!fallback_to_default)
 	{
-	  /* If they explicitly stated a configuration file exit with error... */
+	  /* Don't fallback to the default configuration.. just exit. */
 	  exit(1);
 	}
       /* .. otherwise use our default configuration */
-      fprintf(stderr,"Using defaults.\n");
-      if(cfg_parse_buf(config_file, default_gmond_configuration) == CFG_PARSE_ERROR)
+      if(cfg_parse_buf(config, default_gmond_configuration) == CFG_PARSE_ERROR)
 	{
 	  fprintf(stderr,"Your default configuration buffer failed to parse. Exiting.\n");
           exit(1);
 	}
       break;
     case CFG_PARSE_ERROR:
-      fprintf(stderr,"Parse error for '%s'\n", args_info.conf_arg);
+      fprintf(stderr,"Parse error for '%s'\n", tilde_expanded );
       exit(1);
     case CFG_SUCCESS:
       break;
@@ -186,6 +187,21 @@ process_configuration_file(void)
       exit(1);
     }
 
+  if(tilde_expanded)
+    free(tilde_expanded);
+
+  atexit(cleanup_configuration_file);
+  return config;
+}
+
+/* this is just a temporary function */
+void
+process_configuration_file(void)
+{
+  cfg_t *tmp;
+
+  /* this is a global for now */
+  config_file = Ganglia_gmond_config_new( args_info.conf_arg, !args_info.conf_given );
 
   tmp = cfg_getsec( config_file, "globals");
   /* Get the maximum UDP message size */
@@ -194,11 +210,6 @@ process_configuration_file(void)
   gexec_on            = cfg_getbool(tmp, "gexec");
   /* Get the host dmax ... */
   host_dmax           = cfg_getint( tmp, "host_dmax");
-
-  /* Free memory for this configuration file at exit */
-  if(tilde_expanded) 
-    free(tilde_expanded);
-  atexit(cleanup_configuration_file);
 }
 
 static void
@@ -755,18 +766,19 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   Ganglia_message_save( hostdata, &msg );
 }
 
-static apr_array_header_t *
-setup_udp_send_array( apr_pool_t *context, cfg_t *config )
+/* TODO: put in libgmond */
+Ganglia_udp_send_channels
+Ganglia_udp_send_channels_new( Ganglia_pool context, Ganglia_gmond_config config )
 {
-  apr_array_header_t *send_array = NULL;
+  Ganglia_udp_send_channels send_channels = NULL;
   int i, num_udp_send_channels = cfg_size( config, "udp_send_channel");
 
   /* Return null if there are no send channels specified */
   if(num_udp_send_channels <= 0)
-    return send_array;
+    return send_channels;
 
   /* Create my UDP send array */
-  send_array = apr_array_make( context, num_udp_send_channels, 
+  send_channels = apr_array_make( context, num_udp_send_channels, 
 				   sizeof(apr_socket_t *));
 
   for(i = 0; i< num_udp_send_channels; i++)
@@ -817,10 +829,10 @@ setup_udp_send_array( apr_pool_t *context, cfg_t *config )
 	}
 
       /* Add the socket to the array */
-      *(apr_socket_t **)apr_array_push(send_array) = socket;
+      *(apr_socket_t **)apr_array_push(send_channels) = socket;
     }
 
-  return send_array;
+  return send_channels;
 }
 
 static apr_status_t
@@ -1195,8 +1207,9 @@ poll_listen_channels( apr_interval_time_t timeout, apr_time_t now)
 
 
 /* This function will send a datagram to every udp_send_channel specified */
+/* TODO: add to libgmond */
 static int
-udp_send_message( char *buf, int len )
+Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len )
 {
   apr_status_t status;
   int i;
@@ -1207,9 +1220,9 @@ udp_send_message( char *buf, int len )
   if(!buf || mute)
     return 1;
 
-  for(i=0; i< udp_send_array->nelts; i++)
+  for(i=0; i< channels->nelts; i++)
     {
-      apr_socket_t *socket = ((apr_socket_t **)(udp_send_array->elts))[i];
+      apr_socket_t *socket = ((apr_socket_t **)(channels->elts))[i];
       size   = len;
       status = apr_socket_send( socket, buf, &size );
       if(status != APR_SUCCESS)
@@ -1230,7 +1243,7 @@ tcp_send_message( char *buf, int len )
 static int
 send_message( char *buf, int len )
 {
-  return udp_send_message( buf, len ) + tcp_send_message( buf, len );
+  return Ganglia_udp_send_message(udp_send_channels, buf, len ) + tcp_send_message( buf, len );
 }
 
 static Ganglia_metric_callback *
@@ -1712,7 +1725,7 @@ main ( int argc, char *argv[] )
     {
       setup_metric_callbacks();
       setup_collection_groups();
-      udp_send_array = setup_udp_send_array( global_context, config_file );
+      udp_send_channels = Ganglia_udp_send_channels_new( global_context, config_file );
     }
 
   /* Create the host hash table */

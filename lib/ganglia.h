@@ -33,6 +33,12 @@
 #define END_C_DECLS
 #endif
 
+
+typedef struct apr_pool_t *         Ganglia_pool;
+typedef struct cfg_t *              Ganglia_gmond_config;
+typedef struct apr_array_header_t * Ganglia_udp_send_channels;
+
+
 extern int gexec_errno;
 
 #define GEXEC_TIMEOUT 60
