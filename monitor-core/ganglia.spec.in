@@ -85,7 +85,7 @@ fi
 %install
 %__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 %__mkdir -p $RPM_BUILD_ROOT/usr/include/ganglia
-%__cp -f %{_builddir}/%{name}-%{version}/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
+%__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
 %__make install
 
 ##
