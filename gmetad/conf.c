@@ -108,8 +108,6 @@ static DOTCONF_CB(cb_data_source)
    char *p, *str, *port;
    char *endptr;
 
-   fprintf(stderr, "Datasource = [%s]\n", cmd->data.list[0]);
-
    dslist = (data_source_list_t *) malloc ( sizeof(data_source_list_t) );
    if(!dslist)
       {
@@ -131,10 +129,6 @@ static DOTCONF_CB(cb_data_source)
       }
    else
       dslist->step = 15;
-
-   fprintf(stderr, "Polling interval for %s is %u sec.", dslist->name, dslist->step);
-
-   fprintf(stderr, "There are %d arguments\n", cmd->arg_count);
 
    dslist->names = (char **) malloc( (cmd->arg_count - 1) * sizeof(char *) );
    if (! dslist->names )
@@ -161,8 +155,6 @@ static DOTCONF_CB(cb_data_source)
             {
                port = strdup("8649");
             }
-
-         fprintf(stderr,"name=%s port=%s\n", str, port); 
 
          dslist->names[dslist->num_sources] = strdup(str);
          dslist->ports[dslist->num_sources] = port;
@@ -311,8 +303,6 @@ parse_config_file ( char *config_file )
          err_quit("Unable to open config file: %s\n", config_file);
       }
 
-
-   debug_msg("processing contents of config file %s", config_file );
    configfile->errorhandler = (dotconf_errorhandler_t) errorhandler;
 
    if (dotconf_command_loop(configfile) == 0)
