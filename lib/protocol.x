@@ -1,3 +1,5 @@
+#define UDP_HEADER_SIZE 28
+
 enum Ganglia_value_types {
   GANGLIA_VALUE_UNKNOWN,
   GANGLIA_VALUE_STRING, 
@@ -121,6 +123,7 @@ struct Ganglia_25metric
    string units<32>;
    string slope<32>;
    string fmt<32>;
+   int msg_size;
 };
 
 #ifdef RPC_HDR
@@ -130,42 +133,42 @@ struct Ganglia_25metric
 
 #ifdef RPC_XDR
 % Ganglia_25metric ganglia_25_metric_array[GANGLIA_NUM_25_METRICS] = {
-%   {   metric_user_defined, "gmetric",          0,    GANGLIA_VALUE_UNKNOWN,  "", ""  },
-%   {   metric_cpu_num,      "cpu_num",         1200,    GANGLIA_VALUE_UNSIGNED_SHORT,   "CPUs",       "zero",  "%hu"},
-%   {   metric_cpu_speed,    "cpu_speed",       1200,    GANGLIA_VALUE_UNSIGNED_INT,     "MHz",        "zero",  "%hu"},
-%   {   metric_mem_total,    "mem_total",       1200,    GANGLIA_VALUE_UNSIGNED_INT,     "KB",         "zero",  "%u"},
-%   {   metric_swap_total,   "swap_total",      1200,    GANGLIA_VALUE_UNSIGNED_INT,     "KB",         "zero",  "%u"},
-%   {   metric_boottime,     "boottime",        1200,    GANGLIA_VALUE_UNSIGNED_INT,     "s",          "zero",  "%u"},
-%   {   metric_sys_clock,    "sys_clock",       1200,    GANGLIA_VALUE_UNSIGNED_INT,     "s",          "zero",  "%u"},
-%   {   metric_machine_type, "machine_type",    1200,    GANGLIA_VALUE_STRING,           "",           "zero",  "%s"},
-%   {   metric_os_name,      "os_name",         1200,    GANGLIA_VALUE_STRING,           "",           "zero",  "%s"},
-%   {   metric_os_release,   "os_release",      1200,    GANGLIA_VALUE_STRING,           "",           "zero",  "%s"},
-%   {   metric_cpu_user,     "cpu_user",        90,    GANGLIA_VALUE_FLOAT,            "%",          "both",  "%.1f"},
-%   {   metric_cpu_nice,     "cpu_nice",        90,    GANGLIA_VALUE_FLOAT,            "%",          "both",  "%.1f"},
-%   {   metric_cpu_system,   "cpu_system",      90,    GANGLIA_VALUE_FLOAT,            "%",          "both",  "%.1f"},
-%   {   metric_cpu_idle,     "cpu_idle",        90,    GANGLIA_VALUE_FLOAT,            "%",          "both",  "%.1f"},
-%   {   metric_cpu_aidle,    "cpu_aidle",     3800,    GANGLIA_VALUE_FLOAT,            "%",          "both",  "%.1f"},
-%   {   metric_load_one,     "load_one",        70,    GANGLIA_VALUE_FLOAT,            "",           "both",  "%.2f"},
-%   {   metric_load_five,    "load_five",      325,    GANGLIA_VALUE_FLOAT,            "",           "both",  "%.2f"},
-%   {   metric_load_fifteen, "load_fifteen",   950,    GANGLIA_VALUE_FLOAT,            "",           "both",  "%.2f"},
-%   {   metric_proc_run,     "proc_run",       950,    GANGLIA_VALUE_UNSIGNED_INT,     "",           "both",  "%u"},
-%   {   metric_proc_total,   "proc_total",     950,    GANGLIA_VALUE_UNSIGNED_INT,     "",           "both",  "%u"},
-%   {   metric_mem_free,     "mem_free",       180,    GANGLIA_VALUE_UNSIGNED_INT,     "KB",         "both",  "%u"},
-%   {   metric_mem_shared,   "mem_shared",     180,    GANGLIA_VALUE_UNSIGNED_INT,     "KB",         "both",  "%u"},
-%   {   metric_mem_buffers,  "mem_buffers",    180,    GANGLIA_VALUE_UNSIGNED_INT,     "KB",         "both",  "%u"},
-%   {   metric_mem_cached,   "mem_cached",     180,    GANGLIA_VALUE_UNSIGNED_INT,     "KB",         "both",  "%u"},
-%   {   metric_swap_free,    "swap_free",      180,    GANGLIA_VALUE_UNSIGNED_INT,     "KB",         "both",  "%u"},
-%   {   metric_gexec,        "gexec",          300,    GANGLIA_VALUE_STRING,           "",           "zero",  "%s"},
-%   {   metric_heartbeat,    "heartbeat",       20,    GANGLIA_VALUE_UNSIGNED_INT,     "",           "",      "%u"},
-%   {   metric_mtu,          "mtu",           1200,    GANGLIA_VALUE_UNSIGNED_INT,     "",           "both",  "%u"},
-%   {   metric_location,     "location",      1200,    GANGLIA_VALUE_STRING,           "(x,y,z)",    "",      "%s"},
-%   {   metric_bytes_out,    "bytes_out",      300,    GANGLIA_VALUE_FLOAT,            "bytes/sec",  "both",  "%.2f"},
-%   {   metric_bytes_in,     "bytes_in",       300,    GANGLIA_VALUE_FLOAT,            "bytes/sec",  "both",  "%.2f"},
-%   {   metric_pkts_in,      "pkts_in",        300,    GANGLIA_VALUE_FLOAT,            "packets/sec","both",  "%.2f"},
-%   {   metric_pkts_out,     "pkts_out",       300,    GANGLIA_VALUE_FLOAT,            "packets/sec","both",  "%.2f"},
-%   {   metric_disk_total,   "disk_total",    1200,    GANGLIA_VALUE_DOUBLE,           "GB",         "both",  "%.3f"},
-%   {   metric_disk_free,    "disk_free",      180,    GANGLIA_VALUE_DOUBLE,           "GB",         "both",  "%.3f"},
-%   {   metric_part_max_used,"part_max_used",  180,    GANGLIA_VALUE_FLOAT,            "%",          "both",  "%.1f"}
+%  {metric_user_defined, "gmetric",       0,  GANGLIA_VALUE_UNKNOWN,  "", "", 0  },
+%  {metric_cpu_num,      "cpu_num",    1200,  GANGLIA_VALUE_UNSIGNED_SHORT, "CPUs",       "zero",  "%hu", UDP_HEADER_SIZE+8},
+%  {metric_cpu_speed,    "cpu_speed",  1200,  GANGLIA_VALUE_UNSIGNED_INT,   "MHz",        "zero",  "%hu", UDP_HEADER_SIZE+8},
+%  {metric_mem_total,    "mem_total",  1200,  GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "zero",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_swap_total,   "swap_total", 1200,  GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "zero",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_boottime,     "boottime",   1200,  GANGLIA_VALUE_UNSIGNED_INT,   "s",          "zero",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_sys_clock,    "sys_clock",  1200,  GANGLIA_VALUE_UNSIGNED_INT,   "s",          "zero",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_machine_type, "machine_type",1200, GANGLIA_VALUE_STRING,         "",           "zero",  "%s",  UDP_HEADER_SIZE+32},
+%  {metric_os_name,      "os_name",    1200,  GANGLIA_VALUE_STRING,         "",           "zero",  "%s",  UDP_HEADER_SIZE+32},
+%  {metric_os_release,   "os_release", 1200,  GANGLIA_VALUE_STRING,         "",           "zero",  "%s",  UDP_HEADER_SIZE+32},
+%  {metric_cpu_user,     "cpu_user",     90,  GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_cpu_nice,     "cpu_nice",     90,  GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_cpu_system,   "cpu_system",   90,  GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_cpu_idle,     "cpu_idle",     90,  GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_cpu_aidle,    "cpu_aidle",  3800,  GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_load_one,     "load_one",     70,  GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_load_five,    "load_five",   325,  GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_load_fifteen, "load_fifteen",950,  GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_proc_run,     "proc_run",    950,  GANGLIA_VALUE_UNSIGNED_INT,   "",           "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_proc_total,   "proc_total",  950,  GANGLIA_VALUE_UNSIGNED_INT,   "",           "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_mem_free,     "mem_free",    180,  GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_mem_shared,   "mem_shared",  180,  GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_mem_buffers,  "mem_buffers", 180,  GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_mem_cached,   "mem_cached",  180,  GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_swap_free,    "swap_free",   180,  GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_gexec,        "gexec",       300,  GANGLIA_VALUE_STRING,         "",           "zero",  "%s",  UDP_HEADER_SIZE+32},
+%  {metric_heartbeat,    "heartbeat",    20,  GANGLIA_VALUE_UNSIGNED_INT,   "",           "",      "%u",  UDP_HEADER_SIZE+8},
+%  {metric_mtu,          "mtu",        1200,  GANGLIA_VALUE_UNSIGNED_INT,   "",           "both",  "%u",  UDP_HEADER_SIZE+8},
+%  {metric_location,     "location",   1200,  GANGLIA_VALUE_STRING,         "(x,y,z)",    "",      "%s",  UDP_HEADER_SIZE+12},
+%  {metric_bytes_out,    "bytes_out",   300,  GANGLIA_VALUE_FLOAT,          "bytes/sec",  "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_bytes_in,     "bytes_in",    300,  GANGLIA_VALUE_FLOAT,          "bytes/sec",  "both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_pkts_in,      "pkts_in",     300,  GANGLIA_VALUE_FLOAT,          "packets/sec","both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_pkts_out,     "pkts_out",    300,  GANGLIA_VALUE_FLOAT,          "packets/sec","both",  "%.2f",UDP_HEADER_SIZE+8},
+%  {metric_disk_total,   "disk_total", 1200,  GANGLIA_VALUE_DOUBLE,         "GB",         "both",  "%.3f",UDP_HEADER_SIZE+16},
+%  {metric_disk_free,    "disk_free",   180,  GANGLIA_VALUE_DOUBLE,         "GB",         "both",  "%.3f",UDP_HEADER_SIZE+16},
+%  {metric_part_max_used,"part_max_used",180, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8}
 % };
 %
 % Ganglia_25metric *
@@ -195,12 +198,3 @@ struct Ganglia_25metric
 %   return NULL;
 % }
 #endif
-
-
-
-           
-
-
-
-
-

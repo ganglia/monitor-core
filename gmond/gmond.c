@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -41,8 +44,16 @@ int deaf;
 int mute;
 /* Cluster tag boolean */
 int cluster_tag = 0;
+/* This host's location */
+char *host_location = NULL;
+/* Boolean. Will this host received gexec requests? */
+int gexec_on = 0;
 /* This is tweakable by globals{max_udp_msg_len=...} */
 int max_udp_message_len = 1472;
+/* The default configuration for gmond.  Found in conf.c. */
+extern char *default_gmond_configuration;
+/* The number of seconds to hold "dead" hosts in the hosts hash */
+int host_dmax = 0;
 
 /* The array for outgoing UDP message channels */
 apr_array_header_t *udp_send_array = NULL;
@@ -155,7 +166,7 @@ process_configuration_file(void)
 	}
       /* .. otherwise use our default configuration */
       fprintf(stderr,"Using defaults.\n");
-      if(cfg_parse_buf(config_file, DEFAULT_GMOND_CONFIGURATION) == CFG_PARSE_ERROR)
+      if(cfg_parse_buf(config_file, default_gmond_configuration) == CFG_PARSE_ERROR)
 	{
 	  fprintf(stderr,"Your default configuration buffer failed to parse. Exiting.\n");
           exit(1);
@@ -171,9 +182,14 @@ process_configuration_file(void)
       exit(1);
     }
 
-  /* Get the maximum UDP message size */
+
   tmp = cfg_getsec( config_file, "globals");
+  /* Get the maximum UDP message size */
   max_udp_message_len = cfg_getint( tmp, "max_udp_msg_len");
+  /* Get the gexec status requested */
+  gexec_on            = cfg_getbool(tmp, "gexec");
+  /* Get the host dmax ... */
+  host_dmax           = cfg_getint( tmp, "host_dmax");
 
   /* Free memory for this configuration file at exit */
   if(tilde_expanded) 
@@ -522,22 +538,31 @@ Ganglia_host_data_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *full
       hostdata->last_heard_from = apr_time_now();
     }
 
-  fprintf(stderr,"Processing a Ganglia_message from %s\n", hostdata->hostname);
+  debug_msg("Processing a Ganglia_message from %s", hostdata->hostname);
 
   if(fullmsg->id == metric_location)
     {
-      hostdata->location = fullmsg->Ganglia_message_u.str;
+      /* We have to manage this memory here because.. returning NULL
+       * will not cause Ganglia_message_save to be run.  Maybe this
+       * could be done better later i.e should these metrics be
+       * in the host->metrics list instead of the host structure? */
+      if(hostdata->location)
+	{
+	  /* Free old location */
+	  free(hostdata->location);
+	}
+      /* Save new location */
+      hostdata->location = strdup(fullmsg->Ganglia_message_u.str);
+      debug_msg("Got a location message %s\n", hostdata->location);
+      /* Processing is finished */
       return NULL;
     }
   if(fullmsg->id == metric_heartbeat)
     {
       /* nothing more needs to be done. we handled the timestamps above. */
       hostdata->gmond_started = fullmsg->Ganglia_message_u.u_int;
-      fprintf(stderr,"Got a heartbeat message %d\n", hostdata->gmond_started);
-      return NULL;
-    }
-  if(fullmsg->id == metric_gexec)
-    {
+      debug_msg("Got a heartbeat message %d\n", hostdata->gmond_started);
+      /* Processing is finished */
       return NULL;
     }
 
@@ -1100,42 +1125,37 @@ Ganglia_metric_cb_define(  char *name, g_val_t (*cb)(void))
   return metric;
 }
 
-#if 0
 g_val_t
 gexec_func ( void )
 {
    g_val_t val;
-
-   if( gmond_config.no_gexec || ( SUPPORT_GEXEC == 0 ) )
-      snprintf(val.str, MAX_G_STRING_SIZE, "%s", "OFF");
+   if( gexec_on )
+      snprintf(val.str, 32, "%s", "ON");
    else
-      snprintf(val.str, MAX_G_STRING_SIZE, "%s", "ON");
-
+      snprintf(val.str, 32, "%s", "OFF");
    return val;
 }
-#endif
 
 g_val_t
 heartbeat_func( void )
 {
    g_val_t val;
-
    val.uint32 = started / APR_USEC_PER_SEC;
-   debug_msg("my start_time is %d\n", val.uint32);
    return val;
 }
 
-#if 0
 g_val_t
 location_func(void)
 {
    g_val_t val;
-
-   strncpy(val.str, gmond_config.location, MAX_G_STRING_SIZE);
-   debug_msg("my location is %s", val.str);
+   if(!host_location)
+     {
+       cfg_t *host = cfg_getsec(config_file, "host");
+       host_location = cfg_getstr( host, "location");
+     }
+   strncpy(val.str, host_location, 32);
    return val;
 }
-#endif
 
 /* This function imports the metrics from libmetrics right now but in the future
  * we could easily do this via DSO. */
@@ -1164,13 +1184,6 @@ setup_metric_callbacks( void )
   Ganglia_metric_cb_define("cpu_system",     cpu_system_func);
   Ganglia_metric_cb_define("cpu_idle",       cpu_idle_func);
   Ganglia_metric_cb_define("cpu_aidle",      cpu_aidle_func);
-  Ganglia_metric_cb_define("bytes_in",       bytes_in_func);
-  Ganglia_metric_cb_define("bytes_out",      bytes_out_func);
-  Ganglia_metric_cb_define("pkts_in",        pkts_in_func);
-  Ganglia_metric_cb_define("pkts_out",       pkts_out_func);
-  Ganglia_metric_cb_define("disk_total",     disk_total_func);
-  Ganglia_metric_cb_define("disk_free",      disk_free_func);
-  Ganglia_metric_cb_define("part_max_used",  part_max_used_func);
   Ganglia_metric_cb_define("load_one",       load_one_func);
   Ganglia_metric_cb_define("load_five",      load_five_func);
   Ganglia_metric_cb_define("load_fifteen",   load_fifteen_func);
@@ -1182,15 +1195,51 @@ setup_metric_callbacks( void )
   Ganglia_metric_cb_define("mem_cached",     mem_cached_func);
   Ganglia_metric_cb_define("swap_free",      swap_free_func);
 
+  /* These are "internal" metrics for host heartbeat,location,gexec */
   Ganglia_metric_cb_define("heartbeat",      heartbeat_func);
+  Ganglia_metric_cb_define("location",       location_func);
+  Ganglia_metric_cb_define("gexec",          gexec_func);
 
   /* Add platform specific metrics here... */
+#if SOLARIS
+  Ganglia_metric_cb_define("bread_sec",      bread_sec_func);
+  Ganglia_metric_cb_define("bwrite_sec",     bwrite_sec_func);
+  Ganglia_metric_cb_define("lread_sec",      lread_sec_func);
+  Ganglia_metric_cb_define("lwrite_sec",     lwrite_sec_func);
+  Ganglia_metric_cb_define("phread_sec",     phread_sec_func);
+  Ganglia_metric_cb_define("phwrite_sec",    phwrite_sec_func);
+  Ganglia_metric_cb_define("rcache",         rcache_func);
+  Ganglia_metric_cb_define("wcache",         wcache_func);
+  Ganglia_metric_cb_define("cpu_wio",        cpu_wio_func);
+#endif
+
+#if LINUX || FREEBSD
+  Ganglia_metric_cb_define("bytes_in",       bytes_in_func);
+  Ganglia_metric_cb_define("bytes_out",      bytes_out_func);
+  Ganglia_metric_cb_define("pkts_in",        pkts_in_func);
+  Ganglia_metric_cb_define("pkts_out",       pkts_out_func);
+  Ganglia_metric_cb_define("disk_total",     disk_total_func);
+  Ganglia_metric_cb_define("disk_free",      disk_free_func);
+  Ganglia_metric_cb_define("part_max_used",  part_max_used_func);
+#endif
+
+#if HPUX
+  Ganglia_metric_cb_define("cpu_intr",       cpu_intr_func);
+  Ganglia_metric_cb_define("cpu_ssys",       cpu_ssys_func);
+  Ganglia_metric_cb_define("cpu_wait",       cpu_wait_func);
+  Ganglia_metric_cb_define("mem_arm",        mem_arm_func);
+  Ganglia_metric_cb_define("mem_rm",         mem_rm_func);
+  Ganglia_metric_cb_define("mem_avm",        mem_avm_func);
+  Ganglia_metric_cb_define("mem_vm",         mem_vm_func);
+#endif
+
 }
 
-void
+double
 setup_collection_groups( void )
 {
   int i, num_collection_groups = cfg_size( config_file, "collection_group" );
+  double bytes_per_sec = 0;
   
   /* Create the collection group array */
   collection_groups = apr_array_make( global_context, num_collection_groups,
@@ -1273,6 +1322,9 @@ setup_collection_groups( void )
 	    }
 	  memset( &(metric_cb->last), 0, sizeof(g_val_t));
 
+	  /* Calculate the bandwidth this metric will use */
+	  bytes_per_sec += ( (double)metric_info->msg_size / (double)group->time_threshold );
+
 	  /* Push this metric onto the metric_array for this group */
 	  *(Ganglia_metric_callback **)apr_array_push(group->metric_array) = metric_cb;
 	}
@@ -1280,6 +1332,8 @@ setup_collection_groups( void )
       /* Save the collection group the collection group array */
       *(Ganglia_collection_group **)apr_array_push(collection_groups) = group;
     }
+
+  return bytes_per_sec;
 }
 
 void
@@ -1453,6 +1507,23 @@ process_collection_groups( apr_time_t now )
   return next;
 }
 
+static void
+print_metric_list( void )
+{
+  apr_hash_index_t *hi;
+  void *val;
+
+  for(hi = apr_hash_first(global_context, metric_callbacks);
+      hi;
+      hi = apr_hash_next(hi))
+    {
+      Ganglia_metric_callback *cb;
+      apr_hash_this(hi, NULL, NULL, &val);
+      cb = val;
+      fprintf(stdout, "%s\n", cb->name);
+    }
+}
+
 int
 main ( int argc, char *argv[] )
 {
@@ -1461,23 +1532,43 @@ main ( int argc, char *argv[] )
   /* Mark the time this gmond started */
   started = apr_time_now();
 
+  /* Initializes the apr library in ./srclib/apr */
+  initialize_apr_library();
+
+  /* Builds a default configuration based on platform */
+  build_default_gmond_configuration(global_context);
+
   if (cmdline_parser (argc, argv, &args_info) != 0)
     exit(1) ;
 
   if(args_info.default_config_flag)
     {
-      fprintf(stdout, DEFAULT_GMOND_CONFIGURATION);
+      fprintf(stdout, default_gmond_configuration);
+      fflush( stdout );
+      exit(0);
+    }
+  
+  if(args_info.metrics_flag)
+    {
+      setup_metric_callbacks();
+      print_metric_list();
       fflush( stdout );
       exit(0);
     }
 
   process_configuration_file();
 
+  if(args_info.bandwidth_flag)
+    {
+      double bytes_per_sec;
+      setup_metric_callbacks();
+      bytes_per_sec = setup_collection_groups();
+      fprintf(stdout, "%f bytes/sec\n", bytes_per_sec);
+      exit(0);
+    }
+
   daemonize_if_necessary( argv );
   
-  /* Initializes the apr library in ./srclib/apr */
-  initialize_apr_library();
-
   /* Collect my hostname */
   apr_gethostname( myname, APRMAXHOSTLEN+1, global_context);
 
@@ -1511,7 +1602,7 @@ main ( int argc, char *argv[] )
 	{
           for(; mute || now < next_collection;)
 	    {
-	      poll_listen_channels(mute? -1: next_collection - now);
+	      poll_listen_channels(mute? 60 * APR_USEC_PER_SEC: next_collection - now);
 	      now = apr_time_now();
     	    }
 	}
