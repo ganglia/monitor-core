@@ -3,12 +3,49 @@
 #include "apr_network_io.h"
 #include "apr_arch_networkio.h"
 
+#include "apr_net.h"
+
 #include <sys/ioctl.h>
 #include <net/if.h>
 
 #ifdef SOLARIS2
 #include <sys/sockio.h>  /* for SIOCGIFADDR */
 #endif
+
+
+/* This function is copied directly from the 
+ * apr_sockaddr_ip_get() function and modified to take a static
+ * buffer instead of needing to malloc memory from a pool */
+APR_DECLARE(apr_status_t) apr_sockaddr_ip_buffer_get(char *addr, int len,
+                                         apr_sockaddr_t *sockaddr)
+{
+  if(len< sockaddr->addr_str_len)
+    {
+      return APR_EINVAL;
+    }
+  /*
+   *addr = apr_palloc(sockaddr->pool, sockaddr->addr_str_len);
+   */
+    apr_inet_ntop(sockaddr->family,
+                  sockaddr->ipaddr_ptr,
+                  addr,
+                  sockaddr->addr_str_len);
+#if APR_HAVE_IPV6
+    if (sockaddr->family == AF_INET6 &&
+        IN6_IS_ADDR_V4MAPPED((struct in6_addr *)sockaddr->ipaddr_ptr)) {
+        /* This is an IPv4-mapped IPv6 address; drop the leading
+         * part of the address string so we're left with the familiar
+         * IPv4 format.
+         */
+        /* strlen("::ffff:") == 7 */
+        memmove( addr, addr+7, strlen(addr+7));
+	/*
+        *addr += strlen("::ffff:");
+	*/
+    }
+#endif
+    return APR_SUCCESS;
+}
 
 apr_socket_t *
 create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port)
