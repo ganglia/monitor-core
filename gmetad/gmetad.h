@@ -23,6 +23,21 @@ struct ganglia_metric
 #define MAX_HASH_VALUE 63
 /* maximum key range = 58, duplicates = 0 */
 
+
+/* For xml_hash */
+typedef enum {
+   GANGLIA_XML_TAG,
+   CLUSTER_TAG,
+   HOST_TAG,
+   NAME_TAG,
+   METRIC_TAG,
+   TN_TAG,
+   TMAX_TAG,
+   VAL_TAG,
+   TYPE_TAG,
+   SLOPE_TAG,
+} xml_tag_t;
+
 typedef struct
    {
       unsigned int index;
