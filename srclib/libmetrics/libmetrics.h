@@ -114,6 +114,8 @@ typedef union {
 
 #ifdef CYGWIN
 
+ g_val_t cpu_intr_func(void);
+ g_val_t cpu_sintr_func(void);
  g_val_t bytes_in_func(void);
  g_val_t bytes_out_func(void);
  g_val_t pkts_in_func(void);
@@ -165,6 +167,7 @@ enum {
    cpu_nice,
    cpu_system,
    cpu_idle,
+   cpu_wio,
    cpu_aidle,
    load_one,
    load_five,
@@ -185,7 +188,10 @@ enum {
     * added by swagner for extended solaris monitoring.
     */
 #ifdef SOLARIS
-   cpu_wio,
+   bytes_in,
+   bytes_out,
+   pkts_in,
+   pkts_out,
    bread_sec,
    bwrite_sec,
    lread_sec,
@@ -196,6 +202,8 @@ enum {
    wcache,
 #endif
 #ifdef LINUX
+   cpu_intr,
+   cpu_sintr,
    bytes_in,
    bytes_out,
    pkts_in,
@@ -205,6 +213,8 @@ enum {
    part_max_used,
 #endif
 #ifdef CYGWIN
+   cpu_intr,
+   cpu_sintr,
    bytes_in,
    bytes_out,
    pkts_in,
@@ -212,8 +222,7 @@ enum {
 #endif
 #ifdef HPUX
    cpu_intr,
-   cpu_ssys,
-   cpu_wait,
+   cpu_sintr,
    cpu_arm,
    cpu_rm,
    cpu_avm,
@@ -227,6 +236,9 @@ enum {
    disk_total,
    disk_free,
    part_max_used,
+#endif
+#ifdef IRIX
+   cpu_intr,
 #endif
    num_key_metrics
 }  key_metrics;
