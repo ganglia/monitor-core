@@ -163,6 +163,7 @@ dnl    if test "$ac_cv_lib_pthreads_pthread_create" = yes ; then
 dnl       CFLAGS="$CFLAGS -D_REENTRANT"
 dnl    fi
 dnl fi
+AC_CHECK_LIB(rpc, xdr_string)
 
 if test "$gmetad" = yes ; then
    AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.com/)"], [echo "rrd lib not found"], [-lm])
