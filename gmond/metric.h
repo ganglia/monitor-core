@@ -39,6 +39,7 @@ extern g_val_t mem_cached_func(void);
 extern g_val_t swap_free_func(void);        
 extern g_val_t gexec_func(void);
 extern g_val_t heartbeat_func(void);
+extern g_val_t mtu_func(void);
 
 /* the following are additional internal metrics added by swagner
  * what for the monitoring of buffer/linear read/writes on Solaris boxen.
@@ -123,7 +124,8 @@ KEY(swap_free),  1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
 
 /* gmond internals */
 KEY(gexec),        -1,  -1,   -1,  180,  300, g_string, "",    "%s"},
-KEY(heartbeat),    -1,  -1,   -1,   10,   20, g_uint32, "",    "%u"}
+KEY(heartbeat),    -1,  -1,   -1,   10,   20, g_uint32, "",    "%u"},
+KEY(mtu), -1, -1,  -1, 900, 1200, g_uint32, "B", "%u" }
 
 #ifdef SOLARIS
 ,
