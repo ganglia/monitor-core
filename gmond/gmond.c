@@ -2,6 +2,12 @@
 #include "interface.h"
 #include "gangliaconf.h"
 #include "dotconf.h"
+
+#include <ganglia/error.h>
+#include <ganglia/hash.h>
+#include <ganglia/llist.h>
+#include <ganglia/net.h>
+#include <ganglia/xmlparse.h>
 #include <ganglia/gmond_config.h>
 #include <ganglia/hash.h>
 #include <ganglia/barrier.h>
@@ -117,6 +123,27 @@ location_func(void)
    return val;
 }
 
+/* This only works on IPv4 for right now */
+static int
+is_multicast (const char *ip)
+{
+  struct in_addr haddr;
+  unsigned int addr;
+
+  if(!ip)
+    return -1;
+
+  if(!inet_aton(ip, &haddr))
+    return -1;  /* not a valid address */
+
+  addr = htonl( haddr.s_addr );
+
+  if ((addr & 0xF0000000) == 0xE0000000)
+    return 1;
+
+  return 0;
+}
+
 int 
 main ( int argc, char *argv[] )
 {
@@ -126,8 +153,7 @@ main ( int argc, char *argv[] )
    pthread_attr_t attr;
    barrier *mcast_listen_barrier, *server_barrier;
    struct timeval tv;
-   struct intf_entry *entry;
-   struct in_addr mcast_if_addr;
+   struct intf_entry *entry = NULL;
 
    gettimeofday(&tv, NULL);
    start_time = (uint32_t) tv.tv_sec;
@@ -204,17 +230,78 @@ main ( int argc, char *argv[] )
       }
    else
       {
-         entry = get_interface ( gmond_config.mcast_if );
-         if(!entry)
-            err_quit("%s is not a valid multicast-enabled interface", gmond_config.mcast_if);
-         debug_msg("Using multicast-enabled interface %s", gmond_config.mcast_if);
+         if( is_multicast( gmond_config.mcast_channel ))
+           {
+             entry = get_interface ( gmond_config.mcast_if );
+             if(!entry)
+               err_quit("%s is not a valid multicast-enabled interface", gmond_config.mcast_if);
+             debug_msg("Using multicast-enabled interface %s", gmond_config.mcast_if);
+           }
       }
 
    /* fd for incoming multicast messages */
    if(! gmond_config.deaf )
       {
-         mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port,
+	 if( is_multicast( gmond_config.mcast_channel ))
+	     {
+                mcast_join_socket = g_mcast_in ( gmond_config.mcast_channel, gmond_config.mcast_port,
                                           (struct in_addr *)&(entry->intf_addr.addr_ip));
+	     }
+	 else
+	     {
+               const int on = 1;
+               struct sockaddr_in localaddr;
+
+               fprintf(stderr,"Running UDP server on port %d\n", gmond_config.mcast_port);
+
+	       mcast_join_socket = malloc(sizeof(g_mcast_socket));
+               if(!mcast_join_socket)
+                 {
+                   perror("unable to malloc data for UDP server socket\n");
+                   return -1;
+                 }
+               (mcast_join_socket->ref_count)++;
+               mcast_join_socket->sockfd = socket( AF_INET, SOCK_DGRAM, 0);
+               if(mcast_join_socket->sockfd < 0)
+                 {
+                   perror("unable to create UDP server socket\n");
+                   return -1;
+                 }
+               if(setsockopt(mcast_join_socket->sockfd, SOL_SOCKET, SO_REUSEADDR, (void*) &on, sizeof(on)) != 0)
+                 {
+                   perror("gmond could not setsockopt on UDP server socket");
+                   return -1;
+                 }
+               localaddr.sin_family  = AF_INET;
+               localaddr.sin_port    = htons(gmond_config.mcast_port);
+               if( gmond_config.send_bind_given )
+                 {
+                   /* bind to a specific local address */
+                   struct in_addr inaddr;
+                   /* Try to read the name as if were dotted decimal */
+                   if (inet_aton(gmond_config.send_bind, &inaddr) == 0)
+                     {
+                       fprintf(stderr,"send_bind address is not dotted decimal notation\n");
+                       return -1;
+                     }
+                   memcpy(&localaddr.sin_addr, (char*) &inaddr, sizeof(struct in_addr));
+                 }
+               else
+                 {
+                   /* let the kernel decide which local address to bind to */
+                   localaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
+                 }
+               
+               /* bind to the local address */
+               if (bind(mcast_join_socket->sockfd, (struct sockaddr *)&localaddr, sizeof(localaddr)) <0)
+                 {
+                   perror("unable to bind to local UDP server address\n");
+                   return -1;
+                 }
+
+               fprintf(stderr,"UDP SERVER RUNNING\n");
+	     }
+	      
          if (! mcast_join_socket )
             {
                perror("g_mcast_in() failed");
@@ -264,8 +351,58 @@ main ( int argc, char *argv[] )
    /* fd for outgoing multicast messages */
    if(! gmond_config.mute )
       {
-         mcast_socket = g_mcast_out ( gmond_config.mcast_channel, gmond_config.mcast_port,  
+	 if( is_multicast( gmond_config.mcast_channel ))
+	   {
+             mcast_socket = g_mcast_out ( gmond_config.mcast_channel, gmond_config.mcast_port,  
                              (struct in_addr *)&(entry->intf_addr.addr_ip), gmond_config.mcast_ttl);
+	   }
+	 else
+	   {
+	     struct sockaddr_in remoteaddr;
+             struct in_addr inaddr;
+	     const int on = 1;
+
+	     mcast_socket = malloc(sizeof(g_mcast_socket));
+	     if(!mcast_socket)
+	       {
+		 perror("gmond unable to malloc memory for UDP channel\n");
+		 return -1;
+	       }
+	     memset( mcast_socket, 0, sizeof(g_mcast_socket));
+	     (mcast_socket->ref_count)++;
+
+	     mcast_socket->sockfd = socket( AF_INET, SOCK_DGRAM, 0);
+	     if(mcast_socket->sockfd < 0)
+	       {
+		 perror("gmond could not create UDP socket");
+		 return -1;
+	       }
+
+	     if(setsockopt(mcast_socket->sockfd, SOL_SOCKET, SO_REUSEADDR, (void*) &on, sizeof(on)) != 0)
+	       {
+		 perror("gmond could not setsockopt on UDP socket");
+		 return -1;
+	       }
+
+	     /* create the sockaddr_in structure */
+	     if (inet_aton(gmond_config.mcast_channel, &inaddr) == 0)
+	       {
+		 fprintf(stderr,"mcast_channel/send_channel is not in dotted decimal notation\n");
+		 return -1;
+	       }
+	     remoteaddr.sin_family = AF_INET;
+             remoteaddr.sin_port   = htons(gmond_config.mcast_port);
+             memcpy(&remoteaddr.sin_addr, (char*) &inaddr, sizeof(struct in_addr));
+
+	     /* connect the socket to the UDP address */
+	     if(connect(mcast_socket->sockfd, (struct sockaddr *)&remoteaddr, sizeof(remoteaddr)) < 0)
+	       {
+		 fprintf(stderr,"unable to connect to UDP channel '%s:%d\n", gmond_config.mcast_channel,
+			 gmond_config.mcast_port);
+		 return -1;
+	       }
+	   }
+
          if ( !mcast_socket )
             {
                perror("gmond could not connect to multicast channel");
