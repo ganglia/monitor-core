@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <time.h>
 
 hash_t *xml;
 
@@ -56,7 +57,7 @@ print_sources ( datum_t *key, datum_t *val, void *arg )
    data_source_list_t *d = *((data_source_list_t **)(val->data));
    g_inet_addr *addr;
 
-   fprintf(stderr,"Source: [%s] has %d sources\n", key->data, d->num_sources);
+   fprintf(stderr,"Source: [%s] has %d sources\n", (char*) key->data, d->num_sources);
    for(i = 0; i < d->num_sources; i++)
       {
          addr = d->sources[i];
@@ -84,9 +85,7 @@ int
 save_sums_n_nums( datum_t *key, datum_t *val, void *arg )
 {
    data_source_list_t *ds =  *(data_source_list_t **)val->data;
-   struct ganglia_metric *gm;
    register int i;
-   int len;
 
    /* Ignore dead data sources */
    if( ds->dead )
@@ -245,7 +244,7 @@ main ( int argc, char *argv[] )
                      sprintf(sum, "%Lf", sum_of_sums[i]);
 
                      /* Save the data to a round robin database */
-                     if( write_data_to_rrd( NULL, NULL, (char *)metrics[i].name, sum, num, 15) )
+                     if( write_data_to_rrd( NULL, NULL, (char *)metrics[i].name, sum, num, 15, time(0)) )
                         {
                            err_msg("Unable to write meta data to RRDbs");
                         }

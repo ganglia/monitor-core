@@ -6,7 +6,7 @@
 #include <ganglia/xmlparse.h>
 #include <gmetad.h>
 
-extern int write_data_to_rrd( char *source, char *host, char *metric, char *sum, char *num, unsigned int step);
+extern int write_data_to_rrd( char *source, char *host, char *metric, char *sum, char *num, unsigned int step, unsigned int time_polled);
 
 extern struct xml_tag *in_xml_list (char *, unsigned int);
 extern struct ganglia_metric *in_metric_list (char *, unsigned int);
@@ -19,8 +19,8 @@ typedef struct
       int old;  /* This is true if the remote source is < 2.5.x */
       long double  overall_sum[MAX_METRIC_HASH_VALUE];
       unsigned int overall_num[MAX_METRIC_HASH_VALUE];
-      long double          sum[MAX_METRIC_HASH_VALUE];
-      unsigned int         num[MAX_METRIC_HASH_VALUE];
+      long double sum[MAX_METRIC_HASH_VALUE];
+      unsigned int num[MAX_METRIC_HASH_VALUE];
       char *source;   
       char *host;
       char *metric;
@@ -56,12 +56,15 @@ start_processing_source (xml_data_t *xml_data, const char **attr)
             xml_data->cluster_localtime = strtoul(attr[i+1], (char **)NULL, 10);
             break;
          case NAME_TAG:
-            /* This source can either be a grid name or a cluster name, but should be the most outer
-               name if we are summarizing accross a grid. */
+            /* This source can either be a grid name or a cluster name, 
+               but should be the most outer name if we are summarizing 
+               accross a grid. */
             if (xml_data->grid_depth != 0) break;
 
             xml_data->source = realloc ( xml_data->source, strlen(attr[i+1])+1 );
             strcpy( xml_data->source, attr[i+1] );
+            break;
+          default:
             break;
       }
    }
@@ -72,8 +75,6 @@ finish_processing_source(xml_data_t *xml_data)
 {
    register int i;
    int len;
-   struct xml_tag *xt;
-   struct ganglia_metric *gm;
    char sum[512];
    char num[512];
 
@@ -86,8 +87,6 @@ finish_processing_source(xml_data_t *xml_data)
          len = strlen(metrics[i].name);
          if( len )
             {
-                  gm  =  (struct ganglia_metric *)in_metric_list ((char *)metrics[i].name, len);
-
                   /* Skip it if we have no hosts reporting the data */
                   if (! xml_data->num[i] )
                      continue;
@@ -102,7 +101,8 @@ finish_processing_source(xml_data_t *xml_data)
                   /* Save the data to a round robin database */
                   debug_msg("Writing Summary data for source %s", xml_data->source);
                   xml_data->rval = write_data_to_rrd(xml_data->source, NULL, (char*) metrics[i].name,
-                                                                                 sum, num, xml_data->ds->step);
+                        sum, num, xml_data->ds->step, xml_data->cluster_localtime);
+
                   if (xml_data->rval)
                      {
                         /* Pass the error on to save_to_rrd */
@@ -121,8 +121,8 @@ start (void *data, const char *el, const char **attr)
 {
   register int i;
   xml_data_t *xml_data = (xml_data_t *)data;
-  int tn, tmax, index, is_volatile, is_numeric, len, blessed;
-  struct ganglia_metric *gm;
+  int tn, tmax, is_volatile, is_numeric;
+  struct ganglia_metric *blessed;
   struct xml_tag *xt;
 
   /* We got an error before */
@@ -141,8 +141,7 @@ start (void *data, const char *el, const char **attr)
            tmax        = 0;
            is_volatile = 0;
            is_numeric  = 0;
-           blessed     = 0;
-           gm          = NULL;
+           blessed     = NULL;
 
            for(i = 0; attr[i] ; i+=2)
               {
@@ -154,8 +153,7 @@ start (void *data, const char *el, const char **attr)
                     {
                        case NAME_TAG:
                           xml_data->metric = (char *)attr[i+1];
-                          if( gm = in_metric_list( (char *)(xml_data->metric), strlen( xml_data->metric) ) )
-                             blessed = 1;
+                          blessed = in_metric_list( (char *)(xml_data->metric), strlen( xml_data->metric) );
                           break;
                        
                        case VAL_TAG:
@@ -185,6 +183,9 @@ start (void *data, const char *el, const char **attr)
                                 is_numeric = 1;
                              }
                           break;
+                          
+                       default:
+                           break;
                     }
               }
 
@@ -199,7 +200,9 @@ start (void *data, const char *el, const char **attr)
            if( !( (is_volatile && is_numeric) || blessed))
               return;
 
-           if( gm )
+           /* Although we will create host RRDs for any metric (gmetrics too) that 
+            is volatile and numeric, we only summarize blessed metrics. */
+           if( blessed )
               {
                  unsigned int hash_val;
 
@@ -208,7 +211,7 @@ start (void *data, const char *el, const char **attr)
 
                  hash_val = metric_hash( xml_data->metric, strlen(xml_data->metric) );
 
-                 switch ( gm->type )
+                 switch ( blessed->type )
                     {
                        case FLOAT:
                           xml_data->sum[hash_val] +=  (long double)(strtod( (const char *)(xml_data->metric_val), (char **)NULL));
@@ -236,7 +239,7 @@ start (void *data, const char *el, const char **attr)
            if (xml_data->grid_depth==0) 
            {
                 xml_data->rval = write_data_to_rrd( xml_data->source, xml_data->host, xml_data->metric,
-                                                                                 xml_data->metric_val, NULL, xml_data->ds->step);
+                                                                                 xml_data->metric_val, NULL, xml_data->ds->step, xml_data->cluster_localtime);
                 if (xml_data->rval)  {
                      return;
                 }
@@ -259,6 +262,8 @@ start (void *data, const char *el, const char **attr)
                           xml_data->host = realloc( xml_data->host, strlen(attr[i+1])+1 );
                           strcpy( xml_data->host, attr[i+1] ); 
                           break;
+                       default:
+                         break;
                     }
               }
            break;
@@ -284,7 +289,7 @@ start (void *data, const char *el, const char **attr)
            for(i = 0; attr[i] ; i+=2)
               {
                  /* Only process the XML tags that gmetad is interested in */
-                 if(!( xt = in_xml_list ( (char *)attr[i], strlen(attr[i]))) )
+                 if( !( xt = in_xml_list ( (char *)attr[i], strlen(attr[i]))) )
                     continue;
 
                  switch( xt->tag )
@@ -297,21 +302,26 @@ start (void *data, const char *el, const char **attr)
                                 xml_data->old = 1;
                              }   
                           break;
+                          
+                       default:
+                        break;
                     }
               }
-         
-           break;     
+
+           break;
+
+        default:
+          break;
 
      }  /* end switch */
 
   return;
 }
 
-static void
+static void 
 end (void *data, const char *el)
 {
   xml_data_t *xml_data = (xml_data_t *)data;
-  register int i;
   struct xml_tag *xt;
 
   if(! (xt = in_xml_list ( (char *)el, strlen( el ))) )
@@ -344,7 +354,9 @@ end (void *data, const char *el)
            finish_processing_source(xml_data);
 
            break;
-
+           
+        default:
+            break;
      }
   return;
 }
