@@ -159,7 +159,9 @@ main ( int argc, char *argv[] )
       gmond_config.location = strdup(args_info.location_arg);
    }
 
+   /*
    print_gmond_config();
+   */
 
    if(!gmond_config.no_setuid)
       become_a_nobody(gmond_config.setuid);
