@@ -1,10 +1,10 @@
 AM_CFLAGS = -I.. -I. -I./dnet
 
-EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h getopt.h 
+EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h
 
 lib_LTLIBRARIES      = libganglia.la
 libganglia_la_SOURCES = daemon_inetd.c daemon_init.c debug_msg.c error.c \
-ganglia.c getopt1.c getopt.c getopt_init.c hash.c llist.c my_inet_ntop.c \
+ganglia.c hash.c llist.c my_inet_ntop.c \
 rdwr.c xmlparse.c xmlrole.c xmltok.c file.c gexec_funcs.c barrier.c \
 become_a_nobody.c gexec_process.c gexec_vnn_ip.c gmond_config.c inetaddr.c \
 mcast.c tcp.c fsusage.c dotconf.c readdir.c
@@ -13,8 +13,11 @@ noinst_HEADERS = dotconf.h readdir.h dnet.h dnet/addr.h dnet/arp.h \
 dnet/blob.h dnet/eth.h dnet/fw.h dnet/icmp.h dnet/intf.h \
 dnet/ip.h dnet/os.h dnet/rand.h dnet/route.h dnet/tcp.h dnet/udp.h
 
+noinst_LIBRARIES = libgetopthelper.a libdnet.a
+# A little helper for getopt functions
+libgetopthelper_a_SOURCES = getopt1.c getopt.c getopt_init.c getopt.h
+
 # Making a light version of the dnet library (we only need the intf/eth functions)
-noinst_LIBRARIES = libdnet.a
 libdnet_a_SOURCES = addr.c  strlcat.c strlcpy.c
 libdnet_a_LIBADD  = @DNET_OBJS@
 libdnet_a_DEPENDENCIES = @DNET_OBJS@
