@@ -13,6 +13,8 @@
 
 #include "libmetrics.h"
 
+#include "metric.h"
+
 #include "interface.h"
 #include "dotconf.h"
 
@@ -27,9 +29,6 @@
 #include "lib/barrier.h"
 #include "lib/become_a_nobody.h"
 #include "lib/net.h"
-/*
-#include "metric.h"
-*/
 #include "cmdline.h"
 
 /* The entire cluster this gmond knows about */
