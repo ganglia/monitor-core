@@ -132,6 +132,10 @@ echo $ac_n "${nl}Configuring apr ...${nl}"
 cd srclib/apr && ./configure --cache-file=$ganglia_popdir/config.cache
 cd $ganglia_popdir
 
+echo $ac_n "${nl}Configuring libconfuse ...${nl}"
+cd srclib/confuse && ./configure --cache-file=$ganglia_popdir/config.cache
+cd $ganglia_popdir
+
 
 dnl ##################################################################
 dnl Checks for programs.

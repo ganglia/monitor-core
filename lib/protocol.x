@@ -64,10 +64,10 @@ enum gangliaFormats {
    metric_mem_rm,
    metric_mem_avm,
    metric_mem_vm,
-
-   /* New message formats versions are to be added here...
-    */
-   GANGLIA_METRIC_GROUP = 1024
+   GANGLIA_METRIC_GROUP,
+/* Insert new message formats here */
+   
+   MAX_NUM_GANGLIA_FORMATS  /* Make sure this is always the last in the enum */
 };
 
 struct gmetricMessage {

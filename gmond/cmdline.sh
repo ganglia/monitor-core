@@ -10,6 +10,7 @@ option "conf" c "Location of gmond configuration file" string default="/etc/gmon
 option "location" l "Location of this host in the cluster 'rack,rank,plane'." string default="0,0,0" no
 option "debug" d "Debug level. If greater than zero, daemon will stay in foreground." int default="0" no
 option "foreground" f "Run in foreground (don't daemonize)" flag off 
+option "default_config" t "Print the default configuration and exit" flag off
 
 #Usage (a little tutorial)
 #

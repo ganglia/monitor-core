@@ -10,57 +10,95 @@
 #include <sys/sockio.h>  /* for SIOCGIFADDR */
 #endif
 
+apr_socket_t *
+create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port)
+{
+  apr_sockaddr_t *remotesa = NULL;
+  apr_socket_t *sock = NULL;
+  apr_status_t status;
+  int family = APR_UNSPEC;
+
+  status = apr_sockaddr_info_get(&remotesa, ipaddr, APR_UNSPEC, port, 0, context);
+  if(status!= APR_SUCCESS)
+    {
+      return NULL;
+    }
+  family = remotesa->sa.sin.sin_family;
+
+  /* Created the socket */
+  status = apr_socket_create(&sock, family, SOCK_DGRAM, context);
+  if(status != APR_SUCCESS)
+    {
+      return NULL;
+    }
+
+  /* Connect the socket to the address */
+  status = apr_connect(sock, remotesa);
+  if(status != APR_SUCCESS)
+    {
+      apr_socket_close(sock);
+      return NULL;
+    }
+
+  return sock;
+}
 
 apr_socket_t *
-create_udp_server(apr_pool_t *context, char *ipaddr, apr_port_t port, apr_sockaddr_t **sa )
+create_udp_server(apr_pool_t *context, apr_port_t port, char *bind)
 {
+  apr_sockaddr_t *localsa = NULL;
   apr_socket_t *sock = NULL;
   apr_status_t stat;
-  char buf[128];
+  int family = APR_UNSPEC;
 
-  stat = apr_sockaddr_info_get(sa, ipaddr, APR_UNSPEC, port, 0, context);
-  if (stat != APR_SUCCESS)
+  if(bind)
     {
-      fprintf(stderr, "Couldn't build the socket address correctly: %s\n",
-                apr_strerror(stat, buf, sizeof buf));
-      exit(-1);
+      stat = apr_sockaddr_info_get(&localsa, bind, APR_UNSPEC, port, 0, context);
+      if (stat != APR_SUCCESS)
+        return NULL;
+
+      family = localsa->sa.sin.sin_family;
     }
 
-  stat = apr_socket_create(&sock,(*sa)->sa.sin.sin_family, SOCK_DGRAM, context);
+  stat = apr_socket_create(&sock, family, SOCK_DGRAM, context);
   if( stat != APR_SUCCESS )
-    {
-      fprintf(stderr, "Couldn't create socket\n");
-      exit(-1);
-    }
+    return NULL;
 
   /* Setup to be non-blocking */
   stat = apr_setsocketopt(sock, APR_SO_NONBLOCK, 1);
   if (stat != APR_SUCCESS)
     {
       apr_socket_close(sock);
-      fprintf(stderr, "Couldn't set socket option non-blocking\n");
-      exit(-1);
+      return NULL;
     }
 
   stat = apr_setsocketopt(sock, APR_SO_REUSEADDR, 1);
   if (stat != APR_SUCCESS)
     {
       apr_socket_close(sock);
-      fprintf(stderr, "Couldn't set socket option reuseaddr\n");
-      exit(-1);
+      return NULL;
     }
 
-  stat = apr_bind(sock, *sa);
+  if(!localsa)
+    {
+      apr_socket_addr_get(&localsa, APR_LOCAL, sock);
+      apr_sockaddr_port_set(localsa, port);
+    }
+
+  stat = apr_bind(sock, localsa);
   if( stat != APR_SUCCESS)
     {
        apr_socket_close(sock);
+       /*
        fprintf(stderr, "Could not bind: %s\n", apr_strerror(stat, buf, sizeof buf));
-       exit(-1);
+       */
+       return NULL;
     }
 
   return sock;
 }
 
+#if 0
 apr_socket_t *
 create_mcast_server_socket( apr_pool_t *context, char *mcastaddr, apr_port_t port, char *interface_name, apr_sockaddr_t **sa)
 {
@@ -68,6 +106,7 @@ create_mcast_server_socket( apr_pool_t *context, char *mcastaddr, apr_port_t por
   apr_multicast_join( sock, sa, interface_name );
   return sock;
 }
+#endif
 
 apr_socket_t *
 create_tcp_server_socket(apr_pool_t *context, char *ipaddr, apr_port_t port, apr_sockaddr_t **sa )
@@ -281,8 +320,5 @@ apr_multicast_join( apr_socket_t *sock, apr_sockaddr_t **sa, char *ifname )
 apr_status_t
 apr_multicast_leave( apr_socket_t *sock, apr_sockaddr_t **sa )
 {
-  apr_status_t status;
-
-  
   return APR_SUCCESS;
 }
