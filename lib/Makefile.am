@@ -26,7 +26,7 @@ eth-bsd.c eth-dlpi.c eth-linux.c eth-ndd.c eth-none.c eth-snoop.c eth-win32.c
 
 libganglia_la_LDFLAGS = -version-info 2:0:1
 
-include_HEADERS = ganglia.h ganglia/ascii.h ganglia/asciitab.h ganglia/daemon_inetd.h \
+nobase_include_HEADERS = ganglia.h ganglia/ascii.h ganglia/asciitab.h ganglia/daemon_inetd.h \
 ganglia/daemon_init.h ganglia/debug_msg.h ganglia/error.h ganglia/file.h ganglia/hash.h \
 ganglia/iasciitab.h ganglia/latin1tab.h ganglia/llist.h ganglia/my_inet_ntop.h \
 ganglia/nametab.h ganglia/net.h ganglia/rdwr.h ganglia/utf8tab.h ganglia/xmldef.h \
