@@ -148,7 +148,10 @@ g_mcast_socket_is_loopback (const g_mcast_socket* ms)
     return(-1);
 
   if(! (flagSize <= sizeof(flag) ))
-     exit(-1);
+     {
+        fprintf(stderr,"mcast_socket_is_loopback() flagSize > sizeof(flag)");
+        exit(-1);
+     }
 
   return (int) flag;
 }
@@ -177,8 +180,10 @@ g_mcast_socket_get_ttl (const g_mcast_socket* ms)
     return(-1);
 
   if(! (ttlSize <= sizeof(ttl)))
-     exit(-1);
-
+     {
+        fprintf(stderr,"g_mcast_socket_get_ttl() ttlSize > sizeof(ttl)");
+        exit(-1);
+     }
   return(ttl);
 }
 
