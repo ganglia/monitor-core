@@ -61,6 +61,15 @@ typedef union {
  g_val_t cpu_idle_func(void);
  g_val_t cpu_wio_func(void);
  g_val_t cpu_aidle_func(void);
+ g_val_t cpu_intr_func(void);
+ g_val_t cpu_sintr_func(void);
+ g_val_t bytes_in_func(void);
+ g_val_t bytes_out_func(void);
+ g_val_t pkts_in_func(void);
+ g_val_t pkts_out_func(void);
+ g_val_t disk_total_func(void);
+ g_val_t disk_free_func(void);
+ g_val_t part_max_used_func(void);
  g_val_t load_one_func(void);
  g_val_t load_five_func(void);
  g_val_t load_fifteen_func(void);
@@ -83,10 +92,6 @@ typedef union {
         
 #ifdef SOLARIS
         
- g_val_t bytes_in_func(void);
- g_val_t bytes_out_func(void);
- g_val_t pkts_in_func(void);
- g_val_t pkts_out_func(void);
  g_val_t bread_sec_func(void);
  g_val_t bwrite_sec_func(void);
  g_val_t lread_sec_func(void);
@@ -99,34 +104,13 @@ typedef union {
 #endif  
 
 #ifdef LINUX
-
- g_val_t cpu_intr_func(void);
- g_val_t cpu_sintr_func(void);
- g_val_t bytes_in_func(void);
- g_val_t bytes_out_func(void);
- g_val_t pkts_in_func(void);
- g_val_t pkts_out_func(void);
- g_val_t disk_total_func(void);
- g_val_t disk_free_func(void);
- g_val_t part_max_used_func(void);
-
 #endif
 
 #ifdef CYGWIN
-
- g_val_t cpu_intr_func(void);
- g_val_t cpu_sintr_func(void);
- g_val_t bytes_in_func(void);
- g_val_t bytes_out_func(void);
- g_val_t pkts_in_func(void);
- g_val_t pkts_out_func(void);
-
 #endif
 
 #ifdef HPUX
 
- g_val_t cpu_intr_func(void);
- g_val_t cpu_sintr_func(void);
  g_val_t mem_rm_func(void);
  g_val_t mem_arm_func(void);
  g_val_t mem_vm_func(void);
@@ -135,15 +119,6 @@ typedef union {
 #endif
 
 #ifdef FREEBSD
-
- g_val_t bytes_in_func(void);
- g_val_t bytes_out_func(void);
- g_val_t pkts_in_func(void);
- g_val_t pkts_out_func(void);
- g_val_t disk_total_func(void);
- g_val_t disk_free_func(void);
- g_val_t part_max_used_func(void);
-
 #endif
 
 #ifdef AIX
@@ -153,9 +128,6 @@ typedef union {
 #endif
 
 #ifdef IRIX
-
- g_val_t cpu_intr_func(void);
-
 #endif
 
 #ifdef OSF
@@ -184,6 +156,15 @@ enum {
    cpu_idle,
    cpu_wio,
    cpu_aidle,
+   cpu_intr,
+   cpu_sintr,
+   bytes_in,
+   bytes_out,
+   pkts_in,
+   pkts_out,
+   disk_total,
+   disk_free,
+   part_max_used,
    load_one,
    load_five,
    load_fifteen,
@@ -203,10 +184,6 @@ enum {
     * added by swagner for extended solaris monitoring.
     */
 #ifdef SOLARIS
-   bytes_in,
-   bytes_out,
-   pkts_in,
-   pkts_out,
    bread_sec,
    bwrite_sec,
    lread_sec,
@@ -217,43 +194,18 @@ enum {
    wcache,
 #endif
 #ifdef LINUX
-   bytes_in,
-   bytes_out,
-   pkts_in,
-   pkts_out,
-   disk_total,
-   disk_free,
-   part_max_used,
-   cpu_intr,
-   cpu_sintr,
 #endif
 #ifdef CYGWIN
-   bytes_in,
-   bytes_out,
-   pkts_in,
-   pkgs_out,
-   cpu_intr,
-   cpu_sintr,
 #endif
 #ifdef HPUX
-   cpu_intr,
-   cpu_sintr,
    cpu_arm,
    cpu_rm,
    cpu_avm,
    cpu_vm,
 #endif
 #ifdef FREEBSD
-   bytes_in,
-   bytes_out,
-   pkts_in,
-   pkts_out,
-   disk_total,
-   disk_free,
-   part_max_used,
 #endif
 #ifdef IRIX
-   cpu_intr,
 #endif
 #ifdef AIX
 #endif
