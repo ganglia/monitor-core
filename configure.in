@@ -90,6 +90,9 @@ AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
 AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
 AC_CYGWIN
 
+
+nl='
+'
 echo $ac_n "${nl}Configuring libmetrics ...${nl}"
 APR_SUBDIR_CONFIG(srclib/libmetrics, [ --cache-file=../../config.cache ])
 
