@@ -2,7 +2,8 @@
  * @file daemon_inetd.c Functions for inetd daemons
  */
 /* $Id$ */
-#include	"gangliaconf.h"
+#include <stdarg.h>
+#include <syslog.h>
 
 extern int daemon_proc;		/* defined in error.c */
 

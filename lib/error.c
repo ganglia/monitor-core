@@ -2,7 +2,21 @@
  * @file error.c Error Handling Functions
  */
 /* $Id$ */
-#include	"gangliaconf.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <syslog.h>
+#include <string.h>
+#include <errno.h>
+
+#ifndef MAXLINE
+#define MAXLINE 4096
+#endif
 
 int daemon_proc;		/* set nonzero by daemon_init() */
 

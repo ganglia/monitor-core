@@ -1,11 +1,19 @@
 #ifndef GMETAD_H
 #define GMETAD_H 1 
 
-#include <ganglia/net.h>
-#include <ganglia/hash.h>
-#include <ganglia/debug_msg.h>
-#include <ganglia/error.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "net.h"
+#include "hash.h"
+#include "debug_msg.h"
+#include "error.h"
+#include "llist.h"
 #include "conf.h"
+#include "become_a_nobody.h"
+#include "daemon_init.h"
+#include "my_inet_ntop.h"
 
 /* For metric_hash */
 typedef enum {

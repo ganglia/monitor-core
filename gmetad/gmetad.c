@@ -10,7 +10,7 @@
 #include <time.h>
 #include <gmetad.h>
 #include <cmdline.h>
-#include <ganglia/llist.h>
+
 
 /* Holds our data sources. */
 hash_t *sources;

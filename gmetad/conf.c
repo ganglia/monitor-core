@@ -1,7 +1,5 @@
 #include <dotconf.h>
 #include <string.h>
-#include <ganglia/hash.h>
-#include <ganglia/llist.h>
 #include <gmetad.h>
 #include <ganglia.h>
 #include "conf.h"
@@ -219,7 +217,7 @@ static DOTCONF_CB(cb_scalable)
 static FUNC_ERRORHANDLER(errorhandler)
 {
    err_quit("gmetad config file error: %s\n", msg);
-   return NULL;
+   return 0;
 }
 
 static configoption_t gmetad_options[] =

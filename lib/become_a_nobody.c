@@ -1,7 +1,11 @@
 /* $Id$ */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <stdio.h>
 #include "become_a_nobody.h"
 #include "error.h"
-#include <stdio.h>
 
 void
 become_a_nobody( const char *username )

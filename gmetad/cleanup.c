@@ -122,7 +122,9 @@ cleanup_source ( datum_t *key, datum_t *val, void *arg )
    Source_t * source = (Source_t *) val->data;
    datum_t *rv;
    Host_t *node;
+#if 0
    unsigned int born;
+#endif
 
    /* Currently we never delete a source. */
    

@@ -35,19 +35,13 @@ AC_CONFIG_AUX_DIR(config)
 # if any functions have been added, set GANGLIA_INTERFACE_AGE to 0.
 # if backwards compatibility has been broken,
 # set GANGLIA_BINARY_AGE _and_ GANGLIA_INTERFACE_AGE to 0.
+GANGLIA_RELEASE_NAME="Kittyhawk"
 GANGLIA_MAJOR_VERSION=2
 GANGLIA_MINOR_VERSION=5
 GANGLIA_MICRO_VERSION=8
 GANGLIA_INTERFACE_AGE=8
 GANGLIA_BINARY_AGE=8
 GANGLIA_VERSION=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION.$GANGLIA_MICRO_VERSION
-
-echo
-echo "---------------------------------------------------------------------"
-echo " Welcome to Ganglia $GANGLIA_VERSION"
-echo " Copyright (c) 2003 University of California, Berkeley"
-echo "====================================================================="
-echo
 
 AM_INIT_AUTOMAKE(ganglia-monitor-core, $GANGLIA_VERSION)
 
@@ -245,7 +239,7 @@ dnl AC_FUNC_MEMCMP
 dnl ##################################################################
 dnl Check for function prototypes in headers.
 dnl
-AC_CHECK_FUNCS(getopt_long inet_ntop)
+AC_CHECK_FUNCS(getopt_long inet_ntop strdup)
 dnl AC_CHECK_FUNC(getopt_long)
 dnl AC_CHECK_FUNC(pthread_rwlock_rdlock,
 dnl   [AC_DEFINE(HAVE_PTHREAD_RWLOCK, 1)])
@@ -342,7 +336,20 @@ dnl AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
 AC_OUTPUT(Makefile srclib/Makefile ganglia.spec gmetad/Makefile lib/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile)
 
+
 echo ""
-echo "-- Ganglia $VERSION --"
+echo "Welcome to.."
+echo "     ______                  ___"
+echo "    / ____/___ _____  ____ _/ (_)___ _"
+echo "   / / __/ __ \`/ __ \/ __ \`/ / / __ \`/"
+echo "  / /_/ / /_/ / / / / /_/ / / / /_/ /"
+echo "  \____/\__,_/_/ /_/\__, /_/_/\__,_/"
+echo "                   /____/"
+echo ""
+echo "Copyright (c) 2004 University of California, Berkeley"
+echo ""
+echo "Version: $GANGLIA_VERSION ($GANGLIA_RELEASE_NAME)"
+echo "Library: Release $LT_RELEASE $LT_CURRENT:$LT_REVISION:$LT_AGE"
+echo ""
 echo "Type \"make\" to compile."
 
