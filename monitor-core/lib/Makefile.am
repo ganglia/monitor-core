@@ -1,3 +1,8 @@
+if GEXEC_SUPPORTED
+gexec_libraries = 	$(top_builddir)/libe/libe.la 
+	 		$(top_builddir)/gexec/libgexec.la
+endif
+
 lib_LTLIBRARIES = libganglia.la
 libganglia_la_SOURCES = debug_msg.c \
 hash.c llist.c rdwr.c file.c gexec_funcs.c barrier.c \
@@ -14,8 +19,7 @@ libganglia_la_LDFLAGS = \
 	-release $(LT_RELEASE) \
 	-export-dynamic
 libganglia_la_LIBADD = $(top_builddir)/libhttpd/libhttpd.la \
-	$(top_builddir)/libunp/libunp.la
-
+	$(top_builddir)/libunp/libunp.la $(gexec_libraries)
 
 
 noinst_LIBRARIES = libgetopthelper.a

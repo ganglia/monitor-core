@@ -54,8 +54,8 @@ written in the PHP4 language.
 %package gmetad
 Summary: Ganglia Meta daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-gmetad
-Provides: ganglia-monitor-core-gmetad
+Obsoletes: ganglia-monitor-core-gmetad ganglia-monitor-core
+Provides: ganglia-monitor-core-gmetad ganglia-monitor-core
 
 %description gmetad
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -68,8 +68,8 @@ to form a monitoring grid. It also keeps metric history using the RRD tool.
 %package gmond
 Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-gmond
-Provides: ganglia-monitor-core-gmond
+Obsoletes: ganglia-monitor-core-gmond ganglia-monitor-core
+Provides: ganglia-monitor-core-gmond ganglia-monitor-core
 
 
 %description gmond
@@ -83,7 +83,7 @@ Multicast domain.
 %package devel
 Summary: Ganglia Library http://ganglia.sourceforge.net/
 Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-lib
+Obsoletes: ganglia-monitor-core-lib libe
 Provides: ganglia-monitor-core-lib
 
 %description devel

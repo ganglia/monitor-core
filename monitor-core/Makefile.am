@@ -1,9 +1,12 @@
 # $Id$
 #
-# It's nice to have web last since on 'make install' we echo a message
-SUBDIRS = libunp libhttpd lib tests gmetad gmond gmetric web 
+if GEXEC_SUPPORTED
+gexec_directories = gauthd gexec
+libe_directory = libe
+endif
 
-#DIST_SUBDIRS = lib gmetad gmond gmetric
+# web is last since on 'make install' we echo a message
+SUBDIRS = $(libe_directory) libunp libhttpd lib tests gmetad gmond gmetric $(gexec_directories) web
 
 EXTRA_DIST = config ganglia.spec ganglia.pod ganglia.html mans
 
@@ -35,4 +38,3 @@ dist-hook:
 
 rpm: dist
 	rpmbuild -ta --target noarch,i386 ganglia-monitor-core-@VERSION@.tar.gz
-	
