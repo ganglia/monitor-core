@@ -21,7 +21,7 @@
 
 #include "hash.h"
 #include "barrier.h"
-#include "gmond_config.h"
+#include "conf.h"
 #include "net.h"
 #include "debug_msg.h"
 #include "ganglia.h"

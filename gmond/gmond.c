@@ -11,6 +11,8 @@
 #include <pwd.h>
 #include <signal.h>
 
+#include "conf.h"
+
 #include "libmetrics.h"
 
 #include "metric.h"
@@ -25,7 +27,6 @@
 #include "lib/llist.h"
 #include "lib/net.h"
 #include "expat.h"
-#include "lib/gmond_config.h"
 #include "lib/hash.h"
 #include "lib/barrier.h"
 #include "lib/become_a_nobody.h"
