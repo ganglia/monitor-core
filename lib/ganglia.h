@@ -37,12 +37,21 @@
 typedef struct apr_pool_t *         Ganglia_pool;
 typedef struct cfg_t *              Ganglia_gmond_config;
 typedef struct apr_array_header_t * Ganglia_udp_send_channels;
+typedef struct Ganglia_gmetric_message * Ganglia_gmetric;
 
 Ganglia_gmond_config
-Ganglia_gmond_config_new(char *path, int fallback_to_default);
-Ganglia_udp_send_channels
-Ganglia_udp_send_channels_new(Ganglia_pool context,Ganglia_gmond_config config);
+Ganglia_gmond_config_create(char *path, int fallback_to_default);
+void Ganglia_gmond_config_destroy(Ganglia_gmond_config config);
 
+Ganglia_udp_send_channels
+Ganglia_udp_send_channels_create(Ganglia_pool context,Ganglia_gmond_config config);
+void Ganglia_udp_send_channels_destroy(Ganglia_udp_send_channels channels);
+
+Ganglia_pool Ganglia_pool_create( Ganglia_pool parent );
+void Ganglia_pool_destroy( Ganglia_pool pool );
+
+int Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len );
+int Ganglia_send_gmetric(Ganglia_gmetric gmetric, Ganglia_udp_send_channels channels );
 
 
 extern int gexec_errno;

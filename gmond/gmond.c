@@ -37,7 +37,7 @@ cfg_t *config_file;
 /* The debug level (in debug_msg.c) */
 extern int debug_level;
 /* The global context */
-apr_pool_t *global_context = NULL;
+Ganglia_pool global_context = NULL;
 /* Deaf mode boolean */
 int deaf;
 /* Mute mode boolean */
@@ -56,7 +56,8 @@ extern char *default_gmond_configuration;
 int host_dmax = 0;
 
 /* The array for outgoing UDP message channels */
-apr_array_header_t *udp_send_channels = NULL;
+Ganglia_udp_send_channels udp_send_channels = NULL;
+
 /* TODO: The array for outgoing TCP message channels (later) */
 apr_array_header_t *tcp_send_array = NULL;
 
@@ -151,8 +152,9 @@ process_configuration_file(void)
   cfg_t *tmp;
 
   /* this is a global for now */
-  config_file = Ganglia_gmond_config_new( args_info.conf_arg, !args_info.conf_given );
+  config_file = Ganglia_gmond_config_create( args_info.conf_arg, !args_info.conf_given );
 
+  /* Initialize a few variables */
   tmp = cfg_getsec( config_file, "globals");
   /* Get the maximum UDP message size */
   max_udp_message_len = cfg_getint( tmp, "max_udp_msg_len");
@@ -160,37 +162,6 @@ process_configuration_file(void)
   gexec_on            = cfg_getbool(tmp, "gexec");
   /* Get the host dmax ... */
   host_dmax           = cfg_getint( tmp, "host_dmax");
-}
-
-static void
-cleanup_apr_library( void )
-{
-  apr_pool_destroy(global_context);
-  apr_terminate();
-}
-
-static void
-initialize_apr_library( void )
-{
-  apr_status_t status;
-
-  /* Initialize apr */
-  status = apr_initialize();
-  if(status != APR_SUCCESS)
-    {
-      fprintf(stderr,"Unable to initialize APR library. Exiting.\n");
-      exit(1);
-    }
-
-  /* Create the global context */
-  status = apr_pool_create( &global_context, NULL );
-  if(status != APR_SUCCESS)
-    {
-      fprintf(stderr,"Unable to create global context. Exiting.\n");
-      exit(1);
-    }
-
-  atexit(cleanup_apr_library);
 }
 
 static void
@@ -535,7 +506,7 @@ Ganglia_host_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *fullmsg)
 }
 
 static Ganglia_metric *
-Ganglia_metric_new( Ganglia_host *host )
+Ganglia_metric_create( Ganglia_host *host )
 {
   apr_status_t status;
   Ganglia_metric *metric = NULL;
@@ -609,7 +580,7 @@ Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
   if(!metric)
     {
       /* This is a new metric sent from this host... allocate space for this data */
-      metric = Ganglia_metric_new( host );
+      metric = Ganglia_metric_create( host );
       if(!metric)
 	{
 	  /* no memory */
@@ -1086,34 +1057,6 @@ poll_listen_channels( apr_interval_time_t timeout, apr_time_t now)
     }
 }
 
-
-/* This function will send a datagram to every udp_send_channel specified */
-/* TODO: add to libgmond */
-static int
-Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len )
-{
-  apr_status_t status;
-  int i;
-  int num_errors = 0;
-  apr_size_t size;
-
-  /* Return if we have no data or we're muted */
-  if(!buf || mute)
-    return 1;
-
-  for(i=0; i< channels->nelts; i++)
-    {
-      apr_socket_t *socket = ((apr_socket_t **)(channels->elts))[i];
-      size   = len;
-      status = apr_socket_send( socket, buf, &size );
-      if(status != APR_SUCCESS)
-	{
-	  num_errors++;
-	}
-    }
-  return num_errors;
-}
-
 static int
 tcp_send_message( char *buf, int len )
 {
@@ -1548,11 +1491,11 @@ main ( int argc, char *argv[] )
 {
   apr_time_t now, next_collection;
 
+  /* Create the global context */
+  global_context = Ganglia_pool_create(NULL);
+
   /* Mark the time this gmond started */
   started = apr_time_now();
-
-  /* Initializes the apr library in ./srclib/apr */
-  initialize_apr_library();
 
   /* Builds a default configuration based on platform */
   build_default_gmond_configuration(global_context);
@@ -1606,7 +1549,7 @@ main ( int argc, char *argv[] )
     {
       setup_metric_callbacks();
       setup_collection_groups();
-      udp_send_channels = Ganglia_udp_send_channels_new( global_context, config_file );
+      udp_send_channels = Ganglia_udp_send_channels_create( global_context, config_file );
     }
 
   /* Create the host hash table */
