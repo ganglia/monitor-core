@@ -101,6 +101,15 @@ extern g_val_t part_max_used_func(void);
 
 #endif
 
+#ifdef CYGWIN
+
+extern g_val_t bytes_in_func(void);
+extern g_val_t bytes_out_func(void);
+extern g_val_t pkts_in_func(void);
+extern g_val_t pkts_out_func(void);
+
+#endif
+
 #ifdef HPUX
 
 extern g_val_t cpu_wait_func(void);

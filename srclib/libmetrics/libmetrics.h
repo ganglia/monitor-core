@@ -13,6 +13,10 @@ void libmetrics_init( void );
 #include <sys/types.h>
 #include <rpc/types.h>
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 typedef enum {
    g_string,  /* huh uh.. he said g string */
    g_int8,
@@ -108,6 +112,15 @@ typedef union {
 
 #endif
 
+#ifdef CYGWIN
+
+ g_val_t bytes_in_func(void);
+ g_val_t bytes_out_func(void);
+ g_val_t pkts_in_func(void);
+ g_val_t pkts_out_func(void);
+
+#endif
+
 #ifdef HPUX
 
  g_val_t cpu_intr_func(void);
@@ -190,6 +203,12 @@ enum {
    disk_total,
    disk_free,
    part_max_used,
+#endif
+#ifdef CYGWIN
+   bytes_in,
+   bytes_out,
+   pkts_in,
+   pkgs_out,
 #endif
 #ifdef HPUX
    cpu_intr,

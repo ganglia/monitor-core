@@ -346,6 +346,7 @@ dnl
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
                 AC_DEFINE(FREEBSD, 1, FREEBSD);; 
 *cygwin*)      	metric_source="cygwin.c" 
+                LDFLAGS="-liphlpapi"
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
 
