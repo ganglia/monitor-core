@@ -86,18 +86,18 @@ static configoption_t dotconf_options[] =
 	LAST_CONTEXT_OPTION
 };
 
-static void skip_whitespace(char **cp, int n, char term)
+static void skip_whitespace(signed char **cp, int n, char term)
 {
-	char *cp1 = *cp;
+	signed char *cp1 = *cp;
 	while(isspace((int)*cp1) && *cp1 != term && n--)
 		cp1++;
 	*cp = cp1;
 }
 
-static void copy_word(char **dest, char **src, int max, char term)
+static void copy_word(signed char **dest, signed char **src, int max, char term)
 {
-	char *cp1 = *src;
-	char *cp2 = *dest;
+	signed char *cp1 = *src;
+	signed char *cp2 = *dest;
 	while(max-- && !isspace((int)*cp1) && *cp1 != term)
 		*cp2++ = *cp1++;
 	*cp2 = 0;
@@ -367,11 +367,11 @@ const char *dotconf_invoke_command(configfile_t *configfile, command_t *cmd)
 	return error;
 }
 
-char *dotconf_read_arg(configfile_t *configfile, char **line)
+char *dotconf_read_arg(configfile_t *configfile, signed char **line)
 {
 	int sq = 0, dq = 0;							/* single quote, double quote */
 	int done;
-	char *cp1 = *line;
+	signed char *cp1 = *line;
 	char *cp2, *eos;
 	char buf[CFG_MAX_VALUE];
 
@@ -483,9 +483,9 @@ configoption_t *dotconf_find_command(configfile_t *configfile, const char *comma
 	return option;
 }
 
-void dotconf_set_command(configfile_t *configfile, const configoption_t *option, char *args, command_t *cmd)
+void dotconf_set_command(configfile_t *configfile, const configoption_t *option, signed char *args, command_t *cmd)
 {
-	char *eob = 0;
+	signed char *eob = 0;
 
 	eob = args + strlen(args);
 
@@ -503,10 +503,10 @@ void dotconf_set_command(configfile_t *configfile, const configoption_t *option,
 		cmd->data.str = strdup(args);
 	}
 	else if (option->type == ARG_STR) {
-		char *cp = args;
+		signed char *cp = args;
 
 		/* check if it's a here-document and act accordingly */
-		skip_whitespace(&cp, eob - cp, 0);
+		skip_whitespace(&cp, (int)eob - (int)cp, 0);
 
 		if (!strncmp("<<", cp, 2)) {
 			cmd->data.str = dotconf_get_here_document(configfile, cp + 2);
@@ -587,8 +587,10 @@ void dotconf_free_command(command_t *command)
 
 const char *dotconf_handle_command(configfile_t *configfile, char *buffer)
 {
-	char *cp1, *cp2;							/* generic char pointer      */
-	char *eob;									/* end of buffer; end of string  */
+	signed char *cp1; 
+	signed char *cp2;
+	/* generic char pointer      */
+	signed char *eob;									/* end of buffer; end of string  */
 	const char *error;							/* error message we'll return */
 	const char *context_error;					/* error message returned by contextchecker */
 	command_t command;							/* command structure */
@@ -603,7 +605,7 @@ const char *dotconf_handle_command(configfile_t *configfile, char *buffer)
 	cp1 = buffer;
 	eob = cp1 + strlen(cp1);
 
-	skip_whitespace(&cp1, eob - cp1, 0);
+	skip_whitespace(&cp1, (int)eob - (int)cp1, 0);
 
 	/* ignore comments and empty lines */
 	if (!cp1 || !*cp1 || *cp1 == '#' || *cp1 == '\n' || *cp1 == EOF)
