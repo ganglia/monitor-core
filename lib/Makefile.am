@@ -24,8 +24,6 @@ libdnet_a_DEPENDENCIES = @DNET_OBJS@
 EXTRA_libdnet_a_SOURCES = intf.c intf-win32.c \
 eth-bsd.c eth-dlpi.c eth-linux.c eth-ndd.c eth-none.c eth-snoop.c eth-win32.c
 
-libganglia_la_LIBADD  = $(DOTCONF_LIBS)
-
 libganglia_la_LDFLAGS = -version-info 2:0:1
 
 include_HEADERS = ganglia.h ganglia/ascii.h ganglia/asciitab.h ganglia/daemon_inetd.h \
