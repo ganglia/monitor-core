@@ -3,7 +3,7 @@
 #include <ganglia/llist.h>
 #include <ganglia/hash.h>
 #include "dtd.h"
-#include "gmetad_typedefs.h"
+#include "gmetad.h"
 
 extern g_tcp_socket *   server_socket;
 extern pthread_mutex_t  server_socket_mutex;

@@ -8,7 +8,7 @@
 #include <ganglia/hash.h>
 #include <ganglia/llist.h>
 #include <ganglia/net.h>
-#include "gmetad_typedefs.h"
+#include "gmetad.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
