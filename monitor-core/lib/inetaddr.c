@@ -94,16 +94,17 @@ g_inetaddr_new (const char* name, int port)
      return NULL;
   memset(ia, 0, sizeof(g_inet_addr));
 
+  ia->name = (char *)strdup(name);
+  ia->ref_count = 1;
+
   /* Try to read the name as if were dotted decimal */
   if (inet_aton(name, &inaddr) != 0)
     {
-      ia->ref_count = 1;
       sa_in = (struct sockaddr_in*) &ia->sa;
       sa_in->sin_family = AF_INET;
       sa_in->sin_port = htons(port);
       memcpy(&sa_in->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
     }
-
   else
     {
       struct sockaddr_in sa;
@@ -111,9 +112,6 @@ g_inetaddr_new (const char* name, int port)
       /* Try to get the host by name (ie, DNS) */
       if (g_gethostbyname(name, &sa, NULL))
         {
-          ia->name = (char *)strdup(name);
-          ia->ref_count = 1;
-
           sa_in = (struct sockaddr_in*) &ia->sa;
           sa_in->sin_family = AF_INET;
           sa_in->sin_port = htons(port);
