@@ -142,11 +142,10 @@ pkts_in_func ( void )
    /*  skip past the two-line header ... */
      p = index (p, '\n')+1;
      p = index (p, '\n')+1;
-     p = index (p, '\n')+1;  // and skip loopback, which is always the first one
      while (*p != 0x00 )
        {
        p = index(p, ':')+1; /*  skip past the interface tag portion of this line */
-       if ( (*p-1 != 'o') && (*p-2 != 'l') )
+       if ( (*(p-2) != 'o') && (*(p-3) != 'l') )
           {
           t = strtod( p, &p );
           bytes_in += t;
@@ -201,11 +200,10 @@ pkts_out_func ( void )
    /*  skip past the two-line header ... */
      p = index (p, '\n')+1;
      p = index (p, '\n')+1;
-     p = index (p, '\n')+1;  // and skip loopback, which is always the first one
      while (*p != 0x00 )
        {
        p = index(p, ':')+1; /*  skip past the interface tag portion of this line */
-       if ( (*p-1 != 'o') && (*p-2 != 'l') )
+       if ( (*(p-2) != 'o') && (*(p-3) != 'l') )
           {
           t = strtod( p, &p );
           bytes_in += t;
@@ -260,11 +258,10 @@ bytes_out_func ( void )
    /*  skip past the two-line header ... */
      p = index (p, '\n')+1;
      p = index (p, '\n')+1;
-     p = index (p, '\n')+1;  // and skip loopback, which is always the first one
      while (*p != 0x00 )
        {
        p = index(p, ':')+1; /*  skip past the interface tag portion of this line */
-       if ( (*p-1 != 'o') && (*p-2 != 'l') )
+       if ( (*(p-2) != 'o') && (*(p-3) != 'l') )
           {
           t = strtod( p, &p );
           bytes_in += t;
@@ -321,12 +318,11 @@ bytes_in_func ( void )
    /*  skip past the two-line header ... */
      p = index (p, '\n')+1;
      p = index (p, '\n')+1;
-     p = index (p, '\n')+1;  // and skip loopback, which is always the first one
      while (*p != 0x00 )
        {
        p = index(p, ':')+1; /*  skip past the interface tag portion of this line */
        debug_msg(" Last two chars: %c%c\n", *p-2, *p-1 );
-       if ( (*p-1 != 'o') && (*p-2 != 'l') )
+       if ( (*(p-2) != 'o') && (*(p-3) != 'l') )
           {
           debug_msg(" Last two chars: %c%c\n", *p-2, *p-1 );
           t = strtod( p, &p );
