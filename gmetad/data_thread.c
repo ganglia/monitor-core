@@ -57,7 +57,7 @@ data_thread ( void *arg )
          for(i=0; i < d->num_sources; i++)
             {
                /* Find first viable source in list. */
-               sock = Tcp_connect( d->names[i], d->ports[i]);
+               sock = tcp_connect( d->names[i], d->ports[i]);
                if( sock > 0 )
                   break;
             }
