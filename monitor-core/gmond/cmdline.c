@@ -49,6 +49,7 @@ cmdline_parser_print_help (void)
   printf("  -t, --default_config   Print the default configuration to stdout and exit  \n                           (default=off)\n");
   printf("  -m, --metrics          Print the list of metrics this gmond supports  \n                           (default=off)\n");
   printf("  -b, --bandwidth        Calculate minimum bandwidth use for configuration  \n                           (default=off)\n");
+  printf("  -r, --convert=STRING   Convert a 2.5.x configuration file to the new 2.6 \n                           format\n");
 }
 
 
@@ -81,6 +82,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->default_config_given = 0 ;
   args_info->metrics_given = 0 ;
   args_info->bandwidth_given = 0 ;
+  args_info->convert_given = 0 ;
 #define clear_args() { \
   args_info->conf_arg = gengetopt_strdup("/etc/gmond.conf") ;\
   args_info->location_arg = gengetopt_strdup("0,0,0") ;\
@@ -89,6 +91,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->default_config_flag = 0;\
   args_info->metrics_flag = 0;\
   args_info->bandwidth_flag = 0;\
+  args_info->convert_arg = NULL; \
 }
 
   clear_args();
@@ -113,11 +116,12 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "default_config",	0, NULL, 't' },
         { "metrics",	0, NULL, 'm' },
         { "bandwidth",	0, NULL, 'b' },
+        { "convert",	1, NULL, 'r' },
         { NULL,	0, NULL, 0 }
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVc:l:d:ftmb", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVc:l:d:ftmbr:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -212,6 +216,17 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             }
           args_info->bandwidth_given = 1;
           args_info->bandwidth_flag = !(args_info->bandwidth_flag);
+          break;
+
+        case 'r':	/* Convert a 2.5.x configuration file to the new 2.6 format.  */
+          if (args_info->convert_given)
+            {
+              fprintf (stderr, "%s: `--convert' (`-r') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              clear_args ();
+              exit (EXIT_FAILURE);
+            }
+          args_info->convert_given = 1;
+          args_info->convert_arg = gengetopt_strdup (optarg);
           break;
 
 

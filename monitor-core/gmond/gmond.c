@@ -25,6 +25,7 @@
 #include "debug_msg.h" 
 #include "protocol.h"  /* generated header from ./lib/protocol.x xdr definition file */
 #include "dtd.h"       /* the DTD definition for our XML */
+#include "g25_config.h" /* for converting old file formats to new */
 
 /* When this gmond was started */
 apr_time_t started;
@@ -1689,6 +1690,14 @@ main ( int argc, char *argv[] )
   apr_time_t now, next_collection, last_cleanup;
   Ganglia_pool cleanup_context;
 
+  if (cmdline_parser (argc, argv, &args_info) != 0)
+        exit(1) ;
+
+  if(args_info.convert_given)
+    {
+      exit (print_ganglia_25_config( args_info.convert_arg ));
+    }
+
   /* Create the global context */
   global_context = Ganglia_pool_create(NULL);
 
@@ -1697,9 +1706,6 @@ main ( int argc, char *argv[] )
 
   /* Mark the time this gmond started */
   started = apr_time_now();
-
-  if (cmdline_parser (argc, argv, &args_info) != 0)
-    exit(1) ;
 
   /* Builds a default configuration based on platform */
   build_default_gmond_configuration(global_context);
