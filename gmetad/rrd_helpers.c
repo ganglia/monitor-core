@@ -1,46 +1,94 @@
 /* $Id$ */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <rrd.h>
 #include <gmetad.h>
+#include <errno.h>
 
 extern char * rrd_rootdir;
 
-static int push_data_to_summary_rrd( char *rrd, char *sum, char *num);
+static int push_data_to_summary_rrd( char *rrd, char *sum, char *num, char *polling_interval);
+static int push_data_to_rrd( char *rrd, char *sum, char *polling_interval);
+static int RRD_create( char *rrd, char *polling_interval);
+static int RRD_update( char *rrd, char *sum );
+static int summary_RRD_create( char *rrd, char *polling_interval);
+static int summary_RRD_update( char *rrd, char *sum, char *num );
 
-int
-push_data_to_meta_rrd ( char *metric, char *sum, char *num )
+static void
+my_mkdir ( char *dir )
 {
    int rval;
-   char rrd[2024];
-   char *polling_interval = "15"; /* secs .. constant for now */
-
-   snprintf(rrd, 2024,"%s/%s.rrd", rrd_rootdir, metric);
-   return push_data_to_summary_rrd( rrd, sum, num );
+   rval = mkdir ( dir, 0755 );
+   if ( rval < 0 )
+      {
+         if( errno != EEXIST )
+            {
+               err_sys("Unable to mkdir(%s)",dir);
+            }
+      }
 }
-int
-push_data_to_cluster_rrd( char *cluster, char *metric, char *sum, char *num )
-{
-   int rval;
-   char rrd[2024];
-   char *polling_interval = "15"; /* secs .. constant for now */
 
-   snprintf(rrd, 2024,"%s/%s_%s.rrd", rrd_rootdir, cluster, metric);
-   return push_data_to_summary_rrd( rrd, sum, num );
+int
+write_data_to_rrd ( char *cluster, char *host, char *metric, char *sum, char *num, char *polling_interval )
+{
+   char rrd[ 4096 ];
+   int rval;
+   char *summary_dir = "__SummaryInfo__";
+
+   strcpy( rrd, rrd_rootdir );
+   strcat( rrd, "/" );
+
+   if( ! cluster && ! host )
+      {
+         strcat( rrd, summary_dir );
+         my_mkdir( rrd );
+         strcat( rrd, "/" );
+         strcat( rrd, metric );
+         my_mkdir( rrd );
+         strcat( rrd, "/data.rrd" ); 
+         push_data_to_summary_rrd( rrd, sum, num, polling_interval ); 
+      }
+   else if( cluster && ! host )
+      {
+         strcat( rrd, cluster );
+         my_mkdir( rrd );
+         strcat( rrd, "/" );
+         strcat( rrd, summary_dir );
+         my_mkdir( rrd );  
+         strcat( rrd, "/" );
+         strcat( rrd, metric );
+         my_mkdir( rrd );
+         strcat( rrd, "/data.rrd" );
+         push_data_to_summary_rrd( rrd, sum, num, polling_interval );
+      }
+   else
+      {
+         strcat( rrd, cluster );
+         my_mkdir( rrd );
+         strcat( rrd, "/" ); 
+         strcat( rrd, host );
+         my_mkdir( rrd ); 
+         strcat( rrd, "/" );
+         strcat( rrd, metric );
+         my_mkdir( rrd );
+         strcat( rrd, "/data.rrd" );
+         push_data_to_rrd( rrd, sum, polling_interval ); 
+      }
+   return 0;
 }
 
 /* A summary RRD has a "num" and a "sum" DS (datasource) whereas the
    host rrds only have "sum" (since num is always 1) */
 static int
-push_data_to_summary_rrd( char *rrd, char *sum, char *num)
+push_data_to_summary_rrd( char *rrd, char *sum, char *num, char *polling_interval)
 {
    int rval;
-   char *polling_interval = "15"; /* secs .. constant for now */
    struct stat st;
-
+   
    if( stat(rrd, &st) )
       {
          rval = summary_RRD_create( rrd, polling_interval );
@@ -50,15 +98,11 @@ push_data_to_summary_rrd( char *rrd, char *sum, char *num)
    return summary_RRD_update( rrd, sum, num );
 }
 
-int
-push_data_to_rrd( char *cluster, char *host, char *metric, char *value)
+static int
+push_data_to_rrd( char *rrd, char *sum, char *polling_interval)
 {
   int rval;
-  char rrd[2024];
-  char *polling_interval = "15"; /* secs .. constant for now */
   struct stat st;
-
-  snprintf(rrd, 2024,"%s/%s_%s_%s.rrd", rrd_rootdir, cluster, host, metric);
 
   if( stat(rrd, &st) )
      {
@@ -66,11 +110,10 @@ push_data_to_rrd( char *cluster, char *host, char *metric, char *value)
         if( rval )
            return rval;
      }
-
-  return RRD_update( rrd, value );
+  return RRD_update( rrd, sum );
 }
 
-int
+static int
 RRD_update( char *rrd, char *value )
 {
    char *argv[3];
@@ -95,7 +138,7 @@ RRD_update( char *rrd, char *value )
    return 0;
 }
 
-int
+static int
 summary_RRD_update( char *rrd, char *sum, char *num )
 {
    char *argv[3];
@@ -122,7 +165,7 @@ summary_RRD_update( char *rrd, char *sum, char *num )
 
 
 /* Warning: RRD_create will overwrite a RRdb if it already exists */
-int
+static int
 RRD_create( char *rrd, char *polling_interval)
 {
    char *argv[10];
@@ -151,7 +194,7 @@ RRD_create( char *rrd, char *polling_interval)
    return 0;
 }
 
-int
+static int
 summary_RRD_create( char *rrd, char *polling_interval)
 {
    char *argv[11];

@@ -6,9 +6,7 @@
 #include <ganglia/xmlparse.h>
 #include <gmetad.h>
 
-extern int push_data_to_rrd( char *cluster, char *host, char *metric, char *value);
-extern int push_data_to_cluster_rrd( char *cluster, char *metric, char *sum, char *num);
-extern int push_data_to_meta_rrd( char *metric, char *sum, char *num);
+extern int write_data_to_rrd( char *cluster, char *host, char *metric, char *sum, char *num, char *polling_interval);
 
 extern struct xml_tag *in_xml_list (char *, unsigned int);
 extern struct ganglia_metric *in_metric_list (char *, unsigned int);
@@ -123,7 +121,7 @@ start (void *data, const char *el, const char **attr)
               }
 
            /* Save the data to a round robin database */
-           if( push_data_to_rrd( xml_data->cluster, xml_data->host, xml_data->metric, xml_data->metric_val) )
+           if( write_data_to_rrd( xml_data->cluster, xml_data->host, xml_data->metric, xml_data->metric_val, NULL, "15") )
               {
                  /* Pass the error on to save_to_rrd */
                  xml_data->rval = 1;
@@ -234,7 +232,7 @@ end (void *data, const char *el)
                            }
 
                         /* Save the data to a round robin database */
-                        push_data_to_cluster_rrd( (char *)(xml_data->cluster), (char *)metrics[i].name, sum, num);
+                        write_data_to_rrd( (char *)(xml_data->cluster), NULL, (char *)metrics[i].name, sum, num, "15");
                         debug_msg("SAVE CLUSTER SUMMARY INFORMATION %s sum=%s num=%s", metrics[i].name, sum, num);
                     }
               }
