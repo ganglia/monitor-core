@@ -17,3 +17,4 @@ gmond_LDADD   = $(top_builddir)/lib/libganglia.la \
                 $(top_builddir)/srclib/apr/libapr-0.la \
 		$(top_builddir)/srclib/confuse/src/libconfuse.la
 gmond_LDFLAGS = -static
+gmond_DEPENDENCIES = $(gmond_LDADD)

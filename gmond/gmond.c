@@ -44,6 +44,7 @@ int max_udp_message_len = 1472; /* mtu 1500 - 28 bytes for IP/UDP headers */
 apr_pollset_t *udp_recv_pollset = NULL;
 /* The access control list for each of the UDP channels */
 apr_array_header_t *udp_recv_acl_array = NULL;
+
 /* The array for outgoing UDP message channels */
 apr_array_header_t *udp_send_array = NULL;
 
@@ -66,8 +67,11 @@ struct hostdata_t {
 };
 typedef struct hostdata_t hostdata_t;
 
-/* This is a data structure for recvfrom calls */
-apr_sockaddr_t *remotesa = NULL;
+static void
+cleanup_configuration_file(void)
+{
+  cfg_free( config_file );
+}
 
 static void
 process_configuration_file(void)
@@ -103,6 +107,15 @@ process_configuration_file(void)
       /* I have no clue whats goin' on here... */
       exit(1);
     }
+  /* Free memory for this configuration file at exit */
+  atexit(cleanup_configuration_file);
+}
+
+static void
+cleanup_apr_library( void )
+{
+  apr_pool_destroy(global_context);
+  apr_terminate();
 }
 
 static void
@@ -126,7 +139,7 @@ initialize_apr_library( void )
       exit(1);
     }
 
-  /* Setup atexit() calls to cleanup? */
+  atexit(cleanup_apr_library);
 }
 
 static void
@@ -196,9 +209,6 @@ setup_udp_recv_pollset( void )
   /* Create my UDP recv access control array */
   udp_recv_acl_array = apr_array_make( global_context, num_udp_recv_channels,
                                    sizeof(apr_ipsubnet_t *));
-
-  /* This just creates the remotesa data structure used in recvfrom */
-  apr_sockaddr_info_get(&remotesa, "127.0.0.1", APR_UNSPEC, 8649, 0, global_context);
 
   for(i = 0; i< num_udp_recv_channels; i++)
     {
@@ -284,11 +294,12 @@ find_host_data( char *remoteip, apr_sockaddr_t *sa)
   apr_pool_t *pool;
   hostdata_t *hostdata;
   char *hostname = NULL;
+  char *remoteipdup = NULL;
 
   hostdata =  (hostdata_t *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
   if(!hostdata)
     {
-      /* Lookup the hostname */
+      /* Lookup the hostname (TODO: check for proxy info) */
       status = apr_getnameinfo(&hostname, sa, 0);
       if(status != APR_SUCCESS)
 	{
@@ -316,6 +327,9 @@ find_host_data( char *remoteip, apr_sockaddr_t *sa)
       /* Save the hostname */
       hostdata->hostname = apr_pstrdup( pool, hostname );
 
+      /* Dup the remoteip (it will be freed later) */
+      remoteipdup = apr_pstrdup( pool, remoteip);
+
       /* Set the timestamps */
       hostdata->first_heard_from = hostdata->last_heard_from = apr_time_now();
 
@@ -328,11 +342,11 @@ find_host_data( char *remoteip, apr_sockaddr_t *sa)
 	}
 
       /* Save this host data to the "hosts" hash */
-      apr_hash_set( hosts, remoteip, APR_HASH_KEY_STRING, hostdata); 
+      apr_hash_set( hosts, remoteipdup, APR_HASH_KEY_STRING, hostdata); 
     }
   else
     {
-      /* We already have this host in our "hosts" array */
+      /* We already have this host in our "hosts" hash undate timestamp */
       hostdata->last_heard_from = apr_time_now();
     }
 
@@ -344,8 +358,7 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 {
   apr_status_t status;
   const apr_pollfd_t *descs = NULL;
-  apr_int32_t i, num = 0;
-  apr_socket_t *socket = NULL;
+  apr_int32_t num = 0;
 
   /* Poll for data with given timeout */
   status = apr_pollset_poll(udp_recv_pollset, timeout, &num, &descs);
@@ -354,17 +367,26 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 
   if(num>0)
     {
+      int i;
+
       /* We have data to read */
       for(i=0; i< num; i++)
         {
+	  apr_socket_t *socket;
 	  char buf[max_udp_message_len]; 
 	  apr_size_t len = max_udp_message_len;
-	  char  *protocol, *remoteip = NULL;
+	  apr_sockaddr_t *remotesa = NULL;
+	  char  *protocol, remoteip[256];
 	  apr_ipsubnet_t *ipsub;
 	  hostdata_t *hostdata = NULL;
 
 	  socket         = descs[i].desc.s;
+	  /* We could also use the apr_socket_data_get/set() functions
+	   * to have per socket user data .. see APR docs */
 	  protocol       = descs[i].client_data;
+
+	  apr_socket_addr_get(&remotesa, APR_REMOTE, socket);
+
 
 	  /* Grab the data */
 	  status = apr_socket_recvfrom(remotesa, socket, 0, buf, &len);
@@ -373,14 +395,10 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 	      continue;
 	    }	  
 
-	  /* Collect the remote address */
-	  status = apr_socket_addr_get(&remotesa, APR_REMOTE, socket);
-	  if(status != APR_SUCCESS)
-	    {
-	      continue;
-	    }
-
-	  apr_sockaddr_ip_get(&remoteip, remotesa);
+	  /* This function is in ./lib/apr_net.c and not APR. The
+	   * APR counterpart is apr_sockaddr_ip_get() but we don't 
+	   * want to malloc memory evertime we call this */
+	  apr_sockaddr_ip_buffer_get(remoteip, 256, remotesa);
 
 	  /* Check the ACL (we can make this better later) */
 	  ipsub = ((apr_ipsubnet_t **)(udp_recv_acl_array->elts))[i];
@@ -438,6 +456,7 @@ poll_udp_recv_channels(apr_interval_time_t timeout)
 	      decoded = xdr_getpos(&x); */
 	    }
 #endif
+
         } 
     }
 }
