@@ -13,8 +13,6 @@
 
 #include "conf.h"
 
-#include "libmetrics.h"
-
 #include "metric.h"
 
 #include "interface.h"
@@ -72,6 +70,7 @@ KEY(cpu_user),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_nice),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_system),    1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_idle),      5,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_wio),       1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(cpu_aidle),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
 KEY(load_one),      1,  15,   20,   50,   70, g_float, "",    "%.2f"},
 KEY(load_five),     1,  30,   40,  275,  325, g_float, "",    "%.2f"},
@@ -92,7 +91,16 @@ KEY(location), -1, -1,  -1, 900, 1200, g_string, "(x,y,z)", "%s" }
 
 #ifdef SOLARIS
 ,
-KEY(cpu_wio),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
+/*
+ * (sacerdoti) Experiments have shown gmon resting bandwidth is around
+ * 2KB/s for a 128-node cluster. We set the value thresh of these
+ * metrics to double that.
+ *
+ */
+KEY(bytes_out),  4096, 30,   40,  200,  300, g_float, "bytes/sec", "%.2f" },
+KEY(bytes_in),   4096, 30,   40,  200,  300, g_float, "bytes/sec", "%.2f" },
+KEY(pkts_in), 256, 30,   40,  200,  300, g_float, "packets/sec", "%.2f" },
+KEY(pkts_out),   256, 30,   40,  200,  300, g_float, "packets/sec", "%.2f" },
 
 /* buffer reads and writes, adjusted per second */
 
@@ -118,6 +126,8 @@ KEY(phwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" }
 
 #ifdef LINUX
 ,
+KEY(cpu_intr),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_sintr),     1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 /* (sacerdoti) Experiments have shown gmon resting bandwidth is around 2KB/s for
  * a 128-node cluster. We set the value thresh of these metrics to double that.
  */
@@ -136,6 +146,14 @@ KEY(part_max_used), 1, 30, 40, 120, 180, g_float, "%", "%.1f" }
 
 #ifdef CYGWIN
 ,
+KEY(cpu_intr),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_sintr),     1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+/*
+ * (sacerdoti) Experiments have shown gmon resting bandwidth is around
+ * 2KB/s for a 128-node cluster. We set the value thresh of these
+ * metrics to double that.
+ *
+ */
 KEY(bytes_out),  4096, 30,   40,  200,  300, g_float, "bytes/sec", "%.2f" },
 KEY(bytes_in),   4096, 30,   40,  200,  300, g_float, "bytes/sec", "%.2f" },
 KEY(pkts_in), 256, 30,   40,  200,  300, g_float, "packets/sec", "%.2f" },
@@ -146,8 +164,7 @@ KEY(pkts_out),   256, 30,   40,  200,  300, g_float, "packets/sec", "%.2f" }
 #ifdef HPUX
 ,
 KEY(cpu_intr),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
-KEY(cpu_ssys),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
-KEY(cpu_wait),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
+KEY(cpu_sintr),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 KEY(mem_arm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
 KEY(mem_rm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
 KEY(mem_avm),   1024,  30,   40,  120,  180, g_uint32, "KB", "%u" },
@@ -176,6 +193,12 @@ KEY(pkts_out),   256, 30,   40,  200,  300, g_float, "packets/sec", "%.2f" },
 KEY(disk_total), 1, 1800, 3600, 900, 1200, g_double, "GB", "%.3f" },
 KEY(disk_free), 1, 30, 40, 120, 180, g_double, "GB", "%.3f" },
 KEY(part_max_used), 1, 30, 40, 120, 180, g_float, "%", "%.1f" }
+
+#endif
+
+#ifdef IRIX
+,
+KEY(cpu_intr),      1,  15,   20,   60,   90, g_float, "%",   "%.1f"},
 
 #endif
 };
