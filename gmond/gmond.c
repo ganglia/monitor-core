@@ -1135,6 +1135,7 @@ location_func(void)
    return val;
 }
 
+
 /* This function imports the metrics from libmetrics right now but in the future
  * we could easily do this via DSO. */
 static void
@@ -1160,6 +1161,9 @@ setup_metric_callbacks( void )
   Ganglia_metric_cb_define("cpu_user",       cpu_user_func);
   Ganglia_metric_cb_define("cpu_nice",       cpu_nice_func);
   Ganglia_metric_cb_define("cpu_system",     cpu_system_func);
+  Ganglia_metric_cb_define("cpu_wio",        cpu_wio_func);
+  Ganglia_metric_cb_define("cpu_intr",       cpu_intr_func);
+  Ganglia_metric_cb_define("cpu_sintr",       cpu_sintr_func);
   Ganglia_metric_cb_define("cpu_idle",       cpu_idle_func);
   Ganglia_metric_cb_define("cpu_aidle",      cpu_aidle_func);
   Ganglia_metric_cb_define("load_one",       load_one_func);
@@ -1172,6 +1176,13 @@ setup_metric_callbacks( void )
   Ganglia_metric_cb_define("mem_buffers",    mem_buffers_func);
   Ganglia_metric_cb_define("mem_cached",     mem_cached_func);
   Ganglia_metric_cb_define("swap_free",      swap_free_func);
+  Ganglia_metric_cb_define("bytes_in",       bytes_in_func);
+  Ganglia_metric_cb_define("bytes_out",      bytes_out_func);
+  Ganglia_metric_cb_define("pkts_in",        pkts_in_func);
+  Ganglia_metric_cb_define("pkts_out",       pkts_out_func);
+  Ganglia_metric_cb_define("disk_total",     disk_total_func);
+  Ganglia_metric_cb_define("disk_free",      disk_free_func);
+  Ganglia_metric_cb_define("part_max_used",  part_max_used_func);
 
   /* These are "internal" metrics for host heartbeat,location,gexec */
   Ganglia_metric_cb_define("heartbeat",      heartbeat_func);
@@ -1188,23 +1199,9 @@ setup_metric_callbacks( void )
   Ganglia_metric_cb_define("phwrite_sec",    phwrite_sec_func);
   Ganglia_metric_cb_define("rcache",         rcache_func);
   Ganglia_metric_cb_define("wcache",         wcache_func);
-  Ganglia_metric_cb_define("cpu_wio",        cpu_wio_func);
-#endif
-
-#if LINUX || FREEBSD
-  Ganglia_metric_cb_define("bytes_in",       bytes_in_func);
-  Ganglia_metric_cb_define("bytes_out",      bytes_out_func);
-  Ganglia_metric_cb_define("pkts_in",        pkts_in_func);
-  Ganglia_metric_cb_define("pkts_out",       pkts_out_func);
-  Ganglia_metric_cb_define("disk_total",     disk_total_func);
-  Ganglia_metric_cb_define("disk_free",      disk_free_func);
-  Ganglia_metric_cb_define("part_max_used",  part_max_used_func);
 #endif
 
 #if HPUX
-  Ganglia_metric_cb_define("cpu_intr",       cpu_intr_func);
-  Ganglia_metric_cb_define("cpu_ssys",       cpu_ssys_func);
-  Ganglia_metric_cb_define("cpu_wait",       cpu_wait_func);
   Ganglia_metric_cb_define("mem_arm",        mem_arm_func);
   Ganglia_metric_cb_define("mem_rm",         mem_rm_func);
   Ganglia_metric_cb_define("mem_avm",        mem_avm_func);
