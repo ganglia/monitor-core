@@ -53,7 +53,7 @@ cpu_speed_func ( void )
 {
    g_val_t val;
    size_t len;
-   long cpu_speed;
+   unsigned long cpu_speed;
    int mib[2];
 
    mib[0] = CTL_HW;
@@ -72,17 +72,16 @@ g_val_t
 mem_total_func ( void )
 {
    g_val_t val;
-   size_t len;
-   int total;
+   unsigned long long physmem;
+   size_t len = sizeof (physmem);
    int mib[2];
 
    mib[0] = CTL_HW;
-   mib[1] = HW_PHYSMEM;
-   len = sizeof (total);
+   mib[1] = HW_MEMSIZE;
 
-   sysctl(mib, 2, &total, &len, NULL, 0);
-   total /= 1024;
-   val.uint32 = total;
+   sysctl(mib, 2, &physmem, &len, NULL, 0);
+
+   val.uint32 = (unsigned long) (physmem / 1024);
 
    return val;
 }
@@ -555,8 +554,23 @@ g_val_t
 mem_free_func ( void )
 {
    g_val_t val;
+   vm_size_t pagesize;
+   vm_statistics_data_t vm_stat;
+   int host_count;
+   unsigned long long free_size;
+   host_t host_port;
 
-   val.uint32 = 0;
+   host_port = mach_host_self();
+
+   (void) host_page_size(host_port, &pagesize);
+   host_count = sizeof(vm_stat)/sizeof(integer_t);
+
+   host_statistics(host_port, HOST_VM_INFO,
+                        (host_info_t)&vm_stat, &host_count);
+
+   free_size = (unsigned long long) vm_stat.free_count   * (unsigned long long) pagesize;
+   val.uint32 = (unsigned int) free_size / 1024;
+
    return val;
 }
 
