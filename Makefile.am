@@ -49,4 +49,3 @@ dist-hook:
 	--exclude="*.la" --exclude=".deps" \
 	--exclude="*.tar.gz" \
 	-f - ./srclib | (cd $(distdir) && tar -xf -)
-	rm -f ${distdir}/lib/protocol_xdr.c
