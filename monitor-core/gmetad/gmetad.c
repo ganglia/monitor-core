@@ -188,7 +188,7 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    /* Need to be sure the source has a complete sum for its metrics. */
    pthread_mutex_lock(source->sum_finished);
 
-   /* err_msg("Doing root summary for source %s", source->ds->name); */
+    /* err_msg("Doing root summary for source %s", source->ds->name); */
 
    /* We know that all these metrics are numeric. */
    rc = hash_foreach(source->metric_summary, sum_metrics, arg);
@@ -238,7 +238,7 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
 
    sprintf(num, "%u", metric->num);
 
-   /*err_msg("Writing Overall Summary for metric %s (%s)", name, sum);*/
+   /* err_msg("Writing Overall Summary for metric %s (%s)", name, sum); */
 
    /* Save the data to a round robin database */
    rc = write_data_to_rrd( NULL, NULL, name, sum, num, 15, 0);

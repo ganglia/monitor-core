@@ -46,7 +46,7 @@ typedef struct
 xmldata_t;
 
 
-/* Check to see if "scalable" flag is set, otherwise always return false. */
+/* Authority mode is true if we are within the first level GRID. */
 static int
 authority_mode(xmldata_t *xmldata)
 {
@@ -534,6 +534,9 @@ start (void *data, const char *el, const char **attr)
 
          case HOSTS_TAG:
 
+            /* In non-scalable mode, we do not process summary data. */
+            if (!gmetad_config.scalable_mode) return;
+
             /* Add up/down hosts to this grid summary */
             for(i = 0; attr[i]; i+=2)
                {
@@ -676,6 +679,9 @@ start (void *data, const char *el, const char **attr)
 
 
          case METRICS_TAG:
+
+            /* In non-scalable mode, we do not process summary data. */
+            if (!gmetad_config.scalable_mode) return;
             
             /* Get name for hash key, and val/type for summaries. */
             for(i = 0; attr[i]; i+=2)

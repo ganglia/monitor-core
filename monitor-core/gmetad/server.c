@@ -203,8 +203,6 @@ root_report_start(client_t *client)
    rc = xml_print(client, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmetad\">\n", 
       VERSION);
 
-   if (!gmetad_config.scalable_mode) return rc;
-
    rc = xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
        gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0));
 
@@ -215,10 +213,7 @@ root_report_start(client_t *client)
 int
 root_report_end(client_t *client)
 {
-   if (gmetad_config.scalable_mode)
-      return xml_print(client, "</GRID>\n</GANGLIA_XML>\n");
-
-   return xml_print(client, "</GANGLIA_XML>\n");
+    return xml_print(client, "</GRID>\n</GANGLIA_XML>\n");
 }
 
 
