@@ -157,6 +157,10 @@ main ( int argc, char *argv[] )
       }
 
    debug_msg("Going to run as user %s", gmetad_username);
+   if( should_setuid )
+      {
+         become_a_nobody(setuid_username);
+      }
 
    if( stat( rrd_rootdir, &struct_stat ) )
       {
@@ -182,7 +186,6 @@ main ( int argc, char *argv[] )
       {
          daemon_init ( argv[0], 0);
       }
-
 
    server_socket = g_tcp_socket_server_new( xml_port );
    if (server_socket == NULL)
