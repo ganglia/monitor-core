@@ -8,6 +8,7 @@
 # sacerdoti: These are now context-sensitive, and hold only as much
 # information as we need to make the page.
 #
+include_once "conf.php";
 
 $error="";
 
@@ -227,6 +228,7 @@ function Gmetad ()
    global $error, $parsetime, $clustername, $hostname, $context;
    # From conf.php:
    global $ganglia_ip, $ganglia_port;
+   global $use_compression;
 
    # Parameters are optionalshow
    # Defaults...
@@ -270,7 +272,7 @@ function Gmetad ()
             break;
       }
 
-  $fp = fsockopen( $ip, $port, &$errno, &$errstr, $timeout);
+   $fp = fsockopen( $ip, $port, &$errno, &$errstr, $timeout);
    if (!$fp)
       {
          $error = "fsockopen error: $errstr";
@@ -295,26 +297,71 @@ function Gmetad ()
 
    $start = gettimeofday();
 
+   if(isset($use_compression))
+     {
+       $temp_filename = tempnam("/tmp", "ganglia-web-");
+       $temp = fopen( $temp_filename, "wb");
+       if(!$temp)
+         {
+           $error = "Could not create TMP file";
+           return FALSE;
+         }
+     }
+
    while(!feof($fp))
       {
+         $data = fread($fp, 16384);
+         
          if(isset($use_compression))
            {
-             $data = gzread($fp, 16384);
+             /* Save the input to a temporary file */
+             fwrite($temp, $data);
            }
          else
            {
-             $data = fread($fp, 16384);
+             /* Go ahead and parse the data on-the-fly */
+             if (!xml_parse($parser, $data, feof($fp)))
+               {
+                 $error = sprintf("XML error: %s at %d",
+                            xml_error_string(xml_get_error_code($parser)),
+                            xml_get_current_line_number($parser));
+                 fclose($fp);
+                 return FALSE;
+               }
            }
-         if (!xml_parse($parser, $data, feof($fp)))
-            {
-               $error = sprintf("XML error: %s at %d",
-                  xml_error_string(xml_get_error_code($parser)),
-                  xml_get_current_line_number($parser));
-               fclose($fp);
-               return FALSE;
-            }
       }
    fclose($fp);
+
+   if(isset($use_compression))
+     {
+       fclose($temp);
+       /* This really sucks.  PHP will not let me process compressed data on
+          the fly so I saved it all to a temp file above for processing. */
+       $zp = gzopen($temp_filename,"r");
+       if(!$zp)
+         {
+           unlink($temp_filename);
+           return FALSE;
+         }
+
+       while(!gzeof($zp))
+         {
+           $data = gzread( $zp, 4096 );
+           /* We parse the data here since we didn't do it on-the-fly */
+
+           if (!xml_parse($parser, $data, gzeof($zp)))
+               {
+                 $error = sprintf("XML error: %s at %d",
+                            xml_error_string(xml_get_error_code($parser)),
+                            xml_get_current_line_number($parser));
+                 gzclose($zp);
+                 unlink($temp_filename);
+                 return FALSE;
+               }
+         }
+       gzclose($zp);
+       unlink($temp_filename);
+     }
 
    $end = gettimeofday();
    $parsetime = ($end[sec] + $end[usec]/1e6) - ($start[sec] + $start[usec]/1e6);
