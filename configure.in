@@ -189,6 +189,7 @@ dnl #   AC_SUBST(GETOPT_OBJS)
 dnl #fi
 
 
+
 dnl ##################################################################
 dnl Checks for typedefs.
 dnl
@@ -215,6 +216,9 @@ dnl AC_CHECK_SIZEOF(void *)
 dnl ##################################################################
 dnl Check for structure definitions.
 dnl   
+if test "$ac_cv_header_sys_socket_h" = yes ; then
+   AC_DNET_SOCKADDR_SA_LEN
+fi
 
 dnl ##################################################################
 dnl Check the compiler characteristics
@@ -384,15 +388,6 @@ dnl
 esac
 
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
-
-if test "$use_system_libdnet" != yes; then
-  echo ""
-  echo "Configuring libdnet-1.4"
-  echo ""
-  cd libdnet-1.4
-     ./configure --prefix=`pwd`/binary --cache-file=../config.cache
-  cd ..
-fi 
 
 AC_OUTPUT(Makefile ganglia.spec lib/Makefile gmond/Makefile gmond/gstat/Makefile  gmetric/Makefile)
 
