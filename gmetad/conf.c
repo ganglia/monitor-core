@@ -67,7 +67,7 @@ static DOTCONF_CB(cb_RRAs)
   c->num_RRAs = cmd->arg_count;
   for(i = 0; i < c->num_RRAs; i++)
     {
-      c->RRAs[i] = cmd->data.list[i];
+      c->RRAs[i] = strdup(cmd->data.list[i]);
     }
   return NULL;
 }
