@@ -79,7 +79,7 @@ apr_pollset_t *listen_channels = NULL;
 apr_hash_t *hosts = NULL;
 
 /* The "hosts" hash contains values of type "hostdata" */
-struct Ganglia_host_data {
+struct Ganglia_host {
   /* Name of the host */
   char *hostname;
   /* The IP of this host */
@@ -99,16 +99,20 @@ struct Ganglia_host_data {
   /* Last heard from */
   apr_time_t last_heard_from;
 };
-typedef struct Ganglia_host_data Ganglia_host_data;
+typedef struct Ganglia_host Ganglia_host;
 
 /* This is the structure of the data save to each host->metric hash */
-struct Ganglia_metric_data {
+struct Ganglia_metric {
+  /* The pool used for allocating memory */
+  apr_pool_t *pool;
+  /* The name of the metric */
+  char *name;
   /* The ganglia message */
   Ganglia_message message;
   /* Last heard from */
   apr_time_t last_heard_from;
 };
-typedef struct Ganglia_metric_data Ganglia_metric_data;
+typedef struct Ganglia_metric Ganglia_metric;
 
 /* The hash to hold the metrics available on this platform */
 apr_hash_t *metric_callbacks = NULL;
@@ -455,12 +459,12 @@ setup_listen_channels_pollset( void )
     }
 }
 
-static Ganglia_host_data *
-Ganglia_host_data_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *fullmsg)
+static Ganglia_host *
+Ganglia_host_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *fullmsg)
 {
   apr_status_t status;
   apr_pool_t *pool;
-  Ganglia_host_data *hostdata;
+  Ganglia_host *hostdata;
   char *hostname = NULL;
 
   if(!remoteip || !sa || !fullmsg)
@@ -468,7 +472,7 @@ Ganglia_host_data_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *full
       return NULL;
     }
 
-  hostdata =  (Ganglia_host_data *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
+  hostdata =  (Ganglia_host *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
   if(!hostdata)
     {
       /* Lookup the hostname or use the proxy information if available */
@@ -491,7 +495,7 @@ Ganglia_host_data_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *full
 	}
 
       /* Malloc the hostdata_t from the new pool */
-      hostdata = apr_pcalloc( pool, sizeof( Ganglia_host_data ));
+      hostdata = apr_pcalloc( pool, sizeof( Ganglia_host ));
       if(!hostdata)
 	{
 	  return NULL;
@@ -569,52 +573,123 @@ Ganglia_host_data_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *full
   return hostdata;
 }
 
-static void
-Ganglia_message_save( Ganglia_host_data *host, Ganglia_message *message )
+static Ganglia_metric *
+Ganglia_metric_new( Ganglia_host *host )
 {
-  Ganglia_metric_data *saved = NULL;
+  apr_status_t status;
+  Ganglia_metric *metric = NULL;
+  apr_pool_t *pool = NULL;
+
+  if(!host)
+    return NULL;
+
+  /* Create the context for this metric */
+  status = apr_pool_create( &pool, host->pool);
+  if(status != APR_SUCCESS)
+    return NULL;
+
+  /* Allocate a new metric from this context */
+  metric = apr_pcalloc( pool, sizeof(Ganglia_metric));
+  if(!metric)
+    {
+      /* out of mem... kill context.. return null */
+      apr_pool_destroy(pool);
+      return NULL;
+    }
+
+  metric->pool = pool;
+  return metric;
+}
+
+static void
+Ganglia_metric_free( Ganglia_metric *metric )
+{
+  if(!metric)
+    return;
+  apr_pool_destroy( metric->pool );
+}
+
+static Ganglia_metric *
+Ganglia_message_find_gmetric( Ganglia_host *host, Ganglia_message *message)
+{
+  /* Keyed on the name element of the gmetric sent */
+  return (Ganglia_metric *)apr_hash_get( host->gmetrics,
+				   message->Ganglia_message_u.gmetric.name,
+				   APR_HASH_KEY_STRING);
+}
+
+static Ganglia_metric *
+Ganglia_message_find_metric( Ganglia_host *host, Ganglia_message *message)
+{
+  /* Keyed on the message id number */
+  return (Ganglia_metric *)apr_hash_get( host->metrics, 
+				  &(message->id), 
+				  sizeof(message->id) );
+}
+
+static void
+Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
+{
+  Ganglia_metric *metric = NULL;
 
   if(!host || !message)
     return;
 
-  /* Search for the message id in the current host metric hash */
+  /* Search for the Ganglia_metric in the Ganglia_host */
   if(message->id == metric_user_defined)
     {
-      /* This is a gmetric message .. ignore for now */
-      return;
+      metric = Ganglia_message_find_gmetric( host, message);
+    }
+  else
+    {
+      metric = Ganglia_message_find_metric( host, message);
     }
 
-  saved = (Ganglia_metric_data *)apr_hash_get( host->metrics, &(message->id), sizeof(message->id) );
-  if(!saved)
+  if(!metric)
     {
       /* This is a new metric sent from this host... allocate space for this data */
-      saved = apr_pcalloc( host->pool, sizeof(Ganglia_metric_data));
-      if(!saved)
+      metric = Ganglia_metric_new( host );
+      if(!metric)
 	{
 	  /* no memory */
 	  return;
 	}
-      /* Copy the data */
-      memcpy( &(saved->message), message, sizeof(Ganglia_message));
+      
+      /* NOTE: In order for gmetric messages to be properly saved to the hash table
+       * based on the name of the gmetric sent...we need to strdup() the name
+       * since the xdr_free below will blast the value later (along with the other
+       * allocated structure elements).  This is only performed once at gmetric creation */
+      if(message->id == metric_user_defined)
+	{
+	  metric->name = apr_pstrdup( metric->pool, message->Ganglia_message_u.gmetric.name );
+	} 
     }
   else
     {
-      /* This is a metric update.
-       * Free the old data (note: currently this is only necessary for string data) */
-      xdr_free((xdrproc_t)xdr_Ganglia_message, (char *)&(saved->message));
-      /* Copy the new data in */
-      memcpy(&(saved->message), message, sizeof(Ganglia_message));
+      /* This is a metric update.  Flush the old data. */
+      xdr_free((xdrproc_t)xdr_Ganglia_message, (char *)&(metric->message));
+    }
+
+  /* Copy in the data */
+  memcpy(&(metric->message), message, sizeof(Ganglia_message));
+
+  if(message->id == metric_user_defined)
+    {
+      /* Save the gmetric */
+      apr_hash_set( host->gmetrics, metric->name, APR_HASH_KEY_STRING, metric);
+    }
+  else
+    {
+      /* Save the metric */
+      apr_hash_set( host->metrics, &(message->id), sizeof(message->id), metric );
     }
 
   /* Timestamp */
-  saved->last_heard_from = apr_time_now();
-
-  /* Save the data to the metric hash */
-  apr_hash_set( host->metrics, &(message->id), sizeof(message->id), saved ); 
+  metric->last_heard_from = apr_time_now();
 }
 
 static void
-process_udp_recv_channel(const apr_pollfd_t *desc)
+process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
 {
   apr_status_t status;
   apr_socket_t *socket;
@@ -625,7 +700,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc)
   Ganglia_channel *channel;
   XDR x;
   Ganglia_message msg;
-  Ganglia_host_data *hostdata = NULL;
+  Ganglia_host *hostdata = NULL;
 
   socket         = desc->desc.s;
   /* We could also use the apr_socket_data_get/set() functions
@@ -668,7 +743,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc)
       return;
     }
 
-  hostdata = Ganglia_host_data_get( remoteip, remotesa, &msg);
+  hostdata = Ganglia_host_get( remoteip, remotesa, &msg);
   if(!hostdata)
     {
       /* Processing of this message is finished ... */
@@ -680,16 +755,18 @@ process_udp_recv_channel(const apr_pollfd_t *desc)
   Ganglia_message_save( hostdata, &msg );
 }
 
-static void
-setup_udp_send_array( void )
+static apr_array_header_t *
+setup_udp_send_array( apr_pool_t *context, cfg_t *config )
 {
-  int i, num_udp_send_channels = cfg_size( config_file, "udp_send_channel");
+  apr_array_header_t *send_array = NULL;
+  int i, num_udp_send_channels = cfg_size( config, "udp_send_channel");
 
+  /* Return null if there are no send channels specified */
   if(num_udp_send_channels <= 0)
-    return;
+    return send_array;
 
   /* Create my UDP send array */
-  udp_send_array = apr_array_make( global_context, num_udp_send_channels, 
+  send_array = apr_array_make( context, num_udp_send_channels, 
 				   sizeof(apr_socket_t *));
 
   for(i = 0; i< num_udp_send_channels; i++)
@@ -700,7 +777,7 @@ setup_udp_send_array( void )
       apr_socket_t *socket = NULL;
       apr_pool_t *pool = NULL;
 
-      udp_send_channel = cfg_getnsec( config_file, "udp_send_channel", i);
+      udp_send_channel = cfg_getnsec( config, "udp_send_channel", i);
       ip             = cfg_getstr( udp_send_channel, "ip" );
       mcast_join     = cfg_getstr( udp_send_channel, "mcast_join" );
       mcast_if       = cfg_getstr( udp_send_channel, "mcast_if" );
@@ -713,7 +790,7 @@ setup_udp_send_array( void )
 		  port);
 
       /* Create a subpool */
-      apr_pool_create(&pool, global_context);
+      apr_pool_create(&pool, context);
 
       /* Join the specified multicast channel */
       if( mcast_join )
@@ -740,8 +817,10 @@ setup_udp_send_array( void )
 	}
 
       /* Add the socket to the array */
-      *(apr_socket_t **)apr_array_push(udp_send_array) = socket;
+      *(apr_socket_t **)apr_array_push(send_array) = socket;
     }
+
+  return send_array;
 }
 
 static apr_status_t
@@ -821,7 +900,7 @@ print_xml_footer( apr_socket_t *client )
 }
 
 static apr_status_t
-print_host_start( apr_socket_t *client, Ganglia_host_data *hostinfo)
+print_host_start( apr_socket_t *client, Ganglia_host *hostinfo)
 {
   apr_size_t len;
   char hostxml[1024]; /* for <HOST></HOST> */
@@ -909,19 +988,51 @@ host_metric_value( Ganglia_25metric *metric, Ganglia_message *message )
   return "unknown";
 }
 
+/*
+ * struct Ganglia_gmetric_message {
+ *   char *type;
+ *   char *name;
+ *   char *value;
+ *   char *units;
+ *   u_int slope;
+ *   u_int tmax;
+ *   u_int dmax;
+ * };
+ */
 static apr_status_t
-print_host_metric( apr_socket_t *client, Ganglia_metric_data *data )
+print_host_gmetric( apr_socket_t *client, Ganglia_metric *metric, apr_time_t now )
+{
+  apr_size_t len;
+  char metricxml[1024];
+  Ganglia_gmetric_message *msg = &(metric->message.Ganglia_message_u.gmetric);
+
+  if(!msg)
+    return APR_SUCCESS;
+
+  len = apr_snprintf(metricxml, 1024,
+          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" SLOPE=\"%s\" SOURCE=\"gmetric\"/>\n",
+           msg->name,
+	   msg->value,
+	   msg->type,
+	   msg->units,
+           (int)((now - metric->last_heard_from) / APR_USEC_PER_SEC),
+	   msg->tmax,
+	   msg->dmax,
+	   msg->slope? "both": "zero");
+
+  return apr_send(client, metricxml, &len );
+}
+
+static apr_status_t
+print_host_metric( apr_socket_t *client, Ganglia_metric *data, apr_time_t now )
 {
   Ganglia_25metric *metric;
   char metricxml[1024];
   apr_size_t len;
-  apr_time_t now;
 
   metric = Ganglia_25metric_bykey( data? data->message.id: -1 );
   if(!metric)
     return APR_SUCCESS;
-
-  now = apr_time_now();
 
   len = apr_snprintf(metricxml, 1024,
           "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\" SOURCE=\"gmond\"/>\n",
@@ -936,7 +1047,6 @@ print_host_metric( apr_socket_t *client, Ganglia_metric_data *data )
   return apr_send(client, metricxml, &len);
 }
 
-
 static apr_status_t
 print_host_end( apr_socket_t *client)
 {
@@ -945,7 +1055,7 @@ print_host_end( apr_socket_t *client)
 }
 
 static void
-process_tcp_accept_channel(const apr_pollfd_t *desc)
+process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
 {
   apr_status_t status;
   apr_hash_index_t *hi, *metric_hi;
@@ -998,14 +1108,14 @@ process_tcp_accept_channel(const apr_pollfd_t *desc)
       hi = apr_hash_next(hi))
     {
       apr_hash_this(hi, NULL, NULL, &val);
-      status = print_host_start(client, (Ganglia_host_data *)val);
+      status = print_host_start(client, (Ganglia_host *)val);
       if(status != APR_SUCCESS)
         {
           goto close_accept_socket;
         }
 
       /* Send the metric info for this particular host */
-      for(metric_hi = apr_hash_first(client_context, ((Ganglia_host_data *)val)->metrics);
+      for(metric_hi = apr_hash_first(client_context, ((Ganglia_host *)val)->metrics);
           metric_hi;
 	  metric_hi = apr_hash_next(metric_hi))
         {
@@ -1013,7 +1123,22 @@ process_tcp_accept_channel(const apr_pollfd_t *desc)
 	  apr_hash_this(metric_hi, NULL, NULL, &metric);
 
 	  /* Print each of the metrics for a host ... */
-	  if(print_host_metric(client, metric) != APR_SUCCESS)
+	  if(print_host_metric(client, metric, now) != APR_SUCCESS)
+	    {
+	      goto close_accept_socket;
+	    }
+	}
+
+      /* Send the gmetric info for this particular host */
+      for(metric_hi = apr_hash_first(client_context, ((Ganglia_host *)val)->gmetrics);
+	  metric_hi;
+	  metric_hi = apr_hash_next(metric_hi))
+	{
+	  void *metric;
+	  apr_hash_this(metric_hi, NULL, NULL, &metric);
+
+	  /* Print each of the metrics from gmetric for this host... */
+	  if(print_host_gmetric(client, metric, now) != APR_SUCCESS)
 	    {
 	      goto close_accept_socket;
 	    }
@@ -1039,7 +1164,7 @@ close_accept_socket:
 
 
 static void
-poll_listen_channels( apr_interval_time_t timeout )
+poll_listen_channels( apr_interval_time_t timeout, apr_time_t now)
 {
   apr_status_t status;
   const apr_pollfd_t *descs = NULL;
@@ -1057,10 +1182,10 @@ poll_listen_channels( apr_interval_time_t timeout )
       switch( channel->type )
 	{
 	case UDP_RECV_CHANNEL:
-          process_udp_recv_channel(descs+i); 
+          process_udp_recv_channel(descs+i, now); 
 	  break;
 	case TCP_ACCEPT_CHANNEL:
-	  process_tcp_accept_channel(descs+i);
+	  process_tcp_accept_channel(descs+i, now);
 	  break;
 	default:
 	  continue;
@@ -1587,7 +1712,7 @@ main ( int argc, char *argv[] )
     {
       setup_metric_callbacks();
       setup_collection_groups();
-      setup_udp_send_array();
+      udp_send_array = setup_udp_send_array( global_context, config_file );
     }
 
   /* Create the host hash table */
@@ -1602,7 +1727,7 @@ main ( int argc, char *argv[] )
 	{
           for(; mute || now < next_collection;)
 	    {
-	      poll_listen_channels(mute? 60 * APR_USEC_PER_SEC: next_collection - now);
+	      poll_listen_channels(mute? 60 * APR_USEC_PER_SEC: next_collection - now, now);
 	      now = apr_time_now();
     	    }
 	}

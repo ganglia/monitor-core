@@ -14,7 +14,7 @@ enum Ganglia_value_types {
 struct Ganglia_gmetric_message {
   string type<>;
   string name<>;
-  string values<>;
+  string value<>;
   string units<>;
   unsigned int slope;
   unsigned int tmax;
