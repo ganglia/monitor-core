@@ -2,6 +2,7 @@
 # $Id$
 echo "Bootstrapping libmetrics"
 cd srclib/libmetrics && ./bootstrap
+cd ../..
 
 echo "Running make distclean"  
 make distclean   
