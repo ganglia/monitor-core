@@ -145,7 +145,7 @@ data_thread ( void *arg )
          rval = process_xml(d, buf);
          if(rval)
             {
-               debug_msg("data_thread() couldn't parse the XML for [%s]", d->name);
+               err_msg("data_thread() couldn't parse the XML for [%s]", d->name);
                d->dead = 1;
                goto take_a_break;
             }
