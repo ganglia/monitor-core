@@ -18,7 +18,7 @@
 hash_t *cluster;
 
 g_mcast_socket * mcast_socket;
-pthread_mutex_t  mcast_socket_mutex  = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t  mcast_socket_mutex      = PTHREAD_MUTEX_INITIALIZER;
 
 g_mcast_socket * mcast_join_socket;
 pthread_mutex_t  mcast_join_socket_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -121,7 +121,7 @@ print_intf(const struct intf_entry *entry, void *arg)
    return (0);
 }
 
-int
+void
 get_all_interfaces( void )
 {
    intf_t *intf;
