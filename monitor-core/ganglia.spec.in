@@ -10,22 +10,45 @@ Release: 1
 Copyright: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-gmond
-Obsoletes: ganglia-monitor-core-gmetric
-Provides: ganglia-monitor-core-gmond
-Provides: ganglia-monitor-core-gmetric
 Source: %{name}-%{version}.tar.gz
 Buildroot: /tmp/%{name}-%{version}-buildroot
 Prefix: /usr
 
+%description
+Ganglia is a scalable, real-time monitoring and execution environment
+with all execution requests and statistics expressed in an open
+well-defined XML format.
+
+
+%package gmetad
+Summary: Ganglia Meta daemon http://ganglia.sourceforge.net/
+Group: System Environment/Base
+
+%description gmetad
+Ganglia is a scalable, real-time monitoring and execution environment
+with all execution requests and statistics expressed in an open
+well-defined XML format.
+
+This gmetad daemon can aggregate monitoring data from several clusters
+to form a monitoring grid. It also keeps metric history using the RRD tool.
+
+
+%package gmond
+Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
+Group: System Environment/Base
+
+%description gmond
+Ganglia is a scalable, real-time monitoring and execution environment
+with all execution requests and statistics expressed in an open
+well-defined XML format.
+
+This gmond daemon provides the ganglia service within a single cluster or
+Multicast domain.
+
+
 %package lib
 Summary: Ganglia Toolkit Library http://ganglia.sourceforge.net/
 Group: System Environment/Base
-
-%description
-Ganglia is a scalable, real-time monitoring and execution environment 
-with all execution requests and statistics expressed in an open 
-well-defined XML format.
 
 %description lib
 The Ganglia Monitoring Core library provides a set of functions that programmers
@@ -51,9 +74,19 @@ make
 %pre
 
 ##
-## POST
+## POST GMETA
 ##
-%post
+%post gmetad
+if [ "$1" = 1 ]
+then
+   /etc/rc.d/init.d/gmetad restart
+   /sbin/chkconfig --add gmetad
+fi
+
+##
+## POST GMON
+##
+%post gmond
 if [ "$1" = 1 ]
 then
    /etc/rc.d/init.d/gmond restart
@@ -61,21 +94,38 @@ then
 fi
 
 ##
-## PREUN
+## PREUN GMETA
 ##
-%preun
+%preun gmetad
 if [ "$1" = 0 ]
 then
-   /etc/rc.d/init.d/gmond stop
    /etc/rc.d/init.d/gmetad stop
-   /sbin/chkconfig --del gmond
    /sbin/chkconfig --del gmetad
 fi
 
 ##
-## POSTUN
+## PREUN GMON
 ##
-%postun
+%preun gmond
+if [ "$1" = 0 ]
+then
+   /etc/rc.d/init.d/gmond stop
+   /sbin/chkconfig --del gmond
+fi
+
+##
+## POSTUN GMETA
+##
+%postun gmetad
+if [ "$1" = 1 ]
+then
+   /etc/rc.d/init.d/gmetad restart
+fi
+
+##
+## POSTUN GMON
+##
+%postun gmond
 if [ "$1" = 1 ]
 then
    /etc/rc.d/init.d/gmond restart
@@ -95,19 +145,25 @@ fi
 %__make install prefix=$RPM_BUILD_ROOT/usr
 
 ##
-## FILES
+## FILES GMETA
 ##
-%files
+%files gmetad
+%defattr(-,root,root)
+%attr(0755,nobody,nobody)/var/lib/ganglia/rrds
+/usr/sbin/gmetad
+/etc/rc.d/init.d/gmetad
+%config /etc/gmetad.conf
+
+##
+## FILES GMON
+##
+%files gmond
 %defattr(-,root,root)
 %attr(0500,root,root)/usr/bin/gmetric
 %attr(0555,root,root)/usr/bin/gstat
-%attr(0755,nobody,nobody)/var/lib/ganglia/rrds
 /usr/sbin/gmond
-/usr/sbin/gmetad
 /etc/rc.d/init.d/gmond
-/etc/rc.d/init.d/gmetad
 %config /etc/gmond.conf
-%config /etc/gmetad.conf
 
 %files lib
 /usr/include/ganglia.h
@@ -124,6 +180,9 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Mon Oct 14 2002 Federico Sacerdoti <fds@sdsc.edu>
+- Split package into -gmetad and -gmond subpackages for clarity,
+  and separation of purpose/functionality.
 * Thu Sep 19 2002 Federico Sacerdoti <fds@sdsc.edu>
 - Added config files, made /var/lib/ganglia for RRD storage.
 * Mon Mar 11 2002 Matt Massie <massie@cs.berkeley.edu>
