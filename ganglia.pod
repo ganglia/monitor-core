@@ -1038,16 +1038,7 @@ already been asked and answered.
 
 =head1 Copyright
 
-  Copyright (C) 2002,2003 University of California, Berkeley
- 
-The ganglia source tree incorporated great source code from other projects as well.
-
-  Copyright (c) 2000 Dug Song <dugsong@monkey.org>
-  Copyright (C) 1999,2000,2001,2002 Lukas Schroeder <lukas@azzit.de>,
-   and others.
-  Copyright (C) 1991, 1992, 1996, 1998, 1999 Free Software Foundation, Inc.
-  Copyright (C) 2000  David Helder
-  Copyright (C) 2000  Andrew Lanoix
+  Copyright (C) 2002,2003,2004 University of California, Berkeley
 
 =head1 Authors
 
