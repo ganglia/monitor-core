@@ -199,6 +199,8 @@ B<inet6> for a particular port, explicitly state it with the following:
   }
 
 If you specify a bind address, the family of that address takes precedence.
+f your IPv6 stack doesn't support IPV6_V6ONLY, a warning will be issued
+but gmond will continue working (this should rarely happen).
 
 Multicast Note: for multicast, specifying a B<bind> address that equals the B<mcast_join>
 address will prevent unicast UDP messages to the same B<port> from being 
@@ -243,6 +245,8 @@ B<inet6> for a particular port, explicitly state it with the following:
   }
 
 If you specify a bind address, the family of that address takes precedence.
+If your IPv6 stack doesn't support IPV6_V6ONLY, a warning will be issued
+but gmond will continue working (this should rarely happen).
 
 The B<interface> is not implemented at this time (use B<bind>).
 

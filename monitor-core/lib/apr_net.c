@@ -145,11 +145,13 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t por
        int one = 1;
        /* Don't accept IPv4 connections on an IPv6 listening socket */
        stat = apr_socket_opt_set(sock, APR_IPV6_V6ONLY, one);
-       if (stat != APR_SUCCESS && stat != APR_ENOTIMPL) 
+       if(stat == APR_ENOTIMPL)
 	 {
-	   apr_socket_close(sock);
-	   return NULL;
-	 }
+	   fprintf(stderr,"Warning: your operating system does not support IPV6_V6ONLY!\n");
+	   fprintf(stderr,"This means that you are also listening to IPv4 traffic on port %d\n",
+		   port);
+	   fprintf(stderr,"This IPv6=>IPv4 mapping may be a security risk.\n");
+         }
      }
 #endif
 
