@@ -358,13 +358,10 @@ dnl
 		   CFLAGS="$CFLAGS -D__STDC__ -D_POSIX_C_SOURCE=199506L -DHAVE_STRERROR"
 		fi 
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
-dnl
-dnl Why did BSD decide to do this?  Why not have a separate pthreads library?
-dnl
 *freebsd*)      metric_source="freebsd.c" 
                 CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
-                AC_DEFINE(BSD,1,BSD);; 
+                AC_DEFINE(FREEBSD, 1, FREEBSD);; 
 *cygwin*)      	metric_source="cygwin.c" 
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
