@@ -216,7 +216,7 @@ main ( int argc, char *argv[] )
          /* Save them to RRD */
          for ( i = 0; i < MAX_METRIC_HASH_VALUE; i++ )
             {
-               if( strlen(metrics[i].name) && sum_of_nums[i])
+               if( strlen(metrics[i].name) && sum_of_nums[i] )
                   {
                      sprintf(num, "%d",  sum_of_nums[i]);
                      sprintf(sum, "%Lf", sum_of_sums[i]);
