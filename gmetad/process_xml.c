@@ -15,7 +15,6 @@ extern struct ganglia_metric metrics[];
 typedef struct
    {
       int rval;
-      unsigned int index;
       long double  overall_sum[MAX_METRIC_HASH_VALUE];
       unsigned int overall_num[MAX_METRIC_HASH_VALUE];
       long double          sum[MAX_METRIC_HASH_VALUE];
@@ -228,14 +227,13 @@ end (void *data, const char *el)
 }
 
 int
-process_xml(int index, char *name, char *buf)
+process_xml(data_source_list_t *d, char *buf)
 {
    int rval;
    XML_Parser xml_parser;
    xml_data_t xml_data;
 
    memset( &xml_data, 0, sizeof( xml_data ));
-   xml_data.index = index;
 
    xml_parser = XML_ParserCreate (NULL);
    if (! xml_parser)

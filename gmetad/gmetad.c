@@ -22,8 +22,7 @@ hash_t *sources;
 extern void *data_thread ( void *arg );
 extern void* server_thread(void *);
 extern int parse_config_file ( char *config_file );
-
-long double summary_array[64][MAX_METRIC_HASH_VALUE];
+extern int number_of_datasources ( char *config_file );
 
 llist_entry *trusted_hosts = NULL;
 extern int debug_level;
@@ -75,24 +74,30 @@ main ( int argc, char *argv[] )
    struct stat struct_stat;
    pthread_t pid;
    pthread_attr_t attr;
-   int i;
+   int i, num_sources;
    uid_t gmetad_uid;
    char * gmetad_username;
    struct passwd *pw;
 
-   srand(1234567);
+   srand(52336789);
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       err_quit("command-line parser error");
 
+   num_sources = number_of_datasources( args_info.conf_arg );
+   if(!num_sources)
+      {
+         err_quit("%s doesn't have any data sources specified", args_info.conf_arg);
+      }
+
    /* Get the real number of data sources later */
-   sources = hash_create( 64 );
+   sources = hash_create( num_sources + 5 );
    if (! sources )
       {
          err_quit("Unable to create sources hash\n");
       }
 
-   xml = hash_create( 64 );
+   xml = hash_create( num_sources + 5 );
    if (! xml)
       {
          err_quit("Unable to create XML hash\n");
@@ -100,7 +105,7 @@ main ( int argc, char *argv[] )
 
    parse_config_file ( args_info.conf_arg );
 
-   debug_msg("THERE ARE %d sources", source_index);
+   debug_msg("THERE ARE %d sources", source_index );
 
    /* The rrd_rootdir must be writable by the gmetad process */
    if( should_setuid )

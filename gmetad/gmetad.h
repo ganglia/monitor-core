@@ -43,7 +43,6 @@ struct xml_tag
 
 typedef struct
    {
-      unsigned int index;
       char *name;
       unsigned int num_sources;
       g_inet_addr **sources;
