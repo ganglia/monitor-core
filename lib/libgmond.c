@@ -5,8 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include "ganglia.h"
 #include "confuse.h"
+#include "debug_msg.h"
 #include <apr_pools.h>
 #include <apr_strings.h>
 #include <apr_tables.h>
@@ -510,7 +512,6 @@ Ganglia_gmond_config_create(char *path, int fallback_to_default)
   return config;
 }
 
-
 Ganglia_udp_send_channels
 Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config config )
 {
@@ -605,8 +606,100 @@ Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len 
   return num_errors;
 }
 
-int
-Ganglia_send_gmetric(Ganglia_gmetric_message *msg, Ganglia_udp_send_channels channels )
+Ganglia_gmetric
+Ganglia_gmetric_create( Ganglia_pool parent_pool )
 {
+  Ganglia_pool pool = Ganglia_pool_create(parent_pool);
+  Ganglia_gmetric gmetric;
+  if(!pool)
+    {
+      return NULL;
+    }
+  gmetric = apr_pcalloc( pool, sizeof(struct Ganglia_gmetric));
+  if(!gmetric)
+    {
+      Ganglia_pool_destroy(pool);
+      return NULL;
+    }
+
+  gmetric->pool = pool;
+  gmetric->msg  = apr_pcalloc( pool, sizeof(struct Ganglia_gmetric_message));
+  if(!gmetric->msg)
+    {
+      Ganglia_pool_destroy(pool);
+      return NULL;
+    }
+
+  return gmetric;
+}
+
+int
+Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_channels )
+{
+  int len;
+  XDR x;
+  char gmetricmsg[1500];
+  Ganglia_message msg;
+
+  msg.id = 0;
+  memcpy( &(msg.Ganglia_message_u.gmetric), gmetric->msg, sizeof(Ganglia_gmetric_message));
+
+  /* Send the message */
+  xdrmem_create(&x, gmetricmsg, 1500, XDR_ENCODE);
+  xdr_Ganglia_message(&x, &msg);
+  len = xdr_getpos(&x); 
+  return Ganglia_udp_send_message( send_channels, gmetricmsg, len);
+}
+
+void
+Ganglia_gmetric_destroy( Ganglia_gmetric gmetric )
+{
+  if(!gmetric)
+    return;
+  Ganglia_pool_destroy(gmetric->pool);
+}
+
+
+/*
+ * struct Ganglia_gmetric_message {
+ *   char *type;
+ *   char *name;
+ *   char *value;
+ *   char *units;
+ *   u_int slope;
+ *   u_int tmax;
+ *   u_int dmax;
+ * };
+ */
+int
+Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *type, char *units, unsigned int slope, unsigned int tmax, unsigned int dmax)
+{
+  /* Make sure all the params look ok */
+  if(!gmetric||!name||!value||!type||!units||slope<0||slope>4)
+    return 1;
+
+  /* Make sure none of the string params have a '"' in them (breaks the xml) */
+  if(strchr(name, '"')||strchr(value,'"')||strchr(type,'"')||strchr(units,'"'))
+    {
+      return 2;
+    }
+
+  /* Make sure the type is one that is supported (string|int8|uint8|int16|uint16|int32|uint32|float|double)*/
+  if(!(!strcmp(type,"string")||!strcmp(type,"int8")||!strcmp(type,"uint8")||
+     !strcmp(type,"int16")||!strcmp(type,"uint16")||!strcmp(type,"int32")||
+     !strcmp(type,"uint32")||!strcmp(type,"float")||!strcmp(type,"double")))
+    {
+      return 3;
+    }
+
+  /* All the data is there and validated... copy it into the structure */
+  gmetric->msg->name = apr_pstrdup( gmetric->pool, name);
+  gmetric->msg->value = apr_pstrdup( gmetric->pool, value);
+  gmetric->msg->type  = apr_pstrdup( gmetric->pool, type);
+  gmetric->msg->units = apr_pstrdup( gmetric->pool, units);
+  gmetric->msg->slope = slope;
+  gmetric->msg->tmax = tmax;
+  gmetric->msg->dmax = dmax;
+
   return 0;
 }

@@ -24,11 +24,11 @@ extern "C" {
 
 struct gengetopt_args_info
 {
-  char * conf_arg;	/* The configuration file to use for find send channels (default='/etc/gmond.conf').  */
+  char * conf_arg;	/* The configuration file to use for finding send channels (default='/etc/gmond.conf').  */
   char * name_arg;	/* Name of the metric.  */
   char * value_arg;	/* Value of the metric.  */
   char * type_arg;	/* Either string|int8|uint8|int16|uint16|int32|uint32|float|double.  */
-  char * units_arg;	/* Unit of measure for the value e.g. Kilobytes, Celcius.  */
+  char * units_arg;	/* Unit of measure for the value e.g. Kilobytes, Celcius (default='').  */
   char * slope_arg;	/* Either zero|positive|negative|both (default='both').  */
   int tmax_arg;	/* The maximum time in seconds between gmetric calls (default='60').  */
   int dmax_arg;	/* The lifetime in seconds of this metric (default='0').  */
