@@ -219,7 +219,7 @@ main ( int argc, char *argv[] )
                return -1;
             } 
 
-         rval = g_mcast_socket_connect ( mcast_socket );
+         rval = g_mcast_socket_connect ( mcast_socket, gmond_config.mcast_channel, gmond_config.mcast_port );
          if ( rval <0)
             {
                perror("mcast_connect() connect() error");
