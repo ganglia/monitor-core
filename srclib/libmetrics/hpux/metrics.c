@@ -499,9 +499,9 @@ load_func ( int which)
    else
       switch(which) 
          {
-         case LOAD_1:  val.f = p.psd_avg_1_min;  break;
-         case LOAD_5:  val.f = p.psd_avg_5_min;  break;
-         case LOAD_15: val.f = p.psd_avg_15_min; break;
+         case LOAD_1:  val.f = cpu_num_func_cpu_num * p.psd_avg_1_min;  break;
+         case LOAD_5:  val.f = cpu_num_func_cpu_num * p.psd_avg_5_min;  break;
+         case LOAD_15: val.f = cpu_num_func_cpu_num * p.psd_avg_15_min; break;
          default:
            err_sys("load_func() - invalid value for which = %d", which);
          }
