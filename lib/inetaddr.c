@@ -230,7 +230,6 @@ g_inetaddr_get_interface_to (const g_inet_addr* addr)
   return iface;
 }
 
-/* Change this to llist later */
 llist_entry *
 g_inetaddr_list_interfaces (void)
 {

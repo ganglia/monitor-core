@@ -5,7 +5,6 @@ else
 DOTCONF_LIBS = -ldotconf
 endif
 
-
 AM_CFLAGS = -I. $(DOTCONF_INCLUDES)
 
 EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h getopt.h
