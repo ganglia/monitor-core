@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+if [ "$1" = "purge" ] ; then
+   # remove ganglia user only if gmond isn't installed
+   if [ ! -f /usr/sbin/gmond ] ; then
+        if [ -d /var/lib/ganglia ]; then
+		# Remove rrd dir
+                rm -r /var/lib/ganglia/rrds
+        fi
+        if getent passwd ganglia >/dev/null; then
+                deluser ganglia
+        fi
+        if getent group ganglia >/dev/null; then
+                delgroup ganglia
+        fi
+   fi
+   rm -r /var/lib/ganglia/rrds
+fi
+
+#DEBHELPER#

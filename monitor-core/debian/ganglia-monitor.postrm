@@ -1,0 +1,15 @@
+#!/bin/sh -e
+
+if [ "$1" = "purge" ] ; then
+   if [ ! -f /usr/sbin/gmetad ] ; then
+   # Only remove ganglia user if gmetad isn't installed
+        if getent passwd ganglia >/dev/null; then
+                deluser ganglia
+        fi
+        if getent group ganglia >/dev/null; then
+                delgroup ganglia
+        fi
+    fi
+fi
+
+#DEBHELPER#
