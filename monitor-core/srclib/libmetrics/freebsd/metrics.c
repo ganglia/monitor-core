@@ -194,7 +194,7 @@ swap_total_func ( void )
       for (n = 0; ; ++n) {
         mibswap[mibswap_size] = n;
         size = sizeof(xsw);
-        if (sysctl(mibswap, mibswap_size + 1, &xsw, &size, NULL, NULL) == -1)
+        if (sysctl(mibswap, mibswap_size + 1, &xsw, &size, NULL, 0) == -1)
            break;
         if (xsw.xsw_version != XSWDEV_VERSION)
            return val;
@@ -573,7 +573,7 @@ swap_free_func ( void )
       for (n = 0; ; ++n) {
         mibswap[mibswap_size] = n;
         size = sizeof(xsw);
-        if (sysctl(mibswap, mibswap_size + 1, &xsw, &size, NULL, NULL) == -1)
+        if (sysctl(mibswap, mibswap_size + 1, &xsw, &size, NULL, 0) == -1)
            break;
         if (xsw.xsw_version != XSWDEV_VERSION)
            return val;
@@ -798,6 +798,7 @@ find_disk_space(double *total, double *tot_avail)
 	struct statfs *mntbuf;
 	const char *fstype;
 	const char **vfslist;
+	char *netvfslist;
 	size_t i, mntsize;
 	size_t used, availblks;
 	const double reported_units = 1e9;
@@ -810,7 +811,9 @@ find_disk_space(double *total, double *tot_avail)
 
 	fstype = "ufs";
 
-	vfslist = makevfslist(makenetvfslist());
+	netvfslist = makenetvfslist();
+	vfslist = makevfslist(netvfslist);
+	free(netvfslist);
 
 	mntsize = getmntinfo(&mntbuf, MNT_NOWAIT);
 	mntsize = regetmntinfo(&mntbuf, mntsize, vfslist);
@@ -907,33 +910,32 @@ makevfslist(fslist)
 static char *
 makenetvfslist(void)
 {
+	char *str = NULL, *strptr, **listptr = NULL;
+	int cnt, i;
+
 #if __FreeBSD_version > 500000
-	char *str, *strptr, **listptr;
-	struct xvfsconf *xvfsp, *keep_xvfsp;
+	struct xvfsconf *xvfsp, *keep_xvfsp = NULL;
 	size_t buflen;
-	int cnt, i, maxvfsconf;
+	int maxvfsconf;
 
 	if (sysctlbyname("vfs.conflist", NULL, &buflen, NULL, 0) < 0) {
 		warn("sysctl(vfs.conflist)");
-		return (NULL);
+		goto done;
 	}
-	xvfsp = malloc(buflen);
+	keep_xvfsp = xvfsp = malloc(buflen);
 	if (xvfsp == NULL) {
 		warnx("malloc failed");
-		return (NULL);
+		goto done;
 	}
-	keep_xvfsp = xvfsp;
 	if (sysctlbyname("vfs.conflist", xvfsp, &buflen, NULL, 0) < 0) {
 		warn("sysctl(vfs.conflist)");
-		free(keep_xvfsp);
-		return (NULL);
+		goto done;
 	}
 	maxvfsconf = buflen / sizeof(struct xvfsconf);
 
 	if ((listptr = malloc(sizeof(char*) * maxvfsconf)) == NULL) {
 		warnx("malloc failed");
-		free(keep_xvfsp);
-		return (NULL);
+		goto done;
 	}
 
 	for (cnt = 0, i = 0; i < maxvfsconf; i++) {
@@ -941,36 +943,13 @@ makenetvfslist(void)
 			listptr[cnt++] = strdup(xvfsp->vfc_name);
 			if (listptr[cnt-1] == NULL) {
 				warnx("malloc failed");
-				free(listptr);
-				free(keep_xvfsp);
-				return (NULL);
+				goto done;
 			}
 		}
 		xvfsp++;
 	}
-
-	if (cnt == 0 ||
-	    (str = malloc(sizeof(char) * (32 * cnt + cnt + 2))) == NULL) {
-		if (cnt > 0)
-			warnx("malloc failed");
-		free(listptr);
-		free(keep_xvfsp);
-		return (NULL);
-	}
-
-	*str = 'n'; *(str + 1) = 'o';
-	for (i = 0, strptr = str + 2; i < cnt; i++, strptr++) {
-		strncpy(strptr, listptr[i], 32);
-		strptr += strlen(listptr[i]);
-		*strptr = ',';
-		free(listptr[i]);
-	}
-	*(--strptr) = NULL;
-
-	free(keep_xvfsp);
 #else
-	char *str, *strptr, **listptr;
-	int mib[3], maxvfsconf, cnt=0, i;
+	int mib[3], maxvfsconf;
 	size_t miblen;
 	struct ovfsconf *ptr;
 
@@ -979,12 +958,12 @@ makenetvfslist(void)
 	if (sysctl(mib, (unsigned int)(sizeof(mib) / sizeof(mib[0])),
 	    &maxvfsconf, &miblen, NULL, 0)) {
 		warnx("sysctl failed");
-		return (NULL);
+		goto done;
 	}
 
 	if ((listptr = malloc(sizeof(char*) * maxvfsconf)) == NULL) {
 		warnx("malloc failed");
-		return (NULL);
+		goto done;
 	}
 
 	for (ptr = getvfsent(); ptr; ptr = getvfsent())
@@ -992,16 +971,17 @@ makenetvfslist(void)
 			listptr[cnt++] = strdup(ptr->vfc_name);
 			if (listptr[cnt-1] == NULL) {
 				warnx("malloc failed");
-				return (NULL);
+				goto done;
 			}
 		}
+#endif
 
-	if (cnt == 0 ||
-	    (str = malloc(sizeof(char) * (32 * cnt + cnt + 2))) == NULL) {
-		if (cnt > 0)
-			warnx("malloc failed");
-		free(listptr);
-		return (NULL);
+	if (cnt == 0)
+		goto done;
+
+	if ((str = malloc(sizeof(char) * (32 * cnt + cnt + 2))) == NULL) {
+		warnx("malloc failed");
+		goto done;
 	}
 
 	*str = 'n'; *(str + 1) = 'o';
@@ -1009,12 +989,19 @@ makenetvfslist(void)
 		strncpy(strptr, listptr[i], 32);
 		strptr += strlen(listptr[i]);
 		*strptr = ',';
-		free(listptr[i]);
 	}
-	*(--strptr) = NULL;
+	*(--strptr) = '\0';
 
+done:
+#if __FreeBSD_version > 500000
+	if (keep_xvfsp != NULL)
+		free(keep_xvfsp);
 #endif
-	free(listptr);
+	if (listptr != NULL) {
+		for(i = 0; i < cnt && listptr[i] != NULL; i++)
+			free(listptr[i]);
+		free(listptr);
+	}
 	return (str);
 
 }
