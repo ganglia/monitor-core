@@ -590,6 +590,10 @@ dnl Currently only linux supports gexec
 dnl By default, no support for gexec
 GEXEC=0;
 
+dnl default VARSTATEDIR to /var/lib since that's the traditional location.
+dnl
+varstatedir="/var/lib"
+
 case "$host" in
 *linux*)
 		GEXEC=1
@@ -641,6 +645,7 @@ dnl
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
 *freebsd*)
 		metric_source="freebsd.c" 
+		varstatedir="/var/db"
 		osreldate=`awk '/^\#define[[:space:]]*__FreeBSD_version/ { print $3 }' /usr/include/osreldate.h`
 		if test $osreldate -lt 502102; then   
 			CFLAGS="-pthread $CFLAGS -D_REENTRANT"
@@ -652,6 +657,11 @@ dnl
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 		;;
 esac
+
+dnl Define VARSTATEDIR in config.h
+dnl
+AC_SUBST(varstatedir)
+AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
 if test $GEXEC = 1; then
   AM_CONDITIONAL(GEXEC_SUPPORTED, true) 
@@ -665,16 +675,17 @@ AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 # Each directory appears on a line of its own (more if needed).
 # The lines should be sorted in the obvious manner.
 AC_OUTPUT(Makefile ganglia.spec \
-        libe/Makefile \
-        gauthd/Makefile gauthd/gauthd.init \
-        gexec/Makefile  gexec/gexec_server \
-	gmetad/Makefile \
+	libe/Makefile \
+	gauthd/Makefile gauthd/gauthd.init \
+	gexec/Makefile gexec/gexec_server \
+	gmetad/Makefile gmetad/gmetad.conf \
 	gmetric/Makefile \
 	gmond/Makefile \
 	gmond/gstat/Makefile \
 	lib/Makefile \
 	libhttpd/Makefile \
 	libunp/Makefile \
+	mans/gmetad.1 mans/gmond.1 \
 	tests/Makefile \
 	web/Makefile web/conf.php \
 )
