@@ -1,0 +1,16 @@
+2002-03-21  Brent N. Chun  <bnc@caltech.edu>
+	* Fixed memory leak in tree_destroy in tree.c (not freeing parents)
+2002-03-18  Brent N. Chun  <bnc@caltech.edu>
+	* Removed tree_node, tree_node_nr functions
+	* Changes based on <david.lombard@mscsoftware.com>'s patch	
+	  * Removed multiple defn's for E_WRITE_ERROR and E_READ_ERROR
+	  * Using valid exit codes, convention is roughly 
+	    * 0 (success)
+	    * 1 (base error, i.e., things in libc/pthreads lib)
+	    * 2 (gexec error, i.e,. things in my code)
+	    * 3 (user error, i.e., user errors such as bad options)
+	    * 255 (assertion error)
+	  
+2002-03-11  Brent N. Chun  <bnc@caltech.edu>
+	* Initial release
+	

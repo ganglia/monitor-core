@@ -1,0 +1,39 @@
+2002-04-23  Brent N. Chun  <bnc@caltech.edu>
+        * Binary RPM now linked with Ganglia v2.3.0b6 instead of 
+	  Ganglia v2.3.0b5 which contained a bug. This applies
+          to GEXEC 0.3.3.
+2002-04-20  Brent N. Chun  <bnc@caltech.edu>
+	* Try localhost:8649 for gmond if GEXEC_SVRS and GEXEC_GMOND_SVRS
+	  not set and code compiled with GANGLIA.
+	* Added GEXEC_NO_HOSTS_ERROR
+	* Fixed bug in ips_create_ganglia (was reusing i in inner loop)
+	* Added error messages for chdir, exec on remote node after fork
+2002-04-19  Brent N. Chun  <bnc@caltech.edu>
+	* Using cluster.gexec_hosts (only gexec hosts)
+	* Added #ifdef GANGLIA to call to set_gexec_svrs so GEXEC
+	  compiles when Ganglia not enabled
+2002-04-18  Brent N. Chun  <bnc@caltech.edu>
+	* Now setting GEXEC_SVRS based on servers returned by gmond
+	* Using err_quiet() function to suppress Ganglia error messages
+	* Now supporting host:port syntax for GMOND_SVRS
+2002-03-22  Brent N. Chun  <bnc@caltech.edu>
+	* Added optional node selection using Ganglia (autoconf option 
+	  to enable --enable-ganglia), GEXEC_GMOND_SVRS to use)
+2002-03-21  Brent N. Chun  <bnc@caltech.edu>
+	* Fixed memory leak (free for get_current_dir_name) in request.c
+	* Fixed memory leak (xfree's for argv,envp buf) in request.c
+2002-03-18  Brent N. Chun  <bnc@caltech.edu>
+	* Fixed double xfree in gexecd_thr when inetd option usd
+	* Changes based on <david.lombard@mscsoftware.com>'s patch
+	  * Added -h (help) and -V (version) options to gexec
+	  * Fanout now uses '-f' instead of '-F' to be consistent with pcp
+	  * -n 0 now means all hosts in GEXEC_SVRS
+	  * Fixed typo (detatched -> detached)
+	  * Using valid exit codes, convention is roughly 
+	    * 0 (success)
+	    * 1 (base error, i.e., things in libc/pthreads lib)
+	    * 2 (gexec error, i.e,. things in my code)
+	    * 3 (user error, i.e., user errors such as bad options)
+	* Print error if not enough hosts in GEXEC_SVRS (gexec.c)
+2002-03-11  Brent N. Chun  <bnc@caltech.edu>
+	* Initial release
