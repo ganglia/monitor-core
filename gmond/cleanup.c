@@ -9,6 +9,10 @@
 #include "node_data_t.h"
 #include <string.h>
 
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+
 #ifdef AIX
 extern void *h_errno_which(void);
 #define h_errno   (*(int *)h_errno_which())
@@ -29,6 +33,7 @@ struct cleanup_arg {
    struct timeval *tv;
    datum_t *key;
    datum_t *val;
+   size_t hashval;
 };
 
 
@@ -42,20 +47,13 @@ cleanup_metric ( datum_t *key, datum_t *val, void *arg )
    int rc;
 
    born = metric->timestamp.tv_sec;
-   
-   /* if (metric->dmax) {
-      debug_msg("Attn Cleanup: considering metric \"%s\", tn %u, dmax %u.\n",
-         (char*) key->data,
-         tv->tv_sec - born,
-         metric->dmax);
-   } */
 
    /* Never delete a metric if its DMAX=0 */
-   if (metric->dmax && ((tv->tv_sec - born) > metric->dmax) ) {
-      /* Need to delete this metric, stop hash_foreach() and put key in arg. */
-      cleanup->key = key;
-      return 1;
-   }
+   if (metric->dmax && ((tv->tv_sec - born) > metric->dmax) ) 
+      {
+         cleanup->key = key;
+         return 1;
+      }
    return 0;
 }
 
@@ -63,8 +61,9 @@ cleanup_metric ( datum_t *key, datum_t *val, void *arg )
 static int
 cleanup_node ( datum_t *key, datum_t *val, void *arg )
 {
-   struct cleanup_arg *cleanup = (struct cleanup_arg *) arg;
-   struct timeval *tv = (struct timeval *) cleanup->tv;
+   struct cleanup_arg *nodecleanup = (struct cleanup_arg *) arg;
+   struct cleanup_arg cleanup;
+   struct timeval *tv = (struct timeval *) nodecleanup->tv;
    node_data_t * node = (node_data_t *) val->data;
    datum_t *rv;
    unsigned int born;
@@ -74,35 +73,39 @@ cleanup_node ( datum_t *key, datum_t *val, void *arg )
 
    /* Never delete a node if its DMAX=0 */
    if (node->dmax && ((tv->tv_sec - born) > node->dmax) ) {
-      /* Host is older than dmax. Forget about him. */
-      cleanup->key = key;
-      cleanup->val = val;
+      /* Host is older than dmax. Delete. */
+      nodecleanup->key = key;
+      nodecleanup->val = val;
       return 1;
    }
 
-   /* Re-use the cleanup_arg struct for checking our metrics */
-   cleanup->key = 0;
-   while ((rc=hash_foreach(node->hashp, cleanup_metric, (void*) cleanup))) {
-      if (cleanup->key) {
-         /* cleanup_metric() just told us to delete this metric. Hash_foreach() has
-            not completed. */
-         debug_msg("Cleanup deleting metric \"%d\"", (int) cleanup->key->data);
-         rv=hash_delete(cleanup->key, node->hashp);
+   cleanup.tv = tv;
+
+   cleanup.key = 0;
+   cleanup.hashval = 0;
+   while (hash_walkfrom(node->hashp, cleanup.hashval, cleanup_metric, (void*)&cleanup)) {
+
+      if (cleanup.key) {
+         cleanup.hashval = hashval(cleanup.key, node->hashp);
+         rv=hash_delete(cleanup.key, node->hashp);
          if (rv) datum_free(rv);
-         cleanup->key=0;
+         cleanup.key=0;
       }
       else break;
    }
 
-   cleanup->key = 0;
-   while ((rc=hash_foreach(node->user_hashp, cleanup_metric, (void*) cleanup))) {
-      if (cleanup->key) {
+   cleanup.key = 0;
+   cleanup.hashval = 0;
+   while (hash_walkfrom(node->user_hashp, cleanup.hashval, cleanup_metric, (void*)&cleanup)) {
+
+      if (cleanup.key) {
          debug_msg("Cleanup deleting user metric \"%s\" on host \"%s\"", 
-            (char*) cleanup->key->data,
+            (char*) cleanup.key->data,
             (char*) key->data);
-         rv=hash_delete(cleanup->key, node->user_hashp);
+         cleanup.hashval = hashval(cleanup.key, node->user_hashp);
+         rv=hash_delete(cleanup.key, node->user_hashp);
          if (rv) datum_free(rv);
-         cleanup->key=0;
+         cleanup.key=0;
       }
       else  {
          debug_msg("Cleanup: exiting hash_foreach with an error %d", rc);
@@ -110,6 +113,7 @@ cleanup_node ( datum_t *key, datum_t *val, void *arg )
      }
    }
 
+   /* We have not deleted this node */
    return 0;
 }
 
@@ -124,31 +128,37 @@ cleanup_thread(void *arg)
    int rc;
 
    for (;;) {
-      /* Cleanup every 5 minutes */
-      sleep(300);
+      /* Cleanup every 3 minutes. */
+      sleep(180);
 
+      debug_msg("Cleanup thread running...");
+
+      // report_stats();
       gettimeofday(&tv, NULL);
 
       cleanup.tv = &tv;
       cleanup.key = 0;
       cleanup.val = 0;
+      cleanup.hashval = 0;
+      while (hash_walkfrom(cluster, cleanup.hashval, cleanup_node, (void*)&cleanup)) {
 
-      debug_msg("Cleanup thread running...");
-      while ((rc=hash_foreach(cluster, cleanup_node, (void *) &cleanup))) {
          if (cleanup.key) {
             debug_msg("Cleanup deleting host \"%s\"", (char*) cleanup.key->data);
             node = (node_data_t *) cleanup.val->data;
             hash_destroy(node->hashp);
             hash_destroy(node->user_hashp);
+
             /* No need to WRITE_UNLOCK since there is only one cleanup thread? */
+            cleanup.hashval = hashval(cleanup.key, cluster);
             rv=hash_delete(cleanup.key, cluster);
             /* Don't use 'node' pointer after this call. */
             if (rv) datum_free(rv);
-            /* hash_foreach() has been stopped by cleanup_node() and needs to continue. */
             cleanup.key = 0;
          }
          else break;
       }
+
    } /* for (;;) */
 
 }
+
