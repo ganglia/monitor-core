@@ -1,8 +1,7 @@
 /* $Id$ */
+#include "interface.h"
 #include "gangliaconf.h"
 #include "dotconf.h"
-#include "interface.h"
-#include "dnet.h"
 #include <ganglia/gmond_config.h>
 #include <ganglia/hash.h>
 #include <ganglia/barrier.h>
