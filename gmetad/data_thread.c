@@ -190,7 +190,7 @@ data_thread ( void *arg )
                goto take_a_break;
             }
 
-         /* We processed all the data mark this source as alive */
+         /* We processed all the data.  Mark this source as alive */
          d->dead = 0;
 
        take_a_break:
