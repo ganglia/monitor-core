@@ -120,8 +120,10 @@ KEY(swap_free),  1024,  30,   40,  120,  180, g_uint32, "KBs", "%u" },
 
 /* gmond internals */
 KEY(gexec),        -1,  -1,   -1,  180,  300, g_string, "",    "%s"},
+KEY(heartbeat),    -1,  -1,   -1,   10,   20, g_uint32, "",    "%u"}
 
 #ifdef SOLARIS
+,
 KEY(cpu_wio),     5, 850,  950, 3400, 3800, g_float, "%",   "%.1f"},
 
 /* buffer reads and writes, adjusted per second */
@@ -142,12 +144,9 @@ KEY(wcache), 1,  15,   20,  60,  90, g_float, "%", "%.1f" },
 /* physical reads/writes per second. */
 
 KEY(phread_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" },
-KEY(phwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" },
+KEY(phwrite_sec), 1,  15,   20,  60,  90, g_float, "", "%.2f" }
 
 #endif
-
-KEY(heartbeat),    -1,  -1,   -1,   10,   20, g_uint32, "",    "%u"}
-
 };
 
 #endif  /* METRIC_H */
