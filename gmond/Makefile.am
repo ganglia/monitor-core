@@ -1,6 +1,6 @@
 SUBDIRS = gstat 
 
-EXTRA_DIST = machines
+EXTRA_DIST = machines gmond.init
 
 AM_CFLAGS = -I../lib -I../lib/dnet
 
