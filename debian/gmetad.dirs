@@ -1,4 +1,5 @@
 etc
 usr/sbin
 usr/share/man
-var/lib/gmetad
+var/lib/ganglia
+var/lib/ganglia/rrds

@@ -18,6 +18,7 @@ Description: A scalable, real-time cluster monitoring and execution environment
 Package: gmetad
 Architecture: any
 Depends: libganglia1 (=${Source-Version}), ${shlibs:Depends}
+Suggests: ganglia-monitor
 Description: A scalable, real-time cluster monitoring and execution environment 
  Ganglia is a scalable, real-time cluster monitoring and execution 
  environment with all execution requests and cluster statistics expressed 
