@@ -130,21 +130,3 @@ AC_DEFUN(AC_SEARCH_TYPE,
                 AC_DEFINE($1, $2)
         fi
 ])       
-
-dnl #############################################################
-dnl Check if the system supports 64bit long longs.
-dnl
-dnl AC_DEFUN(AC_CHECK_LONG_LONG,
-dnl         [AC_MSG_CHECKING(for long long type)
-dnl         AC_CACHE_VAL(ac_cv_type_long_long,
-dnl                 AC_TRY_COMPILE(,
-dnl         [long long foo],
-dnl         ac_cv_type_long_long=yes,
-dnl         ac_cv_type_long_long=no))
-dnl         AC_MSG_RESULT($ac_cv_type_long_long)
-dnl         if test $ac_cv_type_long_long = yes; then
-dnl            AC_DEFINE(HAVE_LONG_LONG)
-dnl         fi
-
-
-
