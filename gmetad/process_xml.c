@@ -263,11 +263,12 @@ end (void *data, const char *el)
                         if (! xml_data->num[i] )
                            continue;
                      
+                        /* Don't save to RRD is the datasource is dead */
                         if( xml_data->ds->dead )
                            continue;
 
                         sprintf( sum, "%Lf", xml_data->sum[i] );
-                        sprintf( num, "%d", xml_data->num[i] );
+                        sprintf( num, "%d",  xml_data->num[i] );
 
                         /* Save the data to a round robin database */
                         if(write_data_to_rrd( (char *)(xml_data->cluster), NULL, (char *)metrics[i].name, sum, num, "15"))
