@@ -5,9 +5,13 @@ if BUILD_DOTCONF
 DOTCONF_SUBDIR = dotconf-1.0.9
 endif
 
-SUBDIRS = $(DOTCONF_SUBDIR) lib gmond gmetric
+if BUILD_LIBDNET
+LIBDNET_SUBDIR = libdnet-1.4
+endif
 
-DIST_SUBDIRS = $(DOTCONF_SUBDIR) lib gmond gmetric
+SUBDIRS = $(LIBDNET_SUBDIR) $(DOTCONF_SUBDIR) lib gmond gmetric
+
+DIST_SUBDIRS = $(LIBDNET_SUBDIR) $(DOTCONF_SUBDIR) lib gmond gmetric
 
 EXTRA_DIST = config gmond.init ganglia.spec gmond.init.SuSE mans lib/ganglia 
 
