@@ -81,6 +81,13 @@ int main ( int argc, char **argv )
          exit(1);
       }
 
+   if( args_info.dmax_arg < 0 )
+      {
+         fprintf(stderr,"\nDMAX must be greater than zero\n\n");
+         fprintf(stderr,"Run %s --help\n\n", argv[0]);
+         exit(1);
+      }
+
    if(! args_info.mcast_if_given )
       {
          entry = get_first_multicast_interface();
@@ -101,7 +108,7 @@ int main ( int argc, char **argv )
    name.data = args_info.name_arg;
    name.size = strlen( name.data )+1;
       if (strcspn(name.data," \t") == 0)
-              err_quit("gmetric: --name (-n) can't be blank or empty"); 
+              err_quit("gmetric: --name (-n) can't be blank or empty");
 
    value.data = args_info.value_arg;
    value.size = strlen( value.data )+1;
@@ -133,7 +140,7 @@ int main ( int argc, char **argv )
          err_ret("xdr_bytes() for type failed");
          return SYNAPSE_FAILURE;
       }
-   rval = xdr_bytes(&xhandle, (char **)&(name.data),  &(name.size),  MAX_MCAST_MSG); 
+   rval = xdr_bytes(&xhandle, (char **)&(name.data),  &(name.size),  MAX_MCAST_MSG);
    if ( rval == 0 )
       {
          err_ret("xdr_bytes() for name failed");
@@ -142,7 +149,7 @@ int main ( int argc, char **argv )
    rval = xdr_bytes(&xhandle, (char **)&(value.data), &(value.size), FRAMESIZE);
    if ( rval == 0 )
       {
-         err_ret("xdr_bytes() for metric value failed. Perhaps value is longer than max of %d characters", FRAMESIZE);
+         err_ret("xdr_bytes() for metric value failed. Perhaps your value is longer than the max of %d characters", FRAMESIZE);
          return SYNAPSE_FAILURE;
       }
    rval = xdr_bytes(&xhandle, (char **)&(units.data), &(units.size), MAX_UNITS_LEN);
@@ -165,15 +172,21 @@ int main ( int argc, char **argv )
          err_ret("xdr_u_int for tmax failed");
          return SYNAPSE_FAILURE;
       }
+   rval = xdr_u_int(&xhandle, &(args_info.dmax_arg));
+   if ( rval == 0 )
+      {
+         err_ret("xdr_u_int for dmax failed");
+         return SYNAPSE_FAILURE;
+      }
 
-   len = xdr_getpos(&xhandle); 
+   len = xdr_getpos(&xhandle);
 
    rval = writen( mcast_socket->sockfd, mcast_data, len );
    if ( rval <0)
       {
          err_ret("unable to send data on multicast channel");
          return SYNAPSE_FAILURE;
-      } 
+      }
 
    return 0;
 }

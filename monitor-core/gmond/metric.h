@@ -167,7 +167,7 @@ KEY(bytes_out),  1, 30,   40,  50,  70, g_float, "bytes/sec", "%.2f" },
 KEY(bytes_in),   1, 30,   40,  50,  70, g_float, "bytes/sec", "%.2f" },
 KEY(pkts_in), 1, 30,   40,  50,  70, g_float, "packets/sec", "%.2f" },
 KEY(pkts_out),   1, 30,   40,  50,  70, g_float, "packets/sec", "%.2f" },
-/* The amount of disk space could change - hot-swap, mounts, etc... check: 30-60min. */
+/* The amount of disk space could change - hot-swap, mounts, etc. check: 30-60min. */
 KEY(disk_total), 1, 1800, 3600, 900, 1200, g_double, "GB", "%.3f" },
 KEY(disk_free), 1, 30, 40, 120, 180, g_double, "GB", "%.3f" },
 KEY(part_max_used), 1, 30, 40, 120, 180, g_float, "%", "%.1f" }
