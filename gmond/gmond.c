@@ -149,6 +149,18 @@ main ( int argc, char *argv[] )
          err_quit("failed to process %s. Exiting.", args_info.conf_arg);
       }
 
+   /* If given, use command line directives over config file ones. */
+   if (args_info.debug_given) {
+      gmond_config.debug_level = args_info.debug_arg;
+   }
+   if (args_info.location_given) {
+      debug_msg("Cmd line: Setting location to %s\n", args_info.location_arg);
+      free(gmond_config.location);
+      gmond_config.location = strdup(args_info.location_arg);
+   }
+
+   print_gmond_config();
+
    if(!gmond_config.no_setuid)
       become_a_nobody(gmond_config.setuid);
 

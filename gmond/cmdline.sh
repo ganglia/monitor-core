@@ -1,4 +1,4 @@
-#!/usr/local/bin/gengetopt --input
+#!/usr/bin/gengetopt --input
 # See http://www.gnu.org/software/gengetopt/gengetopt.html for details
 
 package "gmond"
@@ -7,6 +7,8 @@ multicast channel, stores the data in-memory and when requested
 will output an XML description of the state of the cluster"
 
 option "conf" c "Location of gmond configuration file" string default="/etc/gmond.conf" no
+option "location" l "Location of this host in the cluster 'rack,rank,plane'." string default="0,0,0" no
+option "debug" d "Debug level. If greater than zero, daemon will stay in foreground." int default="0" no
 
 #Usage (a little tutorial)
 #
