@@ -20,6 +20,7 @@ int xml_port = 8651;
 g_tcp_socket *   server_socket;
 pthread_mutex_t  server_socket_mutex     = PTHREAD_MUTEX_INITIALIZER;
 int server_threads = 2;
+char *rrd_rootdir = "/var/lib/ganglia/rrds";
 
 extern void* server_thread(void *);
 
@@ -140,6 +141,13 @@ static DOTCONF_CB(cb_server_threads)
    return NULL;
 }
 
+static DOTCONF_CB(cb_rrd_rootdir)
+{
+   debug_msg("Setting the RRD Rootdir to %s", cmd->data.str);
+   free( rrd_rootdir );
+   rrd_rootdir = strdup ( cmd->data.str );
+}
+
 struct gengetopt_args_info args_info;
 static configoption_t gmetad_options[] =
    {
@@ -148,6 +156,7 @@ static configoption_t gmetad_options[] =
       {"debug_level",  ARG_INT,  cb_debug_level, NULL, 0},
       {"xml_port",  ARG_INT, cb_xml_port, NULL, 0},
       {"server_threads", ARG_INT, cb_server_threads, NULL, 0},
+      {"rrd_rootdir", ARG_STR, cb_rrd_rootdir, NULL, 0},
       LAST_OPTION
    };
 
