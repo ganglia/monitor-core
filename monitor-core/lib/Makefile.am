@@ -5,6 +5,7 @@ AM_CFLAGS = -I.. -I. -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srcli
 
 include_HEADERS = ganglia.h
 
+EXTRA_DIST=protocol.x
 protocol_xdr.c: protocol.x
 	rpcgen $<
 
