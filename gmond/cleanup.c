@@ -7,6 +7,7 @@
 #include "key_metrics.h"
 #include "metric_typedefs.h"
 #include "node_data_t.h"
+#include <string.h>
 
 #ifdef AIX
 extern void *h_errno_which(void);
@@ -75,26 +76,29 @@ cleanup_node ( datum_t *key, datum_t *val, void *arg )
    /* Re-use the cleanup_arg struct for checking our metrics */
    cleanup->key = 0;
    while ((rc=hash_foreach(node->hashp, cleanup_metric, (void*) cleanup))) {
-      if (rc && cleanup->key) {
+      if (cleanup->key) {
          /* cleanup_metric() just told us to delete this metric. Hash_foreach() has
             not completed. */
          debug_msg("Cleanup deleting metric \"%d\"", (int) cleanup->key->data);
          rv=hash_delete(cleanup->key, node->hashp);
          if (rv) datum_free(rv);
+         cleanup->key=0;
       }
-      else if (rc)
-         return 1;
+      else break;
    }
 
    cleanup->key = 0;
    while ((rc=hash_foreach(node->user_hashp, cleanup_metric, (void*) cleanup))) {
-      if (rc && cleanup->key) {
+      if (cleanup->key) {
          debug_msg("Cleanup deleting user metric \"%s\"", (char*) cleanup->key->data);
          rv=hash_delete(cleanup->key, node->user_hashp);
          if (rv) datum_free(rv);
+         cleanup->key=0;
       }
-      else if (rc)
-         return 1;
+      else  {
+	  	 debug_msg("Cleanup: exiting hash_foreach with an error %d", rc);
+         break;
+	  }
    }
 
    return 0;
@@ -122,7 +126,7 @@ cleanup_thread(void *arg)
 
       debug_msg("Cleanup thread running...");
       while ((rc=hash_foreach(cluster, cleanup_node, (void *) &cleanup))) {
-         if (rc && cleanup.key) {
+         if (cleanup.key) {
             debug_msg("Cleanup deleting host \"%s\"", (char*) cleanup.key->data);
             node = (node_data_t *) cleanup.val->data;
             hash_destroy(node->hashp);
@@ -132,9 +136,9 @@ cleanup_thread(void *arg)
             /* Don't use 'node' pointer after this call. */
             if (rv) datum_free(rv);
             /* hash_foreach() has been stopped by cleanup_node() and needs to continue. */
+            cleanup.key = 0;
          }
-         else if (rc)
-            break;
+         else break;
       }
    } /* for (;;) */
 
