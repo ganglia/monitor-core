@@ -76,7 +76,7 @@ RRD_create( char *rrd, int summary, unsigned int step)
    char num[64];
 
    /* Our heartbeat is twice the step interval. */
-   heartbeat = 2*step;
+   heartbeat = 8*step;
 
    argv[argc++] = "dummy";
    argv[argc++] = rrd;
