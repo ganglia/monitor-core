@@ -18,7 +18,7 @@
 #include "config.h"
 #endif
 
-#include "getopt.h"
+#include "lib/getopt.h"
 
 #include "cmdline.h"
 
