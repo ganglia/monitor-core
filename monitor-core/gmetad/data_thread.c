@@ -8,7 +8,6 @@
 #include <zlib.h>
 
 #include "gmetad.h"
-
 #include "lib/tpool.h"
 
 extern g3_thread_pool data_source_pool;
