@@ -9,6 +9,7 @@
 #include <zlib.h>
 
 #include "gmetad.h"
+#include "lib/gzio.h"
 #include "lib/tpool.h"
 
 /*
@@ -74,7 +75,8 @@ data_thread ( void *arg )
     
        debug_msg("Successfully connected to [%s]", d->name);
 
-       gz = gzdopen( sock, "r" );
+       gz = NULL;
+       gz = ganglia_gzdopen( sock, "r" );
        if(!gz)
          {
            err_msg("data_thread() unable to gzdopen socket for [%s]", d->name);
@@ -92,7 +94,7 @@ data_thread ( void *arg )
                assert( output != NULL );
              } 
 
-           count = gzread( gz, output+output_index, 2047 );
+           count = ganglia_gzread( gz, output+output_index, 2047 );
            if( count < 0 )
              {
                err_msg("gzread error on %s", d->name);
@@ -156,7 +158,7 @@ data_thread ( void *arg )
      take_a_break:
        if(gz)
          {
-           gzclose(gz);
+           ganglia_gzclose(gz);
            gz= NULL;
          }
      
