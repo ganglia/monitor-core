@@ -15,6 +15,7 @@ extern struct ganglia_metric metrics[];
 typedef struct
    {
       int rval;
+      int old;  /* This is true if the remote source is < 2.5.x */
       long double  overall_sum[MAX_METRIC_HASH_VALUE];
       unsigned int overall_num[MAX_METRIC_HASH_VALUE];
       long double          sum[MAX_METRIC_HASH_VALUE];
@@ -24,6 +25,8 @@ typedef struct
       char *metric;
       char *metric_val;
       data_source_list_t *ds;
+      unsigned int cluster_localtime;
+      unsigned int host_reported; 
    }
 xml_data_t;
 
@@ -93,9 +96,13 @@ start (void *data, const char *el, const char **attr)
                           break;
                     }
               }
+
+           /* For pre-2.5.0, check if the host is up this way */
+           if ( xml_data->old && abs(xml_data->cluster_localtime - xml_data->host_reported) > 60 )
+              return;
  
            /* Only process fresh data, volatile, numeric data (or blessed) */
-           if (  tn >= tmax*4 )
+           if (  tn > tmax*4 )
               return;
 
            if( !( (is_volatile && is_numeric) || blessed))
@@ -148,6 +155,9 @@ start (void *data, const char *el, const char **attr)
 
                  switch( xt->tag )
                     {
+                       case REPORTED_TAG:
+                          xml_data->host_reported = strtoul(attr[i+1], (char **)NULL, 10); 
+                          break;
                        case NAME_TAG:
                           xml_data->host = realloc( xml_data->host, strlen(attr[i+1])+1 );
                           strcpy( xml_data->host, attr[i+1] ); 
@@ -172,6 +182,9 @@ start (void *data, const char *el, const char **attr)
 
                  switch( xt->tag )
                     {
+                       case LOCALTIME_TAG:
+                          xml_data->cluster_localtime = strtoul(attr[i+1], (char **)NULL, 10);
+                          break;
                        case NAME_TAG:
                           xml_data->cluster = realloc ( xml_data->cluster, strlen(attr[i+1])+1 );
                           strcpy( xml_data->cluster, attr[i+1] );
@@ -192,6 +205,11 @@ start (void *data, const char *el, const char **attr)
                     {
                        case VERSION_TAG:
                           /* Process the version tag later */
+                          if(! strstr( attr[i+1], "2.5." ) )
+                             {
+                                debug_msg("[%s] is an OLD version", xml_data->ds->name);
+                                xml_data->old = 1;
+                             }   
                           break;
                     }
               }

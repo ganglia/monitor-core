@@ -3,7 +3,7 @@
 /* $Id$ */
 #include <gmetad.h>
 
-#define TOTAL_KEYWORDS 11
+#define TOTAL_KEYWORDS 13
 #define MIN_WORD_LENGTH 2
 #define MAX_WORD_LENGTH 11
 #define MIN_HASH_VALUE 3
@@ -30,8 +30,8 @@ xml_hash (str, len)
       23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
       23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
       23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
-      23, 23, 23, 23, 23, 23, 23,  0, 23,  0,
-      23,  0,  5, 23, 23, 23,  0,  0, 15, 23,
+      23, 23, 23, 23, 23, 23, 23,  0,  0,  0,
+      23,  0,  9, 23, 23, 23,  0,  0, 15, 23,
       23, 23,  0,  0,  0, 23,  0, 23, 10, 23,
       23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
       23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
@@ -64,7 +64,7 @@ in_xml_list (str, len)
 {
   static unsigned char lengthtable[] =
     {
-       0,  0,  0,  3,  4,  5,  6,  7,  0,  4,  0, 11,  0,  0,
+       0,  0,  0,  3,  4,  5,  6,  7,  8,  9,  0, 11,  0,  4,
        4,  0,  0,  2,  0,  4,  0,  0,  7
     };
   static struct xml_tag xml_tags[] =
@@ -75,11 +75,12 @@ in_xml_list (str, len)
       {"SLOPE", SLOPE_TAG},
       {"METRIC", METRIC_TAG},
       {"CLUSTER", CLUSTER_TAG},
-      {"", 0},
-      {"HOST", HOST_TAG},
+      {"REPORTED", REPORTED_TAG},
+      {"LOCALTIME", LOCALTIME_TAG},
       {"", 0},
       {"GANGLIA_XML", GANGLIA_XML_TAG},
-      {"", 0}, {"", 0},
+      {"", 0},
+      {"HOST", HOST_TAG},
       {"TMAX", TMAX_TAG},
       {"", 0}, {"", 0},
       {"TN", TN_TAG},
