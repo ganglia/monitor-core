@@ -685,7 +685,6 @@ AC_OUTPUT(Makefile ganglia.spec \
 	lib/Makefile \
 	libunp/Makefile \
 	mans/gmetad.1 mans/gmond.1 \
-	tests/Makefile \
 	web/Makefile web/conf.php \
 )
 
