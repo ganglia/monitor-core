@@ -1,6 +1,7 @@
 /* $Id$ */
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <pthread.h>
 #include <cmdline.h>
 #include <ganglia/error.h>
@@ -111,6 +112,9 @@ main ( int argc, char *argv[] )
    char num[512];  
 
    srand(52336789);
+
+   /* Ignore SIGPIPE */
+   signal( SIGPIPE, SIG_IGN );
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       err_quit("command-line parser error");
