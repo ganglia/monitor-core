@@ -90,8 +90,6 @@ main ( int argc, char *argv[] )
    pthread_attr_t attr;
    barrier *mcast_listen_barrier, *server_barrier;
    struct timeval tv;
-   llist_entry *interfaces = NULL;
-   llist_entry *last_interface = NULL;
    struct intf_entry *entry;
    struct in_addr mcast_if_addr;
 
