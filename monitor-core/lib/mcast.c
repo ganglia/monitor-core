@@ -34,32 +34,50 @@ g_mcast_in ( char *channel, unsigned short port, struct in_addr *mcast_addr )
 
    addr = (g_inet_addr *) g_inetaddr_new( channel, port );
    if (!addr)
-      return NULL;
+      {
+         err_ret("g_inetaddr_new() error");
+         return NULL;
+      }
 
    ms = g_mcast_socket_new( addr );
-   g_inetaddr_delete(addr);
    if (! ms )
-      goto error;
+      {
+         err_ret("g_mcast_socket_new() error");
+         goto error;
+      }
 
    /* Set the interface */
    if( setsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_IF, (const void *)mcast_addr, sizeof(struct in_addr)))
-      goto error;
+      {
+         err_ret("setsockopt error");
+         goto error;
+      }
 
    /* Make sure we have loopback on */
    if ( g_mcast_socket_set_loopback( ms, 1) != 0 )
-      goto error;
+      {
+	 err_ret("g_mcast_socket_set_loopback error");
+         goto error;
+      }
 
    /* Join the group */
    if ( g_mcast_socket_join_group( ms, addr, mcast_addr ) != 0 )
-      goto error;
+      {
+         err_ret("g_mcast_socket_join_group() error");
+         goto error;
+      }
 
    /* Bind the socket */
    if ( g_mcast_socket_bind ( ms ) ) 
-      goto error;
+      {
+         err_ret("g_mcast_socket_bind() error");
+         goto error;
+      }
   
    return ms; 
 
  error:
+    g_inetaddr_delete(addr);
     g_mcast_socket_unref(ms);
     return NULL;
 }
@@ -177,10 +195,9 @@ g_mcast_socket_join_group (g_mcast_socket* ms, const g_inet_addr* ia, struct in_
 
   /* Create the multicast request structure */
   memcpy(&mreq.imr_multiaddr,
-         &((struct sockaddr_in*) &ia->sa)->sin_addr,
+	 &((struct sockaddr_in*) &ia->sa)->sin_addr,
          sizeof(struct in_addr));
-  mreq.imr_interface.s_addr = htonl(INADDR_ANY);
- 
+
   memcpy(&mreq.imr_interface, interface, sizeof(struct in_addr));
 
   /* Join the group */
