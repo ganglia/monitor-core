@@ -1,11 +1,11 @@
+
+#include <interface.h>
 #include <ganglia.h>
 #include <ganglia/hash.h>
 #include "metric_typedefs.h"
 #include "node_data_t.h"
 #include "cmdline.h"
 #include <string.h>
-#include <dnet.h>
-#include <interface.h>
 
 extern int optopt;
 extern int optind;
