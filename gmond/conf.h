@@ -14,7 +14,7 @@ typedef struct
   char *port;
   char **interfaces;
   int num_interfaces;
-  char *direction;
+  char *action;
   int ttl;
 } channel_t;  
 
