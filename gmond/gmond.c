@@ -1627,6 +1627,17 @@ main ( int argc, char *argv[] )
       udp_send_channels = Ganglia_udp_send_channels_create( global_context, config_file );
     }
 
+  if(!udp_send_channels)
+    {
+      /* if there are no send channels defined, we are equivalent to mute */
+      mute = 1;
+    }
+  if(!listen_channels)
+    {
+      /* if there are no listen channels defined, we are equivalent to deaf */
+      deaf = 1;
+    }
+
   /* Create the host hash table */
   hosts = apr_hash_make( global_context );
 
