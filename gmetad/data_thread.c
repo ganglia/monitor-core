@@ -1,6 +1,7 @@
 /* $Id$ */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/poll.h>
 #include <sys/time.h>
 #include <gmetad.h>

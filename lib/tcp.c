@@ -23,6 +23,8 @@
  * Boston, MA  02111-1307, USA.
  */
 #include "net.h"
+#include "error.h"
+#include <unistd.h>
 
 g_tcp_socket*
 g_tcp_socket_connect (const char* hostname, int port)
@@ -132,7 +134,7 @@ g_tcp_socket_server_new_interface (const g_inet_addr* iface)
   g_tcp_socket* s;
   struct sockaddr_in* sa_in;
   socklen_t socklen;
-  int flags, rval;
+  int rval;
   const int on = 1;
 
   /* Create socket */

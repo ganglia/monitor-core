@@ -1,4 +1,9 @@
 /* $Id$ */
+#include <pwd.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 #include "unpifi.h"
 #include "interface.h"
 #include "ganglia_private.h"
@@ -10,10 +15,7 @@
 #include "net.h"
 #include "signal.h"
 #include "metric.h"
-#include <pwd.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+#include "debug_msg.h"
 #include "cmdline.h"
 
 /* The entire cluster this gmond knows about */

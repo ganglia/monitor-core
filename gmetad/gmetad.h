@@ -1,10 +1,11 @@
 #ifndef GMETAD_H
 #define GMETAD_H 1 
-#include <ganglia/net.h>
-#include <ganglia/hash.h>
-#include <ganglia/debug_msg.h>
-#include <ganglia/error.h>
+
 #include "conf.h"
+#include "net.h"
+#include "hash.h"
+#include "debug_msg.h"
+#include "error.h"
 
 /* For metric_hash */
 typedef enum {

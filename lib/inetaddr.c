@@ -24,6 +24,10 @@
  */
 #include "llist.h"
 #include "net.h"
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 pthread_mutex_t gethostbyname_mutex = PTHREAD_MUTEX_INITIALIZER;
 
