@@ -87,7 +87,7 @@ fi
 %install
 %__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 %__mkdir -p $RPM_BUILD_ROOT/usr/include/ganglia
-%__mkdir -p $RPM_BUILD_ROOT/var/lib/ganglia
+%__mkdir -p $RPM_BUILD_ROOT/var/lib/ganglia/rrds
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.conf $RPM_BUILD_ROOT/etc/gmond.conf
@@ -101,7 +101,7 @@ fi
 %defattr(-,root,root)
 %attr(0500,root,root)/usr/bin/gmetric
 %attr(0555,root,root)/usr/bin/gstat
-%attr(0755,nobody,nobody)/var/lib/ganglia
+%attr(0755,nobody,nobody)/var/lib/ganglia/rrds
 /usr/sbin/gmond
 /usr/sbin/gmetad
 /etc/rc.d/init.d/gmond
