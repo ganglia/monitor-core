@@ -55,24 +55,15 @@ written in the PHP4 language.
 Summary: The Ganglia Execution Client
 Group: System Environment/Base
 Obsoletes: gexec authd
-Provides: gexec authd
 
 %description gexec-client
 GEXEC is a scalable cluster remote execution system which provides fast, RSA authenticated
-remote execution of parallel and distributed jobs.  It provides transparent forwarding of
-stdin, stdout, stderr, and signals to and from remote processes, provides local environment
-propagation, and is designed to be robust and to scale to systems over 1000 nodes. Internally,
-GEXEC operates by building an n-ary tree of TCP sockets and threads between gexec daemons and
-propagating control information up and down the tree. By using hierarchical control, GEXEC
-distributes both the work and resource usage associated with massive amounts of parallelism
-across multiple nodes, thereby eliminating problems associated with single node resource limits
-(e.g., limits on the number of file descriptors on front-end nodes).
+remote execution of parallel and distributed jobs.  
 
 %package gexec-server
 Summary: The Ganglia Execution Daemon (gexecd)
 Group: System Environment/Base
 Obsoletes: gexec
-Provides: gexec
 Requires: xinetd
 
 %description gexec-server
@@ -84,7 +75,6 @@ the Ganglia Authenication Daemom (gauthd) before they are sent to gexec servers.
 Summary: Ganglia Meta daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
 Obsoletes: ganglia-monitor-core-gmetad ganglia-monitor-core
-Provides: ganglia-monitor-core-gmetad ganglia-monitor-core
 
 %description gmetad
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -98,7 +88,6 @@ to form a monitoring grid. It also keeps metric history using the RRD tool.
 Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
 Obsoletes: ganglia-monitor-core-gmond ganglia-monitor-core
-Provides: ganglia-monitor-core-gmond ganglia-monitor-core
 
 
 %description gmond
@@ -113,7 +102,6 @@ Multicast domain.
 Summary: Ganglia Library http://ganglia.sourceforge.net/
 Group: System Environment/Base
 Obsoletes: ganglia-monitor-core-lib libe
-Provides: ganglia-monitor-core-lib
 
 %description devel
 The Ganglia Monitoring Core library provides a set of functions that programmers
@@ -157,6 +145,15 @@ fi
 ## POST gexec-server
 ##
 %post gexec-server
+svc="`grep 2875 /etc/services`"
+if [ "$svc" = "" ]; then
+    cp /etc/services /etc/services.ganglia
+    cat >>/etc/services<<EOF
+gexec             2875/tcp
+EOF
+    echo "/etc/services updated."
+    echo "Saved old /etc/services as /etc/services.ganglia."
+fi
 echo "Sending SIGUSR2 to xinetd (pid `cat /var/run/xinetd.pid`)"
 kill -USR2 `cat /var/run/xinetd.pid`
 
