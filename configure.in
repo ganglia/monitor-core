@@ -588,11 +588,11 @@ dnl the definitions that we're looking for in some system headers.
 dnl Currently only linux supports gexec
 
 dnl By default, no support for gexec
-GEXEC=false;
+GEXEC=0;
 
 case "$host" in
 *linux*)
-		GEXEC=true
+		GEXEC=1
                 metric_source="linux.c"
                 AC_DEFINE(LINUX, 1, LINUX)
 dnl
@@ -650,16 +650,20 @@ dnl
 *cygwin*)      	metric_source="cygwin.c" 
                 LIBS="$LIBS -lrpc"
 		AC_DEFINE(CYGWIN,1,CYGWIN)
+		;;
 esac
 
-AM_CONDITIONAL(GEXEC_SUPPORTED, $GEXEC)
+if test $GEXEC; then
+  AM_CONDITIONAL(GEXEC_SUPPORTED, true) 
+else
+  AM_CONDITIONAL(GEXEC_SUPPORTED, false)
+fi
+AC_DEFINE_UNQUOTED(GEXEC_SUPPORTED, $GEXEC, Defines whether gexec is supported on this platform)
 
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
 # Each directory appears on a line of its own (more if needed).
 # The lines should be sorted in the obvious manner.
-#
-# I really wanted gexec in the main dist... but...
 AC_OUTPUT(Makefile ganglia.spec \
         libe/Makefile \
         gauthd/Makefile gauthd/gauthd.init \
