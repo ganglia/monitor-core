@@ -10,7 +10,7 @@ DOTCONF_LIBS = -ldotconf
 endif
 
 if BUILD_LIBDNET
-LIBDNET_INCLUDES = -I../libdnet-1.4/src
+LIBDNET_INCLUDES = -I../libdnet-1.4/include
 LIBDNET_LIBS = ../libdnet-1.4/src/libdnet.a
 else
 LIBDNET_LIBS = -ldnet
