@@ -154,9 +154,9 @@ dnl       CFLAGS="$CFLAGS -D_REENTRANT"
 dnl    fi
 dnl fi
 
-AC_CHECK_LIB(expat, XML_ParserCreate, echo "Expat found", echo "Expat NOT found")
+AC_CHECK_LIB(expat, XML_ParserCreate, EXPAT_FOUND="yes", EXPAT_FOUND="no")
 
-if test "$ac_cv_lib_expat_XML_ParserCreate" != yes; then
+if test "$EXPAT_FOUND" != yes; then
 echo
 echo "The expat library could not be found.  Expat can be downloaded from"
 echo
@@ -182,9 +182,9 @@ fi
 
 
 # Adding the echo statements prevents autoconf from changing LIBS
-AC_CHECK_LIB(rrd, rrd_create, echo "Rrdtool found", echo "Rrdtool NOT found!")
+AC_CHECK_LIB(rrd, rrd_create, RRDTOOL_FOUND="yes", RRDTOOL_FOUND="no")
 
-if test "$ac_cv_lib_rrd_rrd_create" != yes; then
+if test "$RRDTOOL_FOUND" != yes; then
 echo
 echo "The Round-Robin Database Tool (rrdtool) cound not be found.  Rrdtool can be found at"
 echo
@@ -210,9 +210,9 @@ echo "      anywhere except the machine you are compiling ganglia on."
 exit;
 fi
 
-AC_CHECK_LIB(z, zlibVersion, echo "Zlib found", echo "Zlib NOT found!")
+AC_CHECK_LIB(z, zlibVersion, ZLIB_FOUND="yes", ZLIB_FOUND="no")
 
-if test "$ac_cv_lib_z_zlibVersion" != yes; then
+if test "$ZLIB_FOUND" != yes; then
 echo
 echo "The zlib library could not be found.  Zlib can be downloaded from"
 echo
@@ -232,7 +232,6 @@ echo "|   ./configure ...                                                    |"
 echo "+======================================================================+"
 exit;
 fi
-
 
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, inet_addr)

@@ -6,6 +6,7 @@
 Summary: Ganglia Cluster Toolkit http://ganglia.sourceforge.net/
 Name: @PACKAGE@
 Version: @VERSION@
+URL: http://ganglia.sourceforge.net/
 Release: 1 
 License: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
@@ -33,7 +34,6 @@ well-defined XML format.
 This gmetad daemon can aggregate monitoring data from several clusters
 to form a monitoring grid. It also keeps metric history using the RRD tool.
 
-
 %package gmond
 Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
@@ -48,7 +48,7 @@ This gmond daemon provides the ganglia service within a single cluster or
 Multicast domain.
 
 %package lib
-Summary: Ganglia Toolkit Library http://ganglia.sourceforge.net/
+Summary: Ganglia Library http://ganglia.sourceforge.net/
 Group: System Environment/Base
 
 %description lib
@@ -65,7 +65,6 @@ Prefix: %{web_prefixdir}
 This package provides a web frontend to display the XML tree published by
 ganglia, and to provide historical graphs of collected metrics. This website is
 written in the PHP4 language.
-
 
 ##
 ## PREP
@@ -140,7 +139,7 @@ fi
 ## INSTALL
 ##
 %install
-## Clean up the build root
+## Flush any old RPM build root
 %__rm -rf $RPM_BUILD_ROOT
 
 ## Create the directory structure
