@@ -361,7 +361,7 @@ get_gmond_config( char *conffile )
          {"mcast_ttl", ARG_INT, cb_msg_ttl, &gmond_config, 0},
          {"mcast_threads", ARG_INT, cb_msg_threads, &gmond_config, 0},
          {"msg_channel", ARG_STR, cb_msg_channel, &gmond_config, 0},
-         {"msg_port", ARG_INT, cb_msg_port, &gmond_config, 0},
+         {"msg_port", ARG_STR, cb_msg_port, &gmond_config, 0},
          {"msg_if", ARG_STR, cb_msg_if, &gmond_config, 0},
          {"msg_ttl", ARG_INT, cb_msg_ttl, &gmond_config, 0},
          {"msg_threads", ARG_INT, cb_msg_threads, &gmond_config, 0},

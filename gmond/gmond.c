@@ -274,13 +274,14 @@ main ( int argc, char *argv[] )
                  perror("barrier_init() error");
                  return -1;    
                }
+
+             for ( i = 0 ; i < gmond_config.msg_threads; i++ )
+               {
+                 pthread_create(&tid, &attr, msg_listen_thread, (void *)msg_listen_barrier);
+               }
+             debug_msg("listening thread(s) have been started");
            }
 
-         for ( i = 0 ; i < gmond_config.msg_threads; i++ )
-            {
-               pthread_create(&tid, &attr, msg_listen_thread, (void *)msg_listen_barrier);
-            }
-         debug_msg("listening thread(s) have been started");
 
          /* threads to answer requests for XML */
          if(barrier_init(&server_barrier, gmond_config.xml_threads + 
