@@ -45,7 +45,7 @@ static DOTCONF_CB(cb_data_source)
    key.size = strlen ( key.data ) + 1;
  
    port = atoi( cmd->data.list[2] );
- 
+
    find = hash_lookup( &key, sources ); 
    if (!find )
       {

@@ -17,20 +17,7 @@ static int RRD_create( char *rrd, char *polling_interval);
 static int RRD_update( char *rrd, char *sum );
 static int summary_RRD_create( char *rrd, char *polling_interval);
 static int summary_RRD_update( char *rrd, char *sum, char *num );
-
-static void
-my_mkdir ( char *dir )
-{
-   int rval;
-   rval = mkdir ( dir, 0755 );
-   if ( rval < 0 )
-      {
-         if( errno != EEXIST )
-            {
-               err_sys("Unable to mkdir(%s)",dir);
-            }
-      }
-}
+static void my_mkdir ( char *dir );
 
 int
 write_data_to_rrd ( char *cluster, char *host, char *metric, char *sum, char *num, char *polling_interval )
@@ -48,9 +35,8 @@ write_data_to_rrd ( char *cluster, char *host, char *metric, char *sum, char *nu
          my_mkdir( rrd );
          strcat( rrd, "/" );
          strcat( rrd, metric );
-         my_mkdir( rrd );
-         strcat( rrd, "/data.rrd" ); 
-         push_data_to_summary_rrd( rrd, sum, num, polling_interval ); 
+         strcat( rrd, ".rrd" ); 
+         return push_data_to_summary_rrd( rrd, sum, num, polling_interval ); 
       }
    else if( cluster && ! host )
       {
@@ -61,9 +47,8 @@ write_data_to_rrd ( char *cluster, char *host, char *metric, char *sum, char *nu
          my_mkdir( rrd );  
          strcat( rrd, "/" );
          strcat( rrd, metric );
-         my_mkdir( rrd );
-         strcat( rrd, "/data.rrd" );
-         push_data_to_summary_rrd( rrd, sum, num, polling_interval );
+         strcat( rrd, ".rrd" );
+         return push_data_to_summary_rrd( rrd, sum, num, polling_interval );
       }
    else
       {
@@ -74,12 +59,27 @@ write_data_to_rrd ( char *cluster, char *host, char *metric, char *sum, char *nu
          my_mkdir( rrd ); 
          strcat( rrd, "/" );
          strcat( rrd, metric );
-         my_mkdir( rrd );
-         strcat( rrd, "/data.rrd" );
-         push_data_to_rrd( rrd, sum, polling_interval ); 
+         strcat( rrd, ".rrd" );
+         return push_data_to_rrd( rrd, sum, polling_interval ); 
       }
-   return 0;
+   /* Shouldn't get here */
+   return 1;
 }
+
+static void
+my_mkdir ( char *dir )
+{
+   int rval;
+   rval = mkdir ( dir, 0755 );
+   if ( rval < 0 )
+      {
+         if( errno != EEXIST )
+            {
+               err_sys("Unable to mkdir(%s)",dir);
+            }
+      }
+}
+
 
 /* A summary RRD has a "num" and a "sum" DS (datasource) whereas the
    host rrds only have "sum" (since num is always 1) */

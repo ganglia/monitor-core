@@ -50,14 +50,6 @@ typedef struct
    }
 data_source_list_t;
 
-typedef union
-   {
-      float f;
-      unsigned int uint32;
-      double d;
-   }
-val_t;
-
 #ifndef SYS_CALL
 #define SYS_CALL(RC,SYSCALL) \
    do {                      \
