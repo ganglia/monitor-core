@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 
 #include "net.h"
@@ -60,12 +61,12 @@ start (void *data, const char *el, const char **attr)
                      strncpy(cluster->host->name, attr[1], n);
                      cluster->host->name[n] = '\0';
                      p++;
-                     strncpy(cluster->host->domain, p, MAXHOSTNAMELEN);
+                     strncpy(cluster->host->domain, p, GEXEC_HOST_STRING_LEN);
                   }
                else
                   {
                      /* The IP DID resolve BUT we DON'T have a domainname */
-                     strncpy(cluster->host->name, attr[1], MAXHOSTNAMELEN);
+                     strncpy(cluster->host->name, attr[1], GEXEC_HOST_STRING_LEN);
                      strcpy(cluster->host->domain, "unspecified");
                   }
             }
@@ -282,6 +283,7 @@ gexec_cluster (gexec_cluster_t *cluster, char *ip, unsigned short port)
    debug_msg("Created the XML Parser");
 
    memset( cluster, 0, sizeof(gexec_cluster_t));
+   cluster->localtime = time(NULL);
 
    XML_SetElementHandler (xml_parser, start, end);
    XML_SetUserData       (xml_parser, cluster); 
@@ -326,6 +328,7 @@ gexec_cluster (gexec_cluster_t *cluster, char *ip, unsigned short port)
    llist_sort( cluster->gexec_hosts, load_sort);
    /* sort the list from latest crash to oldest */
    llist_sort( cluster->dead_hosts, cluster_dead_hosts_sort);
+
 
    gexec_errno = 0;
 

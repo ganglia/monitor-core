@@ -1,10 +1,6 @@
 #ifndef GANGLIA_H
 #define GANGLIA_H 1
 
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64
-#endif
-
 #define GANGLIA_DEFAULT_MCAST_CHANNEL "239.2.11.71"
 #define GANGLIA_DEFAULT_MCAST_PORT    8649
 #define GANGLIA_DEFAULT_XML_PORT      8649
@@ -70,26 +66,26 @@ extern int gexec_errno;
 
 #define GEXEC_TIMEOUT 60
 
-typedef struct
-   {
-      char ip[16];
-      char name[MAXHOSTNAMELEN];
-      char domain[MAXHOSTNAMELEN];
-      double load_one;
-      double load_five;
-      double load_fifteen;
-      double cpu_user;
-      double cpu_nice;
-      double cpu_system;
-      double cpu_idle;
-      unsigned int proc_run;
-      unsigned int proc_total;
-      unsigned int cpu_num;
-      unsigned long last_reported;
-      int gexec_on;
-      int name_resolved;
-   }
-gexec_host_t;
+#define GEXEC_HOST_STRING_LEN  256
+struct gexec_host_t {
+  char ip[64];
+  char name[GEXEC_HOST_STRING_LEN];
+  char domain[GEXEC_HOST_STRING_LEN];
+  double load_one;
+  double load_five;
+  double load_fifteen;
+  double cpu_user;
+  double cpu_nice;
+  double cpu_system;
+  double cpu_idle;
+  unsigned int proc_run;
+  unsigned int proc_total;
+  unsigned int cpu_num;
+  unsigned long last_reported;
+  int gexec_on;
+  int name_resolved;
+};
+typedef struct gexec_host_t gexec_host_t;
 
 typedef struct
    {

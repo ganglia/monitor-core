@@ -88,7 +88,7 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_STR("interface", NULL, CFGF_NONE),
   CFG_SEC("acl", acl_opts, CFGF_NONE),
-  CFG_INT("timeout", 0, CFGF_NONE),
+  CFG_INT("timeout", 1000000, CFGF_NONE),
   CFG_STR("family", "inet4", CFGF_NONE),
   CFG_END()
 };
