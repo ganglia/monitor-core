@@ -64,7 +64,7 @@ data_thread ( void *arg )
 
          if(!sock)
             {
-               debug_msg("data_thread() got not answer from any [%s] datasource", d->name);
+               err_msg("data_thread() got not answer from any [%s] datasource", d->name);
                d->dead = 1;
                goto take_a_break;
             }
@@ -80,14 +80,14 @@ data_thread ( void *arg )
                if( rval < 0 )
                   {
                      /* Error */
-                     debug_msg("poll() error in data_thread");
+                     err_msg("poll() error in data_thread");
                      d->dead = 1;
                      goto take_a_break;
                   }
                else if (rval == 0)
                   {
                      /* No revents during timeout period */
-                     debug_msg("poll() timeout");
+                     err_msg("poll() timeout");
                      d->dead = 1;
                      goto take_a_break; 
                   }
@@ -120,19 +120,19 @@ data_thread ( void *arg )
                         }
                      if( struct_poll.revents & POLLHUP )
                         {
-                           debug_msg("The remote machine closed connection");
+                           err_msg("The remote machine closed connection");
                            d->dead = 1;
                            goto take_a_break;
                         }
                      if( struct_poll.revents & POLLERR )
                         {
-                           debug_msg("POLLERR!");
+                           err_msg("POLLERR!");
                            d->dead = 1;
                            goto take_a_break;
                         }
                      if( struct_poll.revents & POLLNVAL )
                         {
-                           debug_msg("POLLNVAL!");
+                           err_msg("POLLNVAL!");
                            d->dead = 1;
                            goto take_a_break;
                         }
@@ -145,7 +145,9 @@ data_thread ( void *arg )
          rval = process_xml(d, buf);
          if(rval)
             {
-               d->dead = 1;
+               /* We no longer consider the source dead if its XML parsing
+                * had an error - there may be other reasons for this (rrd issues, etc). 
+                */
                goto take_a_break;
             }
 
