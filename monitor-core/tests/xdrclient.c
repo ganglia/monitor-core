@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "msg.h"
+#include "protocol.h"
 
 #define MAXMSGLEN 1500
 

@@ -49,4 +49,4 @@ dist-hook:
 	--exclude="*.la" --exclude=".deps" \
 	--exclude="*.tar.gz" \
 	-f - ./srclib | (cd $(distdir) && tar -xf -)
-	rm -f ${distdir}/gmond/machine.c
+	rm -f ${distdir}/lib/protocol_xdr.c
