@@ -95,7 +95,7 @@ start (void *data, const char *el, const char **attr)
               }
  
            /* Only process fresh data, volatile, numeric data (or blessed) */
-           if (! (tn < tmax*4) )
+           if (  tn >= tmax*4 )
               return;
 
            if( !( (is_volatile && is_numeric) || blessed))
