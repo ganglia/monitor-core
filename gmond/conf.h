@@ -26,6 +26,8 @@ typedef struct
    char *url;
    char *location;
    int   current_channel;
+   int  num_receive_channels;
+   int  num_send_channels;
    channel_t **channels; 
    long int mcast_threads;
    char *xml_port;
