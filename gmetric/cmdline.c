@@ -41,11 +41,11 @@ cmdline_parser_print_help (void)
   printf("\n");
   printf("  -h, --help          Print help and exit\n");
   printf("  -V, --version       Print version and exit\n");
-  printf("  -c, --conf=STRING   The configuration file to use for find send channels  \n                        (default=`/etc/gmond.conf')\n");
+  printf("  -c, --conf=STRING   The configuration file to use for finding send channels  \n                        (default=`/etc/gmond.conf')\n");
   printf("  -n, --name=STRING   Name of the metric\n");
   printf("  -v, --value=STRING  Value of the metric\n");
   printf("  -t, --type=STRING   Either \n                        string|int8|uint8|int16|uint16|int32|uint32|float|double\n");
-  printf("  -u, --units=STRING  Unit of measure for the value e.g. Kilobytes, Celcius\n");
+  printf("  -u, --units=STRING  Unit of measure for the value e.g. Kilobytes, Celcius  \n                        (default=`')\n");
   printf("  -s, --slope=STRING  Either zero|positive|negative|both  (default=`both')\n");
   printf("  -x, --tmax=INT      The maximum time in seconds between gmetric calls  \n                        (default=`60')\n");
   printf("  -d, --dmax=INT      The lifetime in seconds of this metric  (default=`0')\n");
@@ -87,7 +87,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->name_arg = NULL; \
   args_info->value_arg = NULL; \
   args_info->type_arg = NULL; \
-  args_info->units_arg = NULL; \
+  args_info->units_arg = gengetopt_strdup("") ;\
   args_info->slope_arg = gengetopt_strdup("both") ;\
   args_info->tmax_arg = 60 ;\
   args_info->dmax_arg = 0 ;\
@@ -136,7 +136,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           cmdline_parser_print_version ();
           exit (EXIT_SUCCESS);
 
-        case 'c':	/* The configuration file to use for find send channels.  */
+        case 'c':	/* The configuration file to use for finding send channels.  */
           if (args_info->conf_given)
             {
               fprintf (stderr, "%s: `--conf' (`-c') option given more than once\n", CMDLINE_PARSER_PACKAGE);
@@ -190,6 +190,8 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
               exit (EXIT_FAILURE);
             }
           args_info->units_given = 1;
+          if (args_info->units_arg)
+            free (args_info->units_arg); /* free default string */
           args_info->units_arg = gengetopt_strdup (optarg);
           break;
 
