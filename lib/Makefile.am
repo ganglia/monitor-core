@@ -1,8 +1,6 @@
 AM_CFLAGS = -I.. -I. -I./dnet
 
-EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h getopt.h \
-intf.c intf-win32.c eth-bsd.c eth-dlpi.c eth-linux.c eth-ndd.c eth-none.c \
-eth-snoop.c eth-win32.c
+EXTRA_DIST =  xmltok_impl.c xmltok_ns.c EXPAT gangliaconf.h getopt.h 
 
 lib_LTLIBRARIES      = libganglia.la
 libganglia_la_SOURCES = daemon_inetd.c daemon_init.c debug_msg.c error.c \
@@ -15,11 +13,13 @@ noinst_HEADERS = dotconf.h readdir.h dnet.h dnet/addr.h dnet/arp.h \
 dnet/blob.h dnet/eth.h dnet/fw.h dnet/icmp.h dnet/intf.h \
 dnet/ip.h dnet/os.h dnet/rand.h dnet/route.h dnet/tcp.h dnet/udp.h
 
-# Making a light version of the dnet library
+# Making a light version of the dnet library (we only need the intf/eth functions)
 noinst_LIBRARIES = libdnet.a
 libdnet_a_SOURCES = addr.c  strlcat.c strlcpy.c
 libdnet_a_LIBADD  = @DNET_OBJS@
 libdnet_a_DEPENDENCIES = @DNET_OBJS@
+EXTRA_libdnet_a_SOURCES = intf.c intf-win32.c \
+eth-bsd.c eth-dlpi.c eth-linux.c eth-ndd.c eth-none.c eth-snoop.c eth-win32.c
 
 libganglia_la_LIBADD  = $(DOTCONF_LIBS)
 
