@@ -189,7 +189,7 @@ number_of_datasources ( char *config_file )
 
    while (! dotconf_get_next_line( buf, 1024, configfile ))
       {
-         if( strstr( buf, "data_source" ) )
+         if( strstr( buf, "data_source" ) && (buf[0] != '#') )
             {
                number_of_sources++;
             }
