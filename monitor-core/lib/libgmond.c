@@ -79,6 +79,7 @@ static cfg_opt_t udp_recv_channel_opts[] = {
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_STR("mcast_if", NULL, CFGF_NONE),
   CFG_SEC("acl", acl_opts, CFGF_NONE), 
+  CFG_STR("family", "inet4", CFGF_NONE),
   CFG_END()
 };
 
@@ -88,6 +89,7 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
   CFG_STR("interface", NULL, CFGF_NONE),
   CFG_SEC("acl", acl_opts, CFGF_NONE),
   CFG_INT("timeout", 0, CFGF_NONE),
+  CFG_STR("family", "inet4", CFGF_NONE),
   CFG_END()
 };
 
@@ -574,15 +576,13 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
       if( mcast_join )
 	{
 	  /* We'll be listening on a multicast channel */
-	  socket = create_mcast_client(pool, mcast_join, port, 0);
+	  socket = create_mcast_client(pool, mcast_join, port, ttl);
 	  if(!socket)
 	    {
 	      fprintf(stderr,"Unable to join multicast channel %s:%d. Exiting\n",
 		      mcast_join, port);
 	      exit(1);
 	    }
-
-	  mcast_set_ttl(socket, ttl);
 	}
       else
 	{
