@@ -46,7 +46,7 @@ static cfg_opt_t behavior_opts[] = {
 };
 
 static cfg_opt_t udp_send_channel_opts[] = {
-  CFG_STR("mcast_ip", NULL, CFGF_NONE),
+  CFG_STR("mcast_join", NULL, CFGF_NONE),
   CFG_STR("mcast_if", NULL, CFGF_NONE),
   CFG_STR("ip", NULL, CFGF_NONE ),
   CFG_INT("port", -1, CFGF_NONE ),
@@ -55,7 +55,7 @@ static cfg_opt_t udp_send_channel_opts[] = {
 };
 
 static cfg_opt_t udp_recv_channel_opts[] = {
-  CFG_STR("mcast_ip", NULL, CFGF_NONE ),
+  CFG_STR("mcast_join", NULL, CFGF_NONE ),
   CFG_STR("bind", NULL, CFGF_NONE ),
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_STR("mcast_if", NULL, CFGF_NONE),
@@ -63,10 +63,11 @@ static cfg_opt_t udp_recv_channel_opts[] = {
   CFG_END()
 };
 
-static cfg_opt_t xml_out_channel_opts[] = {
+static cfg_opt_t tcp_accept_channel_opts[] = {
   CFG_STR("bind", NULL, CFGF_NONE ),
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_STR("interface", NULL, CFGF_NONE),
+  CFG_STR("protocol", "xml", CFGF_NONE),
   CFG_END()
 };
 
@@ -77,7 +78,7 @@ static cfg_opt_t gmond_opts[] = {
   CFG_SEC("behavior",     behavior_opts, CFGF_NONE), 
   CFG_SEC("udp_send_channel", udp_send_channel_opts, CFGF_MULTI),
   CFG_SEC("udp_recv_channel", udp_recv_channel_opts, CFGF_MULTI),
-  CFG_SEC("xml_out_channel", xml_out_channel_opts, CFGF_MULTI),
+  CFG_SEC("tcp_accept_channel", tcp_accept_channel_opts, CFGF_MULTI),
   CFG_END()
 }; 
 
