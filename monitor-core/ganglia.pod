@@ -688,7 +688,7 @@ shows what platforms the metric are supported on.
 
   Metric Name    Description                             Platforms
   -----------------------------------------------------------------------
-  boottime      System boot timestamp                    l   
+  boottime      System boot timestamp                    l,f
   bread_sec
   bwrite_sec
   bytes_in      Number of bytes in per second            l,f
@@ -708,8 +708,8 @@ shows what platforms the metric are supported on.
   cpu_vm
   cpu_wait
   cpu_wio
-  disk_free     Total free disk space                    l
-  disk_total    Total available disk space               l
+  disk_free     Total free disk space                    l,f
+  disk_total    Total available disk space               l,f
   load_fifteen  Fifteen minute load average              l,f
   load_five     Five minute load average                 l,f
   load_one      One minute load average                  l,f
@@ -717,25 +717,25 @@ shows what platforms the metric are supported on.
   lread_sec
   lwrite_sec
   machine_type
-  mem_buffers   Amount of buffered memory                l
-  mem_cached    Amount of cached memory                  l
-  mem_free      Amount of available memory               l
-  mem_shared    Amount of shared memory                  l
+  mem_buffers   Amount of buffered memory                l,f
+  mem_cached    Amount of cached memory                  l,f
+  mem_free      Amount of available memory               l,f
+  mem_shared    Amount of shared memory                  l,f
   mem_total     Amount of available memory               l,f
-  mtu           Network maximum transmission unit        l
-  os_name       Operating system name                    l
-  os_release    Operating system release (version)       l
-  part_max_used Maximum percent used for all partitions
+  mtu           Network maximum transmission unit        l,f
+  os_name       Operating system name                    l,f
+  os_release    Operating system release (version)       l,f
+  part_max_used Maximum percent used for all partitions  l,f
   phread_sec
   phwrite_sec
-  pkts_in       Packets in per second
-  pkts_out      Packets out per second
-  proc_run      Total number of running processes
-  proc_total    Total number of processes
+  pkts_in       Packets in per second                    l,f
+  pkts_out      Packets out per second                   l,f
+  proc_run      Total number of running processes        l,f
+  proc_total    Total number of processes                l,f
   rcache
-  swap_free     Amount of available swap memory
-  swap_total    Total amount of swap memory
-  sys_clock     Current time on host 
+  swap_free     Amount of available swap memory          l,f
+  swap_total    Total amount of swap memory              l,f
+  sys_clock     Current time on host                     l,f
   wcache
 
   Platform key:
