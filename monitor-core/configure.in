@@ -25,29 +25,38 @@ AC_REVISION([$Revision$])
 AC_INIT(gmond/gmond.c)
 AC_CONFIG_AUX_DIR(config)
 
-###############################
-# Package info
-
-# On making releases:
-#   GANGLIA_MICRO_VERSION += 1;
-#   GANGLIA_INTERFACE_AGE += 1;
-#   GANGLIA_BINARY_AGE += 1;
-# if any functions have been added, set GANGLIA_INTERFACE_AGE to 0.
-# if backwards compatibility has been broken,
-# set GANGLIA_BINARY_AGE _and_ GANGLIA_INTERFACE_AGE to 0.
+### BEGIN RELEASE VARIABLES ############################
+# On making a release...
+# If this release is just a minor bug fix release, increment GANGLIA_MINOR_VERSION.
+# If this release adds significant features or breaks backward compatibility,
+# increment GANGLIA_MINOR_VERSION and set GANGLIA_MICRO_VERSION to 0 (zero).
+# If this release is a complete restructuring of
+# the overall architecture of ganglia,
+# increment GANGLIA_MAJOR_VERSION and set 
+# GANGLIA_MINOR_VERSION and GANGLIA_MICRO_VERSION
+# to 0 (zero) 
 GANGLIA_RELEASE_NAME="Kittyhawk"
 GANGLIA_MAJOR_VERSION=2
 GANGLIA_MINOR_VERSION=5
 GANGLIA_MICRO_VERSION=8
-GANGLIA_INTERFACE_AGE=8
-GANGLIA_BINARY_AGE=8
 
-# If we are releasing snapshots of this, set GANGLIA_SNAPSHOT to "yes"
+# If we are releasing a snapshot (beta), set GANGLIA_SNAPSHOT to "yes"
 # If we are creating an official release, set it to "no" 
 GANGLIA_SNAPSHOT="yes"
-GANGLIA_SNAPSHOT_DATE=`date +%Y%m%d%H%M`
 
-################################
+# If there are any changes to libganglia in this release, you need to...
+#   LIBGANGLIA_MICRO_VERSION += 1;
+#   LIBGANGLIA_INTERFACE_AGE += 1;
+#   LIBGANGLIA_BINARY_AGE += 1;
+# if any functions have been added, set LIBGANGLIA_INTERFACE_AGE to 0.
+# if backwards compatibility has been broken,
+# set LIBGANGLIA_BINARY_AGE _and_ LIBGANGLIA_INTERFACE_AGE to 0.
+LIBGANGLIA_MICRO_VERSION=0
+LIBGANGLIA_INTERFACE_AGE=0
+LIBGANGLIA_BINARY_AGE=0
+### END RELEASE VARIABLES #############################
+
+GANGLIA_SNAPSHOT_DATE=`date +%Y%m%d%H%M`
 
 if test "$GANGLIA_SNAPSHOT" != yes;
 then
@@ -62,24 +71,32 @@ AC_SUBST(GANGLIA_MAJOR_VERSION)
 AC_SUBST(GANGLIA_MINOR_VERSION)
 AC_SUBST(GANGLIA_MICRO_VERSION)
 AC_SUBST(GANGLIA_VERSION)
-AC_SUBST(GANGLIA_INTERFACE_AGE)
-AC_SUBST(GANGLIA_BINARY_AGE)
+
+AC_SUBST(LIBGANGLIA_INTERFACE_AGE)
+AC_SUBST(LIBGANGLIA_BINARY_AGE)
 
 # libtool versioning
-LT_RELEASE=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION
-LT_CURRENT=`expr $GANGLIA_MICRO_VERSION - $GANGLIA_INTERFACE_AGE`
-LT_REVISION=$GANGLIA_INTERFACE_AGE
-LT_AGE=`expr $GANGLIA_BINARY_AGE - $GANGLIA_INTERFACE_AGE`
+# the LT_RELEASE variable is passed with the --release option... it is just
+# a way to tie our internal package library with the release numbers of ganglia in general
+LT_RELEASE=$GANGLIA_VERSION
+# The most current libganglia interface is MICRO - INTERFACE
+LT_CURRENT=`expr $LIBGANGLIA_MICRO_VERSION - $LIBGANGLIA_INTERFACE_AGE`
+# The implementation number of the current interface is simply LIBGANGLIA_INTERFACE_AGE
+LT_REVISION=$LIBGANGLIA_INTERFACE_AGE
+# The different between the new and oldest interfaces this library implements is BINARY-INTERFACE
+LT_AGE=`expr $LIBGANGLIA_BINARY_AGE - $LIBGANGLIA_INTERFACE_AGE`
+
 AC_SUBST(LT_RELEASE)
 AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
+
 # Define version stuff
 AC_DEFINE_UNQUOTED(GANGLIA_MAJOR_VERSION, $GANGLIA_MAJOR_VERSION, GANGLIA_MAJOR_VERSION)
 AC_DEFINE_UNQUOTED(GANGLIA_MINOR_VERSION, $GANGLIA_MINOR_VERSION, GANGLIA_MINOR_VERSION)
 AC_DEFINE_UNQUOTED(GANGLIA_MICRO_VERSION, $GANGLIA_MICRO_VERSION, GANGLIA_MICRO_VERSION)
-AC_DEFINE_UNQUOTED(GANGLIA_INTERFACE_AGE, $GANGLIA_INTERFACE_AGE, GANGLIA_INTERFACE_AGE)
-AC_DEFINE_UNQUOTED(GANGLIA_BINARY_AGE,    $GANGLIA_BINARY_AGE,    GANGLIA_BINARY_AGE)
+#AC_DEFINE_UNQUOTED(GANGLIA_INTERFACE_AGE, $GANGLIA_INTERFACE_AGE, GANGLIA_INTERFACE_AGE)
+#AC_DEFINE_UNQUOTED(GANGLIA_BINARY_AGE,    $GANGLIA_BINARY_AGE,    GANGLIA_BINARY_AGE)
 
 
 ########################
