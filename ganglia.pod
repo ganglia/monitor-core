@@ -14,7 +14,8 @@ B<ganglia> - distributed monitoring system
 B<ganglia> GANGLIA_VERSION
 
 The latest version of this software and document will always be found at 
-http://ganglia.sourceforge.net/
+http://ganglia.sourceforge.net/.  You are currently reading version
+$Version$ of this document.
 
 =head1 Synopsis
 
@@ -676,11 +677,74 @@ To get help with the commandline options, simply pass C<gstat> the C<--help> opt
      -iSTRING   --gmond_ip=STRING  Specify the ip address of the gmond to query (default='127.0.0.1')
      -pINT      --gmond_port=INT   Specify the gmond port to query (default=8649)
 
-=head1 Troubleshooting (FAQ)
+=head1 Frequently Asked Questions (FAQ)
 
 =over 4
 
-=item B<Process XML (x): XML_ParseBuffer() error at line x: not well-formed>
+=item B<What metrics does ganglia collect on platform x?>
+
+This table describes all the metrics that ganglia collects and
+shows what platforms the metric are supported on.  
+
+  Metric Name    Description                             Platforms
+  -----------------------------------------------------------------------
+  boottime      System boot timestamp                    l   
+  bread_sec
+  bwrite_sec
+  bytes_in      Number of bytes in per second            l,f
+  bytes_out     Number of bytes out per second           l,f
+  cpu_aidle     Percent of time since boot idle CPU      l
+  cpu_arm
+  cpu_avm
+  cpu_idle      Percent CPU idle                         l,f
+  cpu_intr
+  cpu_nice      Percent CPU nice                         l,f
+  cpu_num       Number of CPUs                           l,f
+  cpu_rm
+  cpu_speed     Speed in MHz of CPU                      l,f
+  cpu_ssys
+  cpu_system    Percent CPU system                       l,f
+  cpu_user      Percent CPU user                         l,f
+  cpu_vm
+  cpu_wait
+  cpu_wio
+  disk_free     Total free disk space                    l
+  disk_total    Total available disk space               l
+  load_fifteen  Fifteen minute load average              l,f
+  load_five     Five minute load average                 l,f
+  load_one      One minute load average                  l,f
+  location      GPS coordinates for host                 e
+  lread_sec
+  lwrite_sec
+  machine_type
+  mem_buffers   Amount of buffered memory                l
+  mem_cached    Amount of cached memory                  l
+  mem_free      Amount of available memory               l
+  mem_shared    Amount of shared memory                  l
+  mem_total     Amount of available memory               l,f
+  mtu           Network maximum transmission unit        l
+  os_name       Operating system name                    l
+  os_release    Operating system release (version)       l
+  part_max_used Maximum percent used for all partitions
+  phread_sec
+  phwrite_sec
+  pkts_in       Packets in per second
+  pkts_out      Packets out per second
+  proc_run      Total number of running processes
+  proc_total    Total number of processes
+  rcache
+  swap_free     Amount of available swap memory
+  swap_total    Total amount of swap memory
+  sys_clock     Current time on host 
+  wcache
+
+  Platform key:
+  l = Linux, f = FreeBSD, a = AIX, c = Cygwin
+  m = MacOS, i = IRIX, h = HPUX,  t = Tru64
+  e = Every Platform
+
+
+=item B<What does the error "Process XML (x): XML_ParseBuffer() error at line x: not well-formed">
 
 This is an error that occurs when a ganglia components reads data from another ganglia component
 and finds that the XML is not well-formed.  The most common time this is a problem is when the PHP
@@ -739,7 +803,7 @@ more details we have about your configuration the more likely it is we will be a
 you.  Also, all mailing to C<ganglia-developers> is archiving and available to read on the
 web.  You may want to modify C<XML.txt> to remove any sensitive information.
 
-=item B<Removing a host from the list>
+=item B<How do I remove a host from the list?>
 
 A common problem that people have is not being able to remove a host from the ganglia
 web frontend.  
@@ -767,7 +831,7 @@ All data in gmond is soft state so you will need to restart all gmond and gmetad
 It is important to note that ALL dead hosts will be flushed from the record by restarting
 the processes (since they have to hear the host at least once to know it is expired).
 
-=item B<Solaris, IRIX, Tru64>
+=item B<How good is Solaris, IRIX, Tru64 support?>
 
 Here is an email from Steve Wagner about the state of the ganglia on Solaris, 
 IRIX and Tru64. Steve is to thank for porting ganglia to Solaris and Tru64. He also 
@@ -809,7 +873,7 @@ helped with the IRIX port.
    keep hogging all this good stuff - what I'm looking at is ready for
    release.
 
-=item B<Debian Users>
+=item B<Where are the debian packages?>
 
 Here is an email message from Preston Smith for Debian users
 
@@ -823,7 +887,7 @@ Here is an email message from Preston Smith for Debian users
  Also, a CVS note: I checked in the debian/ directory used to create
  debian packages.
 
-=item B<Multihomed Machines>
+=item B<How should I configure multihomed machines?>
 
 Here is an email that Matt Massie sent to a user having problems with
 multihomed machines
@@ -891,7 +955,7 @@ multihomed machines
    > 
    > Any idea ?
 
-=item B<Cisco Catalyst Switches>
+=item B<How should I configure my Cisco Catalyst Switches?>
 
 Perhaps information regarding gmond on networks set up through cisco
 catalyst switches should be mentioned in the ganglia documentation. I think
