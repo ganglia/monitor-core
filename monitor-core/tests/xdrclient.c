@@ -17,27 +17,10 @@ int main( void )
   gangliaMetricGroup group;
   gangliaNamedValue_1 values[20];
 
-  /*
-   *
-struct gangliaMetricGroup_1 {
-	int collected;
-	u_int tn;
-	u_int tmax;
-	u_int dmax;
-	gangliaSlopeTypes_1 slope;
-	gangliaMetricQualities_1 quality;
-	struct {
-		u_int value_len;
-		gangliaNamedValue_1 *value_val;
-	} value;
-};
-typedef struct gangliaMetricGroup_1 gangliaMetricGroup_1;
-*/
- 
   /* Create a message to send */
   memset(&message, 0, sizeof(gangliaMessage));
-  message.format = GANGLIA_METRIC_GROUP;
-  message.gangliaMessage_u.group = &group;
+  message.format = GANGLIA_SIMPLE_METRIC;
+  message.name   = strdup("cpu_num");
 
   /* Setup the info about the group */
   group.collected = time(NULL);

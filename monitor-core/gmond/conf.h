@@ -3,6 +3,8 @@
 
 #include "confuse.h"
 
+void init_validate_funcs(void);
+
 #define DEFAULT_CONFIGURATION "\
 behavior {                    \n\
   setuid = no                 \n\
@@ -83,6 +85,8 @@ static cfg_opt_t udp_recv_channel_opts[] = {
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_STR("mcast_if", NULL, CFGF_NONE),
   CFG_STR("protocol", "xdr", CFGF_NONE),
+  CFG_STR("allow_ip", NULL, CFGF_NONE),
+  CFG_STR("allow_mask", NULL, CFGF_NONE),
   CFG_END()
 };
 
@@ -95,7 +99,7 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
 };
 
 int metric_validate_func(cfg_t *cfg, cfg_opt_t *opt);
-
+cfg_callback_t value_cb;
 
 static cfg_opt_t metric_opts[] = {
   CFG_BOOL( "absolute_minimum_given", 0, CFGF_NONE ),
@@ -118,10 +122,8 @@ static cfg_opt_t metric_opts[] = {
   CFG_FLOAT("relative_change_alert", 0, CFGF_NONE),
   CFG_STR("units", NULL, CFGF_NONE ),
   CFG_STR("name", NULL, CFGF_NONE ),
-/*
-  CFG_PTR_CB("value", NULL, CFGF_NONE ),
-*/
   CFG_INT("current_state", 0, CFGF_NONE), /* high_alert, high_warning, normal, low_warning, low_alert */
+  CFG_END(),  /* hack.. this holds the value */
   CFG_END()
 };
 
