@@ -33,10 +33,6 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
    int   argc = 3;
    char val[128];
 
-   /*  if process_time is undefined, we set it to the current time */
-   if (!process_time)
-      process_time = time(0);
-
    /* If we are a host RRD, we "sum" over only one host. */
    if (num)
       sprintf(val, "%d:%s:%s", process_time, sum, num);
@@ -122,6 +118,10 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
    int rval;
    int summary;
    struct stat st;
+
+   /*  if process_time is undefined, we set it to the current time */
+   if (!process_time)
+      process_time = time(0);
 
    if (num)
       summary=1;

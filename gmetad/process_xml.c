@@ -938,9 +938,12 @@ process_xml(data_source_list_t *d, char *buf)
       }
 
    /* Release lock again for good measure (required under certain errors). */
-   rval = pthread_mutex_unlock(xmldata.source.sum_finished);
-   if (rval!=0)
-      err_msg("Could not release summary lock for %s", d->name);
+   if (xmldata.source.sum_finished)
+      {
+         rval = pthread_mutex_unlock(xmldata.source.sum_finished);
+         if (rval!=0)
+            err_msg("Could not release summary lock for %s", d->name);
+      }
 
    /* Free memory that might have been allocated in xmldata */
    if (xmldata.sourcename)
