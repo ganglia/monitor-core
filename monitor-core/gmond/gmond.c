@@ -835,7 +835,7 @@ print_host_start( apr_socket_t *client, Ganglia_host_data *hostinfo)
 		     (int)(hostinfo->last_heard_from / APR_USEC_PER_SEC),
 		     tn,
 		     20, /*tmax for now is always 20 */
-		     0 /* TODO: (config option) dmax*/,
+		     host_dmax,
 		     hostinfo->location? hostinfo->location: "unspecified", 
 		     hostinfo->gmond_started);
 
