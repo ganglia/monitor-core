@@ -62,6 +62,8 @@ int Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels sen
 void Ganglia_gmetric_destroy( Ganglia_gmetric gmetric );
 
 void build_default_gmond_configuration(Ganglia_pool context);
+char *Ganglia_default_collection_groups(void);
+
 
 
 extern int gexec_errno;
