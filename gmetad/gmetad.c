@@ -411,8 +411,8 @@ main ( int argc, char *argv[] )
    for (i=0; i < c->server_threads; i++)
       pthread_create(&pid, &attr, server_thread, (void*) 1);
 
-   /* 4 workers, maximum queue and 64 and blocking (for now) */
-   data_source_pool = g3_thread_pool_create(4, 64, 0);
+   /* 4 workers, maximum queue of 256 and blocking (for now) */
+   data_source_pool = g3_thread_pool_create(4, 256, 0);
    if(!data_source_pool)
      {
        err_quit("Unable to create data source thread pool\n");

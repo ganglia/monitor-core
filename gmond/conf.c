@@ -1,5 +1,6 @@
 /* $Id$ */
 #include <stdio.h>
+#include <string.h>
 #include <netdb.h>
 
 #include "conf.h"
@@ -9,6 +10,20 @@
 #include "lib/dotconf.h"
 
 gmond_config_t gmond_config;
+
+struct mycontext
+{
+  int permissions;
+  const char *current_end_token;
+};
+
+enum sections
+{
+  ROOT_SECTION = 1,
+  CHANNEL_SECTION = 2
+};
+
+static const char end_ChannelSection[] = "</Channel>";
 
 static char *
 conf_strdup (const char *s)
@@ -66,6 +81,7 @@ static DOTCONF_CB(cb_url)
    return NULL;
 }
 
+#if 0
 static DOTCONF_CB(cb_receive_channels)
 {
   int i;
@@ -147,39 +163,174 @@ static DOTCONF_CB(cb_send_channels)
 
   return NULL;
 }
+#endif
 
 static DOTCONF_CB(cb_mcast_channel)
 {
   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-  free(c->send_channels[0]);
-  c->send_channels[0] = conf_strdup(cmd->data.str);
-  free(c->receive_channels[0]);
-  c->receive_channels[0] = conf_strdup(cmd->data.str);
+
+  /* We are going to overwrite the first channel entry */
+  c->channels[0]->addresses[0] = conf_strdup(cmd->data.str);
+  c->channels[0]->num_addresses = 1;
+  return NULL;
+}
+
+static DOTCONF_CB(cb_open_channel)
+{
+  struct mycontext *context = (struct mycontext *)ctx;
+  const char *old_end_token = context->current_end_token;
+  int old_override          = context->permissions;
+  const char *err = 0;
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+
+  if(context->permissions & CHANNEL_SECTION)
+    return "<Channel> cannot be nested";
+
+  context->permissions |= CHANNEL_SECTION;
+  context->current_end_token = end_ChannelSection;
+
+  while (!cmd->configfile->eof)
+    {
+      err = dotconf_command_loop_until_error(cmd->configfile);
+      if (!err)
+        {
+          err = "</Channel> is missing";
+          break;
+        }
+
+      if (err == context->current_end_token)
+        break;
+
+      dotconf_warning(cmd->configfile, DCLOG_ERR, 0, err);
+    }
+
+  context->current_end_token = old_end_token;
+  context->permissions       = old_override;
+
+  if (err != end_ChannelSection)
+    return err;
+
+  /* No errors, make room for a new channel */
+  if(!c->channel_given)
+    {
+      /* User has specified a channel but we're just going to overwrite
+         the defaults channel */
+      c->channel_given = 1; 
+    }
+  else
+    {
+      /* Make room for the new channel */
+      c->current_channel++;
+      c->channels = (channel_t **)realloc( c->channels, 
+                    c->current_channel +1 * sizeof( channel_t *));
+      
+      c->channels[c->current_channel] = (channel_t *)malloc(sizeof(channel_t));
+    }
+
+  fprintf(stderr,"Flushing channel %d\n", c->current_channel);
+  memset( c->channels[c->current_channel] , 0, sizeof(channel_t));
+  return NULL;
+}
+
+/* This callback is used to close all sections */
+static DOTCONF_CB(cb_close_channel)
+{
+  struct mycontext *context = (struct mycontext *)ctx;
+  static char buf[1024];
+  
+  if (!context->current_end_token)
+    {
+      snprintf(buf, 1024, "%s without matching <%s", cmd->name, cmd->name+2);
+      return buf;
+    }
+
+  if (context->current_end_token != cmd->name)
+    {
+      snprintf(buf, 1024, "Expected '%s' but saw %s", context->current_end_token, cmd->name);
+      return buf;
+    }
+
+  fprintf(stderr,"Closing channel\n");
+
+  return context->current_end_token;
+}
+
+static DOTCONF_CB(cb_addresses)
+{
+  int i;
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+  channel_t *channel;
+ 
+  fprintf(stderr,"Current addresses for %d\n", c->current_channel);
+  channel = c->channels[c->current_channel];
+  /* Malloc enough space for all the IPs in the list */
+  channel->addresses = (char **) malloc ( sizeof( char *) * cmd->arg_count );
+  channel->num_addresses = cmd->arg_count;
+  for (i = 0; i < cmd->arg_count; i++)
+    {
+      channel->addresses[i] = conf_strdup( cmd->data.list[i] );
+    } 
+
+  return NULL;
+}
+
+static DOTCONF_CB(cb_ports)
+{
+  int i;
+  gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+  channel_t *channel;
+
+  channel = c->channels[c->current_channel];
+  /* Malloc enough space for all the ports in the list */
+  channel->ports = (char **) malloc ( sizeof( char *) * cmd->arg_count );
+  channel->num_ports = cmd->arg_count;
+  for (i = 0; i < cmd->arg_count; i++)
+    {
+      channel->ports[i] = conf_strdup( cmd->data.list[i] );
+    }
+
+  return NULL;
+}
+
+static DOTCONF_CB(cb_interfaces)
+{
+  return NULL;
+}
+
+static DOTCONF_CB(cb_direction)
+{
+  return NULL;
+}
+
+static DOTCONF_CB(cb_ttl)
+{
   return NULL;
 }
 
 static DOTCONF_CB(cb_mcast_port)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   free(c->send_ports[0]);
-   c->send_ports[0] = conf_strdup(cmd->data.str);
-   free(c->receive_ports[0]);
-   c->receive_ports[0] = conf_strdup(cmd->data.str);
+
+   /* We are going to overwrite the first channel with mcast_port info */
+   c->channels[0]->ports[0] = conf_strdup(cmd->data.str);
+   c->channels[0]->num_ports = 1;
    return NULL;
 }
 
 static DOTCONF_CB(cb_mcast_if)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   /* no free.. set to NULL by default */
-   c->mcast_if = conf_strdup(cmd->data.str);
+   
+   /* We overwrite the first channels interfaces */
+   c->channels[0]->interfaces[0] = conf_strdup(cmd->data.str);
+   c->channels[0]->num_interfaces = 1;
    return NULL;
 }
 
 static DOTCONF_CB(cb_mcast_ttl)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
-   c->mcast_ttl  = cmd->data.value;
+   c->channels[0]->ttl  = cmd->data.value;
    return NULL;
 }
 
@@ -360,29 +511,44 @@ static int
 set_defaults(gmond_config_t *config )
 {
    /* Gmond defaults */
+   config->channel_given = 0;
+
    config->name = conf_strdup("unspecified");
    config->owner = conf_strdup("unspecified");
    config->latlong = conf_strdup("unspecified");
    config->url = conf_strdup("unspecified");
    config->location = conf_strdup("unspecified");
 
-   config->num_send_channels = 1;
-   config->send_channels_given = 0;
-   config->send_channels[0] = conf_strdup("239.2.11.71");
-   config->send_ports[0]    = conf_strdup("8649");
+   config->current_channel = 0; 
 
-   config->num_receive_channels = 1;
-   config->receive_channels_given = 0;
-   config->receive_channels[0] = conf_strdup("239.2.11.71");
-   config->receive_ports[0]    = conf_strdup("8649");
-#if 0
-   config->msg_channel = conf_strdup("239.2.11.71");
-   config->msg_port = conf_strdup("8649");
-   config->msg_if_given = 0;
-   config->msg_port_given = 0;
-   config->msg_ttl = 1;
-   config->msg_threads = 2;
-#endif
+   /* Make room for the first channel */
+   config->channels = (channel_t **) malloc ( sizeof(channel_t *));
+   if(!config->channels)
+     {
+       fprintf(stderr,"Unable to malloc memory array for first channel\n");
+       exit(1);
+     } 
+   config->channels[0] = (channel_t *) malloc (sizeof(channel_t));
+   if(!config->channels[0])
+     {
+       fprintf(stderr,"Unable to malloc memory for first channel\n");
+       exit(1);
+     }
+
+   /* Start backward compatibility attempt */
+   config->channels[0]->addresses = (char **) malloc ( sizeof( char *) );
+   config->channels[0]->addresses[0] = conf_strdup("239.2.11.71");
+   config->channels[0]->num_addresses = 1;
+   
+   config->channels[0]->ports = (char **) malloc ( sizeof( char *) );
+   config->channels[0]->ports[0] = conf_strdup("8649");
+   config->channels[0]->num_ports = 1;
+  
+   /* We don't explicitly set any interfaces */
+   config->channels[0]->num_interfaces = 0;
+   config->channels[0]->ttl = 1 ;
+   /* End backward compatibility attempt */
+   
    config->xml_port = conf_strdup("8649");
    config->compressed_xml_port = conf_strdup("8650");
    config->xml_threads = 2;
@@ -402,30 +568,40 @@ set_defaults(gmond_config_t *config )
    return 0;
 }
 
-static void
+void
 print_conf( gmond_config_t *config )
 {
-   int i;
+   int i,j;
+   channel_t *c;
+
    printf("name is %s\n", config->name);
    printf("owner is %s\n", config->owner);
    printf("latlong is %s\n", config->latlong);
    printf("cluster URL is %s\n", config->url);
    printf("host location is (x,y,z): %s\n", config->location);
-   printf("There are %d send channels\n", config->num_send_channels);
-   for(i=0; i< config->num_send_channels; i++)
+   printf("There are %d channels\n", config->current_channel+1);
+   for(i=0; i<= config->current_channel; i++)
      {
-       printf("\t%s : %s\n", config->send_channels[i], config->send_ports[i]);
+       c = config->channels[i];
+
+       printf("Info for channel #%d\n", i+1);
+       printf("\tThere are %d addresses\n", c->num_addresses);
+       for(j=0; j< c->num_addresses; j++)
+         {
+           printf("\t\t%s\n", c->addresses[j]);
+         }
+       printf("\tThere are %d ports\n", c->num_ports);
+       for(j=0; j< c->num_ports; j++)
+         {
+           printf("\t\t%s\n", c->ports[j]);
+         }
+       printf("\tThere are %d interfaces\n", c->num_interfaces);
+       for(j=0; j< c->num_interfaces; j++)
+         {
+           printf("\t\t%s\n", c->interfaces[j]);
+         }
+       printf("\tThe TTL is set to %d\n", c->ttl);
      }
-   printf("There are %d receive channels\n", config->num_receive_channels);
-   for(i=0; i< config->num_receive_channels; i++)
-     {
-       printf("\t%s : %s\n", config->receive_channels[i], config->receive_ports[i]);
-     }
-   if(config->mcast_if_given)
-      printf("mcast_if is %s\n", config->mcast_if);
-   else
-      printf("mcast_if is chosen by the kernel\n");
-   printf("mcast_ttl is %ld\n", config->mcast_ttl);
    printf("mcast_threads is %ld\n", config->mcast_threads);
    printf("xml_port is %s\n", config->xml_port);
    printf("compressed_xml_port is %s\n", config->compressed_xml_port);
@@ -446,6 +622,31 @@ print_conf( gmond_config_t *config )
    printf("host_dmax is %ld\n", config->host_dmax);
 }
 
+const char *context_checker(command_t *cmd, unsigned long mask)
+{
+        struct mycontext *context = cmd->context;
+        static char buf[1024];
+
+        /*
+     * this test is quite simple: if the permissions needed for the
+         * to-be-called command are not granted, we'll deny service
+     */
+
+        /* Root Context granted and Root Context given? */
+        if (!mask && !context->permissions)
+                return NULL;
+
+        if ( !(context->permissions & mask) )
+        {
+          snprintf(buf, 1024, "Option %s not allowed in <%s\n", cmd->name, 
+                   context->current_end_token? context->current_end_token + 2 : "global>");
+          return buf;
+        }
+
+        return NULL;
+}
+
+
 int 
 get_gmond_config( char *conffile )
 {
@@ -453,36 +654,43 @@ get_gmond_config( char *conffile )
    configfile_t *configfile;
    char default_conffile[]=DEFAULT_GMOND_CONFIG_FILE;
    FILE *fp;
+   struct mycontext context;
    static configoption_t gmond_options[] =
       {
-         {"name", ARG_STR, cb_name, &gmond_config, 0},
-         {"owner", ARG_STR, cb_owner, &gmond_config, 0},
-         {"latlong", ARG_STR, cb_latlong, &gmond_config, 0},
-         {"url", ARG_STR, cb_url, &gmond_config, 0},
-         {"location", ARG_STR, cb_location, &gmond_config, 0},
-         {"mcast_channel", ARG_STR, cb_mcast_channel, &gmond_config, 0},
-         {"mcast_port", ARG_STR, cb_mcast_port, &gmond_config, 0},
-         {"mcast_if", ARG_STR, cb_mcast_if, &gmond_config, 0},
-         {"mcast_ttl", ARG_INT, cb_mcast_ttl, &gmond_config, 0},
-         {"mcast_threads", ARG_INT, cb_mcast_threads, &gmond_config, 0},
-         {"send_channels", ARG_LIST, cb_send_channels, &gmond_config, 0},
-         {"receive_channels", ARG_LIST, cb_receive_channels, &gmond_config, 0},
-         {"xml_port", ARG_STR, cb_xml_port, &gmond_config, 0},
-         {"compressed_xml_port", ARG_STR, cb_compressed_xml_port, &gmond_config, 0},
-         {"xml_threads", ARG_INT, cb_xml_threads, &gmond_config, 0},
-         {"compressed_xml_threads", ARG_INT, cb_compressed_xml_threads, &gmond_config, 0},
-         {"trusted_hosts", ARG_LIST, cb_trusted_hosts, &gmond_config, 0},
-         {"num_nodes", ARG_INT, cb_num_nodes, &gmond_config, 0},
-         {"num_custom_metrics", ARG_INT, cb_num_custom_metrics, &gmond_config, 0},
-         {"mute", ARG_TOGGLE, cb_mute, &gmond_config, 0},
-         {"deaf", ARG_TOGGLE, cb_deaf, &gmond_config, 0},
-         {"debug_level", ARG_INT, cb_debug_level, &gmond_config, 0},
-         {"no_setuid", ARG_TOGGLE, cb_no_setuid, &gmond_config, 0},
-         {"setuid", ARG_STR, cb_setuid, &gmond_config, 0},
-         {"no_gexec", ARG_TOGGLE, cb_no_gexec, &gmond_config, 0},
-         {"all_trusted", ARG_TOGGLE, cb_all_trusted, &gmond_config, 0},
-         {"host_dmax", ARG_INT, cb_host_dmax, &gmond_config, 0},
-         {"xml_compression_level", ARG_INT, cb_xml_compression_level, &gmond_config, 0},
+         {"<Channel>", ARG_NONE, cb_open_channel, &gmond_config, CTX_ALL},
+         {end_ChannelSection, ARG_NONE, cb_close_channel, &gmond_config, CHANNEL_SECTION},
+         {"addresses", ARG_LIST, cb_addresses, &gmond_config, CHANNEL_SECTION},
+         {"ports", ARG_LIST, cb_ports, &gmond_config, CHANNEL_SECTION},
+         {"interfaces", ARG_LIST, cb_interfaces, &gmond_config, CHANNEL_SECTION},
+         {"direction", ARG_STR, cb_direction, &gmond_config, CHANNEL_SECTION},
+         {"ttl", ARG_INT, cb_ttl, &gmond_config, CHANNEL_SECTION},
+
+         {"name", ARG_STR, cb_name, &gmond_config, CTX_ALL},
+         {"owner", ARG_STR, cb_owner, &gmond_config, CTX_ALL},
+         {"latlong", ARG_STR, cb_latlong, &gmond_config, CTX_ALL},
+         {"url", ARG_STR, cb_url, &gmond_config, CTX_ALL},
+         {"location", ARG_STR, cb_location, &gmond_config, CTX_ALL},
+         {"mcast_channel", ARG_STR, cb_mcast_channel, &gmond_config, CTX_ALL},
+         {"mcast_port", ARG_STR, cb_mcast_port, &gmond_config, CTX_ALL},
+         {"mcast_if", ARG_STR, cb_mcast_if, &gmond_config, CTX_ALL},
+         {"mcast_ttl", ARG_INT, cb_mcast_ttl, &gmond_config, CTX_ALL},
+         {"mcast_threads", ARG_INT, cb_mcast_threads, &gmond_config, CTX_ALL},
+         {"xml_port", ARG_STR, cb_xml_port, &gmond_config, CTX_ALL},
+         {"compressed_xml_port", ARG_STR, cb_compressed_xml_port, &gmond_config, CTX_ALL},
+         {"xml_threads", ARG_INT, cb_xml_threads, &gmond_config, CTX_ALL},
+         {"compressed_xml_threads", ARG_INT, cb_compressed_xml_threads, &gmond_config, CTX_ALL},
+         {"trusted_hosts", ARG_LIST, cb_trusted_hosts, &gmond_config, CTX_ALL},
+         {"num_nodes", ARG_INT, cb_num_nodes, &gmond_config, CTX_ALL},
+         {"num_custom_metrics", ARG_INT, cb_num_custom_metrics, &gmond_config, CTX_ALL},
+         {"mute", ARG_TOGGLE, cb_mute, &gmond_config, CTX_ALL},
+         {"deaf", ARG_TOGGLE, cb_deaf, &gmond_config, CTX_ALL},
+         {"debug_level", ARG_INT, cb_debug_level, &gmond_config, CTX_ALL},
+         {"no_setuid", ARG_TOGGLE, cb_no_setuid, &gmond_config, CTX_ALL},
+         {"setuid", ARG_STR, cb_setuid, &gmond_config, CTX_ALL},
+         {"no_gexec", ARG_TOGGLE, cb_no_gexec, &gmond_config, CTX_ALL},
+         {"all_trusted", ARG_TOGGLE, cb_all_trusted, &gmond_config, CTX_ALL},
+         {"host_dmax", ARG_INT, cb_host_dmax, &gmond_config, CTX_ALL},
+         {"xml_compression_level", ARG_INT, cb_xml_compression_level, &gmond_config, CTX_ALL},
          LAST_OPTION
       };
 
@@ -500,14 +708,19 @@ get_gmond_config( char *conffile )
       return 0; 
 
    if(conffile)
-      configfile = dotconf_create(conffile, gmond_options, 0, CASE_INSENSITIVE);
+      configfile = dotconf_create(conffile, gmond_options, (void *)&context, CASE_INSENSITIVE);
    else
-      configfile = dotconf_create(default_conffile, gmond_options, 0, CASE_INSENSITIVE);
+      configfile = dotconf_create(default_conffile, gmond_options, (void *)&context, CASE_INSENSITIVE);
 
    if (!configfile)
       return -1;
 
-   configfile->errorhandler = (dotconf_errorhandler_t) errorhandler;
+   configfile->errorhandler   = (dotconf_errorhandler_t) errorhandler;
+   configfile->contextchecker = (dotconf_contextchecker_t) context_checker;
+
+   /* initialize my context structure */
+   context.current_end_token = 0;
+   context.permissions = 0;
 
    if (dotconf_command_loop(configfile) == 0)
       {
