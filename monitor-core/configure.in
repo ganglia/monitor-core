@@ -569,6 +569,9 @@ dnl the definitions that we're looking for in some system headers.
 
 dnl Currently only linux and freebsd support gexec
 
+dnl By default, no support for gexec
+GEXEC=false;
+
 case "$host" in
 *linux*)
                 metric_source="linux.c"
@@ -577,13 +580,14 @@ dnl
 dnl For fsusage.c - disk usage.
 dnl
                 AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
-                AM_CONDITIONAL(GEXEC_SUPPORTED, true)
+                GEXEC=true;
                 ;;
 *ia64-*hpux*)		metric_source="hpux.c"
 		CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
                 LIBS="-lpthread $LIBS"
                 AC_DEFINE(IA64,1,IA64)
-                AC_DEFINE(HPUX,1,HPUX);;
+                AC_DEFINE(HPUX,1,HPUX)
+                ;;
 *aix*)		metric_source="aix.c"
                 CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
 		if test "$ac_cv_lib_pmapi_pm_cycles" = yes ; then
@@ -593,7 +597,8 @@ dnl
 			echo "For AIX 4.3, you can download PMAPI at http://alphaworks.ibm.com/tech/pmapi"
 			echo "AIX 5 has PMAPI installed in bos.pmapi"
 		fi
-                AC_DEFINE(AIX, 1, AIX);;
+                AC_DEFINE(AIX, 1, AIX)
+                ;;
 *hpux*)		metric_source="hpux.c"
 		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
                 LIBS="-lpthread $LIBS"
@@ -618,16 +623,18 @@ dnl
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
 *freebsd*)      metric_source="freebsd.c" 
                 CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
-                AM_CONDITIONAL(GEXEC_SUPPORTED, true)
+                GEXEC=true
                 AC_DEFINE(FREEBSD, 1, FREEBSD);; 
 *cygwin*)      	metric_source="cygwin.c" 
                 LIBS="$LIBS -lrpc"
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
 
+AM_CONDITIONAL(GEXEC_SUPPORTED, $GEXEC)
+
 AC_LINK_FILES(gmond/machines/${metric_source}, gmond/machine.c)
 
-AC_OUTPUT(Makefile ganglia.spec libunp/Makefile tests/Makefile gmetad/Makefile lib/Makefile libhttpd/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile web/Makefile web/conf.php libe/Makefile gexec/Makefile gauthd/Makefile)
+AC_OUTPUT(Makefile ganglia.spec libunp/Makefile tests/Makefile gmetad/Makefile lib/Makefile libhttpd/Makefile gmond/Makefile gmond/gstat/Makefile gmetric/Makefile web/Makefile web/conf.php libe/Makefile gexec/Makefile gexec/gexec_server gauthd/Makefile gauthd/gauthd.init)
 
 
 echo ""

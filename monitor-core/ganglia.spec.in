@@ -51,6 +51,35 @@ written in the PHP4 language.
 #######################################################################
 %else
 
+%package gexec-client
+Summary: The Ganglia Execution Client
+Group: System Environment/Base
+Obsoletes: gexec authd
+Provides: gexec authd
+
+%description gexec-client
+GEXEC is a scalable cluster remote execution system which provides fast, RSA authenticated
+remote execution of parallel and distributed jobs.  It provides transparent forwarding of
+stdin, stdout, stderr, and signals to and from remote processes, provides local environment
+propagation, and is designed to be robust and to scale to systems over 1000 nodes. Internally,
+GEXEC operates by building an n-ary tree of TCP sockets and threads between gexec daemons and
+propagating control information up and down the tree. By using hierarchical control, GEXEC
+distributes both the work and resource usage associated with massive amounts of parallelism
+across multiple nodes, thereby eliminating problems associated with single node resource limits
+(e.g., limits on the number of file descriptors on front-end nodes).
+
+%package gexec-server
+Summary: The Ganglia Execution Daemon (gexecd)
+Group: System Environment/Base
+Obsoletes: gexec
+Provides: gexec
+Requires: xinetd
+
+%description gexec-server
+The Ganglia Execution Daemon is an (x)inetd daemon which executes gexec client requests
+after it is authentication using RSA keys.  Client requests must be signed by
+the Ganglia Authenication Daemom (gauthd) before they are sent to gexec servers.
+
 %package gmetad
 Summary: Ganglia Meta daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
@@ -112,6 +141,30 @@ make
 %pre
 
 %ifnarch noarch
+##
+## POST gexec-client
+##
+%post gexec-client
+if [ "$1" = 1 ]; then
+   /etc/init.d/gauthd restart
+   chkconfig --add gauthd
+fi
+
+
+##
+## POST gexec-server
+##
+%post gexec-server
+echo "Sending SIGUSR2 to xinetd (pid `cat /var/run/xinetd.pid`)"
+kill -USR2 `cat /var/run/xinetd.pid`
+
+##
+## POSTUN gexec-server
+##
+%postun gexec-server
+echo "Sending SIGUSR2 to xinetd (pid `cat /var/run/xinetd.pid`)"
+kill -USR2 `cat /var/run/xinetd.pid`
+
 ##
 ## POST GMETA
 ##
@@ -184,17 +237,37 @@ fi
 ## Create the directory structure
 %__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 %__mkdir -p $RPM_BUILD_ROOT/var/lib/ganglia/rrds
+%__mkdir -p $RPM_BUILD_ROOT/etc/xinetd.d
 
 ## Move the files into the structure
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.conf $RPM_BUILD_ROOT/etc/gmond.conf
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
+%__cp -f %{_builddir}/%{name}-%{version}/gexec/gexec_server $RPM_BUILD_ROOT/etc/xinetd.d/gexec_server
+%__cp -f %{_builddir}/%{name}-%{version}/gauthd/gauthd.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gauthd
 %__make install prefix=$RPM_BUILD_ROOT/usr
 
 %endif
 
 %ifnarch noarch
+##
+## FILES GEXEC-CLIENT
+##
+%files gexec-client
+%defattr(-, root, root)
+/usr/bin/gexec
+/usr/sbin/guathd
+/etc/init.d/guathd
+
+##
+## FILES GEXEC-SERVER
+##
+%files gexec-server
+%defattr(-, root, root)
+/etc/xinetd.d/gexec_server
+/usr/sbin/gexecd
+
 ##
 ## FILES GMETA
 ##
