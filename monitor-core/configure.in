@@ -341,6 +341,7 @@ dnl
 			echo "AIX 5 has PMAPI installed in bos.pmapi"
 		fi
 		AC_DEFINE(AIX, 1, AIX);;
+
 *hpux*)		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
 		LIBS="-lpthread $LIBS"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
@@ -370,6 +371,9 @@ dnl
                         CFLAGS="-pthread $CFLAGS -D_REENTRANT"
                 fi
                 AC_DEFINE(FREEBSD, 1, FREEBSD);; 
+*netbsd*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		varstatedir="/var/db"
+		AC_DEFINE(NETBSD, 1, NETBSD);; 
 *cygwin*)      	LDFLAGS="-liphlpapi"
 		AC_DEFINE(CYGWIN,1,CYGWIN)
 esac
