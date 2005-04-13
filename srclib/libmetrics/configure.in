@@ -126,10 +126,6 @@ dnl  LIBS="-lpthread $LIBS"
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
 *freebsd*)      OS="freebsd"
 		varstatedir="/var/db"
-		dnl osreldate=`awk '/^\#define[[:space:]]*__FreeBSD_version/ { print $3 }' /usr/include/osreldate.h`
-		dnl if test $osreldate -lt 502102; then   
-		dnl	CFLAGS="-pthread $CFLAGS -D_REENTRANT"
-		dnl fi
 		AC_DEFINE(FREEBSD, 1, FREEBSD)
 		;; 
 *cygwin*)      	OS="cygwin"
