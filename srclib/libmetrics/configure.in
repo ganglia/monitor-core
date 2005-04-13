@@ -125,7 +125,6 @@ dnl  LIBS="-lpthread $LIBS"
 		fi 
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
 *freebsd*)      OS="freebsd"
-		varstatedir="/var/db"
 		AC_DEFINE(FREEBSD, 1, FREEBSD)
 		;; 
 *cygwin*)      	OS="cygwin"
