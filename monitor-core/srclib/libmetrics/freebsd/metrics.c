@@ -195,7 +195,7 @@ cpu_speed_func ( void )
    }
 
 done:
-   val.uint16 = freq;
+   val.uint32 = freq;
 
    return val;
 }
