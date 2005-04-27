@@ -14,7 +14,9 @@ else
 $tpl = new TemplatePower( template("$header.tpl") );
 $tpl->prepare();
 
-# Maintain our path through the grid tree.
+#
+# sacerdoti: beginning of Grid tree state handling
+#
 $me = $self . "@" . $grid[$self][AUTHORITY];
 if ($initgrid)
    {
@@ -47,12 +49,12 @@ if ($initgrid or $gridwalk)
       setcookie("gs", $gridstack_str, time() + 86400);
    }
 
-# Invariant: back pointer is second-to-last element of gridstack. Grid stack never
-# has duplicate entries.
+# Invariant: back pointer is second-to-last element of gridstack. Grid stack
+# never has duplicate entries.
 list($parentgrid, $parentlink) = explode("@", $gridstack[count($gridstack)-2]);
 
-# Setup a redirect to a remote server if you choose a grid from pulldown menu. Tell
-# destination server that we're walking foward in the grid tree.
+# Setup a redirect to a remote server if you choose a grid from pulldown menu.
+# Tell destination server that we're walking foward in the grid tree.
 if (strstr($clustername, "http://")) 
    {
       $tpl->assign("refresh", "0");
@@ -65,6 +67,7 @@ $tpl->assign("refresh", $default_refresh);
 
 $tpl->assign( "date", date("r"));
 $tpl->assign( "page_title", $title );
+
 
 # The page to go to when "Get Fresh Data" is pressed.
 if (isset($page))
@@ -160,7 +163,10 @@ else
 if ( $clustername && !$hostname )
    {
       # Drop in a host list if we have hosts
-      if(is_array($hosts_up) || is_array($hosts_down))
+      if (!$showhosts) {
+      	 $node_menu .= "[Summary Only]";
+      }
+      elseif (is_array($hosts_up) || is_array($hosts_down))
          {
             $node_menu .= "<SELECT NAME=\"h\" OnChange=\"ganglia_form.submit();\">";
             $node_menu .= "<OPTION VALUE=\"\">--Choose a Node\n";
