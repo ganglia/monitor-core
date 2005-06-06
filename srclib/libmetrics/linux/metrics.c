@@ -1187,7 +1187,7 @@ float find_disk_space(double *total_size, double *total_free)
       if (remote_mount(device, type)) continue;
       if (strncmp(device, "/dev/", 5)) continue;
       thispct = device_space(mount, device, total_size, total_free);
-      debug_msg("Counting device %s (%.2f GB)", device, thispct);
+      debug_msg("Counting device %s (%.2f %%)", device, thispct);
       if (!max || max<thispct)
          max = thispct;
    }
@@ -1195,9 +1195,9 @@ float find_disk_space(double *total_size, double *total_free)
 
    *total_size = *total_size / reported_units;
    *total_free = *total_free / reported_units;
+   debug_msg("For all disks: %.3f GB total, %.3f GB free for users.", *total_size, *total_free);
 
    DFcleanup();
-   debug_msg("For all disks: %.3f GB total, %.3f GB free for users.", *total_size, *total_free);
    return max;
 }
 
