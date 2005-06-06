@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -41,6 +40,7 @@ char *update_file(timely_file *tf)
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
 	      tf->name);
+      return (char *)SYNAPSE_FAILURE;
     }
     else tf->last_read = now;
   }
@@ -90,6 +90,7 @@ g_val_t
 metric_init(void)
 {
    g_val_t rval;
+   char * dummy;
 
    num_cpustates = num_cpustates_func();
 
@@ -104,17 +105,18 @@ metric_init(void)
                        proc_sys_kernel_osrelease, BUFFSIZE);
    if ( rval.int32 == SYNAPSE_FAILURE )
       {
-         err_msg("kernel_func() got an error from slurpfile()");
+         err_msg("metric_init() got an error from slurpfile()");
          return rval;
       }  
    
    /* Get rid of pesky \n in osrelease */
    proc_sys_kernel_osrelease[rval.int32-1] = '\0';
 
-   rval.int32 = (int) update_file(&proc_net_dev);
-   if ( rval.int32 == SYNAPSE_FAILURE )
+   dummy = update_file(&proc_net_dev);
+   if ( dummy == (char *)SYNAPSE_FAILURE )
       {
-         err_msg("net_dev_func() got an error from slurpfile()");
+         err_msg("metric_init() got an error from update_file()");
+	 rval.int32 = SYNAPSE_FAILURE;
          return rval;
       } 
 
@@ -1193,9 +1195,9 @@ float find_disk_space(double *total_size, double *total_free)
 
    *total_size = *total_size / reported_units;
    *total_free = *total_free / reported_units;
-   /* debug_msg("For all disks: %.3f GB total, %.3f GB free for users.", *total_size, *total_free); */
 
    DFcleanup();
+   debug_msg("For all disks: %.3f GB total, %.3f GB free for users.", *total_size, *total_free);
    return max;
 }
 
