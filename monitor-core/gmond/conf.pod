@@ -235,11 +235,11 @@ attribute.  Ganglia will not allow IPV6=>IPV4 mapping (for portability
 and security reasons).  If you want to listen on both B<inet4> and
 B<inet6> for a particular port, explicitly state it with the following:
 
-  udp_recv_channel {
+  tcp_accept_channel {
     port = 8666
     family = inet4
   }
-  udp_recv_channel {
+  tcp_accept_channel {
     port = 8666
     family = inet6
   }
