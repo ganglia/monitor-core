@@ -230,7 +230,7 @@ fi
 %attr(0555,root,root)/usr/bin/gstat
 /usr/sbin/gmond
 /etc/rc.d/init.d/gmond
-%attr(0555,root,root)/usr/share/man/man5/gmond.conf.5.gz
+%attr(0555,root,root)/usr/share/man/man5/gmond.conf.5*
 %config(noreplace) /etc/gmond.conf
 
 ##
