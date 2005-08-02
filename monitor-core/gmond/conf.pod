@@ -321,6 +321,17 @@ B<udp_send_channel>s defined.
 It's important to note that all metrics in a collection group are sent
 even when only a single B<value_threshold> is surpassed.
 
+=head2 include
+
+Useful if you want to include another configuration file; for example:
+
+  include("globals.conf")
+
+  udp_send_channel {
+    mcast_join = 239.2.11.71
+    port       = 8649
+  }
+
 =head1 ACCESS CONTROL
 
 The B<udp_recv_channel> and B<tcp_accept_channel> directives
