@@ -115,6 +115,7 @@ static cfg_opt_t gmond_opts[] = {
   CFG_SEC("udp_recv_channel", udp_recv_channel_opts, CFGF_MULTI),
   CFG_SEC("tcp_accept_channel", tcp_accept_channel_opts, CFGF_MULTI),
   CFG_SEC("collection_group",  collection_group_opts, CFGF_MULTI),
+  CFG_FUNC("include", cfg_include),
   CFG_END()
 }; 
 
@@ -566,7 +567,7 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
       debug_msg("udp_send_channel mcast_join=%s mcast_if=%s host=%s port=%d\n",
 		  mcast_join? mcast_join:"NULL", 
 		  mcast_if? mcast_if:"NULL",
-		  host,
+		  host? host:"NULL",
 		  port);
 
       /* Create a subpool */
