@@ -64,7 +64,7 @@ data_thread ( void *arg )
 
          if(!sock)
             {
-               err_msg("data_thread() got not answer from any [%s] datasource", d->name);
+               err_msg("data_thread() got no answer from any [%s] datasource", d->name);
                d->dead = 1;
                goto take_a_break;
             }
