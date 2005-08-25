@@ -119,6 +119,7 @@ union Ganglia_message switch (Ganglia_message_formats id) {
   case metric_pkts_in:       /* xdr_float */
   case metric_pkts_out:      /* xdr_float */
   case metric_part_max_used: /* xdr_float */
+  case metric_cpu_wio:       /* xdr_float */
     float f;
 
   case metric_disk_total:    /* xdr_double */
@@ -184,7 +185,7 @@ struct Ganglia_25metric
 %  {metric_disk_total,   "disk_total", 1200,  GANGLIA_VALUE_DOUBLE,         "GB",         "both",  "%.3f",UDP_HEADER_SIZE+16},
 %  {metric_disk_free,    "disk_free",   180,  GANGLIA_VALUE_DOUBLE,         "GB",         "both",  "%.3f",UDP_HEADER_SIZE+16},
 %  {metric_part_max_used,"part_max_used",180, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.1f",UDP_HEADER_SIZE+8},
-%  {metric_cpu_wio,      "cpu_wio",     3800, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
+%  {metric_cpu_wio,      "cpu_wio",       90, GANGLIA_VALUE_FLOAT,          "%",          "both",  "%.1f",UDP_HEADER_SIZE+8},
 %  {metric_bread_sec,    "bread_sec",     90, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
 %  {metric_bwrite_sec,   "bwrite_sec",    90, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},
 %  {metric_lread_sec,    "lread_sec",     90, GANGLIA_VALUE_FLOAT,          "",           "both",  "%.2f",UDP_HEADER_SIZE+8},

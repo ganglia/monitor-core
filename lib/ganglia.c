@@ -129,6 +129,10 @@ start (void *data, const char *el, const char **attr)
             {
                cluster->host->cpu_idle = atof( attr[3] );
             }
+         else if(! strcmp( attr[1], "cpu_wio"))
+            {
+               cluster->host->cpu_wio = atof( attr[3] );
+            }
          else if(! strcmp( attr[1], "gexec" ))
             {
                if(! strcmp( attr[3], "ON" ))
