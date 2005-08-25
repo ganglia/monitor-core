@@ -78,6 +78,7 @@ struct gexec_host_t {
   double cpu_nice;
   double cpu_system;
   double cpu_idle;
+  double cpu_wio;
   unsigned int proc_run;
   unsigned int proc_total;
   unsigned int cpu_num;

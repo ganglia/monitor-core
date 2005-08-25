@@ -375,15 +375,6 @@ collection_group { \n\
 #define SOLARIS_SPECIFIC_CONFIGURATION "\
 /* solaris specific metrics begin */ \n\
 collection_group { \n\
-  collect_every = 950 \n\
-  time_threshold = 3800 \n\
-  metric { \n\
-    name = \"cpu_wio\" \n\
-    value_threshold = \"5.0\" \n\
-  } \n\
-} \n\
-\n\
-collection_group { \n\
   collect_every = 20 \n\
   time_threshold = 90 \n\
   metric { \n\
