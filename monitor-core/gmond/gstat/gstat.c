@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
       {
          printf("CLUSTER HOSTS\n");
          printf("Hostname                     LOAD                       CPU              Gexec\n");
-         printf(" CPUs (Procs/Total) [     1,     5, 15min] [  User,  Nice, System, Idle]\n\n");
+         printf(" CPUs (Procs/Total) [     1,     5, 15min] [  User,  Nice, System, Idle, Wio]\n\n");
       }
    for(; li != NULL; li = li->next)
       {
@@ -146,10 +146,10 @@ int main(int argc, char *argv[])
          else
             printf("\n");
 
-         printf(" %4d (%5d/%5d) [%6.2f,%6.2f,%6.2f] [%6.1f,%6.1f,%6.1f,%6.1f] ",
+         printf(" %4d (%5d/%5d) [%6.2f,%6.2f,%6.2f] [%6.1f,%6.1f,%6.1f,%6.1f,%6.1f] ",
                host->cpu_num, host->proc_run, host->proc_total,
                host->load_one, host->load_five, host->load_fifteen,
-               host->cpu_user, host->cpu_nice, host->cpu_system, host->cpu_idle);
+               host->cpu_user, host->cpu_nice, host->cpu_system, host->cpu_idle, host->cpu_wio);
          if(host->gexec_on)
             printf("%s\n", "ON");
          else
