@@ -53,6 +53,12 @@ AC_DEFUN(AC_SEARCH_TYPE,
                 AC_TRY_COMPILE(
 [
 #include        "confdefs.h"    /* the header built by configure so far */
+#ifdef HAVE_STDINT_H
+#  include      <stdint.h>
+#endif
+#ifdef  HAVE_INTTYPES_H
+#  include      <inttypes.h>
+#endif
 #ifdef  HAVE_SYS_TYPES_H
 #  include      <sys/types.h>
 #endif
