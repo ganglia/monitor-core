@@ -43,19 +43,20 @@ function authenticate()
 #-------------------------------------------------------------------------------
 function checkprivate()
 {
-   global $clustername, $context, $PHP_AUTH_PW;
+   global $clustername, $context;
+
    # Allow the Meta context page.
    if ($context=="meta") { return; }
 
    $private=embarrassed();
    if ($private[$clustername]) {
       #echo "The password for $clustername is $private[$clustername]<br>";
-      if (empty($PHP_AUTH_PW)) {
+      if (empty($_SERVER['PHP_AUTH_PW'])) {
 	 authenticate();
       }
       else {
 	 # Check password (in md5 format). Username does not matter.
-	 if (md5($PHP_AUTH_PW) != $private[$clustername]) {
+	 if (md5($_SERVER['PHP_AUTH_PW']) != $private[$clustername]) {
 	    authenticate();
 	 }
       }
@@ -68,17 +69,17 @@ function checkprivate()
 # The control room is always embarrassed.
 function checkcontrol()
 {
-   global $context, $PHP_AUTH_PW;
+   global $context;
 
    if ($context != "control") { return; }
 
-   if (empty($PHP_AUTH_PW)) {
+   if (empty($_SERVER['PHP_AUTH_PW'])) {
       authenticate();
    }
    else {
       #echo "You entered password ". md5($PHP_AUTH_PW) ." ($PHP_AUTH_PW)<br>";
       $private=embarrassed();
-      if (md5($PHP_AUTH_PW) != $private["controlroom"]) {
+      if (md5($_SERVER['PHP_AUTH_PW']) != $private["controlroom"]) {
 	 authenticate();
       }
    }
