@@ -21,6 +21,22 @@ struct Ganglia_gmetric_message {
   unsigned int dmax;
 };
 
+/*
+** When adding a new core metric you need to make three changes
+** in this file:
+**
+** - Add a new entry to "Ganglia_message_formats", just before
+**   GANGLIA_NUM_25_METRICS
+** - Add the new enum entry to the "Ganglia_message" union/switch.
+**   Failing to do so will lead to garbage in the reporting of
+**   the new metric
+** - Add a reporting string to "ganglia_25_metric_array". Put the
+**   new string at the end.
+**
+** In addition do not forget a matching "Ganglia_metric_cb_define"
+** in gmond/gmond.c
+**
+*/
 enum Ganglia_message_formats {
    metric_user_defined = 0, /* gmetric message */
    metric_cpu_num,
@@ -97,6 +113,10 @@ union Ganglia_message switch (Ganglia_message_formats id) {
   case metric_swap_free:     /* xdr_u_int */
   case metric_heartbeat:     /* xdr_u_int */
   case metric_mtu:           /* xdr_u_int */
+  case metric_mem_arm:       /* xdr_u_int */
+  case metric_mem_rm:        /* xdr_u_int */
+  case metric_mem_avm:       /* xdr_u_int */
+  case metric_mem_vm:        /* xdr_u_int */
     unsigned int u_int;  
 
   case metric_machine_type:  /* xdr_string */
@@ -120,6 +140,16 @@ union Ganglia_message switch (Ganglia_message_formats id) {
   case metric_pkts_out:      /* xdr_float */
   case metric_part_max_used: /* xdr_float */
   case metric_cpu_wio:       /* xdr_float */
+  case metric_bread_sec:     /* xdr_float */
+  case metric_bwrite_sec:    /* xdr_float */
+  case metric_lread_sec:     /* xdr_float */
+  case metric_lwrite_sec:    /* xdr_float */
+  case metric_rcache:        /* xdr_float */
+  case metric_wcache:        /* xdr_float */
+  case metric_phread_sec:    /* xdr_float */
+  case metric_phwrite_sec:   /* xdr_float */
+  case metric_cpu_intr:      /* xdr_float */
+  case metric_cpu_sintr:     /* xdr_float */
     float f;
 
   case metric_disk_total:    /* xdr_double */
