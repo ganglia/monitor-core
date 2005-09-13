@@ -11,6 +11,9 @@
 #include <string.h>
 #include <syslog.h>
 #include <errno.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 #ifndef MAXLINE
 #define MAXLINE 8192
