@@ -40,7 +40,7 @@ $tpl->assign("Disk", $Disk);
 
 # Show which node has the most full disk.
 $most_full_hosturl=rawurlencode($most_full_host);
-$most_full = $most_full ? "<a href=\"./?p=1&c=$cluster_url&h=$most_full_host\">".
+$most_full = $most_full ? "<a href=\"./?p=1&amp;c=$cluster_url&amp;h=$most_full_host\">".
    "$most_full_host ($most_full% Used)</a>" : "Unknown";
 $tpl->assign("most_full", $most_full);
 $tpl->assign("cols_menu", $cols_menu);

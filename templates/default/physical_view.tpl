@@ -12,12 +12,12 @@
    1 <INPUT type=radio name="p" value="1" OnClick="ganglia_form.submit();" {checked1}>&nbsp;
 </TD>
 
-<TD align=left valign=top width=25%>
+<TD align=left valign=top width="25%">
 Total CPUs: <b>{CPUs}</b><br>
 Total Memory: <b>{Memory}</b><br>
 </TD>
 
-<TD align=left valign=top width=25%>
+<TD align=left valign=top width="25%">
 Total Disk: <b>{Disk}</b><br>
 Most Full Disk: <b>{most_full}</b><br>
 </TD>
@@ -55,7 +55,7 @@ Legend
 </tr>
 <tr>
 <td class=odd>
-<table width=100% cellpadding=1 cellspacing=0 border=0>
+<table width="100%" cellpadding=1 cellspacing=0 border=0>
 <tr>
  <td style="color: blue">Node Name&nbsp;<br></td>
  <td align=right valign=top>

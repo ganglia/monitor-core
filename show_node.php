@@ -129,13 +129,13 @@ $tpl->assign("swap","Using $swap_used of $swap_total MB swap.");
 
 # For the back link.
 $cluster_url=rawurlencode($clustername);
-$tpl->assign("physical_view","./?p=$physical&c=$cluster_url");
+$tpl->assign("physical_view","./?p=$physical&amp;c=$cluster_url");
 
 # For the full host view link.
-$tpl->assign("full_host_view","./?c=$cluster_url&h=$hostname&$get_metric_string");
+$tpl->assign("full_host_view","./?c=$cluster_url&amp;h=$hostname&amp;$get_metric_string");
 
 # For the reload link.
-$tpl->assign("self","./?c=$cluster_url&h=$hostname&p=$physical");
+$tpl->assign("self","./?c=$cluster_url&amp;h=$hostname&amp;p=$physical");
 
 $tpl->printToScreen();
 ?>

@@ -266,8 +266,8 @@ function nodebox($hostname, $verbose, $title="", $extrarow="")
    $cluster_url=rawurlencode($clustername);
    
    $row1 = "<tr><td class=$rowclass>\n".
-      "<table width=100% cellpadding=1 cellspacing=0 border=0><tr>".
-      "<td><a href=\"$GHOME/?p=$verbose&c=$cluster_url&h=$host_url\">".
+      "<table width=\"100%\" cellpadding=1 cellspacing=0 border=0><tr>".
+      "<td><a href=\"$GHOME/?p=$verbose&amp;c=$cluster_url&amp;h=$host_url\">".
       "$title</a>&nbsp;<br>\n";
 
    $cpus = $cpu_num > 1 ? "($cpu_num)" : "";
