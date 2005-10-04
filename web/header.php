@@ -58,7 +58,7 @@ list($parentgrid, $parentlink) = explode("@", $gridstack[count($gridstack)-2]);
 if (strstr($clustername, "http://")) 
    {
       $tpl->assign("refresh", "0");
-      $tpl->assign("redirect", ";URL=$clustername?gw=fwd&gs=$gridstack_url");
+      $tpl->assign("redirect", ";URL=$clustername?gw=fwd&amp;gs=$gridstack_url");
       echo "<h2>Redirecting, please wait...</h2>";
       $tpl->printToScreen();
       exit;
@@ -82,9 +82,9 @@ $tpl->assign("images","./templates/$template_name/images");
 # Used when making graphs via graph.php. Included in most URLs
 #
 $sort_url=rawurlencode($sort);
-$get_metric_string = "m=$metric&r=$range&s=$sort_url&hc=$hostcols";
+$get_metric_string = "m=$metric&amp;r=$range&amp;s=$sort_url&amp;hc=$hostcols";
 if ($jobrange and $jobstart)
-        $get_metric_string .= "&jr=$jobrange&js=$jobstart";
+        $get_metric_string .= "&amp;jr=$jobrange&amp;js=$jobstart";
 
 # Set the Alternate view link.
 $cluster_url=rawurlencode($clustername);
@@ -95,7 +95,7 @@ $tpl->assign("cluster_url", $cluster_url);
 
 if ($context=="cluster")
    {
-      $tpl->assign("alt_view", "<a href=\"./?p=2&c=$cluster_url\">Physical View</a>");
+      $tpl->assign("alt_view", "<a href=\"./?p=2&amp;c=$cluster_url\">Physical View</a>");
    }
 elseif ($context=="physical")
    {
@@ -104,12 +104,12 @@ elseif ($context=="physical")
 elseif ($context=="node")
    {
       $tpl->assign("alt_view",
-      "<a href=\"./?c=$cluster_url&h=$node_url&$get_metric_string\">Host View</a>");
+      "<a href=\"./?c=$cluster_url&amp;h=$node_url&amp;$get_metric_string\">Host View</a>");
    }
 elseif ($context=="host")
    {
       $tpl->assign("alt_view",
-      "<a href=\"./?p=2&c=$cluster_url&h=$node_url\">Node View</a>");
+      "<a href=\"./?p=2&amp;c=$cluster_url&amp;h=$node_url\">Node View</a>");
    }
 
 # Build the node_menu
@@ -117,14 +117,14 @@ $node_menu = "";
 
 if ($parentgrid) 
    {
-      $node_menu .= "<B><A HREF=\"$parentlink?gw=back&gs=$gridstack_url\">".
+      $node_menu .= "<B><A HREF=\"$parentlink?gw=back&amp;gs=$gridstack_url\">".
          "$parentgrid $meta_designator</A></B> ";
       $node_menu .= "<B>&gt;</B>\n";
    }
 
 # Show grid.
 $mygrid =  ($self == "unspecified") ? "" : $self;
-$node_menu .= "<B><A HREF=\"./?$get_metric_string\">$mygrid $meta_designator</A> ";
+$node_menu .= "<B><A HREF=\"./?$get_metric_string\">$mygrid $meta_designator</A></B> ";
 $node_menu .= "<B>&gt;</B>\n";
 
 if ($physical)
@@ -133,7 +133,7 @@ if ($physical)
 if ( $clustername )
    {
       $url = rawurlencode($clustername);
-      $node_menu .= "<B><A HREF=\"./?c=$url&$get_metric_string\">$clustername</A></B> ";
+      $node_menu .= "<B><A HREF=\"./?c=$url&amp;$get_metric_string\">$clustername</A></B> ";
       $node_menu .= "<B>&gt;</B>\n";
       $node_menu .= hiddenvar("c", $clustername);
    }

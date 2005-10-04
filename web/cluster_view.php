@@ -29,7 +29,7 @@ $tpl->assign("cluster", $clustername);
 #
 # Summary graphs
 #
-$graph_args = "c=$cluster_url&$get_metric_string&st=$cluster[LOCALTIME]";
+$graph_args = "c=$cluster_url&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]";
 $tpl->assign("graph_args", $graph_args);
 if (!isset($optional_graphs))
 	$optional_graphs = array();
@@ -75,7 +75,7 @@ if ($showhosts)
       
       # Show pie chart of loads
       $pie_args = "title=" . rawurlencode("Cluster Load Percentages");
-      $pie_args .= "&size=250x150";
+      $pie_args .= "&amp;size=250x150";
       foreach($load_colors as $name=>$color)
          {
             if (!array_key_exists($color, $percent_hosts))
@@ -89,11 +89,11 @@ else
    {
       # Show pie chart of hosts up/down
       $pie_args = "title=" . rawurlencode("Host Status");
-      $pie_args .= "&size=250x150";
+      $pie_args .= "&amp;size=250x150";
       $up_color = $load_colors["50-75"];
       $down_color = $load_colors["down"];
-      $pie_args .= "&Up=$cluster[HOSTS_UP],$up_color";
-      $pie_args .= "&Down=$cluster[HOSTS_DOWN],$down_color";
+      $pie_args .= "&amp;Up=$cluster[HOSTS_UP],$up_color";
+      $pie_args .= "&amp;Down=$cluster[HOSTS_DOWN],$down_color";
    }
 $tpl->assign("pie_args", $pie_args);
 
@@ -131,7 +131,7 @@ foreach ( $sorted_hosts as $host => $value )
       $tpl->newBlock ("sorted_list");
       $host_url = rawurlencode($host);
 
-      $host_link="\"?c=$cluster_url&h=$host_url&$get_metric_string\"";
+      $host_link="\"?c=$cluster_url&amp;h=$host_url&amp;$get_metric_string\"";
       $textval = "";
       #echo "$host: $value, ";
 
@@ -160,10 +160,11 @@ foreach ( $sorted_hosts as $host => $value )
             else
                {
                   $load_color = load_color($host_load[$host]);
-                  $graphargs = ($reports[$metricname]) ? "g=$metricname&" : 
-                     "m=$metricname&";
-                  $graphargs .= "z=small&c=$cluster_url&h=$host_url&l=$load_color"
-                     ."&v=$val[VAL]&x=$max&n=$min&r=$range&st=$cluster[LOCALTIME]";
+                  $graphargs = ($reports[$metricname]) ? "g=$metricname&amp;" : 
+                     "m=$metricname&amp;";
+                  $graphargs .= "z=small&amp;c=$cluster_url&amp;h=$host_url"
+                     ."&amp;l=$load_color&amp;v=$val[VAL]&amp;x=$max&amp;n=$min"
+                     ."&amp;r=$range&amp;st=$cluster[LOCALTIME]";
                }
          }
 

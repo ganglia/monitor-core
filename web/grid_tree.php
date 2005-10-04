@@ -23,7 +23,7 @@ if (count($ancestors)) {
       $parentgridstack[] = $g;
       $parentgridstack_url = rawurlencode(join(">", $parentgridstack));
       $parentgridtable .= "<tr><td align=center class=grid>".
-         "<a href=\"$link?t=yes&gw=back&gs=$parentgridstack_url\">$name</a></td></tr>\n";
+         "<a href=\"$link?t=yes&amp;gw=back&amp;gs=$parentgridstack_url\">$name</a></td></tr>\n";
    }
 
    $tpl->assign("parents", $parentgridtable);
@@ -43,13 +43,13 @@ if ($n = count($grid))
             if ($grid[$source][GRID])
                {
                   # This child is a grid.
-                  $url = $grid[$source][AUTHORITY] . "?t=yes&gw=fwd&gs=$gridstack_url";
+                  $url = $grid[$source][AUTHORITY] . "?t=yes&amp;gw=fwd&amp;gs=$gridstack_url";
                   $gridtable .= "<td class=grid><a href=\"$url\">$source</a></td>";
                }
             else
                {
                   # A cluster.
-                  $url = "./?c=". rawurlencode($source) ."&$get_metric_string";
+                  $url = "./?c=". rawurlencode($source) ."&amp;$get_metric_string";
                   $gridtable .= "<td><a href=\"$url\">$source</a></td>";
                }
          }

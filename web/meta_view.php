@@ -63,18 +63,18 @@ foreach ( $sorted_sources as $source => $val )
                   if ($controlroom < 0) continue;
                   $num_sources = count($sorted_sources) - 1;
                   $name = "$self $meta_designator ($num_sources sources)";
-                  $graph_url = "me=$sourceurl&$get_metric_string";
+                  $graph_url = "me=$sourceurl&amp;$get_metric_string";
                   $url = "./?$get_metric_string";
                }
             else
                {
                   # Set grid context.
                   $name = "$source $meta_designator";
-                  $graph_url = "G=$sourceurl&$get_metric_string&st=$localtime";
+                  $graph_url = "G=$sourceurl&amp;$get_metric_string&amp;st=$localtime";
                   $authority = $grid[$source][AUTHORITY];
-                  $url = "$authority?gw=fwd&gs=$gridstack_url";
+                  $url = "$authority?gw=fwd&amp;gs=$gridstack_url";
                }
-            $alt_url = "<a href=\"./?t=yes&$get_metric_string\">(tree view)</a>";
+            $alt_url = "<a href=\"./?t=yes&amp;$get_metric_string\">(tree view)</a>";
             $class = "grid";
          }
       else
@@ -82,9 +82,9 @@ foreach ( $sorted_sources as $source => $val )
             # Set cluster context.
             $name = $source;
             $localtime = $grid[$source][LOCALTIME];
-            $graph_url = "c=$sourceurl&$get_metric_string&st=$localtime";
-            $url = "./?c=$sourceurl&$get_metric_string";
-            $alt_url = "<a href=\"./?p=2&$graph_url\">(physical view)</a>";
+            $graph_url = "c=$sourceurl&amp;$get_metric_string&amp;st=$localtime";
+            $url = "./?c=$sourceurl&amp;$get_metric_string";
+            $alt_url = "<a href=\"./?p=2&amp;$graph_url\">(physical view)</a>";
             $class = "cluster";
          }
 
@@ -180,11 +180,11 @@ if ($show_meta_snapshot=="yes") {
                $snapnames .= "<td valign=bottom align=center><b>$n</b></td>\n";
                $snapimgs .= "<td valign=top align=center>";
                if ($grid[$n][GRID])
-                  $snapimgs .= "<a href=\"" . $grid[$n][AUTHORITY] ."?gw=fwd&gs=$gridstack_url\">";
+                  $snapimgs .= "<a href=\"" . $grid[$n][AUTHORITY] ."?gw=fwd&amp;gs=$gridstack_url\">";
                else
                   {
                      $nameurl = rawurlencode($n);
-                     $snapimgs .= "<a href=\"./?c=$nameurl&$get_metric_string\">";
+                     $snapimgs .= "<a href=\"./?c=$nameurl&amp;$get_metric_string\">";
                   }
                $snapimgs .= "<img src=$Images[$k] border=0 align=top></a></td>\n";
             }
