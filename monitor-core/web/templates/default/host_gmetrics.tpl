@@ -15,7 +15,7 @@
 </TR>
 
 <TR>
- <TD ALIGN="LEFT" VALIGN="TOP" WIDTH=70%>
+ <TD ALIGN="LEFT" VALIGN="TOP" WIDTH="70%">
 
 <IMG SRC="{node_image}" HEIGHT="60" WIDTH="30" ALT="{host}" BORDER="0">
 {node_msg}

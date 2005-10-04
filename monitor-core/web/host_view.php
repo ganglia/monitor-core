@@ -18,10 +18,10 @@ else
 
 $cluster_url=rawurlencode($clustername);
 $tpl->assign("cluster_url", $cluster_url);
-$tpl->assign("graphargs", "h=$hostname&$get_metric_string&st=$cluster[LOCALTIME]");
+$tpl->assign("graphargs", "h=$hostname&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]");
 
 # For the node view link.
-$tpl->assign("node_view","./?p=2&c=$cluster_url&h=$hostname");
+$tpl->assign("node_view","./?p=2&amp;c=$cluster_url&amp;h=$hostname");
 
 # No reason to go on if this node is down.
 if ($hosts_down)
@@ -47,8 +47,9 @@ foreach ($metrics as $name => $v)
           continue;
        else
           {
-             $graphargs = "c=$cluster_url&h=$hostname&v=$v[VAL]&m=$name"
-               ."&r=$range&z=medium&jr=$jobrange&js=$jobstart&st=$cluster[LOCALTIME]";
+             $graphargs = "c=$cluster_url&amp;h=$hostname&amp;v=$v[VAL]"
+               ."&amp;m=$name&amp;r=$range&amp;z=medium&amp;jr=$jobrange"
+               ."&amp;js=$jobstart&amp;st=$cluster[LOCALTIME]";
              # Adding units to graph 2003 by Jason Smith <smithj4@bnl.gov>.
              if ($v[UNITS]) {
                 $encodeUnits = rawurlencode($v[UNITS]);
