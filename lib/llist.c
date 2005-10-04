@@ -83,7 +83,7 @@ int llist_remove(llist_entry **llist, llist_entry *e)
  * match in e.
  */
 int llist_search(llist_entry **llist, void *val, 
-                 int (*compare_function)(void *, void *), 
+                 int (*compare_function)(const char *, const char *), 
                  llist_entry **e)
 {
     llist_entry *ei;
