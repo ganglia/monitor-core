@@ -255,6 +255,7 @@ AC_SEARCH_TYPE(uint32_t,  unsigned int)
 AC_SEARCH_TYPE(size_t,    unsigned int)
 AC_SEARCH_TYPE(ssize_t,   signed int)
 AC_SEARCH_TYPE(socklen_t, unsigned int)
+AC_SEARCH_TYPE(time_t,    long)
 
 dnl AC_CHECK_SIZEOF(char)
 dnl AC_CHECK_SIZEOF(short)
