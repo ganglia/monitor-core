@@ -31,7 +31,7 @@ typedef struct _llist_entry {
 void llist_add(llist_entry **llist, llist_entry *e);
 int llist_remove(llist_entry **llist, llist_entry *e);
 int llist_search(llist_entry **llist, void *val, 
-                 int (*compare_function)(void *, void *), 
+                 int (*compare_function)(const char *,const char *), 
                  llist_entry **e);
 int llist_sort(llist_entry *llist, int (*compare_function)(llist_entry *, llist_entry *));
 int llist_print(llist_entry **llist);
