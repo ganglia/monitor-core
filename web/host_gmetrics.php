@@ -36,7 +36,7 @@ $cluster_url=rawurlencode($clustername);
 $tpl->assign("cluster_url", $cluster_url);
 
 # For the node view link.
-$tpl->assign("host_view","./?c=$cluster_url&h=$hostname");
+$tpl->assign("host_view","./?c=$cluster_url&amp;h=$hostname");
 
 foreach ($metrics as $name => $v)
    {

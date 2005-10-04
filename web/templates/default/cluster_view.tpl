@@ -7,11 +7,11 @@
 
 <TR>
 <TD ALIGN=left VALIGN=top>
-<table cellspacing=1 cellpadding=1 width=100% border=0>
+<table cellspacing=1 cellpadding=1 width="100%" border=0>
  <tr><td>CPUs Total:</td><td align=left><B>{cpu_num}</B></td></tr>
- <tr><td width=60%>Hosts up:</td><td align=left><B>{num_nodes}</B></td></tr>
+ <tr><td width="60%">Hosts up:</td><td align=left><B>{num_nodes}</B></td></tr>
  <tr><td>Hosts down:</td><td align=left><B>{num_dead_nodes}</B></td></tr>
- <td><td>&nbsp;</td></tr>
+ <tr><td>&nbsp;</td></tr>
  <tr><td colspan=2>Avg Load (15, 5, 1m):<br>&nbsp;&nbsp;<b>{cluster_load}</b></td></tr>
  <tr><td colspan=2>Localtime:<br>&nbsp;&nbsp;<b>{localtime}</b></td></tr>
  </table>
@@ -21,16 +21,16 @@
 
 <TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top>
 <IMG HEIGHT="147" WIDTH="395" ALT="{cluster} LOAD" 
-   SRC="./graph.php?g=load_report&z=medium&{graph_args}">
+   SRC="./graph.php?g=load_report&amp;z=medium&amp;{graph_args}">
 <IMG HEIGHT="147" WIDTH="395" ALT="{cluster} CPU" 
-   SRC="./graph.php?g=cpu_report&z=medium&{graph_args}">
+   SRC="./graph.php?g=cpu_report&amp;z=medium&amp;{graph_args}">
 <IMG HEIGHT="160" WIDTH="395" ALT="{cluster} MEM" 
-   SRC="./graph.php?g=mem_report&z=medium&{graph_args}">
+   SRC="./graph.php?g=mem_report&amp;z=medium&amp;{graph_args}">
 <IMG HEIGHT="147" WIDTH="395" ALT="{cluster} NETWORK" 
-   SRC="./graph.php?g=network_report&z=medium&{graph_args}">
+   SRC="./graph.php?g=network_report&amp;z=medium&amp;{graph_args}">
 <!-- START BLOCK : optional_graphs -->
 <IMG HEIGHT="147" WIDTH="395" ALT="{cluster} {name}"
-   SRC="./graph.php?g={name}_report&z=medium&{graph_args}">
+   SRC="./graph.php?g={name}_report&amp;z=medium&amp;{graph_args}">
 <!-- END BLOCK : optional_graphs -->
 </TD>
 </TR>
@@ -73,6 +73,6 @@
 </TABLE>
 
 <p>
-(Nodes colored by 1-minute load) | <A HREF="./node_legend.html" ALT="Node Image egend">Legend</A>
+(Nodes colored by 1-minute load) | <A HREF="./node_legend.html">Legend</A>
 
 </CENTER>
