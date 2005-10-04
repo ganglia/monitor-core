@@ -1,5 +1,13 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdarg.h>
 #include <pthread.h>
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#include <string.h>
 #include "dtd.h"
 #include "gmetad.h"
 #include "my_inet_ntop.h"
@@ -496,7 +504,7 @@ void *
 server_thread (void *arg)
 {
    int interactive = (int) arg;
-   int len;
+   socklen_t len;
    client_t client;
    char remote_ip[16];
    char request[REQUESTLEN];
