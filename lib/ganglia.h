@@ -12,6 +12,17 @@
 #define SYNAPSE_SUCCESS 0
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#endif
+
 /* 
  * Max multicast message: 1500 bytes (Ethernet max frame size)
  * minus 20 bytes for IPv4 header, minus 8 bytes for UDP header.
@@ -82,7 +93,7 @@ struct gexec_host_t {
   unsigned int proc_run;
   unsigned int proc_total;
   unsigned int cpu_num;
-  unsigned long last_reported;
+  time_t last_reported;
   int gexec_on;
   int name_resolved;
 };
@@ -91,7 +102,7 @@ typedef struct gexec_host_t gexec_host_t;
 typedef struct
    {
       char name[256];
-      unsigned long localtime;
+      time_t localtime;
       unsigned int num_hosts;
       void *hosts;
       unsigned int num_gexec_hosts;
