@@ -1770,6 +1770,11 @@ main ( int argc, char *argv[] )
       exit(0);
     }
 
+  if(args_info.location_given)
+    {
+      host_location = args_info.location_arg;
+    }
+
   daemonize_if_necessary( argv );
   
   /* Collect my hostname */

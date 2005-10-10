@@ -252,9 +252,13 @@ print_config(char *path, gmond_config_t *config)
 	  config->no_gexec? "no":"yes",
 	  config->host_dmax);
 
-  fprintf(stdout,"/* info about your identity */\n");
+  fprintf(stdout,"/* info about cluster  */\n");
   fprintf(stdout,"cluster {\n  name = \"%s\"\n  owner = \"%s\"\n  latlong = \"%s\"\n  url=\"%s\"\n}\n\n",
 	  config->name, config->owner, config->latlong, config->url);
+
+  fprintf(stdout,"/* info about host */\n");
+  fprintf(stdout,"host {\n  location = \"%s\"\n}\n\n",
+	  config->location);
 
   fprintf(stdout,"/* channel to send multicast on mcast_channel:mcast_port */\n");
   fprintf(stdout,"udp_send_channel {\n  mcast_join = \"%s\"\n  port = \"%hd\"\n  ttl=\"%ld\"\n",
