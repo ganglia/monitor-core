@@ -13,7 +13,7 @@ $error="";
 
 # Gives time in seconds to retrieve and parse XML tree. With subtree-
 # capable gmetad, should be very fast in all but the largest cluster configurations.
-$parsetime;
+$parsetime = 0;
 
 # 2key = "Source Name" / "NAME | AUTHORITY | HOSTS_UP ..." = Value.
 $grid = array();
@@ -44,13 +44,13 @@ function host_alive($host, $cluster)
 {
    $TTL = 60;
 
-   if ($host[TN] and $host[TMAX]) {
-      if ($host[TN] > $host[TMAX] * 4)
+   if ($host['TN'] and $host['TMAX']) {
+      if ($host['TN'] > $host['TMAX'] * 4)
          return FALSE;
          $host_up = FALSE;
    }
    else {      # The old method.
-      if (abs($cluster["LOCALTIME"] - $host[REPORTED]) > (4*$TTL))
+      if (abs($cluster["LOCALTIME"] - $host['REPORTED']) > (4*$TTL))
          return FALSE;
    }
    return TRUE;
@@ -62,8 +62,8 @@ function preamble($ganglia)
 {
    global $version;
 
-   $component = $ganglia[SOURCE];
-   $version[$component] = $ganglia[VERSION];
+   $component = $ganglia['SOURCE'];
+   $version[$component] = $ganglia['VERSION'];
 }
 
 
@@ -81,9 +81,9 @@ function start_meta ($parser, $tagname, $attrs)
          case "GRID":
          case "CLUSTER":
             # Our grid will be first.
-            if (!$sourcename) $self = $attrs[NAME];
+            if (!$sourcename) $self = $attrs['NAME'];
 
-            $sourcename = $attrs[NAME];
+            $sourcename = $attrs['NAME'];
             $grid[$sourcename] = $attrs;
 
             # Identify a grid from a cluster.
@@ -91,13 +91,13 @@ function start_meta ($parser, $tagname, $attrs)
             break;
 
          case "METRICS":
-            $metricname = $attrs[NAME];
+            $metricname = $attrs['NAME'];
             $metrics[$sourcename][$metricname] = $attrs;
             break;
 
          case "HOSTS":
-            $grid[$sourcename][HOSTS_UP] = $attrs[UP];
-            $grid[$sourcename][HOSTS_DOWN] = $attrs[DOWN];
+            $grid[$sourcename]['HOSTS_UP'] = $attrs['UP'];
+            $grid[$sourcename]['HOSTS_DOWN'] = $attrs['DOWN'];
             break;
 
          default:
@@ -117,7 +117,7 @@ function start_cluster ($parser, $tagname, $attrs)
             preamble($attrs);
             break;
          case "GRID":
-            $self = $attrs[NAME];
+            $self = $attrs['NAME'];
             $grid = $attrs;
             break;
 
@@ -126,22 +126,24 @@ function start_cluster ($parser, $tagname, $attrs)
             break;
 
          case "HOST":
-            $hostname = $attrs[NAME];
+            $hostname = $attrs['NAME'];
 
             if (host_alive($attrs, $cluster))
                {
-                  $cluster[HOSTS_UP]++;
+		  isset($cluster['HOSTS_UP']) or $cluster['HOSTS_UP'] = 0;
+                  $cluster['HOSTS_UP']++;
                   $hosts_up[$hostname] = $attrs;
                }
             else
                {
-                  $cluster[HOSTS_DOWN]++;
+		  isset($cluster['HOSTS_DOWN']) or $cluster['HOSTS_DOWN'] = 0;
+                  $cluster['HOSTS_DOWN']++;
                   $hosts_down[$hostname] = $attrs;
                }
             break;
 
          case "METRIC":
-            $metricname = $attrs[NAME];
+            $metricname = $attrs['NAME'];
             $metrics[$hostname][$metricname] = $attrs;
             break;
 
@@ -192,7 +194,7 @@ function start_host ($parser, $tagname, $attrs)
             preamble($attrs);
             break;
          case "GRID":
-            $self = $attrs[NAME];
+            $self = $attrs['NAME'];
             $grid = $attrs;
             break;
          case "CLUSTER":
@@ -207,7 +209,7 @@ function start_host ($parser, $tagname, $attrs)
             break;
 
          case "METRIC":
-            $metrics[$attrs[NAME]] = $attrs;
+            $metrics[$attrs['NAME']] = $attrs;
             break;
 
          default:
@@ -310,7 +312,7 @@ function Gmetad ()
    fclose($fp);
 
    $end = gettimeofday();
-   $parsetime = ($end[sec] + $end[usec]/1e6) - ($start[sec] + $start[usec]/1e6);
+   $parsetime = ($end['sec'] + $end['usec']/1e6) - ($start['sec'] + $start['usec']/1e6);
 
    return TRUE;
 }

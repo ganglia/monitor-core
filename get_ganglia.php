@@ -24,13 +24,13 @@ if (count($grid) == 2 and $context=="meta")
    {
       # Lets look for one cluster (the other is our grid).
       foreach($grid as $source)
-         if ($source[CLUSTER])
+         if (isset($source['CLUSTER']) and $source['CLUSTER'])
             {
                $standalone = 1;
                $context = "cluster";
                # Need to refresh data with new context.
                Gmetad($ganglia_ip, $ganglia_port);
-               $clustername = $source[NAME];
+               $clustername = $source['NAME'];
             }
    }
 
