@@ -49,7 +49,7 @@ function checkprivate()
    if ($context=="meta") { return; }
 
    $private=embarrassed();
-   if ($private[$clustername]) {
+   if (isset($private[$clustername]) and $private[$clustername]) {
       #echo "The password for $clustername is $private[$clustername]<br>";
       if (empty($_SERVER['PHP_AUTH_PW'])) {
 	 authenticate();
