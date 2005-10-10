@@ -42,7 +42,7 @@
     **
     */
     
-if (!function_exists(imagegif) and !function_exists(imagepng))
+if (!function_exists('imagegif') and !function_exists('imagepng'))
    {
       echo "No image support in this version of PHP<br>";
    }
@@ -347,7 +347,7 @@ $debug=0;
 $vals = array();
 $pie = new piechart;
 
-foreach($HTTP_GET_VARS as $key=>$val)
+foreach($_GET as $key=>$val)
    {
       if ($key == "title")
             $heads[] = array($val, 4, "c");

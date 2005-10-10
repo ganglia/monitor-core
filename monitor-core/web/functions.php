@@ -65,7 +65,7 @@ function findlocation($attrs)
 {
    $rack=$rank=$plane=-1;
 
-   $loc=$attrs[LOCATION];
+   $loc=$attrs['LOCATION'];
    if ($loc) {
       sscanf($loc, "%d,%d,%d", $rack, $rank, $plane);
       #echo "Found LOCATION: $rack, $rank, $plane.<br>";
@@ -73,7 +73,7 @@ function findlocation($attrs)
    if ($rack<0 or $rank<0) {
       # Try to parse the host name. Assumes a compute-<rack>-<rank>
       # naming scheme.
-      $n=sscanf($attrs[NAME], "compute-%d-%d", $rack, $rank);
+      $n=sscanf($attrs['NAME'], "compute-%d-%d", $rack, $rank);
       $plane=0;
    }
    return array($rack,$rank,$plane);
@@ -87,7 +87,7 @@ function cluster_sum($name, $metrics)
 
    foreach ($metrics as $host => $val)
       {
-         $sum += $val[$name][VAL];
+         if(isset($val[$name]['VAL'])) $sum += $val[$name]['VAL'];
       }
 
    return $sum;
@@ -100,7 +100,7 @@ function cluster_min($name, $metrics)
 
    foreach ($metrics as $host => $val)
       {
-         $v = $val[$name][VAL];
+         $v = $val[$name]['VAL'];
          if (!is_numeric($min) or $min < $v)
             {
                $min = $v;
@@ -170,16 +170,17 @@ function load_color ($value)
 # the load/death of a cluster node
 function node_image ($metrics)
 {
-   $cpu_num  = $metrics["cpu_num"][VAL];
+   $cpu_num  = $metrics["cpu_num"]['VAL'];
    if(!$cpu_num || $cpu_num == 0)
       {
          $cpu_num = 1;
       }
-   $load_one  = $metrics["load_one"][VAL];
+   $load_one  = $metrics["load_one"]['VAL'];
    $value = $load_one / $cpu_num;
 
    # Check if the host is down
-   if ($hosts_down)
+   # RFM - Added isset() check to eliminate error messages in ssl_error_log
+   if (isset($hosts_down) and $hosts_down)
          $image = template("images/node_dead.jpg");
    else
          $image = load_image("node", $value);
@@ -201,8 +202,8 @@ function find_limits($nodes, $metricname)
 
    $firsthost = key($metrics);
    
-   if ($metrics[$firsthost][$metricname][TYPE] == "string"
-      or $metrics[$firsthost][$metricname][SLOPE] == "zero")
+   if ($metrics[$firsthost][$metricname]['TYPE'] == "string"
+      or $metrics[$firsthost][$metricname]['SLOPE'] == "zero")
          return array(0,0);
 
    $max=0;
@@ -217,7 +218,11 @@ function find_limits($nodes, $metricname)
             "PRINT:limits:MAX:%.2lf ".
             "PRINT:limits:MIN:%.2lf";
          exec($command, $out);
-         $thismax=$out[1];
+	 if(isset($out[1])) {
+         	$thismax = $out[1];
+	 } else {
+		$thismax = NULL;
+	 }
          if (!is_numeric($thismax)) continue;
          if ($max < $thismax) $max = $thismax;
 
@@ -252,10 +257,10 @@ function nodebox($hostname, $verbose, $title="", $extrarow="")
    # The metrics we need for this node.
 
    # Give memory in Gigabytes. 1GB = 2^20 bytes.
-   $mem_total_gb = $m[mem_total][VAL]/1048576;
-   $load_one=$m[load_one][VAL];
-   $cpu_speed=$m[cpu_speed][VAL]/1024;
-   $cpu_num= $m[cpu_num][VAL];
+   $mem_total_gb = $m['mem_total']['VAL']/1048576;
+   $load_one=$m['load_one']['VAL'];
+   $cpu_speed=$m['cpu_speed']['VAL']/1024;
+   $cpu_num= $m['cpu_num']['VAL'];
    #
    # The nested tables are to get the formatting. Insane.
    # We have three levels of verbosity. At L3 we show
@@ -282,7 +287,7 @@ function nodebox($hostname, $verbose, $title="", $extrarow="")
       $row2 .= $hardware;
    else if ($verbose > 2) {
       $hostattrs = $up ? $hosts_up : $hosts_down;
-      $last_heartbeat = $hostattrs[$hostname][TN];
+      $last_heartbeat = $hostattrs[$hostname]['TN'];
       $age = $last_heartbeat > 3600 ? uptime($last_heartbeat) : 
          "${last_heartbeat}s";
       $row2 .= "<font size=-2>Last heartbeat $age</font>";
@@ -341,7 +346,7 @@ function physical_racks()
    global $hosts_up, $hosts_down;
 
    # 2Key = "Rack ID / Rank (order in rack)" = [hostname, UP|DOWN]
-   $rack;
+   $rack = NULL;
 
    # If we don't know a node's location, it goes in a negative ID rack.
    $i=1;
@@ -352,7 +357,7 @@ function physical_racks()
          list($rack, $rank) = findlocation($v);
 
          if ($rack>=0 and $rank>=0) {
-            $racks[$rack][$rank]=$v[NAME];
+            $racks[$rack][$rank]=$v['NAME'];
             continue;
          }
          else {
@@ -360,7 +365,7 @@ function physical_racks()
             if (! ($i % 25)) {
                $unknownID--;
             }
-            $racks[$unknownID][] = $v[NAME];
+            $racks[$unknownID][] = $v['NAME'];
          }
       }
    }
@@ -368,7 +373,7 @@ function physical_racks()
       foreach ($hosts_down as $host=>$v) {
          list($rack, $rank) = findlocation($v);
          if ($rack>=0 and $rank>=0) {
-            $racks[$rack][$rank]=$v[NAME];
+            $racks[$rack][$rank]=$v['NAME'];
             continue;
          }
          else {
@@ -376,7 +381,7 @@ function physical_racks()
             if (! ($i % 25)) {
                $unknownID--;
             }
-            $racks[$unknownID][] = $v[NAME];
+            $racks[$unknownID][] = $v['NAME'];
          }
       }
    }

@@ -40,10 +40,10 @@ if ($n = count($grid))
          {
             if ($source == $self) continue;
 
-            if ($grid[$source][GRID])
+            if (isset($grid[$source]['GRID']) and $grid[$source]['GRID'])
                {
                   # This child is a grid.
-                  $url = $grid[$source][AUTHORITY] . "?t=yes&amp;gw=fwd&amp;gs=$gridstack_url";
+                  $url = $grid[$source]['AUTHORITY'] . "?t=yes&amp;gw=fwd&amp;gs=$gridstack_url";
                   $gridtable .= "<td class=grid><a href=\"$url\">$source</a></td>";
                }
             else

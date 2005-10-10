@@ -6,6 +6,12 @@ include_once "auth.php";
 checkcontrol();
 checkprivate();
 
+# RFM - These definitions are here to eliminate "undefined variable"
+# error maessages in ssl_error_log.
+!isset($initgrid) and $initgrid = 0;
+!isset($metric) and $metric = "";
+!isset($context_metrics) and $context_metrics = "";
+
 if ( $context == "control" && $controlroom < 0 )
       $header = "header-nobanner";
 else
@@ -17,7 +23,8 @@ $tpl->prepare();
 #
 # sacerdoti: beginning of Grid tree state handling
 #
-$me = $self . "@" . $grid[$self][AUTHORITY];
+$me = $self . "@";
+array_key_exists($self, $grid) and $me = $me . $grid[$self]['AUTHORITY'];
 if ($initgrid)
    {
       $gridstack = array();
@@ -51,7 +58,12 @@ if ($initgrid or $gridwalk)
 
 # Invariant: back pointer is second-to-last element of gridstack. Grid stack
 # never has duplicate entries.
-list($parentgrid, $parentlink) = explode("@", $gridstack[count($gridstack)-2]);
+# RFM - The original line caused an error when count($gridstack) = 1.  This
+# should fix that.
+$parentgrid = $parentlink = NULL;
+if(count($gridstack) > 1) {
+  list($parentgrid, $parentlink) = explode("@", $gridstack[count($gridstack)-2]);
+}
 
 # Setup a redirect to a remote server if you choose a grid from pulldown menu.
 # Tell destination server that we're walking foward in the grid tree.
@@ -146,7 +158,7 @@ else
       foreach( $grid as $k => $v )
          {
             if ($k==$self) continue;
-            if ($v[GRID])
+            if (isset($v['GRID']) and $v['GRID'])
                {
                   $url = $v[AUTHORITY];
                   $node_menu .="<OPTION VALUE=\"$url\">$k $meta_designator\n";
