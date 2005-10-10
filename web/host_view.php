@@ -30,20 +30,22 @@ if ($hosts_down)
       return;
    }
 
-$tpl->assign("ip", $hosts_up[IP]);
+$tpl->assign("ip", $hosts_up['IP']);
 
 foreach ($metrics as $name => $v)
    {
-       if ($v[TYPE] == "string" or $v[TYPE]=="timestamp" or $always_timestamp[$name])
+       if ($v['TYPE'] == "string" or $v['TYPE']=="timestamp" or
+           (isset($always_timestamp[$name]) and $always_timestamp[$name]))
           {
              # Long gmetric name/values will disrupt the display here.
-             if ($v[SOURCE] == "gmond") $s_metrics[$name] = $v;
+             if ($v['SOURCE'] == "gmond") $s_metrics[$name] = $v;
           }
-       elseif ($v[SLOPE] == "zero" or $always_constant[$name])
+       elseif ($v['SLOPE'] == "zero" or
+               (isset($always_constant[$name]) and $always_constant[$name]))
           {
              $c_metrics[$name] = $v;
           }
-       else if ($reports[$metric])
+       else if (isset($reports[$name]) and $reports[$metric])
           continue;
        else
           {
@@ -51,24 +53,24 @@ foreach ($metrics as $name => $v)
                ."&amp;m=$name&amp;r=$range&amp;z=medium&amp;jr=$jobrange"
                ."&amp;js=$jobstart&amp;st=$cluster[LOCALTIME]";
              # Adding units to graph 2003 by Jason Smith <smithj4@bnl.gov>.
-             if ($v[UNITS]) {
-                $encodeUnits = rawurlencode($v[UNITS]);
+             if ($v['UNITS']) {
+                $encodeUnits = rawurlencode($v['UNITS']);
                 $graphargs .= "&vl=$encodeUnits";
              }
-             $g_metrics[$name][graph] = $graphargs;
+             $g_metrics[$name]['graph'] = $graphargs;
           }
    }
 # Add the uptime metric for this host. Cannot be done in ganglia.php,
 # since it requires a fully-parsed XML tree. The classic contructor problem.
-$s_metrics[uptime][TYPE] = "string";
-$s_metrics[uptime][VAL] = uptime($cluster[LOCALTIME] - $metrics[boottime][VAL]);
+$s_metrics['uptime']['TYPE'] = "string";
+$s_metrics['uptime']['VAL'] = uptime($cluster['LOCALTIME'] - $metrics['boottime']['VAL']);
 
 # Add the gmond started timestamps & last reported time (in uptime format) from
 # the HOST tag:
-$s_metrics[gmond_started][TYPE] = "timestamp";
-$s_metrics[gmond_started][VAL] = $hosts_up[GMOND_STARTED];
-$s_metrics[last_reported][TYPE] = "string";
-$s_metrics[last_reported][VAL] = uptime($cluster[LOCALTIME] - $hosts_up[REPORTED]);
+$s_metrics['gmond_started']['TYPE'] = "timestamp";
+$s_metrics['gmond_started']['VAL'] = $hosts_up['GMOND_STARTED'];
+$s_metrics['last_reported']['TYPE'] = "string";
+$s_metrics['last_reported']['VAL'] = uptime($cluster['LOCALTIME'] - $hosts_up['REPORTED']);
 
 # Show string metrics
 if (is_array($s_metrics))
@@ -76,15 +78,17 @@ if (is_array($s_metrics))
       ksort($s_metrics);
       foreach ($s_metrics as $name => $v )
      {
+	# RFM - If units aren't defined for metric, make it be the empty string
+	! array_key_exists('UNITS', $v) and $v['UNITS'] = "";
         $tpl->newBlock("string_metric_info");
         $tpl->assign("name", $name);
-        if( $v[TYPE]=="timestamp" or $always_timestamp[$name])
+        if( $v['TYPE']=="timestamp" or (isset($always_timestamp[$name]) and $always_timestamp[$name]))
            {
-              $tpl->assign("value", date("r", $v[VAL]));
+              $tpl->assign("value", date("r", $v['VAL']));
            }
         else
            {
-              $tpl->assign("value", "$v[VAL] $v[UNITS]");
+              $tpl->assign("value", $v['VAL'] . " " . $v['UNITS']);
            }
      }
    }
@@ -110,7 +114,7 @@ if (is_array($g_metrics))
       foreach ( $g_metrics as $name => $v )
          {
             $tpl->newBlock("vol_metric_info");
-            $tpl->assign("graphargs", $v[graph]);
+            $tpl->assign("graphargs", $v['graph']);
             $tpl->assign("alt", "$hostname $name");
             if($i++ %2)
                $tpl->assign("br", "<BR>");

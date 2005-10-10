@@ -27,11 +27,12 @@ if ( $context == "control" ) {
 
 foreach( $source_names as $c)
    {
-      $cpucount = $metrics[$c]["cpu_num"][SUM];
+      $cpucount = $metrics[$c]["cpu_num"]['SUM'];
       if (!$cpucount) $cpucount=1;
-      $load_one = $metrics[$c]["load_one"][SUM];
+      $load_one = $metrics[$c]["load_one"]['SUM'];
       $value = (double) $load_one / $cpucount;
       $sorted_sources[$c] = $value;
+      isset($total_load) or $total_load = 0;
       $total_load += $value;   
    }
 # Insure self is always first 
@@ -53,9 +54,9 @@ foreach ( $sorted_sources as $source => $val )
    {
       $m = $metrics[$source];
       $sourceurl = rawurlencode($source);
-      if ($grid[$source][GRID])
+      if (isset($grid[$source]['GRID']) and $grid[$source]['GRID'])
          {
-            $localtime = $grid[$source][LOCALTIME];
+            $localtime = $grid[$source]['LOCALTIME'];
             # Is this the our own grid?
             if ($source==$self)
                {
@@ -71,7 +72,7 @@ foreach ( $sorted_sources as $source => $val )
                   # Set grid context.
                   $name = "$source $meta_designator";
                   $graph_url = "G=$sourceurl&amp;$get_metric_string&amp;st=$localtime";
-                  $authority = $grid[$source][AUTHORITY];
+                  $authority = $grid[$source]['AUTHORITY'];
                   $url = "$authority?gw=fwd&amp;gs=$gridstack_url";
                }
             $alt_url = "<a href=\"./?t=yes&amp;$get_metric_string\">(tree view)</a>";
@@ -81,22 +82,22 @@ foreach ( $sorted_sources as $source => $val )
          {
             # Set cluster context.
             $name = $source;
-            $localtime = $grid[$source][LOCALTIME];
+            $localtime = $grid[$source]['LOCALTIME'];
             $graph_url = "c=$sourceurl&amp;$get_metric_string&amp;st=$localtime";
             $url = "./?c=$sourceurl&amp;$get_metric_string";
             $alt_url = "<a href=\"./?p=2&amp;$graph_url\">(physical view)</a>";
             $class = "cluster";
          }
 
-      $cpu_num = $m["cpu_num"][SUM] ? $m["cpu_num"][SUM] : 1;
-      $cluster_load15 = sprintf("%.0f", ((double) $m["load_fifteen"][SUM] / $cpu_num) * 100);
-      $cluster_load5 = sprintf("%.0f", ((double) $m["load_five"][SUM] / $cpu_num) * 100);
-      $cluster_load1 = sprintf("%.0f", ((double) $m["load_one"][SUM] / $cpu_num) * 100);
+      $cpu_num = $m["cpu_num"]['SUM'] ? $m["cpu_num"]['SUM'] : 1;
+      $cluster_load15 = sprintf("%.0f", ((double) $m["load_fifteen"]['SUM'] / $cpu_num) * 100);
+      $cluster_load5 = sprintf("%.0f", ((double) $m["load_five"]['SUM'] / $cpu_num) * 100);
+      $cluster_load1 = sprintf("%.0f", ((double) $m["load_one"]['SUM'] / $cpu_num) * 100);
       $cluster_load = "$cluster_load15%, $cluster_load5%, $cluster_load1%";
 
       $tpl->newBlock ("source_info");
       $tpl->assign("name", $name );
-      $tpl->assign("cpu_num", $m["cpu_num"][SUM]);
+      $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
       $tpl->assign("url", $url);
       $tpl->assign("class", $class);
       if ($num_sources)
@@ -104,7 +105,7 @@ foreach ( $sorted_sources as $source => $val )
 
       # I dont like this either, but we need to have private clusters because some
       # users are skittish about publishing the load info.
-      if (!$private[$source]) 
+      if (!isset($private[$source]) or !$private[$source]) 
          {
             $tpl->assign("alt_view", "<FONT SIZE=\"-2\">$alt_url</FONT>");
             # Each block has a different namespace, so we need to redefine variables.
@@ -115,20 +116,22 @@ foreach ( $sorted_sources as $source => $val )
             if ($cluster_load)
                $tpl->assign("cluster_load", "<font size=-1>Avg Load (15, 5, 1m):</font>"
                   ."<br>&nbsp;&nbsp;$cluster_load");
-            $tpl->assign("cpu_num", $m["cpu_num"][SUM]);
+            $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
             $tpl->assign("num_nodes", $grid[$source]["HOSTS_UP"] );
             $tpl->assign("num_dead_nodes", $grid[$source]["HOSTS_DOWN"] );
             $tpl->assign("range", $range);
             $tpl->assign("name", $name );
             $tpl->assign("url", $url);
             $tpl->assign("graph_url", $graph_url);
-            $tpl->assign("base64img", $base64img);
+	    if(isset($base64img)) {
+                $tpl->assign("base64img", $base64img);
+	    }
          }
       else 
          {
             $tpl->newBlock("private");
             $tpl->assign("num_nodes", $grid[$source]["HOSTS_UP"] + $grid[$source]["HOSTS_DOWN"] );
-            $tpl->assign("cpu_num", $m["cpu_num"][SUM]);
+            $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
             if ($localtime)
                $tpl->assign("localtime", "<font size=-1>Localtime:</font><br>&nbsp;&nbsp;"
                   . date("Y-m-d H:i",$localtime));
@@ -142,20 +145,20 @@ if ($show_meta_snapshot=="yes") {
 
    foreach ($sorted_sources as $c=>$value) {
       if ($c==$self) continue;
-      if ($private[$c]) {
+      if (isset($private[$c]) and $private[$c]) {
          $Private[$c] = template("images/cluster_private.jpg");
          continue;
       }
       $names[]=$c;
 
-      if ($grid[$c][GRID])
+      if (isset($grid[$c]['GRID']) and $grid[$c]['GRID'])
          $image = load_image("grid", $value);
       else
          $image = load_image("cluster", $value);
       $Images[]=$image;
    }
    # Add private cluster pictures to the end.
-   if (is_array($Private)) {
+   if (isset($Private) and is_array($Private)) {
       foreach ($Private as $c=>$image) {
          $names[]=$c;
          $Images[]=$image;
@@ -179,8 +182,8 @@ if ($show_meta_snapshot=="yes") {
                $n = $names[$k];
                $snapnames .= "<td valign=bottom align=center><b>$n</b></td>\n";
                $snapimgs .= "<td valign=top align=center>";
-               if ($grid[$n][GRID])
-                  $snapimgs .= "<a href=\"" . $grid[$n][AUTHORITY] ."?gw=fwd&amp;gs=$gridstack_url\">";
+               if (isset($grid[$n]['GRID']) and $grid[$n]['GRID'])
+                  $snapimgs .= "<a href=\"" . $grid[$n]['AUTHORITY'] ."?gw=fwd&amp;gs=$gridstack_url\">";
                else
                   {
                      $nameurl = rawurlencode($n);

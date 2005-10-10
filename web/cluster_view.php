@@ -6,16 +6,20 @@ $tpl->prepare();
 
 $tpl->assign("images","./templates/$template_name/images");
 
-$cpu_num = !$showhosts ? $metrics["cpu_num"][SUM] : cluster_sum("cpu_num", $metrics);
-$load_one_sum = !$showhosts ? $metrics["load_one"][SUM] : cluster_sum("load_one", $metrics);
-$load_five_sum = !$showhosts ? $metrics["load_five"][SUM] : cluster_sum("load_five", $metrics);
-$load_fifteen_sum = !$showhosts ? $metrics["load_fifteen"][SUM] : cluster_sum("load_fifteen", $metrics);
-$units = !$showhosts ? $metrics[$metricname][UNITS] : $metrics[key($metrics)][$metricname][UNITS];
+$cpu_num = !$showhosts ? $metrics["cpu_num"]['SUM'] : cluster_sum("cpu_num", $metrics);
+$load_one_sum = !$showhosts ? $metrics["load_one"]['SUM'] : cluster_sum("load_one", $metrics);
+$load_five_sum = !$showhosts ? $metrics["load_five"]['SUM'] : cluster_sum("load_five", $metrics);
+$load_fifteen_sum = !$showhosts ? $metrics["load_fifteen"]['SUM'] : cluster_sum("load_fifteen", $metrics);
+$units = !$showhosts ? $metrics[$metricname]['UNITS'] : $metrics[key($metrics)][$metricname]['UNITS'];
 
-$tpl->assign("num_nodes", intval($cluster[HOSTS_UP]));
-$tpl->assign("num_dead_nodes", intval($cluster[HOSTS_DOWN]));
+$tpl->assign("num_nodes", intval($cluster['HOSTS_UP']));
+if(isset($cluster['HOSTS_DOWN'])) {
+    $tpl->assign("num_dead_nodes", intval($cluster['HOSTS_DOWN']));
+} else {
+    $tpl->assign("num_dead_nodes", 0);
+}
 $tpl->assign("cpu_num", $cpu_num);
-$tpl->assign("localtime", date("Y-m-d H:i", $cluster[LOCALTIME]));
+$tpl->assign("localtime", date("Y-m-d H:i", $cluster['LOCALTIME']));
 
 if (!$cpu_num) $cpu_num = 1;
 $cluster_load15 = sprintf("%.0f", ((double) $load_fifteen_sum / $cpu_num) * 100);
@@ -24,6 +28,7 @@ $cluster_load1 = sprintf("%.0f", ((double) $load_one_sum / $cpu_num) * 100);
 $tpl->assign("cluster_load", "$cluster_load15%, $cluster_load5%, $cluster_load1%");
 
 $cluster_url=rawurlencode($clustername);
+
 
 $tpl->assign("cluster", $clustername);
 #
@@ -50,27 +55,38 @@ $tpl->assign("checked$showhosts", "checked");
 
 $sorted_hosts = array();
 $down_hosts = array();
+$percent_hosts = array();
 if ($showhosts)
    {
       foreach ($hosts_up as $host => $val)
          {
-            $cpus = $metrics[$host]["cpu_num"][VAL];
+            $cpus = $metrics[$host]["cpu_num"]['VAL'];
             if (!$cpus) $cpus=1;
-            $load_one  = $metrics[$host]["load_one"][VAL];
+            $load_one  = $metrics[$host]["load_one"]['VAL'];
             $load = ((float) $load_one)/$cpus;
             $host_load[$host] = $load;
-            $percent_hosts[load_color($load)] += 1;
+	    if(isset($percent_hosts[load_color($load)])) { 
+                $percent_hosts[load_color($load)] += 1;
+	    } else {
+		$percent_hosts[load_color($load)] = 1;
+	    }
             if ($metricname=="load_one")
                $sorted_hosts[$host] = $load;
-            else 
-               $sorted_hosts[$host] = $metrics[$host][$metricname][VAL];
+            else if (isset($metrics[$host][$metricname]))
+               $sorted_hosts[$host] = $metrics[$host][$metricname]['VAL'];
+	    else
+	       $sorted_hosts[$host] = "";
          }
          
       foreach ($hosts_down as $host => $val)
          {
             $load = -1.0;
             $down_hosts[$host] = $load;
-            $percent_hosts[load_color($load)] += 1;
+            if(isset($percent_hosts[load_color($load)])) {
+                $percent_hosts[load_color($load)] += 1;
+            } else {
+                $percent_hosts[load_color($load)] = 1;
+            }
          }
       
       # Show pie chart of loads
@@ -126,6 +142,11 @@ list($min, $max) = find_limits($sorted_hosts, $metricname);
 
 # Second pass to output the graphs or metrics.
 $i = 1;
+
+foreach ( $sorted_hosts as $host => $value ) {
+#echo "$host: $value, ";
+}
+
 foreach ( $sorted_hosts as $host => $value )
    {
       $tpl->newBlock ("sorted_list");
@@ -133,11 +154,12 @@ foreach ( $sorted_hosts as $host => $value )
 
       $host_link="\"?c=$cluster_url&amp;h=$host_url&amp;$get_metric_string\"";
       $textval = "";
+
       #echo "$host: $value, ";
 
-      if ($hosts_down[$host])
+      if (isset($hosts_down[$host]) and $hosts_down[$host])
          {
-            $last_heartbeat = $cluster[LOCALTIME] - $hosts_down[$host][REPORTED];
+            $last_heartbeat = $cluster['LOCALTIME'] - $hosts_down[$host]['REPORTED'];
             $age = $last_heartbeat > 3600 ? uptime($last_heartbeat) : "${last_heartbeat}s";
 
             $class = "down";
@@ -145,23 +167,31 @@ foreach ( $sorted_hosts as $host => $value )
          }
       else
          {
-            $val = $metrics[$host][$metricname];
+            if(isset($metrics[$host][$metricname]))
+                $val = $metrics[$host][$metricname];
+            else
+                $val = NULL;
             $class = "metric";
 
-            if ($val[TYPE]=="timestamp" or $always_timestamp[$metricname])
+            if ($val['TYPE']=="timestamp" or 
+                (isset($always_timestamp[$metricname]) and
+                 $always_timestamp[$metricname]))
                {
-                  $textval = date("r", $val[VAL]);
+                  $textval = date("r", $val['VAL']);
                }
-            elseif ($val[TYPE]=="string" or $val[SLOPE]=="zero" or
-               $always_constant[$metricname] or ($max_graphs > 0 and $i > $max_graphs ))
+            elseif ($val['TYPE']=="string" or $val['SLOPE']=="zero" or
+                    (isset($always_constant[$metricname]) and
+                    $always_constant[$metricname] or
+                    ($max_graphs > 0 and $i > $max_graphs )))
                {
                   $textval = "$val[VAL] $val[UNITS]";
                }
             else
                {
                   $load_color = load_color($host_load[$host]);
-                  $graphargs = ($reports[$metricname]) ? "g=$metricname&amp;" : 
-                     "m=$metricname&amp;";
+                  $graphargs = (isset($reports[$metricname]) and
+                                $reports[$metricname]) ?
+                        "g=$metricname&amp;" : "m=$metricname&amp;";
                   $graphargs .= "z=small&amp;c=$cluster_url&amp;h=$host_url"
                      ."&amp;l=$load_color&amp;v=$val[VAL]&amp;x=$max&amp;n=$min"
                      ."&amp;r=$range&amp;st=$cluster[LOCALTIME]";

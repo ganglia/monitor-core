@@ -3,17 +3,39 @@
 include_once "./conf.php";
 include_once "./get_context.php";
 
+# RFM - Added all the isset() tests to eliminate "undefined index"
+# messages in ssl_error_log.
+
 # Graph specific variables
-$size = escapeshellcmd( rawurldecode( $HTTP_GET_VARS["z"] ));
-$graph = escapeshellcmd( rawurldecode( $HTTP_GET_VARS["g"] ));
-$grid = escapeshellcmd( rawurldecode( $HTTP_GET_VARS["G"] ));
-$self = escapeshellcmd( rawurldecode( $HTTP_GET_VARS["me"] ));
-$max = escapeshellcmd( rawurldecode( $HTTP_GET_VARS["x"] ));
-$min = escapeshellcmd( rawurldecode( $HTTP_GET_VARS["n"] ));
-$value = escapeshellcmd( rawurldecode( $HTTP_GET_VARS["v"] ));
-$load_color = escapeshellcmd( rawurldecode( $HTTP_GET_VARS["l"] ));
-$vlabel = escapeshellcmd( rawurldecode( $HTTP_GET_VARS["vl"] ));
-$sourcetime = escapeshellcmd($HTTP_GET_VARS["st"]);
+$size = isset($_GET["z"]) ?
+	escapeshellcmd( rawurldecode( $_GET["z"] )) : NULL;
+$graph = isset($_GET["g"]) ?
+	escapeshellcmd( rawurldecode( $_GET["g"] )) : NULL;
+$grid = isset($_GET["G"]) ?
+	escapeshellcmd( rawurldecode( $_GET["G"] )) : NULL;
+$self = isset($_GET["me"]) ?
+	escapeshellcmd(rawurldecode($_GET["me"])) : NULL;
+$max = isset($_GET["x"]) ? 
+	escapeshellcmd( rawurldecode($_GET["x"] )) : NULL;
+$min = isset($_GET["n"]) ?
+	escapeshellcmd( rawurldecode($_GET["n"] )) : NULL;
+$value = isset($_GET["v"]) ?
+	escapeshellcmd( rawurldecode( $_GET["v"] )) : NULL;
+$load_color = isset($_GET["l"]) ?
+	escapeshellcmd( rawurldecode( $_GET["l"] )) : NULL;
+$vlabel = isset($_GET["vl"]) ?
+	escapeshellcmd( rawurldecode( $_GET["vl"] )) : NULL;
+$sourcetime = isset($_GET["st"]) ?
+	escapeshellcmd($_GET["st"]) : NULL;
+
+# RFM - Define these variables to avoid "Undefined variable" errors being 
+# reported in ssl_error_log.
+$command = "";
+$extras = "";
+$upper_limit = "";
+$lower_limit = "";
+$background = "";
+$vertical_label = "";
 
 # Assumes we have a $start variable (set in get_context.php).
 if ($size == "small")
