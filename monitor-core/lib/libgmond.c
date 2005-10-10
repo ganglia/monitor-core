@@ -137,6 +137,11 @@ cluster { \n\
   name = \"unspecified\" \n\
 } \n\
 \n\
+/* The host section describes attributes of the host, like the location */ \n\
+host { \n\
+  location = \"unspecified\" \n\
+} \n\
+\n\
 /* Feel free to specify as many udp_send_channels as you like.  Gmond \n\
    used to only support having a single channel */ \n\
 udp_send_channel { \n\

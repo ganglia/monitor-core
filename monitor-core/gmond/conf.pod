@@ -66,6 +66,16 @@ into the following XML.
 B<NOTE>: Currently gmetad cannot process data sources that do not
 have a cluster tag.  This will be remedied in the future.  
 
+=head2 host
+
+The B<host> section provides information about the host running this
+instance of B<gmond>. Currently only the B<location> string attribute is
+supported. Example:
+
+ host {
+   location = "(1,2,3)"
+ }
+
 =head2 globals
 
 The B<globals> section controls general characteristics of gmond
