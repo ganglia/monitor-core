@@ -87,6 +87,9 @@
    and to 0 otherwise. */
 #undef HAVE_REALLOC
 
+/* We have a len attr in sockaddr */
+#undef HAVE_SOCKADDR_SA_LEN
+
 /* Define to 1 if `stat' has the bug that it succeeds when given the
    zero-length file name argument. */
 #undef HAVE_STAT_EMPTY_STRING_BUG
@@ -192,6 +195,9 @@
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
+
+/* NETBSD */
+#undef NETBSD
 
 /* OSF */
 #undef OSF
