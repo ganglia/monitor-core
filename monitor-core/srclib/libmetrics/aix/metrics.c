@@ -1,111 +1,47 @@
 /*
+ *  Rewrite of AIX metrics using libperfstat API
+ *
+ *  Libperfstat can deal with a 32-bit and a 64-bit Kernel and does not require root authority.
+ *
+ *  The code is tested with AIX 5.2 (32Bit- and 64Bit-Kernel), but 5.1 and 5.3 shoud be OK too
+ *
+ *  by Andreas Schoenfeld, TU Darmstadt, Germany (4/2005) 
+ *  E-Mail: Schoenfeld@hrz.tu-darmstadt.de
+ *
+ *  Its based on the 
  *  First stab at support for metrics in AIX
  *  by Preston Smith <psmith@physics.purdue.edu>
  *  Wed Feb 27 14:55:33 EST 2002
  *
  *  AIX V5 support, bugfixes added by Davide Tacchella <tack@cscs.ch>
  *  May 10, 2002
- *  
+ *
+ *  you may still find some code (like "int bos_level(..)"  ) and the basic structure of this version. 
+ *
+ *  Some code fragments of the network statistics are "borowed" from  
+ *  the Solaris Metrics   
+ *
  */
+
 #include "interface.h"
 #include <stdlib.h>
-#include <unistd.h>
 #include <utmp.h>
 #include <stdio.h>
 #include <procinfo.h>
 #include <strings.h>
 #include <signal.h>
-#include <fcntl.h>
-#include <nlist.h>
 #include <odmi.h>
-#include <dlfcn.h>
-#include <sys/cfgodm.h>
-#include <sys/types.h>
 #include <cf.h>
-#include <sys/sysinfo.h>
-#include <sys/systemcfg.h>
-#include <sys/sysconfig.h>
 #include <sys/utsname.h>
-#include <sys/vminfo.h>
-#include <sys/errno.h>
-#ifdef HAVE_PMAPI
-#include <pmapi.h>
-#endif
-/*#include <sys/proc.h> */
+
+#include <libperfstat.h>
 
 #include "libmetrics.h"
 
-#define MAX_CPUS  64
-#define N_VALUE(index) ((caddr_t)kernelnames[index].n_value)
-#define KNSTRUCTS_CNT 3
-#define NLIST_VMKER 0
-#define NLIST_SYSINFO 0
-#define MAXPROCS 5
-#define NLIST_VMINFO 2
-
-/* vmker structs taken from AIX monitor */
-
-/* -- AIX/6000 System monitor 
-**
-**     get_sysvminfo.h
-**
-** Copyright (c) 1991-1995 Jussi Maki, All Rights Reserved.
-** Copyright (c) 1993-2001 Marcel Mol, All Rights Reserved.
-** NON-COMMERCIAL USE ALLOWED. YOU ARE FREE TO DISTRIBUTE
-** THIS PROGRAM AND MODIFY IT AS LONG AS YOU KEEP ORIGINAL
-** COPYRIGHTS.
-*/
-
-struct vmker433 {
-    uint n0, n1, n2, n3, n4, n5, n6;
-    uint pageresv; /* reserved paging space blocks */
-    uint totalmem; /* total number of pages memory */
-    uint badmem;   /* this is used in RS/6000 model 220 and C10 */
-    uint totalvmem;
-    uint virtacc;
-    uint freevmem;
-    uint n13;
-    uint nonpinnable; /* number of reserved (non-pinable) memory pages */
-    uint maxperm;  /* max number of frames no working */
-    uint numperm;  /* seems to keep other than text and data segment usage */
-                   /* the name is taken from /usr/lpp/bos/samples/vmtune.c */
-    uint n17;
-    uint n18;
-    uint numclient;/* number of client frames */
-    uint maxclient;/* max number of client frames */
-};
 
 
 
-struct vmker {
-    uint n0, n1, n2, n3, n4, n5, n6, n7;
-    uint pageresv; /* reserved paging space blocks */
-    uint totalmem; /* total number of pages memory */
-    uint badmem; /* this is used in RS/6000 model 220 and C10 */
-    uint freemem; /* number of pages on the free list */
-    uint maxperm; /* max number of frames no working */
-    uint numperm; /* seems to keep other than text and data segment usage */
-                  /* the name is taken from /usr/lpp/bos/samples/vmtune.c */
-    uint totalvmem, freevmem;
-    uint n16;
-    uint nonpinnable; /* number of reserved (non-pinable) memory pages */
-    uint n18, n19;
-    uint numclient; /* number of client frames */
-    uint maxclient; /* max number of client frames */
-    uint n22, n23;
-    uint n24, n25;
-    uint n26, n27;
-    uint n28, n29;
-    uint n30, n31;
-    uint n32, n33;
-    uint n34, n35;
-    uint n36, n37;
-    uint n38, n39;
-    uint n40, n41;
-    uint n42, n43;
-    uint n44, n45;
-    uint n46, n47;
-};
+struct Class *My_CLASS;
 
 struct product {
         char filler[12];
@@ -129,43 +65,66 @@ struct product {
         char *supersedes;        /* [512] offset: 0xf4 ( 244) */
 };
 
-static struct nlist kernelnames[] = {  
-    {"sysinfo", 0, 0, 0, 0, 0},
-    {"cpuinfo", 0, 0, 0, 0, 0},
-    {"vmker", 0, 0, 0, 0, 0},
-    {NULL,      0, 0, 0, 0, 0},
-}; 
 
-void (*my_vmgetinfo) ();
 
-int ci = 0;
-struct cpuinfo *cpus[2] = {NULL, NULL};
-struct sysinfo si[3];
-struct vminfo vm[3];
-struct vmker vmk;
-struct vmker433 *vmk433;
-static int n_cpus;
+#define MAX_CPUS  64
+
+#define INFO_TIMEOUT   10
+#define CPU_INFO_TIMEOUT INFO_TIMEOUT
+
+#define MEM_PAGESIZE 4096/1024
+
+
+struct cpu_info {
+  time_t timestamp;  
+  u_longlong_t total_ticks;
+  u_longlong_t user;        /*  raw total number of clock ticks spent in user mode */
+  u_longlong_t sys;         /* raw total number of clock ticks spent in system mode */
+  u_longlong_t idle;        /* raw total number of clock ticks spent idle */
+  u_longlong_t wait;        /* raw total number of clock ticks spent waiting for I/O */
+};
+
+struct net_stat{
+  double ipackets;
+  double opackets;
+  double ibytes;
+  double obytes;
+} cur_net_stat;
+
+
+
+
+
+
+int ci_flag=0;
+int ni_flag=0;
+
+perfstat_cpu_total_t cpu_total_buffer;
+perfstat_memory_total_t minfo;
+perfstat_disk_total_t dinfo;
+perfstat_netinterface_total_t ninfo[2],*last_ninfo, *cur_ninfo ;
+
+
+struct cpu_info cpu_info[2], 
+  *last_cpu_info,
+  *cur_cpu_info;
+
+
+  
+
 int aixver, aixrel, aixlev, aixfix;
-struct Class *My_CLASS;
-
-
-long cpu_sys, cpu_wait, cpu_user, cpu_idle, cpu_sum;
 struct utsname unames;
+
 
 /* Prototypes
  */
-int get_cpuinfo(struct cpuinfo **cpu);
-void getloadavg(double *loadv, int nelem);
-int getloadavg_avenrun(double loadv[], int nelem);
-void get_sys_info(struct sysinfo *s);
-void calc_cpuinfo(struct sysinfo *si1, struct sysinfo *si2);
-int swapqry(char *DevName, struct pginfo *pginfo);
-int count_procs(int flag);
-int getprocs(struct procsinfo *pbuf, int psize, struct fdsinfo *fbuf,
-	     int fsize, pid_t iptr, int cnt);
-void init_sys_vm();
-void get_sys_vm_info(struct sysinfo *si, struct vmker *vmk, struct vminfo *vm);
+void  update_ifdata(void);
+void get_cpuinfo(void);
 int bos_level(int *aix_version, int *aix_release, int *aix_level, int *aix_fix);
+
+
+
+
 
 /*
  * This function is called only once by the gmond.  Use to 
@@ -175,53 +134,41 @@ g_val_t
 metric_init(void)
 {
    g_val_t val;
-   ci ^= 1;
 
+
+   last_cpu_info = &cpu_info[ci_flag];
+   ci_flag^=1;
+   cur_cpu_info  = &cpu_info[ci_flag];
+   cur_cpu_info->total_ticks = 0;
+   
+   update_ifdata();
    uname(&unames);
-   n_cpus = get_cpuinfo(&cpus[ci]); 
-   get_sys_info(&si[ci]);
-  /* get vm info, for memfrees */
-   init_sys_vm();
-   get_sys_vm_info(&si[ci], &vmk, &vm[ci]);
- 
-   calc_cpuinfo(&si[ci], &si[ci^1]);
+   
+   get_cpuinfo();
+   sleep(CPU_INFO_TIMEOUT+1);
+   get_cpuinfo();
 
-  /* get oslevel from odm */
+   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);  
+   perfstat_disk_total(NULL, &dinfo, sizeof(perfstat_disk_total_t), 1);
+
+   update_ifdata();
+
    bos_level(&aixver, &aixrel, &aixlev, &aixfix);
 
    val.int32 = SYNAPSE_SUCCESS;
    return val;
 }
 
-g_val_t
-cpu_num_func ( void )
-{
-   g_val_t val;
 
-   int ncpu;
-   ncpu = get_cpuinfo(&cpus[ci^1]);
-   
-   if(ncpu) n_cpus = ncpu;
-
-   val.uint16 = ncpu;
-   return val;
-}
-
-/*
-   With PMAPI CPU speed can be obtained with
-   double pm_cycles(void);
-*/
 
 g_val_t
 cpu_speed_func ( void )
 {
    g_val_t val;
-#ifdef HAVE_PMAPI
-   double pm_cycles(void);
-   val.uint32 = pm_cycles()/1000000;
-#else
-   val.uint16 = 0;
-#endif
+
+   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
+   val.uint32 = cpu_total_buffer.processorHZ/1000000;
+
    return val;
 }
 
@@ -258,26 +205,18 @@ sys_clock_func ( void )
    return val;
 }
 
-/* Nice little macros in sys/systemcfg.h to get the processor
-   architecture
-*/
+
+
 g_val_t
 machine_type_func ( void )
 {
    g_val_t val;
 
-   if( __power_rs())
-	strncpy( val.str, "POWER", MAX_G_STRING_SIZE );
-   if( __power_pc())
-	strncpy( val.str, "PowerPC", MAX_G_STRING_SIZE );
-#ifdef _AIXVERSION_510
-   if( __isia64())
-#else
-   if( __ia64())
-#endif
-	strncpy( val.str, "IA/64", MAX_G_STRING_SIZE );
+
+   strncpy( val.str,cpu_total_buffer.description , MAX_G_STRING_SIZE );
    return val;
 }
+
 
 g_val_t
 os_name_func ( void )
@@ -286,6 +225,7 @@ os_name_func ( void )
    strncpy( val.str, unames.sysname, MAX_G_STRING_SIZE );
    return val;
 }        
+
 
 g_val_t
 os_release_func ( void )
@@ -300,25 +240,32 @@ os_release_func ( void )
 }        
 
 
-/* AIX 4 defines
-   CPU_IDLE, CPU_USER, CPU_KERNEL, CPU_WAIT
+/* AIX  defines
+   CPU_IDLE, CPU_USER, CPU_SYS(CPU_KERNEL), CPU_WAIT
    so no metrics for cpu_nice, or cpu_aidle
-   Check /usr/include/sys/sysinfo.h for details as to what the CPU stats
-   actually mean.
 */
+
+
+#define CALC_CPUINFO(type) ((100.0*(cur_cpu_info->type - last_cpu_info->type))/(1.0*(cur_cpu_info->total_ticks - last_cpu_info->total_ticks)))
+
 g_val_t
 cpu_user_func ( void )
 {
    g_val_t val;
+   
+   
+   get_cpuinfo();
+   
+   val.f = CALC_CPUINFO(user);
 
-   ci ^= 1;
-   get_sys_info(&si[ci]);
-   calc_cpuinfo(&si[ci], &si[ci^1]);
-
-   val.f = cpu_user;
    if(val.f < 0) val.f = 0.0;
    return val;
 }
+
+
+/*
+** AIX dosen't not that 
+*/
 
 g_val_t
 cpu_nice_func ( void )
@@ -332,12 +279,9 @@ g_val_t
 cpu_system_func ( void )
 {
    g_val_t val;
-   
-   ci ^= 1;
-   get_sys_info(&si[ci]);
-   calc_cpuinfo(&si[ci], &si[ci^1]);
 
-   val.f = cpu_sys;
+   get_cpuinfo();
+   val.f = CALC_CPUINFO(sys) ;
    if(val.f < 0) val.f = 0.0;
    return val;
 }
@@ -347,11 +291,10 @@ cpu_wio_func ( void )
 {
    g_val_t val;
    
-   ci ^= 1;
-   get_sys_info(&si[ci]);
-   calc_cpuinfo(&si[ci], &si[ci^1]);
+   get_cpuinfo();
+   val.f = CALC_CPUINFO(wait);
 
-   val.f = cpu_wait;
+
    if(val.f < 0) val.f = 0.0;
    return val;
 }
@@ -361,17 +304,17 @@ cpu_idle_func ( void )
 {
    g_val_t val;
 
-   ci ^= 1;
-   get_sys_info(&si[ci]);
-   calc_cpuinfo(&si[ci], &si[ci^1]);
 
-   val.f = cpu_idle;
+   get_cpuinfo();
+   val.f = CALC_CPUINFO(idle);
+
+
    if(val.f < 0) val.f = 0.0;
    return val;
 }
 
 /*
-** FIXME
+** AIX dosen't not that 
 */
 g_val_t 
 cpu_aidle_func ( void )
@@ -382,7 +325,7 @@ cpu_aidle_func ( void )
 }
 
 /*
-** FIXME
+** Don't know what it is 
 */
 g_val_t 
 cpu_intr_func ( void )
@@ -392,8 +335,8 @@ cpu_intr_func ( void )
    return val;
 }
 
-/*
-** FIXME
+/* Don't know what it is 
+** FIXME -- 
 */
 g_val_t 
 cpu_sintr_func ( void )
@@ -403,73 +346,75 @@ cpu_sintr_func ( void )
    return val;
 }
 
-/*
-** FIXME
-*/
+
 g_val_t 
 bytes_in_func ( void )
 {
    g_val_t val;
-   val.f = 0.0;
+   update_ifdata();
+   val.f = cur_net_stat.ibytes;
    return val;
 }
 
-/*
-** FIXME
-*/
+
 g_val_t 
 bytes_out_func ( void )
 {
    g_val_t val;
-   val.f = 0.0;
+
+   update_ifdata();
+   val.f = cur_net_stat.obytes;
+   
    return val;
 }
 
-/*
-** FIXME
-*/
+
 g_val_t 
 pkts_in_func ( void )
 {
    g_val_t val;
-   val.f = 0.0;
+
+   update_ifdata();
+   val.f = cur_net_stat.ipackets;
+
    return val;
 }
 
-/*
-** FIXME
-*/
+
 g_val_t 
 pkts_out_func ( void )
 {
    g_val_t val;
-   val.f = 0.0;
+
+
+   update_ifdata();
+   val.f = cur_net_stat.opackets;
+
    return val;
 }
 
-/*
-** FIXME
-*/
+
 g_val_t 
 disk_free_func ( void )
 {
    g_val_t val;
-   val.d = 0;
+   
+   perfstat_disk_total(NULL, &dinfo, sizeof(perfstat_disk_total_t), 1);
+   val.d = dinfo.free;
    return val;
 }
 
-/*
-** FIXME
-*/
+
 g_val_t 
 disk_total_func ( void )
 {
    g_val_t val;
-   val.d = 0;
+   perfstat_disk_total(NULL, &dinfo, sizeof(perfstat_disk_total_t), 1);
+   val.d =dinfo.size ;
    return val;
 }
 
-/*
+/* most used Partition dose not make sense to me 
 ** FIXME
 */
 g_val_t 
@@ -480,25 +425,25 @@ part_max_used_func ( void )
    return val;
 }
 
+
+
 g_val_t
 load_one_func ( void )
 {
    g_val_t val;
-   double load[3];
-
-   getloadavg_avenrun(load, 3);
-   val.f = load[0];
+   
+   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
+   val.f =(1.0*cpu_total_buffer.loadavg[0])/(1<<SBITS) ;
    return val;
 }
 
 g_val_t
 load_five_func ( void )
-{
+{  
    g_val_t val;
-   double load[3];
-   getloadavg_avenrun(load, 3);
- 
-   val.f = load[1];
+
+   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
+   val.f =(1.0*cpu_total_buffer.loadavg[1])/(1<<SBITS) ;
    return val;
 }
 
@@ -506,41 +451,30 @@ g_val_t
 load_fifteen_func ( void )
 {
    g_val_t val;
-   double load[3];
-   getloadavg_avenrun(load, 3);
 
-   val.f = load[2];
+   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
+   val.f =(1.0*cpu_total_buffer.loadavg[2])/(1<<SBITS)*1.0 ;
+
    return val;
 }
 
-  /* I get a SIGSEGV when I have the code for process counting 
-     compiled in. It works when I display count_procs()
-     from main() tho. Running in gmond, though, it reliably chokes on
-     both proc_total_func and proc_run_func
+g_val_t
+cpu_num_func ( void )
+{
+   g_val_t val;
 
-     It works and gets a process count when run as a standalone program.
-     
-     So, I'm pretty sure count_procs() works ok. No idea where 
-     the issue lies...
+   val.uint16 =  cpu_total_buffer.ncpus;
+   return val;
+}
 
-     Until I have a revelation, I've #ifdef'd it out.   
 
-     tack notes that this SIGSEGV seems pthread related.
-*/
 
 g_val_t
 proc_total_func ( void )
 {
   g_val_t foo;
  
-  int nprocs;
-
-#ifdef COUNT_PROCS
-  nprocs = count_procs(0);
-#else
-  nprocs = 0;
-#endif
-  foo.uint32 = nprocs;
+  foo.uint32 = cpu_total_buffer.ncpus;
  
   return foo;
 }
@@ -550,42 +484,24 @@ g_val_t
 proc_run_func( void )
 {
   g_val_t val;
-  int nprocs;
 
-#ifdef COUNT_PROCS
-  nprocs = count_procs(1);  
-#else
-  nprocs = 0;
-#endif
-  val.uint32 = nprocs;
+  perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
+  val.uint32 = cpu_total_buffer.ncpus_cfg;
+
  
   return val;
 }
 
 
-/* AIX does funny things with virtual memory.
-   Like fill it up with buffered files.
-   Don't know if there's an equivalent for shared and cached..
-*/
+
 g_val_t
 mem_total_func ( void )
 {
    g_val_t val;
-   struct CuAt                 *at;
-   struct objlistinfo          ObjListInfo;
+  
+   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
 
-   odm_initialize();
-   odm_set_path("/etc/objrepos");
-
-   at = get_CuAt_list(CuAt_CLASS, "name = 'sys0' and attribute = 'realmem'",
-        &ObjListInfo, 20, 1);
-   if ((int)at == -1) {
-       odm_terminate();
-   }
-
-   (void) odm_close_class(CuAt_CLASS);
-   odm_terminate();
-   val.uint32 =  atoi(at->value);
+   val.uint32 = minfo.real_total*MEM_PAGESIZE;
    
    return val;
 }
@@ -594,25 +510,10 @@ g_val_t
 mem_free_func ( void )
 {
    g_val_t val;
-   uint mem;
-#ifdef _AIXVERSION_510
-   struct vminfo dtsvm;
-   int status;
-
-   memset(&dtsvm, 0, sizeof(struct vminfo));
-
-   status = vmgetinfo (&dtsvm, VMINFO, 0);  
-   mem = (int) dtsvm.numfrb; /* numfrb is a 64 bit integer, cast it to int */
-#else
-   /* Our code only gets memfree for >= 4.3.3 */
-   if(aixver >= 4 && aixrel >= 3 && aixlev >= 3) {
-     get_sys_vm_info(&si[ci], &vmk, &vm[ci]);
-     mem = vmk.freemem;
-   } else {
-     mem = 0;
-   }
-#endif
-   val.uint32 = mem * (getpagesize() / 1024); 
+  
+   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
+   
+   val.uint32 = minfo.real_free*MEM_PAGESIZE; 
    return val;
 }
 
@@ -641,45 +542,14 @@ mem_cached_func ( void )
    return val;
 }
 
-/* There's vmker entries totalvmem and freevm,
-   but they don't seem to give anything correct.
- 
-   Swapqry should give it.. gotta do it for each paging space.
-   Get it out of the ODM
-*/
-
 g_val_t
 swap_total_func ( void )
 {
    g_val_t val;
-   struct CuAt                 *at;
-   struct objlistinfo          ObjListInfo;
-   register int                i;
-   static char                 DevName[BUFSIZ];
-   static struct pginfo        pginfo;
-   int                         tot = 0;
 
-   odm_initialize();
-   odm_set_path("/etc/objrepos");
-
-   at = get_CuAt_list(CuAt_CLASS, "value = 'paging' and attribute = 'type'", 
-	&ObjListInfo, 20, 1);
-   if ((int)at == -1) {
-       odm_terminate();
-       val.uint32 = 0;
-       return val;
-   }
-  /* For each paging space the ODM tells us about, do swapqry on it.
-  */
-   for (i = 0; i < ObjListInfo.num; ++i, at++) {
-       (void) sprintf(DevName, "/dev/%s", at->name);
-       if (swapqry(DevName, &pginfo) == -1) {
-           continue;
-       }
-       tot +=  ( (pginfo.size * getpagesize() ) / 1024 );
-   }
-   odm_terminate();
-   val.uint32 = tot;
+   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
+   
+   val.uint32 =minfo.pgsp_total ;
    return val;
    
 }
@@ -688,37 +558,11 @@ g_val_t
 swap_free_func ( void )
 {
    g_val_t val;
-   struct CuAt                 *at;
-   struct objlistinfo          ObjListInfo;
-   register int                i;
-   static char                 DevName[BUFSIZ];
-   static struct pginfo        pginfo;
-   int                         tot = 0;
+   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
+   
+   val.uint32 =minfo.pgsp_free;
 
-   odm_initialize();
-   odm_set_path("/etc/objrepos");
-
-   at = get_CuAt_list(CuAt_CLASS, "value = 'paging' and attribute = 'type'",
-        &ObjListInfo, 20, 1);
-   if ((int)at == -1) {
-       odm_terminate();
-       val.uint32 = 0;
-       return val;
-   }
-
-  /* For each paging space the ODM tells us about, do swapqry on it.
-  */
-   for (i = 0; i < ObjListInfo.num; ++i, at++) {
-       (void) sprintf(DevName, "/dev/%s", at->name);
-       if (swapqry(DevName, &pginfo) == -1) {
-           continue;
-       }
-       tot +=  ( (pginfo.free * getpagesize() ) / 1024 );
-   }
-   odm_terminate();
-   val.uint32 = tot;
    return val;
-
 }
 
 
@@ -737,288 +581,54 @@ mtu_func ( void )
 
 
 
-/* Lifted from AIX 'monitor'
- * http://www.mesa.nl/pub/monitor
- *
-** -- AIX/6000 System monitor 
-**
-**     getkmemdata.c
-**
-** Copyright (c) 1991-1995 Jussi Maki, All Rights Reserved.
-** Copyright (c) 1993-1998 Marcel Mol, All Rights Reserved.
-** NON-COMMERCIAL USE ALLOWED. YOU ARE FREE TO DISTRIBUTE
-** THIS PROGRAM AND MODIFY IT AS LONG AS YOU KEEP ORIGINAL
-** COPYRIGHTS.
-*/
-int kmemfd = -1;
-
-/*********************************************************************/
-
-int getkmemdata(void *buf, int bufsize, caddr_t address) {
-    int n;
-
-    /*
-     * Do stuff we only need to do once per invocation, like opening
-     * the kmem file and fetching the parts of the symbol table.
-     */
-    if (kmemfd < 0) {
-        if ((kmemfd = open("/dev/kmem", O_RDONLY)) < 0) {
-            perror("kmem");
-            return 0;
-        }
-        /*
-         * We only need to be root for getting access to kmem, so give up
-         * root permissions now!
-         */
-        setuid(getuid());
-        setgid(getgid());
-    }
-    /*
-     * Get the structure from the running kernel.
-     */
-    lseek(kmemfd, (off_t) address, SEEK_SET);
-    n = read(kmemfd, buf, bufsize);
-
-    return(n);
-
-} /* getkmemdata */
 
 
-/* -- AIX/6000 System monitor 
-**
-**     getloadavg.c
-**
-** Copyright (c) 1991-1995 Jussi Maki, All Rights Reserved.
-** Copyright (c) 1993-1998 Marcel Mol, All Rights Reserved.
-** NON-COMMERCIAL USE ALLOWED. YOU ARE FREE TO DISTRIBUTE
-** THIS PROGRAM AND MODIFY IT AS LONG AS YOU KEEP ORIGINAL
-** COPYRIGHTS.
-*/
 
 
-typedef struct {
-    long l1, l5, l15;
-} avenrun_t;
-
-int getloadavg_avenrun(double *loadv, int nelem)
+void get_cpuinfo() 
 {
-    static int initted=0;
-    int avenrun[3];
-    static struct nlist knames[] = {
-          {"avenrun", 0, 0, 0, 0, 0},
-          {NULL, 0, 0, 0, 0, 0}
-      };
-
-    static int no_avenrun_here = 0;
-
-    if (no_avenrun_here) 
-        return -1;
-
-    if (!initted) {
-        initted = 1;
-        if (knlist(knames, 1, sizeof(struct nlist)) == -1){
-            no_avenrun_here = 1;
-            return -1;
-        }
-    }
-    getkmemdata(&avenrun, sizeof(avenrun), (caddr_t) knames->n_value);
-    if (nelem > 0)
-       loadv[0] = avenrun[0] / 65536.0;
-    if (nelem > 1)
-       loadv[1] = avenrun[1] / 65536.0;
-    if (nelem > 2)
-       loadv[2] = avenrun[2] / 65536.0;
-
-    return(0);
-
-} /* getloadavg_avenrun */
-
-/* -- AIX/6000 System monitor 
-**
-**     vmker.c
-**
-** Copyright (c) 1998 Marcel Mol, All Rights Reserved.
-** NON-COMMERCIAL USE ALLOWED. YOU ARE FREE TO DISTRIBUTE
-** THIS PROGRAM AND MODIFY IT AS LONG AS YOU KEEP ORIGINAL
-** COPYRIGHTS.
-*/
-
-/* get_sys_info adapted from AIX monitor get_sys_vm_info.c
- */
-void get_sys_info(struct sysinfo *s) {
-
-    int nlistdone = 0;
-    getkmemdata(s,  sizeof(struct sysinfo), N_VALUE(NLIST_SYSINFO));
-
-    if (!nlistdone) {
-        if (knlist(kernelnames, KNSTRUCTS_CNT, sizeof(struct nlist)) == -1)
-            perror("knlist, entry not found");
-        nlistdone = 1;
-    }
-    return;
-} /* get_sys_info */
+  u_longlong_t cpu_total;
+  time_t new_time;
 
 
-/* -- AIX/6000 System monitor 
-**
-**     get_cpuinfo.c
-**
-** Copyright (c) 1991-1995 Jussi Maki, All Rights Reserved.
-** Copyright (c) 1993-1998 Marcel Mol, All Rights Reserved.
-** NON-COMMERCIAL USE ALLOWED. YOU ARE FREE TO DISTRIBUTE
-** THIS PROGRAM AND MODIFY IT AS LONG AS YOU KEEP ORIGINAL
-** COPYRIGHTS.
-*/
+  new_time = time(NULL);
 
-
-int get_cpuinfo(struct cpuinfo **cpu) {
-
-    int ncpus;  
-    ncpus = _system_configuration.ncpus;
-
-    if (!kernelnames[0].n_value) {
-        if (knlist(kernelnames, 1, sizeof(struct nlist)) == -1)
-            perror("knlist, entry not found");
-    }
-    if (!*cpu)
-      *cpu = (struct cpuinfo *)calloc(n_cpus, sizeof(struct cpuinfo));
-
-
-    getkmemdata((char *) *cpu, sizeof(struct cpuinfo) * ncpus, 
-                (caddr_t) kernelnames[0].n_value); 
-    return ncpus;
-} /* get_cpuinfo */
-
-
-#define SIDELTA(a) (si1->a - si2->a)
-
-/*
- * Compute the cpu percentages for CPU_IDLE, CPU_KERNEL, CPU_USER, CPU_WAIT
- * Get them from a sysinfo struct, which contains the cumulative CPU stats.
- * cpuinfo struct keeps the same info on a per-processor basis. Much easier
- * This way
- */
-void
-calc_cpuinfo(struct sysinfo *si1, struct sysinfo *si2) {
-
-    
-    cpu_sum = (SIDELTA(cpu[CPU_IDLE])   + SIDELTA(cpu[CPU_USER]) +
-               SIDELTA(cpu[CPU_KERNEL]) + SIDELTA(cpu[CPU_WAIT])) / 100.0;
-    cpu_sys  = SIDELTA(cpu[CPU_KERNEL]) / cpu_sum;
-    cpu_wait = SIDELTA(cpu[CPU_WAIT])   / cpu_sum;
-    cpu_user = SIDELTA(cpu[CPU_USER])   / cpu_sum;
-    cpu_idle = SIDELTA(cpu[CPU_IDLE])   / cpu_sum;
- 
-    return;
-}
-  
-
-/* Pass 0 as flag if you want to get a list of all processes.
-   Pass 1 if you want to get a list of all SACTIVE processes */
-
-int count_procs(int flag) {
-
-  struct procsinfo ProcessBuffer[MAXPROCS];
-  int ProcessSize = sizeof( ProcessBuffer[0] );
-  struct fdsinfo FileBuffer[MAXPROCS];
-  int FileSize = sizeof( FileBuffer[0] );
-  pid_t IndexPointer = 0;
-  int Count = MAXPROCS;
-  int stat_val;
-  int i;
-  /* int state = -1; */
-  int np = 0; 
-  
-  while ((stat_val = getprocs(
-			      &ProcessBuffer[0],
-			      ProcessSize,
-			      NULL,
-			      FileSize,
-			      (pid_t)&IndexPointer,
-			      Count )) == MAXPROCS  ) 
-    
+  if (new_time - CPU_INFO_TIMEOUT > cur_cpu_info->timestamp ) 
     {
-      if(flag != 0) {
-	for ( i=0; i<stat_val; i++) {
-	  if(ProcessBuffer[i].pi_state == SACTIVE) np++;
-	}
-      } else {
-	np += stat_val;
-      }
-    }       
-	
-  return np;
-}
 
-/* -- AIX/6000 System monitor 
-**
-**     get_sysvminfo.c
-**
-** Copyright (c) 1991-1995 Jussi Maki, All Rights Reserved.
-** Copyright (c) 1993-2001 Marcel Mol, All Rights Reserved.
-** NON-COMMERCIAL USE ALLOWED. YOU ARE FREE TO DISTRIBUTE
-** THIS PROGRAM AND MODIFY IT AS LONG AS YOU KEEP ORIGINAL
-** COPYRIGHTS.
-*/
+      perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
 
 
-/* init_sys_vm and  get_sys_vm_info adapted from get_sysvminfo.c */
+      cpu_total = cpu_total_buffer.user +  cpu_total_buffer.sys  
+	+  cpu_total_buffer.idle +  cpu_total_buffer.wait;
 
-void init_sys_vm() { 
-    void * handle;
-    char *progname;
+  
+      last_cpu_info=&cpu_info[ci_flag];
+      ci_flag^=1; 
+      cur_cpu_info=&cpu_info[ci_flag];
 
-    if (knlist(kernelnames, KNSTRUCTS_CNT, sizeof(struct nlist)) == -1)
-        perror("knlist, entry not found");
-
-    vmk433 = (struct vmker433 *) malloc(sizeof(struct vmker433));
-    /*
-     * Get the call address for the vmgetinfo system call
-     */
-    if ((handle = dlopen("/unix", RTLD_NOW | RTLD_GLOBAL)) == NULL) {
-        fprintf(stderr, "%s: init_sys_vm: dlopen: can't load %s (%s)\n",
-                        progname, "/unix", dlerror());
-        perror("dlopen");
-        exit(1);
+      cur_cpu_info->timestamp   = new_time;
+      cur_cpu_info->total_ticks = cpu_total;
+      cur_cpu_info->user        = cpu_total_buffer.user;
+      cur_cpu_info->sys         = cpu_total_buffer.sys;
+      cur_cpu_info->idle        = cpu_total_buffer.idle;
+      cur_cpu_info->wait        = cpu_total_buffer.wait;
     }
-    my_vmgetinfo = dlsym( handle, "vmgetinfo");
-    dlclose(handle);
-    if (my_vmgetinfo == NULL) {
-        fprintf(stderr, "%s: init_sys_vm: dlsym: can't find %s (err %s)\n",
-                        progname, "vmgetinfo", dlerror());
-        perror("dlsym");
-    }
+} /*      get_cpuinfo  */
+  
 
-   return;
-}
 
-void
-get_sys_vm_info(struct sysinfo *si, struct vmker *vmk, struct vminfo *vm)
-{
-
-    getkmemdata(si,  sizeof(struct sysinfo), N_VALUE(NLIST_SYSINFO));
-    /*
-     * Get the system info structure from the running kernel.
-     * Get the kernel virtual memory vmker structure
-     * Get the kernel virtual memory info structure
-     */
-    my_vmgetinfo(vm, VMINFO, 1);
-
-     getkmemdata(vmk433, sizeof(struct vmker433),   N_VALUE(NLIST_VMKER));
-     vmk->totalmem    = vmk433->totalmem;
-     vmk->badmem      = vmk433->badmem;
-     vmk->freemem     = vm->numfrb;
-     vmk->maxperm     = vm->maxperm;
-     vmk->numperm     = vm->numperm;
-     vmk->totalvmem   = vmk433->totalvmem;
-     vmk->freevmem    = vmk433->freevmem;
-     vmk->nonpinnable = 0;
-     vmk->numclient   = vm->numclient;
-     vmk->maxclient   = vm->maxclient;
-
-    return;
-}
-
+/* int bos_level(int *aix_version, int *aix_release, int *aix_level, int *aix_fix)
+ *  is copied form 
+ *
+ *  First stab at support for metrics in AIX
+ *  by Preston Smith <psmith@physics.purdue.edu>
+ *  Wed Feb 27 14:55:33 EST 2002
+ *
+ *  AIX V5 support, bugfixes added by Davide Tacchella <tack@cscs.ch>
+ *  May 10, 2002
+ *
+ */
 
 int bos_level(int *aix_version, int *aix_release, int *aix_level, int *aix_fix)
 {
@@ -1109,3 +719,60 @@ int bos_level(int *aix_version, int *aix_release, int *aix_level, int *aix_fix)
     return (found ? 0 : -1);
 
 } /* bos_level */
+
+
+
+#define CALC_NETSTAT(type) (double) ( (cur_ninfo->type - last_ninfo->type)/timediff)
+
+void 
+update_ifdata(void){
+
+   static int init_done = 0;
+   static struct timeval lasttime={0,0};
+   struct timeval thistime;
+   double timediff;
+   
+
+   /*
+   ** Compute time between calls
+   */
+   gettimeofday (&thistime, NULL);
+   if (lasttime.tv_sec)
+     timediff = ((double) thistime.tv_sec * 1.0e6 +
+                 (double) thistime.tv_usec -
+                 (double) lasttime.tv_sec * 1.0e6 -
+                 (double) lasttime.tv_usec) / 1.0e6;
+   else
+     timediff = 1.0;
+
+   /*
+   ** Do nothing if we are called to soon after the last call
+   */
+   if (init_done && (timediff < INFO_TIMEOUT)) return;
+   
+   lasttime = thistime;
+
+   last_ninfo = &ninfo[ni_flag];
+
+   ni_flag^=1;
+
+   cur_ninfo = &ninfo[ni_flag];
+
+   perfstat_netinterface_total(NULL, cur_ninfo, sizeof(perfstat_netinterface_total_t), 1);
+
+   if (init_done) {
+      cur_net_stat.ipackets = CALC_NETSTAT(ipackets);
+      cur_net_stat.opackets = CALC_NETSTAT(opackets);
+      cur_net_stat.ibytes   = CALC_NETSTAT(ibytes);
+      cur_net_stat.obytes   = CALC_NETSTAT(obytes);
+   }
+   else
+     {
+       init_done = 1;
+       cur_net_stat.ipackets = 0;
+       cur_net_stat.opackets = 0;
+       cur_net_stat.ibytes   = 0;
+       cur_net_stat.obytes   = 0;
+     }
+
+}  /* update_ifdata */

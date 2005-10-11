@@ -20,6 +20,7 @@ AC_CHECK_LIB(kstat, kstat_open)
 AC_CHECK_LIB(kvm, kvm_open)
 AC_CHECK_LIB(odm, odm_initialize)
 AC_CHECK_LIB(cfg, _system_configuration)
+AC_CHECK_LIB(perfstat, perfstat_cpu_total)
 AC_HAVE_LIBRARY(socket)
 AC_HAVE_LIBRARY(resolv)
 AC_HAVE_LIBRARY(nsl)
@@ -93,12 +94,11 @@ dnl LIBS="-lpthread $LIBS"
                 ;;
 *aix*)		OS="aix"
                 CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
-		if test "$ac_cv_lib_pmapi_pm_cycles" = yes ; then
-			CFLAGS="$CFLAGS -DHAVE_PMAPI" 
+		if test "$ac_cv_lib_perfstat_perfstat_cpu_total" = yes ; then
+			CFLAGS="$CFLAGS -DHAVE_PERFSTAT"
 		else
-			echo "PMAPI not detected."
-			echo "For AIX 4.3, you can download PMAPI at http://alphaworks.ibm.com/tech/pmapi"
-			echo "AIX 5 has PMAPI installed in bos.pmapi"
+			echo "libperfstat not detected."
+			echo "For AIX 5 you need to install bos.perf.libperfstat"
 		fi
                 AC_DEFINE(AIX, 1, AIX)
                 ;;

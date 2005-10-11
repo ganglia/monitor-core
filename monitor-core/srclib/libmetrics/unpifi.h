@@ -6,7 +6,17 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
+#ifdef AIX
+#ifndef IP_MULTICAST
+#define IP_MULTICAST
+#endif
+#endif
 #include <net/if.h>
+#ifdef AIX
+#undef IP_MULTICAST
+#endif
+
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
