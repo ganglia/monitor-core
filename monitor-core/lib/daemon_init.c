@@ -10,11 +10,53 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <signal.h>
+#include <assert.h>
+#include <string.h>
+#include <errno.h>
 
 #include "daemon_init.h"
 
-
 #define	MAXFD	64
+
+/**
+ * @fn void update_pidfile (const char *pname)
+ * @param argv0 name of this program
+ */
+extern pid_t getpgid(pid_t pid);
+void
+update_pidfile (char *pidfile)
+{
+  pid_t pid;
+  FILE *file;
+
+  /* make sure this program isn't already running. */
+  file = fopen (pidfile, "r");
+  if (file)
+    {
+      if (fscanf(file, "%d", &pid) == 1 &&
+	  (getpgid (pid) > -1))
+	{
+	  fprintf (stderr, "daemon already running: %s pid %d\n", pidfile, pid);
+	  exit (1);
+	}
+      fclose (file);
+    }
+
+  /* write the pid of this process to the pidfile */
+  umask(0112);
+  unlink(pidfile);
+
+  file = fopen (pidfile, "w");
+  if (!file)
+    {
+      fprintf (stderr, "Error writing pidfile '%s' -- %s\n",
+	       pidfile, strerror (errno));
+      exit (1);
+    }
+  fprintf (file, "%d\n", (int) getpid());
+  fclose (file);
+}
+
 
 extern int daemon_proc;		/* defined in error.c */
 

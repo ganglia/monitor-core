@@ -26,6 +26,7 @@
 #include "protocol.h"  /* generated header from ./lib/protocol.x xdr definition file */
 #include "dtd.h"       /* the DTD definition for our XML */
 #include "g25_config.h" /* for converting old file formats to new */
+#include "daemon_init.h"
 
 /* When this gmond was started */
 apr_time_t started;
@@ -719,6 +720,7 @@ Ganglia_metric_create( Ganglia_host *host )
   return metric;
 }
 
+#if 0
 static void
 Ganglia_metric_free( Ganglia_metric *metric )
 {
@@ -726,6 +728,7 @@ Ganglia_metric_free( Ganglia_metric *metric )
     return;
   apr_pool_destroy( metric->pool );
 }
+#endif
 
 static Ganglia_metric *
 Ganglia_message_find_gmetric( Ganglia_host *host, Ganglia_message *message)
@@ -1776,6 +1779,11 @@ main ( int argc, char *argv[] )
     }
 
   daemonize_if_necessary( argv );
+
+  if (args_info.pid_file_given)
+    {
+      update_pidfile (args_info.pid_file_arg);
+    }
   
   /* Collect my hostname */
   apr_gethostname( myname, APRMAXHOSTLEN+1, global_context);

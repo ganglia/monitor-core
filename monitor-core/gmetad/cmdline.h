@@ -22,11 +22,13 @@ struct gengetopt_args_info
 {
   char * conf_arg;	/* Location of gmetad configuration file (default='/etc/gmetad.conf').  */
   int debug_arg;	/* Debug level. If greater than zero, daemon will stay in foreground. (default=0).  */
+  char * pid_file_arg;	/* file to write a pid to */
 
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
   int conf_given ;	/* Whether conf was given.  */
   int debug_given ;	/* Whether debug was given.  */
+  int pid_file_given ;	/* Whether a file for writing a pid to was given.  */
 
 } ;
 

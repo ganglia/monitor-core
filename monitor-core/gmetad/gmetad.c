@@ -10,6 +10,7 @@
 #include <time.h>
 #include <gmetad.h>
 #include <cmdline.h>
+#include "daemon_init.h"
 
 
 /* Holds our data sources. */
@@ -320,6 +321,17 @@ main ( int argc, char *argv[] )
          root.stringslen += strlen(root.strings) + 1;
       }
 
+   /* Debug level 1 is error output only, and no daemonizing. */
+   if (!debug_level)
+      {
+         daemon_init (argv[0], 0);
+      }
+
+   if (args_info.pid_file_given)
+     {
+       update_pidfile (args_info.pid_file_arg);
+     }
+
    /* The rrd_rootdir must be writable by the gmetad process */
    if( c->should_setuid )
       {
@@ -363,12 +375,6 @@ main ( int argc, char *argv[] )
       {
          printf("Sources are ...\n");
          hash_foreach( sources, print_sources, NULL);
-      }
-
-   /* Debug level 1 is error output only, and no daemonizing. */
-   if (!debug_level)
-      {
-         daemon_init (argv[0], 0);
       }
 
    server_socket = g_tcp_socket_server_new( c->xml_port );
