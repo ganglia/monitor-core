@@ -54,13 +54,26 @@ data_thread ( void *arg )
    for (;;)
       {
          gettimeofday(&start, NULL);
-         for(i=0; i < d->num_sources; i++)
-            {
-               /* Find first viable source in list. */
-               sock = g_tcp_socket_new ( d->sources[i] );
-               if( sock )
-                  break;
-            }
+	 sock = NULL;
+	 
+	 /* If we successfully read from a good data source last time then try the same host again first. */
+	 if(d->last_good_index >= 0)
+	   sock = g_tcp_socket_new ( d->sources[d->last_good_index] );
+
+	 /* If there was no good connection last time or the above connect failed then try each host in the list. */
+	 if(!sock)
+           {
+             for(i=0; i < d->num_sources; i++)
+               {
+                 /* Find first viable source in list. */
+                 sock = g_tcp_socket_new ( d->sources[i] );
+                 if( sock )
+                   {
+                     d->last_good_index = i;
+                     break;
+                   }
+               }
+           }
 
          if(!sock)
             {
@@ -80,14 +93,14 @@ data_thread ( void *arg )
                if( rval < 0 )
                   {
                      /* Error */
-                     err_msg("poll() error in data_thread");
+		    err_msg("poll() error in data_thread for [%s] data source after %d bytes read", d->name, read_index);
                      d->dead = 1;
                      goto take_a_break;
                   }
                else if (rval == 0)
                   {
                      /* No revents during timeout period */
-                     err_msg("poll() timeout");
+                     err_msg("poll() timeout for [%s] data source after %d bytes read", d->name, read_index);
                      d->dead = 1;
                      goto take_a_break; 
                   }
@@ -120,19 +133,19 @@ data_thread ( void *arg )
                         }
                      if( struct_poll.revents & POLLHUP )
                         {
-                           err_msg("The remote machine closed connection");
+                           err_msg("The remote machine closed connection for [%s] data source after %d bytes read", d->name, read_index);
                            d->dead = 1;
                            goto take_a_break;
                         }
                      if( struct_poll.revents & POLLERR )
                         {
-                           err_msg("POLLERR!");
+                           err_msg("POLLERR! for [%s] data source after %d bytes read", d->name, read_index);
                            d->dead = 1;
                            goto take_a_break;
                         }
                      if( struct_poll.revents & POLLNVAL )
                         {
-                           err_msg("POLLNVAL!");
+                           err_msg("POLLNVAL! for [%s] data source after %d bytes read", d->name, read_index);
                            d->dead = 1;
                            goto take_a_break;
                         }
@@ -156,6 +169,10 @@ data_thread ( void *arg )
 
        take_a_break:
          g_tcp_socket_delete(sock);
+
+	 /* Don't remember this host if there was a problem */
+	 if(d->dead)
+           d->last_good_index = -1;
 
          gettimeofday(&end, NULL);
          /* Sleep somewhere between (step +/- 5sec.) */
