@@ -104,6 +104,7 @@ typedef struct
       unsigned int num_sources;
       g_inet_addr **sources;
       int dead;
+      int last_good_index;
    }
 data_source_list_t;;
 

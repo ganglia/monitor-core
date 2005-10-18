@@ -117,6 +117,7 @@ static DOTCONF_CB(cb_data_source)
       err_quit("Unable to malloc sources array");
 
    dslist->num_sources = 0;
+   dslist->last_good_index = -1;
 
    for ( ; i< cmd->arg_count; i++)
       {
