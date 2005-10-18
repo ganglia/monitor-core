@@ -32,6 +32,7 @@ struct gengetopt_args_info
   int metrics_flag;	/* Print the list of metrics this gmond supports (default=off).  */
   int bandwidth_flag;	/* Calculate minimum bandwidth use for configuration (default=off).  */
   char * convert_arg;	/* Convert a 2.5.x configuration file to the new 2.6 format.  */
+  char * pid_file_arg;	/* file to write a pid to */
 
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
@@ -43,6 +44,7 @@ struct gengetopt_args_info
   int metrics_given ;	/* Whether metrics was given.  */
   int bandwidth_given ;	/* Whether bandwidth was given.  */
   int convert_given ;	/* Whether convert was given.  */
+  int pid_file_given ;	/* Whether a file for writing a pid to was given.  */
 
 } ;
 

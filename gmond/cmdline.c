@@ -50,6 +50,7 @@ cmdline_parser_print_help (void)
   printf("  -m, --metrics          Print the list of metrics this gmond supports  \n                           (default=off)\n");
   printf("  -b, --bandwidth        Calculate minimum bandwidth use for configuration  \n                           (default=off)\n");
   printf("  -r, --convert=STRING   Convert a 2.5.x configuration file to the new 2.6 \n                           format\n");
+  printf("  -p, --pid-file=STRING  Write process-id to file\n");
 }
 
 
@@ -83,6 +84,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->metrics_given = 0 ;
   args_info->bandwidth_given = 0 ;
   args_info->convert_given = 0 ;
+  args_info->pid_file_given = 0 ;
 #define clear_args() { \
   args_info->conf_arg = gengetopt_strdup("/etc/gmond.conf") ;\
   args_info->location_arg = gengetopt_strdup("0,0,0") ;\
@@ -92,6 +94,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->metrics_flag = 0;\
   args_info->bandwidth_flag = 0;\
   args_info->convert_arg = NULL; \
+  args_info->pid_file_arg = NULL; \
 }
 
   clear_args();
@@ -117,11 +120,12 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "metrics",	0, NULL, 'm' },
         { "bandwidth",	0, NULL, 'b' },
         { "convert",	1, NULL, 'r' },
+        { "pid-file",	1, NULL, 'p' },
         { NULL,	0, NULL, 0 }
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVc:l:d:ftmbr:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVc:l:d:ftmbr:p:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -229,6 +233,17 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           args_info->convert_arg = gengetopt_strdup (optarg);
           break;
 
+        case 'p':  /* store this process's pid to a file */
+
+	  if (args_info->pid_file_given)
+	    {
+              fprintf (stderr, "%s: `--pid-file' (`-p') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+	      clear_args ();
+	      exit (EXIT_FAILURE);
+	    }
+	  args_info->pid_file_given = 1;
+          args_info->pid_file_arg = gengetopt_strdup (optarg);
+	  break;
 
         case 0:	/* Long option with no short option */
 

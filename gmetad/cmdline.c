@@ -52,6 +52,7 @@ cmdline_parser_print_help (void)
   printf("   -V         --version      Print version and exit\n");
   printf("   -cSTRING   --conf=STRING  Location of gmetad configuration file (default='/etc/gmetad.conf')\n");
   printf("   -dINT      --debug=INT    Debug level. If greater than zero, daemon will stay in foreground. (default=0)\n");
+  printf("   -p         --pid-file=STRING  Write process-id to file\n");
 }
 
 
@@ -79,9 +80,11 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->version_given = 0 ;
   args_info->conf_given = 0 ;
   args_info->debug_given = 0 ;
+  args_info->pid_file_given = 0 ;
 #define clear_args() { \
   args_info->conf_arg = strdup("/etc/gmetad.conf") ;\
   args_info->debug_arg = 0 ;\
+  args_info->pid_file_arg = NULL ; \
 }
 
   clear_args();
@@ -99,10 +102,11 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "version",	0, NULL, 'V' },
         { "conf",	1, NULL, 'c' },
         { "debug",	1, NULL, 'd' },
+        { "pid-file",	1, NULL, 'p' },
         { NULL,	0, NULL, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVc:d:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVc:d:p:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -140,6 +144,17 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
           args_info->debug_arg = atoi (optarg);
           break;
 
+        case 'p':  /* store this process's pid to a file */
+
+	  if (args_info->pid_file_given)
+	    {
+              fprintf (stderr, "%s: `--pid-file' (`-p') option given more than once\n", PACKAGE);
+	      clear_args ();
+	      exit (EXIT_FAILURE);
+	    }
+	  args_info->pid_file_given = 1;
+          args_info->pid_file_arg = strdup (optarg);
+	  break;
 
         case 0:	/* Long option with no short option */
 
