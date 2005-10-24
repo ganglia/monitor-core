@@ -10,7 +10,7 @@ Gmetad Web Backend <i>({webbackend-component})</i> version {webbackend-version}
 version={webbackend-version}">Check for Updates.</A><BR>
 
 Downloading and parsing ganglia's XML tree took {parsetime}.<BR>
-Images created with <A HREF="http://www.rrdtool.com/">RRDTool</A>.<BR>
+Images created with <A HREF="http://www.rrdtool.org/">RRDTool</A>.<BR>
 </FONT>
 </CENTER>
 
