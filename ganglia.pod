@@ -134,7 +134,7 @@ problems with ganglia this is a core issue.
 
 =item B<Gmetad is not installed by default>
 
-Since C<gmetad> relies on the Round-Robin Database Tool ( see http://www.rrdtool.com/ )
+Since C<gmetad> relies on the Round-Robin Database Tool ( see http://www.rrdtool.org/ )
 it will not be compiled unless you explicit request it by using a B<--with-gmetad> flag.
 
   % ./configure --with-gmetad
