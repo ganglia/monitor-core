@@ -11,7 +11,7 @@ void libmetrics_init( void );
 #endif
 
 #include <sys/types.h>
-#include <rpc/types.h>
+#include <rpc/rpc.h>
 
 
 #ifdef  HAVE_STDLIB_H

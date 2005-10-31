@@ -9,6 +9,7 @@
  *
  */
 
+#include <stdlib.h>
 #include "interface.h"
 #include <kvm.h>
 #include <sys/sysctl.h>
