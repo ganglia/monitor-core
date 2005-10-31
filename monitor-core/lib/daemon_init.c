@@ -27,6 +27,7 @@ void
 update_pidfile (char *pidfile)
 {
   pid_t pid;
+  mode_t prev_umask;
   FILE *file;
 
   /* make sure this program isn't already running. */
@@ -43,7 +44,7 @@ update_pidfile (char *pidfile)
     }
 
   /* write the pid of this process to the pidfile */
-  umask(0112);
+  prev_umask = umask (0112);
   unlink(pidfile);
 
   file = fopen (pidfile, "w");
@@ -55,6 +56,7 @@ update_pidfile (char *pidfile)
     }
   fprintf (file, "%d\n", (int) getpid());
   fclose (file);
+  umask (prev_umask);
 }
 
 
