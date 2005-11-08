@@ -391,6 +391,22 @@ collection_group { \n\
    value_threshold = 1.0 \n\
   } \n\
   metric { \n\
+    name = \"bread_sec\" \n\
+    value_threshold = 1.0 \n\
+  } \n\
+  metric { \n\
+    name = \"bwrite_sec\" \n\
+    value_threshold = 1.0 \n\
+  }\n\
+  metric { \n\
+    name = \"lread_sec\" \n\
+    value_threshold = 1.0 \n\
+  } \n\
+  metric { \n\
+    name = \"lwrite_sec\" \n\
+    value_threshold = 1.0 \n\
+  }\n\
+  metric { \n\
     name = \"phread_sec\" \n\
     value_threshold = 1.0 \n\
   } \n\
