@@ -152,5 +152,8 @@ uninstall:
 	  cd $$dir; $(MAKE) uninstall; cd ..; \
 	done
 
+check:
+	echo "Don't know how to check things!!!"
+
 depend:
 	echo SOMEONE SHOULD MAKE THIS DO SOMETHING!!!
