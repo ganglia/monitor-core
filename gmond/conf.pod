@@ -134,7 +134,7 @@ the limitations of memory and file descriptors.  If B<gmond> is configured
 as B<mute> this section will be ignored.
 
 The B<udp_send_channel> has a total of five attributes: B<mcast_join>,
-B<mcast_if>, B<host> and B<port>.
+B<mcast_if>, B<host>, B<port> and B<ttl>.
 
 For example, the 2.5.x version gmond would send on the following single channel
 by default...
@@ -155,14 +155,14 @@ for redundancy as B<gmond> will send UDP messages to all UDP channels.
 For example...
 
   udp_send_channel {
-    host = 192.168.3.4
-    port = 2344
-  }
-  udp_send_channel {
     host = host.foo.com
     port = 2389
   }
- 
+  udp_send_channel {
+    host = 192.168.3.4
+    port = 2344
+  }
+
 would configure gmond to send messages to two hosts.  The B<host> specification
 can be an IPv4/IPv6 address or a resolvable hostname.
 
