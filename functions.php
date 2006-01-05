@@ -116,17 +116,19 @@ function cluster_min($name, $metrics)
 # load. Scope is "node | cluster | grid". Value is 0 <= v <= 1.
 function load_image ($scope, $value)
 {
+   global $load_scale;
 
-   if ($value>1.00) {
+   $scaled_load = $value / $load_scale;
+   if ($scaled_load>1.00) {
       $image = template("images/${scope}_overloaded.jpg");
    }
-   else if ($value>=0.75) {
+   else if ($scaled_load>=0.75) {
       $image = template("images/${scope}_75-100.jpg");
    }
-   else if ($value >= 0.50) {
+   else if ($scaled_load >= 0.50) {
       $image = template("images/${scope}_50-74.jpg");
    }
-   else if ($value>=0.25) {
+   else if ($scaled_load>=0.25) {
       $image = template("images/${scope}_25-49.jpg");
    }
    else {
@@ -142,20 +144,22 @@ function load_image ($scope, $value)
 function load_color ($value)
 {
    global $load_colors;
+   global $load_scale;
 
-   if ($value>1.00) {
+   $scaled_load = $value / $load_scale;
+   if ($scaled_load>1.00) {
       $color = $load_colors["100+"];
    }
-   else if ($value>=0.75) {
+   else if ($scaled_load>=0.75) {
       $color = $load_colors["75-100"];
    }
-   else if ($value >= 0.50) {
+   else if ($scaled_load >= 0.50) {
       $color = $load_colors["50-75"];
    }
-   else if ($value>=0.25) {
+   else if ($scaled_load>=0.25) {
       $color = $load_colors["25-50"];
    }
-   else if ($value < 0.0)
+   else if ($scaled_load < 0.0)
       $color = $load_colors["down"];
    else {
       $color = $load_colors["0-25"];

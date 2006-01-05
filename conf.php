@@ -101,6 +101,10 @@ $load_colors = array(
    "down" => "515151"
 );
 
+#
+# Load scaling
+#
+$load_scale = 1.0;
 
 #
 # Default color for single metric graphs
