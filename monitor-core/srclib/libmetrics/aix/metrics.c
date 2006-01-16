@@ -21,6 +21,8 @@
  *  Some code fragments of the network statistics are "borowed" from  
  *  the Solaris Metrics   
  *
+ *  Fix proc_total, proc_run, swap_free and swap_total. Implement mem_cached (MKN, 16-Jan-2006)
+ *
  */
 
 #include "interface.h"
@@ -463,10 +465,100 @@ cpu_num_func ( void )
 {
    g_val_t val;
 
+   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
    val.uint16 =  cpu_total_buffer.ncpus;
    return val;
 }
 
+#define MAXPROCS 20
+/*
+** Theese Missing prototypes have caused me an afternoon of real grief !!!
+*/
+int getprocs64 (struct procentry64 *ProcessBuffer, int ProcessSize, 
+                struct fdsinfo64 *FileBuffer, int FileSize,
+                pid_t *IndexPointer, int Count);
+int getthrds64 (pid_t ProcessIdentifier, struct thrdentry64 *ThreadBuffer,
+            int  ThreadSize, tid64_t *IndexPointer, int Count);
+
+/*
+** count_threads(pid) finds all runnable threads belonging to
+** process==pid. We do not count threads with the TFUNNELLED
+** flag set, as they do not seem to count against the load
+** averages (pure WOODOO, also known as "heuristics" :-)
+*/
+int count_threads(pid_t pid) {
+
+  struct thrdentry64 ThreadsBuffer[MAXPROCS];
+  tid64_t IndexPointer = 0;
+  int stat_val;
+  int nth = 0; 
+  int i;
+  
+  while ((stat_val = getthrds64(pid,
+			      ThreadsBuffer,
+			      sizeof(struct thrdentry64),
+			      &IndexPointer,
+			      MAXPROCS )) > 0 ) 
+    
+    {
+      for ( i=0; i<stat_val; i++) {
+        /*
+        ** Do not count FUNNELED threads, as they do not seem to
+        ** be counted in loadavg.
+        */
+        if (ThreadsBuffer[i].ti_flag & TFUNNELLED) continue;
+	if(ThreadsBuffer[i].ti_state == TSRUN) {
+          /*fprintf(stderr,"i=%d pid=%d tid=%lld state=%x flags=%x\n",i,ThreadsBuffer[i].ti_pid,
+			ThreadsBuffer[i].ti_tid,ThreadsBuffer[i].ti_state,
+			ThreadsBuffer[i].ti_flag);*/
+          nth++;
+        }
+      }
+      if (stat_val < MAXPROCS) break;
+    }       
+  return nth;
+}
+
+/*
+** count_procs() computes the number of processes as shown in "ps -A".
+**    Pass 0 as flag if you want to get a list of all processes.
+**    Pass 1 if you want to get a list of all processes with
+**    runnable threads.
+*/
+int count_procs(int flag) {
+
+  struct procentry64 ProcessBuffer[MAXPROCS];
+  pid_t IndexPointer = 0;
+  int np = 0; 
+  int stat_val;
+  int i;
+  
+  while ((stat_val = getprocs64(
+			      &ProcessBuffer[0],
+			      sizeof(struct procentry64),
+			      NULL,
+			      sizeof(struct fdsinfo64),
+			      &IndexPointer,
+			      MAXPROCS )) > 0 ) 
+    
+    {
+      for ( i=0; i<stat_val; i++) {
+        if(flag != 0) {
+          /*fprintf(stderr,"i=%d pid=%d state=%x flags=%x flags2=%x thcount=%d\n",i,
+				ProcessBuffer[i].pi_pid,ProcessBuffer[i].pi_state,
+				ProcessBuffer[i].pi_flags,ProcessBuffer[i].pi_flags2,
+				ProcessBuffer[i].pi_thcount);*/
+	  np += count_threads(ProcessBuffer[i].pi_pid);
+        }
+        else {
+          np++;
+        }
+      }
+      if (stat_val < MAXPROCS) break;
+    }       
+	
+  return np;
+}
 
 
 g_val_t
@@ -474,7 +566,7 @@ proc_total_func ( void )
 {
   g_val_t foo;
  
-  foo.uint32 = cpu_total_buffer.ncpus;
+  foo.uint32 = count_procs(0);
  
   return foo;
 }
@@ -485,8 +577,7 @@ proc_run_func( void )
 {
   g_val_t val;
 
-  perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
-  val.uint32 = cpu_total_buffer.ncpus_cfg;
+  val.uint32 = count_procs(1);
 
  
   return val;
@@ -538,7 +629,10 @@ g_val_t
 mem_cached_func ( void )
 {
    g_val_t val;
-   val.uint32 = 0;
+
+   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
+   
+   val.uint32 = minfo.numperm*MEM_PAGESIZE;
    return val;
 }
 
@@ -549,7 +643,7 @@ swap_total_func ( void )
 
    perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
    
-   val.uint32 =minfo.pgsp_total ;
+   val.uint32 =minfo.pgsp_total*MEM_PAGESIZE;
    return val;
    
 }
@@ -560,7 +654,7 @@ swap_free_func ( void )
    g_val_t val;
    perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
    
-   val.uint32 =minfo.pgsp_free;
+   val.uint32 =minfo.pgsp_free*MEM_PAGESIZE;
 
    return val;
 }
