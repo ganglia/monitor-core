@@ -979,6 +979,9 @@ mem_shared_func ( void )
    char *p;
    g_val_t val;
 
+   /*
+   ** Broken since linux-2.5.52 when Memshared was removed !!
+   */
    p = strstr( update_file(&proc_meminfo), "MemShared:" );
    if (p) {
       p = skip_token(p);
