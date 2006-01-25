@@ -696,6 +696,23 @@ Ganglia_gmetric_destroy( Ganglia_gmetric gmetric )
 }
 
 
+int
+check_value( char *type, char* value)
+{
+char *tail;
+int ret=1;
+
+  if (strcmp(type,"float")||strcmp(type,"double"))
+    strtod(value,&tail);
+  else
+    strtol(value,&tail,10);
+
+  if(strlen(tail)==0)
+    ret=0;
+
+  return ret;
+}
+
 /*
  * struct Ganglia_gmetric_message {
  *   char *type;
@@ -726,6 +743,14 @@ Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *typ
      !strcmp(type,"uint32")||!strcmp(type,"float")||!strcmp(type,"double")))
     {
       return 3;
+    }
+
+  /* Make sure we have a number for (int8|uint8|int16|uint16|int32|uint32|float|double)*/
+  if(strcmp(type,"int8")||strcmp(type,"uint8")||
+     strcmp(type,"int16")||strcmp(type,"uint16")||strcmp(type,"int32")||
+     strcmp(type,"uint32")||strcmp(type,"float")||strcmp(type,"double"))
+    {
+      if(check_value(type,value)) return 4;
     }
 
   /* All the data is there and validated... copy it into the structure */
