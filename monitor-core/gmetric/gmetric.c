@@ -64,7 +64,10 @@ main( int argc, char *argv[] )
       fprintf(stderr,"one of your parameters has an invalid character '\"'. exiting.\n");
       exit(1);
     case 3:
-      fprintf(stderr,"the type parameter, %s, is not a valid type. exiting.\n", args_info.type_arg);
+      fprintf(stderr,"the type parameter \"%s\" is not a valid type. exiting.\n", args_info.type_arg);
+      exit(1);
+    case 4:
+      fprintf(stderr,"the value parameter \"%s\" does not represent a number. exiting.\n", args_info.value_arg);
       exit(1);
     }
 
