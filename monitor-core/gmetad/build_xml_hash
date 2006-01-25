@@ -1,2 +1,0 @@
-#!/bin/sh
-gperf -l -H xml_hash -t -F ', 0' -N in_xml_list -k 1,$ -W xml_tags ./xml_hash.gperf > xml_hash.c
