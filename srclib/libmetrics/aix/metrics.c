@@ -557,6 +557,11 @@ int count_procs(int flag) {
       if (stat_val < MAXPROCS) break;
     }       
 	
+/*
+** Reduce by one to make proc_run more Linux "compliant".
+*/
+  if ((flag != 0) && (np > 0)) np--;
+
   return np;
 }
 
