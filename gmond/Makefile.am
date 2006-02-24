@@ -1,6 +1,6 @@
 SUBDIRS = gstat
 
-EXTRA_DIST = gmond.init gmond.conf.5 gmond.conf.html conf.pod
+EXTRA_DIST = gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
 
 AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/srclib/libmetrics/ -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/confuse/src/
 
