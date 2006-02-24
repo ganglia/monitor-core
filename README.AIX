@@ -9,8 +9,19 @@ Installation
 
 You still need some "tricks" to use ganglia on a AIX system:
 
-1. You have to use "gcc". xlc won't work. It might be possible to use gcc to
-   compile "./srclib/confuse" and xlc for the rest, but it's not tested.
+1. You should use "gcc". xlc does not work out of the box. If you only have
+   "xlc", the following might work. Run configure first !!
+
+   a) add "-qlanglvl=ext99" to the CFLAGS in srclib/confuse/src/Makefile
+   b) remove "-Wall" from all Makefiles, especially:
+
+     lib/Makefile
+     gmond/gstat/Makefile
+     gmond/Makefile
+     gmetric/Makefile
+     gmetad/Makefile  (still does not build :-(
+
+   This should be done automatically, but automake/autoconf experts are needed.
 
 2. The AIX-Version should not be compiled with shared libraries
         You must add the "--disable-shared" and "--enable-static" configure
@@ -26,15 +37,15 @@ Known problems and Limitations
    (Will be fixed soon, but might not make it in ganglia-3.0.2)
 
  - The following standard metrics are _not_ reported (reported as 0):
-   mem_cached, mem_buffers, mem_shared, part_max_used(+), cpu_sintr
+   mem_buffers (-), mem_shared (-), part_max_used(+), cpu_sintr
    (--), cpu_intr (--), cpu_aidle (+),   cpu_nice (-)
 
    (--) cpu_nice, cpu_intr and  cpu_sintr:
         There is no way to include this metric, because AIX
         dose not know anything about them
 	
-   (-)  mem_cached, mem_buffers and mem_shared: libperfstat does not
-        report this informatin, but maybe somebody knows another way.
+   (-)  mem_buffers and mem_shared: libperfstat does not report
+        his information, but maybe somebody knows another way.
 
    (+)  part_max_used and cpu_aidle: it's quite easy to do this
 	metrics as well using libperfstat, but no body has written
