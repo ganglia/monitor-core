@@ -17,7 +17,7 @@ SUBDIRS = srclib $(GANGLIA_SUBDIRS)
 # that the gmetad directory gets distributed
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS) gmetad
 
-EXTRA_DIST = config ganglia.spec ganglia.pod ganglia.html mans
+EXTRA_DIST = README.AIX config ganglia.spec ganglia.pod ganglia.html mans
 
 ganglia.sub: ganglia.pod
 	sed -e 's/GANGLIA_VERSION/@VERSION@/' < $(srcdir)/ganglia.pod > ganglia.sub
