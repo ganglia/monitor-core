@@ -16,6 +16,9 @@
 #define OSNAME_LEN strlen(OSNAME)
 
 /* Never changes */
+#ifndef BUFFSIZE
+#define BUFFSIZE 8192
+#endif
 char proc_cpuinfo[BUFFSIZE];
 char proc_sys_kernel_osrelease[BUFFSIZE];
 
