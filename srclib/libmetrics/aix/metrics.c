@@ -266,9 +266,9 @@ cpu_user_func ( void )
 
 
 /*
-** AIX dosen't not that 
+** AIX does not have this
+** FIXME -- 
 */
-
 g_val_t
 cpu_nice_func ( void )
 {
@@ -316,7 +316,8 @@ cpu_idle_func ( void )
 }
 
 /*
-** AIX dosen't not that 
+** AIX does not have this
+** FIXME -- 
 */
 g_val_t 
 cpu_aidle_func ( void )
@@ -328,6 +329,7 @@ cpu_aidle_func ( void )
 
 /*
 ** Don't know what it is 
+** FIXME -- 
 */
 g_val_t 
 cpu_intr_func ( void )
@@ -613,6 +615,10 @@ mem_free_func ( void )
    return val;
 }
 
+/*
+** AIX does not have this
+** FIXME --
+*/
 g_val_t
 mem_shared_func ( void )
 {
@@ -622,6 +628,10 @@ mem_shared_func ( void )
    return val;
 }
 
+/*
+** AIX does not have this
+** FIXME --
+*/
 g_val_t
 mem_buffers_func ( void )
 {
