@@ -7,12 +7,13 @@ GMETAD_SUBDIR =
 endif
 
 GANGLIA_SUBDIRS = lib tests $(GMETAD_SUBDIR) gmond gmetric
+GANGLIA_SUBDIRS1 = lib srclib tests $(GMETAD_SUBDIR) gmond gmetric
 
 AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-shar dist-zip
 
 # Make sure we run the srclib but don't distribute it.  That
 # is handled in the "dist-hook" below...
-SUBDIRS = srclib $(GANGLIA_SUBDIRS)
+SUBDIRS = $(GANGLIA_SUBDIRS1)
 # Make sure that no matter the setting for --with-gmetad
 # that the gmetad directory gets distributed
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS) gmetad
