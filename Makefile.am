@@ -6,17 +6,16 @@ else
 GMETAD_SUBDIR = 
 endif
 
-GANGLIA_SUBDIRS = lib tests $(GMETAD_SUBDIR) gmond gmetric
-GANGLIA_SUBDIRS1 = lib srclib tests $(GMETAD_SUBDIR) gmond gmetric
-
 AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-shar dist-zip
 
 # Make sure we run the srclib but don't distribute it.  That
 # is handled in the "dist-hook" below...
-SUBDIRS = $(GANGLIA_SUBDIRS1)
+GANGLIA_SUBDIRS = lib srclib tests $(GMETAD_SUBDIR) gmond gmetric
+SUBDIRS = $(GANGLIA_SUBDIRS)
 # Make sure that no matter the setting for --with-gmetad
 # that the gmetad directory gets distributed
-DIST_SUBDIRS = $(GANGLIA_SUBDIRS) gmetad
+GANGLIA_SUBDIRS_DIST = lib tests gmetad gmond gmetric
+DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
 EXTRA_DIST = README.AIX config ganglia.spec ganglia.pod ganglia.html mans
 
@@ -55,9 +54,21 @@ dist-hook:
 	  tar -c --exclude=".libs" --exclude "core.*" --exclude="*CVS" \
 	  --exclude="*.o"  --exclude="*.lo" \
 	  --exclude="*.la" --exclude=".deps" \
-	  --exclude="*.tar.gz" \
+	  --exclude="Makefile" --exclude="libtool" \
+	  --exclude="web/version.php" --exclude="config.h" \
+	  --exclude="*.spec" --exclude="stamp-h1" --exclude="*-config" \
+	  --exclude="autom4te.cache" --exclude="test-metrics" \
+	  --exclude="*.tar.gz" --exclude="config.status" \
+	  --exclude="config.log" --exclude="config.cache" \
+	  --exclude="configure.lineno" --exclude="configure.status.lineno" \
 	  -f - $$subdir | (cd $(distdir) && tar -xf -)\
 	done;
-	find $(distir) -exec touch -r $(distdir)/Makefile.am {} \;
+	find $(distdir) -exec touch -r $(distdir)/Makefile.am {} \;
 
+#
+# Make sure distclean ist done in the scrlib tree
+#
+distclean-local:
+	cd srclib &&  $(MAKE) $(AM_MAKEFLAGS) distclean
+#
 bin_SCRIPTS = ganglia-config
