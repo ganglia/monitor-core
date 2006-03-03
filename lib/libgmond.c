@@ -674,16 +674,20 @@ Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_ch
 {
   int len;
   XDR x;
-  char gmetricmsg[1500];
+  char gmetricmsg[MAX_GMETRIC_MESSAGE_LEN];
   Ganglia_message msg;
 
   msg.id = 0;
   memcpy( &(msg.Ganglia_message_u.gmetric), gmetric->msg, sizeof(Ganglia_gmetric_message));
 
-  /* Send the message */
-  xdrmem_create(&x, gmetricmsg, 1500, XDR_ENCODE);
-  xdr_Ganglia_message(&x, &msg);
+  /* Create a memory buffer... */
+  xdrmem_create(&x, gmetricmsg, MAX_GMETRIC_MESSAGE_LEN, XDR_ENCODE);
+  /* Encode the message into the buffer... */
+  if(!xdr_Ganglia_message(&x, &msg)){
+	  return 1;
+  }
   len = xdr_getpos(&x); 
+  /* Send the encoded data along...*/
   return Ganglia_udp_send_message( send_channels, gmetricmsg, len);
 }
 
@@ -753,11 +757,27 @@ Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *typ
       if(check_value(type,value)) return 4;
     }
 
+  if( strlen(name) >= MAX_GMETRIC_NAME_LEN ){
+	  return 5;
+  }
+  if( strlen(value) >= MAX_GMETRIC_VALUE_LEN){
+	  return 6;
+  }
+  if( strlen(type) >= MAX_GMETRIC_TYPE_LEN){
+	  return 7;
+  }
+  if( strlen(units) >= MAX_GMETRIC_UNITS_LEN){
+	  return 8;
+  }
+
   /* All the data is there and validated... copy it into the structure */
-  gmetric->msg->name = apr_pstrdup( gmetric->pool, name);
-  gmetric->msg->value = apr_pstrdup( gmetric->pool, value);
-  gmetric->msg->type  = apr_pstrdup( gmetric->pool, type);
-  gmetric->msg->units = apr_pstrdup( gmetric->pool, units);
+  gmetric->msg->name = apr_pstrndup( gmetric->pool, name, MAX_GMETRIC_NAME_LEN);
+  gmetric->msg->value = apr_pstrndup( gmetric->pool, value,
+		  MAX_GMETRIC_VALUE_LEN);
+  gmetric->msg->type  = apr_pstrndup( gmetric->pool, type,
+		  MAX_GMETRIC_TYPE_LEN);
+  gmetric->msg->units = apr_pstrndup( gmetric->pool, units,
+		  MAX_GMETRIC_UNITS_LEN);
   gmetric->msg->slope = slope;
   gmetric->msg->tmax = tmax;
   gmetric->msg->dmax = dmax;

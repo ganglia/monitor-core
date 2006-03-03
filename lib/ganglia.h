@@ -23,14 +23,6 @@
 #endif
 #endif
 
-/* 
- * Max multicast message: 1500 bytes (Ethernet max frame size)
- * minus 20 bytes for IPv4 header, minus 8 bytes for UDP header.
- */
-#ifndef MAX_MCAST_MSG
-#define MAX_MCAST_MSG 1472
-#endif
-
 /* For C++ */
 #ifdef __cplusplus
 #define BEGIN_C_DECLS extern "C" {

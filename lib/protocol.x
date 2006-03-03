@@ -1,4 +1,13 @@
+#define GANGLIA_MTU     1500
 #define UDP_HEADER_SIZE 28
+
+/* These MAX_GMETRIC_ defines should add up to
+   no more than GANGLIA_MTU - UDP_HEADER_SIZE - 16 (1456) */
+#define MAX_GMETRIC_XDR_TYPE_LEN 12
+#define MAX_GMETRIC_XDR_NAME_LEN 36
+#define MAX_GMETRIC_XDR_VALUE_LEN 1396
+#define MAX_GMETRIC_XDR_UNITS_LEN 12
+#define MAX_GMETRIC_XDR_MESSAGE_LEN (MAX_GMETRIC_XDR_TYPE_LEN + MAX_GMETRIC_XDR_NAME_LEN + MAX_GMETRIC_XDR_VALUE_LEN + MAX_GMETRIC_XDR_UNITS_LEN + 16)
 
 enum Ganglia_value_types {
   GANGLIA_VALUE_UNKNOWN,
@@ -11,11 +20,24 @@ enum Ganglia_value_types {
   GANGLIA_VALUE_DOUBLE
 };
 
+/* We have replaced this gmetric message definition in
+ * order to prevent xdr buffer overruns (no security problem but
+ * it used to corrupt data).. -matt 
 struct Ganglia_gmetric_message {
   string type<>;
   string name<>;
   string value<>;
   string units<>;
+  unsigned int slope;
+  unsigned int tmax;
+  unsigned int dmax;
+};
+*/
+struct Ganglia_gmetric_message {
+  string type<MAX_GMETRIC_XDR_TYPE_LEN>;
+  string name<MAX_GMETRIC_XDR_NAME_LEN>;
+  string value<MAX_GMETRIC_XDR_VALUE_LEN>;
+  string units<MAX_GMETRIC_XDR_UNITS_LEN>;
   unsigned int slope;
   unsigned int tmax;
   unsigned int dmax;
@@ -173,6 +195,11 @@ struct Ganglia_25metric
 };
 
 #ifdef RPC_HDR
+% #define MAX_GMETRIC_MESSAGE_LEN MAX_GMETRIC_XDR_MESSAGE_LEN
+% #define MAX_GMETRIC_NAME_LEN MAX_GMETRIC_XDR_NAME_LEN
+% #define MAX_GMETRIC_TYPE_LEN MAX_GMETRIC_XDR_TYPE_LEN
+% #define MAX_GMETRIC_UNITS_LEN MAX_GMETRIC_XDR_UNITS_LEN
+% #define MAX_GMETRIC_VALUE_LEN MAX_GMETRIC_XDR_VALUE_LEN
 % Ganglia_25metric *Ganglia_25metric_bykey( int key );
 % Ganglia_25metric *Ganglia_25metric_byname( char *name );
 #endif
