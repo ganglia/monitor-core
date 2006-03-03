@@ -756,27 +756,11 @@ Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *typ
       if(check_value(type,value)) return 4;
     }
 
-  if( strlen(name) >= MAX_GMETRIC_NAME_LEN ){
-	  return 5;
-  }
-  if( strlen(value) >= MAX_GMETRIC_VALUE_LEN){
-	  return 6;
-  }
-  if( strlen(type) >= MAX_GMETRIC_TYPE_LEN){
-	  return 7;
-  }
-  if( strlen(units) >= MAX_GMETRIC_UNITS_LEN){
-	  return 8;
-  }
-
   /* All the data is there and validated... copy it into the structure */
-  gmetric->msg->name = apr_pstrndup( gmetric->pool, name, MAX_GMETRIC_NAME_LEN);
-  gmetric->msg->value = apr_pstrndup( gmetric->pool, value,
-		  MAX_GMETRIC_VALUE_LEN);
-  gmetric->msg->type  = apr_pstrndup( gmetric->pool, type,
-		  MAX_GMETRIC_TYPE_LEN);
-  gmetric->msg->units = apr_pstrndup( gmetric->pool, units,
-		  MAX_GMETRIC_UNITS_LEN);
+  gmetric->msg->name = apr_pstrdup( gmetric->pool, name);
+  gmetric->msg->value = apr_pstrdup( gmetric->pool, value);
+  gmetric->msg->type  = apr_pstrdup( gmetric->pool, type);
+  gmetric->msg->units = apr_pstrdup( gmetric->pool, units);
   gmetric->msg->slope = slope;
   gmetric->msg->tmax = tmax;
   gmetric->msg->dmax = dmax;
