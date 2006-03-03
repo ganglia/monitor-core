@@ -674,15 +674,14 @@ Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_ch
 {
   int len;
   XDR x;
-  char gmetricmsg[MAX_GMETRIC_MESSAGE_LEN];
+  char gmetricmsg[GANGLIA_MAX_MESSAGE_LEN];
   Ganglia_message msg;
 
   msg.id = 0;
   memcpy( &(msg.Ganglia_message_u.gmetric), gmetric->msg, sizeof(Ganglia_gmetric_message));
 
-  /* Create a memory buffer... */
-  xdrmem_create(&x, gmetricmsg, MAX_GMETRIC_MESSAGE_LEN, XDR_ENCODE);
-  /* Encode the message into the buffer... */
+  /* Send the message */
+  xdrmem_create(&x, gmetricmsg, GANGLIA_MAX_MESSAGE_LEN, XDR_ENCODE);
   if(!xdr_Ganglia_message(&x, &msg)){
 	  return 1;
   }
