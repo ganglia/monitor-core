@@ -112,6 +112,10 @@ class piechart
     ** Initialize the object and draw the pie. This would be the
     ** constructor in an ordinary OO scenario -- just that we haven't
     ** got constructors in PHP, now do we? ;-)
+    **
+    ** RB 09.03.2006:
+    **   - rearranged: please use indentation to seperate if/for blocks/statements!
+    **   - modified to use draw_slices in stead of draw_slice
     */
     function init ($w, $h, $d) {
       $this->im= ImageCreate($w, $h);
@@ -127,34 +131,24 @@ class piechart
       $this->fy = array(0, 7,8,10,14,11);
       /* decide the diameter of the pie */
       if ($this->da_height > $this->da_width) {
-      $this->diameter = $this->da_width;
+        $this->diameter = $this->da_width;
       } else {
-      $this->diameter = $this->da_height;
+        $this->diameter = $this->da_height;
       }
       $this->white = ImageColorAllocate($this->im, 255, 255, 255);
       $this->black = ImageColorAllocate($this->im,0,0,0);
       $n = count($this->data);
       for ($i = 0; $i < $n; $i++) {
-      $this->colors[$i] = ImageColorAllocate($this->im, $this->data[$i][2],
-      $this->data[$i][3],
-      $this->data[$i][4]);
-      $this->sum += $this->data[$i][0];
+        $this->colors[$i] = ImageColorAllocate($this->im, $this->data[$i][2],
+	      $this->data[$i][3],
+	      $this->data[$i][4]);
+        $this->sum += $this->data[$i][0];
       }
       $from = 0;$to = 0;
       for ($i = 0; $i < $n; $i++) {
-      $this->angles[$i] = $this->roundoff(($this->data[$i][0] * 360)
-      / doubleval($this->sum));
-      $to = $from + $this->angles[$i];
-      $col = $this->colors[$i];
-
-      $foo = $this->angles[$i];
-      $this->draw_slice($this->center_x,
-      $this->center_y,
-      $from, 
-      $to,
-      $this->colors[$i]);
-      $from += $this->angles[$i];
+        $this->angles[$i] = $this->roundoff( ($this->data[$i][0] * 360) / doubleval($this->sum));
       }
+      $this->draw_slices( $this->center_x, $this->center_y, $this->angles, $this->colors );
     }
     /* }}} */
     /* {{{ set_legend_percent */
@@ -264,33 +258,66 @@ class piechart
       }
     }
     /* }}} */
-    /* {{{ draw_slice */
+    /* {{{ draw_slices */
     /*
-    ** This function draws a piece of pie centered at x,y starting at
+    ** This function draws pieces of pie centered at x,y starting at
     ** "from" degrees and ending at "to" degrees using the specified color.
+    **
+    ** RB 09.03.2006:
+    **  - fixed: ImageFill for pie slices broke when a very small pie was drawn,
+    **           and filled entire image with color (orange background color).
+    **  - modified draw_slice to be draw_slices and added 3D effect ;)
     */
-    function draw_slice ($x, $y, $from, $to, $color) {
-      # Awful Kludge!!!
-      if ($to > 360) {
-      $to = 360;
+    function draw_slices( $x, $y, $angles, $colors ) {
+
+      $pie_count = count( $angles );
+      $PIE_THICKNESS = ($this->diameter * 0.075);
+
+      for( $j = ($this->center_y+$PIE_THICKNESS); $j > $this->center_y; $j-- ) {
+
+        $from = 0;
+
+        for( $p = 0; $p < $pie_count; $p++ ) {
+
+          $to = $from + $angles[$p];
+
+          if( $to > 360 )
+            $to = 360;
+
+          $color = $colors[$p];
+          $orig_colors = imageColorsForIndex( $this->im, $color );
+
+          $dark_red = ( $orig_colors['red'] > 30 ) ? $orig_colors['red'] - 30 : $orig_colors['red'];
+          $dark_green = ( $orig_colors['green'] > 30 ) ? $orig_colors['green'] - 30 : $orig_colors['green'];
+          $dark_blue = ( $orig_colors['blue'] > 30 ) ? $orig_colors['blue'] - 30 : $orig_colors['blue'];
+
+          $new_color = ImageColorAllocate( $this->im, $dark_red, $dark_green, $dark_blue );
+        
+          ImageFilledArc( $this->im, $this->center_x, $j, $this->diameter, $this->diameter, $from, $to, $new_color, IMG_ARC_PIE );
+
+          $from += $angles[$p];
+        }
       }
-      ImageArc($this->im, $this->center_x, $this->center_y,
-      $this->diameter, $this->diameter, $from, $to, $color);
-      /* First line */
-      $axy2 = $this->get_xy_factors($from);
-      $ax2 = floor($this->center_x + ($axy2[0] * ($this->diameter /2)));
-      $ay2 = floor($this->center_y + ($axy2[1] * ($this->diameter /2)));
-      ImageLine($this->im, $this->center_x, $this->center_y, $ax2, $ay2, $color);
-      /* Second line */
-      $bxy2 = $this->get_xy_factors($to);
-      $bx2 = ceil($this->center_x + ($bxy2[0] * ($this->diameter /2)));
-      $by2 = ceil($this->center_y + ($bxy2[1] * ($this->diameter /2)));
-      ImageLine($this->im, $this->center_x, $this->center_y, $bx2, $by2, $color);
-      /* decide where to start filling, then fill */
-      $xy2 = $this->get_xy_factors((($to - $from) / 2) + $from);
-      $x2 = floor($this->center_x + ($xy2[0] * ($this->diameter /3)));
-      $y2 = floor($this->center_y + ($xy2[1] * ($this->diameter /3)));
-      ImageFillToBorder($this->im, $x2, $y2, $color, $color);
+   
+      $from = 0;
+  
+      for( $p = 0; $p < $pie_count; $p++ ) {
+
+        $to = $from + $angles[$p];
+        
+        $color = $colors[$p];
+
+        if( $to > 360 )
+          $to = 360;
+
+        if ($to > 360) {
+          $to = 360;
+        }
+
+        ImageFilledArc( $this->im, $this->center_x, $this->center_y, $this->diameter, $this->diameter, $from, $to, $color, IMG_ARC_PIE );
+
+        $from += $angles[$p];
+      }
     }
     /* }}} */
     /* {{{ display */
