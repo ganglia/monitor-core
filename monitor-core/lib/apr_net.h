@@ -22,7 +22,8 @@ apr_socket_t *
 create_mcast_server(apr_pool_t *context, int32_t family, char *mcast_ip, apr_port_t port, char *bind, char *interface);
 
 apr_socket_t *
-create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port, char *bind, char *interface);
+create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port, char
+		*bind, char *interface, int blocking);
 
 
 

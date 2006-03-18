@@ -94,7 +94,8 @@ create_udp_client(apr_pool_t *context, char *host, apr_port_t port)
 }
 
 static apr_socket_t *
-create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t port, char *bind_addr)
+create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t
+		port, char *bind_addr, int blocking)
 {
   apr_sockaddr_t *localsa = NULL;
   apr_socket_t *sock = NULL;
@@ -118,13 +119,15 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t por
   if( stat != APR_SUCCESS )
     return NULL;
 
-  /* Setup to be non-blocking */
-  stat = apr_setsocketopt(sock, APR_SO_NONBLOCK, 1);
-  if (stat != APR_SUCCESS)
-    {
-      apr_socket_close(sock);
-      return NULL;
-    }
+  if(!blocking){
+     /* This is a non-blocking server */
+     stat = apr_setsocketopt(sock, APR_SO_NONBLOCK, 1);
+     if (stat != APR_SUCCESS)
+     {
+           apr_socket_close(sock);
+           return NULL;
+     }
+  }
 
   stat = apr_setsocketopt(sock, APR_SO_REUSEADDR, 1);
   if (stat != APR_SUCCESS)
@@ -166,15 +169,18 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t por
 }
 
 apr_socket_t *
-create_udp_server(apr_pool_t *context, int32_t family, apr_port_t port, char *bind_addr)
+create_udp_server(apr_pool_t *context, int32_t family, apr_port_t port, char
+		*bind_addr)
 {
-  return create_net_server(context, family, SOCK_DGRAM, port, bind_addr);
+  return create_net_server(context, family, SOCK_DGRAM, port, bind_addr, 0);
 }
 
 apr_socket_t *
-create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port, char *bind_addr, char *interface)
+create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port, char
+		*bind_addr, char *interface, int blocking)
 {
-  apr_socket_t *sock = create_net_server(context, family, SOCK_STREAM, port, bind_addr);
+  apr_socket_t *sock = create_net_server(context, family, SOCK_STREAM, port,
+		  bind_addr, blocking);
   if(!sock)
     {
       return NULL;
