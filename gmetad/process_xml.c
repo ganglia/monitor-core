@@ -821,16 +821,16 @@ startElement_GANGLIA_XML(void *data, const char *el, const char **attr)
          if (xt->tag == VERSION_TAG)
             {
                   /* Process the version tag later */
-                  if(! strncmp( attr[i+1], "2.", 2) )
-                  {
-                         debug_msg("[%s] is a 2.x data stream", xmldata->ds->name);
+                  if( strncmp( attr[i+1], "2.5" , 3 ) < 0 )
+                     {
+                         debug_msg("[%s] is a pre-2.5 data stream", xmldata->ds->name);
                          xmldata->old = 1;
-                  }
-		  else
-		  {
-			 debug_msg("[%s] is not a 2.x data stream", xmldata->ds->name);
-			 xmldata->old = 0;
-		  }
+                      }
+                  else
+                     {
+                         debug_msg("[%s] is a 2.5 or later data stream", xmldata->ds->name);
+                         xmldata->old = 0;
+                      }
              }
        } 
    return 0;
