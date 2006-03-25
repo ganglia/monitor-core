@@ -163,19 +163,19 @@ function start_cluster_summary ($parser, $tagname, $attrs)
             preamble($attrs);
             break;
          case "GRID":
-            $self = $attrs[NAME];
+            $self = $attrs['NAME'];
             $grid = $attrs;
          case "CLUSTER":
             $cluster = $attrs;
             break;
          
          case "HOSTS":
-            $cluster[HOSTS_UP] = $attrs[UP];
-            $cluster[HOSTS_DOWN] = $attrs[DOWN];
+            $cluster['HOSTS_UP'] = $attrs['UP'];
+            $cluster['HOSTS_DOWN'] = $attrs['DOWN'];
             break;
             
          case "METRICS":
-            $metrics[$attrs[NAME]] = $attrs;
+            $metrics[$attrs['NAME']] = $attrs;
             break;
             
          default:
