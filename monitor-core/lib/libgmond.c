@@ -749,9 +749,7 @@ Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *typ
     }
 
   /* Make sure we have a number for (int8|uint8|int16|uint16|int32|uint32|float|double)*/
-  if(strcmp(type,"int8")||strcmp(type,"uint8")||
-     strcmp(type,"int16")||strcmp(type,"uint16")||strcmp(type,"int32")||
-     strcmp(type,"uint32")||strcmp(type,"float")||strcmp(type,"double"))
+  if(strcmp(type, "string") != 0)
     {
       if(check_value(type,value)) return 4;
     }
