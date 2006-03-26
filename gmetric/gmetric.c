@@ -68,17 +68,6 @@ main( int argc, char *argv[] )
       exit(1);
     case 4:
       fprintf(stderr,"the value parameter \"%s\" does not represent a number. exiting.\n", args_info.value_arg);
-    case 5:
-      fprintf(stderr,"the name parameter is too long.");
-      exit(1);
-    case 6:
-      fprintf(stderr,"the value parameter is too long.");
-      exit(1);
-    case 7:
-      fprintf(stderr,"the type parameter is too long.");
-      exit(1);
-    case 8:
-      fprintf(stderr,"the units parameter is too long.");
       exit(1);
     }
 
