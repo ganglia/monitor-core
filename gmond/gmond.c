@@ -1051,13 +1051,14 @@ static apr_status_t
 print_host_gmetric( apr_socket_t *client, Ganglia_metric *metric, apr_time_t now )
 {
   apr_size_t len;
-  char metricxml[1024];
+#define GMETRIC_BUFFER_SIZE (GANGLIA_MAX_MESSAGE_LEN + 1024)
+  char metricxml[GMETRIC_BUFFER_SIZE];
   Ganglia_gmetric_message *msg = &(metric->message.Ganglia_message_u.gmetric);
 
   if(!msg)
     return APR_SUCCESS;
 
-  len = apr_snprintf(metricxml, 1024,
+  len = apr_snprintf(metricxml, GMETRIC_BUFFER_SIZE,
           "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" SLOPE=\"%s\" SOURCE=\"gmetric\"/>\n",
            msg->name,
 	   msg->value,
