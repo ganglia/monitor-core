@@ -198,8 +198,16 @@ fi
 %__mkdir -p $RPM_BUILD_ROOT/usr/share/man/man5
 
 ## Move the files into the structure
-%__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
-%__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+if [ -f /etc/SuSE-release ]; then
+   %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init.SuSE $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
+   %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init.SuSE $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+   chmod +x $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
+   chmod +x $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+else
+   %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
+   %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+fi
+
 # We just output the default gmond.conf from gmond using the '-t' flag
 %{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/gmond.conf
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
@@ -263,6 +271,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Fri Feb 25 2006 Bernard Li <bli@bcgsc.ca>
+- Use SuSE specific init scripts if /etc/SuSE-release file exists
 * Fri Dec 10 2004 Matt Massie <massie@cs.berkeley.edu>
 - Updated the spec file for 2.6.0 release
 * Tue Apr 13 2004 Brooks Davis <brooks@one-eyed-alien.net>
