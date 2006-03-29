@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,16 +109,18 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr,
                                                     apr_file_t *child_in,
                                                     apr_file_t *parent_in)
 {
+    apr_status_t rv = APR_SUCCESS;
+
     if (attr->child_in == NULL && attr->parent_in == NULL)
-        apr_file_pipe_create(&attr->child_in, &attr->parent_in, attr->pool);
+        rv = apr_file_pipe_create(&attr->child_in, &attr->parent_in, attr->pool);
+    
+    if (child_in != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->child_in, child_in, attr->pool);
 
-    if (child_in != NULL)
-        apr_file_dup2(attr->child_in, child_in, attr->pool);
+    if (parent_in != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->parent_in, parent_in, attr->pool);
 
-    if (parent_in != NULL)
-        apr_file_dup2(attr->parent_in, parent_in, attr->pool);
-
-    return APR_SUCCESS;
+    return rv;
 }
 
 
@@ -125,16 +128,18 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr,
                                                      apr_file_t *child_out,
                                                      apr_file_t *parent_out)
 {
+    apr_status_t rv = APR_SUCCESS;
+
     if (attr->child_out == NULL && attr->parent_out == NULL)
-        apr_file_pipe_create(&attr->child_out, &attr->parent_out, attr->pool);
+        rv = apr_file_pipe_create(&attr->child_out, &attr->parent_out, attr->pool);
 
-    if (child_out != NULL)
-        apr_file_dup2(attr->child_out, child_out, attr->pool);
+    if (child_out != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->child_out, child_out, attr->pool);
 
-    if (parent_out != NULL)
-        apr_file_dup2(attr->parent_out, parent_out, attr->pool);
+    if (parent_out != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->parent_out, parent_out, attr->pool);
 
-    return APR_SUCCESS;
+    return rv;
 }
 
 
@@ -142,16 +147,18 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
                                                      apr_file_t *child_err,
                                                      apr_file_t *parent_err)
 {
+    apr_status_t rv = APR_SUCCESS;
+
     if (attr->child_err == NULL && attr->parent_err == NULL)
-        apr_file_pipe_create(&attr->child_err, &attr->parent_err, attr->pool);
+        rv = apr_file_pipe_create(&attr->child_err, &attr->parent_err, attr->pool);
 
-    if (child_err != NULL)
-        apr_file_dup2(attr->child_err, child_err, attr->pool);
+    if (child_err != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->child_err, child_err, attr->pool);
 
-    if (parent_err != NULL)
-        apr_file_dup2(attr->parent_err, parent_err, attr->pool);
+    if (parent_err != NULL && rv == APR_SUCCESS)
+        rv = apr_file_dup2(attr->parent_err, parent_err, attr->pool);
 
-    return APR_SUCCESS;
+    return rv;
 }
 
 
@@ -270,6 +277,13 @@ APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
+                                                       apr_int32_t addrspace)
+{
+    /* won't ever be used on this platform, so don't save the flag */
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           const char *progname,
                                           const char * const *args,
@@ -285,7 +299,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
     if (attr->errchk) {
         if (attr->currdir) {
-            if (access(attr->currdir, R_OK|X_OK) == -1) {
+            if (access(attr->currdir, X_OK) == -1) {
                 /* chdir() in child wouldn't have worked */
                 return errno;
             }
@@ -382,7 +396,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             exit(-1);   /* We have big problems, the child should exit. */
         }
 
-        if (attr->cmdtype == APR_SHELLCMD) {
+        if (attr->cmdtype == APR_SHELLCMD ||
+            attr->cmdtype == APR_SHELLCMD_ENV) {
             int onearg_len = 0;
             const char *newargs[4];
 
@@ -433,7 +448,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 apr_proc_detach(APR_PROC_DETACH_DAEMONIZE);
             }
 
-            execve(SHELL_PATH, (char * const *) newargs, (char * const *)env);
+            if (attr->cmdtype == APR_SHELLCMD) {
+                execve(SHELL_PATH, (char * const *) newargs, (char * const *)env);
+            }
+            else {
+                execv(SHELL_PATH, (char * const *)newargs);
+            }
         }
         else if (attr->cmdtype == APR_PROGRAM) {
             if (attr->detached) {

@@ -1,4 +1,5 @@
-/* Copyright  2004 The Apache Software Foundation
+/* Copyright  2004-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +46,9 @@ int _NonAppStart
     const char  **messages
 )
 {
+    WSADATA wsaData;
+    apr_status_t status;
+
     NX_LOCK_INFO_ALLOC(liblock, "Per-Application Data Lock", 0);
 
 #pragma unused(cmdLine)
@@ -57,8 +61,6 @@ int _NonAppStart
 #pragma unused(messageCount)
 #pragma unused(messages)
 
-    WSADATA wsaData;
-    apr_status_t status;
     
     gLibId = register_library(DisposeLibraryData);
 
@@ -112,6 +114,7 @@ int register_NLM(void *NLMHandle)
         if (app_data) {
             memset (app_data, 0, sizeof(APP_DATA));
             set_app_data(gLibId, app_data);
+            app_data->gs_nlmhandle = NLMHandle;
         }
     }
 

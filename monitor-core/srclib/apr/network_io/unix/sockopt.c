@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,11 +151,8 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_SO_SNDBUF:
 #ifdef SO_SNDBUF
-        if (apr_is_option_set(sock->netmask, APR_SO_SNDBUF) != on) {
-            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
-                return errno;
-            }
-            apr_set_option(&sock->netmask, APR_SO_SNDBUF, on);
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
+            return errno;
         }
 #else
         return APR_ENOTIMPL;
@@ -162,11 +160,8 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_SO_RCVBUF:
 #ifdef SO_RCVBUF
-        if (apr_is_option_set(sock->netmask, APR_SO_RCVBUF) != on) {
-            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVBUF, (void *)&on, sizeof(int)) == -1) {
-                return errno;
-            }
-            apr_set_option(&sock->netmask, APR_SO_RCVBUF, on);
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVBUF, (void *)&on, sizeof(int)) == -1) {
+            return errno;
         }
 #else
         return APR_ENOTIMPL;

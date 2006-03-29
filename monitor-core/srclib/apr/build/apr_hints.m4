@@ -131,9 +131,14 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         ;;
     *-openbsd*)
 	APR_ADDTO(CPPFLAGS, [-D_POSIX_THREADS])
+        # getsockname() reports the wrong address on a socket
+        # bound to an ephmeral port so the test fails.
+        APR_SETIFNULL(ac_cv_o_nonblock_inherited, [yes])
 	;;
     *-netbsd*)
 	APR_ADDTO(CPPFLAGS, [-DNETBSD])
+        # fcntl() lies about O_NONBLOCK on an accept()ed socket (PR kern/26950)
+        APR_SETIFNULL(ac_cv_o_nonblock_inherited, [yes])
 	;;
     *-freebsd*)
 	case $host in
@@ -159,6 +164,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-apple-darwin*)
 	APR_ADDTO(CPPFLAGS, [-DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp])
 	APR_SETIFNULL(apr_posixsem_is_global, [yes])
+        APR_SETIFNULL(ac_cv_func_poll, [no]) # See issue 34332
 	;;
     *-dec-osf*)
 	APR_ADDTO(CPPFLAGS, [-DOSF1])
@@ -198,6 +204,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-solaris2*)
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
 	APR_ADDTO(CPPFLAGS, [-DSOLARIS2=$PLATOSVERS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT])
+        APR_SETIFNULL(apr_lock_method, [USE_FCNTL_SERIALIZE])
 	;;
     *-sunos4*)
 	APR_ADDTO(CPPFLAGS, [-DSUNOS4])

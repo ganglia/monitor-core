@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +50,15 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 #endif
 
         if (thefile->direction == 1) {
-            apr_file_flush(thefile);
+            rv = apr_file_flush(thefile);
+            if (rv) {
+#if APR_HAS_THREADS
+                if (thefile->thlock) {
+                    apr_thread_mutex_unlock(thefile->thlock);
+                }
+#endif
+                return rv;
+            }
             thefile->bufpos = 0;
             thefile->direction = 0;
             thefile->dataRead = 0;
@@ -172,7 +181,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   /* write buffer is full*/
-                apr_file_flush(thefile);
+                rv = apr_file_flush(thefile);
 
             blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? 
                         APR_FILE_BUFSIZE - thefile->bufpos : size;

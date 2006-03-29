@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,6 +256,13 @@ APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
+                                                       apr_int32_t addrspace)
+{
+    /* won't ever be used on this platform, so don't save the flag */
+    return APR_SUCCESS;
+}
+
 
 
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname,
@@ -326,7 +334,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
 
     /* ### how to handle APR_PROGRAM_ENV and APR_PROGRAM_PATH? */
 
-    if (attr->cmdtype == APR_SHELLCMD || strcasecmp(extension, ".cmd") == 0) {
+    if (attr->cmdtype == APR_SHELLCMD ||
+        attr->cmdtype == APR_SHELLCMD_ENV ||
+        strcasecmp(extension, ".cmd") == 0) {
         strcpy(interpreter, "#!" SHELL_PATH);
         extra_arg = "/C";
     } else if (stricmp(extension, ".exe") != 0) {
@@ -365,8 +375,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
                     interpreter[0] = 0;
                 }
             }
+
+            apr_file_close(progfile);
         }
-        apr_file_close(progfile);
     }
 
     i = 0;

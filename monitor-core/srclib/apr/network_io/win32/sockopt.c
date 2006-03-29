@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +116,18 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
                 return apr_get_netos_error();
             }
             apr_set_option(&sock->netmask, APR_SO_DEBUG, on);
+        }
+        break;
+    case APR_SO_SNDBUF:
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF,
+                       (void *)&on, sizeof(int)) == -1) {
+            return apr_get_netos_error();
+        }
+        break;
+    case APR_SO_RCVBUF:
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVBUF,
+                       (void *)&on, sizeof(int)) == -1) {
+            return apr_get_netos_error();
         }
         break;
     case APR_SO_REUSEADDR:

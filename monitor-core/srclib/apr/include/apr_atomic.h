@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,8 +151,7 @@ void *apr_atomic_casptr(void **mem, void *with, const void *cmp);
 
 inline int apr_atomic_dec(apr_atomic_t *mem) 
 {
-    atomic_dec(mem);
-    return *mem; 
+    return (atomic_xchgadd(mem, 0xFFFFFFFF) - 1);
 }
 
 inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
@@ -162,10 +162,10 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
 #elif defined(__FreeBSD__)
 
 #define apr_atomic_t apr_uint32_t
-#define apr_atomic_add(mem, val)     atomic_add_int(mem,val)
-#define apr_atomic_dec(mem)          atomic_subtract_int(mem,1)
-#define apr_atomic_inc(mem)          atomic_add_int(mem,1)
-#define apr_atomic_set(mem, val)     atomic_set_int(mem, val)
+#define apr_atomic_add(mem, val)     (atomic_add_int(mem,val),mem)
+#define apr_atomic_dec(mem)          (atomic_subtract_int(mem,1),mem)
+#define apr_atomic_inc(mem)          (atomic_add_int(mem,1),mem)
+#define apr_atomic_set(mem, val)     (atomic_set_int(mem, val),mem)
 #define apr_atomic_read(mem)         (*mem)
 
 #elif (defined(__linux__) || defined(__EMX__)) && defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC

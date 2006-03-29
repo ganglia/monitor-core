@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +41,7 @@ apr_status_t apr_socket_send(apr_socket_t *sock, const char *buf,
         rv = write(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) 
+    while (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) 
         && apr_is_option_set(sock->netmask, APR_SO_TIMEOUT)) {
         apr_status_t arv;
 do_select:
@@ -80,7 +81,7 @@ apr_status_t apr_socket_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
         rv = read(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
+    while (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
         apr_is_option_set(sock->netmask, APR_SO_TIMEOUT)) {
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
@@ -120,7 +121,7 @@ apr_status_t apr_socket_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
                     where->salen);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)
+    while (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)
         && apr_is_option_set(sock->netmask, APR_SO_TIMEOUT)) {
         apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
@@ -153,7 +154,7 @@ apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
                       (struct sockaddr*)&from->sa, &from->salen);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) &&
+    while (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) &&
         apr_is_option_set(sock->netmask, APR_SO_TIMEOUT)) {
         apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
         if (arv != APR_SUCCESS) {
@@ -200,7 +201,7 @@ apr_status_t apr_socket_sendv(apr_socket_t * sock, const struct iovec *vec,
         rv = writev(sock->socketdes, vec, nvec);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
+    while (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
         apr_is_option_set(sock->netmask, APR_SO_TIMEOUT)) {
         apr_status_t arv;
 do_select:
@@ -299,7 +300,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                       *len);   /* number of bytes to send */
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && 
+    while (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         apr_is_option_set(sock->netmask, APR_SO_TIMEOUT)) {
 do_select:
@@ -640,7 +641,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         }
     } while (rc == -1 && errno == EINTR);
 
-    if (rc == -1 && 
+    while (rc == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         apr_is_option_set(sock->netmask, APR_SO_TIMEOUT)) {
         apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
@@ -788,7 +789,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                        flags);             /* flags */
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 &&
+    while (rv == -1 &&
         (errno == EAGAIN || errno == EWOULDBLOCK) &&
         apr_is_option_set(sock->netmask, APR_SO_TIMEOUT)) {
 do_select:

@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +47,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     }     
     new_mutex->pool = pool;
 
-    new_mutex->mutex = NXMutexAlloc(NX_MUTEX_RECURSIVE, NULL, NULL);
+    new_mutex->mutex = NXMutexAlloc(NX_MUTEX_RECURSIVE, 0, NULL);
     
     if(new_mutex->mutex == NULL)
         return APR_ENOMEM;

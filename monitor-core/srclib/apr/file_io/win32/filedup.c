@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +44,13 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
     (*new_file)->append = old_file->append;
     (*new_file)->buffered = FALSE;
     (*new_file)->ungetchar = old_file->ungetchar;
+
+#if APR_HAS_THREADS
+    if (old_file->mutex) {
+        apr_thread_mutex_create(&((*new_file)->mutex),
+                                APR_THREAD_MUTEX_DEFAULT, p);
+    }
+#endif
 
     apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file), file_cleanup,
                         apr_pool_cleanup_null);
@@ -113,6 +121,13 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
     new_file->append = old_file->append;
     new_file->buffered = FALSE;
     new_file->ungetchar = old_file->ungetchar;
+
+#if APR_HAS_THREADS
+    if (old_file->mutex) {
+        apr_thread_mutex_create(&(new_file->mutex),
+                                APR_THREAD_MUTEX_DEFAULT, p);
+    }
+#endif
 
     return APR_SUCCESS;
 #endif /* !defined(_WIN32_WCE) */
