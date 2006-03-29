@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -372,7 +373,13 @@ static char *native_strerror(apr_status_t statcode, char *buf,
     sprintf(err, "Native Error #%d", statcode);
     return stuffbuffer(buf, bufsize, err);
 #else
-    return stuffbuffer(buf, bufsize, strerror(statcode));
+    const char *err = strerror(statcode);
+    if (err) {
+        return stuffbuffer(buf, bufsize, err);
+    } else {
+        return stuffbuffer(buf, bufsize, 
+                           "APR does not understand this error code");
+    }
 #endif
 }
 #endif

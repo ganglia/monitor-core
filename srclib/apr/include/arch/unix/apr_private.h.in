@@ -317,6 +317,9 @@
 /* Define to 1 if you have the `pthread_mutexattr_setrobust_np' function. */
 #undef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
 
+/* Define if recursive pthread mutexes are available */
+#undef HAVE_PTHREAD_MUTEX_RECURSIVE
+
 /* Define if PTHREAD_PROCESS_SHARED is defined in pthread.h */
 #undef HAVE_PTHREAD_PROCESS_SHARED
 

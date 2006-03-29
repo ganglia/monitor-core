@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +46,10 @@ typedef enum {
     APR_SHELLCMD,       /**< use the shell to invoke the program */
     APR_PROGRAM,        /**< invoke the program directly, no copied env */
     APR_PROGRAM_ENV,    /**< invoke the program, replicating our environment */
-    APR_PROGRAM_PATH    /**< find program on PATH, use our environment */
+    APR_PROGRAM_PATH,   /**< find program on PATH, use our environment */
+    APR_SHELLCMD_ENV    /**< use the shell to invoke the program,
+                          *   replicating our environment
+                          */
 } apr_cmdtype_e;
 
 typedef enum {
@@ -216,6 +220,14 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr,
 APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr);
 
 /**
+ * Set the stack size of newly created threads.
+ * @param attr The threadattr to affect 
+ * @param stacksize The stack size in bytes
+ */
+APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
+                                                       apr_size_t stacksize);
+
+/**
  * Create a new thread of execution
  * @param new_thread The newly created thread handle.
  * @param attr The threadattr to use to determine how to create the thread
@@ -288,7 +300,7 @@ APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key,
 /**
  * Return the pool associated with the current thread.
  * @param data The user data to associate with the thread.
- * @param key The key to use for associating the data with the tread
+ * @param key The key to use for associating the data with the thread
  * @param cleanup The cleanup routine to use when the thread is destroyed.
  * @param thread The currently open thread.
  */
@@ -493,6 +505,16 @@ APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
                                                        apr_int32_t chk);
 
+/**
+ * Determine if the child should start in its own address space or using the 
+ * current one from its parent
+ * @param attr The procattr we care about. 
+ * @param addrspace Should the child start in its own address space?  Default
+ *                  is no on NetWare and yes on other platforms.
+ */
+APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
+                                                       apr_int32_t addrspace);
+
 #if APR_HAS_FORK
 /**
  * This is currently the only non-portable call in APR.  This executes 
@@ -511,8 +533,8 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont);
  *             one should be the program name.
  * @param env The new environment table for the new process.  This 
  *            should be a list of NULL-terminated strings. This argument
- *            is ignored for APR_PROGRAM_ENV and APR_PROGRAM_PATH types
- *            of commands.
+ *            is ignored for APR_PROGRAM_ENV, APR_PROGRAM_PATH, and
+ *            APR_SHELLCMD_ENV types of commands.
  * @param attr the procattr we should use to determine how to create the new
  *         process
  * @param cont The pool to use. 

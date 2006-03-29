@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +36,12 @@ static apr_status_t socket_cleanup(void *sock)
         }
         thesocket->socketdes = INVALID_SOCKET;
     }
+#if APR_HAS_SENDFILE
+    if (thesocket->overlapped) {
+        CloseHandle(thesocket->overlapped->hEvent);
+        thesocket->overlapped = NULL;
+    }
+#endif
     return APR_SUCCESS;
 }
 

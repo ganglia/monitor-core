@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +61,7 @@ struct apr_procattr_t {
     char *currdir;
     apr_int32_t cmdtype;
     apr_int32_t detached;
+    apr_int32_t addrspace;
 };
 
 struct apr_thread_once_t {

@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -612,6 +613,9 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
         struct sockaddr_in tmpsa;
         tmpsa.sin_family = AF_INET;
         tmpsa.sin_addr.s_addr = ((apr_uint32_t *)sockaddr->ipaddr_ptr)[3];
+#ifdef SIN6_LEN
+        tmpsa.sin_len = sizeof(tmpsa);
+#endif
 
         rc = getnameinfo((const struct sockaddr *)&tmpsa, sizeof(tmpsa),
                          tmphostname, sizeof(tmphostname), NULL, 0,

@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +32,6 @@
 struct apr_thread_mutex_t {
     apr_pool_t *pool;
     pthread_mutex_t mutex;
-    volatile apr_os_thread_t owner;
-    volatile apr_atomic_t owner_ref;
-    char nested; /* a boolean */
 };
 #endif
 

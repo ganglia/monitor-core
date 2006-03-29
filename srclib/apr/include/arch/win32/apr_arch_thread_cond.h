@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +22,6 @@
 struct apr_thread_cond_t {
     apr_pool_t *pool;
     HANDLE event;
-    HANDLE mutex;
     int signal_all;
     int num_waiting;
     int signalled;

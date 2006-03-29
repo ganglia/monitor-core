@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +81,22 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
     if (state == 1)
         return APR_DETACH;
     return APR_NOTDETACH;
+}
+
+APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
+                                                       apr_size_t stacksize)
+{
+    int stat;
+
+    stat = pthread_attr_setstacksize(attr->attr, stacksize);
+    if (stat == 0) {
+        return APR_SUCCESS;
+    }
+#ifdef PTHREAD_SETS_ERRNO
+    stat = errno;
+#endif
+
+    return stat;
 }
 
 static void *dummy_worker(void *opaque)

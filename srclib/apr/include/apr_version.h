@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,14 +61,14 @@ extern "C" {
 #define APR_MINOR_VERSION       9
 
 /** patch level */
-#define APR_PATCH_VERSION       5
-
+#define APR_PATCH_VERSION       7
 
 /** 
  *  This symbol is defined for internal, "development" copies of APR. This
  *  symbol will be #undef'd for releases. 
  */
-#define APR_IS_DEV_VERSION
+/* #define APR_IS_DEV_VERSION */
+
 
 /** The formatted string of APR's version */
 #define APR_VERSION_STRING \

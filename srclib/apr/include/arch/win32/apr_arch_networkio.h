@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +42,13 @@ struct apr_socket_t {
     int                 remote_addr_unknown;
     apr_int32_t         netmask;
     apr_int32_t         inherit;
+#if APR_HAS_SENDFILE
+    /* As of 07.20.04, the overlapped structure is only used by 
+     * apr_socket_sendfile and that's where it will be allocated 
+     * and initialized.
+     */
+    OVERLAPPED         *overlapped;
+#endif
     sock_userdata_t    *userdata;
 };
 
