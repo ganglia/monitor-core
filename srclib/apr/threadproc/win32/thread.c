@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +39,9 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
     }
 
     (*new)->pool = pool;
+    (*new)->detach = 0;
+    (*new)->stacksize = 0;
+
     return APR_SUCCESS;
 }
 
@@ -55,6 +59,13 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
+APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
+                                                       apr_size_t stacksize)
+{
+    attr->stacksize = stacksize;
+    return APR_SUCCESS;
+}
+
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
@@ -69,7 +80,8 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 {
     apr_status_t stat;
 	unsigned temp;
-
+    HANDLE   handle;
+    
     (*new) = (apr_thread_t *)apr_palloc(pool, sizeof(apr_thread_t));
 
     if ((*new) == NULL) {
@@ -79,7 +91,8 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     (*new)->pool = pool;
     (*new)->data = data;
     (*new)->func = func;
-    
+    (*new)->td   = NULL;
+
     stat = apr_pool_create(&(*new)->pool, pool);
     if (stat != APR_SUCCESS) {
         return stat;
@@ -89,22 +102,25 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
      * same size as the calling thread. 
      */
 #ifndef _WIN32_WCE
-    if (((*new)->td = (HANDLE)_beginthreadex(NULL, 0, 
+    if ((handle = (HANDLE)_beginthreadex(NULL,
+                        attr && attr->stacksize > 0 ? attr->stacksize : 0,
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
         return APR_FROM_OS_ERROR(_doserrno);
     }
 #else
-   if (((*new)->td = CreateThread(NULL, 0, 
+   if ((handle = CreateThread(NULL,
+                        attr && attr->stacksize > 0 ? attr->stacksize : 0,
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
         return apr_get_os_error();
     }
 #endif
     if (attr && attr->detach) {
-        CloseHandle((*new)->td);
-        (*new)->td = NULL;
+        CloseHandle(handle);
     }
+    else
+        (*new)->td = handle;
 
     return APR_SUCCESS;
 }
@@ -114,10 +130,8 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
 {
     thd->exitval = retval;
     apr_pool_destroy(thd->pool);
+    thd->pool = NULL;
 #ifndef _WIN32_WCE
-    if (thd->td) {
-        CloseHandle(thd->td);
-    }
     _endthreadex(0);
 #else
     ExitThread(0);
@@ -128,15 +142,26 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
 APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
                                           apr_thread_t *thd)
 {
-    apr_status_t rv;
-
+    apr_status_t rv = APR_SUCCESS;
+    
+    if (!thd->td) {
+        /* Can not join on detached threads */
+        return APR_DETACH;
+    }
     rv = WaitForSingleObject(thd->td, INFINITE);
     if ( rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
-        *retval = thd->exitval;
-        return APR_SUCCESS;
+        /* If the thread_exit has been called */
+        if (!thd->pool)
+            *retval = thd->exitval;
+        else
+            rv = APR_INCOMPLETE;
     }
-    /* Wait failed */
-    return apr_get_os_error();;
+    else
+        rv = apr_get_os_error();
+    CloseHandle(thd->td);
+    thd->td = NULL;
+
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)

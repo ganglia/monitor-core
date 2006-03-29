@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,12 +67,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     }
 
     if (flag & APR_CREATE) {
-        oflags |= OPEN_ACTION_CREATE_IF_NEW; 
-        if (!(flag & APR_EXCL)) {
-            if (flag & APR_APPEND)
-                oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
-            else
-                oflags |= OPEN_ACTION_REPLACE_IF_EXISTS;
+        oflags |= OPEN_ACTION_CREATE_IF_NEW;
+
+        if (!(flag & APR_EXCL) && !(flag & APR_TRUNCATE)) {
+            oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
         }
     }
     
@@ -157,7 +156,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path, const char *to_
 {
     ULONG rc = DosMove(from_path, to_path);
 
-    if (rc == ERROR_ACCESS_DENIED) {
+    if (rc == ERROR_ACCESS_DENIED || rc == ERROR_ALREADY_EXISTS) {
         rc = DosDelete(to_path);
 
         if (rc == 0 || rc == ERROR_FILE_NOT_FOUND) {

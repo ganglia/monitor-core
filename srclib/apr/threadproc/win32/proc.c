@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,12 +246,19 @@ static char *apr_caret_escape_args(apr_pool_t *p, const char *str)
 APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
                                                        apr_child_errfn_t *errfn)
 {
-    /* won't ever be called on this platform, so don't save the function pointer */
+    attr->errfn = errfn;
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
                                                        apr_int32_t chk)
+{
+    attr->errchk = chk;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
+                                                       apr_int32_t addrspace)
 {
     /* won't ever be used on this platform, so don't save the flag */
     return APR_SUCCESS;
@@ -304,6 +312,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         char *fullpath = NULL;
         if ((rv = apr_filepath_merge(&fullpath, attr->currdir, progname, 
                                      APR_FILEPATH_NATIVE, pool)) != APR_SUCCESS) {
+            if (attr->errfn) {
+                attr->errfn(pool, rv, 
+                            apr_pstrcat(pool, "filepath_merge failed.", 
+                                        " currdir: ", attr->currdir, 
+                                        " progname: ", progname,NULL));
+            }
             return rv;
         }
         progname = fullpath;
@@ -342,9 +356,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     }
 
 #ifndef _WIN32_WCE
-    if (attr->cmdtype == APR_SHELLCMD) {
+    if (attr->cmdtype == APR_SHELLCMD || attr->cmdtype == APR_SHELLCMD_ENV) {
         char *shellcmd = getenv("COMSPEC");
         if (!shellcmd) {
+            if (attr->errfn) {
+                attr->errfn(pool, APR_EINVAL, "COMSPEC envar is not set");
+            }
             return APR_EINVAL;
         }
         if (shellcmd[0] == '"') {
@@ -381,6 +398,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         {
             char *shellcmd = getenv("COMSPEC");
             if (!shellcmd) {
+                if (attr->errfn) {
+                    attr->errfn(pool, APR_EINVAL, "COMSPEC envar is not set");
+                }
                 return APR_EINVAL;
             }
             if (shellcmd[0] == '"') {
@@ -438,8 +458,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
     }
 
-    if (!env || attr->cmdtype == APR_PROGRAM_ENV) 
+    if (!env || attr->cmdtype == APR_PROGRAM_ENV ||
+        attr->cmdtype == APR_SHELLCMD_ENV) {
         pEnvBlock = NULL;
+    }
     else {
         apr_size_t iEnvBlockLen;
         /*
@@ -470,6 +492,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 if ((rv = apr_conv_utf8_to_ucs2(env[i], &in, 
                                                 pNext, &iEnvBlockLen)) 
                         != APR_SUCCESS) {
+                    if (attr->errfn) {
+                        attr->errfn(pool, rv, 
+                                    apr_pstrcat(pool, 
+                                                "utf8 to ucs2 conversion failed" 
+                                                " on this string: ", env[i], NULL));
+                    }
                     return rv;
                 }
                 pNext = wcschr(pNext, L'\0') + 1;
@@ -516,6 +544,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             wprg = apr_palloc(pool, nwprg * sizeof(wprg[0]));
             if ((rv = apr_conv_utf8_to_ucs2(progname, &nprg, wprg, &nwprg))
                    != APR_SUCCESS) {
+                if (attr->errfn) {
+                    attr->errfn(pool, rv, 
+                                apr_pstrcat(pool, 
+                                            "utf8 to ucs2 conversion failed" 
+                                            " on progname: ", progname, NULL));
+                }
                 return rv;
             }
         }
@@ -526,6 +560,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             wcmd = apr_palloc(pool, nwcmd * sizeof(wcmd[0]));
             if ((rv = apr_conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd))
                     != APR_SUCCESS) {
+                if (attr->errfn) {
+                    attr->errfn(pool, rv, 
+                                apr_pstrcat(pool, 
+                                            "utf8 to ucs2 conversion failed" 
+                                            " on cmdline: ", cmdline, NULL));
+                }
                 return rv;
             }
         }
@@ -538,6 +578,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             if ((rv = apr_conv_utf8_to_ucs2(attr->currdir, &ncwd, 
                                             wcwd, &nwcwd))
                     != APR_SUCCESS) {
+                if (attr->errfn) {
+                    attr->errfn(pool, rv, 
+                                apr_pstrcat(pool, 
+                                            "utf8 to ucs2 conversion failed" 
+                                            " on currdir: ", attr->currdir, NULL));
+                }
                 return rv;
             }
         }

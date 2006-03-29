@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +34,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool
 
     (*new)->pool = pool;
     (*new)->attr = 0;
+    (*new)->stacksize = 0;
     return APR_SUCCESS;
 }
 
@@ -49,6 +51,15 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr, apr_
 APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
 {
     return (attr->attr & APR_THREADATTR_DETACHED) ? APR_DETACH : APR_NOTDETACH;
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
+                                                       apr_size_t stacksize)
+{
+    attr->stacksize = stacksize;
+    return APR_SUCCESS;
 }
 
 
@@ -93,8 +104,10 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
         }
     }
 
-    thread->tid = _beginthread(apr_thread_begin, NULL, 
-                               APR_THREAD_STACKSIZE, thread);
+    thread->tid = _beginthread(apr_thread_begin, NULL,
+                               thread->attr->stacksize > 0 ?
+                               thread->attr->stacksize : APR_THREAD_STACKSIZE,
+                               thread);
         
     if (thread->tid < 0) {
         return errno;

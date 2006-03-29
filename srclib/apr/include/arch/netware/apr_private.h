@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +36,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <library.h>
+#include <netware.h>
 
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
@@ -61,6 +63,8 @@
 #define HAVE_GETENV     1
 #define HAVE_SETENV     1
 #define HAVE_UNSETENV   1
+
+#define HAVE_WRITEV     1
 
 /*#define DSO_USE_DLFCN */
 
@@ -143,6 +147,12 @@ typedef struct app_data {
     void*   gs_aHooksToSort;
     void*   gs_phOptionalHooks;
     void*   gs_phOptionalFunctions;
+    void*   gs_nlmhandle;
+    rtag_t  gs_startup_rtag;
+    rtag_t  gs_socket_rtag;
+    rtag_t  gs_lookup_rtag;
+    rtag_t  gs_event_rtag;
+    rtag_t  gs_pcp_rtag;
 } APP_DATA;
 
 int setGlobalPool(void *data);

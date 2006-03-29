@@ -1,4 +1,88 @@
+Changes with APR 0.9.7
+
+  *) Fix crash in apr_dir_make_recursive() for relative path
+     when the working directory has been deleted.  [Joe Orton]
+
+  *) Win32: fix apr_proc_mutex_trylock() to handle WAIT_TIMEOUT,
+     returning APR_EBUSY.  [Ronen Mizrahi <ronen@tversity.com>]
+
+  *) Fix apr_file_read() to catch write failures when flushing pending
+     writes for a buffered file.  [Joe Orton]
+
+  *) Fix apr_file_write() infinite loop on write failure for buffered
+     files.  [Erik Huelsmann <ehuels gmail.com>]
+
+  *) Fix error handling where apr_uid_* and apr_gid_* could segfault
+     or return APR_SUCCESS in failure cases.  PR 34053.  [Joe Orton,
+     Paul Querna]
+
+  *) Refactor Win32 condition variables code to address bugs 27654, 34336.
+     [Henry Jen <henryjen ztune.net>, E Holyat <eholyat yahoo.com>]
+
+  *) Support APR_SO_SNDBUF and APR_SO_RCVBUF on Windows.  PR 32177.
+     [Sim <sgobbi datamanagement.it>, Jeff Trawick]
+
+  *) Fix detection of rwlocks on Mac OS X. [Aaron Bannert]
+
+  *) Fix issue with poll() followed by net I/O yielding EAGAIN on
+     Mac OS 10.4 (Darwin 8). [Wilfredo Sanchez]
+
+Changes with APR 0.9.6
+
+  *) Add apr_threadattr_stacksize_set() for overriding the default
+     stack size for threads created by apr_thread_create().
+     [Jeff Trawick]
+
+  *) Add an RPM spec file. [Graham Leggett]
+
+  *) Add a build script to create a solaris package. [Graham Leggett]
+
 Changes with APR 0.9.5
+
+  *) Prevent unbounded memory use during repeated operations on a hash table.
+     [Julian Foad <julianfoad btopenworld.com>
+
+  *) fix apr_file_dup and apr_file_dup2 win32 implementations
+     to create a mutex [Steve Hay <steve.hay uk.radan.com>]
+
+  *) Makes the threads to behave like on posix. If the thread is created
+     without APR_DETACH expect that the thread_join will be called, so don't
+     close the handle in advance, if the thread has already finished.
+     [Mladen Turk]
+ 
+   *) The apr/test/Makefile.win is missing a target to build a
+     readchild.exe that test is depending on but is never built.
+     [Mladen Turk]
+ 
+  *) Fix build issues in paths containing symlinks.  PR 8867.
+     [Joe Orton]
+
+  *) Update config.{guess,sub} for DragonFly BSD.  PR 29858.
+     [Joe Orton]
+
+  *) Win32: Fix bug in apr_socket_sendfile that interferred with
+     Win32 LSPs. Bug is described in Apache 2.0 bugzilla report 
+     23982 [Jan Bilek, Bill Stoddard]
+
+  *) apr_proc_create() on Unix: Remove unnecessary check for read 
+     access to the working directory of the child process.
+     PR 30137.  [Jeremy Chadwick <apache jdc.parodius.com>]
+
+  *) Win32: Fix bug tracking the file pointer on a file opened for 
+     overlapped/APR_XTHREAD io. [Bill Stoddard]
+
+  *) Fix FreeBSD atomics.  [Paul Querna <chip force-elite.com>]
+
+  *) Fix apr_snprintf() to respect precision for small floating point
+     numbers.  PR 29621.  [Artur Zaprzala <zybi talex.pl>]
+
+  *) Add command type APR_SHELLCMD_ENV for creating a process
+     which is started by the shell and which inherits the parent's
+     environment variables.  [Jeff Trawick]
+
+  *) Change default inter-process locking mechanisms: POSIX semaphores
+     and pthread cross-process mutexes are not used by default; on 
+     Solaris, fcntl locks are used by default.  [Joe Orton]
 
   *) Don't try to enable run-time linking on AIX < 4.2, as this
      results in invalid linker options being used.  PR 29170.  

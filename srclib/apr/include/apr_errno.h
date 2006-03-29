@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1122,8 +1123,18 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
 /** path name is too long */
 #define APR_STATUS_IS_ENAMETOOLONG(s)   ((s) == APR_ENAMETOOLONG)
-/** no such file or directory */
+/**
+ * no such file or directory
+ * @remark
+ * EMVSCATLG can be returned by the automounter on z/OS for
+ * paths which do not exist.
+ */
+#ifdef EMVSCATLG
+#define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT \
+                                      || (s) == EMVSCATLG)
+#else
 #define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT)
+#endif
 /** not a directory */
 #define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
 /** no space left on device */

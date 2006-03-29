@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,9 +143,28 @@ static void snprintf_int64(CuTest *tc)
     CuAssertStrEquals(tc, buf, "3141592653589793238");
 }
 
+static void snprintf_underflow(CuTest *tc)
+{
+    char buf[20];
+    int rv;
+
+    rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.0001);
+    CuAssertIntEquals(tc, 4, rv);
+    CuAssertStrEquals(tc, "0.00", buf);
+    
+    rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.001);
+    CuAssertIntEquals(tc, 4, rv);
+    CuAssertStrEquals(tc, "0.00", buf);
+    
+    rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.01);
+    CuAssertIntEquals(tc, 4, rv);
+    CuAssertStrEquals(tc, "0.01", buf);
+}
+
 static void string_error(CuTest *tc)
 {
      char buf[128], *rv;
+     apr_status_t n;
 
      buf[0] = '\0';
      rv = apr_strerror(APR_ENOENT, buf, sizeof buf);
@@ -154,6 +174,11 @@ static void string_error(CuTest *tc)
      rv = apr_strerror(APR_TIMEUP, buf, sizeof buf);
      CuAssertPtrEquals(tc, buf, rv);
      CuAssertStrEquals(tc, "The timeout specified has expired", buf);
+     
+     /* throw some randomish numbers at it to check for robustness */
+     for (n = 1; n < 1000000; n *= 2) {
+         apr_strerror(n, buf, sizeof buf);
+     }
 }
 
 #define SIZE 180000
@@ -271,6 +296,7 @@ CuSuite *teststr(void)
     SUITE_ADD_TEST(suite, snprintf_0nonNULL);
     SUITE_ADD_TEST(suite, snprintf_noNULL);
     SUITE_ADD_TEST(suite, snprintf_int64);
+    SUITE_ADD_TEST(suite, snprintf_underflow);
     SUITE_ADD_TEST(suite, test_strtok);
     SUITE_ADD_TEST(suite, string_error);
     SUITE_ADD_TEST(suite, string_long);

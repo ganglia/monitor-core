@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,11 +133,12 @@ static char *apr_cvt(double arg, int ndigits, int *decpt, int *sign,
     p1 = &buf[ndigits];
     if (eflag == 0)
         p1 += r2;
-    *decpt = r2;
     if (p1 < &buf[0]) {
+        *decpt = -ndigits;
         buf[0] = '\0';
         return (buf);
     }
+    *decpt = r2;
     while (p <= p1 && p < &buf[NDIG]) {
         arg *= 10;
         arg = modf(arg, &fj);
