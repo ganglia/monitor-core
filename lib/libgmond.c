@@ -125,9 +125,16 @@ char *default_gmond_configuration = NULL;
 /* This configuration is as close to 2.5.x default behavior as possible \n\
    The values closely match ./gmond/metric.h definitions in 2.5.x */ \n\
 globals {                    \n\
-  setuid = yes              \n\
+  daemonize = yes              \n\
+  setuid = yes             \n\
   user = nobody              \n\
+  debug_level = 0               \n\
+  max_udp_msg_len = 1472        \n\
+  mute = no             \n\
+  deaf = no             \n\
+  host_dmax = 0 /*secs */ \n\
   cleanup_threshold = 300 /*secs */ \n\
+  gexec = no             \n\
 } \n\
 \n\
 /* If a cluster attribute is specified, then all gmond hosts are wrapped inside \n\
@@ -135,6 +142,9 @@ globals {                    \n\
  * NOT be wrapped inside of a <CLUSTER> tag. */ \n\
 cluster { \n\
   name = \"unspecified\" \n\
+  owner = \"unspecified\" \n\
+  latlong = \"unspecified\" \n\
+  url = \"unspecified\" \n\
 } \n\
 \n\
 /* The host section describes attributes of the host, like the location */ \n\
