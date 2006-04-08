@@ -54,7 +54,7 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
       {
          err_msg("RRD_update (%s): %s", rrd, rrd_get_error());
          pthread_mutex_unlock( &rrd_mutex );
-         return 1;
+         return 0;
       } 
    /* debug_msg("Updated rrd %s with value %s", rrd, val); */
    pthread_mutex_unlock( &rrd_mutex );
