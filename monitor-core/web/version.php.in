@@ -5,7 +5,7 @@ $majorversion = @GANGLIA_MAJOR_VERSION@;
 $minorversion = @GANGLIA_MINOR_VERSION@;
 $microversion = @GANGLIA_MICRO_VERSION@;
 
-$ganglia_version = "@GANGLIA_MAJOR_VERSION@.@GANGLIA_MINOR_VERSION@.@GANGLIA_MICRO_VERSION@";
+$ganglia_version = "@GANGLIA_VERSION@";
 $ganglia_release_name    = "@GANGLIA_RELEASE_NAME@";
 
 ?>
