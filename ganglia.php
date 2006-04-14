@@ -33,7 +33,8 @@ $metrics = array();
 $version = array();
 
 # The web frontend version, from conf.php.
-$version["webfrontend"] = "$majorversion.$minorversion.$microversion";
+#$version["webfrontend"] = "$majorversion.$minorversion.$microversion";
+$version["webfrontend"] = "$ganglia_version";
 
 # The name of our local grid.
 $self = " ";
