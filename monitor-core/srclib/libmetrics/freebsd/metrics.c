@@ -18,6 +18,12 @@
 #include <sys/mount.h>
 #include <sys/sysctl.h>
 #include <sys/time.h>
+/*
+ * XXX: HACK HACK HACK - avoid including machine/pmap.h and things that
+ * depend on it to avoid collision with struct pmap in rpc/pmap_prot.h. :-P
+ */
+#define _MACHINE_PMAP_H_
+#define _VM_MAP_
 #include <sys/user.h>
 #if __FreeBSD_version < 500101
 #include <sys/dkstat.h>
