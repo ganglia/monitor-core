@@ -12,7 +12,7 @@ You still need some "tricks" to use ganglia on a AIX system:
 1. You should use "gcc". xlc does not work out of the box. If you only have
    "xlc", the following might work. Run configure first !!
 
-   a) add "-qlanglvl=ext99" to the CFLAGS in srclib/confuse/src/Makefile
+   a) add "-qlanglvl=extc99" to the CFLAGS in srclib/confuse/src/Makefile
    b) remove "-Wall" from all Makefiles, especially:
 
      lib/Makefile
