@@ -9,25 +9,44 @@ Installation
 
 You still need some "tricks" to use ganglia on a AIX system:
 
-1. You should use "gcc". xlc does not work out of the box. If you only have
+1. The AIX-Version should not be compiled with shared libraries
+   You must add the "--disable-shared" and "--enable-static" configure
+   flags if you running on AIX
+
+   ./configure --disable-shared --enable-static
+
+2. You should use "gcc". xlc does not work out of the box. If you only have
    "xlc", the following might work. Run configure first !!
 
-   a) add "-qlanglvl=extc99" to the CFLAGS in srclib/confuse/src/Makefile
-   b) remove "-Wall" from all Makefiles, especially:
+   a) remove "-Wall" from all Makefiles, especially:
 
      lib/Makefile
      gmond/gstat/Makefile
      gmond/Makefile
      gmetric/Makefile
-     gmetad/Makefile  (still does not build :-(
+     gmetad/Makefile  (see below)
 
-   This should be done automatically, but automake/autoconf experts are needed.
+     This should be done automatically, but automake/autoconf experts are
+     needed.
 
-2. The AIX-Version should not be compiled with shared libraries
-        You must add the "--disable-shared" and "--enable-static" configure
-        flags if you running on AIX
+   b) to actually build the binaries do:
 
-           ./configure --disable-shared --enable-static
+     make CC="cc -qlanglvl=extc99"
+
+   c) To build "gmetad", the following is needed:
+   c1) install the following software, preferably from RPMs:
+
+       libart_lgpl-devel-2.3.16-1
+       freetype2-devel-2.1.7-2
+       zlib-1.2.2-4
+       libpng-1.2.1-6
+       freetype2-2.1.7-2
+       libart_lgpl-2.3.16-1
+       rrdtool-1.2.11.perl56-1 (cp /opt/freeware/include/rrd.h /usr/include/ )
+
+   c2) For Gmetad-3.0.3 or earlier: there is a conflict regarding the macro
+       "FRAMSIZE". In "gmetad/*" change all occurences of "FRAMESIZE" to
+       "GMETAD_FRAMESIZE". This will be fixed in version 3.0.4.
 
 Known problems and Limitations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
