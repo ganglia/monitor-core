@@ -516,7 +516,7 @@ startElement_HOST(void *data, const char *el, const char **attr)
    host->stringslen = edge;
 
    /* Trim structure to the correct length. */
-   hashval.size = sizeof(*host) - FRAMESIZE + host->stringslen;
+   hashval.size = sizeof(*host) - GMETAD_FRAMESIZE + host->stringslen;
    hashval.data = host;
 
    /* We dont care if this is an insert or an update. */
@@ -642,7 +642,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
          metric->t0.tv_sec -= metric->tn;
 
          /* Trim metric structure to the correct length. */
-         hashval.size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
+         hashval.size = sizeof(*metric) - GMETAD_FRAMESIZE + metric->stringslen;
          hashval.data = (void*) metric;
 
          /* Update full metric in cluster host table. */
@@ -698,7 +698,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
          metric->num++;
 
          /* Trim metric structure to the correct length. Tricky. */
-         hashval.size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
+         hashval.size = sizeof(*metric) - GMETAD_FRAMESIZE + metric->stringslen;
          hashval.data = (void*) metric;
 
          /* Update metric in summary table. */
@@ -792,7 +792,7 @@ startElement_METRICS(void *data, const char *el, const char **attr)
          }
 
    /* Update metric in summary table. */
-   hashval.size = sizeof(*metric) - FRAMESIZE + metric->stringslen;
+   hashval.size = sizeof(*metric) - GMETAD_FRAMESIZE + metric->stringslen;
    hashval.data = (void*) metric;
 
    summary = xmldata->source.metric_summary;
@@ -981,7 +981,7 @@ endElement_CLUSTER(void *data, const char *el)
 
          hashval.data = source;
          /* Trim structure to the correct length. */
-         hashval.size = sizeof(*source) - FRAMESIZE + source->stringslen;
+         hashval.size = sizeof(*source) - GMETAD_FRAMESIZE + source->stringslen;
 
          /* We insert here to get an accurate hosts up/down value. */
          rdatum = hash_insert( &hashkey, &hashval, xmldata->root);

@@ -112,7 +112,7 @@ data_source_list_t;;
  * plus a bit since gmond sends meta data in binary format, while
  * we get everything in ascii.
  */
-#define FRAMESIZE 1572
+#define GMETAD_FRAMESIZE 1572
 
 /* We convert numeric types to binary so we can use the
  * metric_t to compute summaries. */
@@ -175,7 +175,7 @@ typedef struct
       short int latlong;
       short int url;
       short int stringslen;
-      char strings[FRAMESIZE];
+      char strings[GMETAD_FRAMESIZE];
    }
 Source_t;
 
@@ -197,7 +197,7 @@ typedef struct
       uint32_t reported;
       uint32_t started;
       short int stringslen;
-      char strings[FRAMESIZE];
+      char strings[GMETAD_FRAMESIZE];
    }
 Host_t;
 
@@ -227,7 +227,7 @@ typedef struct
       short int slope;
       short int source;
       short int stringslen;
-      char strings[FRAMESIZE];
+      char strings[GMETAD_FRAMESIZE];
    }
 Metric_t;
 
