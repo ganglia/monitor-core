@@ -95,7 +95,7 @@ addstring(char *strings, int *edge, const char *s)
 	int end = e + strlen(s) + 1;
 
 	/* I wish C had real exceptions. */
-	if (e > FRAMESIZE || end > FRAMESIZE)
+	if (e > GMETAD_FRAMESIZE || end > GMETAD_FRAMESIZE)
 	{
 		err_msg("Field is too big!!");
 		return -1;
