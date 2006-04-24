@@ -831,16 +831,16 @@ int bos_level(int *aix_version, int *aix_release, int *aix_level, int *aix_fix)
 
 
 
-#define CALC_NETSTAT(type) (double) ( (cur_ninfo->type - last_ninfo->type)/timediff)
 
-void 
+#define CALC_NETSTAT(type) (double) ((cur_ninfo->type<last_ninfo->type)?-1:(cur_ninfo->type - last_ninfo->type)/timediff)
+void
 update_ifdata(void){
 
    static int init_done = 0;
    static struct timeval lasttime={0,0};
    struct timeval thistime;
    double timediff;
-   
+
 
    /*
    ** Compute time between calls
@@ -858,7 +858,7 @@ update_ifdata(void){
    ** Do nothing if we are called to soon after the last call
    */
    if (init_done && (timediff < INFO_TIMEOUT)) return;
-   
+
    lasttime = thistime;
 
    last_ninfo = &ninfo[ni_flag];
@@ -870,14 +870,15 @@ update_ifdata(void){
    perfstat_netinterface_total(NULL, cur_ninfo, sizeof(perfstat_netinterface_total_t), 1);
 
    if (init_done) {
-      cur_net_stat.ipackets = CALC_NETSTAT(ipackets);
-      cur_net_stat.opackets = CALC_NETSTAT(opackets);
-      cur_net_stat.ibytes   = CALC_NETSTAT(ibytes);
-      cur_net_stat.obytes   = CALC_NETSTAT(obytes);
+      cur_net_stat.ipackets = (CALC_NETSTAT(ipackets)<0)?cur_net_stat.ipackets:CALC_NETSTAT(ipackets);
+      cur_net_stat.opackets = (CALC_NETSTAT(opackets)<0)?cur_net_stat.opackets:CALC_NETSTAT(opackets);
+      cur_net_stat.ibytes   = (CALC_NETSTAT(ibytes ) <0)?cur_net_stat.ibytes:CALC_NETSTAT(ibytes );
+      cur_net_stat.obytes   = (CALC_NETSTAT(obytes  )<0)?cur_net_stat.obytes:CALC_NETSTAT(obytes  );
    }
    else
      {
        init_done = 1;
+
        cur_net_stat.ipackets = 0;
        cur_net_stat.opackets = 0;
        cur_net_stat.ibytes   = 0;
@@ -885,3 +886,5 @@ update_ifdata(void){
      }
 
 }  /* update_ifdata */
+
+
