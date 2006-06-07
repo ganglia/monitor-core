@@ -31,8 +31,10 @@ ganglia.html: ganglia.sub
 README: ganglia.sub
 	pod2text ganglia.sub README
 
-CHANGE_LOG_GEN_BIN = scripts/cvs2cl.pl
-CHANGE_LOG_GEN_FLAGS = -r --accum -I ChangeLog --gmt --prune
+#CHANGE_LOG_GEN_BIN = scripts/cvs2cl.pl
+#CHANGE_LOG_GEN_FLAGS = -r --accum -I ChangeLog --gmt --prune
+CHANGE_LOG_GEN_BIN = scripts/svn2cl.sh
+CHANGE_LOG_GEN_FLAGS = --revision HEAD:1
 
 ChangeLog::
 	touch ChangeLog
@@ -52,7 +54,7 @@ dist-local: README ganglia.html ChangeLog
 dist-hook:
 	for subdir in "./srclib ./web"; do \
 	  tar -c --exclude=".libs" --exclude "core.*" --exclude="*CVS" \
-	  --exclude="*.o"  --exclude="*.lo" \
+	  --exclude ".svn" --exclude="*.o"  --exclude="*.lo" \
 	  --exclude="*.la" --exclude=".deps" \
 	  --exclude="Makefile" --exclude="libtool" \
 	  --exclude="web/version.php" --exclude="config.h" \
@@ -63,6 +65,7 @@ dist-hook:
 	  --exclude="configure.lineno" --exclude="configure.status.lineno" \
 	  -f - $$subdir | (cd $(distdir) && tar -xf -)\
 	done;
+	find $(distdir) -name ".svn" -type d -prune -execdir rm -rf {} \;
 	touch $(distdir)/Makefile.am
 	find $(distdir) -exec touch -r $(distdir)/Makefile.am {} \;
 
