@@ -1,10 +1,24 @@
 Welcome to the Bleeding Edge of Ganglia Development
 
-The CVS source represents the latest snapshot of ganglia
+The SVN source represents the latest snapshot of ganglia
 development.
 
 To prepare the distribution for compilation, run the 
 script "./bootstrap".
+
+To build a distribution tarball, run:
+
+./configure
+make dist-gzip
+
+To prepare a distribution tree, run:
+
+./configure
+make distdir
+
+To build RPMs after building the tarball:
+
+rpmbuild -ta --target i686,noarch <tarball>
 
 For best results, make sure you have
 at least the following installed.
