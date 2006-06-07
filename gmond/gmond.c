@@ -191,7 +191,6 @@ process_configuration_file(void)
   cleanup_threshold   = cfg_getint( tmp, "cleanup_threshold");
 }
 
-
 static void
 daemonize_if_necessary( char *argv[] )
 {
