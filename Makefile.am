@@ -70,7 +70,7 @@ dist-hook:
 	find $(distdir) -exec touch -r $(distdir)/Makefile.am {} \;
 
 #
-# Make sure distclean ist done in the scrlib tree
+# Make sure distclean is done in the scrlib tree
 #
 distclean-local:
 	cd srclib &&  $(MAKE) $(AM_MAKEFLAGS) distclean
