@@ -21,6 +21,12 @@ Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
 Buildroot: /tmp/%{name}-%{version}-buildroot
 Prefix: /usr
+BuildRequires: libpng-devel, libart_lgpl-devel
+%if %{?suse_version:1}0
+BuildRequires: rrdtool, freetype2-devel
+%else
+BuildRequires: rrdtool-devel, freetype-devel
+%endif
 
 %description
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -97,7 +103,11 @@ can use to build scalable cluster or grid applications
 ## BUILD
 ##
 %build
+%ifarch x86_64
+./configure --prefix=/usr --with-gmetad --libdir=$RPM_BUILD_ROOT/usr/lib64 
+%else
 ./configure --prefix=/usr --with-gmetad
+%endif
 make
 
 ##
@@ -114,10 +124,10 @@ make
 
 if [ "$1" == "1" ]; then
    # Installing new package - start gmetad
-   /etc/rc.d/init.d/gmetad start
+   /etc/init.d/gmetad start
 elif [ "$1" -gt "1" ]; then
    # Upgrading ganglia package - restart gmetad
-   /etc/rc.d/init.d/gmetad restart
+   /etc/init.d/gmetad restart
 fi
 
 
@@ -129,10 +139,10 @@ fi
 
 if [ "$1" == "1" ]; then
    # Installing new package - start gmond
-   /etc/rc.d/init.d/gmond start
+   /etc/init.d/gmond start
 elif [ "$1" -gt "1" ]; then
    # Upgrading ganglia package - restart gmond
-   /etc/rc.d/init.d/gmond restart
+   /etc/init.d/gmond restart
 fi
 
 `rpm -q ganglia-monitor-core-gmond| grep "is not installed" > /dev/null 2>&1`
@@ -161,7 +171,7 @@ fi
 %preun gmetad
 if [ "$1" = 0 ]
 then
-   /etc/rc.d/init.d/gmetad stop
+   /etc/init.d/gmetad stop
    /sbin/chkconfig --del gmetad
 fi
 
@@ -171,7 +181,7 @@ fi
 %preun gmond
 if [ "$1" = 0 ]
 then
-   /etc/rc.d/init.d/gmond stop
+   /etc/init.d/gmond stop
    /sbin/chkconfig --del gmond
 fi
 
@@ -193,19 +203,17 @@ fi
 %else
 
 ## Create the directory structure
-%__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
+%__mkdir -p $RPM_BUILD_ROOT/etc/init.d
 %__mkdir -p $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
 %__mkdir -p $RPM_BUILD_ROOT/usr/share/man/man5
 
 ## Move the files into the structure
 if [ -f /etc/SuSE-release ]; then
-   %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init.SuSE $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
-   %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init.SuSE $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
-   chmod +x $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
-   chmod +x $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+   %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmond
+   %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmetad
 else
-   %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
-   %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+   %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/init.d/gmond
+   %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/init.d/gmetad
 fi
 
 # We just output the default gmond.conf from gmond using the '-t' flag
@@ -226,7 +234,7 @@ fi
 %defattr(-,root,root)
 %attr(0755,nobody,nobody)@varstatedir@/ganglia/rrds
 /usr/sbin/gmetad
-/etc/rc.d/init.d/gmetad
+/etc/init.d/gmetad
 %config(noreplace) /etc/gmetad.conf
 
 ##
@@ -237,7 +245,7 @@ fi
 %attr(0500,root,root)/usr/bin/gmetric
 %attr(0555,root,root)/usr/bin/gstat
 /usr/sbin/gmond
-/etc/rc.d/init.d/gmond
+/etc/init.d/gmond
 %attr(0555,root,root)/usr/share/man/man5/gmond.conf.5*
 %config(noreplace) /etc/gmond.conf
 
@@ -246,7 +254,7 @@ fi
 ##
 %files devel
 /usr/include/ganglia.h
-/usr/lib/libganglia*
+/usr/%{_lib}/libganglia*
 /usr/bin/ganglia-config
 
 %else
@@ -271,6 +279,15 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Mon Jun 05 2006 Bernard Li <bli@bcgsc.ca>
+- Changed /etc/rc.d/init.d -> /etc/init.d
+* Mon May 22 2006 Bernard Li <bli@bcgsc.ca>
+- Add rrdtool/rrdtool-devel, freetype2-devel/freetype-devel,
+  libart_lgpl-devel to BuildRequires
+- Use /usr/lib64 for x86_64
+* Sun May 21 2006 Bernard Li <bli@bcgsc.ca>
+- Correct init scripts dir for SuSE
+- Add BuildRequires for libpng-devel
 * Fri Feb 25 2006 Bernard Li <bli@bcgsc.ca>
 - Use SuSE specific init scripts if /etc/SuSE-release file exists
 * Fri Dec 10 2004 Matt Massie <massie@cs.berkeley.edu>
