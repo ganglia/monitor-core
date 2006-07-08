@@ -1,6 +1,6 @@
 Summary: Ganglia Distributed Monitoring System
 Name: ganglia
-Version: 3.0.3
+Version: 3.0.4
 URL: http://ganglia.info/
 Release: 1 
 License: BSD
