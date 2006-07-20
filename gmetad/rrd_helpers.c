@@ -97,6 +97,7 @@ RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time
        argv[argc++] = gmetad_config.RRAs[i];
      }
 #if 0
+   /* Read in or defaulted in conf.c */
    argv[argc++] = "RRA:AVERAGE:0.5:1:240";
    argv[argc++] = "RRA:AVERAGE:0.5:24:240";
    argv[argc++] = "RRA:AVERAGE:0.5:168:240";

@@ -269,11 +269,11 @@ set_defaults (gmetad_config_t *config)
    config->scalable_mode = 1;
    config->all_trusted = 0;
    config->num_RRAs = 5;
-   config->RRAs[0] = "RRA:AVERAGE:0.5:1:240";
-   config->RRAs[1] = "RRA:AVERAGE:0.5:24:240";
-   config->RRAs[2] = "RRA:AVERAGE:0.5:168:240";
-   config->RRAs[3] = "RRA:AVERAGE:0.5:672:240";
-   config->RRAs[4] = "RRA:AVERAGE:0.5:5760:370";
+   config->RRAs[0] = "RRA:AVERAGE:0.5:1:244";
+   config->RRAs[1] = "RRA:AVERAGE:0.5:24:244";
+   config->RRAs[2] = "RRA:AVERAGE:0.5:168:244";
+   config->RRAs[3] = "RRA:AVERAGE:0.5:672:244";
+   config->RRAs[4] = "RRA:AVERAGE:0.5:5760:374";
 }
 
 int
