@@ -157,6 +157,7 @@ host { \n\
 udp_send_channel { \n\
   mcast_join = 239.2.11.71 \n\
   port = 8649 \n\
+  ttl = 1 \n\
 } \n\
 \n\
 /* You can specify as many udp_recv_channels as you like as well. */ \n\
