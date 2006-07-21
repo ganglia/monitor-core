@@ -665,8 +665,6 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                      metric = &(xmldata->metric);
                      memset((void*) metric, 0, sizeof(*metric));
                      fillmetric(attr, metric, type);
-                     metric->t0 = xmldata->now;
-                     metric->t0.tv_sec -= metric->tn;
                   }
                /* else we have already filled in the metric above. */
             }
@@ -696,6 +694,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
             }
 
          metric->num++;
+         metric->t0 = xmldata->now; /* tell cleanup thread we are using this */
 
          /* Trim metric structure to the correct length. Tricky. */
          hashval.size = sizeof(*metric) - GMETAD_FRAMESIZE + metric->stringslen;
@@ -985,6 +984,7 @@ endElement_CLUSTER(void *data, const char *el)
 
          /* We insert here to get an accurate hosts up/down value. */
          rdatum = hash_insert( &hashkey, &hashval, xmldata->root);
+         source->sum_finished = NULL; /* remember that we released the lock */
          if (!rdatum) {
                err_msg("Could not insert source %s", xmldata->sourcename);
                return 1;
