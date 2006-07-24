@@ -104,7 +104,7 @@ can use to build scalable cluster or grid applications
 ##
 %build
 %ifarch x86_64
-./configure --prefix=/usr --with-gmetad --libdir=$RPM_BUILD_ROOT/usr/lib64 
+./configure --prefix=/usr --with-gmetad --libdir=/usr/lib64 
 %else
 ./configure --prefix=/usr --with-gmetad
 %endif
@@ -220,7 +220,7 @@ fi
 %{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/gmond.conf
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
 
-%__make install prefix=$RPM_BUILD_ROOT/usr
+%__make DESTDIR=$RPM_BUILD_ROOT install
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.conf.5 $RPM_BUILD_ROOT/usr/share/man/man5/gmond.conf.5
 
 %endif
@@ -279,6 +279,10 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Sun Jul 23 2006 Bernard Li <bli@bcgsc.ca>
+- Changed make install prefix=$RPM_BUILD_ROOT/usr to
+  make DESTDIR=$RPM_BUILD_ROOT install (suggested by Jarod Wilson
+  <jwilson@redhat.com>
 * Mon Jun 05 2006 Bernard Li <bli@bcgsc.ca>
 - Changed /etc/rc.d/init.d -> /etc/init.d
 * Mon May 22 2006 Bernard Li <bli@bcgsc.ca>
