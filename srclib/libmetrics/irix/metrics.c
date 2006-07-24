@@ -33,6 +33,8 @@
 #include <sys/types.h>
 #include <sys/times.h>
 
+#include <fcntl.h>
+
 #include <sys/sysinfo.h>
 #include <sys/sysmp.h>
 
