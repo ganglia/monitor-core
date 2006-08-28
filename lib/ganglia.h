@@ -58,6 +58,8 @@ int Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int 
 Ganglia_gmetric Ganglia_gmetric_create( Ganglia_pool parent_pool );
 int Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *type, char *units, unsigned int slope, unsigned int tmax, unsigned int dmax);
 int Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_channels );
+// Yemi
+int Ganglia_gmetric_send_spoof( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_channels, char* spoof_info,int heartbeat);
 void Ganglia_gmetric_destroy( Ganglia_gmetric gmetric );
 
 void build_default_gmond_configuration(Ganglia_pool context);
