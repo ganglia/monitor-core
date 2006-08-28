@@ -21,7 +21,7 @@ Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
 Buildroot: /tmp/%{name}-%{version}-buildroot
 Prefix: /usr
-BuildRequires: libpng-devel, libart_lgpl-devel
+BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++
 %if %{?suse_version:1}0
 BuildRequires: rrdtool, freetype2-devel
 %else
@@ -279,6 +279,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Mon Aug 28 2006 Bernard Li <bli@bcgsc.ca>
+- Added gcc-c++ to BuildRequires
 * Sun Jul 23 2006 Bernard Li <bli@bcgsc.ca>
 - Changed make install prefix=$RPM_BUILD_ROOT/usr to
   make DESTDIR=$RPM_BUILD_ROOT install (suggested by Jarod Wilson
