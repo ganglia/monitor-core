@@ -24,6 +24,16 @@ struct Ganglia_gmetric_message {
   unsigned int dmax;
 };
 
+/* Yemi */
+struct Ganglia_spoof_header {
+  string spoofName<>;
+  string spoofIP<>;
+};
+struct Ganglia_spoof_message {
+  struct Ganglia_spoof_header spheader;
+  struct Ganglia_gmetric_message gmetric;
+};
+
 /*
 ** When adding a new core metric you need to make three changes
 ** in this file:
@@ -92,13 +102,21 @@ enum Ganglia_message_formats {
    metric_mem_rm,
    metric_mem_avm,
    metric_mem_vm,
-   GANGLIA_NUM_25_METRICS /* this should always directly follow the last 25 metric_* */
+   GANGLIA_NUM_25_METRICS, /* this should always directly follow the last 25 metric_* */
+/* Yemi */
+   spoof_metric = 4096,
+   spoof_heartbeat = 4097
 };
 
 union Ganglia_message switch (Ganglia_message_formats id) {
   case metric_user_defined:
     Ganglia_gmetric_message gmetric;
-
+/* Yemi */
+  case spoof_metric:
+    Ganglia_spoof_message spmetric;
+  case spoof_heartbeat:
+    Ganglia_spoof_header spheader;
+ 
   case metric_cpu_num:       /* xdr_u_short */
     unsigned short u_short;
 

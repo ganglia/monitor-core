@@ -701,6 +701,59 @@ Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_ch
   return Ganglia_udp_send_message( send_channels, gmetricmsg, len);
 }
 
+// Yemi
+int
+Ganglia_gmetric_send_spoof( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_channels, char* spoof_info, int heartbeat)
+{
+  int len;
+  XDR x;
+  char gmetricmsg[GANGLIA_MAX_MESSAGE_LEN];
+  Ganglia_message msg;
+  char *spoofName;
+  char *spoofIP;
+  char *buff;
+  int spoof_info_len;
+  int result;
+
+  spoof_info_len = strlen(spoof_info);
+  buff = malloc(spoof_info_len+1);
+  strcpy(buff,spoof_info);
+  spoofIP = buff;
+  if( !(spoofName = strchr(buff+1,':')) ){
+      fprintf(stderr,"Incorrect format for spoof argument. exiting.\n");
+      exit(1);
+  }
+  *spoofName = 0;
+  spoofName++;
+  if(!(*spoofName)){
+      fprintf(stderr,"Incorrect format for spoof argument. exiting.\n");
+      exit(1);
+  }
+  printf(" spoofName: %s    spoofIP: %s \n",spoofName,spoofIP);
+
+  if(heartbeat){
+      msg.id = spoof_heartbeat;
+      msg.Ganglia_message_u.spheader.spoofName = spoofName;
+      msg.Ganglia_message_u.spheader.spoofIP = spoofIP;
+  }else{
+      msg.id = spoof_metric;
+      msg.Ganglia_message_u.spmetric.spheader.spoofName = spoofName;
+      msg.Ganglia_message_u.spmetric.spheader.spoofIP = spoofIP;
+      msg.Ganglia_message_u.spmetric.gmetric = *(gmetric->msg);
+  }
+
+  // memcpy( &(msg.Ganglia_message_u.gmetric), gmetric->msg, sizeof(Ganglia_gmetric_message));
+
+  /* Send the message */
+  xdrmem_create(&x, gmetricmsg, GANGLIA_MAX_MESSAGE_LEN, XDR_ENCODE);
+  xdr_Ganglia_message(&x, &msg);
+  len = xdr_getpos(&x); 
+  result = Ganglia_udp_send_message( send_channels, gmetricmsg, len);
+  free(buff);
+  return result;
+
+}
+
 void
 Ganglia_gmetric_destroy( Ganglia_gmetric gmetric )
 {
