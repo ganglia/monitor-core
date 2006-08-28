@@ -578,19 +578,29 @@ setup_listen_channels_pollset( void )
          }
     }
 }
-
+// Yemi
 static Ganglia_host *
-Ganglia_host_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *fullmsg)
+Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_message *fullmsg)
 {
   apr_status_t status;
   apr_pool_t *pool;
   Ganglia_host *hostdata;
   char *hostname = NULL;
-
+  char *remoteip = remIP;
+ 
   if(!remoteip || !sa || !fullmsg)
     {
       return NULL;
     }
+  
+  if(fullmsg->id == spoof_metric){
+      hostname = fullmsg->Ganglia_message_u.spmetric.spheader.spoofName;
+      remoteip = fullmsg->Ganglia_message_u.spmetric.spheader.spoofIP;
+  }
+  if(fullmsg->id == spoof_heartbeat){
+      hostname = fullmsg->Ganglia_message_u.spheader.spoofName;
+      remoteip = fullmsg->Ganglia_message_u.spheader.spoofIP;
+  }
 
   hostdata =  (Ganglia_host *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
   if(!hostdata)
@@ -689,6 +699,13 @@ Ganglia_host_get( char *remoteip, apr_sockaddr_t *sa, Ganglia_message *fullmsg)
       /* Processing is finished */
       return NULL;
     }
+  if(fullmsg->id == spoof_heartbeat)
+    {
+      /* nothing more needs to be done. we handled the timestamps above. */
+      debug_msg("Got a spoof heartbeat message %d\n", hostdata->gmond_started);
+      /* Processing is finished */
+      return NULL;
+    }
 
   return hostdata;
 }
@@ -739,6 +756,15 @@ Ganglia_message_find_gmetric( Ganglia_host *host, Ganglia_message *message)
 				   message->Ganglia_message_u.gmetric.name,
 				   APR_HASH_KEY_STRING);
 }
+// Yemi
+static Ganglia_metric *
+Ganglia_message_find_spmetric( Ganglia_host *host, Ganglia_message *message)
+{
+  /* Keyed on the name element of the gmetric sent */
+  return (Ganglia_metric *)apr_hash_get( host->gmetrics,
+				   message->Ganglia_message_u.spmetric.gmetric.name,
+				   APR_HASH_KEY_STRING);
+}
 
 static Ganglia_metric *
 Ganglia_message_find_metric( Ganglia_host *host, Ganglia_message *message)
@@ -753,7 +779,7 @@ static void
 Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
 {
   Ganglia_metric *metric = NULL;
-
+  
   if(!host || !message)
     return;
 
@@ -761,6 +787,11 @@ Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
   if(message->id == metric_user_defined)
     {
       metric = Ganglia_message_find_gmetric( host, message);
+    }
+  // Yemi
+  else if(message->id == spoof_metric)
+    {
+      metric = Ganglia_message_find_spmetric( host, message);
     }
   else
     {
@@ -785,6 +816,11 @@ Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
 	{
 	  metric->name = apr_pstrdup( metric->pool, message->Ganglia_message_u.gmetric.name );
 	} 
+      // Yemi
+      if(message->id == spoof_metric)
+	{
+	  metric->name = apr_pstrdup( metric->pool, message->Ganglia_message_u.spmetric.gmetric.name );
+	} 
     }
   else
     {
@@ -793,9 +829,19 @@ Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
     }
 
   /* Copy in the data */
-  memcpy(&(metric->message), message, sizeof(Ganglia_message));
+  // Yemi
+  if(message->id == spoof_metric){
+    // Store data as regular gmetric in hash table!!
 
-  if(message->id == metric_user_defined)
+      metric->message.id = metric_user_defined;   
+      metric->message.Ganglia_message_u.gmetric = message->Ganglia_message_u.spmetric.gmetric;
+
+
+  }else{
+      memcpy(&(metric->message), message, sizeof(Ganglia_message));
+  }
+
+  if(message->id == metric_user_defined || message->id == spoof_metric)
     {
       /* Save the gmetric */
       apr_hash_set( host->gmetrics, metric->name, APR_HASH_KEY_STRING, metric);
