@@ -46,10 +46,10 @@ typedef struct {
   char buffer[BUFFSIZE];
 } timely_file;
 
-timely_file proc_stat    = { 0, 15, "/proc/stat" };
-timely_file proc_loadavg = { 0, 15, "/proc/loadavg" };
-timely_file proc_meminfo = { 0, 30, "/proc/meminfo" };
-timely_file proc_net_dev = { 0, 30, "/proc/net/dev" };
+timely_file proc_stat    = { 0, 1, "/proc/stat" };
+timely_file proc_loadavg = { 0, 5, "/proc/loadavg" };
+timely_file proc_meminfo = { 0, 5, "/proc/meminfo" };
+timely_file proc_net_dev = { 0, 1, "/proc/net/dev" };
 
 char *update_file(timely_file *tf)
 {
