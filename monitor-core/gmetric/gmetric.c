@@ -50,10 +50,19 @@ main( int argc, char *argv[] )
       fprintf(stderr,"Unable to allocate gmetric structure. Exiting.\n");
       exit(1);
     }
-
-  rval = Ganglia_gmetric_set( gmetric, args_info.name_arg, args_info.value_arg,
+  // Yemi 
+  if(args_info.spoof_given && args_info.heartbeat_given){
+      rval = 0;
+  }else{
+      if( ! (args_info.name_given && args_info.value_given && 
+	     args_info.type_given)){
+          fprintf(stderr,"Incorrect options supplied, exiting.\n");
+          exit(1);
+      }
+      rval = Ganglia_gmetric_set( gmetric, args_info.name_arg, args_info.value_arg,
 			      args_info.type_arg, args_info.units_arg, !strcmp(args_info.slope_arg,"zero")? 0: 3,
 			      args_info.tmax_arg, args_info.dmax_arg);
+  }
   /* TODO: make this less ugly later */
   switch(rval)
     {
@@ -72,7 +81,13 @@ main( int argc, char *argv[] )
     }
 
   /* send the message */
-  rval = Ganglia_gmetric_send(gmetric, send_channels);
+  //Yemi
+  if(!strlen(args_info.spoof_arg))
+    {
+      rval = Ganglia_gmetric_send(gmetric, send_channels);
+    }else{
+      rval = Ganglia_gmetric_send_spoof(gmetric, send_channels,args_info.spoof_arg,args_info.heartbeat_given);
+    }
   if(rval)
     {
       fprintf(stderr,"There was an error sending to %d of the send channels.\n", rval);
