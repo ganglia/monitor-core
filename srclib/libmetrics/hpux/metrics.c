@@ -381,7 +381,7 @@ cpu_sintr_func ( void )
 }
 
 g_val_t 
-cpu_aidle_func ( uint32_t i )
+cpu_aidle_func ( void )
 {
    return cpu_func(CP_IDLE + CPUSTATES);
 }
@@ -881,7 +881,7 @@ swap_func( int which)
 #endif
 
 g_val_t
-swap_free_func ( int which)
+swap_free_func ( void )
 {
   return swap_func(SWAP_FREE);
 }
