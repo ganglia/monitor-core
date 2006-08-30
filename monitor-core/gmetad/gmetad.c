@@ -373,7 +373,7 @@ main ( int argc, char *argv[] )
 
    if(debug_level)
       {
-         printf("Sources are ...\n");
+         fprintf(stderr,"Sources are ...\n");
          hash_foreach( sources, print_sources, NULL);
       }
 
