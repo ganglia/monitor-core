@@ -10,11 +10,11 @@ AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-shar dist-zip
 
 # Make sure we run the srclib but don't distribute it.  That
 # is handled in the "dist-hook" below...
-GANGLIA_SUBDIRS = lib srclib tests $(GMETAD_SUBDIR) gmond gmetric
+GANGLIA_SUBDIRS = lib libmetrics srclib tests $(GMETAD_SUBDIR) gmond gmetric
 SUBDIRS = $(GANGLIA_SUBDIRS)
 # Make sure that no matter the setting for --with-gmetad
 # that the gmetad directory gets distributed
-GANGLIA_SUBDIRS_DIST = lib tests gmetad gmond gmetric
+GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gmetric
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
 EXTRA_DIST = README.AIX config ganglia.aix.spec ganglia.spec ganglia.pod ganglia.html mans
