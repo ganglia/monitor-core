@@ -1,8 +1,8 @@
 #!/bin/sh
 # $Id$
 echo "Bootstrapping libmetrics"
-cd srclib/libmetrics && ./bootstrap
-cd ../..
+cd libmetrics && ./bootstrap
+cd ..
 
 echo "Create distribution timestamp"
 touch Makefile.am

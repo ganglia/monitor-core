@@ -1,4 +1,4 @@
-SUBDIRS = libmetrics expat apr confuse
+SUBDIRS = expat apr confuse
 
 test:
 	echo

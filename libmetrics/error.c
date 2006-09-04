@@ -1,7 +1,7 @@
 /**
  * @file error.c Error Handling Functions
  */
-/* $Id$ */
+/* $Id: error.c 582 2005-09-13 10:04:30Z knobi1 $ */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

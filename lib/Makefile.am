@@ -1,7 +1,7 @@
 #SUFFIXES=.x
 #.c.x: rpcgen $<
 
-AM_CFLAGS = -I.. -I. -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/libmetrics/ -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/apr/include/arch/unix/ -I$(top_builddir)/srclib/confuse/src
+AM_CFLAGS = -I.. -I. -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/libmetrics/ -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/apr/include/arch/unix/ -I$(top_builddir)/srclib/confuse/src
 
 include_HEADERS = ganglia.h
 
