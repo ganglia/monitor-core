@@ -120,7 +120,7 @@ nl='
 ganglia_popdir=`pwd`
 
 echo $ac_n "${nl}Configuring libmetrics ...${nl}"
-cd srclib/libmetrics && ./configure --cache-file=$ganglia_popdir/config.cache
+cd libmetrics && ./configure --cache-file=$ganglia_popdir/config.cache
 cd $ganglia_popdir
 
 echo $ac_n "${nl}Configuring expat ...${nl}"

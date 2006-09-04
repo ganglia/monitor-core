@@ -2,7 +2,7 @@ SUBDIRS = gstat
 
 EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
 
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/srclib/libmetrics/ -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/confuse/src/
+AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/libmetrics/ -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/confuse/src/
 
 sbin_PROGRAMS = gmond
 # metric.h and dtd.h are for gmetad/gmetric for now....
@@ -19,7 +19,7 @@ gmond.conf.html: conf.pod
 #monitor.c server.c listen.c cleanup.c \
 #metric.h dtd.h 
 # Add -lintl??? for libconfuse on cygwin?
-gmond_LDADD   = $(top_builddir)/srclib/libmetrics/libmetrics.la \
+gmond_LDADD   = $(top_builddir)/libmetrics/libmetrics.la \
 		$(top_builddir)/lib/libganglia.la \
 	        $(top_builddir)/lib/libgetopthelper.a \
 		$(top_builddir)/srclib/confuse/src/libconfuse.la \

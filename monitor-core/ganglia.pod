@@ -667,7 +667,7 @@ is only partially complete).
   e = Every Platform
 
 If you are interested in B<how> the metrics are collected, just
-take a look in directory C<./srclib/libmetrics> in the source distribution.
+take a look in directory C<./libmetrics> in the source distribution.
 There is a single source file in the directory for each platform that is supported.
 
 =item B<What does the error "Process XML (x): XML_ParseBuffer() error at line x: not well-formed">
