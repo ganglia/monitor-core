@@ -6,7 +6,7 @@
  *  Fixed libkvm code.
  *  Tue Jul 15 16:42:22 EST 2003
  *
- * $Id$
+ * $Id: metrics.c 645 2006-04-14 20:16:06Z brooks_en_davis $
  */
 #include <stdio.h>
 #include <stdlib.h>

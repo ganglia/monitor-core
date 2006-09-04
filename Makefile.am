@@ -77,6 +77,6 @@ distclean-local:
 	-rm -f configure ganglia.html ChangeLog README *.tar.gz aclocal.m4 Makefile.in config.h.in
 	-rm config/depcomp config/missing config/config.guess config/config.sub config/install-sh
 	-find . -name "autom4te.cache" -exec rm -rf {} \;
-	-find gmond gmetad gmetric lib tests srclib/libmetrics -name "Makefile.in" -exec rm -f {} \;
+	-find gmond gmetad gmetric lib tests libmetrics -name "Makefile.in" -exec rm -f {} \;
 #
 bin_SCRIPTS = ganglia-config

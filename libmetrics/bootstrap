@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id$
+# $Id: bootstrap 388 2004-11-18 02:24:06Z massie $
 if [ -d ../autotools ]; then
 	PATH=../autotools/bin:${PATH}
 fi
