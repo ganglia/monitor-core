@@ -284,7 +284,7 @@ fi
 * Sun Jul 23 2006 Bernard Li <bli@bcgsc.ca>
 - Changed make install prefix=$RPM_BUILD_ROOT/usr to
   make DESTDIR=$RPM_BUILD_ROOT install (suggested by Jarod Wilson
-  <jwilson@redhat.com>
+  <jwilson@redhat.com>)
 * Mon Jun 05 2006 Bernard Li <bli@bcgsc.ca>
 - Changed /etc/rc.d/init.d -> /etc/init.d
 * Mon May 22 2006 Bernard Li <bli@bcgsc.ca>
