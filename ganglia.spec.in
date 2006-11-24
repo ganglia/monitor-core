@@ -108,7 +108,9 @@ can use to build scalable cluster or grid applications
 %else
 ./configure --prefix=/usr --with-gmetad
 %endif
+%ifnarch noarch
 make
+%endif
 
 ##
 ## PRE
