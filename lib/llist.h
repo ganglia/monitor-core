@@ -23,9 +23,9 @@
 
 /* programmer manages setting/storage for val */
 typedef struct _llist_entry {
-    void                    *val;   /* Entry value              */
     struct _llist_entry     *prev;  /* Previous entry on list   */
     struct _llist_entry     *next;  /* Next entry on list       */
+    void                    *val;   /* Entry value              */
 } llist_entry;
 
 void llist_add(llist_entry **llist, llist_entry *e);
