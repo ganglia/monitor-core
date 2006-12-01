@@ -223,6 +223,7 @@ fi
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
 
 %__make DESTDIR=$RPM_BUILD_ROOT install
+%__make -C gmond gmond.conf.5
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.conf.5 $RPM_BUILD_ROOT/usr/share/man/man5/gmond.conf.5
 
 %endif
