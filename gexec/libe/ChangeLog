@@ -1,5 +1,18 @@
+2006-02-01  Brent N. Chun  <bnc@theether.org>
+	* Added endianness fix to net.c from Mike Howard and
+          Jose Luis Palacios.  Bumped up to 0.3.0.
+	 
+2004-10-02  Brent N. Chun  <bnc@intel-research.net>
+	* Added placeholder for anet.[ch]
+	* Added pack.[ch] from I3 project
+
+2002-04-29  Brent N. Chun  <bnc@caltech.edu>	
+	* Added Matt Massie's pointer arithmetic patch for
+ 	  portability to IA64. 
+
 2002-03-21  Brent N. Chun  <bnc@caltech.edu>
 	* Fixed memory leak in tree_destroy in tree.c (not freeing parents)
+
 2002-03-18  Brent N. Chun  <bnc@caltech.edu>
 	* Removed tree_node, tree_node_nr functions
 	* Changes based on <david.lombard@mscsoftware.com>'s patch	
@@ -13,4 +26,3 @@
 	  
 2002-03-11  Brent N. Chun  <bnc@caltech.edu>
 	* Initial release
-	

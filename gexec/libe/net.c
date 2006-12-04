@@ -243,11 +243,7 @@ int net_hosttoip(char *host, char *ip)
     if ((h = gethostbyname(host)) == NULL)
         return E_GETHOSTNAME_ERROR;
     memcpy(&addr.s_addr, h->h_addr_list[0], sizeof(struct in_addr));
-    sprintf(ip, "%d.%d.%d.%d",
-            (addr.s_addr & 0x000000FF) >> 0,
-            (addr.s_addr & 0x0000FF00) >> 8,
-            (addr.s_addr & 0x00FF0000) >> 16,
-            (addr.s_addr & 0xFF000000) >> 24);
+    sprintf(ip, "%s", inet_ntoa(addr));
     return E_OK;
 }
 

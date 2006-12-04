@@ -2,7 +2,7 @@ Summary: libe (a library of useful functions in C)
 Name: @PACKAGE@
 Version: @VERSION@
 Release: 1
-Copyright: GPL
+License: GPL
 Group: Development/Libraries
 Source: @PACKAGE@-@VERSION@.tar.gz
 
@@ -30,6 +30,7 @@ make install
 /usr/include/e/e_error.h
 /usr/include/e/hash.h 
 /usr/include/e/io.h
+/usr/include/e/llist.h
 /usr/include/e/net.h
 /usr/include/e/safe.h
 /usr/include/e/token_array.h

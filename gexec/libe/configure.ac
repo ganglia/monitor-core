@@ -6,7 +6,7 @@ AC_INIT(e_error.c)
 dnl
 dnl Sets PACKAGE and VERSION defines
 dnl
-AM_INIT_AUTOMAKE(libe,0.2.2)
+AM_INIT_AUTOMAKE(libe,0.3.0)
 
 dnl
 dnl Creates config.h file with #defines instead of passing to compiler.
@@ -58,6 +58,5 @@ dnl
 dnl Generate Makefiles (and other files) with substitutions.
 dnl
 AC_OUTPUT(Makefile \
+          test/Makefile \
           libe.spec)
-
-

@@ -36,6 +36,10 @@
 #define E_GETHOSTNAME_ERROR    -10
 #define E_GRAPH_CYCLE_ERROR    -11
 #define E_MEMLEN_ERROR         -12
+#define E_OPEN_ERROR           -13
+#define E_STAT_ERROR           -14
+
+#define E_PACK_FORMAT_ERROR    -15 
 
 #define fatal_error(__str)                             \
         fprintf(stderr, "%s:%d ", __FILE__, __LINE__); \
