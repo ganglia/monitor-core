@@ -1,0 +1,22 @@
+2004-09-14  Brent N. Chun  <bnc@intel-research.net>
+	* Using NID_sha1, as opposed to 0, for RSA_sign, RSA_verify (fixes
+	  problems with later versions of openssl, e.g., on RedHat 9).
+	* Version 0.2.2
+	
+2002-04-29  Brent N. Chun  <bnc@caltech.edu>
+	* Added Matt Massie's patch for pointer arithmetic for
+	  portability to IA64.  Also added authd.spec.in to
+	  simplify RPM creation.
+2002-03-18  Brent N. Chun  <bnc@caltech.edu>
+	* Added chkconfig to RPM SPEC file to create/delete symlinks to rc files
+	* Changes based on <david.lombard@mscsoftware.com>'s patch
+	  * Added status and restart to authd.in
+	  * Using valid exit codes, convention is roughly 
+	    * 0 (success)
+	    * 1 (base error, i.e., things in libc/pthreads lib)
+	    * 2 (gexec error, i.e,. things in my code)
+	    * 3 (user error, i.e., user errors such as bad options)
+	* Added -h (help) and -V (version) options
+
+2002-03-11  Brent N. Chun  <bnc@caltech.edu>
+	* Initial release
