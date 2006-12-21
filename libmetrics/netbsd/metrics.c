@@ -9,6 +9,12 @@
 
 #include <sys/param.h> 
 #include <sys/mount.h>
+#if __NetBSD_Version__ > 299000000
+#include <sys/statvfs.h>
+#define statfs statvfs
+#define f_flags f_flag
+#define f_bsize f_frsize
+#endif
 #include <sys/sysctl.h>
 #include <sys/time.h>
 #include <sys/user.h>
@@ -118,17 +124,17 @@ g_val_t
 cpu_speed_func ( void )
 {
    g_val_t val;
-   size_t len;
+   size_t len = sizeof(long);
    long cpu_speed;
 
    cpu_speed = 0;
 
 #if (__NetBSD_Version__ > 299000000)
    if (sysctlbyname("machdep.est.frequency.target", &cpu_speed, &len, NULL, 0) == -1)
-	val.uint16 = 0;
+	val.uint32 = 0;
 #endif
 
-   val.uint16 = cpu_speed /= 1000000;
+   val.uint32 = cpu_speed /= 1000000;
    return val;
 }
 
