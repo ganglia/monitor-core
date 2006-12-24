@@ -26,10 +26,10 @@
  *   number of installed CPUs. That would result in a sparse numering of
  *   CPUs and lead to a core dump with the old algorithm.
  *
- * Modification by Martin Knoblauch:
+ * Modifications made by Martin Knoblauch:
  *
  * - Add proc_run statistics - may need finetuning
- * - Add bytes_in, bytes_out, pakts_in and pkts_out
+ * - Add bytes_in, bytes_out, pkts_in and pkts_out
  * - Fix misallocation of "buffers" (3 needed instead of 2 !!!)
  *   array in determine_cpu_percentages
  * - Port to new get_ifi_info() functionality
@@ -44,7 +44,12 @@
  * - kill get_metric_val. Dead code.
  * - fix potential data corruption when calculating CPU percentages
  *
+ * Modifications made by Carlo Marcelo Arenas Belon:
+ * - Add disk_total, disk_free, part_max_used
+ *
  * Tested on Solaris 5.8 (64-bit) with gcc-3.3.1
+ * Tested on Solaris 9 (64-bit) with gcc-3.4.4
+ * Tested on Solaris 10 SPARC (64-bit) and x86 (32-bit and 64-bit)
  */
 
 #include "kstat.h"
@@ -81,6 +86,12 @@
  * largely an imitation (if not a shameless copy) of the Solaris-specific
  * code for top.
  */
+
+/* used for disk space determination - getmntent(), statvfs()
+ */
+
+#include <sys/mnttab.h>
+#include <sys/statvfs.h>
 
 /*  number of seconds to wait before refreshing/recomputing values off kstat */
 
@@ -1227,36 +1238,115 @@ cpu_sintr_func ( void )
    return val;
 }
 
-/*
-** FIXME
-*/
+/* Solaris Specific path.  but this is a Solaris machine file even if mostly */
+/* stolen from a Linux machine one */
+#define MOUNTS "/etc/mnttab"
+
+/* Prior to Solaris 8 was a regular plain text file which should be locked */
+/* on read to ensure consistency; a read-only filesystem in newer releases */
+
+/* --------------------------------------------------------------------------- */
+int valid_mount_type(const char *type)
+{
+   return ((strncmp(type, "ufs", 3) == 0) || (strncmp(type, "vxfs", 4) == 0));
+}
+
+/* --------------------------------------------------------------------------- */
+float device_space(char *mount, char *device, double *total_size, double *total_free)
+{
+   struct statvfs buf;
+   u_long blocksize;
+   fsblkcnt_t free, size;
+   float pct = 0.0;
+
+   statvfs(mount, &buf);
+   size = buf.f_blocks;
+   free = buf.f_bavail;
+   blocksize = buf.f_frsize;
+   /* Keep running sum of total used, free local disk space. */
+   *total_size += size * (double)blocksize;
+   *total_free += free * (double)blocksize;
+   pct = size ? ((size - free) / (float)size) * 100 : 0.0;
+   return pct;
+}
+
+/* --------------------------------------------------------------------------- */
+float find_disk_space(double *total_size, double *total_free)
+{
+   FILE *mounts;
+   struct mnttab mp;
+   struct statvfs buf;
+   char *mount, *device, *type;
+   /* We report in GB = 1 thousand million bytes */
+   const double reported_units = 1e9;
+   /* Track the most full disk partition, report with a percentage. */
+   float thispct, max=0.0;
+
+   /* Read all currently mounted filesystems. */
+   mounts=fopen(MOUNTS,"r");
+   if (!mounts) {
+      debug_msg("Df Error: could not open mounts file %s. Are we on the right OS?\n", MOUNTS);
+      return max;
+   }
+
+   while (getmntent(mounts, &mp) == 0) {
+      mount = mp.mnt_mountp;
+      device = mp.mnt_special;
+      type = mp.mnt_fstype;
+
+      if (!valid_mount_type(type)) continue;
+
+      thispct = device_space(mount, device, total_size, total_free);
+      debug_msg("Counting device %s (%.2f %%)", device, thispct);
+      if (!max || max<thispct)
+         max = thispct;
+   }
+   fclose(mounts);
+
+   *total_size = *total_size / reported_units;
+   *total_free = *total_free / reported_units;
+   debug_msg("For all disks: %.3f GB total, %.3f GB free for users.", *total_size, *total_free);
+
+   return max;
+}
+
 g_val_t 
 disk_free_func ( void )
 {
+   double total_free = 0.0;
+   double total_size = 0.0;
    g_val_t val;
-   val.d = 0;
+
+   find_disk_space(&total_size, &total_free);
+
+   val.d = total_free;
    return val;
 }
 
-/*
-** FIXME
-*/
 g_val_t 
 disk_total_func ( void )
 {
+   double total_free = 0.0;
+   double total_size = 0.0;
    g_val_t val;
-   val.d = 0;
+
+   find_disk_space(&total_size, &total_free);
+
+   val.d = total_size;
    return val;
 }
 
-/*
-** FIXME
-*/
 g_val_t 
 part_max_used_func ( void )
 {
+   double total_free = 0.0;
+   double total_size = 0.0;
+   float most_full;
    g_val_t val;
-   val.f = 0.0;
+
+   most_full = find_disk_space(&total_size, &total_free);
+
+   val.f = most_full;
    return val;
 }
 
