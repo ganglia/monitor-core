@@ -36,7 +36,7 @@ Socket(int family, int type, int protocol)
 }
 
 int
-Ioctl(int fd, int request, void *arg)
+Ioctl(int fd, unsigned long request, void *arg)
 {
   int             n;
 
