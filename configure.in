@@ -374,8 +374,11 @@ dnl
 *netbsd*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		varstatedir="/var/db"
 		AC_DEFINE(NETBSD, 1, NETBSD);; 
+*openbsd*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		varstatedir="/var/db"
+		AC_DEFINE(OPENBSD, 1, OPENBSD);;
 *cygwin*)      	LDFLAGS="-liphlpapi"
-		AC_DEFINE(CYGWIN,1,CYGWIN)
+		AC_DEFINE(CYGWIN, 1, CYGWIN)
 esac
 
 dnl Define VARSTATEDIR in config.h
