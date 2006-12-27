@@ -127,9 +127,12 @@ dnl  LIBS="-lpthread $LIBS"
 *freebsd*)      OS="freebsd"
 		AC_DEFINE(FREEBSD, 1, FREEBSD)
 		;; 
-*netbsd*)      OS="netbsd"
+*netbsd*)       OS="netbsd"
 		AC_DEFINE(NETBSD, 1, NETBSD)
 		;; 
+*openbsd*)      OS="openbsd"
+		AC_DEFINE(OPENBSD, 1, OPENBSD)
+		;;
 *cygwin*)      	OS="cygwin"
                 dnl LIBS="$LIBS -lrpc"
 		AC_DEFINE(CYGWIN,1,CYGWIN)
@@ -147,6 +150,7 @@ AC_CONFIG_FILES([Makefile
                  irix/Makefile
                  linux/Makefile
                  netbsd/Makefile
+                 openbsd/Makefile
                  osf/Makefile
                  solaris/Makefile])
 AC_OUTPUT
