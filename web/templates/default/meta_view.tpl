@@ -23,14 +23,14 @@
   <TD VALIGN=top align=right>
   <A HREF="{url}">
    <IMG SRC="./graph.php?{graph_url}&g=load_report&z=medium&r={range}"
-       HEIGHT="147" WIDTH="395" ALT="{name} Load" BORDER="0">
+       ALT="{name} Load" BORDER="0">
   </A>
   </TD>
 
   <TD VALIGN=top>
   <A HREF="{url}" VALIGN=top>
    <IMG SRC="./graph.php?{graph_url}&g=mem_report&z=medium&r={range}"
-       HEIGHT="160" WIDTH="395" ALT="{name} MEM" BORDER="0">
+       ALT="{name} MEM" BORDER="0">
   </A>
    </TD>
 <!-- END BLOCK : public -->

@@ -20,16 +20,16 @@
 </TD>
 
 <TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top>
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster} LOAD" 
+<IMG ALT="{cluster} LOAD" 
    SRC="./graph.php?g=load_report&amp;z=medium&amp;{graph_args}">
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster} CPU" 
+<IMG ALT="{cluster} CPU" 
    SRC="./graph.php?g=cpu_report&amp;z=medium&amp;{graph_args}">
-<IMG HEIGHT="160" WIDTH="395" ALT="{cluster} MEM" 
+<IMG ALT="{cluster} MEM" 
    SRC="./graph.php?g=mem_report&amp;z=medium&amp;{graph_args}">
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster} NETWORK" 
+<IMG ALT="{cluster} NETWORK" 
    SRC="./graph.php?g=network_report&amp;z=medium&amp;{graph_args}">
 <!-- START BLOCK : optional_graphs -->
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster} {name}"
+<IMG ALT="{cluster} {name}"
    SRC="./graph.php?g={name}_report&amp;z=medium&amp;{graph_args}">
 <!-- END BLOCK : optional_graphs -->
 </TD>
