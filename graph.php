@@ -42,16 +42,25 @@ if ($size == "small")
     {
       $height = 40;
       $width = 130;
+      $fudge_0 = 0;
+      $fudge_1 = 0;
+      $fudge_2 = 0;
     }
 else if ($size == "medium")
     {
       $height = 75;
       $width = 300;
+      $fudge_0 = 0;
+      $fudge_1 = 14;
+      $fudge_2 = 28;
     }
 else
     {
       $height = 100;
       $width = 400;
+      $fudge_0 = 0;
+      $fudge_1 = 0;
+      $fudge_2 = 0;
     }
 
 
@@ -82,10 +91,12 @@ switch ($context)
       exit;
 }
 
+$fudge = 0;
 if ($graph)   /* Canned graph request */
     {
       if($graph == "cpu_report")
          {
+            $fudge = $fudge_1;
             $style = "CPU";
 
             $upper_limit = "--upper-limit 100 --rigid";
@@ -134,6 +145,7 @@ if ($graph)   /* Canned graph request */
          }
       else if ($graph == "mem_report")
          {
+            $fudge = $fudge_0;
             $style = "Memory";
 
             $lower_limit = "--lower-limit 0 --rigid";
@@ -165,6 +177,7 @@ if ($graph)   /* Canned graph request */
          }
       else if ($graph == "load_report")
          {
+            $fudge = $fudge_2;
             $style = "Load";
 
             $lower_limit = "--lower-limit 0 --rigid";
@@ -187,6 +200,7 @@ if ($graph)   /* Canned graph request */
          }
       else if ($graph == "network_report")
          {
+            $fudge = $fudge_2;
             $style = "Network";
 
             $lower_limit = "--lower-limit 0 --rigid";
@@ -200,6 +214,7 @@ if ($graph)   /* Canned graph request */
          }
       else if ($graph == "packet_report")
          {
+            $fudge = $fudge_2;
             $style = "Packets";
 
             $lower_limit = "--lower-limit 0 --rigid";
@@ -305,8 +320,9 @@ if ($range=="month")
 #
 # Generate the rrdtool graph command.
 #
+$fudge += $height;
 $command = RRDTOOL . " graph - --start $start --end $end ".
-   "--width $width --height $height $upper_limit $lower_limit ".
+   "--width $width --height $fudge $upper_limit $lower_limit ".
    "--title '$title' $vertical_label $extras $background ".
    $series;
 

@@ -217,23 +217,25 @@ function find_limits($nodes, $metricname)
          $out = array();
 
          $rrd_dir = "$rrds/$clustername/$host";
-         $command = RRDTOOL . " graph - --start $start --end $end ".
-            "DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
-            "PRINT:limits:MAX:%.2lf ".
-            "PRINT:limits:MIN:%.2lf";
-         exec($command, $out);
-	 if(isset($out[1])) {
-         	$thismax = $out[1];
-	 } else {
-		$thismax = NULL;
-	 }
-         if (!is_numeric($thismax)) continue;
-         if ($max < $thismax) $max = $thismax;
+         if (file_exists("$rrd_dir/$metricname.rrd")) {
+		$command = RRDTOOL . " graph - --start $start --end $end ".
+		"DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
+		"PRINT:limits:MAX:%.2lf ".
+		"PRINT:limits:MIN:%.2lf";
+		exec($command, $out);
+		if(isset($out[1])) {
+         		$thismax = $out[1];
+	 	} else {
+			$thismax = NULL;
+	 	}
+	 if (!is_numeric($thismax)) continue;
+	 if ($max < $thismax) $max = $thismax;
 
-         $thismin=$out[2];
-         if (!is_numeric($thismin)) continue;
-         if ($min > $thismin) $min = $thismin;
-         #echo "$host: $thismin - $thismax (now $value)<br>\n";
+	 $thismin=$out[2];
+	 if (!is_numeric($thismin)) continue;
+	 if ($min > $thismin) $min = $thismin;
+	 #echo "$host: $thismin - $thismax (now $value)<br>\n";
+	 }
       }
       
       return array($min, $max);

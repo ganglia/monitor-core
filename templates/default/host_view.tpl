@@ -50,15 +50,15 @@
 </TD>
 
 <TD ALIGN="CENTER" VALIGN="TOP" WIDTH="395">
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster_url} LOAD"
+<IMG ALT="{cluster_url} LOAD"
    SRC="./graph.php?g=load_report&z=medium&c={cluster_url}&{graphargs}">
-<IMG HEIGHT="160" WIDTH="395" ALT="{cluster_url} MEM"
+<IMG ALT="{cluster_url} MEM"
    SRC="./graph.php?g=mem_report&z=medium&c={cluster_url}&{graphargs}">
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster_url} CPU"
+<IMG ALT="{cluster_url} CPU"
    SRC="./graph.php?g=cpu_report&z=medium&c={cluster_url}&{graphargs}">
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster_url} NETWORK"
+<IMG ALT="{cluster_url} NETWORK"
    SRC="./graph.php?g=network_report&z=medium&c={cluster_url}&{graphargs}">
-<IMG HEIGHT="147" WIDTH="395" ALT="{cluster_url} PACKETS"
+<IMG ALT="{cluster_url} PACKETS"
    SRC="./graph.php?g=packet_report&z=medium&c={cluster_url}&{graphargs}">
 
 </TD>
@@ -82,7 +82,7 @@
  <TD>
 
 <!-- START BLOCK : vol_metric_info -->
-<IMG HEIGHT="147" WIDTH="395" ALT="{alt}" SRC="./graph.php?{graphargs}">{br}
+<IMG ALT="{alt}" SRC="./graph.php?{graphargs}">{br}
 <!-- END BLOCK : vol_metric_info -->
 
  </TD>
