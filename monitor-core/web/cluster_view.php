@@ -208,7 +208,7 @@ foreach ( $sorted_hosts as $host => $value )
          {
             $cell="<td><a href=$host_link>".
                "<img src=\"./graph.php?$graphargs\" ".
-               "alt=\"$host\" height=112 width=225 border=0></a></td>";
+               "alt=\"$host\" border=0></a></td>";
          }
 
       $tpl->assign("metric_image", $cell);
