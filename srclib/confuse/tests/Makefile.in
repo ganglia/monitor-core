@@ -35,7 +35,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = check_confuse$(EXEEXT)
+@HAVE_CHECK_TRUE@check_PROGRAMS = check_confuse$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -50,16 +50,19 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/support/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-am_check_confuse_OBJECTS = check_confuse-check_confuse.$(OBJEXT) \
-	check_confuse-suite_single.$(OBJEXT) \
-	check_confuse-suite_dup.$(OBJEXT) \
-	check_confuse-suite_list.$(OBJEXT) \
-	check_confuse-suite_validate.$(OBJEXT) \
-	check_confuse-suite_func.$(OBJEXT)
+am__check_confuse_SOURCES_DIST = check_confuse.c suite_single.c \
+	suite_dup.c suite_list.c suite_validate.c suite_func.c
+@HAVE_CHECK_TRUE@am_check_confuse_OBJECTS =  \
+@HAVE_CHECK_TRUE@	check_confuse-check_confuse.$(OBJEXT) \
+@HAVE_CHECK_TRUE@	check_confuse-suite_single.$(OBJEXT) \
+@HAVE_CHECK_TRUE@	check_confuse-suite_dup.$(OBJEXT) \
+@HAVE_CHECK_TRUE@	check_confuse-suite_list.$(OBJEXT) \
+@HAVE_CHECK_TRUE@	check_confuse-suite_validate.$(OBJEXT) \
+@HAVE_CHECK_TRUE@	check_confuse-suite_func.$(OBJEXT)
 check_confuse_OBJECTS = $(am_check_confuse_OBJECTS)
 am__DEPENDENCIES_1 =
-check_confuse_DEPENDENCIES = ../src/libconfuse.la \
-	$(am__DEPENDENCIES_1)
+@HAVE_CHECK_TRUE@check_confuse_DEPENDENCIES = ../src/libconfuse.la \
+@HAVE_CHECK_TRUE@	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/support/depcomp
 am__depfiles_maybe = depfiles
@@ -72,7 +75,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(check_confuse_SOURCES)
-DIST_SOURCES = $(check_confuse_SOURCES)
+DIST_SOURCES = $(am__check_confuse_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -110,6 +113,8 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 GMSGFMT = @GMSGFMT@
+HAVE_CHECK_FALSE = @HAVE_CHECK_FALSE@
+HAVE_CHECK_TRUE = @HAVE_CHECK_TRUE@
 HAVE_PKGCONFIG_FALSE = @HAVE_PKGCONFIG_FALSE@
 HAVE_PKGCONFIG_TRUE = @HAVE_PKGCONFIG_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
@@ -173,7 +178,6 @@ build_alias = @build_alias@
 build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
-check_confuse = @check_confuse@
 confuse_cflags = @confuse_cflags@
 confuse_cppflags = @confuse_cppflags@
 confuse_libs = @confuse_libs@
@@ -200,12 +204,13 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@
-TESTS = check_confuse
-check_confuse_SOURCES = check_confuse.c suite_single.c suite_dup.c suite_list.c suite_validate.c \
-					  suite_func.c
+@HAVE_CHECK_FALSE@TESTS = 
+@HAVE_CHECK_TRUE@TESTS = check_confuse
+@HAVE_CHECK_TRUE@check_confuse_SOURCES = check_confuse.c suite_single.c suite_dup.c suite_list.c suite_validate.c \
+@HAVE_CHECK_TRUE@					  suite_func.c
 
-check_confuse_CPPFLAGS = -I$(top_srcdir)/src @CHECK_CFLAGS@
-check_confuse_LDADD = -L../src/ @CHECK_LIBS@ ../src/libconfuse.la $(LTLIBINTL)
+@HAVE_CHECK_TRUE@check_confuse_CPPFLAGS = -I$(top_srcdir)/src @CHECK_CFLAGS@
+@HAVE_CHECK_TRUE@check_confuse_LDADD = -L../src/ @CHECK_LIBS@ ../src/libconfuse.la $(LTLIBINTL)
 EXTRA_DIST = a.conf b.conf
 CLEANFILES = *~ \#*\#
 all: all-am
