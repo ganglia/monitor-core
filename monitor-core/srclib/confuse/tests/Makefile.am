@@ -1,3 +1,5 @@
+if HAVE_CHECK
+
 TESTS=check_confuse
 
 check_PROGRAMS=check_confuse
@@ -5,6 +7,12 @@ check_confuse_SOURCES=check_confuse.c suite_single.c suite_dup.c suite_list.c su
 					  suite_func.c
 check_confuse_CPPFLAGS=-I$(top_srcdir)/src @CHECK_CFLAGS@
 check_confuse_LDADD=-L../src/ @CHECK_LIBS@ ../src/libconfuse.la $(LTLIBINTL)
+
+else
+
+TESTS=
+
+endif
+
 EXTRA_DIST=a.conf b.conf
 CLEANFILES=*~ \#*\#
-
