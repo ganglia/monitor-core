@@ -31,7 +31,7 @@ AC_C_CONST
 # Checks for library functions.
 # AC_FUNC_MALLOC
 # AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([strcasecmp strdup strndup])
+AC_CHECK_FUNCS([strcasecmp strdup strndup strlcat])
 
 dnl pkgconfig/confuse-config.
 dnl If pkgconfig is found, use it and disable confuse-config, otherwise do the

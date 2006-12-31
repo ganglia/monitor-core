@@ -1105,6 +1105,7 @@ DLLIMPORT cfg_t *cfg_init(cfg_opt_t *opts, cfg_flag_t flags)
 DLLIMPORT char *cfg_tilde_expand(const char *filename)
 {
     char *expanded = 0;
+    int len;
 
 #ifndef _WIN32
     /* do tilde expansion
@@ -1136,9 +1137,14 @@ DLLIMPORT char *cfg_tilde_expand(const char *filename)
 
         if(passwd)
         {
-            expanded = (char *)malloc(strlen(passwd->pw_dir) + strlen(file) + 1);
-            strcpy(expanded, passwd->pw_dir);
+            len = strlen(passwd->pw_dir) + strlen(file) + 1;
+            expanded = (char *)malloc(len);
+            strncpy(expanded, passwd->pw_dir, strlen(passwd->pw_dir));
+#ifdef HAVE_STRLCAT
+            strlcat(expanded, file, len);
+#else
             strcat(expanded, file);
+#endif
         }
     }
 #endif
