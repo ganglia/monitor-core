@@ -19,7 +19,8 @@ AC_PROG_LIBTOOL
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION(0.14.1)
 
-AM_PATH_CHECK(, [AC_SUBST([check_confuse], ['check_confuse${EXTEXT}'])], [AC_WARN([Check not found, tests will not be built])])
+AM_PATH_CHECK(, [have_check="yes"], [AC_MSG_WARN([Check not found, tests will not be built])])
+AM_CONDITIONAL(HAVE_CHECK, test x"$have_check" = "xyes")
 
 # Checks for header files.
 AC_HEADER_STDC
