@@ -184,7 +184,7 @@ if ( $clustername && !$hostname )
             $node_menu .= "<OPTION VALUE=\"\">--Choose a Node\n";
             if(is_array($hosts_up))
                {
-                  ksort($hosts_up);
+                  uksort($hosts_up, "strnatcmp");
                   foreach($hosts_up as $k=> $v)
                      {
                         $url = rawurlencode($k);
@@ -193,7 +193,7 @@ if ( $clustername && !$hostname )
                }
             if(is_array($hosts_down))
                {
-                  ksort($hosts_down);
+                  uksort($hosts_down, "strnatcmp");
                   foreach($hosts_down as $k=> $v)
                      {
                         $url = rawurlencode($k);

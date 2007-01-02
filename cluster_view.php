@@ -10,7 +10,17 @@ $cpu_num = !$showhosts ? $metrics["cpu_num"]['SUM'] : cluster_sum("cpu_num", $me
 $load_one_sum = !$showhosts ? $metrics["load_one"]['SUM'] : cluster_sum("load_one", $metrics);
 $load_five_sum = !$showhosts ? $metrics["load_five"]['SUM'] : cluster_sum("load_five", $metrics);
 $load_fifteen_sum = !$showhosts ? $metrics["load_fifteen"]['SUM'] : cluster_sum("load_fifteen", $metrics);
-$units = !$showhosts ? $metrics[$metricname]['UNITS'] : $metrics[key($metrics)][$metricname]['UNITS'];
+#
+# Correct handling of *_report metrics
+#
+if (!$showhosts) {
+  if(array_key_exists($metricname, $metrics))
+     $units = $metrics[$metricname]['UNITS'];
+  }
+else {
+  if(array_key_exists($metricname, $metrics[key($metrics)]))
+     $units = $metrics[key($metrics)][$metricname]['UNITS'];
+  }
 
 $tpl->assign("num_nodes", intval($cluster['HOSTS_UP']));
 if(isset($cluster['HOSTS_DOWN'])) {
@@ -45,12 +55,24 @@ foreach ($optional_graphs as $g) {
 	
 }
 
-$units=$units ? "($units)" : "";
+#
+# Correctly handle *_report cases and blank (" ") units
+#
+if (isset($units)) {
+  if ($units == " ")
+    $units = "";
+  else
+    $units=$units ? "($units)" : "";
+}
+else {
+  $units = "";
+}
 $tpl->assign("metric","$metricname $units");
 $tpl->assign("sort", $sort);
 $tpl->assign("range", $range);
 # Host columns menu defined in header.php
-$tpl->assign("cols_menu", $cols_menu);
+if ($showhosts)
+  $tpl->assign("cols_menu", $cols_menu);
 $tpl->assign("checked$showhosts", "checked");
 
 $sorted_hosts = array();
@@ -106,7 +128,7 @@ else
       # Show pie chart of hosts up/down
       $pie_args = "title=" . rawurlencode("Host Status");
       $pie_args .= "&amp;size=250x150";
-      $up_color = $load_colors["50-75"];
+      $up_color = $load_colors["25-50"];
       $down_color = $load_colors["down"];
       $pie_args .= "&amp;Up=$cluster[HOSTS_UP],$up_color";
       $pie_args .= "&amp;Down=$cluster[HOSTS_DOWN],$down_color";
@@ -125,7 +147,7 @@ switch ($sort)
       arsort($sorted_hosts);
       break;
    case "by hostname":
-      ksort($sorted_hosts);
+      uksort($sorted_hosts, "strnatcmp");
       break;
    default:
    case "ascending":
