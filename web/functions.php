@@ -206,9 +206,14 @@ function find_limits($nodes, $metricname)
 
    $firsthost = key($metrics);
    
-   if ($metrics[$firsthost][$metricname]['TYPE'] == "string"
-      or $metrics[$firsthost][$metricname]['SLOPE'] == "zero")
-         return array(0,0);
+   if (array_key_exists($metricname,$metrics[$firsthost])) {
+     if ($metrics[$firsthost][$metricname]['TYPE'] == "string"
+        or $metrics[$firsthost][$metricname]['SLOPE'] == "zero")
+           return array(0,0);
+   }
+   else {
+     return array(0,0);
+   }
 
    $max=0;
    $min=0;
