@@ -235,7 +235,7 @@ os_name_func ( void )
    mib[1] = KERN_OSTYPE;
 
    if (sysctl(mib, 2, &osname, &len, NULL, 0) == -1 || !len)
-        strncpy( val.str, "NetBSD", MAX_G_STRING_SIZE );
+        strncpy( val.str, "OpenBSD", MAX_G_STRING_SIZE );
 
    strncpy( val.str, osname, MAX_G_STRING_SIZE );
  
