@@ -265,6 +265,9 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Mon Jan 08 2007 Bernard Li <bernard@vanhpc.org>
+- Do not automatically start/restart services as this may cause 
+  ganglia to startup with bad config.
 * Mon Aug 28 2006 Bernard Li <bli@bcgsc.ca>
 - Added gcc-c++ to BuildRequires
 * Sun Jul 23 2006 Bernard Li <bli@bcgsc.ca>
