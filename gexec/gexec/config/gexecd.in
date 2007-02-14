@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# chkconfig: 2345 20 80
+# description: gexec startup script
+#
+# 1. This file should be installed as /etc/init.d/gexecd
+# 
+# 2. Start gexecd with:
+#
+#      /etc/init.d/gexecd start
+#
+# Source function library.
+[ -f /etc/rc.d/init.d/functions ] || exit 0
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+
+#
+# The pathname substitution in daemon command assumes prefix and
+# exec_prefix are same.  This is the default, unless the user requests
+# otherwise.
+#
+case "$1" in
+    start)
+        echo -n "Starting gexecd: "
+   	daemon @prefix@/sbin/gexecd </dev/null >/dev/null 2>&1 &
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/gexecd
+        ;;
+    stop)
+        echo -n "Shutting down gexecd: "
+        killproc gexecd
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/gexecd
+        echo
+        ;;
+    status)
+        status gexecd
+        ;;
+    restart)
+        $0 stop
+        $0 start
+		;;
+    *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac

@@ -32,11 +32,12 @@
 #include <e/net.h>
 #include <e/token_array.h>
 #include <e/xmalloc.h>
+#include <e/llist.h>
 #include "gexec.h"
 #include "gexec_lib.h"
 #include "gexec_options.h"
 #ifdef GANGLIA
-#include <ganglia/gexec_funcs.h>
+#include <ganglia.h>
 extern void err_quiet();
 #endif /* GANGLIA */
 

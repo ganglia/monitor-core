@@ -6,7 +6,7 @@ AC_INIT(gexec.h)
 dnl
 dnl Sets PACKAGE and VERSION defines
 dnl
-AM_INIT_AUTOMAKE(gexec,0.3.4)
+AM_INIT_AUTOMAKE(gexec,0.3.7)
 
 dnl
 dnl Creates config.h file with #defines instead of passing to compiler.
@@ -23,7 +23,7 @@ dnl Checks for programs.
 dnl
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_PROG_RANLIB
+AC_PROG_LIBTOOL
 AC_PROG_AWK
 AC_PROG_LN_S
 
@@ -35,7 +35,7 @@ AC_ARG_ENABLE(ganglia,
 [ if test "$enableval" = "yes" ; then
      echo "Use of Ganglia for node selection enabled"
      AC_DEFINE(GANGLIA)
-     GANGLIA_LIB="/usr/lib/libganglia.a"
+     GANGLIA_LIB="@libdir@/libganglia.a"
   else
      GANGLIA_LIB=""
   fi
@@ -49,11 +49,11 @@ dnl
 dnl
 dnl Checks for libraries.
 dnl
-AC_CHECK_LIB(auth, auth_init_credentials)
-AC_CHECK_LIB(crypto, CRYPTO_free)
-AC_CHECK_LIB(e, barrier_create)
-AC_CHECK_LIB(pthread, pthread_create)
-AC_CHECK_LIB(ssl, RSA_free)
+AC_CHECK_LIB([auth -le -lssl], auth_init_credentials,[],[AC_MSG_ERROR(libauth not found)])
+AC_CHECK_LIB(crypto, CRYPTO_free,[],[AC_MSG_ERROR(libcrypto test failed)])
+AC_CHECK_LIB([e -lpthread], barrier_create,[],[AC_MSG_ERROR(libe not found)])
+AC_CHECK_LIB(pthread, pthread_create,[],[AC_MSG_ERROR(pthread_create failed)])
+AC_CHECK_LIB(ssl, RSA_free,[],[AC_MSG_ERROR(libssl RSA_free failed)])
 
 dnl
 dnl Checks for header files.
@@ -81,6 +81,6 @@ dnl
 dnl Generate Makefiles with substitutions.
 dnl
 AC_OUTPUT(Makefile     \
-          config/gexec \
+          config/gexecd \
           gexec.spec)
    
