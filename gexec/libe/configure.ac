@@ -23,7 +23,7 @@ dnl Checks for programs.
 dnl
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_PROG_RANLIB
+AC_PROG_LIBTOOL
 
 dnl
 dnl Optional modules

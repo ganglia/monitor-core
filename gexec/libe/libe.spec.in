@@ -1,7 +1,7 @@
 Summary: libe (a library of useful functions in C)
 Name: @PACKAGE@
 Version: @VERSION@
-Release: 1
+Release: 3
 License: GPL
 Group: Development/Libraries
 Source: @PACKAGE@-@VERSION@.tar.gz
@@ -13,7 +13,7 @@ libe (a library of useful functions in C)
 %setup
 
 %build
-./configure --prefix=/usr
+%configure --prefix=/usr
 make RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
 
 %install
@@ -22,7 +22,7 @@ make install
 %clean
 
 %files
-/usr/lib/libe.a
+/usr/%{_lib}/libe.a
 /usr/include/e/barrier.h
 /usr/include/e/bitmask.h
 /usr/include/e/bytes.h
@@ -38,3 +38,6 @@ make install
 /usr/include/e/xmalloc.h
 
 %post 
+
+%changelog
+
