@@ -1,3 +1,12 @@
+RedHat 9 Installation
+==================
+
+Add the following line to /etc/services:
+
+   gexec 2875/tcp # Caltech GEXEC
+
+This is required to get GEXEC working through xinetd on Redhat 9.
+
 Basic Installation
 ==================
 

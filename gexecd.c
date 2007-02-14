@@ -347,8 +347,7 @@ static int route_down_stdin_handler(int up_sock, int *child_socks, int nchildren
         w_stdin = -1;
     }
     else {
-        if (io_write_bytes(w_stdin, stdin_buf, stdin_len) != E_OK)
-            return GEXEC_IO_ERROR;
+        io_write_bytes(w_stdin, stdin_buf, stdin_len);
     }
     return GEXEC_OK;
 }

@@ -1,11 +1,12 @@
 Summary: gexec (cluster remote execution environment)
 Name: @PACKAGE@
 Version: @VERSION@
-Release: 1
-Copyright: GPL
+Release: 4
+License: GPL
 Group: System Environment/Daemons
 Source: @PACKAGE@-@VERSION@.tar.gz
 Requires: gexec
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 gexec (cluster remote execution environment)
@@ -14,12 +15,12 @@ gexec (cluster remote execution environment)
 %setup
 
 %build
-./configure --prefix=/usr --enable-ganglia
-make RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
+%configure
+make ROOT="$RPM_BUILD_ROOT" RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
 
 %install
-make install
-install -D -m 755 config/gexec /etc/xinetd.d/gexec
+make DESTDIR="$RPM_BUILD_ROOT" install
+install -D -m 755 config/gexecd $RPM_BUILD_ROOT/etc/init.d/gexecd
 
 %clean
 
@@ -27,14 +28,25 @@ install -D -m 755 config/gexec /etc/xinetd.d/gexec
 %defattr(-, root, root)
 /usr/sbin/gexecd
 /usr/bin/gexec
-/usr/lib/libgexec.a
+/usr/%{_lib}/libgexec.a
 /usr/include/gexec_lib.h
-/etc/xinetd.d/gexec
+/etc/init.d/gexecd
 
 %post 
-echo "Sending SIGUSR2 to xinetd (pid `cat /var/run/xinetd.pid`)"
-kill -USR2 `cat /var/run/xinetd.pid`
+if [ "$1" = 1 ]; then
+   /etc/init.d/gexecd restart
+   chkconfig --add gexecd
+fi
+
+%preun
+if [ "$1" = 0 ]; then
+   /etc/init.d/gexecd stop
+   chkconfig --del gexecd
+fi
 
 %postun
-echo "Sending SIGUSR2 to xinetd (pid `cat /var/run/xinetd.pid`)"
-kill -USR2 `cat /var/run/xinetd.pid`
+
+%changelog
+* Thu Dec 07 2006 Erich Focht
+- Stopping service in "make uninstall"
+- updated version to 0.3.6-2
