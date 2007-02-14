@@ -103,7 +103,7 @@ can use to build scalable cluster or grid applications
 ## BUILD
 ##
 %build
-%ifarch x86_64
+%ifarch x86_64 ppc64
 ./configure --prefix=/usr --with-gmetad --libdir=/usr/lib64 
 %else
 ./configure --prefix=/usr --with-gmetad
