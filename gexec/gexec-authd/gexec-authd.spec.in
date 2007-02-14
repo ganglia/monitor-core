@@ -1,7 +1,7 @@
 Summary: authd (RSA authentication daemon) for gexec and pcp
 Name: @PACKAGE@
 Version: @VERSION@
-Release: 1
+Release: 4
 License: GPL
 Group: System Environment/Daemons
 Source: @PACKAGE@-@VERSION@.tar.gz
@@ -15,21 +15,21 @@ authd (RSA authentication daemon)
 %setup
 
 %build
-./configure --prefix=/usr
+%configure
 make RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
 
 %install
 make install
-install -D -m 755 config/authd /etc/init.d/authd
+install -D -m 755 config/gexec-authd /etc/init.d/gexec-authd
 
 %clean
 
 %files
 %defattr(-, root, root)
 /usr/sbin/authd
-/usr/lib/libauth.a
+/usr/%{_lib}/libauth.a
 /usr/include/auth.h
-/etc/init.d/authd
+/etc/init.d/gexec-authd
 
 %pre
 
@@ -38,19 +38,19 @@ if [ "$1" = 1 ]; then
   /usr/bin/openssl genrsa -out /etc/auth_priv.pem
   /usr/bin/openssl rsa -in /etc/auth_priv.pem -pubout -out /etc/auth_pub.pem
   /bin/chmod 600 /etc/auth_priv.pem
-  /etc/init.d/authd restart
-   chkconfig --add authd
+  /etc/init.d/gexec-authd restart
+   chkconfig --add gexec-authd
 fi
 
 %preun
 if [ "$1" = 0 ]; then
-   /etc/init.d/authd stop
-   chkconfig --del authd
+   /etc/init.d/gexec-authd stop
+   chkconfig --del gexec-authd
 fi
 
 %postun
 if [ "$1" = 1 ]; then
-   /etc/init.d/authd restart
+   /etc/init.d/gexec-authd restart
 fi
 
 ##
@@ -58,6 +58,8 @@ fi
 ##
 
 %changelog
+* Tue Dec 5 2006 Erich Focht
+- renamed startup script authd to gexec-authd
 * Sun Aug 20 2006 Babu Sundaram <babu@cs.uh.edu>
 - Added openssl key creation to complete authd setup
 

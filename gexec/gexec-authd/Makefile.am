@@ -9,19 +9,18 @@ authd_SOURCES		= authd.c authd.h authd_options.c authd_options.h \
 				  	  auth.h
 libauth_a_SOURCES	= auth.c auth.h
 
-authd_LDADD			= -lpthread -lssl -le
+authd_LDADD		= -lpthread -lssl -le
 
 authd_LDFLAGS		= -L.
 
-EXTRA_DIST			= config/authd gexec-authd.spec
+EXTRA_DIST		= config/gexec-authd gexec-authd.spec
 
 install-data-local: $(EXTRA_DIST)
-	$(INSTALL_SCRIPT) config/authd /etc/init.d/authd
-	/etc/init.d/authd start
+	$(INSTALL_SCRIPT) config/gexec-authd /etc/init.d/gexec-authd
 
 uninstall-local: $(EXTRA_DIST)
-	if [ -f /etc/init.d/authd ]; then  \
-		/etc/init.d/authd stop        ; \
-		rm -f /etc/init.d/authd       ; \
+	if [ -f /etc/init.d/gexec-authd ]; then  \
+		/etc/init.d/gexec-authd stop        ; \
+		rm -f /etc/init.d/gexec-authd       ; \
 	fi
 

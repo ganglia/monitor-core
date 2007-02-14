@@ -1,6 +1,6 @@
 #! /bin/sh
 
-MODULES_DIRS="."
+MODULES_DIRS=". config"
 
 SCRIPT_DIR=`dirname $0`
 SCRIPT_DIR=`cd $SCRIPT_DIR && pwd`

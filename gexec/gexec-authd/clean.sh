@@ -1,8 +1,8 @@
 #!/bin/sh
 
-MODULES_DIRS="."
+MODULES_DIRS=". config"
 
-AUTOGEN_FILES="aclocal.m4 autom4te.cache configure config.guess config.log config.sub config.status depcomp install-sh compile libtool ltmain.sh missing mkinstalldirs src/.deps"
+AUTOGEN_FILES="aclocal.m4 autom4te.cache configure config.guess config.log config.sub config.status depcomp install-sh compile libtool ltmain.sh missing mkinstalldirs .deps"
 
 for module in $MODULES_DIRS; do
     test -d $module && (

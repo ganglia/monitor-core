@@ -63,6 +63,6 @@ dnl Generate Makefiles (and other files) with substitutions.
 dnl
 AC_OUTPUT(Makefile \
           gexec-authd.spec \
-          config/authd, chmod 755 config/authd)
+          config/gexec-authd, chmod 755 config/gexec-authd)
  
 
