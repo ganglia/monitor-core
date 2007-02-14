@@ -1,0 +1,55 @@
+2004-09-27  Brent N. Chun  <bnc@intel-research.net>
+	* Modified xinetd file to set LD_ASSUME_KERNEL="2.2.5" to deal
+	  with LinuxThreads not implementing all POSIX cancellation
+	  points.
+	* Modified pcp.spec.in to use a build root so RedHat 9's
+	  broken version of rpmbuild builds without the infamous
+	  "getOutputFrom(): Broken pipe" error.
+2002-4-29  Brent N. Chun  <bnc@caltech.edu>
+	* Added pcp.spec.in to simplify RPM creation. RPMs now built
+	  using libe, authd that work on IA64.
+2002-03-20  Brent N. Chun  <bnc@caltech.edu>
+	* Added case for PCP_HEARTBEAT_MSG (was returning error incorrectly)
+	* Added port option to long_options, so port shows up with -h
+	
+2002-03-18  Brent N. Chun  <bnc@caltech.edu>
+	* Added heartbeat thread for long timeouts (e.g., node powered down)
+	* Added missing close call to match open in sha1 (pcpd.c)
+	* Added -P option to pcp and pcpd to set TCP port
+	* For writes, delete file if file already exists
+	* For writes, using same file permissions as original file
+	* Changes based on <david.lombard@mscsoftware.com>'s patch
+	  * Added -h (help) and -V (version) options to gexec
+	  * Added -lcrypto to Makefile.{am,in}
+	  * Using valid exit codes, convention is roughly 
+	    * 0 (success)
+	    * 1 (base error, i.e., things in libc/pthreads lib)
+	    * 2 (gexec error, i.e,. things in my code)
+	    * 3 (user error, i.e., user errors such as bad options)
+	
+2002-03-11  Brent N. Chun  <bnc@caltech.edu>
+	* Factored libe and authd code out
+	* Now distributing pcp as an RPM
+
+2002-03-05  Brent N. Chun  <bnc@caltech.edu>
+	* Fixed memcpy bug in tree_create_from_buf (parents)
+
+2002-03-02  Brent N. Chun  <bnc@caltech.edu>
+	* Changed error return codes in tree.c to be E_*
+	* Added tree.[ch] to libe.a
+	* Changed pcp_lib.c to check for E_OK on tree_create
+	
+2002-02-27  Brent N. Chun  <bnc@caltech.edu>
+	* Working version w/ decent error messages
+	* Still have memory leak to track down
+	* Fixed memory leak (RSA_free on keys)
+	
+2002-02-18  Brent N. Chun  <bnc@caltech.edu>
+	* RouteUp only if dst != self
+	* RouteDown only if dst != self
+
+2002-02-17  Brent N. Chun  <bnc@caltech.edu>
+	* Added EOF msgs so stdout, stderr flush completely
+	* No malloc on short messages (< MAX_BDY_FRAGMENT)
+	* Added src/dst fields to header
+

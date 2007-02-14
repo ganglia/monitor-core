@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# chkconfig: 2345 20 80
+# description: pcpd startup script
+#
+# 1. This file should be installed as /etc/init.d/pcpd
+# 
+# 2. Start pcpd with:
+#
+#      /etc/init.d/pcpd start
+#
+# Source function library.
+[ -f /etc/rc.d/init.d/functions ] || exit 0
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+
+#
+# The pathname substitution in daemon command assumes prefix and
+# exec_prefix are same.  This is the default, unless the user requests
+# otherwise.
+#
+case "$1" in
+    start)
+        echo -n "Starting pcpd: "
+   	daemon @prefix@/sbin/pcpd </dev/null >/dev/null 2>&1 &
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/pcpd
+        ;;
+    stop)
+        echo -n "Shutting down pcpd: "
+        killproc pcpd
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/pcpd
+        echo
+        ;;
+    status)
+        status pcpd
+        ;;
+    restart)
+        $0 stop
+        $0 start
+		;;
+    *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac

@@ -1,0 +1,60 @@
+Summary: pcp (parallel, pipelined file distribution)
+Name: @PACKAGE@
+Version: @VERSION@
+Release: 4
+License: GPL
+Group: System Environment/Daemons
+Source: @PACKAGE@-@VERSION@.tar.gz
+Requires: authd
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+
+%description
+pcp (parallel, pipelined file distribution)
+
+%prep
+%setup
+
+%build
+%configure
+make ROOT="$RPM_BUILD_ROOT" RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
+
+%install
+make DESTDIR="$RPM_BUILD_ROOT" install
+install -D -m 755 config/pcpd $RPM_BUILD_ROOT/etc/init.d/pcpd
+
+%clean
+
+%files
+%defattr(-, root, root)
+/usr/sbin/pcpd
+/usr/bin/pcp
+/usr/%{_lib}/libpcp.a
+/usr/include/pcp_lib.h
+/etc/init.d/pcpd
+
+%post 
+if [ "$1" = 1 ]; then
+  /etc/init.d/pcpd restart
+   chkconfig --add pcpd
+fi
+
+%preun
+if [ "$1" = 0 ]; then
+   /etc/init.d/pcpd stop
+   chkconfig --del pcpd
+fi
+
+%postun
+if [ "$1" = 1 ]; then
+   /etc/init.d/pcpd restart
+fi
+
+##
+## CHANGELOG
+##
+
+%changelog
+* Thu Dec 07 2006 Erich Focht
+- changed from xinetd to init.d daemon
+- version update to 0.3.3-3
+
