@@ -26,3 +26,4 @@ at least the following installed.
 automake (GNU automake) 1.6.3
 autoconf (GNU Autoconf) 2.53
 ltmain.sh (GNU libtool) 1.4.2
+xsltproc (The XSLT C library for GNOME)
