@@ -8,11 +8,12 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <sys/sysinfo.h>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
 
 /* From old ganglia 2.5.x... */
 #include "file.h"
 #include "libmetrics.h"
-#include "fsusage.h"
 /* End old ganglia 2.5.x headers */
 
 #define OSNAME "Linux"
@@ -1323,7 +1324,7 @@ int remote_mount(const char *device, const char *type)
 /* --------------------------------------------------------------------------- */
 float device_space(char *mount, char *device, double *total_size, double *total_free)
 {
-   struct fs_usage fsu;
+   struct statvfs svfs;
    uint32_t blocksize;
    uint32_t free;
    uint32_t size;
@@ -1333,16 +1334,14 @@ float device_space(char *mount, char *device, double *total_size, double *total_
    /* Avoid multiply-mounted disks - not done in df. */
    if (seen_before(device)) return pct;
 
-   if (get_fs_usage(mount, device, &fsu)) {
+   if (statvfs(mount, &svfs)) {
       /* Ignore funky devices... */
       return pct;
    }
 
-   free = fsu.fsu_bavail;
-   /* Is the space available negative? */
-   if (fsu.fsu_bavail_top_bit_set) free = 0;
-   size = fsu.fsu_blocks;
-   blocksize = fsu.fsu_blocksize;
+   free = svfs.f_bavail;
+   size  = svfs.f_blocks;
+   blocksize = svfs.f_bsize;
    /* Keep running sum of total used, free local disk space. */
    *total_size += size * (double) blocksize;
    *total_free += free * (double) blocksize;
