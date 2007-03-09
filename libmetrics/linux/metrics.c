@@ -39,6 +39,8 @@ static net_dev_stats *netstats[NHASH];
 #endif
 char proc_cpuinfo[BUFFSIZE];
 char proc_sys_kernel_osrelease[BUFFSIZE];
+char sys_devices_system_cpu[32];
+int cpufreq;
 
 typedef struct {
   uint32_t last_read;
@@ -164,6 +166,11 @@ metric_init(void)
    char * dummy;
 
    num_cpustates = num_cpustates_func();
+
+   cpufreq = 1;
+   rval.int32 = slurpfile("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", sys_devices_system_cpu, BUFFSIZE);
+   if ( rval.int32 == SYNAPSE_FAILURE )
+      cpufreq = 0;
 
    rval.int32 = slurpfile("/proc/cpuinfo", proc_cpuinfo, BUFFSIZE);
    if ( rval.int32 == SYNAPSE_FAILURE )
@@ -568,6 +575,13 @@ cpu_speed_func ( void )
 {
    char *p;
    static g_val_t val = {0};
+
+   /* we'll use scaling_max_freq before we fallback on proc_cpuinfo */
+   if(cpufreq && ! val.uint32)
+      {
+         p = sys_devices_system_cpu;
+         val.uint32 = (uint32_t)(strtol( p, (char **)NULL , 10 ) / 1000 );
+      }
 
 /* i386, ia64, x86_64 and hppa all report MHz in the same format */
 #if defined (__i386__) || defined(__ia64__) || defined(__hppa__) || defined(__x86_64__)
