@@ -71,6 +71,7 @@ static void print_version()
 void pcpd_options_init(pcpd_options *opts)
 {
     opts->inetd = 0;
+    opts->daemon = 0;
     opts->port  = PCP_DEF_PORT;
 }
 
@@ -82,12 +83,13 @@ void pcpd_options_parse(pcpd_options *opts, int argc, char **argv)
     {
         { "help", no_argument, NULL, 'h' },
         { "inetd", no_argument, NULL, 'i' },
+        { "daemon", no_argument, NULL, 'd' },
         { "version", no_argument, NULL, 'V' },
         { "port", required_argument, NULL, 'P' },
         { 0, 0, 0, 0 }
     };
 
-    while ((c = getopt_long (argc, argv, "hiVP:", long_options, 
+    while ((c = getopt_long (argc, argv, "hidVP:", long_options, 
                              (int *)0)) != EOF) {
         switch (c) {
 
@@ -97,6 +99,10 @@ void pcpd_options_parse(pcpd_options *opts, int argc, char **argv)
 
         case 'i':
             opts->inetd = 1;
+            break;
+
+        case 'd':
+            opts->daemon = 1;
             break;
 
         case 'V':

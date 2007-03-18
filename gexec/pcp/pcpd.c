@@ -912,9 +912,11 @@ int main(int argc, char **argv)
         args->opts    = &opts;
         pcpd_thr(args);
         xfree(args);
-    }
-    else
+    } else {
+	if (opts.daemon)
+	    daemon(0, 0);
         pcpd_standalone(&opts);
+    }
 
     return 0;
 }

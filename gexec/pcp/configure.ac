@@ -6,7 +6,7 @@ AC_INIT(pcp.c)
 dnl
 dnl Sets PACKAGE and VERSION defines
 dnl
-AM_INIT_AUTOMAKE(pcp,0.3.4)
+AM_INIT_AUTOMAKE(gexec-pcp,0.3.5)
 
 dnl
 dnl Creates config.h file with #defines instead of passing to compiler.
@@ -68,10 +68,6 @@ dnl
 dnl Generate Makefiles (and other files) with substitutions.
 dnl
 AC_OUTPUT(Makefile     \
-          config/pcpd  \
-          pcp.spec)
-
-
-
-
+          config/gexec-pcpd  \
+          gexec-pcp.spec)
 

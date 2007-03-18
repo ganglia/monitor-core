@@ -22,6 +22,7 @@
 typedef struct {
     int inetd;
     int port;
+    int daemon;
 } pcpd_options;
 
 void pcpd_options_init(pcpd_options *opts);
