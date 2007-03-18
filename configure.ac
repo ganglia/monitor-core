@@ -6,7 +6,7 @@ AC_INIT(gexec.h)
 dnl
 dnl Sets PACKAGE and VERSION defines
 dnl
-AM_INIT_AUTOMAKE(gexec,0.3.7)
+AM_INIT_AUTOMAKE(gexec,0.3.8)
 
 dnl
 dnl Creates config.h file with #defines instead of passing to compiler.

@@ -22,6 +22,7 @@
 typedef struct {
     int inetd;
     int port;
+    int daemon;
 } gexecd_options;
 
 void gexecd_options_init(gexecd_options *opts);

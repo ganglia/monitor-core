@@ -71,6 +71,7 @@ static void print_version()
 void gexecd_options_init(gexecd_options *opts)
 {
     opts->inetd = 0;
+    opts->daemon = 0;
     opts->port  = GEXEC_DEF_PORT;
 }
 
@@ -82,12 +83,13 @@ void gexecd_options_parse(gexecd_options *opts, int argc, char **argv)
     {
         { "help", no_argument, NULL, 'h' },
         { "inetd", no_argument, NULL, 'i' },
+        { "daemon", no_argument, NULL, 'd' },
         { "version", no_argument, NULL, 'V' },
         { "port", required_argument, NULL, 'P' },
         { 0, 0, 0, 0 }
     };
 
-    while ((c = getopt_long (argc, argv, "ihVP:", long_options, 
+    while ((c = getopt_long (argc, argv, "ihdVP:", long_options, 
                              (int *)0)) != EOF) {
         switch (c) {
 
@@ -97,6 +99,10 @@ void gexecd_options_parse(gexecd_options *opts, int argc, char **argv)
 
         case 'i':
             opts->inetd = 1;
+            break;
+
+        case 'd':
+            opts->daemon = 1;
             break;
 
         case 'V':
