@@ -1,17 +1,17 @@
 CFLAGS				= -O2 -Wall -D_REENTRANT -g
 INCLUDES			= -I.
 
-sbin_PROGRAMS		= authd
+sbin_PROGRAMS		= gexec-authd
 lib_LIBRARIES		= libauth.a
 include_HEADERS		= auth.h
 
-authd_SOURCES		= authd.c authd.h authd_options.c authd_options.h \
+gexec_authd_SOURCES	= authd.c authd.h authd_options.c authd_options.h \
 				  	  auth.h
 libauth_a_SOURCES	= auth.c auth.h
 
-authd_LDADD		= -lpthread -lssl -le
+gexec_authd_LDADD	= -lpthread -lssl -le
 
-authd_LDFLAGS		= -L.
+gexec_authd_LDFLAGS	= -L.
 
 EXTRA_DIST		= config/gexec-authd gexec-authd.spec
 

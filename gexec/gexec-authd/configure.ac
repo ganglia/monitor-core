@@ -6,7 +6,7 @@ AC_INIT(auth.h)
 dnl
 dnl Sets PACKAGE and VERSION defines
 dnl
-AM_INIT_AUTOMAKE(gexec-authd,0.2.2)
+AM_INIT_AUTOMAKE(gexec-authd,0.2.3)
 
 dnl
 dnl Creates config.h file with #defines instead of passing to compiler.

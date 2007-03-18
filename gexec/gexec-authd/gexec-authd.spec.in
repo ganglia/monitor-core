@@ -26,7 +26,7 @@ install -D -m 755 config/gexec-authd /etc/init.d/gexec-authd
 
 %files
 %defattr(-, root, root)
-/usr/sbin/authd
+/usr/sbin/gexec-authd
 /usr/%{_lib}/libauth.a
 /usr/include/auth.h
 /etc/init.d/gexec-authd
