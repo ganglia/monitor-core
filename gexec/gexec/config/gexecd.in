@@ -1,49 +1,89 @@
 #!/bin/bash
 #
 # chkconfig: 2345 20 80
-# description: gexec startup script
+# description: gexecd startup script
 #
 # 1. This file should be installed as /etc/init.d/gexecd
 # 
-# 2. Start gexecd with:
+# 2. Start jobmond with:
 #
 #      /etc/init.d/gexecd start
 #
 # Source function library.
-[ -f /etc/rc.d/init.d/functions ] || exit 0
-. /etc/rc.d/init.d/functions
+[ -f /etc/rc.d/init.d/functions ] && . /etc/rc.d/init.d/functions
+
+FULLPATH=@prefix@/sbin/gexecd
+BASE=`basename $FULLPATH`
+pidfile=/var/run/$BASE.pid
+
+runpid() {
+    local pid
+    pid=`pidof -o $$ -o $PPID $BASE`
+    echo $pid > $pidfile
+}
+
+running() {
+    local pid running
+    if [ -f $pidfile ]; then
+	pid=`cat $pidfile`
+	running=`ps -wwe -o cmd $pid | grep -c $FULLPATH`
+	[ $running -eq 0 ] && pid=""
+    else
+	pid=`pidof -o $$ -o $PPID $BASE`
+    fi
+    echo $pid
+}
 
 RETVAL=0
-
-#
-# The pathname substitution in daemon command assumes prefix and
-# exec_prefix are same.  This is the default, unless the user requests
-# otherwise.
-#
 case "$1" in
     start)
-        echo -n "Starting gexecd: "
-   	daemon @prefix@/sbin/gexecd </dev/null >/dev/null 2>&1 &
+        echo -n "Starting $BASE: "
+        pid=`running`
+	if [ -n "$pid" ]; then
+	    echo " ... process already running on $pid"
+	    exit 1
+	fi
+   	$FULLPATH -d
         RETVAL=$?
         echo
-        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/gexecd
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/$BASE
+        [ $RETVAL -eq 0 ] && runpid
         ;;
     stop)
-        echo -n "Shutting down gexecd: "
-        killproc gexecd
+        echo -n "Shutting down $BASE: "
+	pid=`running`
+	[ -n "$pid" ] && kill $pid
         RETVAL=$?
-        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/gexecd
-        echo
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$BASE $pidfile
+	[ $RETVAL -eq 0 ] || echo " ... failed"
+	echo
         ;;
     status)
-        status gexecd
+	if [ -f $pidfile ]; then
+	    pid=`running`
+	    if [ -n "$pid" ]; then
+		echo "$BASE (pid $pid) is running ..."
+		exit 0
+	    else
+	        echo "$BASE is dead but pidfile exists"
+	        exit 1
+	    fi
+	else
+	    if [ -f /var/lock/subsys/$BASE ]; then
+		echo "$BASE is dead but subsystem is locked"
+		exit 2
+	    fi
+	fi
+	echo "$BASE is stopped"
+	exit 3
         ;;
     restart)
         $0 stop
         $0 start
 		;;
     *)
-        echo "Usage: $0 {start|stop}"
+        echo "Usage: $0 {start|stop|status}"
         exit 1
         ;;
 esac
+exit $RETVAL

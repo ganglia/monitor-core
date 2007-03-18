@@ -33,6 +33,8 @@
 #include <netinet/tcp.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -1222,9 +1224,10 @@ int main(int argc, char **argv)
         args->up_sock = STDIN_FILENO;
         args->opts    = &opts;
         gexecd_thr(args);
-    }
-    else 
+    } else {
+	if (opts.daemon)
+	    daemon(0, 0);
         gexecd_standalone(&opts);
-
+    }
     return 0;
 }
