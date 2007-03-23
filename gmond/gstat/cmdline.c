@@ -47,6 +47,7 @@ cmdline_parser_print_help (void)
   printf("  -m, --mpifile          Print a load-balanced mpifile  (default=off)\n");
   printf("  -1, --single_line      Print host and information all on one line  (default=\n                           off)\n");
   printf("  -l, --list             Print ONLY the host list  (default=off)\n");
+  printf("  -n, --numeric          Print numeric addresses instead of hostnames (default=off)\n");
   printf("  -i, --gmond_ip=STRING  Specify the ip address of the gmond to query  \n                           (default=`localhost')\n");
   printf("  -p, --gmond_port=INT   Specify the gmond port to query  (default=`8649')\n");
 }
@@ -79,6 +80,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->mpifile_given = 0 ;
   args_info->single_line_given = 0 ;
   args_info->list_given = 0 ;
+  args_info->numeric_given = 0 ;
   args_info->gmond_ip_given = 0 ;
   args_info->gmond_port_given = 0 ;
 #define clear_args() { \
@@ -87,6 +89,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->mpifile_flag = 0;\
   args_info->single_line_flag = 0;\
   args_info->list_flag = 0;\
+  args_info->numeric_flag = 0;\
   args_info->gmond_ip_arg = gengetopt_strdup("localhost") ;\
   args_info->gmond_port_arg = 8649 ;\
 }
@@ -111,13 +114,14 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         { "mpifile",	0, NULL, 'm' },
         { "single_line",	0, NULL, '1' },
         { "list",	0, NULL, 'l' },
+        { "numeric",	0, NULL, 'n' },
         { "gmond_ip",	1, NULL, 'i' },
         { "gmond_port",	1, NULL, 'p' },
         { NULL,	0, NULL, 0 }
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVadm1li:p:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVadm1lni:p:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -186,6 +190,17 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
             }
           args_info->list_given = 1;
           args_info->list_flag = !(args_info->list_flag);
+          break;
+
+        case 'n':	/* Print numeric addresses instead of hostnames.  */
+          if (args_info->numeric_given)
+            {
+              fprintf (stderr, "%s: `--numeric' (`-n') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              clear_args ();
+              exit (EXIT_FAILURE);
+            }
+          args_info->numeric_given = 1;
+          args_info->numeric_flag = !(args_info->numeric_flag);
           break;
 
         case 'i':	/* Specify the ip address of the gmond to query.  */
