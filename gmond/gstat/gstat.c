@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
          for( ; li != NULL; li = li->next )
             {
                host = li->val;
-               if( host->name_resolved )
+               if( host->name_resolved && ! args_info.numeric_flag )
                   {
                      if(!strcmp(host->domain, "unspecified"))
                         printf("%s:%d\n", host->name, host->cpu_num);
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
    for(; li != NULL; li = li->next)
       {
          host = li->val;
-         if( host->name_resolved )
+         if( host->name_resolved && ! args_info.numeric_flag )
                   {
                      if(!strcmp(host->domain, "unspecified"))
                         printf("%s", host->name);

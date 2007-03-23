@@ -10,7 +10,8 @@ option "all" a "List all hosts.  Not just hosts running gexec" flag off
 option "dead" d "Print only the hosts which are dead" flag off
 option "mpifile" m "Print a load-balanced mpifile" flag off
 option "single_line" 1 "Print host and information all on one line" flag off
-option "list" l  "Print ONLY the host list" flag off
+option "list" l "Print ONLY the host list" flag off
+option "numeric" n "Print numeric addresses instead of hostnames" flag off
 option "gmond_ip" i "Specify the ip address of the gmond to query" string default="localhost" no
 option "gmond_port" p "Specify the gmond port to query" int default="8649" no
 
