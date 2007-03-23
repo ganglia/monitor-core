@@ -29,6 +29,7 @@ struct gengetopt_args_info
   int mpifile_flag;	/* Print a load-balanced mpifile (default=off).  */
   int single_line_flag;	/* Print host and information all on one line (default=off).  */
   int list_flag;	/* Print ONLY the host list (default=off).  */
+  int numeric_flag;	/* Print numeric addresses instead of hostnames (default=off). */
   char * gmond_ip_arg;	/* Specify the ip address of the gmond to query (default='localhost').  */
   int gmond_port_arg;	/* Specify the gmond port to query (default='8649').  */
 
@@ -39,6 +40,7 @@ struct gengetopt_args_info
   int mpifile_given ;	/* Whether mpifile was given.  */
   int single_line_given ;	/* Whether single_line was given.  */
   int list_given ;	/* Whether list was given.  */
+  int numeric_given ;	/* Whether numeric was given.  */
   int gmond_ip_given ;	/* Whether gmond_ip was given.  */
   int gmond_port_given ;	/* Whether gmond_port was given.  */
 
