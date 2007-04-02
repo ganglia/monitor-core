@@ -396,6 +396,8 @@ AC_OUTPUT(Makefile
           lib/Makefile 
           gmond/Makefile 
           gmond/gstat/Makefile 
+	  gmond/modules/Makefile
+	  gmond/modules/example/Makefile
           gmetric/Makefile 
           web/version.php)
 

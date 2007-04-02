@@ -1,7 +1,8 @@
-#define GANGLIA_MTU     1500
-#define UDP_HEADER_SIZE 28
+#define __GANGLIA_MTU     1500
+#define __UDP_HEADER_SIZE 28
+%#define UDP_HEADER_SIZE __UDP_HEADER_SIZE
 
-#define GANGLIA_MAX_XDR_MESSAGE_LEN (GANGLIA_MTU - UDP_HEADER_SIZE - 8)
+#define GANGLIA_MAX_XDR_MESSAGE_LEN (__GANGLIA_MTU - __UDP_HEADER_SIZE - 8)
 
 enum Ganglia_value_types {
   GANGLIA_VALUE_UNKNOWN,
@@ -105,11 +106,13 @@ enum Ganglia_message_formats {
    GANGLIA_NUM_25_METRICS, /* this should always directly follow the last 25 metric_* */
 /* Yemi */
    spoof_metric = 4096,
-   spoof_heartbeat = 4097
+   spoof_heartbeat = 4097,
+   modular_metric = 4098
 };
 
 union Ganglia_message switch (Ganglia_message_formats id) {
   case metric_user_defined:
+  case modular_metric:
     Ganglia_gmetric_message gmetric;
 /* Yemi */
   case spoof_metric:
