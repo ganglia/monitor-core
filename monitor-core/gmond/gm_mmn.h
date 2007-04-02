@@ -1,0 +1,42 @@
+
+#ifndef GM_MMN_H
+#define GM_MMN_H
+
+/*
+ * MODULE_MAGIC_NUMBER_MAJOR
+ * Major API changes that could cause compatibility problems for older modules
+ * such as structure size changes.  No binary compatibility is possible across
+ * a change in the major version.
+ *
+ * MODULE_MAGIC_NUMBER_MINOR
+ * Minor API changes that do not cause binary compatibility problems.
+ * Should be reset to 0 when upgrading MODULE_MAGIC_NUMBER_MAJOR.
+ *
+ * See the MODULE_MAGIC_AT_LEAST macro below for an example.
+ */
+
+/*
+ * 20070222.0 (3.0.4-dev) MODULE_MAGIC_COOKIE set to "GM30"
+ */
+
+#define MMODULE_MAGIC_COOKIE 0x474D3330UL /* "GM30" */
+
+#ifndef MMODULE_MAGIC_NUMBER_MAJOR
+#define MMODULE_MAGIC_NUMBER_MAJOR 20070222
+#endif
+#define MMODULE_MAGIC_NUMBER_MINOR 0                     /* 0...n */
+
+/**
+ * Determine if the current MMODULE_MAGIC_NUMBER is at least a
+ * specified value.
+ * @param major The major module magic number
+ * @param minor The minor module magic number
+ * @deffunc GM_MODULE_MAGIC_AT_LEAST(int major, int minor)
+ */
+#define GM_MODULE_MAGIC_AT_LEAST(major,minor)		\
+    ((major) < MMODULE_MAGIC_NUMBER_MAJOR 		\
+	|| ((major) == MMODULE_MAGIC_NUMBER_MAJOR 	\
+	    && (minor) <= MMODULE_MAGIC_NUMBER_MINOR))
+
+#endif /* !GM_MMN_H */
+/** @} */

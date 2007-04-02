@@ -1,4 +1,4 @@
-SUBDIRS = gstat
+SUBDIRS = gstat modules
 
 EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
 

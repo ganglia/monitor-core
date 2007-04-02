@@ -107,6 +107,17 @@ static cfg_opt_t collection_group_opts[] = {
   CFG_END()
 };
 
+static cfg_opt_t metric_module_opts[] = {
+  CFG_STR("name", NULL, CFGF_NONE ),
+  CFG_STR("path", NULL, CFGF_NONE),
+  CFG_END()
+};
+
+static cfg_opt_t metric_modules_opts[] = {
+  CFG_SEC("module", metric_module_opts, CFGF_MULTI),
+  CFG_END()
+};
+
 static cfg_opt_t gmond_opts[] = {
   CFG_SEC("cluster",   cluster_opts, CFGF_NONE),
   CFG_SEC("host",      host_opts, CFGF_NONE),
@@ -116,6 +127,7 @@ static cfg_opt_t gmond_opts[] = {
   CFG_SEC("tcp_accept_channel", tcp_accept_channel_opts, CFGF_MULTI),
   CFG_SEC("collection_group",  collection_group_opts, CFGF_MULTI),
   CFG_FUNC("include", cfg_include),
+  CFG_SEC("modules",  metric_modules_opts, CFGF_NONE),
   CFG_END()
 }; 
 

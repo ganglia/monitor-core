@@ -1,8 +1,13 @@
 #ifndef METRIC_H
 #define METRIC_H 1
 
+#include "gm_mmn.h"
 #include "libmetrics.h"
+#include "protocol.h"
 
+#include <apr_pools.h>
+
+typedef void (*metric_info_func)(Ganglia_25metric *gmi);
 typedef g_val_t (*metric_func)(void);
 
 /*
@@ -28,5 +33,53 @@ typedef struct
    int key;                /* the unique key for this metric */
 }
 metric_t;          
+
+/**
+ * Module structures.  
+ */
+typedef struct mmodule_struct mmodule;
+struct mmodule_struct {
+    /** API version, *not* module version; check that module is 
+     * compatible with this version of the server.
+     */
+    int version;
+    /** API minor version. Provides API feature milestones. */
+    int minor_version;
+    /** The name of the module's C file */
+    const char *name;
+    /** The handle for the DSO.  Internal use only */
+    void *dynamic_load_handle;
+    /** The metric name */
+    char *metric_name;
+
+    /** A pointer to the next module in the list
+     *  @defvar module_struct *next */
+    struct mmodule_struct *next;
+
+    /** Magic Cookie to identify a module structure. */
+    unsigned long magic;
+
+    /** Metric init callback function */
+    int (*init)(void); /* callback function */
+
+    /** Metric cleanup callback function */
+    void (*cleanup)(void); /* callback function */
+
+    /** Metric info callback function */
+    void (*getinfo)(Ganglia_25metric *gmi); /* callback function */
+
+    /** Metric callback function */
+    g_val_t (*handler)(void); /* callback function */
+};
+
+/** Use this in all standard modules */
+#define STD_MMODULE_STUFF	MMODULE_MAGIC_NUMBER_MAJOR, \
+				MMODULE_MAGIC_NUMBER_MINOR, \
+				__FILE__, \
+				NULL, \
+				NULL, \
+                NULL, \
+				MMODULE_MAGIC_COOKIE
+
 
 #endif  /* METRIC_H */
