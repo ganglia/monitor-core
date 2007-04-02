@@ -1937,15 +1937,16 @@ main ( int argc, char *argv[] )
       exit(0);
     }
 
+  process_configuration_file();
+
   if(args_info.metrics_flag)
     {
+      load_metric_modules();
       setup_metric_callbacks();
       print_metric_list();
       fflush( stdout );
       exit(0);
     }
-
-  process_configuration_file();
 
   if(args_info.bandwidth_flag)
     {
