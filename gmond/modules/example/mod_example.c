@@ -47,6 +47,7 @@ mmodule example_module;
 #define METRIC_UNITS "s"
 #define METRIC_SLOPE "both"
 #define METRIC_FMT "%u"
+#define METRIC_DESC "Example module metric (random numbers)"
 
 /*XXX gmond needs to link dynamically with apr so that each
    of the modules can link to apr as well.  Then the modules
@@ -75,6 +76,7 @@ static void ex_metric_info ( Ganglia_25metric *gmi )
     gmi->slope = METRIC_SLOPE;
     gmi->fmt = METRIC_FMT;
     gmi->msg_size = UDP_HEADER_SIZE+8;
+    gmi->desc = METRIC_DESC;
 
     return;
 }
