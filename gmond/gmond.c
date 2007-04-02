@@ -1105,12 +1105,23 @@ print_host_gmetric( apr_socket_t *client, Ganglia_metric *metric, apr_time_t now
 #define GMETRIC_BUFFER_SIZE (GANGLIA_MAX_MESSAGE_LEN + 1024)
   char metricxml[GMETRIC_BUFFER_SIZE];
   Ganglia_gmetric_message *msg = &(metric->message.Ganglia_message_u.gmetric);
+  Ganglia_metric_callback *metric_cb;
+  char desc[MAX_DESC_LEN];
 
   if(!msg)
     return APR_SUCCESS;
 
+  memset (desc, '\0', sizeof (desc));
+  metric_cb = (Ganglia_metric_callback *)apr_hash_get( metric_callbacks, msg->name, APR_HASH_KEY_STRING );
+  if (metric_cb) {
+	  strncpy (desc, metric_cb->info->desc, sizeof(desc)-1);
+  }
+  else {
+	  sprintf (desc, "%s - no description available", msg->name);
+  }
+
   len = apr_snprintf(metricxml, GMETRIC_BUFFER_SIZE,
-          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" SLOPE=\"%s\" SOURCE=\"gmetric\"/>\n",
+          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" SLOPE=\"%s\" SOURCE=\"gmetric\" DESC=\"%s\"/>\n",
            msg->name,
 	   msg->value,
 	   msg->type,
@@ -1118,7 +1129,8 @@ print_host_gmetric( apr_socket_t *client, Ganglia_metric *metric, apr_time_t now
            (int)((now - metric->last_heard_from) / APR_USEC_PER_SEC),
 	   msg->tmax,
 	   msg->dmax,
-	   msg->slope? "both": "zero");
+	   msg->slope? "both": "zero",
+       desc);
 
   return apr_socket_send(client, metricxml, &len );
 }
@@ -1135,14 +1147,15 @@ print_host_metric( apr_socket_t *client, Ganglia_metric *data, apr_time_t now )
     return APR_SUCCESS;
 
   len = apr_snprintf(metricxml, 1024,
-          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\" SOURCE=\"gmond\"/>\n",
+          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\" SOURCE=\"gmond\" DESC=\"%s\"/>\n",
 	  metric->name,
 	  host_metric_value( metric, &(data->message) ),
 	  host_metric_type( metric->type ),
 	  metric->units? metric->units: "",
 	  (int)((now - data->last_heard_from) / APR_USEC_PER_SEC),
 	  metric->tmax,
-	  metric->slope );
+	  metric->slope,
+      metric->desc );
 
   return apr_socket_send(client, metricxml, &len);
 }
@@ -1730,7 +1743,6 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
         {
             Ganglia_gmetric gmetric = Ganglia_gmetric_create(global_context);
             char *val, *type;
-            int rval;
 
             if(!gmetric)
             {
@@ -1840,9 +1852,30 @@ print_metric_list( void )
       hi = apr_hash_next(hi))
     {
       Ganglia_metric_callback *cb;
+      Ganglia_25metric *metric_info;
+      char *desc = NULL;
+
       apr_hash_this(hi, NULL, NULL, &val);
       cb = val;
-      fprintf(stdout, "%s\n", cb->name);
+	  metric_info = Ganglia_25metric_byname(cb->name);
+
+	  if(metric_info)
+        {
+          desc = metric_info->desc;
+        }
+      else if (cb->modp) 
+        {
+          metric_info = apr_pcalloc( global_context, sizeof(Ganglia_25metric));
+          cb->modp->getinfo(metric_info);
+          desc = metric_info->desc;
+	    }
+
+      if (desc == NULL) 
+        {
+          desc = "<no description available>";
+        }
+
+      fprintf(stdout, "%-15s\t%s\n", cb->name, desc);
     }
 }
 

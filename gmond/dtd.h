@@ -36,6 +36,7 @@
       <!ATTLIST METRIC DMAX CDATA #IMPLIED>\n\
       <!ATTLIST METRIC SLOPE (zero | positive | negative | both | unspecified) #IMPLIED>\n\
       <!ATTLIST METRIC SOURCE (gmond | gmetric) #REQUIRED>\n\
+      <!ATTLIST METRIC DESC CDATA #REQUIRED>\n\
    <!ELEMENT HOSTS EMPTY>\n\
       <!ATTLIST HOSTS UP CDATA #REQUIRED>\n\
       <!ATTLIST HOSTS DOWN CDATA #REQUIRED>\n\
