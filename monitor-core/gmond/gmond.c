@@ -1113,7 +1113,7 @@ print_host_gmetric( apr_socket_t *client, Ganglia_metric *metric, apr_time_t now
 
   memset (desc, '\0', sizeof (desc));
   metric_cb = (Ganglia_metric_callback *)apr_hash_get( metric_callbacks, msg->name, APR_HASH_KEY_STRING );
-  if (metric_cb) {
+  if (metric_cb && metric_cb->info && metric_cb->info->desc) {
 	  strncpy (desc, metric_cb->info->desc, sizeof(desc)-1);
   }
   else {
