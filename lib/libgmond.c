@@ -13,6 +13,10 @@
 #include <apr_strings.h>
 #include <apr_tables.h>
 #include <apr_net.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <fnmatch.h>
 
 #include "protocol.h"  /* generated from ./lib/protocol.x */
 
@@ -22,6 +26,8 @@ in order for the documentation to be in order with the code
 ****************************/
 
 void build_default_gmond_configuration(apr_pool_t *context);
+static int Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
+                          const char **argv);
 
 static cfg_opt_t cluster_opts[] = {
   CFG_STR("name", NULL, CFGF_NONE ),
@@ -126,7 +132,7 @@ static cfg_opt_t gmond_opts[] = {
   CFG_SEC("udp_recv_channel", udp_recv_channel_opts, CFGF_MULTI),
   CFG_SEC("tcp_accept_channel", tcp_accept_channel_opts, CFGF_MULTI),
   CFG_SEC("collection_group",  collection_group_opts, CFGF_MULTI),
-  CFG_FUNC("include", cfg_include),
+  CFG_FUNC("include", Ganglia_cfg_include),
   CFG_SEC("modules",  metric_modules_opts, CFGF_NONE),
   CFG_END()
 }; 
@@ -841,3 +847,108 @@ Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *typ
 
   return 0;
 }
+
+int has_wildcard(const char *pattern)
+{
+    int nesting;
+
+    nesting = 0;
+    while (*pattern) {
+    	switch (*pattern) {
+        	case '?':
+        	case '*':
+        	    return 1;
+        
+        	case '\\':
+        	    if (*pattern++ == '\0') {
+                    return 0;
+        	    }
+        	    break;
+        
+        	case '[':	
+        	    ++nesting;
+        	    break;
+        
+        	case ']':
+        	    if (nesting) {
+                    return 1;
+        	    }
+        	    break;
+    	}
+    	++pattern;
+    }
+    return 0;
+}
+
+static int 
+Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
+                          const char **argv)
+{
+    char *fname = (char*)argv[0];
+    struct stat statbuf;
+    DIR *dir;
+    struct dirent *entry;
+
+    if(argc != 1)
+    {
+        cfg_error(cfg, "wrong number of arguments to cfg_include()");
+        return 1;
+    }
+
+    if (stat (fname, &statbuf) == 0) 
+    {
+        return cfg_include(cfg, opt, argc, argv);
+    }
+    else if (has_wildcard(fname))
+    {
+        int ret;
+        char *path = calloc(sizeof(char), strlen(fname)+1);
+        char *pattern = NULL;
+        char *idx = strrchr(fname, '/');
+
+        if (idx == NULL) {
+            idx = strrchr(fname, '\\');
+        }
+
+        if (idx == NULL) {
+            strncpy (path, ".", 1);
+            pattern = fname;
+        }
+        else {
+            strncpy (path, fname, idx - fname);
+            pattern = idx + 1;
+        }
+
+        dir = opendir(path);
+
+        if(dir != NULL){
+            while((entry = readdir(dir)) != NULL) {
+                ret = fnmatch(pattern, entry->d_name, 
+                              FNM_PATHNAME|FNM_PERIOD);
+                if (ret == 0) {
+                    char *newpath = malloc (strlen(path) + strlen(entry->d_name)+2);
+                    sprintf (newpath, "%s/%s", path, entry->d_name);
+                    argv[0] = newpath;
+                    if (cfg_include(cfg, opt, argc, argv))
+                        cfg_error(cfg, "failed to process include file %s", entry->d_name);
+                    else
+                        debug_msg("processed include file %s\n", entry->d_name);
+                    free (newpath);
+                } else {
+                    continue;
+                } 
+            }
+            closedir(dir);
+        }
+        free (path);
+        argv[0] = fname;
+    }
+    else 
+    {
+        cfg_error(cfg, "invalid include path");
+        return 1;
+    }
+
+    return 0;
+}
+
