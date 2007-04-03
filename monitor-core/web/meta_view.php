@@ -100,7 +100,7 @@ foreach ( $sorted_sources as $source => $val )
       $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
       $tpl->assign("url", $url);
       $tpl->assign("class", $class);
-      if ($num_sources)
+      if (isset($num_sources))
          $tpl->assign("Sources: $num_sources");
 
       # I dont like this either, but we need to have private clusters because some
