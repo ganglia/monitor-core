@@ -160,7 +160,7 @@ else
             if ($k==$self) continue;
             if (isset($v['GRID']) and $v['GRID'])
                {
-                  $url = $v[AUTHORITY];
+                  $url = $v['AUTHORITY'];
                   $node_menu .="<OPTION VALUE=\"$url\">$k $meta_designator\n";
                }
             else
