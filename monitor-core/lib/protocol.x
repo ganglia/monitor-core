@@ -208,7 +208,7 @@ struct Ganglia_25metric
 
 #ifdef RPC_XDR
 % Ganglia_25metric ganglia_25_metric_array[GANGLIA_NUM_25_METRICS] = {
-%  {metric_user_defined, "gmetric",       0,  GANGLIA_VALUE_UNKNOWN,  "", "", 0, "User Defined"},
+%  {metric_user_defined, "gmetric",       0,  GANGLIA_VALUE_UNKNOWN,        "",           "",      "",    0,                 "User Defined"},
 %  {metric_cpu_num,      "cpu_num",    1200,  GANGLIA_VALUE_UNSIGNED_SHORT, "CPUs",       "zero",  "%hu", UDP_HEADER_SIZE+8, "Total number of CPUs"},
 %  {metric_cpu_speed,    "cpu_speed",  1200,  GANGLIA_VALUE_UNSIGNED_INT,   "MHz",        "zero",  "%hu", UDP_HEADER_SIZE+8, "CPU Speed in terms of MHz"},
 %  {metric_mem_total,    "mem_total",  1200,  GANGLIA_VALUE_UNSIGNED_INT,   "KB",         "zero",  "%u",  UDP_HEADER_SIZE+8, "Total amount of memory displayed in KBs"},
