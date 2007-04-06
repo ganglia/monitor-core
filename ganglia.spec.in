@@ -205,6 +205,10 @@ fi
 %{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/gmond.conf
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
 
+%__mkdir -p $RPM_BUILD_ROOT/etc/ganglia
+%__mkdir -p $RPM_BUILD_ROOT/etc/ganglia/conf.d
+%__cp -f %{_builddir}/%{name}-%{version}/gmond/modules/conf.d/* $RPM_BUILD_ROOT/etc/ganglia/conf.d
+
 %__make DESTDIR=$RPM_BUILD_ROOT install
 %__make -C gmond gmond.conf.5
 %__install -m 0644 %{_builddir}/%{name}-%{version}/gmond/gmond.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/gmond.conf.5
@@ -234,7 +238,10 @@ fi
 /etc/init.d/gmond
 %{_mandir}/man5/gmond.conf.5*
 %config(noreplace) /etc/gmond.conf
-%{_libdir}/libmodexample*
+%dir /etc/ganglia/
+%dir /etc/ganglia/conf.d/
+%config(noreplace) /etc/ganglia/conf.d/*
+%{_libdir}/ganglia/*
 
 ##
 ## FILES DEVEL
@@ -280,7 +287,7 @@ fi
 %{web_prefixdir}/show_node.php
 %{web_prefixdir}/styles.css
 %{web_prefixdir}/templates
-%{web_prefixdir}/version.php.in
+%{web_prefixdir}/version.php
 
 %endif
 
