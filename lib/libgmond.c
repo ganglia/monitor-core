@@ -191,6 +191,8 @@ tcp_accept_channel { \n\
   port = 8649 \n\
 } \n\
 \n\
+include ('/etc/ganglia/conf.d/*.conf') \n\
+\n\
 \n\
 "
 
