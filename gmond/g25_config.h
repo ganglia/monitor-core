@@ -4,7 +4,7 @@
 #include <string.h>
 
 /* autoconf me later */
-#define DEFAULT_GMOND_CONFIG_FILE "/etc/gmond.conf"
+#define DEFAULT_GMOND_CONFIG_FILE "/etc/ganglia/gmond.conf"
 
 typedef struct
    {

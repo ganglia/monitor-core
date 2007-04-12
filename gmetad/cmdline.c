@@ -50,7 +50,7 @@ cmdline_parser_print_help (void)
   "Usage: %s [OPTIONS]...\n", PACKAGE);
   printf("   -h         --help         Print help and exit\n");
   printf("   -V         --version      Print version and exit\n");
-  printf("   -cSTRING   --conf=STRING  Location of gmetad configuration file (default='/etc/gmetad.conf')\n");
+  printf("   -cSTRING   --conf=STRING  Location of gmetad configuration file (default='/etc/ganglia/gmetad.conf')\n");
   printf("   -dINT      --debug=INT    Debug level. If greater than zero, daemon will stay in foreground. (default=0)\n");
   printf("   -p         --pid-file=STRING  Write process-id to file\n");
 }
@@ -82,7 +82,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->debug_given = 0 ;
   args_info->pid_file_given = 0 ;
 #define clear_args() { \
-  args_info->conf_arg = strdup("/etc/gmetad.conf") ;\
+  args_info->conf_arg = strdup("/etc/ganglia/gmetad.conf") ;\
   args_info->debug_arg = 0 ;\
   args_info->pid_file_arg = NULL ; \
 }

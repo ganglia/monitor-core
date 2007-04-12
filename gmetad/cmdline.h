@@ -20,7 +20,7 @@ extern "C" {
 
 struct gengetopt_args_info
 {
-  char * conf_arg;	/* Location of gmetad configuration file (default='/etc/gmetad.conf').  */
+  char * conf_arg;	/* Location of gmetad configuration file (default='/etc/ganglia/gmetad.conf').  */
   int debug_arg;	/* Debug level. If greater than zero, daemon will stay in foreground. (default=0).  */
   char * pid_file_arg;	/* file to write a pid to */
 

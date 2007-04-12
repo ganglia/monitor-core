@@ -5,7 +5,7 @@ package "gmetric"
 purpose "The Ganglia Metric Client (gmetric) announces a metric
 on the list of defined send channels defined in a configuration file"
 
-option "conf" c "The configuration file to use for finding send channels" string default="/etc/gmond.conf" no
+option "conf" c "The configuration file to use for finding send channels" string default="/etc/ganglia/gmond.conf" no
 option "name" n "Name of the metric" string no
 option "value" v "Value of the metric" string no
 option "type" t "Either string|int8|uint8|int16|uint16|int32|uint32|float|double" string no

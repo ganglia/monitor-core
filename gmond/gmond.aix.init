@@ -15,7 +15,7 @@ test -x $GMOND_BIN || { echo "$GMOND_BIN not installed";
 	else exit 5; fi; }
 
 # Check for existence of needed config file and read it
-GMOND_CONFIG=/etc/gmond.conf
+GMOND_CONFIG=/etc/ganglia/gmond.conf
 test -r $GMOND_CONFIG || { echo "$GMOND_CONFIG not existing";
 	if [ "$1" = "stop" ]; then exit 0;
 	else exit 6; fi; }
