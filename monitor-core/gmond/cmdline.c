@@ -86,7 +86,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
   args_info->convert_given = 0 ;
   args_info->pid_file_given = 0 ;
 #define clear_args() { \
-  args_info->conf_arg = gengetopt_strdup("/etc/gmond.conf") ;\
+  args_info->conf_arg = gengetopt_strdup("/etc/ganglia/gmond.conf") ;\
   args_info->location_arg = gengetopt_strdup("0,0,0") ;\
   args_info->debug_arg = 0 ;\
   args_info->foreground_flag = 0;\

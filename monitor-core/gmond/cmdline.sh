@@ -6,7 +6,7 @@ purpose "The Ganglia Monitoring Daemon (gmond) listens to the cluster
 message channel, stores the data in-memory and when requested
 will output an XML description of the state of the cluster"
 
-option "conf" c "Location of gmond configuration file" string default="/etc/gmond.conf" no
+option "conf" c "Location of gmond configuration file" string default="/etc/ganglia/gmond.conf" no
 option "location" l "Location of this host in the cluster 'rack,rank,plane'." string default="0,0,0" no
 option "debug" d "Debug level. If greater than zero, daemon will stay in foreground." int default="0" no
 option "foreground" f "Run in foreground (don't daemonize)" flag off 

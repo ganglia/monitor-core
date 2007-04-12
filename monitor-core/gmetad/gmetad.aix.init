@@ -15,7 +15,7 @@ test -x $GMETAD_BIN || { echo "$GMETAD_BIN not installed";
 	else exit 5; fi; }
 
 # Check for existence of needed config file and read it
-GMETAD_CONFIG=/etc/gmetad.conf
+GMETAD_CONFIG=/etc/ganglia/gmetad.conf
 test -r $GMETAD_CONFIG || { echo "$GMETAD_CONFIG not existing";
 	if [ "$1" = "stop" ]; then exit 0;
 	else exit 6; fi; }

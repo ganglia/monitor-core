@@ -201,12 +201,12 @@ fi
    %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/init.d/gmetad
 %endif
 
-# We just output the default gmond.conf from gmond using the '-t' flag
-%{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/gmond.conf
-%__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
-
 %__mkdir -p $RPM_BUILD_ROOT/etc/ganglia
 %__mkdir -p $RPM_BUILD_ROOT/etc/ganglia/conf.d
+
+# We just output the default gmond.conf from gmond using the '-t' flag
+%{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
+%__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/ganglia/gmetad.conf
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/modules/conf.d/* $RPM_BUILD_ROOT/etc/ganglia/conf.d
 
 %__make DESTDIR=$RPM_BUILD_ROOT install
@@ -225,7 +225,7 @@ fi
 %attr(0755,nobody,nobody)@varstatedir@/ganglia/rrds
 %{_sbindir}/gmetad
 /etc/init.d/gmetad
-%config(noreplace) /etc/gmetad.conf
+%config(noreplace) /etc/ganglia/gmetad.conf
 
 ##
 ## FILES GMON
@@ -237,7 +237,7 @@ fi
 %{_sbindir}/gmond
 /etc/init.d/gmond
 %{_mandir}/man5/gmond.conf.5*
-%config(noreplace) /etc/gmond.conf
+%config(noreplace) /etc/ganglia/gmond.conf
 %dir /etc/ganglia/
 %dir /etc/ganglia/conf.d/
 %config(noreplace) /etc/ganglia/conf.d/*
@@ -301,6 +301,12 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Thu Apr 12 2007 Brad Nicholes <bnicholes@novell.com>
+- Move the main .conf file out of /etc and into /etc/ganglia
+* Fri Apr 06 2007 Brad Nicholes <bnicholes@novell.com>
+- install the module .conf files under a /etc/ganglia/conf.d 
+  directory and list the file owner of the .conf files and 
+  the module DSOs
 * Wed Apr 04 2007 Bernard Li <bernard@vanhpc.org>
 - Added libmodexample* files to ganglia-gmond sub-package
 * Tue Apr 03 2007 Bernard Li <bernard@vanhpc.org>
