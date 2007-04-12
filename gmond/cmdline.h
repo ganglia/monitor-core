@@ -24,7 +24,7 @@ extern "C" {
 
 struct gengetopt_args_info
 {
-  char * conf_arg;	/* Location of gmond configuration file (default='/etc/gmond.conf').  */
+  char * conf_arg;	/* Location of gmond configuration file (default='/etc/ganglia/gmond.conf').  */
   char * location_arg;	/* Location of this host in the cluster 'rack,rank,plane'. (default='0,0,0').  */
   int debug_arg;	/* Debug level. If greater than zero, daemon will stay in foreground. (default='0').  */
   int foreground_flag;	/* Run in foreground (don't daemonize) (default=off).  */

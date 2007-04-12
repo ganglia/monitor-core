@@ -28,7 +28,7 @@ const char *gengetopt_args_info_usage = "Usage: gmetric [OPTIONS]...";
 const char *gengetopt_args_info_help[] = {
   "  -h, --help          Print help and exit",
   "  -V, --version       Print version and exit",
-  "  -c, --conf=STRING   The configuration file to use for finding send channels  \n                        (default=`/etc/gmond.conf')",
+  "  -c, --conf=STRING   The configuration file to use for finding send channels  \n                        (default=`/etc/ganglia/gmond.conf')",
   "  -n, --name=STRING   Name of the metric",
   "  -v, --value=STRING  Value of the metric",
   "  -t, --type=STRING   Either \n                        string|int8|uint8|int16|uint16|int32|uint32|float|double",
@@ -73,7 +73,7 @@ void clear_given (struct gengetopt_args_info *args_info)
 static
 void clear_args (struct gengetopt_args_info *args_info)
 {
-  args_info->conf_arg = gengetopt_strdup ("/etc/gmond.conf");
+  args_info->conf_arg = gengetopt_strdup ("/etc/ganglia/gmond.conf");
   args_info->conf_orig = NULL;
   args_info->name_arg = NULL;
   args_info->name_orig = NULL;

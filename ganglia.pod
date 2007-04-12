@@ -201,7 +201,7 @@ message announcing that gexec is installed on it and open for requests.
 Now the question is, what if I don't want gexec to run on every host in my cluster?  For
 example, you may not want to have C<gexec> run jobs on your cluster frontend nodes.
 
-You simply add the following line to your C<gmond> configuration file (C</etc/gmond.conf> by
+You simply add the following line to your C<gmond> configuration file (C</etc/ganglia/gmond.conf> by
 default)
 
   no_gexec on
@@ -319,7 +319,7 @@ The configuration file format has changed between gmond version 2.5.x and versio
 2.6.x.  The change was necessary in order to allow more complex configuration options.
 
 Gmond has a default configuration it will use if it does not find the default configuration
-file B</etc/gmond.conf>.  To see the default configuration simply run the command:
+file B</etc/ganglia/gmond.conf>.  To see the default configuration simply run the command:
 
   % gmond --default_config
 
@@ -328,10 +328,10 @@ serve as a good starting place for building a more custom configuration.
 
   % gmond --default_config > gmond.conf
 
-would create a file B<gmond.conf> which you can then edit to taste and copy to B</etc/gmond.conf>
+would create a file B<gmond.conf> which you can then edit to taste and copy to B</etc/ganglia/gmond.conf>
 or elsewhere.
 
-To start gmond with a configuration file other then B</etc/gmond.conf>, simply specify the
+To start gmond with a configuration file other then B</etc/ganglia/gmond.conf>, simply specify the
 configuration file location by running
 
   % gmond --config /my/ganglia/configs/custom.conf
@@ -355,7 +355,7 @@ for a complete listing of options with detailed explanations.
 =head2 Gmetad Configuration
 
 The behavior of the Ganglia Meta Daemon is completely controlled by a single configuration 
-file which is by default C</etc/gmetad.conf>. For gmetad to do anything useful you much 
+file which is by default C</etc/ganglia/gmetad.conf>. For gmetad to do anything useful you much 
 specify at least one C<data_source> in the configuration. The format of the data_source 
 line is as follows
 
@@ -524,7 +524,7 @@ If you want help with the gmetric sytax, simply use the "help" commandline optio
     -h, --help          Print help and exit
     -V, --version       Print version and exit
     -c, --conf=STRING   The configuration file to use for finding send channels
-                        (default=`/etc/gmond.conf')
+                        (default=`/etc/ganglia/gmond.conf')
     -n, --name=STRING   Name of the metric
     -v, --value=STRING  Value of the metric
     -t, --type=STRING   Either
@@ -537,7 +537,7 @@ If you want help with the gmetric sytax, simply use the "help" commandline optio
     -d, --dmax=INT      The lifetime in seconds of this metric  (default=`0')
 
 Gmetric sends the metric specified on the commandline to all B<udp_send_channel>s specified
-in the configuration file B</etc/gmond.conf> by default.  If you want to send metric to 
+in the configuration file B</etc/ganglia/gmond.conf> by default.  If you want to send metric to 
 alternate B<udp_send_channel>s, you can specify a different configuration file as such:
 
   % gmetric --conf=./custom.conf -n "wow" -v "it works" -t "string"
@@ -834,7 +834,7 @@ multihomed machines
    
    mcast_if eth1
    
-   .. in /etc/gmond.conf that tells gmond to send its data out the "eth1"
+   .. in /etc/ganglia/gmond.conf that tells gmond to send its data out the "eth1"
    network interface but that doesn't necessarily mean that the source
    address of the packets will match the "eth1" interface.  to make sure that
    data sent out eth1 has the correct source address run the following...

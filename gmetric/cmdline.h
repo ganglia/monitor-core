@@ -26,7 +26,7 @@ struct gengetopt_args_info
 {
   const char *help_help; /* Print help and exit help description.  */
   const char *version_help; /* Print version and exit help description.  */
-  char * conf_arg;	/* The configuration file to use for finding send channels (default='/etc/gmond.conf').  */
+  char * conf_arg;	/* The configuration file to use for finding send channels (default='/etc/ganglia/gmond.conf').  */
   char * conf_orig;	/* The configuration file to use for finding send channels original value given at command line.  */
   const char *conf_help; /* The configuration file to use for finding send channels help description.  */
   char * name_arg;	/* Name of the metric.  */
