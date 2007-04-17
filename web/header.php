@@ -293,7 +293,15 @@ if ($context == "meta" or $context == "cluster")
    {
       $context_sorts[]="ascending";
       $context_sorts[]="descending";
-      $context_sorts[]="by hostname";
+      $context_sorts[]="by name";
+
+      #
+      # Show sort order options for meta context only:
+      #
+      if ($context == "meta" ) {
+          $context_sorts[]="by hosts up";
+          $context_sorts[]="by hosts down";
+      }
 
       $sort_menu = "<B>Sorted</B>&nbsp;&nbsp;"
          ."<SELECT NAME=\"s\" OnChange=\"ganglia_form.submit();\">\n";
