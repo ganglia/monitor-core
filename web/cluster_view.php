@@ -146,7 +146,7 @@ switch ($sort)
    case "descending":
       arsort($sorted_hosts);
       break;
-   case "by hostname":
+   case "by name":
       uksort($sorted_hosts, "strnatcmp");
       break;
    default:
