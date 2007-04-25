@@ -5,7 +5,7 @@
 #include "libmetrics.h"
 #include "protocol.h"
 
-#include <apr_pools.h>
+//#include <apr_pools.h>
 
 typedef void (*metric_info_func)(Ganglia_25metric *gmi);
 typedef g_val_t (*metric_func)(void);
@@ -45,6 +45,7 @@ struct mmodule_struct {
     int version;
     /** API minor version. Provides API feature milestones. */
     int minor_version;
+
     /** The name of the module's C file */
     const char *name;
     /** The handle for the DSO.  Internal use only */

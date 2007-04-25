@@ -2,7 +2,15 @@ SUBDIRS = gstat modules
 
 EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
 
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/libmetrics/ -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/confuse/src/
+if USE_DYNAMIC_APR
+APR_LIB = 
+APR_INC = -D_LARGEFILE64_SOURCE
+else
+APR_LIB = $(top_builddir)/srclib/apr/libapr-0.la
+APR_INC = -I$(top_builddir)/srclib/apr/include/
+endif
+
+AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/libmetrics/ -I$(top_builddir)/srclib/expat/lib/ $(APR_INC) -I$(top_builddir)/srclib/confuse/src/
 
 sbin_PROGRAMS = gmond
 # metric.h and dtd.h are for gmetad/gmetric for now....
@@ -23,6 +31,13 @@ gmond_LDADD   = $(top_builddir)/libmetrics/libmetrics.la \
 		$(top_builddir)/lib/libganglia.la \
 	        $(top_builddir)/lib/libgetopthelper.a \
 		$(top_builddir)/srclib/confuse/src/libconfuse.la \
-		$(top_builddir)/srclib/apr/libapr-0.la
-gmond_LDFLAGS = -static
+		$(APR_LIB)
+
 gmond_DEPENDENCIES = $(gmond_LDADD)
+
+if USE_DYNAMIC_APR
+gmond_LDFLAGS = 
+else
+gmond_LDFLAGS = -static
+endif
+

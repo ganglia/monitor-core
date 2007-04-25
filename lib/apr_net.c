@@ -5,10 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <apr_strings.h>
-#include "apr_network_io.h"
-#include "apr_arch_networkio.h"
+#include <apr_network_io.h>
+#include <apr_portable.h>
+//#include "apr_arch_networkio.h"
 
-#include "apr_net.h"
+#include <apr_net.h>
+#include <apr_version.h>
 
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -16,6 +18,12 @@
 #ifdef SOLARIS2
 #include <sys/sockio.h>  /* for SIOCGIFADDR */
 #endif
+
+#if (APR_MAJOR_VERSION >= 1) && (APR_MINOR_VERSION >= 2)
+#define USING_APR_12
+#endif
+
+const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
 
 /* This function is copied directly from the 
  * apr_sockaddr_ip_get() function and modified to take a static
@@ -70,14 +78,22 @@ create_net_client(apr_pool_t *context, int type, char *host, apr_port_t port)
   family = remotesa->sa.sin.sin_family;
 
   /* Created the socket */
+#ifdef USING_APR_12
+  status = apr_socket_create(&sock, family, type, 0, context);
+#else
   status = apr_socket_create(&sock, family, type, context);
+#endif
   if(status != APR_SUCCESS)
     {
       return NULL;
     }
 
   /* Connect the socket to the address */
+#ifdef USING_APR_12
+  status = apr_socket_connect(sock, remotesa);
+#else
   status = apr_connect(sock, remotesa);
+#endif
   if(status != APR_SUCCESS)
     {
       apr_socket_close(sock);
@@ -115,13 +131,21 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t
       family = localsa->sa.sin.sin_family;
     }
 
+#ifdef USING_APR_12
+  stat = apr_socket_create(&sock, family, type, 0, context);
+#else
   stat = apr_socket_create(&sock, family, type, context);
+#endif
   if( stat != APR_SUCCESS )
     return NULL;
 
   if(!blocking){
      /* This is a non-blocking server */
+#ifdef USING_APR_12
+      stat = apr_socket_opt_set(sock, APR_SO_NONBLOCK, 1);
+#else
      stat = apr_setsocketopt(sock, APR_SO_NONBLOCK, 1);
+#endif
      if (stat != APR_SUCCESS)
      {
            apr_socket_close(sock);
@@ -129,7 +153,11 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t
      }
   }
 
+#ifdef USING_APR_12
+  stat = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
+#else
   stat = apr_setsocketopt(sock, APR_SO_REUSEADDR, 1);
+#endif
   if (stat != APR_SUCCESS)
     {
       apr_socket_close(sock);
@@ -139,7 +167,11 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t
   if(!localsa)
     {
       apr_socket_addr_get(&localsa, APR_LOCAL, sock);
+#ifdef USING_APR_12
+      apr_sockaddr_vars_set(localsa, localsa->family, port);
+#else
       apr_sockaddr_port_set(localsa, port);
+#endif
     }
 
 #if APR_HAVE_IPV6
@@ -158,7 +190,11 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t
      }
 #endif
 
+#ifdef USING_APR_12
+   stat = apr_socket_bind(sock, localsa);
+#else
   stat = apr_bind(sock, localsa);
+#endif
   if( stat != APR_SUCCESS)
     {
        apr_socket_close(sock);
@@ -185,30 +221,39 @@ create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port, char
     {
       return NULL;
     }
+#ifdef USING_APR_12
+  if(apr_socket_listen(sock, 5) != APR_SUCCESS) 
+#else
   if(apr_listen(sock, 5) != APR_SUCCESS) 
+#endif
     {
       return NULL;
     }
   return sock;
 }
 
+#ifndef USING_APR_12
 int
 mcast_set_ttl(apr_socket_t *socket, int val)
 {
   apr_sockaddr_t *sa;
+  apr_os_sock_t s;
 
   apr_socket_addr_get(&sa, APR_LOCAL, socket);
   if(!sa)
     {
       return -1;
     }
+
+  apr_os_sock_get(&s, socket);
+
   switch (sa->family)
     {
 	case APR_INET: {
 		u_char		ttl;
 
 		ttl = val;
-		return(setsockopt(socket->socketdes, IPPROTO_IP, IP_MULTICAST_TTL,
+        return(setsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL,
 						  &ttl, sizeof(ttl)));
 	}
 
@@ -217,7 +262,7 @@ mcast_set_ttl(apr_socket_t *socket, int val)
 		int		hop;
 
 		hop = val;
-		return(setsockopt(socket->socketdes, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+		return(setsockopt(s, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
 						  &hop, sizeof(hop)));
 	}
 #endif
@@ -227,19 +272,24 @@ mcast_set_ttl(apr_socket_t *socket, int val)
 		return(-1);
 	}
 }
+#endif
 
+/*XXX This should really be replaced by the APR mcast functions */
 static apr_status_t
 mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_port_t port, char *ifname )
 {
   apr_status_t status;
   int rval;
   apr_sockaddr_t *sa;
+  apr_os_sock_t s;
 
   status = apr_sockaddr_info_get(&sa, mcast_channel , APR_UNSPEC, port, 0, context);
   if(status != APR_SUCCESS)
     {
       return status;
     }
+
+  apr_os_sock_get(&s, sock);
 
   switch( sa->family ) /* (*sa)->sa.sin.sin_family */
     {
@@ -257,7 +307,7 @@ mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
 	    {
               memset(ifreq, 0, sizeof(struct ifreq));
               strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
-              if(ioctl(sock->socketdes, SIOCGIFADDR, ifreq) == -1)
+              if(ioctl(s, SIOCGIFADDR, ifreq) == -1)
 		{
 		  return APR_EGENERAL;
 		}
@@ -272,7 +322,7 @@ mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
 		 &((struct sockaddr_in *)&ifreq->ifr_addr)->sin_addr, 
 		 sizeof mreq->imr_interface);
 
-	  rval = setsockopt(sock->socketdes, IPPROTO_IP, IP_ADD_MEMBERSHIP, 
+	  rval = setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, 
 			    mreq, sizeof mreq);
 	  if(rval<0)
 	    {
@@ -296,10 +346,10 @@ mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
 	      strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
 	    }
 
-	  if (ioctl(sock->socketdes, SIOCGIFADDR, ifreq) == -1)
+	  if (ioctl(s, SIOCGIFADDR, ifreq) == -1)
 	                return -1;
 
-	  rval = setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_JOIN_GROUP, mreq, sizeof mreq);
+	  rval = setsockopt(s, IPPROTO_IPV6, IPV6_JOIN_GROUP, mreq, sizeof mreq);
 	  break;
 	}
 #endif
@@ -319,7 +369,11 @@ create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int tt
     {
       return NULL;
     }
+#ifdef USING_APR_12
+  apr_mcast_hops(socket, ttl);
+#else
   mcast_set_ttl(socket, ttl);
+#endif
   return socket;
 }
 
