@@ -1,7 +1,15 @@
 #SUFFIXES=.x
 #.c.x: rpcgen $<
 
-AM_CFLAGS = -I.. -I. -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/libmetrics/ -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/apr/include/arch/unix/ -I$(top_builddir)/srclib/confuse/src
+if USE_DYNAMIC_APR
+APR_LIB = 
+APR_INC = -D_LARGEFILE64_SOURCE
+else
+APR_LIB = $(top_builddir)/srclib/apr/libapr-0.la
+APR_INC = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/apr/include/arch/unix/
+endif
+
+AM_CFLAGS = -I.. -I. -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/libmetrics/ $(APR_INC)  -I$(top_builddir)/srclib/confuse/src
 
 include_HEADERS = ganglia.h
 
@@ -20,6 +28,13 @@ libganglia_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-release $(LT_RELEASE) \
 	-export-dynamic 
+
+if USE_DYNAMIC_APR
+libganglia_la_LIBADD = 	$(top_builddir)/srclib/expat/lib/libexpat.la \
+			$(top_builddir)/srclib/confuse/src/libconfuse.la 
+
+libganglia_la_DEPENDENCIES = $(libganglia_la_LIBADD)
+endif
 
 noinst_LIBRARIES = libgetopthelper.a
 # A little helper for getopt functions
