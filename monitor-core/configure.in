@@ -124,15 +124,11 @@ cd libmetrics && ./configure --cache-file=$ganglia_popdir/config.cache
 cd $ganglia_popdir
 
 echo $ac_n "${nl}Configuring expat ...${nl}"
-cd srclib/expat && ./configure --cache-file=$ganglia_popdir/config.cache
-cd $ganglia_popdir
-
-echo $ac_n "${nl}Configuring apr ...${nl}"
-cd srclib/apr && ./configure --cache-file=$ganglia_popdir/config.cache 
+cd srclib/expat && ./configure --cache-file=$ganglia_popdir/config.cache --prefix=$prefix 
 cd $ganglia_popdir
 
 echo $ac_n "${nl}Configuring libconfuse ...${nl}"
-cd srclib/confuse && ./configure --cache-file=$ganglia_popdir/config.cache --disable-nls
+cd srclib/confuse && ./configure --cache-file=$ganglia_popdir/config.cache --disable-nls --prefix=$prefix 
 cd $ganglia_popdir
 
 
@@ -152,6 +148,22 @@ AC_ARG_WITH( gmetad,
 if test "$withval" = yes; then gmetad=yes; fi)
 
 AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
+
+AC_ARG_WITH( libapr,
+[  --with-libapr      Dynamically link with libapr-1.so module],
+[if test x"$withval" != xno; then libapr=yes; fi])
+
+AM_CONDITIONAL(USE_DYNAMIC_APR, test x$libapr = xyes)
+if test x"$libapr" = xyes ; then
+   if test x"$withval" != xyes ; then
+      LDFLAGS="$LDFLAGS -L$withval"
+   fi 
+else
+   echo $ac_n "${nl}Configuring apr ...${nl}"
+   cd srclib/apr && ./configure --cache-file=$ganglia_popdir/config.cache --prefix=$prefix
+   cd $ganglia_popdir
+fi
+
 
 AC_ARG_ENABLE(debug,
 [
@@ -208,6 +220,21 @@ if test "$gmetad" = yes ; then
       echo
       exit;
    fi
+fi
+
+echo
+echo Checking for apr
+echo
+
+if test x"$libapr" = xyes ; then
+dnl   AC_CHECK_LIB(apr-1, apr_socket_send, [echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"], [echo "libapr lib not found"], -lapr-1)
+   AC_CHECK_LIB(apr-1, apr_socket_send)
+dnl   AC_CHECK_HEADERS(apr.h)
+  if test $ac_cv_lib_apr_1_apr_socket_send = yes; then
+    echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
+  else
+    echo "libapr lib not found"
+  fi
 fi
 
 AC_CHECK_LIB(rpc, xdr_string)

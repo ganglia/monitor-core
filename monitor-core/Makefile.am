@@ -10,7 +10,7 @@ AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-shar dist-zip
 
 # Make sure we run the srclib but don't distribute it.  That
 # is handled in the "dist-hook" below...
-GANGLIA_SUBDIRS = lib libmetrics srclib tests $(GMETAD_SUBDIR) gmond gmetric
+GANGLIA_SUBDIRS = srclib lib libmetrics tests $(GMETAD_SUBDIR) gmond gmetric
 SUBDIRS = $(GANGLIA_SUBDIRS)
 # Make sure that no matter the setting for --with-gmetad
 # that the gmetad directory gets distributed

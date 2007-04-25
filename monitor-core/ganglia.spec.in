@@ -21,7 +21,7 @@ Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
 Buildroot: /tmp/%{name}-%{version}-buildroot
 Prefix: /usr
-BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++
+BuildRequires: libapr1-devel libpng-devel, libart_lgpl-devel, gcc-c++
 %if %{?suse_version:1}0
 BuildRequires: rrdtool, freetype2-devel
 %else
@@ -107,7 +107,7 @@ can use to build scalable cluster or grid applications
 ## BUILD
 ##
 %build
-%configure --with-gmetad
+%configure --with-gmetad --with-libapr
 %ifnarch noarch
 make
 %endif
@@ -226,6 +226,9 @@ fi
 %{_sbindir}/gmetad
 /etc/init.d/gmetad
 %config(noreplace) /etc/ganglia/gmetad.conf
+%{_libdir}/ganglia/*
+%{_libdir}/libexpat.so*
+%{_libdir}/libganglia*
 
 ##
 ## FILES GMON
@@ -242,6 +245,8 @@ fi
 %dir /etc/ganglia/conf.d/
 %config(noreplace) /etc/ganglia/conf.d/*
 %{_libdir}/ganglia/*
+%{_libdir}/libexpat.so*
+%{_libdir}/libganglia*
 
 ##
 ## FILES DEVEL
@@ -301,6 +306,9 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Wed Apr 25 2007 Brad Nicholes <bnicholes@novell.com>
+- Dynamically link APR rather than statically linking
+  the Ganglia version of APR.
 * Thu Apr 12 2007 Brad Nicholes <bnicholes@novell.com>
 - Move the main .conf file out of /etc and into /etc/ganglia
 * Fri Apr 06 2007 Brad Nicholes <bnicholes@novell.com>
