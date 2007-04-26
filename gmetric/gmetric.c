@@ -60,7 +60,7 @@ main( int argc, char *argv[] )
           exit(1);
       }
       rval = Ganglia_gmetric_set( gmetric, args_info.name_arg, args_info.value_arg,
-			      args_info.type_arg, args_info.units_arg, !strcmp(args_info.slope_arg,"zero")? 0: 3,
+			      args_info.type_arg, args_info.units_arg, cstr_to_slope(args_info.slope_arg),
 			      args_info.tmax_arg, args_info.dmax_arg);
   }
   /* TODO: make this less ugly later */

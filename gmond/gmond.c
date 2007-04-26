@@ -1165,7 +1165,7 @@ print_host_gmetric( apr_socket_t *client, Ganglia_metric *metric, apr_time_t now
            (int)((now - metric->last_heard_from) / APR_USEC_PER_SEC),
 	   msg->tmax,
 	   msg->dmax,
-	   msg->slope? "both": "zero",
+	   slope_to_cstr(msg->slope),
        desc);
 
   return apr_socket_send(client, metricxml, &len );

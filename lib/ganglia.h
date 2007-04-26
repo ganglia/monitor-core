@@ -42,6 +42,20 @@ struct Ganglia_gmetric {
 };
 typedef struct Ganglia_gmetric * Ganglia_gmetric;
 
+enum ganglia_slope {
+	GANGLIA_SLOPE_ZERO = 0,
+    GANGLIA_SLOPE_POSITIVE,
+    GANGLIA_SLOPE_NEGATIVE,
+    GANGLIA_SLOPE_BOTH,
+    GANGLIA_SLOPE_UNSPECIFIED
+};
+
+typedef enum ganglia_slope ganglia_slope_t;
+
+ganglia_slope_t cstr_to_slope(const char* str);
+const char*     slope_to_cstr(unsigned int slope);
+
+
 Ganglia_gmond_config
 Ganglia_gmond_config_create(char *path, int fallback_to_default);
 void Ganglia_gmond_config_destroy(Ganglia_gmond_config config);
