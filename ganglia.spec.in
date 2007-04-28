@@ -21,11 +21,11 @@ Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
 Buildroot: /tmp/%{name}-%{version}-buildroot
 Prefix: /usr
-BuildRequires: libapr1-devel libpng-devel, libart_lgpl-devel, gcc-c++
+BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++
 %if %{?suse_version:1}0
-BuildRequires: rrdtool, freetype2-devel
+BuildRequires: rrdtool, freetype2-devel, libapr1-devel
 %else
-BuildRequires: rrdtool-devel, freetype-devel
+BuildRequires: rrdtool-devel, freetype-devel, apr-devel
 %endif
 
 %description
@@ -306,6 +306,9 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Fri Apr 27 2007 Bernard Li <bernard@vanhpc.org>
+- Add apr-devel to BuildRequires for distro other than SuSE
+  (Red Hat/Fedora/Mandriva)
 * Wed Apr 25 2007 Brad Nicholes <bnicholes@novell.com>
 - Dynamically link APR rather than statically linking
   the Ganglia version of APR.
