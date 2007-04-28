@@ -17,7 +17,7 @@ SUBDIRS = $(GANGLIA_SUBDIRS)
 GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gmetric
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
-EXTRA_DIST = README.AIX config ganglia.aix.spec ganglia.spec ganglia.pod ganglia.html mans
+EXTRA_DIST = README.AIX config ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html mans
 
 ganglia.sub: ganglia.pod
 	sed -e 's/GANGLIA_VERSION/@VERSION@/' < $(srcdir)/ganglia.pod > ganglia.sub
@@ -31,8 +31,6 @@ ganglia.html: ganglia.sub
 README: ganglia.sub
 	pod2text ganglia.sub README
 
-#CHANGE_LOG_GEN_BIN = scripts/cvs2cl.pl
-#CHANGE_LOG_GEN_FLAGS = -r --accum -I ChangeLog --gmt --prune
 CHANGE_LOG_GEN_BIN = scripts/svn2cl.sh
 CHANGE_LOG_GEN_FLAGS = --revision HEAD:1
 
@@ -53,7 +51,7 @@ dist-local: README ganglia.html ChangeLog
 # the same timestamp with the last command here...
 dist-hook:
 	for subdir in "./srclib ./web"; do \
-	  tar -c --exclude=".libs" --exclude "core.*" --exclude="*CVS" \
+	  tar -c --exclude=".libs" --exclude "core.*" \
 	  --exclude ".svn" --exclude="*.o"  --exclude="*.lo" \
 	  --exclude="*.la" --exclude=".deps" \
 	  --exclude="Makefile" --exclude="libtool" \
@@ -65,7 +63,7 @@ dist-hook:
 	  --exclude="configure.lineno" --exclude="configure.status.lineno" \
 	  -f - $$subdir | (cd $(distdir) && tar -xf -)\
 	done;
-	find $(distdir) -name ".svn" -type d -prune -execdir rm -rf {} \;
+	find $(distdir) -name ".svn" -type d -prune -exec rm -rf {} \;
 	touch $(distdir)/Makefile.am
 	find $(distdir) -exec touch -r $(distdir)/Makefile.am {} \;
 
