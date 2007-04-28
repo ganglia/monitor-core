@@ -150,7 +150,7 @@ if test "$withval" = yes; then gmetad=yes; fi)
 AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
 
 AC_ARG_WITH( libapr,
-[  --with-libapr      Dynamically link with libapr-1.so module],
+[  --with-libapr           Dynamically link with libapr-1.so module],
 [if test x"$withval" != xno; then libapr=yes; fi])
 
 AM_CONDITIONAL(USE_DYNAMIC_APR, test x$libapr = xyes)
