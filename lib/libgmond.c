@@ -600,7 +600,7 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
       if( mcast_join )
 	{
 	  /* We'll be listening on a multicast channel */
-	  socket = create_mcast_client(pool, mcast_join, port, ttl);
+	  socket = create_mcast_client(pool, mcast_join, port, ttl, mcast_if);
 	  if(!socket)
 	    {
 	      fprintf(stderr,"Unable to join multicast channel %s:%d. Exiting\n",
