@@ -108,7 +108,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
 
       c = getopt_long (argc, argv, "hVc:d:p:", long_options, &option_index);
 
-      if (c == -1) break;	/* Exit from `while (1)' loop.  */
+      if (c == -1) break;	/* Exit from 'while (1)' loop.  */
 
       switch (c)
         {
@@ -125,7 +125,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 'c':	/* Location of gmetad configuration file.  */
           if (args_info->conf_given)
             {
-              fprintf (stderr, "%s: `--conf' (`-c') option given more than once\n", PACKAGE);
+              fprintf (stderr, "%s: '--conf' ('-c') option given more than once\n", PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -136,7 +136,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 'd':	/* Debug level. If greater than zero, daemon will stay in foreground..  */
           if (args_info->debug_given)
             {
-              fprintf (stderr, "%s: `--debug' (`-d') option given more than once\n", PACKAGE);
+              fprintf (stderr, "%s: '--debug' ('-d') option given more than once\n", PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -148,7 +148,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
 
 	  if (args_info->pid_file_given)
 	    {
-              fprintf (stderr, "%s: `--pid-file' (`-p') option given more than once\n", PACKAGE);
+              fprintf (stderr, "%s: '--pid-file' ('-p') option given more than once\n", PACKAGE);
 	      clear_args ();
 	      exit (EXIT_FAILURE);
 	    }
@@ -159,7 +159,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 0:	/* Long option with no short option */
 
         case '?':	/* Invalid option.  */
-          /* `getopt_long' already printed an error message.  */
+          /* 'getopt_long' already printed an error message.  */
           exit (EXIT_FAILURE);
 
         default:	/* bug: option not considered.  */
