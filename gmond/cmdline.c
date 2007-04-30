@@ -42,14 +42,14 @@ cmdline_parser_print_help (void)
   printf("\n");
   printf("  -h, --help             Print help and exit\n");
   printf("  -V, --version          Print version and exit\n");
-  printf("  -c, --conf=STRING      Location of gmond configuration file  (default=\n                           `/etc/gmond.conf')\n");
-  printf("  -l, --location=STRING  Location of this host in the cluster \n                           'rack,rank,plane'.  (default=`0,0,0')\n");
-  printf("  -d, --debug=INT        Debug level. If greater than zero, daemon will stay \n                           in foreground.  (default=`0')\n");
+  printf("  -c, --conf=STRING      Location of gmond configuration file  \n                           (default='/etc/ganglia/gmond.conf')\n");
+  printf("  -l, --location=STRING  Location of this host in the cluster \n                           'rack,rank,plane'.  (default='0,0,0')\n");
+  printf("  -d, --debug=INT        Debug level. If greater than zero, daemon will stay \n                           in foreground.  (default='0')\n");
   printf("  -f, --foreground       Run in foreground (don't daemonize)  (default=off)\n");
   printf("  -t, --default_config   Print the default configuration to stdout and exit  \n                           (default=off)\n");
   printf("  -m, --metrics          Print the list of metrics this gmond supports  \n                           (default=off)\n");
   printf("  -b, --bandwidth        Calculate minimum bandwidth use for configuration  \n                           (default=off)\n");
-  printf("  -r, --convert=STRING   Convert a 2.5.x configuration file to the new 2.6 \n                           format\n");
+  printf("  -r, --convert=STRING   Convert a 2.5.x configuration file to the new 3.X \n                           format\n");
   printf("  -p, --pid-file=STRING  Write process-id to file\n");
 }
 
@@ -127,7 +127,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
       stop_char = 0;
       c = getopt_long (argc, argv, "hVc:l:d:ftmbr:p:", long_options, &option_index);
 
-      if (c == -1) break;	/* Exit from `while (1)' loop.  */
+      if (c == -1) break;	/* Exit from 'while (1)' loop.  */
 
       switch (c)
         {
@@ -144,7 +144,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 'c':	/* Location of gmond configuration file.  */
           if (args_info->conf_given)
             {
-              fprintf (stderr, "%s: `--conf' (`-c') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              fprintf (stderr, "%s: '--conf' ('-c') option given more than once\n", CMDLINE_PARSER_PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -157,7 +157,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 'l':	/* Location of this host in the cluster 'rack,rank,plane'..  */
           if (args_info->location_given)
             {
-              fprintf (stderr, "%s: `--location' (`-l') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              fprintf (stderr, "%s: '--location' ('-l') option given more than once\n", CMDLINE_PARSER_PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -170,7 +170,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 'd':	/* Debug level. If greater than zero, daemon will stay in foreground..  */
           if (args_info->debug_given)
             {
-              fprintf (stderr, "%s: `--debug' (`-d') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              fprintf (stderr, "%s: '--debug' ('-d') option given more than once\n", CMDLINE_PARSER_PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -181,7 +181,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 'f':	/* Run in foreground (don't daemonize).  */
           if (args_info->foreground_given)
             {
-              fprintf (stderr, "%s: `--foreground' (`-f') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              fprintf (stderr, "%s: '--foreground' ('-f') option given more than once\n", CMDLINE_PARSER_PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -192,7 +192,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 't':	/* Print the default configuration to stdout and exit.  */
           if (args_info->default_config_given)
             {
-              fprintf (stderr, "%s: `--default_config' (`-t') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              fprintf (stderr, "%s: '--default_config' ('-t') option given more than once\n", CMDLINE_PARSER_PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -203,7 +203,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 'm':	/* Print the list of metrics this gmond supports.  */
           if (args_info->metrics_given)
             {
-              fprintf (stderr, "%s: `--metrics' (`-m') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              fprintf (stderr, "%s: '--metrics' ('-m') option given more than once\n", CMDLINE_PARSER_PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -214,7 +214,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 'b':	/* Calculate minimum bandwidth use for configuration.  */
           if (args_info->bandwidth_given)
             {
-              fprintf (stderr, "%s: `--bandwidth' (`-b') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              fprintf (stderr, "%s: '--bandwidth' ('-b') option given more than once\n", CMDLINE_PARSER_PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -225,7 +225,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 'r':	/* Convert a 2.5.x configuration file to the new 2.6 format.  */
           if (args_info->convert_given)
             {
-              fprintf (stderr, "%s: `--convert' (`-r') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              fprintf (stderr, "%s: '--convert' ('-r') option given more than once\n", CMDLINE_PARSER_PACKAGE);
               clear_args ();
               exit (EXIT_FAILURE);
             }
@@ -237,7 +237,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
 
 	  if (args_info->pid_file_given)
 	    {
-              fprintf (stderr, "%s: `--pid-file' (`-p') option given more than once\n", CMDLINE_PARSER_PACKAGE);
+              fprintf (stderr, "%s: '--pid-file' ('-p') option given more than once\n", CMDLINE_PARSER_PACKAGE);
 	      clear_args ();
 	      exit (EXIT_FAILURE);
 	    }
@@ -248,7 +248,7 @@ cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_i
         case 0:	/* Long option with no short option */
 
         case '?':	/* Invalid option.  */
-          /* `getopt_long' already printed an error message.  */
+          /* 'getopt_long' already printed an error message.  */
           exit (EXIT_FAILURE);
 
         default:	/* bug: option not considered.  */
