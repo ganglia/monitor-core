@@ -28,15 +28,15 @@ const char *gengetopt_args_info_usage = "Usage: gmetric [OPTIONS]...";
 const char *gengetopt_args_info_help[] = {
   "  -h, --help          Print help and exit",
   "  -V, --version       Print version and exit",
-  "  -c, --conf=STRING   The configuration file to use for finding send channels  \n                        (default=`/etc/ganglia/gmond.conf')",
+  "  -c, --conf=STRING   The configuration file to use for finding send channels  \n                        (default='/etc/ganglia/gmond.conf')",
   "  -n, --name=STRING   Name of the metric",
   "  -v, --value=STRING  Value of the metric",
   "  -t, --type=STRING   Either \n                        string|int8|uint8|int16|uint16|int32|uint32|float|double",
-  "  -u, --units=STRING  Unit of measure for the value e.g. Kilobytes, Celcius  \n                        (default=`')",
-  "  -s, --slope=STRING  Either zero|positive|negative|both  (default=`both')",
-  "  -x, --tmax=INT      The maximum time in seconds between gmetric calls  \n                        (default=`60')",
-  "  -d, --dmax=INT      The lifetime in seconds of this metric  (default=`0')",
-  "  -S, --spoof=STRING  IP address and name of host/device (colon separated) we \n                        are spoofing  (default=`')",
+  "  -u, --units=STRING  Unit of measure for the value e.g. Kilobytes, Celcius  \n                        (default='')",
+  "  -s, --slope=STRING  Either zero|positive|negative|both  (default='both')",
+  "  -x, --tmax=INT      The maximum time in seconds between gmetric calls  \n                        (default='60')",
+  "  -d, --dmax=INT      The lifetime in seconds of this metric  (default='0')",
+  "  -S, --spoof=STRING  IP address and name of host/device (colon separated) we \n                        are spoofing  (default='')",
   "  -H, --heartbeat     spoof a heartbeat message (use with spoof option)",
     0
 };
@@ -414,7 +414,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
       stop_char = 0;
       c = getopt_long (argc, argv, "hVc:n:v:t:u:s:x:d:S:H", long_options, &option_index);
 
-      if (c == -1) break;	/* Exit from `while (1)' loop.  */
+      if (c == -1) break;	/* Exit from 'while (1)' loop.  */
 
       switch (c)
         {
@@ -431,7 +431,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'c':	/* The configuration file to use for finding send channels.  */
           if (local_args_info.conf_given)
             {
-              fprintf (stderr, "%s: `--conf' (`-c') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--conf' ('-c') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->conf_given && ! override)
@@ -449,7 +449,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'n':	/* Name of the metric.  */
           if (local_args_info.name_given)
             {
-              fprintf (stderr, "%s: `--name' (`-n') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--name' ('-n') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->name_given && ! override)
@@ -467,7 +467,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'v':	/* Value of the metric.  */
           if (local_args_info.value_given)
             {
-              fprintf (stderr, "%s: `--value' (`-v') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--value' ('-v') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->value_given && ! override)
@@ -485,7 +485,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 't':	/* Either string|int8|uint8|int16|uint16|int32|uint32|float|double.  */
           if (local_args_info.type_given)
             {
-              fprintf (stderr, "%s: `--type' (`-t') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--type' ('-t') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->type_given && ! override)
@@ -503,7 +503,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'u':	/* Unit of measure for the value e.g. Kilobytes, Celcius.  */
           if (local_args_info.units_given)
             {
-              fprintf (stderr, "%s: `--units' (`-u') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--units' ('-u') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->units_given && ! override)
@@ -521,7 +521,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 's':	/* Either zero|positive|negative|both.  */
           if (local_args_info.slope_given)
             {
-              fprintf (stderr, "%s: `--slope' (`-s') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--slope' ('-s') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->slope_given && ! override)
@@ -539,7 +539,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'x':	/* The maximum time in seconds between gmetric calls.  */
           if (local_args_info.tmax_given)
             {
-              fprintf (stderr, "%s: `--tmax' (`-x') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--tmax' ('-x') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->tmax_given && ! override)
@@ -559,7 +559,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'd':	/* The lifetime in seconds of this metric.  */
           if (local_args_info.dmax_given)
             {
-              fprintf (stderr, "%s: `--dmax' (`-d') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--dmax' ('-d') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->dmax_given && ! override)
@@ -579,7 +579,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'S':	/* IP address and name of host/device (colon separated) we are spoofing.  */
           if (local_args_info.spoof_given)
             {
-              fprintf (stderr, "%s: `--spoof' (`-S') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--spoof' ('-S') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->spoof_given && ! override)
@@ -597,7 +597,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         case 'H':	/* spoof a heartbeat message (use with spoof option).  */
           if (local_args_info.heartbeat_given)
             {
-              fprintf (stderr, "%s: `--heartbeat' (`-H') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              fprintf (stderr, "%s: '--heartbeat' ('-H') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
               goto failure;
             }
           if (args_info->heartbeat_given && ! override)
@@ -609,7 +609,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
 
         case 0:	/* Long option with no short option */
         case '?':	/* Invalid option.  */
-          /* `getopt_long' already printed an error message.  */
+          /* 'getopt_long' already printed an error message.  */
           goto failure;
 
         default:	/* bug: option not considered.  */
