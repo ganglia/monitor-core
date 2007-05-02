@@ -5,8 +5,6 @@
 #include "libmetrics.h"
 #include "protocol.h"
 
-//#include <apr_pools.h>
-
 typedef void (*metric_info_func)(Ganglia_25metric *gmi);
 typedef g_val_t (*metric_func)(void);
 
@@ -50,6 +48,8 @@ struct mmodule_struct {
     const char *name;
     /** The handle for the DSO.  Internal use only */
     void *dynamic_load_handle;
+    /** The module name */
+    char *module_name;
     /** The metric name */
     char *metric_name;
 
@@ -67,16 +67,17 @@ struct mmodule_struct {
     void (*cleanup)(void); /* callback function */
 
     /** Metric info callback function */
-    void (*getinfo)(Ganglia_25metric *gmi); /* callback function */
+    const Ganglia_25metric *metrics_info;
 
     /** Metric callback function */
-    g_val_t (*handler)(void); /* callback function */
+    g_val_t (*handler)(int metric_index); /* callback function */
 };
 
 /** Use this in all standard modules */
 #define STD_MMODULE_STUFF	MMODULE_MAGIC_NUMBER_MAJOR, \
 				MMODULE_MAGIC_NUMBER_MINOR, \
 				__FILE__, \
+				NULL, \
 				NULL, \
 				NULL, \
                 NULL, \
