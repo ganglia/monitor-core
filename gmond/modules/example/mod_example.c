@@ -35,19 +35,11 @@
 #include <stdio.h>
 #include <time.h>
 
-//#include <apr_strings.h>
-
 /*
  * Declare ourselves so the configuration routines can find and know us.
  * We'll fill it in at the end of the module.
  */
 mmodule example_module;
-
-#define METRIC_NAME "example_module"
-#define METRIC_UNITS "s"
-#define METRIC_SLOPE "both"
-#define METRIC_FMT "%u"
-#define METRIC_DESC "Example module metric (random numbers)"
 
 /*XXX gmond needs to link dynamically with apr so that each
    of the modules can link to apr as well.  Then the modules
@@ -66,27 +58,33 @@ static void ex_metric_cleanup ( void )
 {
 }
 
-static void ex_metric_info ( Ganglia_25metric *gmi )
-{
-    /* gmi->key will be automatically assigned by gmond */
-    gmi->name = METRIC_NAME;
-    gmi->tmax = 90;
-    gmi->type = GANGLIA_VALUE_UNSIGNED_INT;
-    gmi->units = METRIC_UNITS;
-    gmi->slope = METRIC_SLOPE;
-    gmi->fmt = METRIC_FMT;
-    gmi->msg_size = UDP_HEADER_SIZE+8;
-    gmi->desc = METRIC_DESC;
-
-    return;
-}
-
-static g_val_t ex_metric_handler ( void )
+static g_val_t ex_metric_handler ( int metric_index )
 {
     g_val_t val;
-    val.int32 = rand()%99;
+
+    /* The metric_index corresponds to the order in which
+       the metrics were inserted into the array in 
+       the getinfo() callback */
+    switch (metric_index) {
+    case 0:
+        val.int32 = rand()%99;
+        return val;
+    case 1:
+        val.int32 = 50;
+        return val;
+    }
+
+    /* default case */
+    val.int32 = 0;
     return val;
 }
+
+static const Ganglia_25metric ex_metric_info[] = 
+{
+    {0, "Random_Numbers", 90, GANGLIA_VALUE_UNSIGNED_INT, "s", "both", "%u", UDP_HEADER_SIZE+8, "Example module metric (random numbers)"},
+    {0, "Constant_Number", 90, GANGLIA_VALUE_UNSIGNED_INT, "Num", "zero", "%hu", UDP_HEADER_SIZE+8, "Example module metric (constant number)"},
+    {0, NULL}
+};
 
 mmodule example_module =
 {
