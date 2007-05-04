@@ -1485,7 +1485,7 @@ load_metric_modules( void )
             continue;
         }
 
-        if (modp->init && modp->init()) {
+        if (modp->init && modp->init(global_context)) {
             fprintf (stderr, "Module %s failed to initialize.\n", modName);
         }
 

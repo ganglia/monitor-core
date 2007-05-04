@@ -41,14 +41,7 @@
  */
 mmodule example_module;
 
-/*XXX gmond needs to link dynamically with apr so that each
-   of the modules can link to apr as well.  Then the modules
-   should use the apr string functions to allocate memory
-   for the metric info structure rather than using the 
-   stack.  Each of the callbacks should also take the
-   memory pool as a parameter. */
-
-static int ex_metric_init ( void )
+static int ex_metric_init ( apr_pool_t *p )
 {
     srand(time(NULL)%99);
     return 0;
@@ -63,8 +56,8 @@ static g_val_t ex_metric_handler ( int metric_index )
     g_val_t val;
 
     /* The metric_index corresponds to the order in which
-       the metrics were inserted into the array in 
-       the getinfo() callback */
+       the metrics appear in the metric_info array
+    */
     switch (metric_index) {
     case 0:
         val.int32 = rand()%99;

@@ -5,6 +5,9 @@
 #include "libmetrics.h"
 #include "protocol.h"
 
+#include <apr.h>
+#include <apr_pools.h>
+
 typedef void (*metric_info_func)(Ganglia_25metric *gmi);
 typedef g_val_t (*metric_func)(void);
 
@@ -61,7 +64,7 @@ struct mmodule_struct {
     unsigned long magic;
 
     /** Metric init callback function */
-    int (*init)(void); /* callback function */
+    int (*init)(apr_pool_t *p); /* callback function */
 
     /** Metric cleanup callback function */
     void (*cleanup)(void); /* callback function */
