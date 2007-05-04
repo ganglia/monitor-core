@@ -1,4 +1,4 @@
-AM_CFLAGS  = -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/lib -I$(top_builddir)/srclib/apr/include/
+AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/lib 
 
 pkglib_LTLIBRARIES    = modexample.la
 modexample_la_SOURCES = mod_example.c 
