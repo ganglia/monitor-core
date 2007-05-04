@@ -1,2 +1,2 @@
-SUBDIRS = example
+SUBDIRS = example cpu
 
