@@ -534,7 +534,6 @@ static int ex_metric_init (apr_pool_t *p)
 
 static void ex_metric_cleanup ( void )
 {
-    apr_pool_destroy (pool);
 }
 
 static g_val_t ex_metric_handler ( int metric_index )
