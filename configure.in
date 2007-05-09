@@ -119,25 +119,38 @@ nl='
 '
 ganglia_popdir=`pwd`
 
-echo $ac_n "${nl}Configuring libmetrics ...${nl}"
-cd libmetrics && ./configure --cache-file=$ganglia_popdir/config.cache
-cd $ganglia_popdir
-
-echo $ac_n "${nl}Configuring expat ...${nl}"
-cd srclib/expat && ./configure --cache-file=$ganglia_popdir/config.cache --prefix=$prefix 
-cd $ganglia_popdir
-
-echo $ac_n "${nl}Configuring libconfuse ...${nl}"
-cd srclib/confuse && ./configure --cache-file=$ganglia_popdir/config.cache --disable-nls --prefix=$prefix 
-cd $ganglia_popdir
-
-
 dnl ##################################################################
 dnl Checks for programs.
 dnl
 AC_PROG_CC
 AC_PROG_RANLIB
 AM_PROG_LIBTOOL
+
+AC_ARG_ENABLE( static-build,
+[  --enable-static-build   Statically link libGanglia, APR, Expat and Confuse libraries (may disable some metric modules) ],
+[ enable_static_build=yes ],[ enable_static_build=no ])
+
+AM_CONDITIONAL(STATIC_BUILD, test x"$enable_static_build" = xyes)
+
+echo $ac_n "${nl}Configuring libmetrics ...${nl}"
+cd libmetrics && ./configure --cache-file=$ganglia_popdir/config.cache
+cd $ganglia_popdir
+
+if test x"$enable_static_build" = xyes ; then
+
+  echo $ac_n "${nl}Configuring apr ...${nl}"
+  cd srclib/apr && ./configure --cache-file=$ganglia_popdir/config.cache --prefix=$prefix
+  cd $ganglia_popdir
+
+  echo $ac_n "${nl}Configuring expat ...${nl}"
+  cd srclib/expat && ./configure --cache-file=$ganglia_popdir/config.cache --prefix=$prefix 
+  cd $ganglia_popdir
+
+  echo $ac_n "${nl}Configuring libconfuse ...${nl}"
+  cd srclib/confuse && ./configure --cache-file=$ganglia_popdir/config.cache --disable-nls --prefix=$prefix 
+  cd $ganglia_popdir
+
+fi
 
 dnl ##################################################################
 dnl Special parameters
@@ -150,20 +163,16 @@ if test "$withval" = yes; then gmetad=yes; fi)
 AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
 
 AC_ARG_WITH( libapr,
-[  --with-libapr           Dynamically link with libapr-1.so module],
-[if test x"$withval" != xno; then libapr=yes; fi])
+[  --with-libapr=DIR       Specify alternate location for libapr-1],
+[if test x"$withval" != xno; then libapr=yes; libaprpath=$withval; fi])
 
-AM_CONDITIONAL(USE_DYNAMIC_APR, test x$libapr = xyes)
-if test x"$libapr" = xyes ; then
-   if test x"$withval" != xyes ; then
-      LDFLAGS="$LDFLAGS -L$withval"
-   fi 
-else
-   echo $ac_n "${nl}Configuring apr ...${nl}"
-   cd srclib/apr && ./configure --cache-file=$ganglia_popdir/config.cache --prefix=$prefix
-   cd $ganglia_popdir
-fi
+AC_ARG_WITH( libexpat,
+[  --with-libexpat=DIR     Specify alternate location for libexpat],
+[if test x"$withval" != xno; then libexpat=yes; libexpatpath=$withval; fi])
 
+AC_ARG_WITH( libconfuse,
+[  --with-libconfuse=DIR   Specify alternate location for libconfuse],
+[if test x"$withval" != xno; then libconfuse=yes; libconfusepath=$withval; fi])
 
 AC_ARG_ENABLE(debug,
 [
@@ -222,19 +231,52 @@ if test "$gmetad" = yes ; then
    fi
 fi
 
-echo
-echo Checking for apr
-echo
+AM_CONDITIONAL(USE_DYNAMIC_APR, test x$libapr = xyes)
+AM_CONDITIONAL(USE_DYNAMIC_EXPAT, test x$libexpat = xyes)
 
-if test x"$libapr" = xyes ; then
-dnl   AC_CHECK_LIB(apr-1, apr_socket_send, [echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"], [echo "libapr lib not found"], -lapr-1)
-   AC_CHECK_LIB(apr-1, apr_socket_send)
-dnl   AC_CHECK_HEADERS(apr.h)
+if test x"$enable_static_build" = xno ; then
+
+  echo
+  echo Checking for apr
+  if test x"$libaprpath" != x && test x"$libaprpath" != xyes ; then
+    CFLAGS="$CFLAGS -I$libaprpath/include"
+    LDFLAGS="$LDFLAGS -L$libaprpath/lib"
+  fi
+  AC_CHECK_LIB(apr-1, apr_socket_send)
   if test $ac_cv_lib_apr_1_apr_socket_send = yes; then
     echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
   else
-    echo "libapr lib not found"
+    echo "libapr not found"
   fi
+
+  echo
+  echo Checking for expat
+  if test x"$libexpatpath" != x && test x"$libexpatpath" != xyes ; then
+    CFLAGS="$CFLAGS -I$libexpatpath/include"
+    LDFLAGS="$LDFLAGS -L$libexpatpath/lib"
+  fi
+  AC_CHECK_LIB(expat, XML_ParserCreate)
+  if test $ac_cv_lib_expat_XML_ParserCreate = yes; then
+    echo "Using the installed Expat library"
+  else
+    echo "libexpat not found"
+  fi
+  echo
+
+  echo
+  echo Checking for confuse
+  if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes ; then
+    CFLAGS="$CFLAGS -I$libconfusepath/include"
+    LDFLAGS="$LDFLAGS -L$libconfusepath/lib"
+  fi
+  AC_CHECK_LIB(confuse, cfg_parse)
+  if test $ac_cv_lib_confuse_cfg_parse = yes; then
+    echo "Using the installed Confuse library"
+  else
+    echo "libconfuse not found"
+  fi
+  echo
+
 fi
 
 AC_CHECK_LIB(rpc, xdr_string)
