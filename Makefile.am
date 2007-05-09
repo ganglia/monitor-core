@@ -6,18 +6,28 @@ else
 GMETAD_SUBDIR = 
 endif
 
+if STATIC_BUILD
+SRCLIB_SUBDIR = srclib
+EXTRA_SUBDIRS = "./$(SRCLIB_SUBDIR) ./web"
+EXTRA_DIST_FILES = 
+else
+SRCLIB_SUBDIR = 
+EXTRA_SUBDIRS = "./web"
+EXTRA_DIST_FILES = srclib/Makefile.am srclib/Makefile.in
+endif
+
 AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-shar dist-zip
 
 # Make sure we run the srclib but don't distribute it.  That
 # is handled in the "dist-hook" below...
-GANGLIA_SUBDIRS = srclib lib libmetrics tests $(GMETAD_SUBDIR) gmond gmetric
+GANGLIA_SUBDIRS = $(SRCLIB_SUBDIR) lib libmetrics tests $(GMETAD_SUBDIR) gmond gmetric
 SUBDIRS = $(GANGLIA_SUBDIRS)
 # Make sure that no matter the setting for --with-gmetad
 # that the gmetad directory gets distributed
 GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gmetric
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
-EXTRA_DIST = README.AIX config ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html mans
+EXTRA_DIST = README.AIX config ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html mans $(EXTRA_DIST_FILES)
 
 ganglia.sub: ganglia.pod
 	sed -e 's/GANGLIA_VERSION/@VERSION@/' < $(srcdir)/ganglia.pod > ganglia.sub
@@ -50,7 +60,7 @@ dist-local: README ganglia.html ChangeLog
 # We also go through and make sure all the files have
 # the same timestamp with the last command here...
 dist-hook:
-	for subdir in "./srclib ./web"; do \
+	for subdir in $(EXTRA_SUBDIRS); do \
 	  tar -c --exclude=".libs" --exclude "core.*" \
 	  --exclude ".svn" --exclude="*.o"  --exclude="*.lo" \
 	  --exclude="*.la" --exclude=".deps" \
@@ -67,6 +77,7 @@ dist-hook:
 	touch $(distdir)/Makefile.am
 	find $(distdir) -exec touch -r $(distdir)/Makefile.am {} \;
 
+if STATIC_BUILD
 #
 # Make sure distclean is done in the scrlib tree
 #
@@ -77,4 +88,5 @@ distclean-local:
 	-find . -name "autom4te.cache" -exec rm -rf {} \;
 	-find gmond gmetad gmetric lib tests libmetrics -name "Makefile.in" -exec rm -f {} \;
 #
+endif
 bin_SCRIPTS = ganglia-config
