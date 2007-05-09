@@ -107,7 +107,7 @@ can use to build scalable cluster or grid applications
 ## BUILD
 ##
 %build
-%configure --with-gmetad --with-libapr
+%configure --with-gmetad
 %ifnarch noarch
 make
 %endif
@@ -227,7 +227,6 @@ fi
 /etc/init.d/gmetad
 %config(noreplace) /etc/ganglia/gmetad.conf
 %{_libdir}/ganglia/*
-%{_libdir}/libexpat.so*
 %{_libdir}/libganglia*
 
 ##
@@ -245,7 +244,6 @@ fi
 %dir /etc/ganglia/conf.d/
 %config(noreplace) /etc/ganglia/conf.d/*
 %{_libdir}/ganglia/*
-%{_libdir}/libexpat.so*
 %{_libdir}/libganglia*
 
 ##
@@ -306,6 +304,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Wed May 9 2007 Brad Nicholes <bnicholes@novell.com>
+- Converted to dynamically link all external libraries
 * Fri Apr 27 2007 Bernard Li <bernard@vanhpc.org>
 - Add apr-devel to BuildRequires for distro other than SuSE
   (Red Hat/Fedora/Mandriva)

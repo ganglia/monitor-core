@@ -1,15 +1,17 @@
 #SUFFIXES=.x
 #.c.x: rpcgen $<
 
-if USE_DYNAMIC_APR
-APR_LIB = 
-APR_INC = -D_LARGEFILE64_SOURCE
+if STATIC_BUILD
+GCFLAGS = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/apr/include/arch/unix/ -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/confuse/src
+GLDADD =
+GLDFLAGS = 
 else
-APR_LIB = $(top_builddir)/srclib/apr/libapr-0.la
-APR_INC = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/apr/include/arch/unix/
+GCFLAGS = -D_LARGEFILE64_SOURCE
+GLDADD = 
+GLDFLAGS = 
 endif
 
-AM_CFLAGS = -I.. -I. -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/libmetrics/ $(APR_INC)  -I$(top_builddir)/srclib/confuse/src
+AM_CFLAGS = -I.. -I. -I$(top_builddir)/libmetrics/ $(GCFLAGS)  
 
 include_HEADERS = ganglia.h
 
@@ -28,13 +30,9 @@ libganglia_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-release $(LT_RELEASE) \
 	-export-dynamic 
+	$(GLDFLAGS)
 
-if USE_DYNAMIC_APR
-libganglia_la_LIBADD = 	$(top_builddir)/srclib/expat/lib/libexpat.la \
-			$(top_builddir)/srclib/confuse/src/libconfuse.la 
-
-libganglia_la_DEPENDENCIES = $(libganglia_la_LIBADD)
-endif
+libganglia_la_LIBADD = $(GLDADD)	
 
 noinst_LIBRARIES = libgetopthelper.a
 # A little helper for getopt functions
