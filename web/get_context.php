@@ -116,6 +116,15 @@ if (!$metricname)
 if (!$sort)
       $sort = "descending";
 
+# Since cluster context do not have the option to sort "by hosts down" or
+# "by hosts up", therefore change sort order to "descending" if previous
+# sort order is either "by hosts down" or "by hosts up"
+if ($context == "cluster") {
+    if ($sort == "by hosts up" || $sort == "by hosts down") {
+        $sort = "descending";
+    }
+}
+
 # A hack for pre-2.5.0 ganglia data sources.
 $always_constant = array(
    "swap_total" => 1,

@@ -32,19 +32,32 @@ foreach( $source_names as $c)
       $load_one = $metrics[$c]["load_one"]['SUM'];
       $value = (double) $load_one / $cpucount;
       $sorted_sources[$c] = $value;
+      $values[$c] = $value;
       isset($total_load) or $total_load = 0;
       $total_load += $value;   
    }
 # Insure self is always first 
-$sorted_sources[$self] = $total_load + 1;
+$sorted_sources[$self] = 999999;
 
 if ($sort == "descending") {
       arsort($sorted_sources);
 }
-else if ($sort == "by hostname") {
-	  ksort($sorted_sources);
-}
-else {
+else if ($sort == "by name") {
+      ksort($sorted_sources);
+} else if ($sort == "by hosts up") {
+      foreach ($sorted_sources as $source => $val) {
+            $sorted_sources[$source] = intval($grid[$source]['HOSTS_UP']);
+      }
+      $sorted_sources[$self] = 999999;
+      arsort($sorted_sources);
+} else if ($sort == "by hosts down") {
+      foreach ($sorted_sources as $source => $val) {
+            $sorted_sources[$source] = intval($grid[$source]['HOSTS_DOWN']);
+      }
+      $sorted_sources[$self] = 999999;
+      arsort($sorted_sources);
+} else {
+      $sorted_sources[$self] = -1;
       asort($sorted_sources);
 }
 
@@ -152,9 +165,9 @@ if ($show_meta_snapshot=="yes") {
       $names[]=$c;
 
       if (isset($grid[$c]['GRID']) and $grid[$c]['GRID'])
-         $image = load_image("grid", $value);
+         $image = load_image("grid", $values[$c]);
       else
-         $image = load_image("cluster", $value);
+         $image = load_image("cluster", $values[$c]);
       $Images[]=$image;
    }
    # Add private cluster pictures to the end.
