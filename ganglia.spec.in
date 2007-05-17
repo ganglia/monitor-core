@@ -184,6 +184,7 @@ fi
 
 %__mkdir -p $RPM_BUILD_ROOT/%{web_prefixdir}
 %__cp -rf %{_builddir}/%{name}-%{version}/web/* $RPM_BUILD_ROOT/%{web_prefixdir}
+%__rm -rf $RPM_BUILD_ROOT/%{web_prefixdir}/*.in
 
 %else
 
@@ -234,7 +235,6 @@ fi
 /etc/init.d/gmond
 %{_mandir}/man5/gmond.conf.5*
 %config(noreplace) /etc/gmond.conf
-%{_libdir}/libmodexample*
 
 ##
 ## FILES DEVEL
@@ -280,7 +280,7 @@ fi
 %{web_prefixdir}/show_node.php
 %{web_prefixdir}/styles.css
 %{web_prefixdir}/templates
-%{web_prefixdir}/version.php.in
+%{web_prefixdir}/version.php
 
 %endif
 
@@ -294,8 +294,9 @@ fi
 ## CHANGELOG
 ##
 %changelog
-* Wed Apr 04 2007 Bernard Li <bernard@vanhpc.org>
-- Added libmodexample* files to ganglia-gmond sub-package
+* Wed May 16 2007 Bernard Li <bernard@vanhpc.org>
+- %{web_prefixdir}/version.php.in -> %{web_prefixdir}/version.php
+- Explicitly delete %{web_prefixdir}/*.in
 * Tue Apr 03 2007 Bernard Li <bernard@vanhpc.org>
 - Applied patch from Marcus Rueckert
 - Use different web_prefixdir for SuSE
