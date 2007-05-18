@@ -43,6 +43,7 @@ Provides: ganglia-webfrontend
 # We should put rrdtool as a Requires too but rrdtool rpm support is very weak
 # so most people install from source
 #Requires: ganglia-gmetad >=  @VERSION@
+Requires: php-gd
 %if 0%{?suse_version}
 %define web_prefixdir /srv/www/htdocs/ganglia
 %else
@@ -294,6 +295,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Fri May 18 2007 Bernard Li <bernard@vanhpc.org>
+- Add php-gd to web subpackage Requires
 * Wed May 16 2007 Bernard Li <bernard@vanhpc.org>
 - %{web_prefixdir}/version.php.in -> %{web_prefixdir}/version.php
 - Explicitly delete %{web_prefixdir}/*.in
