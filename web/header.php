@@ -53,7 +53,9 @@ if ($initgrid or $gridwalk)
    {
       # Use cookie so we dont have to pass gridstack around within this site.
       # Cookie values are automatically urlencoded. Expires in a day.
-      setcookie("gs", $gridstack_str, time() + 86400);
+      $gscookie = $_COOKIE["gs"];
+      if (! isset($gscookie))
+            setcookie("gs", $gridstack_str, time() + 86400);
    }
 
 # Invariant: back pointer is second-to-last element of gridstack. Grid stack
