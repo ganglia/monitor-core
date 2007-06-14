@@ -197,6 +197,12 @@ AC_ARG_ENABLE(memcheck,
                            http://www.cbmamiga.demon.co.uk/mpatrol/],
 [ enable_memcheck="yes" ])
 
+AC_ARG_ENABLE( python,
+[  --enable-python    compile and install mod_python to enable python metric module support],
+[ enable_python="yes" ], [ enable_python="no" ] )
+
+AM_CONDITIONAL(BUILD_PYTHON, test "$enable_python" = yes)
+
 dnl ##################################################################
 dnl Checks for libraries.
 dnl The order of these tests is the *reverse* order of the libraries in
@@ -231,6 +237,23 @@ if test "$gmetad" = yes ; then
    fi
 fi
 
+if test "$enable_python" = yes ; then
+  echo
+  echo Checking for python
+dnl   AC_CHECK_LIB(python2.4, set_python_path, [echo "The ganglia python support module uses Python 2.4"], [echo "Python library not found"], [-lm])
+   AC_CHECK_HEADERS(python/Python.h, [ found_python_header=yes ])
+      echo
+      echo "The Ganglia python support module expects to use the Python 2.4 libraries."
+      echo "Make sure that you either have the devel package for Python 2.4 installed "
+      echo "or you make the appropriate changes to the Makefile.am to support your "
+      echo "version of the Python libraries."
+   if test "$found_python_header" != yes; then
+      echo
+      echo "No Python devel package detected. "
+      exit;
+   fi
+fi
+
 AM_CONDITIONAL(USE_DYNAMIC_APR, test x$libapr = xyes)
 AM_CONDITIONAL(USE_DYNAMIC_EXPAT, test x$libexpat = xyes)
 
@@ -247,6 +270,7 @@ if test x"$enable_static_build" = xno ; then
     echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
   else
     echo "libapr not found"
+    exit;
   fi
 
   echo
@@ -260,6 +284,7 @@ if test x"$enable_static_build" = xno ; then
     echo "Using the installed Expat library"
   else
     echo "libexpat not found"
+    exit;
   fi
   echo
 
@@ -274,6 +299,7 @@ if test x"$enable_static_build" = xno ; then
     echo "Using the installed Confuse library"
   else
     echo "libconfuse not found"
+    exit;
   fi
   echo
 
@@ -468,6 +494,7 @@ AC_OUTPUT(Makefile
 	  gmond/modules/Makefile
 	  gmond/modules/example/Makefile
 	  gmond/modules/cpu/Makefile
+	  gmond/modules/python/Makefile
           gmetric/Makefile 
           web/version.php)
 

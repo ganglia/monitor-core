@@ -108,7 +108,7 @@ can use to build scalable cluster or grid applications
 ## BUILD
 ##
 %build
-%configure --with-gmetad
+%configure --with-gmetad --enable-python
 %ifnarch noarch
 make
 %endif
@@ -204,6 +204,7 @@ fi
 
 %__mkdir -p $RPM_BUILD_ROOT/etc/ganglia
 %__mkdir -p $RPM_BUILD_ROOT/etc/ganglia/conf.d
+%__mkdir -p $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules
 
 # We just output the default gmond.conf from gmond using the '-t' flag
 %{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
