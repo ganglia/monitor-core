@@ -116,6 +116,7 @@ static cfg_opt_t collection_group_opts[] = {
 static cfg_opt_t metric_module_opts[] = {
   CFG_STR("name", NULL, CFGF_NONE ),
   CFG_STR("path", NULL, CFGF_NONE),
+  CFG_STR("params", NULL, CFGF_NONE),
   CFG_END()
 };
 
