@@ -2031,6 +2031,12 @@ cleanup_data( Ganglia_pool pool, apr_time_t now)
   apr_pool_clear( pool );
 }
 
+int done = 0;
+void sig_handler(int i)
+{
+    done = 1;
+}
+
 int
 main ( int argc, char *argv[] )
 {
@@ -2101,6 +2107,7 @@ main ( int argc, char *argv[] )
   apr_gethostname( myname, APRMAXHOSTLEN+1, global_context);
 
   apr_signal( SIGPIPE, SIG_IGN );
+  apr_signal( SIGINT, sig_handler );
 
   /* This must occur before we setuid_if_necessary() particularly on freebsd
    * where we need to be root to access /dev/mem to initialize metric collection */
@@ -2139,7 +2146,7 @@ main ( int argc, char *argv[] )
   last_cleanup = next_collection = now = apr_time_now();
 
   /* Loop */
-  for(;;)
+  for(;!done;)
     {
       /* Make sure we never wait for negative seconds (shouldn't happen) */
       apr_interval_time_t wait = next_collection >= now ? next_collection - now : 1;
