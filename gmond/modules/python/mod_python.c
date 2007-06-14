@@ -1,0 +1,576 @@
+/*******************************************************************************
+* Portions Copyright (C) 2007 Novell, Inc. All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+*  - Redistributions of source code must retain the above copyright notice,
+*    this list of conditions and the following disclaimer.
+*
+*  - Redistributions in binary form must reproduce the above copyright notice,
+*    this list of conditions and the following disclaimer in the documentation
+*    and/or other materials provided with the distribution.
+*
+*  - Neither the name of Novell, Inc. nor the names of its
+*    contributors may be used to endorse or promote products derived from this
+*    software without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL Novell, Inc. OR THE CONTRIBUTORS
+* BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*
+* Author: Brad Nicholes (bnicholes novell.com)
+*         Jon Carey (jcarey novell.com)
+******************************************************************************/
+
+#include <metric.h>
+#include <gm_mmn.h>
+#include <stdio.h>
+#include <time.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+
+#include "file.h"
+#include "error.h"
+
+#include <apr_tables.h>
+#include <apr_strings.h>
+
+#include <python/Python.h>
+#include <dirent.h>
+#include <sys/stat.h>
+
+
+/*
+ * Declare ourselves so the configuration routines can find and know us.
+ * We'll fill it in at the end of the module.
+ */
+mmodule python_module;
+
+typedef struct
+{
+    PyObject* pmod;
+    char *mod_name;
+}
+mapped_info_t;          
+
+typedef struct
+{
+	char mname[128];
+	int tmax;
+	char vtype[32];
+	char units[64];
+	char slope[32];
+	char format[64];
+	char desc[512];
+}
+py_metric_init_t;
+
+
+static apr_pool_t *pool;
+static FILE *config_file;
+
+static apr_array_header_t *metric_info = NULL;
+static apr_array_header_t *metric_mapping_info = NULL;
+static const Ganglia_25metric pyth_metric_info[] = 
+{
+    {0, NULL}
+};
+static apr_status_t pyth_metric_cleanup ( void *data);
+
+static void set_python_path(const char* path)
+{
+	const char* p;
+	char pathbuf[PATH_MAX];
+
+	strcpy(pathbuf, "PYTHONPATH=");
+	if ((p = getenv("PYTHONPATH"))) {
+		strcat(pathbuf, p);
+		strcat(pathbuf, ":");
+	}
+	strcat(pathbuf, path);
+	putenv(pathbuf);
+}
+
+char modname_bfr[PATH_MAX];
+static const char* is_python_module(const char* fname)
+{
+    char* p = strrchr(fname, '.');
+    if (!p) {
+        return NULL;
+    }
+
+    if (strcmp(p, ".py")) {
+        return NULL;
+    }
+
+    strncpy(modname_bfr, fname, p-fname);
+    modname_bfr[p-fname] = 0;
+    return modname_bfr;
+}
+
+int
+get_python_string_value(PyObject* dv, char* bfr, int len)
+{
+	int cc = 1;
+    if (PyLong_Check(dv)) {
+        long v = PyLong_AsLong(dv);
+        snprintf(bfr, len, "%ld", v);
+    }
+    else if (PyInt_Check(dv)) {
+        long v = PyInt_AsLong(dv);
+        snprintf(bfr, len, "%ld", v);
+    }
+    else if (PyString_Check(dv)) {
+        char* p = PyString_AsString(dv);
+        strncpy(bfr, p, len);
+    }
+	else if (PyFloat_Check(dv)) {
+		double v = PyFloat_AsDouble(dv);
+        snprintf(bfr, len, "%f", v);
+    }
+    else {
+        /* Don't know how to convert */
+        cc = -1;
+    }
+	return cc;
+}
+
+
+/* Get a string value from a python dictionary
+ * Return:
+ *  0 - Item not in dictionary
+ *  -1 - Invalid data type for key in dictionary
+ *  1 - Success
+ */
+int
+get_pydict_string_value(PyObject* pdict, char* key, char* bfr, int len)
+{
+    PyObject* dv;
+    int cc = 1;
+    if (!PyMapping_HasKeyString(pdict, key))
+        return 0;	/* Key not in dictionary */
+    dv = PyMapping_GetItemString(pdict, key);
+    if (!dv)
+        return 0;   /* shouldn't happen */
+	cc = get_python_string_value(dv, bfr, len);
+    Py_DECREF(dv);
+    return cc;
+}
+
+
+int
+get_python_uint_value(PyObject* dv, unsigned int* pint)
+{
+	int cc = 1;
+    if (PyInt_Check(dv) || PyLong_Check(dv)) {
+		unsigned long v = PyInt_AsUnsignedLongMask(dv);
+        *pint = (unsigned int)v;
+    }
+    else if (PyString_Check(dv)) {
+        /* Convert from string to int */
+        unsigned long tid;
+        char *endptr;
+        char* p = PyString_AsString(dv);
+        tid = strtoul(p, &endptr, 10);
+        if(endptr == p || *endptr)
+            cc = -1;	/* Invalid numeric format */
+        else
+            *pint = (unsigned int)tid;
+    }
+    else {
+        cc = -1;	/* Don't know how to convert this */
+    }
+	return cc;
+}
+
+int
+get_python_int_value(PyObject* dv, int* pint)
+{
+	int cc = 1;
+    if (PyLong_Check(dv)) {
+        long v = PyLong_AsLong(dv);
+        *pint = (int)v;
+    }
+    else if (PyInt_Check(dv)) {
+        long v = PyInt_AsLong(dv);
+        *pint = (int)v;
+    }
+    else if (PyString_Check(dv)) {
+        /* Convert from string to int */
+        long tid;
+        char *endptr;
+        char* p = PyString_AsString(dv);
+        tid = strtol(p, &endptr, 10);
+        if(endptr == p || *endptr)
+            cc = -1;	/* Invalid numeric format */
+        else
+            *pint = (int)tid;
+    }
+    else {
+        cc = -1;	/* Don't know how to convert this */
+    }
+	return cc;
+}
+
+/* Return:
+ *  0 - Item not in dictionary
+ *  -1 - Invalid data type for key in dictionary
+ *  1 - Success
+ */
+int
+get_pydict_int_value(PyObject* pdict, char* key, int* pint)
+{
+    PyObject* dv;
+    int cc = 1;
+    if (!PyMapping_HasKeyString(pdict, key))
+        return 0;
+    dv = PyMapping_GetItemString(pdict, key);
+    if (!dv)
+        return 0;   /* shouldn't happen */
+	cc = get_python_int_value(dv, pint);
+    Py_DECREF(dv);
+    return cc;
+}
+
+int
+get_python_float_value(PyObject* dv, double* pnum)
+{
+	int cc = 1;
+    if (PyFloat_Check(dv)) {
+        *pnum = PyFloat_AsDouble(dv);
+    }
+    else if (PyLong_Check(dv)) {
+        long v = PyLong_AsLong(dv);
+        *pnum = (double)v;
+    }
+    else if (PyInt_Check(dv)) {
+        long v = PyInt_AsLong(dv);
+        *pnum = (double)v;
+    }
+    else if (PyString_Check(dv)) {
+        // Convert from string to int
+        double tid;
+        char *endptr;
+        char* p = PyString_AsString(dv);
+        tid = strtod(p, &endptr);
+        if(endptr == p || *endptr)
+            cc = -1;	/* Invalid format for double */
+        else
+            *pnum = tid;
+    }
+    else {
+        cc = -1;	/* Don't know how to convert this */
+    }
+	return cc;
+}
+
+/* Return:
+ *  0 - Item not in dictionary
+ *  -1 - Invalid data type for key in dictionary
+ *  1 - Success
+ */
+int
+get_pydict_float_value(PyObject* pdict, char* key, double* pnum)
+{
+    int cc = 1;
+    PyObject* dv;
+    if (!PyMapping_HasKeyString(pdict, key))
+        return 0;
+    dv = PyMapping_GetItemString(pdict, key);
+    if (!dv)
+        return 0;   /* shouldn't happen */
+	cc = get_python_float_value(dv, pnum);
+    Py_DECREF(dv);
+    return cc;
+}
+
+static int pyth_metric_init (apr_pool_t *p)
+{
+	DIR *dp;
+	struct dirent *entry;
+	int i;
+    const char* modname;
+	PyObject *pmod, *pfunc, *pinitfunc, *pdict;
+	py_metric_init_t minfo;
+    Ganglia_25metric *gmi;
+    mapped_info_t *mi;
+	const char* path = python_module.module_params;
+
+    /* Allocate a pool that will be used by this module */
+    apr_pool_create(&pool, p);
+
+    metric_info = apr_array_make(pool, 10, sizeof(Ganglia_25metric));
+    metric_mapping_info = apr_array_make(pool, 10, sizeof(mapped_info_t));
+
+	/* Verify path exists and can be read */
+
+	if (access(path, F_OK))
+	{
+		/* 'path' does not exist */
+	}
+
+	if (access(path, R_OK))
+	{
+		/* Don't have read access to 'path' */
+	}
+
+    /* Init Python environment */
+
+	/* Set up the python path to be able to load module from our module path */
+	set_python_path(path);
+	Py_Initialize();
+
+	/* Initialize each python module */
+	if ((dp = opendir(path)) == NULL) {
+		/* Error: Cannot open the directory - Shouldn't happen */
+		/* Log? */
+        err_msg("[PYTHON] Can't open the python module path %s.\n", path);
+		return -1;
+	}
+
+	i = 0;
+	while ((entry = readdir(dp)) != NULL) {
+        modname = is_python_module(entry->d_name);
+
+        if (modname == NULL)
+            continue;
+
+		pmod = PyImport_ImportModule(modname);
+		if (!pmod) {
+			/* Failed to import module. Log? */
+            err_msg("[PYTHON] Can't import the metric module %s.\n", modname);
+			PyErr_Clear();
+			continue;
+		}
+
+		pinitfunc = PyObject_GetAttrString(pmod, "metric_init");
+		if (!pinitfunc || !PyCallable_Check(pinitfunc)) {
+			/* No metric_init function. */
+            err_msg("[PYTHON] Can't find the metric_init function in the python script %s.\n", modname);
+			Py_DECREF(pmod);
+			continue;
+		}
+
+		pfunc = PyObject_GetAttrString(pmod, "metric_handler");
+		if (!pfunc || !PyCallable_Check(pfunc)) {
+			/* No metric_init function. */
+            err_msg("[PYTHON] Can't find the metric_handler function in the python script %s.\n", modname);
+			Py_XDECREF(pfunc);
+			Py_DECREF(pinitfunc);
+			Py_DECREF(pmod);
+			continue;
+		}
+		Py_DECREF(pfunc);
+
+		/* Now call the metric_init method of the python module */
+		pdict = PyObject_CallFunction(pinitfunc, NULL);
+		if (!pdict) {
+			/* failed calling metric_init */
+            err_msg("[PYTHON] Can't call the metric_init function in the python script %s.\n", modname);
+			PyErr_Clear();
+			Py_DECREF(pinitfunc);
+			Py_DECREF(pmod);
+			continue;
+		}
+
+		if (!PyMapping_Check(pdict)) {
+			/* Invalid return type from metric_init. Log? */
+			Py_DECREF(pdict);
+			Py_DECREF(pinitfunc);
+			Py_DECREF(pmod);
+			continue;
+		}
+
+		memset(&minfo, 0, sizeof(minfo));
+		if (get_pydict_string_value(pdict, "name", minfo.mname, sizeof(minfo.mname)) < 1) {
+			sprintf (minfo.mname, "Unknown%d", i++);
+            err_msg("[PYTHON] No metric name given. Using %s.\n", minfo.mname);
+		}
+		if (get_pydict_int_value(pdict, "time_max", &minfo.tmax) < 1) {
+			minfo.tmax = 60;
+            err_msg("[PYTHON] No time max given. Using %d.\n", minfo.tmax);
+		}
+		if (get_pydict_string_value(pdict, "value_type", minfo.vtype, sizeof(minfo.vtype)) < 1) {
+			strcpy (minfo.vtype, "uint");
+            err_msg("[PYTHON] No value type given. Using %s.\n", minfo.vtype);
+		}
+		if (get_pydict_string_value(pdict, "units", minfo.units, sizeof(minfo.units)) < 1) {
+			strcpy (minfo.units, "unknown");
+            err_msg("[PYTHON] No metric units given. Using %s.\n", minfo.units);
+		}
+		if (get_pydict_string_value(pdict, "slope", minfo.slope, sizeof(minfo.slope)) < 1) {
+			strcpy (minfo.slope, "both");
+            err_msg("[PYTHON] No slope given. Using %s.\n", minfo.slope);
+		}
+		if (get_pydict_string_value(pdict, "format", minfo.format, sizeof(minfo.format)) < 1) {
+			strcpy (minfo.format, "%u");
+            err_msg("[PYTHON] No format given. Using %s.\n", minfo.format);
+		}
+		if (get_pydict_string_value(pdict, "description", minfo.desc, sizeof(minfo.desc)) < 1) {
+			strcpy (minfo.desc, "unknown metric");
+            err_msg("[PYTHON] No description given. Using %s.\n", minfo.desc);
+		}
+
+		/* Don't need this anymore */
+		Py_DECREF(pdict);
+
+		/* Don't need metric_init any longer */
+		Py_DECREF(pinitfunc);
+
+        gmi = apr_array_push(metric_info);
+
+        /* gmi->key will be automatically assigned by gmond */
+        gmi->name = apr_pstrdup (pool, minfo.mname);
+        gmi->tmax = minfo.tmax;
+		if (!strcasecmp(minfo.vtype, "string"))
+			gmi->type = GANGLIA_VALUE_STRING;
+		else if (!strcasecmp(minfo.vtype, "uint"))
+			gmi->type = GANGLIA_VALUE_UNSIGNED_INT;
+		else if (!strcasecmp(minfo.vtype, "int"))
+			gmi->type = GANGLIA_VALUE_INT;
+		else if (!strcasecmp(minfo.vtype, "float"))
+			gmi->type = GANGLIA_VALUE_FLOAT;
+		else if (!strcasecmp(minfo.vtype, "double"))
+			gmi->type = GANGLIA_VALUE_DOUBLE;
+		else
+			gmi->type = GANGLIA_VALUE_UNKNOWN;
+
+        gmi->units = apr_pstrdup(pool, minfo.units);
+        gmi->slope = apr_pstrdup(pool, minfo.slope);
+        gmi->fmt = apr_pstrdup(pool, minfo.format);
+        gmi->msg_size = UDP_HEADER_SIZE+8;
+        gmi->desc = apr_pstrdup(pool, minfo.desc);
+
+        mi = apr_array_push(metric_mapping_info);
+        mi->pmod = pmod;
+        mi->mod_name = apr_pstrdup(pool, modname);
+	}
+	closedir(dp);
+    apr_pool_cleanup_register(pool, NULL,
+                              pyth_metric_cleanup,
+                              apr_pool_cleanup_null);
+
+    /* Replace the empty static metric definition array with the
+       dynamic array that we just created 
+    */
+    /*XXX Need to put this into a finalize MACRO. This is just pushing
+      a NULL entry onto the array so that the looping logic can 
+      determine the end if the array. We should probably give back
+      a ready APR array rather than a pointer to a Ganglia_25metric
+      array. */
+    gmi = apr_array_push(metric_info);
+    memset (gmi, 0, sizeof(*gmi));
+    mi = apr_array_push(metric_mapping_info);
+    memset (mi, 0, sizeof(*mi));
+    python_module.metrics_info = (Ganglia_25metric *)metric_info->elts;
+    return 0;
+}
+
+static apr_status_t pyth_metric_cleanup ( void *data)
+{
+	PyObject *pcleanup, *pobj;
+    mapped_info_t *mi;
+    int i;
+
+    mi = (mapped_info_t*) metric_mapping_info->elts;
+    for (i = 0; i < metric_mapping_info->nelts; i++) {
+        if (mi[i].pmod) {
+            pcleanup = PyObject_GetAttrString(mi[i].pmod, "metric_cleanup");
+            if (pcleanup && PyCallable_Check(pcleanup)) {
+                pobj = PyObject_CallFunction(pcleanup, NULL);
+				Py_XDECREF(pobj);
+                PyErr_Clear();
+            }
+			Py_XDECREF(pcleanup);
+            Py_DECREF(mi[i].pmod);
+        }
+    }
+
+	Py_Finalize();
+    return APR_SUCCESS;
+}
+
+static g_val_t pyth_metric_handler( int metric_index )
+{
+    g_val_t val;
+	PyObject *phandler, *pobj;
+    Ganglia_25metric *gmi = (Ganglia_25metric *) metric_info->elts;
+    mapped_info_t *mi = (mapped_info_t*) metric_mapping_info->elts;
+
+	/* metric_handler should be there and callable because we checked that
+	 * in the init function.
+	 */
+	phandler = PyObject_GetAttrString(mi[metric_index].pmod, "metric_handler");
+	pobj = PyObject_CallFunction(phandler, NULL);
+   	Py_DECREF(phandler);
+	if (!pobj) {
+		/* Error calling metric_handler. Log? */
+		PyErr_Clear();
+		/* return what? */
+		memset(&val, 0, sizeof(val));
+		return val;
+	}
+
+	switch (gmi[metric_index].type) {
+		case GANGLIA_VALUE_STRING:
+		{
+			get_python_string_value(pobj, val.str, sizeof(val.str));
+			break;
+		}
+		case GANGLIA_VALUE_UNSIGNED_INT:
+		{
+			unsigned int v = 0;
+			get_python_uint_value(pobj, &v);
+			val.uint32 = v;
+			break;
+		}
+		case GANGLIA_VALUE_INT:
+		{
+			int v = 0;
+			get_python_int_value(pobj, &v);
+			val.int32 = v;
+			break;
+		}
+		case GANGLIA_VALUE_FLOAT:
+		{
+			double v = 0.0;
+			get_python_float_value(pobj, &v);
+			val.f = v;
+			break;
+		}
+		case GANGLIA_VALUE_DOUBLE:
+		{
+			double v = 0.0;
+			get_python_float_value(pobj, &v);
+			val.d = v;
+			break;
+		}
+		default:
+		{
+			memset(&val, 0, sizeof(val));
+			break;
+		}
+	}
+	Py_DECREF(pobj);
+    return val;
+}
+
+mmodule python_module =
+{
+    STD_MMODULE_STUFF,
+    pyth_metric_init,
+    NULL,
+    pyth_metric_info,
+    pyth_metric_handler,
+};

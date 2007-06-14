@@ -1,0 +1,97 @@
+How To Write And Use A Python Metric
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One of the new features in Gmond is the ability to develop
+and install new metrics as dynamically loadable modules. This
+has enabled Gmond to be extended in new ways. One of these 
+ways is embeded python. By loading and using the new 
+mod_python DSO, gmond now has the ability to load and call new 
+metric modules that have been developed using the python 
+scripting language. The following sections will describe
+how to develop and deploy new metric modules using python.
+
+
+Writing a python metric module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are three functions that must be included in every python
+based metric module. These functions are:
+
+def metric_init():
+  This function will be called once at initialization time. It
+  can be used to do any kind of initialization that the module
+  requires in order to properly gather the intended metric.
+  However, in addition to any other initialization that is done,
+  the function must also create, populate and return the metric 
+  description dictionary. The dictionary must supply the following
+  elements:
+
+   d = {'name': '<your_metric_name>',
+        'time_max': int(<your_time_max>),
+        'value_type': '<string | uint | float | double>',
+        'units': '<your_units>',
+        'slope': '<zero | positive | negative | both>',
+        'format': '<your_format>',
+        'description': '<your_description>'}
+
+  These elements are basically the same type of data that must be
+  supplied to the gmetric commandline utility. See the gmetric help 
+  document for more information.
+
+def metric_handler():
+  This function is where the code that handles the gathering of the
+  metric data. The return value from this function must match the 
+  data value type that was specified in the metric description 
+  during the metric_init() function.
+
+def metric_cleanup():
+  This function will be called once when gmond is shutting down.
+  Any module clean up code can be executed here and the function
+  must not return a value.
+
+Other than the mandatory functions and metric description as specified
+above, the metric module is free to do whatever it needs in order to
+appropriately gather the intended metric data.
+
+Deploying a python metric module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once a python metric module has been developed, deploying the module
+is as easy as copying a file to a specific directory. In the configuration
+of the mod_python module that is part of gmond.conf, a python metric module
+directory must have been specified (see next section). To deploy a 
+python module, simply copy the .py file to the specified python module 
+directory. Once the python module has been copied, start gmond using the 
+-m parameter. This will show a list of all of the available metrics that
+gmond is capable of gathering. The list should include the name of the
+python module that was just deployed. Add this metric to a collection
+group, just like any other gmond metric.
+
+Configuring Gmond for python support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Configuring Gmond to support python based modules is as easy as loading
+any other type of gmond dynamically loadable metric module. The name of
+the python support module is mod_python.so. A base configuration file 
+is included in the Ganglia source code and should have been installed
+automatically if done through an RPM. The basic configuration that
+should be added to or included by gmond.conf is as follows:
+
+  modules {
+    module {
+      name = "python_module"
+      path = "/usr/lib/ganglia/modpython.so"
+      params = "/usr/lib/ganglia/python_modules"
+    }
+  }
+
+The most significant part of this configuration is the 'params'
+directive. The path that has been assigned to this directive will
+be passed down to the mod_python module and used to search for .py
+python modules. Any python module that is found in this location
+will be loaded and assumed to be a metric gathering module. It 
+would probably also be a good idea to add all of your collection
+groups that use python based metric modules, in this same .conf
+file.  Then if mod_python is not included in the gmond.conf
+configuration, the python based metrics will also not be included. 
+
