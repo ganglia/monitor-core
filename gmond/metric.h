@@ -55,6 +55,8 @@ struct mmodule_struct {
     char *module_name;
     /** The metric name */
     char *metric_name;
+    /** The metric name */
+    char *module_params;
 
     /** A pointer to the next module in the list
      *  @defvar module_struct *next */
@@ -83,6 +85,7 @@ struct mmodule_struct {
 				NULL, \
 				NULL, \
 				NULL, \
+                NULL, \
                 NULL, \
 				MMODULE_MAGIC_COOKIE
 
