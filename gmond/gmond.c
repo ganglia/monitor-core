@@ -1426,7 +1426,9 @@ location_func(void)
 static apr_status_t modular_metric_cleanup(void *param)
 {
     mmodule *modp = (mmodule*)param;
-    modp->cleanup();
+    if (modp->cleanup) {
+        modp->cleanup();
+    }
     return APR_SUCCESS;
 }
 
@@ -1442,11 +1444,12 @@ load_metric_modules( void )
         apr_dso_handle_t *modHandle;
         apr_dso_handle_sym_t modSym;
         mmodule *modp;
-        char *modPath, *modName;
+        char *modPath, *modName, *modParams;
 
         cfg_t *module = cfg_getnsec(tmp, "module", j);
         modPath = cfg_getstr(module, "path");
         modName = cfg_getstr(module, "name");
+        modParams = cfg_getstr(module, "params");
 
         /*
          * Load the file into the gmond address space
@@ -1473,6 +1476,7 @@ load_metric_modules( void )
         modp = (mmodule*) modSym;
         modp->dynamic_load_handle = (apr_dso_handle_t *)modHandle;
         modp->module_name = apr_pstrdup (global_context, modName);
+        modp->module_params = apr_pstrdup (global_context, modParams);
 
         /*
          * Make sure the found module structure is really a module structure
