@@ -33,6 +33,7 @@ for module in $MODULES_DIRS; do
 	cd $module
 	echo "Regenerating module: $module"
 	libtoolize -c \
+	    && autoheader \
 	    && $ACLOCAL \
 	    && $AUTOMAKE --add-missing --foreign \
 	    && autoconf

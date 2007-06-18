@@ -11,6 +11,7 @@ AM_INIT_AUTOMAKE(libe,0.3.0)
 dnl
 dnl Creates config.h file with #defines instead of passing to compiler.
 dnl
+AC_CONFIG_HEADERS(config.h.in)
 AM_CONFIG_HEADER(config.h)
 
 dnl
