@@ -14,8 +14,9 @@ how to develop and deploy new metric modules using python.
 Writing a python metric module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are three functions that must be included in every python
-based metric module. These functions are:
+There are two functions that must be included in every python
+based metric module as well as at least one callback handler. 
+These functions are:
 
 def metric_init():
   This function will be called once at initialization time. It
@@ -23,10 +24,11 @@ def metric_init():
   requires in order to properly gather the intended metric.
   However, in addition to any other initialization that is done,
   the function must also create, populate and return the metric 
-  description dictionary. The dictionary must supply the following
-  elements:
+  description dictionary or a dictionary list. The dictionary 
+  must within the list must supply the following elements:
 
    d = {'name': '<your_metric_name>',
+	'call_back': <metric_handler_function>,
         'time_max': int(<your_time_max>),
         'value_type': '<string | uint | float | double>',
         'units': '<your_units>',
@@ -35,21 +37,26 @@ def metric_init():
         'description': '<your_description>'}
 
   These elements are basically the same type of data that must be
-  supplied to the gmetric commandline utility. See the gmetric help 
-  document for more information.
+  supplied to the gmetric commandline utility with the exception
+  of the call_back function. See the gmetric help document for 
+  more information.  The call_back entry designates a function 
+  that will be called whenever the data for this metric needs to
+  be gathered.  The format of this function is very simple.  It 
+  is just a function name with no parameters
 
-def metric_handler():
+	def My_Metric_Handler():
+
   This function is where the code that handles the gathering of the
   metric data. The return value from this function must match the 
-  data value type that was specified in the metric description 
-  during the metric_init() function.
+  data value type that was specified in the corresponding metric 
+  description that was defined during the metric_init() function.
 
 def metric_cleanup():
   This function will be called once when gmond is shutting down.
   Any module clean up code can be executed here and the function
   must not return a value.
 
-Other than the mandatory functions and metric description as specified
+Other than the mandatory functions and metric description list as specified
 above, the metric module is free to do whatever it needs in order to
 appropriately gather the intended metric data.
 
