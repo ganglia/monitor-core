@@ -494,6 +494,7 @@ AC_OUTPUT(Makefile
 	  gmond/modules/Makefile
 	  gmond/modules/example/Makefile
 	  gmond/modules/cpu/Makefile
+	  gmond/modules/sensors/Makefile
 	  gmond/modules/python/Makefile
           gmetric/Makefile 
           web/version.php)
