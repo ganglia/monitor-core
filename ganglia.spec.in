@@ -306,6 +306,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Wed Jun 14 2007 Brad Nicholes <bnicholes@novell.com>
+- Build the python support module by default
 * Fri May 18 2007 Bernard Li <bernard@vanhpc.org>
 - Add php-gd to web subpackage Requires
 * Wed May 9 2007 Brad Nicholes <bnicholes@novell.com>
