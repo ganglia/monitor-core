@@ -362,23 +362,34 @@ static void fill_gmi(Ganglia_25metric* gmi, py_metric_init_t* minfo)
     /* gmi->key will be automatically assigned by gmond */
     gmi->name = apr_pstrdup (pool, minfo->mname);
     gmi->tmax = minfo->tmax;
-    if (!strcasecmp(minfo->vtype, "string"))
+    if (!strcasecmp(minfo->vtype, "string")) {
         gmi->type = GANGLIA_VALUE_STRING;
-    else if (!strcasecmp(minfo->vtype, "uint"))
+        gmi->msg_size = UDP_HEADER_SIZE+32;
+    }
+    else if (!strcasecmp(minfo->vtype, "uint")) {
         gmi->type = GANGLIA_VALUE_UNSIGNED_INT;
-    else if (!strcasecmp(minfo->vtype, "int"))
+        gmi->msg_size = UDP_HEADER_SIZE+8;
+    }
+    else if (!strcasecmp(minfo->vtype, "int")) {
         gmi->type = GANGLIA_VALUE_INT;
-    else if (!strcasecmp(minfo->vtype, "float"))
+        gmi->msg_size = UDP_HEADER_SIZE+8;
+    }
+    else if (!strcasecmp(minfo->vtype, "float")) {
         gmi->type = GANGLIA_VALUE_FLOAT;
-    else if (!strcasecmp(minfo->vtype, "double"))
+        gmi->msg_size = UDP_HEADER_SIZE+8;
+    }
+    else if (!strcasecmp(minfo->vtype, "double")) {
         gmi->type = GANGLIA_VALUE_DOUBLE;
-    else
+        gmi->msg_size = UDP_HEADER_SIZE+16;
+    }
+    else {
         gmi->type = GANGLIA_VALUE_UNKNOWN;
+        gmi->msg_size = UDP_HEADER_SIZE+8;
+    }
 
     gmi->units = apr_pstrdup(pool, minfo->units);
     gmi->slope = apr_pstrdup(pool, minfo->slope);
     gmi->fmt = apr_pstrdup(pool, minfo->format);
-    gmi->msg_size = UDP_HEADER_SIZE+8;
     gmi->desc = apr_pstrdup(pool, minfo->desc);
 }
 
@@ -555,7 +566,7 @@ static g_val_t pyth_metric_handler( int metric_index )
     }
 
     /* Call the metric handler call back for this metric */
-    pobj = PyObject_CallFunction(mi[metric_index].pcb, NULL);
+    pobj = PyObject_CallFunction(mi[metric_index].pcb, "s", gmi[metric_index].name);
     if (!pobj) {
         /* Error calling metric_handler. Log? */
         PyErr_Clear();
