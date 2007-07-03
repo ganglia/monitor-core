@@ -211,6 +211,14 @@ fi
 %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/ganglia/gmetad.conf
 %__cp -f %{_builddir}/%{name}-%{version}/gmond/modules/conf.d/* $RPM_BUILD_ROOT/etc/ganglia/conf.d
 
+# Copy the python metric modules and .conf files
+%__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/
+%__cp -f gmond/python_modules/example/*.py $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
+%__cp -f gmond/python_modules/disk/*.py $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
+
+# Disable the diskusage module until it is configured properly
+%__mv $RPM_BUILD_ROOT/etc/ganglia/conf.d/diskusage.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/diskusage.pyconf.off
+
 %__make DESTDIR=$RPM_BUILD_ROOT install
 %__make -C gmond gmond.conf.5
 %__install -m 0644 %{_builddir}/%{name}-%{version}/gmond/gmond.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/gmond.conf.5
@@ -306,6 +314,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Wed Jul 3 2007 Brad Nicholes <bnicholes@novell.com>
+- Add the python modules and configuration
 * Wed Jun 14 2007 Brad Nicholes <bnicholes@novell.com>
 - Build the python support module by default
 * Fri May 18 2007 Bernard Li <bernard@vanhpc.org>
