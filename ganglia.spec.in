@@ -21,7 +21,7 @@ Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
 Buildroot: /tmp/%{name}-%{version}-buildroot
 Prefix: /usr
-BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++
+BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel
 %if %{?suse_version:1}0
 BuildRequires: rrdtool, freetype2-devel, libapr1-devel
 %else
@@ -185,6 +185,7 @@ fi
 
 %__mkdir -p $RPM_BUILD_ROOT/%{web_prefixdir}
 %__cp -rf %{_builddir}/%{name}-%{version}/web/* $RPM_BUILD_ROOT/%{web_prefixdir}
+%__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*.in
 
 %else
 
@@ -314,6 +315,10 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Wed Jul 11 2007 Bernard Li <bernard@vanhpc.org>
+- Delete .in files in %{web_prefixdir}
+* Wed Jul 10 2007 Bernard Li <bernard@vanhpc.org>
+- Added python-devel to BuildRequires
 * Wed Jul 3 2007 Brad Nicholes <bnicholes@novell.com>
 - Add the python modules and configuration
 * Wed Jun 14 2007 Brad Nicholes <bnicholes@novell.com>
