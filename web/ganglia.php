@@ -36,6 +36,13 @@ $version = array();
 #$version["webfrontend"] = "$majorversion.$minorversion.$microversion";
 $version["webfrontend"] = "$ganglia_version";
 
+# Get rrdtool version
+$rrdtool_version = array();
+exec(RRDTOOL, $rrdtool_version);
+$rrdtool_version = explode(" ", $rrdtool_version[0]);
+$rrdtool_version = $rrdtool_version[1];
+$version["rrdtool"] = "$rrdtool_version";
+ 
 # The name of our local grid.
 $self = " ";
 
