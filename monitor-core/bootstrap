@@ -6,8 +6,6 @@ cd ..
 
 echo "Create distribution timestamp"
 touch Makefile.am
-echo "Running make distclean"  
-make distclean   
 echo "Running aclocal"  &&
 aclocal   &&
 echo "Running autoheader"  &&
