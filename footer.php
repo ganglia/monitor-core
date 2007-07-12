@@ -4,6 +4,10 @@ $tpl = new TemplatePower( template("footer.tpl") );
 $tpl->prepare();
 $tpl->assign("webfrontend-version",$version["webfrontend"]);
 
+if ($version["rrdtool"]) {
+   $tpl->assign("rrdtool-version",$version["rrdtool"]);
+}
+
 if ($version["gmetad"]) {
    $tpl->assign("webbackend-component", "gmetad");
    $tpl->assign("webbackend-version",$version["gmetad"]);
