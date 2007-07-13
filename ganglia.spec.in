@@ -214,8 +214,11 @@ fi
 
 # Copy the python metric modules and .conf files
 %__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/
-%__cp -f gmond/python_modules/example/*.py $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
 %__cp -f gmond/python_modules/disk/*.py $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
+
+# Don't install the example modules
+%__rm -f $RPM_BUILD_ROOT/etc/ganglia/conf.d/example.conf
+%__rm -f $RPM_BUILD_ROOT/etc/ganglia/conf.d/example.pyconf
 
 # Disable the diskusage module until it is configured properly
 %__mv $RPM_BUILD_ROOT/etc/ganglia/conf.d/diskusage.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/diskusage.pyconf.off
@@ -315,6 +318,8 @@ fi
 ## CHANGELOG
 ##
 %changelog
+* Fri Jul 13 2007 Brad Nicholes <bnicholes@novell.com>
+- Don't install the example modules
 * Wed Jul 11 2007 Bernard Li <bernard@vanhpc.org>
 - Delete .in files in %{web_prefixdir}
 * Wed Jul 10 2007 Bernard Li <bernard@vanhpc.org>
