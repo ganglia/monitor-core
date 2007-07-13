@@ -54,6 +54,16 @@ else if ($size == "medium")
       $fudge_1 = 14;
       $fudge_2 = 28;
     }
+else if ($size == "large")
+    {
+      $height = 600;
+      $width = 800;
+    }
+else if ($size == "xlarge")
+    {
+      $height = 1200;
+      $width = 1600;
+    }
 else
     {
       $height = 100;
