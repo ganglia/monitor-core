@@ -58,11 +58,13 @@ else if ($size == "large")
     {
       $height = 600;
       $width = 800;
+      $fudge_2 = 0;
     }
 else if ($size == "xlarge")
     {
       $height = 1200;
       $width = 1600;
+      $fudge_2 = 0;
     }
 else
     {
