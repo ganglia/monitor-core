@@ -264,10 +264,13 @@ if test x"$enable_static_build" = xno ; then
   if test x"$libaprpath" != x && test x"$libaprpath" != xyes ; then
     CFLAGS="$CFLAGS -I$libaprpath/include"
     LDFLAGS="$LDFLAGS -L$libaprpath/lib"
+    echo "Added -I$libaprpath/include to CFLAGS"
+    echo "Added -I$libaprpath/lib to LDLAGS"
   fi
   AC_CHECK_LIB(apr-1, apr_socket_send)
   if test $ac_cv_lib_apr_1_apr_socket_send = yes; then
     echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
+    echo "Found a suitable libapr1 library"
   else
     echo "libapr not found"
     exit;
@@ -278,10 +281,12 @@ if test x"$enable_static_build" = xno ; then
   if test x"$libexpatpath" != x && test x"$libexpatpath" != xyes ; then
     CFLAGS="$CFLAGS -I$libexpatpath/include"
     LDFLAGS="$LDFLAGS -L$libexpatpath/lib"
+    echo "Added -I$libexpatpath/include to CFLAGS"
+    echo "Added -I$libexpatpath/lib to LDLAGS"
   fi
   AC_CHECK_LIB(expat, XML_ParserCreate)
   if test $ac_cv_lib_expat_XML_ParserCreate = yes; then
-    echo "Using the installed Expat library"
+    echo "Found a suitable Expat library"
   else
     echo "libexpat not found"
     exit;
@@ -293,10 +298,12 @@ if test x"$enable_static_build" = xno ; then
   if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes ; then
     CFLAGS="$CFLAGS -I$libconfusepath/include"
     LDFLAGS="$LDFLAGS -L$libconfusepath/lib"
+    echo "Added -I$libconfusepath/include to CFLAGS"
+    echo "Added -L$libconfusepath/lib to LDLAGS"
   fi
   AC_CHECK_LIB(confuse, cfg_parse)
   if test $ac_cv_lib_confuse_cfg_parse = yes; then
-    echo "Using the installed Confuse library"
+    echo "Found a suitable Confuse library"
   else
     echo "libconfuse not found"
     exit;
