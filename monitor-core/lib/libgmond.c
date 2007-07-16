@@ -13,6 +13,7 @@
 #include <apr_strings.h>
 #include <apr_tables.h>
 #include <apr_net.h>
+#include <apr_file_io.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -960,6 +961,10 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
         char *path = calloc(sizeof(char), strlen(fname)+1);
         char *pattern = NULL;
         char *idx = strrchr(fname, '/');
+        Ganglia_pool p;
+        apr_file_t *ftemp;
+        char *dirname = NULL;
+        char tn[] = "gmond.tmp.XXXXXX";
 
         if (idx == NULL) {
             idx = strrchr(fname, '\\');
@@ -974,6 +979,20 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
             pattern = idx + 1;
         }
 
+        p = Ganglia_pool_create(NULL);
+        if (apr_temp_dir_get((const char**)&dirname, p) != APR_SUCCESS) {
+            cfg_error(cfg, "failed to determine the temp dir");
+            return 1;
+        }
+        dirname = apr_psprintf(p, "%s/%s", dirname, tn);
+
+        if (apr_file_mktemp(&ftemp, dirname, 
+                            APR_FOPEN_CREATE | APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_DELONCLOSE, 
+                            p) != APR_SUCCESS) {
+            cfg_error(cfg, "unable to create a temporary file %s", dirname);
+            return 1;
+        }
+
         dir = opendir(path);
 
         if(dir != NULL){
@@ -982,20 +1001,30 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
                               FNM_PATHNAME|FNM_PERIOD);
                 if (ret == 0) {
                     char *newpath = malloc (strlen(path) + strlen(entry->d_name)+2);
+
                     sprintf (newpath, "%s/%s", path, entry->d_name);
-                    argv[0] = newpath;
-                    if (cfg_include(cfg, opt, argc, argv))
-                        cfg_error(cfg, "failed to process include file %s", entry->d_name);
-                    else
-                        debug_msg("processed include file %s\n", entry->d_name);
-                    free (newpath);
-                } else {
-                    continue;
-                } 
+
+                    if (newpath) {
+                        char *line = apr_pstrcat(p, "include ('", newpath, "')\n", NULL);
+
+                        apr_file_puts(line, ftemp);
+                        free(newpath);
+                    }
+                }
             }
             closedir(dir);
+            free (path);
+
+            argv[0] = dirname;
+            if (cfg_include(cfg, opt, argc, argv))
+                cfg_error(cfg, "failed to process include file %s", fname);
+            else
+                debug_msg("processed include file %s\n", fname);
         }
-        free (path);
+
+        apr_file_close(ftemp);
+        Ganglia_pool_destroy(p);
+
         argv[0] = fname;
     }
     else 
