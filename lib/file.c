@@ -107,7 +107,7 @@ slurpfile ( char * filename, char *buffer, int buflen )
    fd = open(filename, O_RDONLY);
    if ( fd < 0 )
       {
-         err_ret("slurpfile() open() error");      
+         err_ret("slurpfile() open() error on file %s", filename);      
          return SYNAPSE_FAILURE;
       }
  
@@ -117,7 +117,7 @@ slurpfile ( char * filename, char *buffer, int buflen )
       {
          if ( errno == EINTR )
             goto read;
-         err_ret("slurpfile() read() error");
+         err_ret("slurpfile() read() error on file %s", filename);
          close(fd);
          return SYNAPSE_FAILURE;
       }
