@@ -46,7 +46,7 @@
 #include <apr_tables.h>
 #include <apr_strings.h>
 
-#include <python/Python.h>
+#include <Python.h>
 #include <dirent.h>
 #include <sys/stat.h>
 

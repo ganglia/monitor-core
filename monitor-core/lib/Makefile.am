@@ -8,7 +8,8 @@ GLDFLAGS =
 else
 GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD = 
-GLDFLAGS = 
+GLDFLAGS =
+INCLUDES = @APR_INCLUDES@
 endif
 
 AM_CFLAGS = -I.. -I. -I$(top_builddir)/libmetrics/ $(GCFLAGS)  
