@@ -8,8 +8,9 @@ GLDADD = $(top_builddir)/srclib/apr/libapr-0.la $(top_builddir)/srclib/confuse/s
 GLDFLAGS = -static
 else
 GCFLAGS = -D_LARGEFILE64_SOURCE
-GLDADD = 
-GLDFLAGS = 
+GLDADD =
+GLDFLAGS =
+INCLUDES = @APR_INCLUDES@
 endif
 
 AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/libmetrics/ $(GCFLAGS) 

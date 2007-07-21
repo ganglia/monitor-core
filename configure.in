@@ -240,17 +240,36 @@ fi
 if test "$enable_python" = yes ; then
   echo
   echo Checking for python
-dnl   AC_CHECK_LIB(python2.4, set_python_path, [echo "The ganglia python support module uses Python 2.4"], [echo "Python library not found"], [-lm])
-   AC_CHECK_HEADERS(python/Python.h, [ found_python_header=yes ])
-      echo
-      echo "The Ganglia python support module expects to use the Python 2.4 libraries."
-      echo "Make sure that you either have the devel package for Python 2.4 installed "
-      echo "or you make the appropriate changes to the Makefile.am to support your "
-      echo "version of the Python libraries."
+
+  # check for Python executable
+  if test -z "$PYTHON_BIN"; then
+    AC_PATH_PROG(PYTHON_BIN, python)
+    if test -z "$PYTHON_BIN"; then
+      AC_MSG_ERROR(python binary not found in path)
+    fi
+  fi
+
+  # find out python version
+  AC_MSG_CHECKING(Python version)
+  PyVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:3]'`]
+  PyMAJVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:1]'`]
+  AC_MSG_RESULT($PyVERSION)
+  PYTHON_VERSION=$PyVERSION
+  AC_SUBST(PYTHON_VERSION)
+
+dnl   AC_CHECK_LIB(python{PyVERSION}, set_python_path, [echo "The ganglia python support module requires Python to compile"], [echo "Python library not found"], [-lm])
+   AC_CHECK_HEADERS(python$PyVERSION/Python.h python/Python.h, [ found_python_header=yes ])
    if test "$found_python_header" != yes; then
       echo
       echo "No Python devel package detected. "
       exit;
+   else
+      if test -d "/usr/include/python"; then
+         PYTHON_INCLUDES="-I/usr/include/python"
+      else
+         PYTHON_INCLUDES="-I/usr/include/python$PyVERSION"
+      fi
+      AC_SUBST(PYTHON_INCLUDES)
    fi
 fi
 
@@ -266,7 +285,15 @@ if test x"$enable_static_build" = xno ; then
     LDFLAGS="$LDFLAGS -L$libaprpath/lib"
     echo "Added -I$libaprpath/include to CFLAGS"
     echo "Added -I$libaprpath/lib to LDLAGS"
+  else
+    AC_PATH_PROG(APR_CONFIG, apr-1-config)
+    if test -z "$APR_CONFIG"; then
+      AC_MSG_ERROR(apr-1-config binary not found in path)
+    fi
+    APR_INCLUDES=`$APR_CONFIG --includes`
+    AC_SUBST(APR_INCLUDES)
   fi
+
   AC_CHECK_LIB(apr-1, apr_socket_send)
   if test $ac_cv_lib_apr_1_apr_socket_send = yes; then
     echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"

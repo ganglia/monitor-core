@@ -5,3 +5,4 @@ modmulticpu_la_SOURCES = mod_multicpu.c
 modmulticpu_la_LDFLAGS = -module
 
 EXTRA_DIST = ../conf.d/multicpu.conf
+INCLUDES = @APR_INCLUDES@

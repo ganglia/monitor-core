@@ -14,6 +14,7 @@ else
 SRCLIB_SUBDIR = 
 EXTRA_SUBDIRS = "./web"
 EXTRA_DIST_FILES = srclib/Makefile.am srclib/Makefile.in
+INCLUDES = @APR_INCLUDES@
 endif
 
 AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-shar dist-zip
