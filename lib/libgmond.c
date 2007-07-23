@@ -987,7 +987,7 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
         dirname = apr_psprintf(p, "%s/%s", dirname, tn);
 
         if (apr_file_mktemp(&ftemp, dirname, 
-                            APR_FOPEN_CREATE | APR_FOPEN_READ | APR_FOPEN_WRITE | APR_FOPEN_DELONCLOSE, 
+                            APR_CREATE | APR_READ | APR_WRITE | APR_DELONCLOSE, 
                             p) != APR_SUCCESS) {
             cfg_error(cfg, "unable to create a temporary file %s", dirname);
             return 1;
