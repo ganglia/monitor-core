@@ -145,7 +145,7 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
 #define apr_atomic_cas(mem,with,cmp) atomic_cmpxchg((unsigned long *)(mem),(unsigned long)(cmp),(unsigned long)(with))
     
 int apr_atomic_dec(apr_atomic_t *mem);
-void *apr_atomic_casptr(void **mem, void *with, const void *cmp);
+void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
 #define APR_OVERRIDE_ATOMIC_DEC 1
 #define APR_OVERRIDE_ATOMIC_CASPTR 1
 
@@ -154,7 +154,7 @@ inline int apr_atomic_dec(apr_atomic_t *mem)
     return (atomic_xchgadd(mem, 0xFFFFFFFF) - 1);
 }
 
-inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
+inline void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
 {
     return (void*)atomic_cmpxchg((unsigned long *)mem,(unsigned long)cmp,(unsigned long)with);
 }
