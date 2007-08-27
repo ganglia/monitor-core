@@ -1,0 +1,31 @@
+Build Ganglia 3.0.x using Cygwin on Windows 
+=========================================== 
+
+Ganglia 3.0.x (Gmond and Gmetric) may be built in the Cygwin environment 
+for use by Cygwin applications. As with the Unix platform, Ganglia on 
+Cygwin uses GNU tools. Therefore Ganglia on Cygwin could be built using 
+the same instructions as in the UNIX platforms. 
+
+Prerequisites 
+
+-Latest version of Cygwin with the following packages autoconf, automake, 
+bison, gcc, sharutils, sunrpc, vim, make, flex, libtool. 
+
+
+Download Ganglia 3.0.x (ganglia monitor core) from 
+  http://ganglia.sourceforge.net/?page_id=55. 
+
+Extract Ganglia 3.0.x source files in the Cygwin command console.  
+
+Build Ganglia 3.0.x 
+
+cd ganglia-3.0.x 
+./configure  
+make 
+
+If everything works right, then you should see a gmond.exe and gmetric.exe 
+created in the gmond and gmetric directories respectively. 
+
+As of now gmetad cannot be built on Cygwin.
+
+
