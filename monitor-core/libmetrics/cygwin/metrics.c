@@ -260,20 +260,17 @@ bytes_in_func ( void )
 g_val_t
 cpu_num_func ( void )
 {
-#if 0
-   static int cpu_num = 0;
-#endif
+   static DWORD cpu_num = 0;
+   SYSTEM_INFO siSysInfo;
    g_val_t val;
 
-#if 0
    /* Only need to do this once */
-   if (! cpu_num) {
-      /* We'll use _SC_NPROCESSORS_ONLN to get operating cpus */
-      cpu_num = get_nprocs();
+   if (!cpu_num) {
+      GetSystemInfo(&siSysInfo);
+      cpu_num = siSysInfo.dwNumberOfProcessors;
    }
-#endif
-   val.uint16 = 1;/**FIXME: assuming only one processor right now */
 
+   val.uint16 = cpu_num;
    return val;
 }
 
