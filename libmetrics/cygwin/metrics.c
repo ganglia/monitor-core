@@ -48,7 +48,7 @@ get_netbw(double *in_bytes, double *out_bytes,
   dwSize = sizeof(MIB_IFTABLE);
   
   iftable = (PMIB_IFTABLE) malloc (dwSize);
-  while (ret = GetIfTable(iftable, &dwSize, 1) == ERROR_INSUFFICIENT_BUFFER) {
+  while ((ret = GetIfTable(iftable, &dwSize, 1)) == ERROR_INSUFFICIENT_BUFFER) {
      iftable = (PMIB_IFTABLE) realloc (iftable, dwSize);
   }
  
