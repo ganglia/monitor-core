@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <windows.h>
 #include <iphlpapi.h>
+#include <sys/types.h>
 #include <sys/timeb.h>
 
 /* From old ganglia 2.5.x... */
@@ -42,7 +43,7 @@ get_netbw(double *in_bytes, double *out_bytes,
   double bytes_in = 0, bytes_out = 0, pkts_in = 0, pkts_out = 0;
   static DWORD dwSize;
   DWORD ret, dwInterface;
-  struct timeb timebuffer;
+  struct _timeb timebuffer;
   PMIB_IFROW ifrow;
 
   dwSize = sizeof(MIB_IFTABLE);
@@ -54,7 +55,7 @@ get_netbw(double *in_bytes, double *out_bytes,
  
   if (ret == NO_ERROR) { 
 
-    _ftime ( &timebuffer );
+    _ftime_s ( &timebuffer );
 
     /* scan the interface table */
     for (dwInterface = 0; dwInterface < (iftable -> dwNumEntries); dwInterface++) {
