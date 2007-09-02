@@ -396,41 +396,37 @@ sys_clock_func ( void )
 g_val_t
 machine_type_func ( void )
 {
+   SYSTEM_INFO siSysInfo;
    g_val_t val;
  
-#ifdef __i386__
-   snprintf(val.str, MAX_G_STRING_SIZE, "x86");
-#endif
-#ifdef __x86_64__
-   snprintf(val.str, MAX_G_STRING_SIZE, "x86_64");
-#endif
-#ifdef __ia64__
-   snprintf(val.str, MAX_G_STRING_SIZE, "ia64");
-#endif
-#ifdef __sparc__
-   snprintf(val.str, MAX_G_STRING_SIZE, "sparc");
-#endif
-#ifdef __alpha__
-   snprintf(val.str, MAX_G_STRING_SIZE, "alpha");
-#endif
-#ifdef __powerpc__
-   snprintf(val.str, MAX_G_STRING_SIZE, "powerpc");
-#endif
-#ifdef __m68k__
-   snprintf(val.str, MAX_G_STRING_SIZE, "m68k");
-#endif
-#ifdef __mips__
-   snprintf(val.str, MAX_G_STRING_SIZE, "mips");
-#endif
-#ifdef __arm__
-   snprintf(val.str, MAX_G_STRING_SIZE, "arm");
-#endif
-#ifdef __hppa__
-   snprintf(val.str, MAX_G_STRING_SIZE, "hppa");
-#endif
-#ifdef __s390__
-   snprintf(val.str, MAX_G_STRING_SIZE, "s390");
-#endif
+   GetSystemInfo(&siSysInfo);
+
+   switch (siSysInfo.wProcessorArchitecture) {
+      case PROCESSOR_ARCHITECTURE_AMD64:
+         snprintf(val.str, MAX_G_STRING_SIZE, "x86_64");
+         break;
+      case PROCESSOR_ARCHITECTURE_IA64:
+         snprintf(val.str, MAX_G_STRING_SIZE, "ia64");
+         break;
+      case PROCESSOR_ARCHITECTURE_INTEL:
+         snprintf(val.str, MAX_G_STRING_SIZE, "x86");
+         break;
+      case PROCESSOR_ARCHITECTURE_ALPHA:
+      case PROCESSOR_ARCHITECTURE_ALPHA64:
+         snprintf(val.str, MAX_G_STRING_SIZE, "alpha");
+         break;
+      case PROCESSOR_ARCHITECTURE_PPC:
+         snprintf(val.str, MAX_G_STRING_SIZE, "powerpc");
+         break;
+      case PROCESSOR_ARCHITECTURE_MIPS:
+         snprintf(val.str, MAX_G_STRING_SIZE, "mips");
+         break;
+      case PROCESSOR_ARCHITECTURE_ARM:
+         snprintf(val.str, MAX_G_STRING_SIZE, "arm");
+         break;
+      default:
+         snprintf(val.str, MAX_G_STRING_SIZE, "unknown");
+   }
 
    return val;
 }
