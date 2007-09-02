@@ -13,6 +13,11 @@
 #include "file.h"
 #include "libmetrics.h"
 /* End old ganglia 2.5.x headers */
+#include "error.h"
+#include "debug_msg.h"
+#undef min
+#undef max
+#include "interface.h"
 
 #define OSNAME "Cygwin"
 #define OSNAME_LEN strlen(OSNAME)
@@ -43,7 +48,7 @@ get_netbw(double *in_bytes, double *out_bytes,
   double bytes_in = 0, bytes_out = 0, pkts_in = 0, pkts_out = 0;
   static DWORD dwSize;
   DWORD ret, dwInterface;
-  struct _timeb timebuffer;
+  struct timeb timebuffer;
   PMIB_IFROW ifrow;
 
   dwSize = sizeof(MIB_IFTABLE);
@@ -55,7 +60,7 @@ get_netbw(double *in_bytes, double *out_bytes,
  
   if (ret == NO_ERROR) { 
 
-    _ftime_s ( &timebuffer );
+    ftime ( &timebuffer );
 
     /* scan the interface table */
     for (dwInterface = 0; dwInterface < (iftable -> dwNumEntries); dwInterface++) {
