@@ -27,5 +27,3 @@ If everything works right, then you should see a gmond.exe and gmetric.exe
 created in the gmond and gmetric directories respectively. 
 
 As of now gmetad cannot be built on Cygwin.
-
-
