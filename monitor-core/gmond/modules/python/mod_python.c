@@ -81,6 +81,7 @@ py_metric_init_t;
 
 static apr_pool_t *pool;
 static FILE *config_file;
+static PyThreadState* gtstate = NULL;
 
 static apr_array_header_t *metric_info = NULL;
 static apr_array_header_t *metric_mapping_info = NULL;
@@ -428,6 +429,8 @@ static int pyth_metric_init (apr_pool_t *p)
     /* Set up the python path to be able to load module from our module path */
     set_python_path(path);
     Py_Initialize();
+	PyEval_InitThreads();
+	gtstate = PyEval_SaveThread();
 
     /* Initialize each python module */
     if ((dp = opendir(path)) == NULL) {
@@ -438,17 +441,21 @@ static int pyth_metric_init (apr_pool_t *p)
     }
 
     i = 0;
+
     while ((entry = readdir(dp)) != NULL) {
         modname = is_python_module(entry->d_name);
 
         if (modname == NULL)
             continue;
 
+		PyEval_RestoreThread(gtstate); // TEST
+
         pmod = PyImport_ImportModule(modname);
         if (!pmod) {
             /* Failed to import module. Log? */
             err_msg("[PYTHON] Can't import the metric module %s.\n", modname);
             PyErr_Clear();
+			gtstate = PyEval_SaveThread();
             continue;
         }
 
@@ -457,24 +464,27 @@ static int pyth_metric_init (apr_pool_t *p)
             /* No metric_init function. */
             err_msg("[PYTHON] Can't find the metric_init function in the python script %s.\n", modname);
             Py_DECREF(pmod);
+			gtstate = PyEval_SaveThread();
             continue;
         }
 
         /* Now call the metric_init method of the python module */
         pobj = PyObject_CallFunction(pinitfunc, NULL);
+
         if (!pobj) {
             /* failed calling metric_init */
             err_msg("[PYTHON] Can't call the metric_init function in the python script %s.\n", modname);
             PyErr_Clear();
             Py_DECREF(pinitfunc);
             Py_DECREF(pmod);
+			gtstate = PyEval_SaveThread();
             continue;
         }
 
         if (PyList_Check(pobj)) {
-            int j, k;
+            int j;
             int size = PyList_Size(pobj);
-            for (j = k = 0; j < size; j++) {
+            for (j = 0; j < size; j++) {
                 PyObject* plobj = PyList_GetItem(pobj, j);
                 if (PyMapping_Check(plobj)) {
                     fill_metric_info(plobj, &minfo);
@@ -484,13 +494,6 @@ static int pyth_metric_init (apr_pool_t *p)
                     mi->pmod = pmod;
                     mi->mod_name = apr_pstrdup(pool, modname);
                     mi->pcb = minfo.pcb;
-                    if (k > 0) {
-                        /* We need additional references on the module if
-                         * more than one dictionary is being returned
-                         */
-                        Py_INCREF(pmod);
-                    }
-                    ++k;
                 }
             }
         }
@@ -505,8 +508,10 @@ static int pyth_metric_init (apr_pool_t *p)
         }
         Py_DECREF(pobj);
         Py_DECREF(pinitfunc);
+		gtstate = PyEval_SaveThread();
     }
     closedir(dp);
+
     apr_pool_cleanup_register(pool, NULL,
                               pyth_metric_cleanup,
                               apr_pool_cleanup_null);
@@ -530,12 +535,13 @@ static int pyth_metric_init (apr_pool_t *p)
 static apr_status_t pyth_metric_cleanup ( void *data)
 {
     PyObject *pcleanup, *pobj;
-    mapped_info_t *mi;
-    int i;
+    mapped_info_t *mi, *smi;
+    int i, j;
 
     mi = (mapped_info_t*) metric_mapping_info->elts;
     for (i = 0; i < metric_mapping_info->nelts; i++) {
         if (mi[i].pmod) {
+			PyEval_RestoreThread(gtstate);
             pcleanup = PyObject_GetAttrString(mi[i].pmod, "metric_cleanup");
             if (pcleanup && PyCallable_Check(pcleanup)) {
                 pobj = PyObject_CallFunction(pcleanup, NULL);
@@ -545,9 +551,22 @@ static apr_status_t pyth_metric_cleanup ( void *data)
             Py_XDECREF(pcleanup);
             Py_DECREF(mi[i].pmod);
             Py_XDECREF(mi[i].pcb);
+			gtstate = PyEval_SaveThread();
+
+			/* Set all modules that fall after this once with the same
+			 * module pointer to NULL so metric_cleanup only gets called
+			 * once on the module.
+			 */
+			smi = (mapped_info_t*) metric_mapping_info->elts;
+			for (j = i+1; j < metric_mapping_info->nelts; j++) {
+				if (smi[j].pmod == mi[i].pmod) {
+					smi[j].pmod = NULL;
+				}
+			}
         }
     }
 
+	PyEval_RestoreThread(gtstate);
     Py_Finalize();
     return APR_SUCCESS;
 }
@@ -565,11 +584,14 @@ static g_val_t pyth_metric_handler( int metric_index )
         return val;
     }
 
+	PyEval_RestoreThread(gtstate);
+
     /* Call the metric handler call back for this metric */
     pobj = PyObject_CallFunction(mi[metric_index].pcb, "s", gmi[metric_index].name);
     if (!pobj) {
         /* Error calling metric_handler. Log? */
         PyErr_Clear();
+		gtstate = PyEval_SaveThread();
         /* return what? */
         return val;
     }
@@ -615,6 +637,7 @@ static g_val_t pyth_metric_handler( int metric_index )
         }
     }
     Py_DECREF(pobj);
+	gtstate = PyEval_SaveThread();
     return val;
 }
 
