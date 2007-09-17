@@ -130,6 +130,10 @@ data_thread ( void *arg )
                                  break;
                               }
                            read_index+= bytes_read;
+                           if( struct_poll.revents & POLLHUP )
+                              {
+                                 break;
+                              }
                         }
                      if( struct_poll.revents & POLLHUP )
                         {
