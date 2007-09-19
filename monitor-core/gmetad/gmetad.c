@@ -36,7 +36,7 @@ extern int write_data_to_rrd( const char *source, const char *host, const char *
 struct gengetopt_args_info args_info;
 
 extern gmetad_config_t gmetad_config;
-extern int debug_level;
+static int debug_level;
 
 /* In cleanup.c */
 extern void *cleanup_thread(void *arg);
@@ -310,6 +310,7 @@ main ( int argc, char *argv[] )
          c->debug_level = args_info.debug_arg;
       }
    debug_level = c->debug_level;
+   set_debug_msg_level(debug_level);
 
    /* Setup our default authority pointer if the conf file hasnt yet.
     * Done in the style of hash node strings. */

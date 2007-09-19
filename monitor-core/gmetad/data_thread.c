@@ -7,8 +7,6 @@
 #include <string.h>
 #include <gmetad.h>
 
-extern int debug_level;
-
 extern hash_t *xml;
 
 extern hash_t *root;
@@ -29,7 +27,7 @@ data_thread ( void *arg )
    struct pollfd struct_poll;
    struct timeval start, end;
  
-   if(debug_level)
+   if(get_debug_msg_level())
       {
          fprintf(stderr,"Data thread %d is monitoring [%s] data source\n", (int) pthread_self(), d->name);
          for(i = 0; i < d->num_sources; i++)

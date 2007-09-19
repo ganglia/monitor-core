@@ -48,7 +48,7 @@ struct gengetopt_args_info args_info;
 /* The configuration file */
 cfg_t *config_file;
 /* The debug level (in debug_msg.c) */
-extern int debug_level;
+static int debug_level;
 /* The global context */
 Ganglia_pool global_context = NULL;
 /* Deaf mode boolean */
@@ -205,15 +205,6 @@ process_configuration_file(void)
   host_dmax           = cfg_getint( tmp, "host_dmax");
   /* Get the cleanup threshold */
   cleanup_threshold   = cfg_getint( tmp, "cleanup_threshold");
-}
-
-static void
-daemonize_if_necessary( char *argv[] )
-{
-  int should_daemonize;
-  cfg_t *tmp;
-  tmp = cfg_getsec( config_file, "globals");
-  should_daemonize = cfg_getbool( tmp, "daemonize");
 
   /* Commandline for debug_level trumps configuration file behaviour ... */
   if (args_info.debug_given) 
@@ -224,6 +215,17 @@ daemonize_if_necessary( char *argv[] )
     {
       debug_level = cfg_getint ( tmp, "debug_level");
     }
+  set_debug_msg_level(debug_level);
+
+}
+
+static void
+daemonize_if_necessary( char *argv[] )
+{
+  int should_daemonize;
+  cfg_t *tmp;
+  tmp = cfg_getsec( config_file, "globals");
+  should_daemonize = cfg_getbool( tmp, "daemonize");
 
   /* Daemonize if needed */
   if(!args_info.foreground_flag && should_daemonize && !debug_level)

@@ -20,7 +20,7 @@ struct gengetopt_args_info args_info;
 
 void process_opts( int argc, char **argv );
 
-extern int debug_level;
+static int debug_level;
 
 int main(int argc, char *argv[])
 {
@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 
 /*
    debug_level = 1;
+   set_debug_msg_level(debug_level);
 */
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
