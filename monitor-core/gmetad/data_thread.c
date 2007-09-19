@@ -131,12 +131,17 @@ data_thread ( void *arg )
                               }
                            read_index+= bytes_read;
                         }
-                     if( struct_poll.revents & POLLHUP )
-                        {
-                           err_msg("The remote machine closed connection for [%s] data source after %d bytes read", d->name, read_index);
-                           d->dead = 1;
-                           goto take_a_break;
-                        }
+                        /* Appears that OSX uses POLLHUP on Sockets that I have loaded the entire message into the buffer...
+                         * not that I lost the connection (See FreeBSD lists on this discussion)
+                         */
+#if !(defined(DARWIN))
+                        if( struct_poll.revents & POLLHUP )
+                          {
+                            err_msg("The remote machine closed connection for [%s] data source after %d bytes read", d->name, read_index);
+                            d->dead = 1;
+                            goto take_a_break;
+                          }
+#endif /* DARWIN */
                      if( struct_poll.revents & POLLERR )
                         {
                            err_msg("POLLERR! for [%s] data source after %d bytes read", d->name, read_index);
