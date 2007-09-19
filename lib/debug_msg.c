@@ -26,3 +26,17 @@ debug_msg(const char *format, ...)
       } 
    return;
 }
+
+void
+set_debug_msg_level(int level)
+{
+    debug_level = level;
+    return;
+}
+
+int
+get_debug_msg_level()
+{
+    return debug_level;
+}
+
