@@ -133,7 +133,7 @@ data_thread ( void *arg )
                         }
        /* Appears that OSX uses POLLHUP on Sockets that I have loaded the entire message into the buffer...
         * not that I lost the connection (See FreeBSD lists on this discussion)
-        * /
+        */
        #if !(defined(DARWIN))
                      if( struct_poll.revents & POLLHUP )
                         {
