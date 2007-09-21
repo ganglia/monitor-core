@@ -4,9 +4,11 @@
 #include "gm_mmn.h"
 #include "libmetrics.h"
 #include "protocol.h"
+#include "confuse.h"   /* header for libconfuse */
 
 #include <apr.h>
 #include <apr_pools.h>
+#include <apr_tables.h>
 
 typedef void (*metric_info_func)(Ganglia_25metric *gmi);
 typedef g_val_t (*metric_func)(void);
@@ -38,6 +40,12 @@ metric_t;
 /**
  * Module structures.  
  */
+typedef struct mmodule_param mmparam;
+struct mmodule_param {
+    char *name;
+    char *value;
+};
+
 typedef struct mmodule_struct mmodule;
 struct mmodule_struct {
     /** API version, *not* module version; check that module is 
@@ -55,8 +63,12 @@ struct mmodule_struct {
     char *module_name;
     /** The metric name */
     char *metric_name;
-    /** The metric name */
+    /** Single string parameter */
     char *module_params;
+    /** Multiple name/value pair parameter list */
+    apr_array_header_t *module_params_list;
+    /** Configuration file handle */
+    cfg_t *config_file;
 
     /** A pointer to the next module in the list
      *  @defvar module_struct *next */
@@ -85,6 +97,8 @@ struct mmodule_struct {
 				NULL, \
 				NULL, \
 				NULL, \
+                NULL, \
+                NULL, \
                 NULL, \
                 NULL, \
 				MMODULE_MAGIC_COOKIE

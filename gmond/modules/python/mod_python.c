@@ -80,7 +80,7 @@ py_metric_init_t;
 
 
 static apr_pool_t *pool;
-static FILE *config_file;
+//static FILE *config_file;
 static PyThreadState* gtstate = NULL;
 
 static apr_array_header_t *metric_info = NULL;
@@ -394,17 +394,60 @@ static void fill_gmi(Ganglia_25metric* gmi, py_metric_init_t* minfo)
     gmi->desc = apr_pstrdup(pool, minfo->desc);
 }
 
+static cfg_t* find_module_config(char *modname)
+{
+    cfg_t *modules_cfg;
+    int j;
+
+    modules_cfg = cfg_getsec(python_module.config_file, "modules");
+    for (j = 0; j < cfg_size(modules_cfg, "pymodule"); j++) {
+        char *modName;
+
+        cfg_t *pymodule = cfg_getnsec(modules_cfg, "pymodule", j);
+        modName = cfg_getstr(pymodule, "name");
+        if (strcasecmp(modname, modName)) {
+            continue;
+        }
+        return pymodule;
+    }
+    return NULL; 
+}
+
+static PyObject* build_params_dict(cfg_t *pymodule)
+{
+    int k;
+    PyObject *params_dict = PyDict_New();
+
+    if (pymodule && params_dict) {
+        for (k = 0; k < cfg_size(pymodule, "param"); k++) {
+            cfg_t *param;
+            char *name, *value;
+            PyObject *pyvalue;
+    
+            param = cfg_getnsec(pymodule, "param", k);
+            name = apr_pstrdup(pool, param->title);
+            value = apr_pstrdup(pool, cfg_getstr(param, "value"));
+            pyvalue = PyString_FromString(value);
+            if (name && pyvalue) {
+                PyDict_SetItemString(params_dict, name, pyvalue);
+                Py_DECREF(pyvalue);
+            }
+        }
+    }
+    return params_dict;
+}
 static int pyth_metric_init (apr_pool_t *p)
 {
     DIR *dp;
     struct dirent *entry;
     int i;
     char* modname;
-    PyObject *pmod, *pinitfunc, *pobj;
+    PyObject *pmod, *pinitfunc, *pobj, *pparamdict;
     py_metric_init_t minfo;
     Ganglia_25metric *gmi;
     mapped_info_t *mi;
     const char* path = python_module.module_params;
+    cfg_t *module_cfg;
 
     /* Allocate a pool that will be used by this module */
     apr_pool_create(&pool, p);
@@ -429,8 +472,8 @@ static int pyth_metric_init (apr_pool_t *p)
     /* Set up the python path to be able to load module from our module path */
     set_python_path(path);
     Py_Initialize();
-	PyEval_InitThreads();
-	gtstate = PyEval_SaveThread();
+    PyEval_InitThreads();
+    gtstate = PyEval_SaveThread();
 
     /* Initialize each python module */
     if ((dp = opendir(path)) == NULL) {
@@ -448,14 +491,14 @@ static int pyth_metric_init (apr_pool_t *p)
         if (modname == NULL)
             continue;
 
-		PyEval_RestoreThread(gtstate); // TEST
+        PyEval_RestoreThread(gtstate); // TEST
 
         pmod = PyImport_ImportModule(modname);
         if (!pmod) {
             /* Failed to import module. Log? */
             err_msg("[PYTHON] Can't import the metric module %s.\n", modname);
             PyErr_Clear();
-			gtstate = PyEval_SaveThread();
+            gtstate = PyEval_SaveThread();
             continue;
         }
 
@@ -464,12 +507,24 @@ static int pyth_metric_init (apr_pool_t *p)
             /* No metric_init function. */
             err_msg("[PYTHON] Can't find the metric_init function in the python script %s.\n", modname);
             Py_DECREF(pmod);
-			gtstate = PyEval_SaveThread();
+            gtstate = PyEval_SaveThread();
+            continue;
+        }
+
+        /* Find the specified module configuration in gmond.conf */
+        module_cfg = find_module_config(modname);
+        /* Build a parameter dictionary to pass to the module */
+        pparamdict = build_params_dict(module_cfg);
+        if (!pparamdict || !PyDict_Check(pparamdict)) {
+            /* No metric_init function. */
+            err_msg("[PYTHON] Can't build the parameters dictionary for %s.\n", modname);
+            Py_DECREF(pmod);
+            gtstate = PyEval_SaveThread();
             continue;
         }
 
         /* Now call the metric_init method of the python module */
-        pobj = PyObject_CallFunction(pinitfunc, NULL);
+        pobj = PyObject_CallFunction(pinitfunc, "(N)", pparamdict);
 
         if (!pobj) {
             /* failed calling metric_init */
@@ -477,7 +532,7 @@ static int pyth_metric_init (apr_pool_t *p)
             PyErr_Clear();
             Py_DECREF(pinitfunc);
             Py_DECREF(pmod);
-			gtstate = PyEval_SaveThread();
+            gtstate = PyEval_SaveThread();
             continue;
         }
 
@@ -508,7 +563,7 @@ static int pyth_metric_init (apr_pool_t *p)
         }
         Py_DECREF(pobj);
         Py_DECREF(pinitfunc);
-		gtstate = PyEval_SaveThread();
+        gtstate = PyEval_SaveThread();
     }
     closedir(dp);
 
@@ -541,7 +596,7 @@ static apr_status_t pyth_metric_cleanup ( void *data)
     mi = (mapped_info_t*) metric_mapping_info->elts;
     for (i = 0; i < metric_mapping_info->nelts; i++) {
         if (mi[i].pmod) {
-			PyEval_RestoreThread(gtstate);
+            PyEval_RestoreThread(gtstate);
             pcleanup = PyObject_GetAttrString(mi[i].pmod, "metric_cleanup");
             if (pcleanup && PyCallable_Check(pcleanup)) {
                 pobj = PyObject_CallFunction(pcleanup, NULL);
@@ -551,22 +606,22 @@ static apr_status_t pyth_metric_cleanup ( void *data)
             Py_XDECREF(pcleanup);
             Py_DECREF(mi[i].pmod);
             Py_XDECREF(mi[i].pcb);
-			gtstate = PyEval_SaveThread();
+            gtstate = PyEval_SaveThread();
 
-			/* Set all modules that fall after this once with the same
-			 * module pointer to NULL so metric_cleanup only gets called
-			 * once on the module.
-			 */
-			smi = (mapped_info_t*) metric_mapping_info->elts;
-			for (j = i+1; j < metric_mapping_info->nelts; j++) {
-				if (smi[j].pmod == mi[i].pmod) {
-					smi[j].pmod = NULL;
-				}
-			}
+            /* Set all modules that fall after this once with the same
+             * module pointer to NULL so metric_cleanup only gets called
+             * once on the module.
+             */
+            smi = (mapped_info_t*) metric_mapping_info->elts;
+            for (j = i+1; j < metric_mapping_info->nelts; j++) {
+                if (smi[j].pmod == mi[i].pmod) {
+                    smi[j].pmod = NULL;
+                }
+            }
         }
     }
 
-	PyEval_RestoreThread(gtstate);
+    PyEval_RestoreThread(gtstate);
     Py_Finalize();
     return APR_SUCCESS;
 }
@@ -584,14 +639,14 @@ static g_val_t pyth_metric_handler( int metric_index )
         return val;
     }
 
-	PyEval_RestoreThread(gtstate);
+    PyEval_RestoreThread(gtstate);
 
     /* Call the metric handler call back for this metric */
     pobj = PyObject_CallFunction(mi[metric_index].pcb, "s", gmi[metric_index].name);
     if (!pobj) {
         /* Error calling metric_handler. Log? */
         PyErr_Clear();
-		gtstate = PyEval_SaveThread();
+        gtstate = PyEval_SaveThread();
         /* return what? */
         return val;
     }
@@ -637,7 +692,7 @@ static g_val_t pyth_metric_handler( int metric_index )
         }
     }
     Py_DECREF(pobj);
-	gtstate = PyEval_SaveThread();
+    gtstate = PyEval_SaveThread();
     return val;
 }
 

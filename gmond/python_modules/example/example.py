@@ -32,20 +32,34 @@
 
 import random
 descriptors = list()
+Random_Max = 50
+Constant_Value = 50
 
 def Random_Numbers(name):
     '''Return a random number.'''
-    return int(random.uniform(0,50))
+    global Random_Max
+    return int(random.uniform(0,Random_Max))
 
 def Constant_Number(name):
     '''Return a constant number.'''
-    return int(50)
+    global Constant_Value
+    return int(Constant_Value)
 
-def metric_init():
+def metric_init(params):
     '''Initialize the random number generator and create the
     metric definition dictionary object for each metric.'''
     global descriptors
+    global Random_Max
+    global Constant_Value
     random.seed()
+    
+    print '[pyexample] Received the following parameters'
+    print params
+    
+    if 'RandomMax' in params:
+        Random_Max = int(params['RandomMax'])
+    if 'CoonstantValue' in params:
+        Constant_Value = int(params['ConstantValue'])
     
     d1 = {'name': 'PyRandom_Numbers',
         'call_back': Random_Numbers,
@@ -74,7 +88,9 @@ def metric_cleanup():
 
 #This code is for debugging and unit testing    
 if __name__ == '__main__':
-    metric_init()
+    params = {'RandomMax': '500',
+        'ConstantValue': '322'}
+    metric_init(params)
     for d in descriptors:
         v = d['call_back'](d['name'])
         print 'value for %s is %u' % (d['name'],  v)
