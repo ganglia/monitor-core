@@ -35,15 +35,44 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "debug_msg.h"
+
 /*
  * Declare ourselves so the configuration routines can find and know us.
  * We'll fill it in at the end of the module.
  */
 mmodule example_module;
+static int random_max = 50;
+static int constant_value = 20;
 
 static int ex_metric_init ( apr_pool_t *p )
 {
+    const char* str_params = example_module.module_params;
+    apr_array_header_t *list_params = example_module.module_params_list;
+    int i;
+
     srand(time(NULL)%99);
+
+    /* Read the parameters from the gmond.conf file. */
+    /* Single raw string parameter */
+    if (str_params) {
+        debug_msg("[mod_example]Received string params: %s", str_params);
+    }
+    /* Multiple name/value pair parameters. */
+    if (list_params) {
+        debug_msg("[mod_example]Received following params list: ");
+        mmparam *params = (mmparam*) list_params->elts;
+        for(i=0; i< list_params->nelts; i++) {
+            debug_msg("\tParam: %s = %s", params[i].name, params[i].value);
+            if (!strcasecmp(params[i].name, "RandomMax")) {
+                random_max = atoi(params[i].value);
+            }
+            if (!strcasecmp(params[i].name, "ConstantValue")) {
+                constant_value = atoi(params[i].value);
+            }
+        }
+    }
+
     return 0;
 }
 
@@ -60,10 +89,10 @@ static g_val_t ex_metric_handler ( int metric_index )
     */
     switch (metric_index) {
     case 0:
-        val.int32 = rand()%99;
+        val.int32 = rand()%random_max;
         return val;
     case 1:
-        val.int32 = 50;
+        val.int32 = constant_value;
         return val;
     }
 

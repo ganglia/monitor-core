@@ -1,3 +1,15 @@
+modules {
+  pymodule {
+    name = "example"
+    param RandomMax {
+        value = 600
+    }
+    param ConstantValue {
+        value = 112
+    }
+  }
+}
+
 #/* Collection groups for the
 #    example python module */
 collection_group {

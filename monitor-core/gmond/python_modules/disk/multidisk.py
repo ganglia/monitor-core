@@ -96,7 +96,7 @@ def Init_Metric (line, name, tmax, type, units, slope, fmt, desc, handler):
     return d
     
 
-def metric_init():
+def metric_init(params):
     '''Discover all of the local disk devices on the system and create
     a metric definition dictionary object for each.'''
     global descriptors
