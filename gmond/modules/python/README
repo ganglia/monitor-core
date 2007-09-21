@@ -18,14 +18,17 @@ There are two functions that must be included in every python
 based metric module as well as at least one callback handler. 
 These functions are:
 
-def metric_init():
+def metric_init(params):
   This function will be called once at initialization time. It
   can be used to do any kind of initialization that the module
-  requires in order to properly gather the intended metric.
-  However, in addition to any other initialization that is done,
-  the function must also create, populate and return the metric 
-  description dictionary or a dictionary list. Each dictionary 
-  in the list, must supply at least the following elements:
+  requires in order to properly gather the intended metric. This
+  function also takes a single dictionary type parameter which 
+  contains configuration directives that were designated for 
+  this module in the gmond.conf file.  In addition to any other 
+  initialization that is done, the function must also create, 
+  populate and return the metric description dictionary or a 
+  dictionary list. Each dictionary in the list, must supply at 
+  least the following elements:
 
    d = {'name': '<your_metric_name>',
 	'call_back': <metric_handler_function>,
@@ -113,4 +116,37 @@ python, are put into separate configuration files and the file
 extension of the configuration files are .pyconf, they will
 automatically be loaded and read whenever the mod_python module
 is included. 
+
+Configuring a Gmond python module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The configuration of a Gmond python module is really no different
+than any other module.  Most python modules will not require any
+specialized configuration at all. However, support has been 
+provided to allow for parameters to be passed from the gmond.conf
+file to a python module.  The syntax for passing parameters to
+a specific python module is at follows:
+
+modules {
+  pymodule {
+    name = "example"
+    params = "Raw string parameter"
+    param YouNameIt {
+        value = Whatever
+    }
+    param Another {
+        value = NewValue
+    }
+  }
+}
+
+The "pymodule" section must contain a "name" directive.  The value
+of this directive must match the file name of the python module's 
+.py file.  The section can then take either a "params" directive
+whose value is a single string parameter and/or multiple "param"
+sections.  each "param" section must include a name which will be
+the name of the value when it is passed to the python module, and
+a "value" directive.  The "value" directive will always be passed
+as a string to the python module.  It is up to the module itself
+to determine the actual value type.
 
