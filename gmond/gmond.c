@@ -1446,12 +1446,25 @@ load_metric_modules( void )
         apr_dso_handle_t *modHandle;
         apr_dso_handle_sym_t modSym;
         mmodule *modp;
-        char *modPath, *modName, *modParams;
+        char *modPath, *modName, *modparams;
+        apr_array_header_t *modParams_list = NULL;
+        int k;
 
         cfg_t *module = cfg_getnsec(tmp, "module", j);
         modPath = cfg_getstr(module, "path");
         modName = cfg_getstr(module, "name");
-        modParams = cfg_getstr(module, "params");
+        modparams = cfg_getstr(module, "params");
+        modParams_list = apr_array_make(global_context, 2, sizeof(mmparam));
+
+        for (k = 0; k < cfg_size(module, "param"); k++) 
+          {
+            cfg_t *param;
+            mmparam *node = apr_array_push(modParams_list);
+
+            param = cfg_getnsec(module, "param", k);
+            node->name = apr_pstrdup(global_context, param->title);
+            node->value = apr_pstrdup(global_context, cfg_getstr(param, "value"));
+          }
 
         /*
          * Load the file into the gmond address space
@@ -1463,7 +1476,7 @@ load_metric_modules( void )
                      apr_dso_error(modHandle, my_error, sizeof(my_error)));
             continue;
         }
-        debug_msg("loaded module: %s\n", modName);
+        debug_msg("loaded module: %s", modName);
 
         /*
          * Retrieve the pointer to the module structure through the module name.
@@ -1478,7 +1491,9 @@ load_metric_modules( void )
         modp = (mmodule*) modSym;
         modp->dynamic_load_handle = (apr_dso_handle_t *)modHandle;
         modp->module_name = apr_pstrdup (global_context, modName);
-        modp->module_params = apr_pstrdup (global_context, modParams);
+        modp->module_params = apr_pstrdup (global_context, modparams);
+        modp->module_params_list = modParams_list;
+        modp->config_file = config_file;
 
         /*
          * Make sure the found module structure is really a module structure

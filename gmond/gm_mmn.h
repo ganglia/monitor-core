@@ -16,13 +16,16 @@
  */
 
 /*
- * 20070222.0 (3.0.4-dev) MODULE_MAGIC_COOKIE set to "GM30"
+ * 20070222.0 (3.1.0-dev) MODULE_MAGIC_COOKIE set to "GM31"
+ * 20070918.0 (3.1.0-dev) mmodule_struct change. Pass parameter list 
+ *                          C interface modules and python modules. Allow
+ *                          configuration file access from a C module.
  */
 
-#define MMODULE_MAGIC_COOKIE 0x474D3330UL /* "GM30" */
+#define MMODULE_MAGIC_COOKIE 0x474D3331UL /* "GM31" */
 
 #ifndef MMODULE_MAGIC_NUMBER_MAJOR
-#define MMODULE_MAGIC_NUMBER_MAJOR 20070222
+#define MMODULE_MAGIC_NUMBER_MAJOR 20070918
 #endif
 #define MMODULE_MAGIC_NUMBER_MINOR 0                     /* 0...n */
 
