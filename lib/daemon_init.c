@@ -26,6 +26,7 @@ extern pid_t getpgid(pid_t pid);
 void
 update_pidfile (char *pidfile)
 {
+  long p;
   pid_t pid;
   mode_t prev_umask;
   FILE *file;
@@ -34,10 +35,10 @@ update_pidfile (char *pidfile)
   file = fopen (pidfile, "r");
   if (file)
     {
-      if (fscanf(file, "%d", &pid) == 1 &&
+      if (fscanf(file, "%ld", &p) == 1 && (pid = p) && 
 	  (getpgid (pid) > -1))
 	{
-	  fprintf (stderr, "daemon already running: %s pid %d\n", pidfile, pid);
+	  fprintf (stderr, "daemon already running: %s pid %ld\n", pidfile, p);
 	  exit (1);
 	}
       fclose (file);
@@ -54,7 +55,7 @@ update_pidfile (char *pidfile)
 	       pidfile, strerror (errno));
       exit (1);
     }
-  fprintf (file, "%d\n", (int) getpid());
+  fprintf (file, "%ld\n", (long) getpid());
   fclose (file);
   umask (prev_umask);
 }
