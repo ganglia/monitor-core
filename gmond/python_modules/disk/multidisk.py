@@ -125,7 +125,7 @@ def metric_cleanup():
 
 #This code is for debugging and unit testing    
 if __name__ == '__main__':
-    metric_init()
+    metric_init(None)
     for d in descriptors:
         v = d['call_back'](d['name'])
         print 'value for %s is %f' % (d['name'],  v)
