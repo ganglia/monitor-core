@@ -496,8 +496,10 @@ static int pyth_metric_init (apr_pool_t *p)
         pmod = PyImport_ImportModule(modname);
         if (!pmod) {
             /* Failed to import module. Log? */
-            err_msg("[PYTHON] Can't import the metric module %s.\n", modname);
-            PyErr_Clear();
+            err_msg("[PYTHON] Can't import the metric module [%s].\n", modname);
+            if (PyErr_Occurred()) {
+                PyErr_Print();
+            }
             gtstate = PyEval_SaveThread();
             continue;
         }
@@ -505,7 +507,7 @@ static int pyth_metric_init (apr_pool_t *p)
         pinitfunc = PyObject_GetAttrString(pmod, "metric_init");
         if (!pinitfunc || !PyCallable_Check(pinitfunc)) {
             /* No metric_init function. */
-            err_msg("[PYTHON] Can't find the metric_init function in the python script %s.\n", modname);
+            err_msg("[PYTHON] Can't find the metric_init function in the python module [%s].\n", modname);
             Py_DECREF(pmod);
             gtstate = PyEval_SaveThread();
             continue;
@@ -517,7 +519,7 @@ static int pyth_metric_init (apr_pool_t *p)
         pparamdict = build_params_dict(module_cfg);
         if (!pparamdict || !PyDict_Check(pparamdict)) {
             /* No metric_init function. */
-            err_msg("[PYTHON] Can't build the parameters dictionary for %s.\n", modname);
+            err_msg("[PYTHON] Can't build the parameters dictionary for [%s].\n", modname);
             Py_DECREF(pmod);
             gtstate = PyEval_SaveThread();
             continue;
@@ -528,8 +530,10 @@ static int pyth_metric_init (apr_pool_t *p)
 
         if (!pobj) {
             /* failed calling metric_init */
-            err_msg("[PYTHON] Can't call the metric_init function in the python script %s.\n", modname);
-            PyErr_Clear();
+            err_msg("[PYTHON] Can't call the metric_init function in the python module [%s].\n", modname);
+            if (PyErr_Occurred()) {
+                PyErr_Print();
+            }
             Py_DECREF(pinitfunc);
             Py_DECREF(pmod);
             gtstate = PyEval_SaveThread();
@@ -601,7 +605,9 @@ static apr_status_t pyth_metric_cleanup ( void *data)
             if (pcleanup && PyCallable_Check(pcleanup)) {
                 pobj = PyObject_CallFunction(pcleanup, NULL);
                 Py_XDECREF(pobj);
-                PyErr_Clear();
+                if (PyErr_Occurred()) {
+                    PyErr_Print();
+                }
             }
             Py_XDECREF(pcleanup);
             Py_DECREF(mi[i].pmod);
@@ -644,8 +650,11 @@ static g_val_t pyth_metric_handler( int metric_index )
     /* Call the metric handler call back for this metric */
     pobj = PyObject_CallFunction(mi[metric_index].pcb, "s", gmi[metric_index].name);
     if (!pobj) {
-        /* Error calling metric_handler. Log? */
-        PyErr_Clear();
+        err_msg("[PYTHON] Can't call the metric handler function for [%s] in the python module [%s].\n", 
+                gmi[metric_index].name, mi[metric_index].mod_name);
+        if (PyErr_Occurred()) {
+            PyErr_Print();
+        }
         gtstate = PyEval_SaveThread();
         /* return what? */
         return val;
