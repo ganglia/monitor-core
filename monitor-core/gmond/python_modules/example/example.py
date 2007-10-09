@@ -58,7 +58,7 @@ def metric_init(params):
     
     if 'RandomMax' in params:
         Random_Max = int(params['RandomMax'])
-    if 'CoonstantValue' in params:
+    if 'ConstantValue' in params:
         Constant_Value = int(params['ConstantValue'])
     
     d1 = {'name': 'PyRandom_Numbers',
