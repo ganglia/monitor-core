@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <syslog.h>
 
 #include <apr.h>
 #include <apr_strings.h>
@@ -185,6 +186,7 @@ typedef struct Ganglia_collection_group Ganglia_collection_group;
 apr_array_header_t *collection_groups = NULL;
 
 mmodule *metric_modules = NULL;
+extern int daemon_proc;		/* defined in error.c */
 
 /* this is just a temporary function */
 void
@@ -230,7 +232,16 @@ daemonize_if_necessary( char *argv[] )
   /* Daemonize if needed */
   if(!args_info.foreground_flag && should_daemonize && !debug_level)
     {
+      apr_status_t ret;
+      char *cwd;
+
+      apr_filepath_get(&cwd, 0, global_context);
       apr_proc_detach(1);
+      apr_filepath_set(cwd, global_context);
+
+      /* enable errmsg logging to syslog */
+      daemon_proc = 1;		/* for our err_XXX() functions */
+      openlog ("GMOND", LOG_PID, LOG_DAEMON);
     }
 }
 
@@ -1506,14 +1517,6 @@ load_metric_modules( void )
             continue;
         }
 
-        if (modp->init && modp->init(global_context)) {
-            fprintf (stderr, "Module %s failed to initialize.\n", modName);
-        }
-
-        apr_pool_cleanup_register(global_context, modp,
-                                  modular_metric_cleanup,
-                                  apr_pool_cleanup_null);
-
         if (metric_modules != NULL) {
             modp->next = metric_modules;
         }
@@ -1536,9 +1539,18 @@ setup_metric_callbacks( void )
   metric_callbacks = apr_hash_make( global_context );
 
   while (modp) {
-      const Ganglia_25metric* metric_info = modp->metrics_info;
+      Ganglia_25metric* metric_info;
       int i;
     
+      if (modp->init && modp->init(global_context)) {
+          err_msg("Module %s failed to initialize.\n", modp->module_name);
+      }
+
+      apr_pool_cleanup_register(global_context, modp,
+                                modular_metric_cleanup,
+                                apr_pool_cleanup_null);
+
+      metric_info = modp->metrics_info;
       for (i = 0; metric_info[i].name != NULL; i++) 
         {
           Ganglia_metric_cb_define(metric_info[i].name, modp->handler, i, modp);
