@@ -37,6 +37,9 @@ $jobstart = isset($_GET["js"]) ?
 # The direction we are travelling in the grid tree
 $gridwalk = isset($_GET["gw"]) ?
 	escapeshellcmd($_GET["gw"]) : NULL;
+# Size of the host graphs in the cluster view
+$clustergraphsize = isset($_GET["z"]) ?
+    escapeshellcmd($_GET["z"]) : NULL;
 # A stack of grid parents. Prefer a GET variable, default to cookie.
 if (isset($_GET["gs"]) and $_GET["gs"])
       $gridstack = explode(">", rawurldecode($_GET["gs"]));

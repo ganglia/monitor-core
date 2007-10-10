@@ -27,6 +27,8 @@ $vlabel = isset($_GET["vl"]) ?
 	escapeshellcmd( rawurldecode( $_GET["vl"] )) : NULL;
 $sourcetime = isset($_GET["st"]) ?
 	escapeshellcmd($_GET["st"]) : NULL;
+$summary = isset($_GET["su"]) ? 
+    escapeshellcmd($_GET["su"]) : NULL;
 
 # RFM - Define these variables to avoid "Undefined variable" errors being 
 # reported in ssl_error_log.
@@ -53,6 +55,14 @@ else if ($size == "medium")
       $fudge_0 = 0;
       $fudge_1 = 14;
       $fudge_2 = 28;
+    }
+else if ($size == "large")
+    {
+      $height = 600;
+      $width = 800;
+      $fudge_0 = 0;
+      $fudge_1 = 0;
+      $fudge_2 = 0;
     }
 else
     {
@@ -240,7 +250,7 @@ else
       $subtitle = $metricname;
       if ($context == "host") 
       {
-          if ($size == "small")
+          if ($summary)
               $prefix = $metricname;
           else
               $prefix = $hostname;
@@ -292,16 +302,16 @@ else if ($context == "cluster")
    }
 else
    {
-    if ($size == "small")
-      {
-        # Value for this graph define a background color.
-        if (!$load_color) $load_color = "ffffff";
-        $background = "--color BACK#'$load_color'";
+    # Value for this graph define a background color.
+    if (!$load_color) $load_color = "ffffff";
+    $background = "--color BACK#'$load_color'";
 
+    if ($size == "small")
         $title = $hostname;
-      }
     else if ($style)
        $title = "$hostname $style last $range";
+    else if ($summary)
+       $title = "$hostname";
     else
        $title = $metricname;
    }
