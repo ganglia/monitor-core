@@ -119,6 +119,8 @@ class piechart
     */
     function init ($w, $h, $d) {
       $this->im= ImageCreate($w, $h);
+      imagesavealpha($this->im, true);
+ 
       $this->width = $w;
       $this->height = $h;
       $this->data = $d;
@@ -135,7 +137,9 @@ class piechart
       } else {
         $this->diameter = $this->da_height;
       }
-      $this->white = ImageColorAllocate($this->im, 255, 255, 255);
+      $this->white = ImageColorAllocateAlpha($this->im, 0, 0, 0, 127);
+      imagefill($this->im, 0, 0, $this->white);
+
       $this->black = ImageColorAllocate($this->im,0,0,0);
       $n = count($this->data);
       for ($i = 0; $i < $n; $i++) {
