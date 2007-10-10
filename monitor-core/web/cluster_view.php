@@ -71,8 +71,10 @@ $tpl->assign("metric","$metricname $units");
 $tpl->assign("sort", $sort);
 $tpl->assign("range", $range);
 # Host columns menu defined in header.php
-if ($showhosts)
+if ($showhosts) {
   $tpl->assign("cols_menu", $cols_menu);
+  $tpl->assign("size_menu", $size_menu);
+}
 $tpl->assign("checked$showhosts", "checked");
 
 $sorted_hosts = array();
@@ -211,12 +213,13 @@ foreach ( $sorted_hosts as $host => $value )
             else
                {
                   $load_color = load_color($host_load[$host]);
+                  $size = isset($clustergraphsize) ? $clustergraphsize : 'small';
                   $graphargs = (isset($reports[$metricname]) and
                                 $reports[$metricname]) ?
                         "g=$metricname&amp;" : "m=$metricname&amp;";
-                  $graphargs .= "z=small&amp;c=$cluster_url&amp;h=$host_url"
+                  $graphargs .= "z=$size&amp;c=$cluster_url&amp;h=$host_url"
                      ."&amp;l=$load_color&amp;v=$val[VAL]&amp;x=$max&amp;n=$min"
-                     ."&amp;r=$range&amp;st=$cluster[LOCALTIME]";
+                     ."&amp;r=$range&amp;su=1&amp;st=$cluster[LOCALTIME]";
                }
          }
 

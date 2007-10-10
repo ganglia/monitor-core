@@ -58,6 +58,7 @@
   |
    <FONT SIZE="-1">
    Columns&nbsp;&nbsp;{cols_menu}
+   Size&nbsp;&nbsp;{size_menu}
    </FONT>
   </TD>
 </TR>

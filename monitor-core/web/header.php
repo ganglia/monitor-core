@@ -334,7 +334,19 @@ if ($context == "physical" or $context == "cluster")
             $cols_menu .= ">$cols\n";
          }
       $cols_menu .= "</SELECT>\n";
-
+      
+      $size_menu = '<SELECT NAME="z" OnChange="ganglia_form.submit();">';
+      
+      $size_arr = array("small","medium","large");
+      foreach ($size_arr as $size) {
+          $size_menu .= "<OPTION VALUE=\"$size\"";
+          if (isset($clustergraphsize) && ($size === $clustergraphsize)) {
+              $size_menu .= " SELECTED";
+          }
+          $size_menu .= ">$size</OPTION>\n";
+      }
+      $size_menu .= "</SELECT>\n";
+  
       # Assign template variable in cluster view.
    }
 
