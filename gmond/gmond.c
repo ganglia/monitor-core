@@ -26,6 +26,7 @@
 #include "libmetrics.h"/* libmetrics header in ./libmetrics */
 #include "apr_net.h"   /* our private network functions based on apr */
 #include "debug_msg.h" 
+#include "error.h" 
 #include "protocol.h"  /* generated header from ./lib/protocol.x xdr definition file */
 #include "dtd.h"       /* the DTD definition for our XML */
 #include "g25_config.h" /* for converting old file formats to new */
@@ -232,7 +233,6 @@ daemonize_if_necessary( char *argv[] )
   /* Daemonize if needed */
   if(!args_info.foreground_flag && should_daemonize && !debug_level)
     {
-      apr_status_t ret;
       char *cwd;
 
       apr_filepath_get(&cwd, 0, global_context);
@@ -273,7 +273,7 @@ process_deaf_mute_mode( void )
   mute =       cfg_getbool( tmp, "mute");
   if(deaf && mute)
     {
-      fprintf(stderr,"Configured to run both deaf and mute. Nothing to do. Exiting.\n");
+      err_msg("Configured to run both deaf and mute. Nothing to do. Exiting.\n");
       exit(1);
     }
 }
@@ -311,7 +311,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
   acl = apr_pcalloc( pool, sizeof(Ganglia_acl));
   if(!acl)
     {
-      fprintf(stderr,"Unable to allocate memory for ACL. Exiting.\n");
+      err_msg("Unable to allocate memory for ACL. Exiting.\n");
       exit(1);
     }
 
@@ -326,7 +326,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
     }
   else
     {
-      fprintf(stderr,"Invalid default ACL '%s'. Exiting.\n", default_action);
+      err_msg("Invalid default ACL '%s'. Exiting.\n", default_action);
       exit(1);
     }
 
@@ -334,7 +334,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
   acl->access_array  = apr_array_make( pool, num_access, sizeof(Ganglia_acl *));
   if(!acl->access_array)
     {
-      fprintf(stderr,"Unable to malloc access array. Exiting.\n");
+      err_msg("Unable to malloc access array. Exiting.\n");
       exit(1);
     }
   for(i=0; i< num_access; i++)
@@ -347,7 +347,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
         {
           /* This shouldn't happen unless maybe acl is empty and
            * the safest thing to do it exit */
-          fprintf(stderr,"Unable to process ACLs. Exiting.\n");
+          err_msg("Unable to process ACLs. Exiting.\n");
           exit(1);
         }
 
@@ -356,7 +356,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
       action = cfg_getstr( access_config, "action");
       if(!ip && !mask && !action)
         {
-          fprintf(stderr,"An access record requires an ip, mask and action. Exiting.\n");
+          err_msg("An access record requires an ip, mask and action. Exiting.\n");
           exit(1);
         }
 
@@ -371,7 +371,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
         }
       else
         {
-          fprintf(stderr,"ACL access entry has action '%s'. Must be deny|allow. Exiting.\n", action);
+          err_msg("ACL access entry has action '%s'. Must be deny|allow. Exiting.\n", action);
           exit(1);
         }  
 
@@ -380,7 +380,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
       status = apr_ipsubnet_create( &(access->ipsub), ip, mask, pool);
       if(status != APR_SUCCESS)
         {
-          fprintf(stderr,"ACL access entry has invalid ip('%s')/mask('%s'). Exiting.\n", ip, mask);
+          err_msg("ACL access entry has invalid ip('%s')/mask('%s'). Exiting.\n", ip, mask);
           exit(1);
         }
 
@@ -432,12 +432,12 @@ get_sock_family( char *family )
 #if APR_INET6
       return APR_INET6;
 #else
-      fprintf(stderr,"IPv6 is not supported on this host. Exiting.\n");
+      err_msg("IPv6 is not supported on this host. Exiting.\n");
       exit(1);
 #endif
     }
 
-  fprintf(stderr,"Unknown family '%s'. Try inet4|inet6. Exiting.\n", family);
+  err_msg("Unknown family '%s'. Try inet4|inet6. Exiting.\n", family);
   exit(1);
   /* shouldn't get here */
   return APR_UNSPEC;
@@ -490,7 +490,7 @@ setup_listen_channels_pollset( void )
           socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
           if(!socket)
             {
-              fprintf(stderr,"Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Exiting.\n",
+              err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Exiting.\n",
                   mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
               exit(1);
             }
@@ -501,7 +501,7 @@ setup_listen_channels_pollset( void )
           socket = create_udp_server( pool, sock_family, port, bindaddr );
           if(!socket)
             {
-              fprintf(stderr,"Error creating UDP server on port %d bind=%s. Exiting.\n",
+              err_msg("Error creating UDP server on port %d bind=%s. Exiting.\n",
                   port, bindaddr? bindaddr: "unspecified");
               exit(1);
             }
@@ -515,7 +515,7 @@ setup_listen_channels_pollset( void )
       channel = apr_pcalloc( pool, sizeof(Ganglia_channel));
       if(!channel)
         {
-          fprintf(stderr,"Unable to malloc memory for channel.  Exiting. \n");
+          err_msg("Unable to malloc memory for channel.  Exiting. \n");
           exit(1);
         }
 
@@ -536,7 +536,7 @@ setup_listen_channels_pollset( void )
       status = apr_pollset_add(listen_channels, &socket_pollfd);
       if(status != APR_SUCCESS)
         {
-          fprintf(stderr,"Failed to add socket to pollset. Exiting.\n");
+          err_msg("Failed to add socket to pollset. Exiting.\n");
           exit(1);
         }
     }
@@ -571,7 +571,7 @@ setup_listen_channels_pollset( void )
                                  interface, 1);// blocking w/timeout 
       if(!socket)
         {
-          fprintf(stderr,"Unable to create tcp_accept_channel. Exiting.\n");
+          err_msg("Unable to create tcp_accept_channel. Exiting.\n");
           exit(1);
         }
 
@@ -583,7 +583,7 @@ setup_listen_channels_pollset( void )
       channel = apr_pcalloc( pool, sizeof(Ganglia_channel));
       if(!channel)
         {
-          fprintf(stderr,"Unable to malloc data for channel. Exiting.\n");
+          err_msg("Unable to malloc data for channel. Exiting.\n");
           exit(1);
         }
       
@@ -602,7 +602,7 @@ setup_listen_channels_pollset( void )
       status = apr_pollset_add(listen_channels, &socket_pollfd);
       if(status != APR_SUCCESS)
          {
-            fprintf(stderr,"Failed to add socket to pollset. Exiting.\n");
+            err_msg("Failed to add socket to pollset. Exiting.\n");
             exit(1);
          }
     }
@@ -1486,7 +1486,7 @@ load_metric_modules( void )
         if (apr_dso_load(&modHandle, modPath, global_context) != APR_SUCCESS) {
             char my_error[256];
 
-            fprintf (stderr, "Cannot load %s metric module: %s\n", modPath,
+            err_msg("Cannot load %s metric module: %s\n", modPath,
                      apr_dso_error(modHandle, my_error, sizeof(my_error)));
             continue;
         }
@@ -1498,7 +1498,7 @@ load_metric_modules( void )
         if (apr_dso_sym(&modSym, modHandle, modName) != APR_SUCCESS) {
             char my_error[256];
 
-            fprintf (stderr, "Cannot locate internal module structure '%s' in file %s: %s\n", 
+            err_msg("Cannot locate internal module structure '%s' in file %s: %s\n", 
                      modName, modPath, apr_dso_error(modHandle, my_error, sizeof(my_error)));
             continue;
         }
@@ -1514,7 +1514,7 @@ load_metric_modules( void )
          *
          */
         if (modp->magic != MMODULE_MAGIC_COOKIE) {
-            fprintf (stderr, "Internal module structure '%s' in file %s is not compatible -"
+            err_msg("Internal module structure '%s' in file %s is not compatible -"
                      "perhaps this is not a metric module.\n", 
                      modName, modPath);
             continue;
@@ -1642,7 +1642,7 @@ setup_collection_groups( void )
                                                      sizeof(Ganglia_collection_group));
       if(!group)
         {
-          fprintf(stderr,"Unable to malloc memory for collection group. Exiting.\n");
+          err_msg("Unable to malloc memory for collection group. Exiting.\n");
           exit(1);
         }
 
@@ -1679,7 +1679,7 @@ setup_collection_groups( void )
 
           if(!metric_cb)
             {
-              fprintf(stderr,"Unable to collect metric '%s' on this platform. Exiting.\n", name);
+              err_msg("Unable to collect metric '%s' on this platform. Exiting.\n", name);
               exit(1);
             }
 
@@ -1704,7 +1704,7 @@ setup_collection_groups( void )
                 }
               else 
                 {
-                  fprintf(stderr,"Unable to send metric '%s' (not in protocol.x). Exiting.\n", name);
+                  err_msg("Unable to send metric '%s' (not in protocol.x). Exiting.\n", name);
                   exit(1);
                 }
             }
@@ -1874,14 +1874,14 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
                         cb->info->tmax, 0);
             if (errors) 
               {
-                fprintf(stderr,"Error %d setting the modular data for %s\n", errors, cb->name);
+                err_msg("Error %d setting the modular data for %s\n", errors, cb->name);
               }
             else 
               {
                 errors = Ganglia_gmetric_send(gmetric, udp_send_channels);
                 if (errors) 
                   {
-                    fprintf(stderr,"Error %d sending the modular data for %s\n", errors, cb->name);
+                    err_msg("Error %d sending the modular data for %s\n", errors, cb->name);
                     debug_msg("\tsent message '%s' with %d errors", cb->name, errors);
                   }
               }
