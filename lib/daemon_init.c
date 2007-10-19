@@ -15,8 +15,9 @@
 #include <errno.h>
 
 #include "daemon_init.h"
+#include "error.h"
 
-#define	MAXFD	64
+#define MAXFD 64
 
 /**
  * @fn void update_pidfile (const char *pname)
@@ -36,11 +37,11 @@ update_pidfile (char *pidfile)
   if (file)
     {
       if (fscanf(file, "%ld", &p) == 1 && (pid = p) && 
-	  (getpgid (pid) > -1))
-	{
-	  fprintf (stderr, "daemon already running: %s pid %ld\n", pidfile, p);
-	  exit (1);
-	}
+          (getpgid (pid) > -1))
+        {
+          err_msg("daemon already running: %s pid %ld\n", pidfile, p);
+          exit (1);
+        }
       fclose (file);
     }
 
@@ -51,8 +52,8 @@ update_pidfile (char *pidfile)
   file = fopen (pidfile, "w");
   if (!file)
     {
-      fprintf (stderr, "Error writing pidfile '%s' -- %s\n",
-	       pidfile, strerror (errno));
+      err_msg("Error writing pidfile '%s' -- %s\n",
+               pidfile, strerror (errno));
       exit (1);
     }
   fprintf (file, "%ld\n", (long) getpid());
@@ -77,21 +78,21 @@ daemon_init (const char *pname, int facility)
    pid = fork();
 
    if (pid != 0)
-      exit (0);			/* parent terminates */
+      exit (0);         /* parent terminates */
 
    /* 41st child continues */
-   setsid ();			/* become session leader */
+   setsid ();           /* become session leader */
 
    signal (SIGHUP, SIG_IGN);
    if ((pid = fork ()) != 0)
-      exit (0);			/* 1st child terminates */
+      exit (0);         /* 1st child terminates */
 
    /* 42nd child continues */
-   daemon_proc = 1;		/* for our err_XXX() functions */
+   daemon_proc = 1;     /* for our err_XXX() functions */
 
-   chdir ("/");			/* change working directory */
+   chdir ("/");         /* change working directory */
 
-   umask (0);			/* clear our file mode creation mask */
+   umask (0);           /* clear our file mode creation mask */
 
    for (i = 0; i < MAXFD; i++)
       close (i);
