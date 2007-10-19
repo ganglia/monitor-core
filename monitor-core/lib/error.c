@@ -18,7 +18,7 @@
 #define MAXLINE 4096
 #endif
 
-int daemon_proc;		/* set nonzero by daemon_init() */
+int daemon_proc;    /* set nonzero by daemon_init() */
 
 int ganglia_quiet_errors = 0;
 
@@ -149,13 +149,13 @@ err_doit (int errnoflag, int level, const char *fmt, va_list ap)
 
    if (daemon_proc)
      {
-	syslog (level, buf);
+        syslog (level, buf);
      }
    else
      {
-	fflush (stdout);	/* in case stdout and stderr are the same */
-	fputs (buf, stderr);
-	fflush (stderr);
+        fflush (stdout);	/* in case stdout and stderr are the same */
+        fputs (buf, stderr);
+        fflush (stderr);
      }
    return;
 }
