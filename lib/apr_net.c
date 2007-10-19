@@ -19,6 +19,8 @@
 #include <sys/sockio.h>  /* for SIOCGIFADDR */
 #endif
 
+#include "error.h"
+
 #if (APR_MAJOR_VERSION >= 1) && (APR_MINOR_VERSION >= 2)
 #define USING_APR_12
 #endif
@@ -53,10 +55,10 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_buffer_get(char *addr, int len,
 
         /* use memmove since the memory areas overlap */
         memmove( addr, addr+7, strlen(addr+7) + 1);/* +1 for \0 */
-	
-	/* old code
+        
+        /* old code
         *addr += strlen("::ffff:");
-	*/
+        */
     }
 #endif
     return APR_SUCCESS;
@@ -110,8 +112,8 @@ create_udp_client(apr_pool_t *context, char *host, apr_port_t port)
 }
 
 static apr_socket_t *
-create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t
-		port, char *bind_addr, int blocking)
+create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t port, 
+                  char *bind_addr, int blocking)
 {
   apr_sockaddr_t *localsa = NULL;
   apr_socket_t *sock = NULL;
@@ -181,17 +183,17 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t
        /* Don't accept IPv4 connections on an IPv6 listening socket */
        stat = apr_socket_opt_set(sock, APR_IPV6_V6ONLY, one);
        if(stat == APR_ENOTIMPL)
-	 {
-	   fprintf(stderr,"Warning: your operating system does not support IPV6_V6ONLY!\n");
-	   fprintf(stderr,"This means that you are also listening to IPv4 traffic on port %d\n",
-		   port);
-	   fprintf(stderr,"This IPv6=>IPv4 mapping may be a security risk.\n");
+         {
+           err_msg("Warning: your operating system does not support IPV6_V6ONLY!\n");
+           err_msg("This means that you are also listening to IPv4 traffic on port %d\n",
+               port);
+           err_msg("This IPv6=>IPv4 mapping may be a security risk.\n");
          }
      }
 #endif
 
 #ifdef USING_APR_12
-   stat = apr_socket_bind(sock, localsa);
+  stat = apr_socket_bind(sock, localsa);
 #else
   stat = apr_bind(sock, localsa);
 #endif
@@ -205,18 +207,18 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t
 }
 
 apr_socket_t *
-create_udp_server(apr_pool_t *context, int32_t family, apr_port_t port, char
-		*bind_addr)
+create_udp_server(apr_pool_t *context, int32_t family, apr_port_t port, 
+                  char *bind_addr)
 {
   return create_net_server(context, family, SOCK_DGRAM, port, bind_addr, 0);
 }
 
 apr_socket_t *
-create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port, char
-		*bind_addr, char *interface, int blocking)
+create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port, 
+                  char *bind_addr, char *interface, int blocking)
 {
   apr_socket_t *sock = create_net_server(context, family, SOCK_STREAM, port,
-		  bind_addr, blocking);
+                                         bind_addr, blocking);
   if(!sock)
     {
       return NULL;
@@ -249,28 +251,30 @@ mcast_set_ttl(apr_socket_t *socket, int val)
 
   switch (sa->family)
     {
-	case APR_INET: {
-		u_char		ttl;
-
-		ttl = val;
+    case APR_INET: 
+      {
+        u_char ttl;
+    
+        ttl = val;
         return(setsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL,
-						  &ttl, sizeof(ttl)));
-	}
+                          &ttl, sizeof(ttl)));
+      }
 
 #if	APR_HAVE_IPV6
-	case APR_INET6: {
-		int		hop;
-
-		hop = val;
-		return(setsockopt(s, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-						  &hop, sizeof(hop)));
-	}
+    case APR_INET6: 
+      {
+        int hop;
+    
+        hop = val;
+        return(setsockopt(s, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+                          &hop, sizeof(hop)));
+      }
 #endif
 
-	default:
-		errno = EPROTONOSUPPORT;
-		return(-1);
-	}
+    default:
+        errno = EPROTONOSUPPORT;
+        return(-1);
+    }
 }
 #endif
 
@@ -294,68 +298,68 @@ mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
   switch( sa->family ) /* (*sa)->sa.sin.sin_family */
     {
     case APR_INET:
-	{
-	  struct ip_mreq mreq[1];
-	  struct ifreq ifreq[1];
-
-	  /* &((*sa)->sa.sin.sin_addr */
-	  memcpy(&mreq->imr_multiaddr, &(sa->sa.sin.sin_addr), 
-		 sizeof mreq->imr_multiaddr);
-
-	  memset(&ifreq,0, sizeof(ifreq));
-	  if(ifname)
-	    {
-              memset(ifreq, 0, sizeof(struct ifreq));
-              strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
-              if(ioctl(s, SIOCGIFADDR, ifreq) == -1)
-		{
-		  return APR_EGENERAL;
-		}
-	    }
-	  else
-	    {
-	      /* wildcard address (let the kernel decide) */
-	      mreq->imr_interface.s_addr = htonl(INADDR_ANY);
-	    }
-
-	  memcpy(&mreq->imr_interface, 
-		 &((struct sockaddr_in *)&ifreq->ifr_addr)->sin_addr, 
-		 sizeof mreq->imr_interface);
-
-	  rval = setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, 
-			    mreq, sizeof mreq);
-	  if(rval<0)
-	    {
-	      return APR_EGENERAL;
-	    }
-	  break;
-	}
+      {
+        struct ip_mreq mreq[1];
+        struct ifreq ifreq[1];
+        
+        /* &((*sa)->sa.sin.sin_addr */
+        memcpy(&mreq->imr_multiaddr, &(sa->sa.sin.sin_addr), 
+               sizeof mreq->imr_multiaddr);
+        
+        memset(&ifreq,0, sizeof(ifreq));
+        if(ifname)
+          {
+            memset(ifreq, 0, sizeof(struct ifreq));
+            strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
+            if(ioctl(s, SIOCGIFADDR, ifreq) == -1)
+              {
+                return APR_EGENERAL;
+              }
+          }
+        else
+          {
+            /* wildcard address (let the kernel decide) */
+            mreq->imr_interface.s_addr = htonl(INADDR_ANY);
+          }
+        
+        memcpy(&mreq->imr_interface, 
+               &((struct sockaddr_in *)&ifreq->ifr_addr)->sin_addr, 
+               sizeof mreq->imr_interface);
+        
+        rval = setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, 
+                mreq, sizeof mreq);
+        if(rval<0)
+          {
+            return APR_EGENERAL;
+          }
+        break;
+      }
 #if APR_HAVE_IPV6
     case APR_INET6:
-	{
-	  struct ipv6_mreq mreq[1];
-	  struct ifreq ifreq[1];
-
-	  /* &((*sa)->sa.sin6.sin6_addr)*/
-          memcpy(&mreq->ipv6mr_multiaddr, &(sa->sa.sin6.sin6_addr),
-		                  sizeof mreq->ipv6mr_multiaddr);
-
-          memset(&ifreq,0, sizeof(ifreq));
-	  if(ifname)
-	    {
-	      strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
-	    }
-
-	  if (ioctl(s, SIOCGIFADDR, ifreq) == -1)
-	                return -1;
-
-	  rval = setsockopt(s, IPPROTO_IPV6, IPV6_JOIN_GROUP, mreq, sizeof mreq);
-	  break;
-	}
+      {
+        struct ipv6_mreq mreq[1];
+        struct ifreq ifreq[1];
+        
+        /* &((*sa)->sa.sin6.sin6_addr)*/
+        memcpy(&mreq->ipv6mr_multiaddr, &(sa->sa.sin6.sin6_addr),
+               sizeof mreq->ipv6mr_multiaddr);
+        
+        memset(&ifreq,0, sizeof(ifreq));
+        if(ifname)
+          {
+            strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
+          }
+        
+        if (ioctl(s, SIOCGIFADDR, ifreq) == -1)
+            return -1;
+        
+        rval = setsockopt(s, IPPROTO_IPV6, IPV6_JOIN_GROUP, mreq, sizeof mreq);
+        break;
+      }
 #endif
     default:
-      /* Set errno to EPROTONOSUPPORT */
-      return -1;
+        /* Set errno to EPROTONOSUPPORT */
+        return -1;
     }
 
   return APR_SUCCESS;
@@ -364,17 +368,18 @@ mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
 apr_socket_t *
 create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int ttl)
 {
-  apr_socket_t *socket = create_udp_client(context, mcast_ip, port);
-  if(!socket)
-    {
-      return NULL;
-    }
+    apr_socket_t *socket = create_udp_client(context, mcast_ip, port);
+    if(!socket)
+      {
+        return NULL;
+      }
 #ifdef USING_APR_12
-  apr_mcast_hops(socket, ttl);
+    apr_mcast_hops(socket, ttl);
 #else
-  mcast_set_ttl(socket, ttl);
+    mcast_set_ttl(socket, ttl);
 #endif
-  return socket;
+
+    return socket;
 }
 
 apr_socket_t *

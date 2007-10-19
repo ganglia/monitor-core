@@ -9,6 +9,7 @@
 #include "ganglia.h"
 #include "confuse.h"
 #include "debug_msg.h"
+#include "error.h"
 #include <apr_pools.h>
 #include <apr_strings.h>
 #include <apr_tables.h>
@@ -528,9 +529,9 @@ Ganglia_pool_create( Ganglia_pool parent )
     {
       status = apr_initialize();
       if(status != APR_SUCCESS)
-	{
-	  return NULL;
-	}
+        {
+          return NULL;
+        }
       libgmond_apr_lib_initialized = 1;
       atexit(apr_terminate);
     }
@@ -561,21 +562,21 @@ Ganglia_gmond_config_create(char *path, int fallback_to_default)
     {
     case CFG_FILE_ERROR:
       /* Unable to open file so we'll go with the configuration defaults */
-      fprintf(stderr,"Configuration file '%s' not found.\n", tilde_expanded);
+      err_msg("Configuration file '%s' not found.\n", tilde_expanded);
       if(!fallback_to_default)
-	{
-	  /* Don't fallback to the default configuration.. just exit. */
-	  exit(1);
-	}
+        {
+          /* Don't fallback to the default configuration.. just exit. */
+          exit(1);
+        }
       /* .. otherwise use our default configuration */
       if(cfg_parse_buf(config, default_gmond_configuration) == CFG_PARSE_ERROR)
-	{
-	  fprintf(stderr,"Your default configuration buffer failed to parse. Exiting.\n");
+        {
+          err_msg("Your default configuration buffer failed to parse. Exiting.\n");
           exit(1);
-	}
+        }
       break;
     case CFG_PARSE_ERROR:
-      fprintf(stderr,"Parse error for '%s'\n", tilde_expanded );
+      err_msg("Parse error for '%s'\n", tilde_expanded );
       exit(1);
     case CFG_SUCCESS:
       break;
@@ -605,7 +606,7 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
 
   /* Create my UDP send array */
   send_channels = apr_array_make( context, num_udp_send_channels, 
-				   sizeof(apr_socket_t *));
+                                  sizeof(apr_socket_t *));
 
   for(i = 0; i< num_udp_send_channels; i++)
     {
@@ -623,37 +624,37 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
       ttl            = cfg_getint( udp_send_channel, "ttl");
 
       debug_msg("udp_send_channel mcast_join=%s mcast_if=%s host=%s port=%d\n",
-		  mcast_join? mcast_join:"NULL", 
-		  mcast_if? mcast_if:"NULL",
-		  host? host:"NULL",
-		  port);
+                mcast_join? mcast_join:"NULL", 
+                mcast_if? mcast_if:"NULL",
+                host? host:"NULL",
+                port);
 
       /* Create a subpool */
       apr_pool_create(&pool, context);
 
       /* Join the specified multicast channel */
       if( mcast_join )
-	{
-	  /* We'll be listening on a multicast channel */
-	  socket = create_mcast_client(pool, mcast_join, port, ttl);
-	  if(!socket)
-	    {
-	      fprintf(stderr,"Unable to join multicast channel %s:%d. Exiting\n",
-		      mcast_join, port);
-	      exit(1);
-	    }
-	}
+        {
+          /* We'll be listening on a multicast channel */
+          socket = create_mcast_client(pool, mcast_join, port, ttl);
+          if(!socket)
+            {
+              err_msg("Unable to join multicast channel %s:%d. Exiting\n",
+                  mcast_join, port);
+              exit(1);
+            }
+        }
       else
-	{
+        {
           /* Create a UDP socket */
           socket = create_udp_client( pool, host, port );
           if(!socket)
             {
-              fprintf(stderr,"Unable to create UDP client for %s:%d. Exiting.\n",
-		      host? host: "NULL", port);
-	      exit(1);
-	    }
-	}
+              err_msg("Unable to create UDP client for %s:%d. Exiting.\n",
+                      host? host: "NULL", port);
+              exit(1);
+            }
+        }
 
       /* Add the socket to the array */
       *(apr_socket_t **)apr_array_push(send_channels) = socket;
@@ -681,9 +682,9 @@ Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len 
       size   = len;
       status = apr_socket_send( socket, buf, &size );
       if(status != APR_SUCCESS)
-	{
-	  num_errors++;
-	}
+        {
+          num_errors++;
+        }
     }
   return num_errors;
 }
@@ -728,9 +729,10 @@ Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_ch
 
   /* Send the message */
   xdrmem_create(&x, gmetricmsg, GANGLIA_MAX_MESSAGE_LEN, XDR_ENCODE);
-  if(!xdr_Ganglia_message(&x, &msg)){
-	  return 1;
-  }
+  if(!xdr_Ganglia_message(&x, &msg))
+    {
+      return 1;
+    }
   len = xdr_getpos(&x); 
   /* Send the encoded data along...*/
   return Ganglia_udp_send_message( send_channels, gmetricmsg, len);
@@ -755,13 +757,13 @@ Ganglia_gmetric_send_spoof( Ganglia_gmetric gmetric, Ganglia_udp_send_channels s
   strcpy(buff,spoof_info);
   spoofIP = buff;
   if( !(spoofName = strchr(buff+1,':')) ){
-      fprintf(stderr,"Incorrect format for spoof argument. exiting.\n");
+      err_msg("Incorrect format for spoof argument. exiting.\n");
       exit(1);
   }
   *spoofName = 0;
   spoofName++;
   if(!(*spoofName)){
-      fprintf(stderr,"Incorrect format for spoof argument. exiting.\n");
+      err_msg("Incorrect format for spoof argument. exiting.\n");
       exit(1);
   }
   printf(" spoofName: %s    spoofIP: %s \n",spoofName,spoofIP);
@@ -867,54 +869,54 @@ Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *typ
 
 ganglia_slope_t cstr_to_slope(const char* str)
 {
-	if (str == NULL) {
-		return GANGLIA_SLOPE_UNSPECIFIED;
-	}
-
-	if (!strcmp(str, "zero")) {
-		return GANGLIA_SLOPE_ZERO;
-	}
-
-	if (!strcmp(str, "positive")) {
-		return GANGLIA_SLOPE_POSITIVE;
-	}
-
-	if (!strcmp(str, "negative")) {
-		return GANGLIA_SLOPE_NEGATIVE;
-	}
-
-	if (!strcmp(str, "both")) {
-		return GANGLIA_SLOPE_BOTH;
-	}
-
-	// well, it might just be _wrong_ too
-	// but we'll handle that situation another time
-	return GANGLIA_SLOPE_UNSPECIFIED;
+    if (str == NULL) {
+        return GANGLIA_SLOPE_UNSPECIFIED;
+    }
+    
+    if (!strcmp(str, "zero")) {
+        return GANGLIA_SLOPE_ZERO;
+    }
+    
+    if (!strcmp(str, "positive")) {
+        return GANGLIA_SLOPE_POSITIVE;
+    }
+    
+    if (!strcmp(str, "negative")) {
+        return GANGLIA_SLOPE_NEGATIVE;
+    }
+    
+    if (!strcmp(str, "both")) {
+        return GANGLIA_SLOPE_BOTH;
+    }
+    
+    // well, it might just be _wrong_ too
+    // but we'll handle that situation another time
+    return GANGLIA_SLOPE_UNSPECIFIED;
 }
 
 const char* slope_to_cstr(unsigned int slope)
 {
-	// this function takes a raw int, not a
-	// ganglia_slope_t in order to help future
-	// unit testing (where any value can be passed
-	// in)
-
-	switch (slope) {
-	case GANGLIA_SLOPE_ZERO:
-		return "zero";
-	case GANGLIA_SLOPE_POSITIVE:
-		return "positive";
-	case GANGLIA_SLOPE_NEGATIVE:
-		return "negative";
-	case GANGLIA_SLOPE_BOTH:
-		return "both";
-	case GANGLIA_SLOPE_UNSPECIFIED:
-		return "unspecified";
-	}
-	// by NOT using a default in the switch statement
-	// the compiler will complain if anyone adds
-	// to the enum without changing this function.
-	return "unspecified";
+    // this function takes a raw int, not a
+    // ganglia_slope_t in order to help future
+    // unit testing (where any value can be passed
+    // in)
+    
+    switch (slope) {
+    case GANGLIA_SLOPE_ZERO:
+        return "zero";
+    case GANGLIA_SLOPE_POSITIVE:
+        return "positive";
+    case GANGLIA_SLOPE_NEGATIVE:
+        return "negative";
+    case GANGLIA_SLOPE_BOTH:
+        return "both";
+    case GANGLIA_SLOPE_UNSPECIFIED:
+        return "unspecified";
+    }
+    // by NOT using a default in the switch statement
+    // the compiler will complain if anyone adds
+    // to the enum without changing this function.
+    return "unspecified";
 }
 
 int has_wildcard(const char *pattern)
@@ -923,28 +925,28 @@ int has_wildcard(const char *pattern)
 
     nesting = 0;
     while (*pattern) {
-    	switch (*pattern) {
-        	case '?':
-        	case '*':
-        	    return 1;
+        switch (*pattern) {
+            case '?':
+            case '*':
+                return 1;
         
-        	case '\\':
-        	    if (*pattern++ == '\0') {
+            case '\\':
+                if (*pattern++ == '\0') {
                     return 0;
-        	    }
-        	    break;
+                }
+                break;
         
-        	case '[':	
-        	    ++nesting;
-        	    break;
+            case '[':	
+                ++nesting;
+                break;
         
-        	case ']':
-        	    if (nesting) {
+            case ']':
+                if (nesting) {
                     return 1;
-        	    }
-        	    break;
-    	}
-    	++pattern;
+                }
+                break;
+        }
+        ++pattern;
     }
     return 0;
 }
