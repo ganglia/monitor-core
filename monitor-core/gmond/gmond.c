@@ -240,7 +240,7 @@ daemonize_if_necessary( char *argv[] )
       apr_filepath_set(cwd, global_context);
 
       /* enable errmsg logging to syslog */
-      daemon_proc = 1;		/* for our err_XXX() functions */
+      daemon_proc = 1;  
       openlog ("GMOND", LOG_PID, LOG_DAEMON);
     }
 }
@@ -344,45 +344,45 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
       char *ip, *mask, *action;
 
       if(!access_config)
-	{
-	  /* This shouldn't happen unless maybe acl is empty and
-	   * the safest thing to do it exit */
-	  fprintf(stderr,"Unable to process ACLs. Exiting.\n");
-	  exit(1);
-	}
+        {
+          /* This shouldn't happen unless maybe acl is empty and
+           * the safest thing to do it exit */
+          fprintf(stderr,"Unable to process ACLs. Exiting.\n");
+          exit(1);
+        }
 
       ip     = cfg_getstr( access_config, "ip");
       mask   = cfg_getstr( access_config, "mask");
       action = cfg_getstr( access_config, "action");
       if(!ip && !mask && !action)
-	{
-	  fprintf(stderr,"An access record requires an ip, mask and action. Exiting.\n");
-	  exit(1);
-	}
+        {
+          fprintf(stderr,"An access record requires an ip, mask and action. Exiting.\n");
+          exit(1);
+        }
 
       /* Process the action first */
       if(!apr_strnatcasecmp( action, "deny" ))
-	{
+        {
           access->action = GANGLIA_ACCESS_DENY;
-	}
+        }
       else if(!apr_strnatcasecmp( action, "allow"))
-	{
+        {
           access->action = GANGLIA_ACCESS_ALLOW;
-	}
+        }
       else
-	{
+        {
           fprintf(stderr,"ACL access entry has action '%s'. Must be deny|allow. Exiting.\n", action);
           exit(1);
-	}	  
+        }  
 
       /* Create the subnet */
       access->ipsub = NULL;
       status = apr_ipsubnet_create( &(access->ipsub), ip, mask, pool);
       if(status != APR_SUCCESS)
-	{
-	  fprintf(stderr,"ACL access entry has invalid ip('%s')/mask('%s'). Exiting.\n", ip, mask);
-	  exit(1);
-	}
+        {
+          fprintf(stderr,"ACL access entry has invalid ip('%s')/mask('%s'). Exiting.\n", ip, mask);
+          exit(1);
+        }
 
       /* Save this access entry to the acl */
       *(Ganglia_access **)apr_array_push( acl->access_array ) = access;
@@ -406,14 +406,14 @@ Ganglia_acl_action( Ganglia_acl *acl, apr_sockaddr_t *addr )
     {
       Ganglia_access *access = ((Ganglia_access **)(acl->access_array->elts))[i];
       if(!apr_ipsubnet_test( access->ipsub, addr ))
-	{
-	  /* no action will occur because addr is not in this subnet */
-	  continue;
-	}
+        {
+          /* no action will occur because addr is not in this subnet */
+          continue;
+        }
       else
-	{
+        {
           return access->action;
-	}
+        }
     }
 
   /* No matches in the access list so we return the default */
@@ -475,9 +475,9 @@ setup_listen_channels_pollset( void )
       family         = cfg_getstr( udp_recv_channel, "family");
 
       debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s",
-		  mcast_join? mcast_join:"NULL", 
-		  mcast_if? mcast_if:"NULL", port,
-		  bindaddr? bindaddr: "NULL");
+                mcast_join? mcast_join:"NULL", 
+                mcast_if? mcast_if:"NULL", port,
+                bindaddr? bindaddr: "NULL");
 
       /* Create a sub-pool for this channel */
       apr_pool_create(&pool, global_context);
@@ -485,27 +485,27 @@ setup_listen_channels_pollset( void )
       sock_family = get_sock_family(family);
 
       if( mcast_join )
-	{
-	  /* Listen on the specified multicast channel */
-	  socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
-	  if(!socket)
-	    {
-	      fprintf(stderr,"Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Exiting.\n",
-		      mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
-	      exit(1);
-	    }
-	}
+        {
+          /* Listen on the specified multicast channel */
+          socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
+          if(!socket)
+            {
+              fprintf(stderr,"Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Exiting.\n",
+                  mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
+              exit(1);
+            }
+        }
       else
-	{
-	  /* Create a UDP server */
+        {
+          /* Create a UDP server */
           socket = create_udp_server( pool, sock_family, port, bindaddr );
           if(!socket)
             {
               fprintf(stderr,"Error creating UDP server on port %d bind=%s. Exiting.\n",
-		      port, bindaddr? bindaddr: "unspecified");
-	      exit(1);
-	    }
-	}
+                  port, bindaddr? bindaddr: "unspecified");
+              exit(1);
+            }
+        }
 
       /* Build the socket poll file descriptor structure */
       socket_pollfd.desc_type   = APR_POLL_SOCKET;
@@ -514,10 +514,10 @@ setup_listen_channels_pollset( void )
 
       channel = apr_pcalloc( pool, sizeof(Ganglia_channel));
       if(!channel)
-	{
-	  fprintf(stderr,"Unable to malloc memory for channel.  Exiting. \n");
-	  exit(1);
-	}
+        {
+          fprintf(stderr,"Unable to malloc memory for channel.  Exiting. \n");
+          exit(1);
+        }
 
       /* Mark this channel as a udp_recv_channel */
       channel->type = UDP_RECV_CHANNEL;
@@ -535,10 +535,10 @@ setup_listen_channels_pollset( void )
       /* Add the socket to the pollset */
       status = apr_pollset_add(listen_channels, &socket_pollfd);
       if(status != APR_SUCCESS)
-	{
-	  fprintf(stderr,"Failed to add socket to pollset. Exiting.\n");
-	  exit(1);
-	}
+        {
+          fprintf(stderr,"Failed to add socket to pollset. Exiting.\n");
+          exit(1);
+        }
     }
 
   /* Process all the tcp_accept_channels */ 
@@ -559,7 +559,7 @@ setup_listen_channels_pollset( void )
       family         = cfg_getstr( tcp_accept_channel, "family");
 
       debug_msg("tcp_accept_channel bind=%s port=%d",
-		  bindaddr? bindaddr: "NULL", port);
+                bindaddr? bindaddr: "NULL", port);
 
       /* Create a subpool context */
       apr_pool_create(&pool, global_context);
@@ -567,13 +567,13 @@ setup_listen_channels_pollset( void )
       sock_family = get_sock_family(family);
 
       /* Create the socket for the channel */
-      socket = create_tcp_server(pool, sock_family, port, bindaddr, interface,
-		      1);// blocking w/timeout 
+      socket = create_tcp_server(pool, sock_family, port, bindaddr, 
+                                 interface, 1);// blocking w/timeout 
       if(!socket)
-	{
-	  fprintf(stderr,"Unable to create tcp_accept_channel. Exiting.\n");
-	  exit(1);
-	}
+        {
+          fprintf(stderr,"Unable to create tcp_accept_channel. Exiting.\n");
+          exit(1);
+        }
 
       /* Build the socket poll file descriptor structure */
       socket_pollfd.desc_type   = APR_POLL_SOCKET;
@@ -582,10 +582,10 @@ setup_listen_channels_pollset( void )
 
       channel = apr_pcalloc( pool, sizeof(Ganglia_channel));
       if(!channel)
-	{
-	  fprintf(stderr,"Unable to malloc data for channel. Exiting.\n");
-	  exit(1);
-	}
+        {
+          fprintf(stderr,"Unable to malloc data for channel. Exiting.\n");
+          exit(1);
+        }
       
       channel->type = TCP_ACCEPT_CHANNEL;
 
@@ -636,29 +636,29 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_message *fullmsg)
     {
       /* Lookup the hostname or use the proxy information if available */
       if( !hostname )
-	{
-	  /* We'll use the resolver to find the hostname */
+        {
+          /* We'll use the resolver to find the hostname */
           status = apr_getnameinfo(&hostname, sa, 0);
           if(status != APR_SUCCESS)
-	    {
-	      /* If hostname lookup fails.. set it to the ip */
-	      hostname = remoteip;
-	    }
-	}
+            {
+              /* If hostname lookup fails.. set it to the ip */
+              hostname = remoteip;
+            }
+        }
 
       /* This is the first time we've heard from this host.. create a new pool */
       status = apr_pool_create( &pool, global_context );
       if(status != APR_SUCCESS)
-	{
-	  return NULL;
-	}
+        {
+          return NULL;
+        }
 
       /* Malloc the hostdata_t from the new pool */
       hostdata = apr_pcalloc( pool, sizeof( Ganglia_host ));
       if(!hostdata)
-	{
-	  return NULL;
-	}
+        {
+          return NULL;
+        }
 
       /* Save the pool address for later.. freeing this pool free everthing
        * for this particular host */
@@ -679,18 +679,18 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_message *fullmsg)
       /* Create a hash for the metric data */
       hostdata->metrics = apr_hash_make( pool );
       if(!hostdata->metrics)
-	{
-	  apr_pool_destroy(pool);
-	  return NULL;
-	}
+        {
+          apr_pool_destroy(pool);
+          return NULL;
+        }
 
       /* Create a hash for the gmetric data */
       hostdata->gmetrics = apr_hash_make( pool );
       if(!hostdata->gmetrics)
-	{
-	  apr_pool_destroy(pool);
-	  return NULL;
-	}
+        {
+          apr_pool_destroy(pool);
+          return NULL;
+        }
 
       /* Save this host data to the "hosts" hash */
       apr_hash_set( hosts, hostdata->ip, APR_HASH_KEY_STRING, hostdata); 
@@ -710,10 +710,10 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_message *fullmsg)
        * could be done better later i.e should these metrics be
        * in the host->metrics list instead of the host structure? */
       if(hostdata->location)
-	{
-	  /* Free old location */
-	  free(hostdata->location);
-	}
+        {
+          /* Free old location */
+          free(hostdata->location);
+        }
       /* Save new location */
       hostdata->location = strdup(fullmsg->Ganglia_message_u.str);
       debug_msg("Got a location message %s\n", hostdata->location);
@@ -782,8 +782,8 @@ Ganglia_message_find_gmetric( Ganglia_host *host, Ganglia_message *message)
 {
   /* Keyed on the name element of the gmetric sent */
   return (Ganglia_metric *)apr_hash_get( host->gmetrics,
-				   message->Ganglia_message_u.gmetric.name,
-				   APR_HASH_KEY_STRING);
+                                         message->Ganglia_message_u.gmetric.name,
+                                         APR_HASH_KEY_STRING);
 }
 // Yemi
 static Ganglia_metric *
@@ -791,8 +791,8 @@ Ganglia_message_find_spmetric( Ganglia_host *host, Ganglia_message *message)
 {
   /* Keyed on the name element of the gmetric sent */
   return (Ganglia_metric *)apr_hash_get( host->gmetrics,
-				   message->Ganglia_message_u.spmetric.gmetric.name,
-				   APR_HASH_KEY_STRING);
+                                         message->Ganglia_message_u.spmetric.gmetric.name,
+                                         APR_HASH_KEY_STRING);
 }
 
 static Ganglia_metric *
@@ -800,8 +800,8 @@ Ganglia_message_find_metric( Ganglia_host *host, Ganglia_message *message)
 {
   /* Keyed on the message id number */
   return (Ganglia_metric *)apr_hash_get( host->metrics, 
-				  &(message->id), 
-				  sizeof(message->id) );
+                                         &(message->id), 
+                                         sizeof(message->id) );
 }
 
 static void
@@ -832,24 +832,24 @@ Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
       /* This is a new metric sent from this host... allocate space for this data */
       metric = Ganglia_metric_create( host->pool );
       if(!metric)
-	{
-	  /* no memory */
-	  return;
-	}
+        {
+          /* no memory */
+          return;
+        }
       
       /* NOTE: In order for gmetric messages to be properly saved to the hash table
        * based on the name of the gmetric sent...we need to strdup() the name
        * since the xdr_free below will blast the value later (along with the other
        * allocated structure elements).  This is only performed once at gmetric creation */
       if(message->id == metric_user_defined)
-	{
-	  metric->name = apr_pstrdup( metric->pool, message->Ganglia_message_u.gmetric.name );
-	} 
+        {
+          metric->name = apr_pstrdup( metric->pool, message->Ganglia_message_u.gmetric.name );
+        } 
       // Yemi
       if(message->id == spoof_metric)
-	{
-	  metric->name = apr_pstrdup( metric->pool, message->Ganglia_message_u.spmetric.gmetric.name );
-	} 
+        {
+          metric->name = apr_pstrdup( metric->pool, message->Ganglia_message_u.spmetric.gmetric.name );
+        } 
     }
   else
     {
@@ -859,16 +859,19 @@ Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
 
   /* Copy in the data */
   // Yemi
-  if(message->id == spoof_metric){
-    // Store data as regular gmetric in hash table!!
+  if(message->id == spoof_metric)
+    {
+      // Store data as regular gmetric in hash table!!
 
       metric->message.id = metric_user_defined;   
       metric->message.Ganglia_message_u.gmetric = message->Ganglia_message_u.spmetric.gmetric;
 
 
-  }else{
+    }
+  else
+    {
       memcpy(&(metric->message), message, sizeof(Ganglia_message));
-  }
+    }
 
   if(message->id == metric_user_defined || message->id == spoof_metric)
     {
@@ -927,7 +930,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       apr_pool_destroy(p);
 #endif
       return;
-    }	  
+    }  
 
   /* This function is in ./lib/apr_net.c and not APR. The
    * APR counterpart is apr_sockaddr_ip_get() but we don't 
@@ -951,7 +954,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
 
   /* Read the gangliaMessage from the stream */
   if(!xdr_Ganglia_message(&x, &msg))
-    {	
+    {
 #ifdef USING_APR_12
       apr_pool_destroy(p);
 #endif
@@ -995,7 +998,7 @@ print_xml_header( apr_socket_t *client )
     return status;
 
   len = apr_snprintf( gangliaxml, 128, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmond\">\n",
-		      VERSION);
+                      VERSION);
   status = apr_socket_send( client, gangliaxml, &len);
   if(status != APR_SUCCESS)
     return status;
@@ -1005,28 +1008,28 @@ print_xml_header( apr_socket_t *client )
       /* We only run this on the first connection we process */
       cfg_t *cluster = cfg_getsec(config_file, "cluster");
       if(cluster)
-	{
+        {
           name    = cfg_getstr( cluster, "name" );
           owner   = cfg_getstr( cluster, "owner" );
           latlong = cfg_getstr( cluster, "latlong" );
           url     = cfg_getstr( cluster, "url" );
-	  if(name || owner || latlong || url)
-	    {
-	      cluster_tag =1;
-	    }
-	}
+          if(name || owner || latlong || url)
+            {
+              cluster_tag =1;
+            }
+        }
       clusterinit = 1;
     }
 
   if(cluster_tag)
     {
       len = apr_snprintf( clusterxml, 1024, 
-	"<CLUSTER NAME=\"%s\" LOCALTIME=\"%d\" OWNER=\"%s\" LATLONG=\"%s\" URL=\"%s\">\n", 
-		      name?name:"unspecified", 
-		      (int)(now / APR_USEC_PER_SEC),
-		      owner?owner:"unspecified", 
-		      latlong?latlong:"unspecified",
-		      url?url:"unspecified");
+        "<CLUSTER NAME=\"%s\" LOCALTIME=\"%d\" OWNER=\"%s\" LATLONG=\"%s\" URL=\"%s\">\n", 
+                  name?name:"unspecified", 
+                  (int)(now / APR_USEC_PER_SEC),
+                  owner?owner:"unspecified", 
+                  latlong?latlong:"unspecified",
+                  url?url:"unspecified");
 
       return apr_socket_send( client, clusterxml, &len);
     }
@@ -1044,9 +1047,9 @@ print_xml_footer( apr_socket_t *client )
       len = 11;
       status = apr_socket_send(client, "</CLUSTER>\n", &len);
       if(status != APR_SUCCESS)
-	{
-	  return status;
-	}
+        {
+          return status;
+        }
     }
   len = 15;
   return apr_socket_send( client, "</GANGLIA_XML>\n", &len);
@@ -1063,13 +1066,13 @@ print_host_start( apr_socket_t *client, Ganglia_host *hostinfo)
   len = apr_snprintf(hostxml, 1024, 
            "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%d\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" LOCATION=\"%s\" GMOND_STARTED=\"%d\">\n",
                      hostinfo->hostname, 
-		     hostinfo->ip, 
-		     (int)(hostinfo->last_heard_from / APR_USEC_PER_SEC),
-		     tn,
-		     20, /*tmax for now is always 20 */
-		     host_dmax,
-		     hostinfo->location? hostinfo->location: "unspecified", 
-		     hostinfo->gmond_started);
+                     hostinfo->ip, 
+                     (int)(hostinfo->last_heard_from / APR_USEC_PER_SEC),
+                     tn,
+                     20, /*tmax for now is always 20 */
+                     host_dmax,
+                     hostinfo->location? hostinfo->location: "unspecified", 
+                     hostinfo->gmond_started);
 
   return apr_socket_send(client, hostxml, &len);
 }
@@ -1167,24 +1170,26 @@ print_host_gmetric( apr_socket_t *client, Ganglia_metric *metric, apr_time_t now
 
   memset (desc, '\0', sizeof (desc));
   metric_cb = (Ganglia_metric_callback *)apr_hash_get( metric_callbacks, msg->name, APR_HASH_KEY_STRING );
-  if (metric_cb && metric_cb->info && metric_cb->info->desc) {
-	  strncpy (desc, metric_cb->info->desc, sizeof(desc)-1);
-  }
-  else {
-	  sprintf (desc, "%s - no description available", msg->name);
-  }
+  if (metric_cb && metric_cb->info && metric_cb->info->desc) 
+    {
+      strncpy (desc, metric_cb->info->desc, sizeof(desc)-1);
+    }
+  else 
+    {
+      sprintf (desc, "%s - no description available", msg->name);
+    }
 
   len = apr_snprintf(metricxml, GMETRIC_BUFFER_SIZE,
           "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" SLOPE=\"%s\" SOURCE=\"gmetric\" DESC=\"%s\"/>\n",
            msg->name,
-	   msg->value,
-	   msg->type,
-	   msg->units,
-           (int)((now - metric->last_heard_from) / APR_USEC_PER_SEC),
-	   msg->tmax,
-	   msg->dmax,
-	   slope_to_cstr(msg->slope),
-       desc);
+           msg->value,
+           msg->type,
+           msg->units,
+               (int)((now - metric->last_heard_from) / APR_USEC_PER_SEC),
+           msg->tmax,
+           msg->dmax,
+           slope_to_cstr(msg->slope),
+           desc);
 
   return apr_socket_send(client, metricxml, &len );
 }
@@ -1202,14 +1207,14 @@ print_host_metric( apr_socket_t *client, Ganglia_metric *data, apr_time_t now )
 
   len = apr_snprintf(metricxml, 1024,
           "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\" SOURCE=\"gmond\" DESC=\"%s\"/>\n",
-	  metric->name,
-	  host_metric_value( metric, &(data->message) ),
-	  host_metric_type( metric->type ),
-	  metric->units? metric->units: "",
-	  (int)((now - data->last_heard_from) / APR_USEC_PER_SEC),
-	  metric->tmax,
-	  metric->slope,
-      metric->desc );
+              metric->name,
+              host_metric_value( metric, &(data->message) ),
+              host_metric_type( metric->type ),
+              metric->units? metric->units: "",
+              (int)((now - data->last_heard_from) / APR_USEC_PER_SEC),
+              metric->tmax,
+              metric->slope,
+              metric->desc );
 
   return apr_socket_send(client, metricxml, &len);
 }
@@ -1284,40 +1289,38 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
 
       /* Send the metric info for this particular host */
       for(metric_hi = apr_hash_first(client_context, ((Ganglia_host *)val)->metrics);
-          metric_hi;
-	  metric_hi = apr_hash_next(metric_hi))
+          metric_hi; metric_hi = apr_hash_next(metric_hi))
         {
-	  void *metric;
-	  apr_hash_this(metric_hi, NULL, NULL, &metric);
+          void *metric;
+          apr_hash_this(metric_hi, NULL, NULL, &metric);
 
-	  /* Print each of the metrics for a host ... */
-	  if(print_host_metric(client, metric, now) != APR_SUCCESS)
-	    {
-	      goto close_accept_socket;
-	    }
-	}
+          /* Print each of the metrics for a host ... */
+          if(print_host_metric(client, metric, now) != APR_SUCCESS)
+            {
+              goto close_accept_socket;
+            }
+        }
 
       /* Send the gmetric info for this particular host */
       for(metric_hi = apr_hash_first(client_context, ((Ganglia_host *)val)->gmetrics);
-	  metric_hi;
-	  metric_hi = apr_hash_next(metric_hi))
-	{
-	  void *metric;
-	  apr_hash_this(metric_hi, NULL, NULL, &metric);
+           metric_hi; metric_hi = apr_hash_next(metric_hi))
+        {
+          void *metric;
+          apr_hash_this(metric_hi, NULL, NULL, &metric);
 
-	  /* Print each of the metrics from gmetric for this host... */
-	  if(print_host_gmetric(client, metric, now) != APR_SUCCESS)
-	    {
-	      goto close_accept_socket;
-	    }
-	}
+          /* Print each of the metrics from gmetric for this host... */
+          if(print_host_gmetric(client, metric, now) != APR_SUCCESS)
+            {
+              goto close_accept_socket;
+            }
+        }
 
       /* Close the host tag */
       status = print_host_end(client);
       if(status != APR_SUCCESS)
         {
-	  goto close_accept_socket;
-	}
+          goto close_accept_socket;
+        }
     }
 
   /* Close the CLUSTER and GANGLIA_XML tags */
@@ -1352,16 +1355,16 @@ poll_listen_channels( apr_interval_time_t timeout, apr_time_t now)
     {
       Ganglia_channel *channel = descs[i].client_data;
       switch( channel->type )
-	{
-	case UDP_RECV_CHANNEL:
+        {
+        case UDP_RECV_CHANNEL:
           process_udp_recv_channel(descs+i, now); 
-	  break;
-	case TCP_ACCEPT_CHANNEL:
-	  process_tcp_accept_channel(descs+i, now);
-	  break;
-	default:
-	  continue;
-	}
+          break;
+        case TCP_ACCEPT_CHANNEL:
+          process_tcp_accept_channel(descs+i, now);
+          break;
+        default:
+          continue;
+        }
     }
 }
 
@@ -1541,7 +1544,7 @@ setup_metric_callbacks( void )
   while (modp) {
       Ganglia_25metric* metric_info;
       int i;
-    
+
       if (modp->init && modp->init(global_context)) {
           err_msg("Module %s failed to initialize.\n", modp->module_name);
       }
@@ -1629,19 +1632,19 @@ setup_collection_groups( void )
   
   /* Create the collection group array */
   collection_groups = apr_array_make( global_context, num_collection_groups,
-				      sizeof(Ganglia_collection_group *));
+                                      sizeof(Ganglia_collection_group *));
 
   for(i = 0; i < num_collection_groups; i++)
     {
       int j, num_metrics;
       cfg_t *group_conf;
       Ganglia_collection_group *group = apr_pcalloc( global_context, 
-						     sizeof(Ganglia_collection_group));
+                                                     sizeof(Ganglia_collection_group));
       if(!group)
-	{
-	  fprintf(stderr,"Unable to malloc memory for collection group. Exiting.\n");
-	  exit(1);
-	}
+        {
+          fprintf(stderr,"Unable to malloc memory for collection group. Exiting.\n");
+          exit(1);
+        }
 
       group_conf  = cfg_getnsec( config_file, "collection_group", i);
       group->once = cfg_getbool( group_conf, "collect_once");
@@ -1652,8 +1655,8 @@ setup_collection_groups( void )
         {
           /* TODO: this isn't pretty but simplifies the code( next collect in a year)
              since we will collect the value in this function */
-	  group->next_collect = apr_time_now() + (31536000 * APR_USEC_PER_SEC);
-	}
+          group->next_collect = apr_time_now() + (31536000 * APR_USEC_PER_SEC);
+        }
       else
         {
           group->next_collect = 0;
@@ -1663,78 +1666,80 @@ setup_collection_groups( void )
 
       num_metrics = cfg_size( group_conf, "metric" );
       group->metric_array = apr_array_make(global_context, num_metrics,
-					  sizeof(Ganglia_metric_callback *)); 
+                                           sizeof(Ganglia_metric_callback *)); 
       for(j=0; j< num_metrics; j++)
-	{
-	  cfg_t *metric         = cfg_getnsec( group_conf, "metric", j );
-	  char *name            = cfg_getstr  ( metric, "name");
-	  float value_threshold = cfg_getfloat( metric, "value_threshold");
+        {
+          cfg_t *metric         = cfg_getnsec( group_conf, "metric", j );
+          char *name            = cfg_getstr  ( metric, "name");
+          float value_threshold = cfg_getfloat( metric, "value_threshold");
 
-	  Ganglia_metric_callback *metric_cb =  (Ganglia_metric_callback *)
-	                apr_hash_get( metric_callbacks, name, APR_HASH_KEY_STRING );
-	  Ganglia_25metric *metric_info = Ganglia_25metric_byname(name);
+          Ganglia_metric_callback *metric_cb =  (Ganglia_metric_callback *)
+                        apr_hash_get( metric_callbacks, name, APR_HASH_KEY_STRING );
+          Ganglia_25metric *metric_info = Ganglia_25metric_byname(name);
 
-	  if(!metric_cb)
-	    {
-	      fprintf(stderr,"Unable to collect metric '%s' on this platform. Exiting.\n", name);
-	      exit(1);
-	    }
+          if(!metric_cb)
+            {
+              fprintf(stderr,"Unable to collect metric '%s' on this platform. Exiting.\n", name);
+              exit(1);
+            }
 
-	  if(!metric_info)
-	    {
-          if (metric_cb->modp) {
-              const Ganglia_25metric *mi = metric_cb->modp->metrics_info;
-              int k;
-
-              metric_info = apr_pcalloc( global_context, sizeof(Ganglia_25metric));
-
-              for (k = 0; mi[k].name != NULL; k++) 
+          if(!metric_info)
+            {
+              if (metric_cb->modp) 
                 {
-                  if (strcasecmp(name,  mi[k].name) == 0) 
+                  const Ganglia_25metric *mi = metric_cb->modp->metrics_info;
+                  int k;
+    
+                  metric_info = apr_pcalloc( global_context, sizeof(Ganglia_25metric));
+    
+                  for (k = 0; mi[k].name != NULL; k++) 
                     {
-                      memcpy (metric_info, &(mi[k]), sizeof(Ganglia_25metric));
+                      if (strcasecmp(name,  mi[k].name) == 0) 
+                        {
+                          memcpy (metric_info, &(mi[k]), sizeof(Ganglia_25metric));
+                        }
                     }
+    
+                  metric_info->key = modular_metric;
                 }
+              else 
+                {
+                  fprintf(stderr,"Unable to send metric '%s' (not in protocol.x). Exiting.\n", name);
+                  exit(1);
+                }
+            }
 
-              metric_info->key = modular_metric;
-          }
-          else {
-	      fprintf(stderr,"Unable to send metric '%s' (not in protocol.x). Exiting.\n", name);
-	      exit(1);
-	    }
-	    }
+          /* This sets the key for this particular metric.
+           * The value is set by the callback function later */
+          metric_cb->msg.id = metric_info->key;
 
-	  /* This sets the key for this particular metric.
-	   * The value is set by the callback function later */
-	  metric_cb->msg.id = metric_info->key;
+          /* Save the location of information about this particular metric */
+          metric_cb->info   = metric_info;
 
-	  /* Save the location of information about this particular metric */
-	  metric_cb->info   = metric_info;
+          /* Set the value threshold for this particular metric */
+          metric_cb->value_threshold = value_threshold;
 
-	  /* Set the value threshold for this particular metric */
-	  metric_cb->value_threshold = value_threshold;
-
-      /* If this metric will only be collected once, run it now at setup... */
-	  if(group->once)
-	    {
-          if (metric_cb->multi_metric_index == CB_NOINDEX) 
-              metric_cb->now = metric_cb->cb();
+          /* If this metric will only be collected once, run it now at setup... */
+          if(group->once)
+            {
+              if (metric_cb->multi_metric_index == CB_NOINDEX) 
+                  metric_cb->now = metric_cb->cb();
+              else
+                  metric_cb->now = metric_cb->cbindexed(metric_cb->multi_metric_index);
+            }
           else
-              metric_cb->now = metric_cb->cbindexed(metric_cb->multi_metric_index);
-	    }
-	  else
-	    {
-	      /* ... otherwise set it to zero */
-	      memset( &(metric_cb->now), 0, sizeof(g_val_t));
-	    }
-	  memset( &(metric_cb->last), 0, sizeof(g_val_t));
+            {
+              /* ... otherwise set it to zero */
+              memset( &(metric_cb->now), 0, sizeof(g_val_t));
+            }
+          memset( &(metric_cb->last), 0, sizeof(g_val_t));
 
-	  /* Calculate the bandwidth this metric will use */
-	  bytes_per_sec += ( (double)metric_info->msg_size / (double)group->time_threshold );
+          /* Calculate the bandwidth this metric will use */
+          bytes_per_sec += ( (double)metric_info->msg_size / (double)group->time_threshold );
 
-	  /* Push this metric onto the metric_array for this group */
-	  *(Ganglia_metric_callback **)apr_array_push(group->metric_array) = metric_cb;
-	}
+          /* Push this metric onto the metric_array for this group */
+          *(Ganglia_metric_callback **)apr_array_push(group->metric_array) = metric_cb;
+        }
 
       /* Save the collection group the collection group array */
       *(Ganglia_collection_group **)apr_array_push(collection_groups) = group;
@@ -1763,43 +1768,41 @@ Ganglia_collection_group_collect( Ganglia_collection_group *group, apr_time_t no
       /* Check the value threshold.  If passed.. set this group to send immediately. */
       if( cb->value_threshold >= 0.0 )
         {
-	  debug_msg("\tmetric '%s' has value_threshold %f", cb->name, cb->value_threshold);
-	  switch(cb->info->type)
-	    {
-	    case GANGLIA_VALUE_UNKNOWN:
-	    case GANGLIA_VALUE_STRING:
-	      /* do nothing for non-numeric data */
-	      break;
-	    case GANGLIA_VALUE_UNSIGNED_SHORT:
-	      if( abs( cb->last.uint16 - cb->now.uint16 ) >= cb->value_threshold )
-		group->next_send = 0; /* send immediately */
-	      break;
-	    case GANGLIA_VALUE_SHORT:
+          debug_msg("\tmetric '%s' has value_threshold %f", cb->name, cb->value_threshold);
+          switch(cb->info->type)
+            {
+            case GANGLIA_VALUE_UNKNOWN:
+            case GANGLIA_VALUE_STRING:
+              /* do nothing for non-numeric data */
+              break;
+            case GANGLIA_VALUE_UNSIGNED_SHORT:
+              if( abs( cb->last.uint16 - cb->now.uint16 ) >= cb->value_threshold )
+                  group->next_send = 0; /* send immediately */
+              break;
+            case GANGLIA_VALUE_SHORT:
               if( abs( cb->last.int16 - cb->now.int16 ) >= cb->value_threshold )
-		group->next_send = 0; /* send immediately */
-	      break;
-	    case GANGLIA_VALUE_UNSIGNED_INT:
+                  group->next_send = 0; /* send immediately */
+              break;
+            case GANGLIA_VALUE_UNSIGNED_INT:
               if( abs( cb->last.uint32 - cb->now.uint32 ) >= cb->value_threshold )
-		group->next_send = 0; /* send immediately */
-	      break;
-	    case GANGLIA_VALUE_INT:
+                  group->next_send = 0; /* send immediately */
+              break;
+            case GANGLIA_VALUE_INT:
               if( abs( cb->last.int32 - cb->now.int32 ) >= cb->value_threshold )
-		group->next_send = 0; /* send immediately */
-	      break;
-	    case GANGLIA_VALUE_FLOAT:
+                  group->next_send = 0; /* send immediately */
+              break;
+            case GANGLIA_VALUE_FLOAT:
               if( abs( cb->last.f - cb->now.f ) >= cb->value_threshold )
-		group->next_send = 0; /* send immediately */
-	      break;
-	    case GANGLIA_VALUE_DOUBLE:
+                  group->next_send = 0; /* send immediately */
+              break;
+            case GANGLIA_VALUE_DOUBLE:
               if( abs( cb->last.d - cb->now.d ) >= cb->value_threshold )
-		group->next_send = 0; /* send immediately */
-	      break;
-	    default:
-	      break;
-	    }
-
-	}
-
+                  group->next_send = 0; /* send immediately */
+              break;
+            default:
+              break;
+            }
+        }
     }
 
   /* Set the next time this group should be collected */
@@ -1809,98 +1812,98 @@ Ganglia_collection_group_collect( Ganglia_collection_group *group, apr_time_t no
 void
 Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
 {
-  int i;
-
-  /* This group needs to be sent */
-  for(i=0; i< group->metric_array->nelts; i++)
-    {
-      XDR x;
-      int len, errors;
-      char metricmsg[max_udp_message_len];
-      Ganglia_metric_callback *cb = ((Ganglia_metric_callback **)(group->metric_array->elts))[i];
-
-      /* Build the message */
-      switch(cb->info->type)
-        {
-	  case GANGLIA_VALUE_UNKNOWN:
-	    /* The 2.5.x protocol doesn't allow for unknown values. :(  Do nothing. */
-	    continue;
-	  case GANGLIA_VALUE_STRING:
-	    cb->msg.Ganglia_message_u.str = cb->now.str; 
-	    break;
-	  case GANGLIA_VALUE_UNSIGNED_SHORT:
-	    cb->msg.Ganglia_message_u.u_short = cb->now.uint16;
-	    break;
-	  case GANGLIA_VALUE_SHORT:
-	    /* TODO: currently there are no signed short values in protocol.x
-	     * As soon as we add one, we need to implement it here... */
-	    break;
-	  case GANGLIA_VALUE_UNSIGNED_INT:
-	    cb->msg.Ganglia_message_u.u_int = cb->now.uint32;
-	    break;
-	  case GANGLIA_VALUE_INT:
-	    /* TODO: currently there are no signed int value in protocol.x
-	     * As soon as we add one, we need to implement it here... */
-	    break;
-	  case GANGLIA_VALUE_FLOAT:
-	    cb->msg.Ganglia_message_u.f = cb->now.f;
-	    break;
-	  case GANGLIA_VALUE_DOUBLE:
-	    cb->msg.Ganglia_message_u.d = cb->now.d;
-	    break;
-	  default:
-	    continue;
-	}
+    int i;
+    
+    /* This group needs to be sent */
+    for(i=0; i< group->metric_array->nelts; i++)
+      {
+        XDR x;
+        int len, errors;
+        char metricmsg[max_udp_message_len];
+        Ganglia_metric_callback *cb = ((Ganglia_metric_callback **)(group->metric_array->elts))[i];
+        
+        /* Build the message */
+        switch(cb->info->type)
+          {
+          case GANGLIA_VALUE_UNKNOWN:
+            /* The 2.5.x protocol doesn't allow for unknown values. :(  Do nothing. */
+            continue;
+          case GANGLIA_VALUE_STRING:
+            cb->msg.Ganglia_message_u.str = cb->now.str; 
+            break;
+          case GANGLIA_VALUE_UNSIGNED_SHORT:
+            cb->msg.Ganglia_message_u.u_short = cb->now.uint16;
+            break;
+          case GANGLIA_VALUE_SHORT:
+            /* TODO: currently there are no signed short values in protocol.x
+             * As soon as we add one, we need to implement it here... */
+            break;
+          case GANGLIA_VALUE_UNSIGNED_INT:
+            cb->msg.Ganglia_message_u.u_int = cb->now.uint32;
+            break;
+          case GANGLIA_VALUE_INT:
+            /* TODO: currently there are no signed int value in protocol.x
+             * As soon as we add one, we need to implement it here... */
+            break;
+          case GANGLIA_VALUE_FLOAT:
+            cb->msg.Ganglia_message_u.f = cb->now.f;
+            break;
+          case GANGLIA_VALUE_DOUBLE:
+            cb->msg.Ganglia_message_u.d = cb->now.d;
+            break;
+          default:
+            continue;
+          }
 
         if (cb->msg.id == modular_metric) 
-        {
+          {
             Ganglia_gmetric gmetric = Ganglia_gmetric_create(global_context);
             char *val, *type;
-
+        
             if(!gmetric)
-            {
+              {
                 /* no memory */
                 return;
-            }
-
+              }
+        
             val = apr_pstrdup(gmetric->pool, host_metric_value(cb->info, &(cb->msg)));
             type = apr_pstrdup(gmetric->pool, host_metric_type(cb->info->type));
-
+        
             errors = Ganglia_gmetric_set(gmetric, cb->info->name, val, type,
                         cb->info->units, !strcmp(cb->info->slope,"zero")? 0: 3,
                         cb->info->tmax, 0);
             if (errors) 
-            {
+              {
                 fprintf(stderr,"Error %d setting the modular data for %s\n", errors, cb->name);
-            }
+              }
             else 
-            {
+              {
                 errors = Ganglia_gmetric_send(gmetric, udp_send_channels);
                 if (errors) 
-                {
+                  {
                     fprintf(stderr,"Error %d sending the modular data for %s\n", errors, cb->name);
                     debug_msg("\tsent message '%s' with %d errors", cb->name, errors);
-                }
-            }
-
+                  }
+              }
+        
             apr_pool_destroy(gmetric->pool);
-        }
+          }
         else 
-        {
-      /* Send the message */
-      xdrmem_create(&x, metricmsg, max_udp_message_len, XDR_ENCODE);
-      xdr_Ganglia_message(&x, &(cb->msg));
-      len = xdr_getpos(&x); 
-      errors = send_message( metricmsg, len );
-      debug_msg("\tsent message '%s' of length %d with %d errors", cb->name, len, errors);
-        }
+          {
+            /* Send the message */
+            xdrmem_create(&x, metricmsg, max_udp_message_len, XDR_ENCODE);
+            xdr_Ganglia_message(&x, &(cb->msg));
+            len = xdr_getpos(&x); 
+            errors = send_message( metricmsg, len );
+            debug_msg("\tsent message '%s' of length %d with %d errors", cb->name, len, errors);
+          }
 
-      if(!errors)
-	{
-	  /* If the message send ok. Schedule the next time threshold. */
-	  group->next_send = now + (group->time_threshold * APR_USEC_PER_SEC);
-	}
-    }
+        if(!errors)
+          {
+            /* If the message send ok. Schedule the next time threshold. */
+            group->next_send = now + (group->time_threshold * APR_USEC_PER_SEC);
+          }
+      }
 }
  
 /* TODO: It might be necessary in the future to use a heap for the collection groups.
@@ -1917,8 +1920,8 @@ process_collection_groups( apr_time_t now )
       Ganglia_collection_group *group = ((Ganglia_collection_group **)(collection_groups->elts))[i];
       if(group->next_collect <= now)
         {
-	  Ganglia_collection_group_collect(group, now);
-	}
+          Ganglia_collection_group_collect(group, now);
+        }
     }
 
   /* Run through each collection group and send any data that needs sending... */
@@ -1926,9 +1929,9 @@ process_collection_groups( apr_time_t now )
     {
       Ganglia_collection_group *group = ((Ganglia_collection_group **)(collection_groups->elts))[i];
       if( group->next_send <= now )
-	{
-	  Ganglia_collection_group_send(group, now);
-	}
+        {
+          Ganglia_collection_group_send(group, now);
+        }
     }
 
   /* Run through each collection group and find when our next event (collect|send) occurs */
@@ -1938,16 +1941,16 @@ process_collection_groups( apr_time_t now )
       Ganglia_collection_group *group = ((Ganglia_collection_group **)(collection_groups->elts))[i];
       min = group->next_send < group->next_collect? group->next_send : group->next_collect;
       if(!next)
-	{
-	  next = min;
-	}
+        {
+          next = min;
+        }
       else
-	{
-	  if(min < next)
-	    {
-	      next = min;
-	    }
-	}
+        {
+          if(min < next)
+            {
+              next = min;
+            }
+        }
     }
 
   /* make sure we don't schedule for the past */
@@ -1971,9 +1974,9 @@ print_metric_list( void )
 
       apr_hash_this(hi, NULL, NULL, &val);
       cb = val;
-	  metric_info = Ganglia_25metric_byname(cb->name);
+      metric_info = Ganglia_25metric_byname(cb->name);
 
-	  if(metric_info)
+      if(metric_info)
         {
           desc = metric_info->desc;
         }
@@ -1991,7 +1994,7 @@ print_metric_list( void )
                   break;
                 }
             }
-	    }
+        }
 
       if (desc == NULL) 
         {
@@ -2018,43 +2021,43 @@ cleanup_data( Ganglia_pool pool, apr_time_t now)
       host = val;
 
       if( host_dmax && (now - host->last_heard_from) > (host_dmax * APR_USEC_PER_SEC) )
-	{
-	  /* this host is older than dmax... delete it */
-	  debug_msg("deleting old host '%s' from host hash'", host->hostname);
-	  /* remove it from the hash */
-	  apr_hash_set( hosts, host->ip, APR_HASH_KEY_STRING, NULL);
-	  /* free all its memory */
-	  apr_pool_destroy( host->pool);
-	} 
+        {
+          /* this host is older than dmax... delete it */
+          debug_msg("deleting old host '%s' from host hash'", host->hostname);
+          /* remove it from the hash */
+          apr_hash_set( hosts, host->ip, APR_HASH_KEY_STRING, NULL);
+          /* free all its memory */
+          apr_pool_destroy( host->pool);
+        } 
       else
-	{
-	  /* this host isn't being deleted but it might have some stale gmetric data */
-	  for( gmetric_hi = apr_hash_first( pool, host->gmetrics );
-	       gmetric_hi;
-	       gmetric_hi = apr_hash_next( gmetric_hi ))
-	    {
-	      void *val;
-	      Ganglia_metric *gmetric;
-	      int dmax;
+        {
+          /* this host isn't being deleted but it might have some stale gmetric data */
+          for( gmetric_hi = apr_hash_first( pool, host->gmetrics );
+               gmetric_hi;
+               gmetric_hi = apr_hash_next( gmetric_hi ))
+            {
+              void *val;
+              Ganglia_metric *gmetric;
+              int dmax;
 
-	      apr_hash_this( gmetric_hi, NULL, NULL, &val );
-	      gmetric = val;
+              apr_hash_this( gmetric_hi, NULL, NULL, &val );
+              gmetric = val;
 
-	      if(!gmetric)
-		continue;  /* this shouldn't happen */
+              if(!gmetric)
+                  continue;  /* this shouldn't happen */
 
-	      dmax = gmetric->message.Ganglia_message_u.gmetric.dmax;
-	      if( dmax && (now - gmetric->last_heard_from) > (dmax * APR_USEC_PER_SEC) )
-	        {
-		  /* this is a stale gmetric */
-		  debug_msg("deleting old gmetric '%s' from host '%s'", gmetric->name, host->hostname);
-		  /* remove the metric from the gmetric hash */
-		  apr_hash_set( host->gmetrics, gmetric->name, APR_HASH_KEY_STRING, NULL);
-		  /* destroy any memory that was allocated for this gmetric */
-		  apr_pool_destroy( gmetric->pool );
+              dmax = gmetric->message.Ganglia_message_u.gmetric.dmax;
+              if( dmax && (now - gmetric->last_heard_from) > (dmax * APR_USEC_PER_SEC) )
+                {
+                  /* this is a stale gmetric */
+                  debug_msg("deleting old gmetric '%s' from host '%s'", gmetric->name, host->hostname);
+                  /* remove the metric from the gmetric hash */
+                  apr_hash_set( host->gmetrics, gmetric->name, APR_HASH_KEY_STRING, NULL);
+                  /* destroy any memory that was allocated for this gmetric */
+                  apr_pool_destroy( gmetric->pool );
                 }
-	    }
-	}
+            }
+        }
     }
 
   apr_pool_clear( pool );
@@ -2073,7 +2076,7 @@ main ( int argc, char *argv[] )
   Ganglia_pool cleanup_context;
 
   if (cmdline_parser (argc, argv, &args_info) != 0)
-        exit(1) ;
+      exit(1) ;
 
   if(args_info.convert_given)
     {
@@ -2180,41 +2183,41 @@ main ( int argc, char *argv[] )
       /* Make sure we never wait for negative seconds (shouldn't happen) */
       apr_interval_time_t wait = next_collection >= now ? next_collection - now : 1;
       if(!deaf)
-	{
-	  /* Pull in incoming data */
-	  poll_listen_channels(wait, now);
-	}
+        {
+          /* Pull in incoming data */
+          poll_listen_channels(wait, now);
+        }
       else
-	{
-	  /* Sleep until next collection */
+        {
+          /* Sleep until next collection */
           apr_sleep( wait );
-	}
+        }
 
       /* only continue if it's time to process our collection groups */
       now = apr_time_now();
       if(now < next_collection)
-	continue;
+          continue;
 
       if(!deaf)
-	{
-	  /* cleanup the data if the cleanup threshold has been met */
-	  if( (now - last_cleanup) > cleanup_threshold )
-	    {
-	      cleanup_data( cleanup_context, now );
-	      last_cleanup = now;
-	    }
-	}
+        {
+          /* cleanup the data if the cleanup threshold has been met */
+          if( (now - last_cleanup) > cleanup_threshold )
+            {
+              cleanup_data( cleanup_context, now );
+              last_cleanup = now;
+            }
+        }
 
       if(!mute)
-	{
-	  /* collect data from collection_groups */
-	  next_collection = process_collection_groups( now );
-	}
+        {
+          /* collect data from collection_groups */
+          next_collection = process_collection_groups( now );
+        }
       else
-	{
-	  /* we're mute. nothing to collect and send. */
-	  next_collection = now + 60 * APR_USEC_PER_SEC;
-	}
+        {
+          /* we're mute. nothing to collect and send. */
+          next_collection = now + 60 * APR_USEC_PER_SEC;
+        }
     }
 
   return 0;
