@@ -39,6 +39,8 @@ static net_dev_stats *netstats[NHASH];
 #endif
 char proc_cpuinfo[BUFFSIZE];
 char proc_sys_kernel_osrelease[BUFFSIZE];
+
+#define SCALING_MAX_FREQ "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
 char sys_devices_system_cpu[32];
 int cpufreq;
 
@@ -164,13 +166,16 @@ metric_init(void)
 {
    g_val_t rval;
    char * dummy;
+   struct stat struct_stat;
 
    num_cpustates = num_cpustates_func();
 
-   cpufreq = 1;
-   rval.int32 = slurpfile("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", sys_devices_system_cpu, BUFFSIZE);
-   if ( rval.int32 == SYNAPSE_FAILURE )
-      cpufreq = 0;
+   /* scaling_max_freq will contain the max CPU speed if available */
+   cpufreq = 0;
+   if ( stat(SCALING_MAX_FREQ, &struct_stat) == 0 ) {
+      cpufreq = 1;
+      slurpfile(SCALING_MAX_FREQ, sys_devices_system_cpu, BUFFSIZE);
+   }
 
    rval.int32 = slurpfile("/proc/cpuinfo", proc_cpuinfo, BUFFSIZE);
    if ( rval.int32 == SYNAPSE_FAILURE )
