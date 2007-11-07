@@ -19,13 +19,17 @@ License: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
-Buildroot: /tmp/%{name}-%{version}-buildroot
-Prefix: /usr
-BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel
-%if %{?suse_version:1}0
-BuildRequires: rrdtool, freetype2-devel, libapr1-devel
+Buildroot: %{_tmppath}/%{name}-%{version}-buildroot
+BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel
+%if 0%{?suse_version}
+BuildRequires:  freetype2-devel, libapr1-devel
+%if 0%{?suse_version} > 1020
+BuildRequires: rrdtool-devel, libexpat-devel
 %else
-BuildRequires: rrdtool-devel, freetype-devel, apr-devel
+BuildRequires: rrdtool, expat
+%endif
+%else
+BuildRequires: rrdtool-devel, freetype-devel, apr-devel > 1
 %endif
 
 %description
@@ -38,8 +42,8 @@ Ganglia is a scalable, real-time monitoring and execution environment
 %package web
 Summary: Ganglia Web Frontend
 Group: System Environment/Base
-Obsoletes: ganglia-webfrontend
-Provides: ganglia-webfrontend
+Obsoletes: ganglia-webfrontend < %{version}
+Provides: ganglia-webfrontend = %{version}
 # We should put rrdtool as a Requires too but rrdtool rpm support is very weak
 # so most people install from source
 #Requires: ganglia-gmetad >=  @VERSION@
@@ -63,7 +67,10 @@ written in the PHP4 language.
 %package gmetad
 Summary: Ganglia Meta daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-gmetad ganglia-monitor-core
+Obsoletes: ganglia-monitor-core-gmetad < %{version}
+Obsoletes: ganglia-monitor-core < %{version}
+Provides: ganglia-monitor-core-gmetad = %{version}
+Provides: ganglia-monitor-core = %{version}
 
 %description gmetad
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -76,7 +83,10 @@ to form a monitoring grid. It also keeps metric history using rrdtool.
 %package gmond
 Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-gmond ganglia-monitor-core
+Obsoletes: ganglia-monitor-core-gmond < %{version}
+Obsoletes: ganglia-monitor-core < %{version}
+Provides: ganglia-monitor-core-gmond = %{version}
+Provides: ganglia-monitor-core = %{version}
 
 %description gmond
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -86,48 +96,58 @@ well-defined XML format.
 This gmond daemon provides the ganglia service within a single cluster or
 Multicast domain.
 
-%package devel
-Summary: Ganglia Library http://ganglia.sourceforge.net/
+%package gmond-modules-python
+Summary: Ganglia Monitor daemon DSO/Python metric modules support http://ganglia.sourceforge.net/
 Group: System Environment/Base
-Obsoletes: ganglia-monitor-core-lib 
+Requires: ganglia-gmond, python
+
+%description gmond-modules-python
+Ganglia is a scalable, real-time monitoring and execution environment
+with all execution requests and statistics expressed in an open
+well-defined XML format.
+
+This gmond modules support package provides the capability of loading gmetric/python modules
+via DSO at daemon start time instead of via gmetric
+
+%package devel
+Summary: Ganglia static libraries and header files http://ganglia.sourceforge.net/
+Group: Development/Libraries
+# revisit this list. it might be libtool bloat
+Requires: expat-devel, apr-devel > 1
+%if 0%{?suse_version}
+Requires: libconfuse-devel, libexpat-devel, libapr1-devel, libganglia-3_1_0
+%endif
 
 %description devel
 The Ganglia Monitoring Core library provides a set of functions that programmers
 can use to build scalable cluster or grid applications
 
+%package -n libganglia-3_1_0
+Summary: Ganglia Shared Libraries http://ganglia.sourceforge.net/
+Group: System Environment/Base
+
+%description -n libganglia-3_1_0
+The Ganglia Shared Libraries contains common libraries required by both gmond and
+gmetad packages
+
 %endif
 
-##
-## PREP
-##
-
-%prep 
+%prep
 %setup
 
-##
-## BUILD
-##
 %build
 %configure --with-gmetad --enable-python
 %ifnarch noarch
 make
 %endif
 
-##
-## PRE
-##
 %pre
 
 %ifnarch noarch
-##
-## POST GMETA
-##
+
 %post gmetad
 /sbin/chkconfig --add gmetad
 
-##
-## POST GMON
-##
 %post gmond
 /sbin/chkconfig --add gmond
 
@@ -150,10 +170,6 @@ if [[ $? != 0 ]]; then
   echo "altering your configuration without your notice."
 fi
    
-
-##
-## PREUN GMETA
-##
 %preun gmetad
 if [ "$1" = 0 ]
 then
@@ -161,9 +177,6 @@ then
    /sbin/chkconfig --del gmetad
 fi
 
-##
-## PREUN GMON
-##
 %preun gmond
 if [ "$1" = 0 ]
 then
@@ -171,46 +184,46 @@ then
    /sbin/chkconfig --del gmond
 fi
 
-#ifnarch noarch
-%endif
+%post   -n libganglia-3_1_0 -p /sbin/ldconfig
 
-##
-## INSTALL
-##
+%postun -n libganglia-3_1_0 -p /sbin/ldconfig
+
+%endif #ifnarch noarch
+
 %install
-## Flush any old RPM build root
+# Flush any old RPM build root
 %__rm -rf $RPM_BUILD_ROOT
 
 %ifarch noarch
 
-%__mkdir -p $RPM_BUILD_ROOT/%{web_prefixdir}
-%__cp -rf %{_builddir}/%{name}-%{version}/web/* $RPM_BUILD_ROOT/%{web_prefixdir}
+%__install -d -m 0755 $RPM_BUILD_ROOT/%{web_prefixdir}
+%__cp -rf web/* $RPM_BUILD_ROOT/%{web_prefixdir}
 %__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*.in
 
 %else
 
-## Create the directory structure
-%__mkdir -p $RPM_BUILD_ROOT/etc/init.d
-%__mkdir -p $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
-%__mkdir -p $RPM_BUILD_ROOT%{_mandir}/man5
+# Create the directory structure
+%__install -d -m 0755 $RPM_BUILD_ROOT/etc/init.d
+%__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
+%__install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man5
 
-## Move the files into the structure
+# Move the files into the structure
 %if 0%{?suse_version}
-   %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmond
-   %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmetad
+   %__cp -f gmond/gmond.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmond
+   %__cp -f gmetad/gmetad.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmetad
 %else
-   %__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/init.d/gmond
-   %__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/init.d/gmetad
+   %__cp -f gmond/gmond.init $RPM_BUILD_ROOT/etc/init.d/gmond
+   %__cp -f gmetad/gmetad.init $RPM_BUILD_ROOT/etc/init.d/gmetad
 %endif
 
-%__mkdir -p $RPM_BUILD_ROOT/etc/ganglia
-%__mkdir -p $RPM_BUILD_ROOT/etc/ganglia/conf.d
-%__mkdir -p $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules
+%__install -d -m 0755 $RPM_BUILD_ROOT/etc/ganglia
+%__install -d -m 0755 $RPM_BUILD_ROOT/etc/ganglia/conf.d
+%__install -d -m 0755 $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules
 
 # We just output the default gmond.conf from gmond using the '-t' flag
-%{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
-%__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/ganglia/gmetad.conf
-%__cp -f %{_builddir}/%{name}-%{version}/gmond/modules/conf.d/* $RPM_BUILD_ROOT/etc/ganglia/conf.d
+gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
+%__cp -f gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/ganglia/gmetad.conf
+%__cp -f gmond/modules/conf.d/* $RPM_BUILD_ROOT/etc/ganglia/conf.d
 
 # Copy the python metric modules and .conf files
 %__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/
@@ -224,29 +237,25 @@ fi
 # Disable the diskusage module until it is configured properly
 %__mv $RPM_BUILD_ROOT/etc/ganglia/conf.d/diskusage.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/diskusage.pyconf.off
 
+%__mv $RPM_BUILD_ROOT/etc/ganglia/conf.d/tcpconn.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/tcpconn.pyconf.off
+
 %__make DESTDIR=$RPM_BUILD_ROOT install
 %__make -C gmond gmond.conf.5
-%__install -m 0644 %{_builddir}/%{name}-%{version}/gmond/gmond.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/gmond.conf.5
+%__install -m 0644 gmond/gmond.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/gmond.conf.5
 
+# cleanup section
+%__rm -v $RPM_BUILD_ROOT%{_libdir}/ganglia/*.{la,a}
 %endif
 
 %ifnarch noarch
-##
-## FILES GMETA
-##
 
 %files gmetad
 %defattr(-,root,root)
-%attr(0755,nobody,nobody)@varstatedir@/ganglia/rrds
+%attr(0755,nobody,nobody)@varstatedir@/ganglia/
 %{_sbindir}/gmetad
 /etc/init.d/gmetad
 %config(noreplace) /etc/ganglia/gmetad.conf
-%{_libdir}/ganglia/*
-%{_libdir}/libganglia*
 
-##
-## FILES GMON
-##
 %files gmond
 %defattr(-,root,root)
 %attr(0500,root,root)%{_bindir}/gmetric
@@ -257,23 +266,30 @@ fi
 %config(noreplace) /etc/ganglia/gmond.conf
 %dir /etc/ganglia/
 %dir /etc/ganglia/conf.d/
-%config(noreplace) /etc/ganglia/conf.d/*
-%{_libdir}/ganglia/*
-%{_libdir}/libganglia*
+%dir %{_libdir}/ganglia/
+%{_libdir}/ganglia/modmulticpu.so*
+/etc/ganglia/conf.d/multicpu.conf
 
-##
-## FILES DEVEL
-##
+%files gmond-modules-python
+%dir %{_libdir}/ganglia/python_modules/
+%{_libdir}/ganglia/python_modules/*.py
+%{_libdir}/ganglia/modpython.so*
+%config(noreplace) /etc/ganglia/conf.d/modpython.conf
+%config(noreplace) /etc/ganglia/conf.d/*.pyconf*
+
 %files devel
+%defattr(-,root,root,-)
 %{_includedir}/ganglia.h
-%{_libdir}/libganglia*
+%{_libdir}/libganglia*.so
+%{_libdir}/libganglia*.*a
 %{_bindir}/ganglia-config
+
+%files -n libganglia-3_1_0
+%defattr(-,root,root,-)
+%{_libdir}/libganglia*.so.*
 
 %else
 
-##
-## FILES WEB
-##
 %files web
 %defattr(-,root,root)
 %dir %{web_prefixdir}/
@@ -309,16 +325,14 @@ fi
 
 %endif
 
-##
-## CLEAN
-##
 %clean
 %__rm -rf $RPM_BUILD_ROOT
 
-##
-## CHANGELOG
-##
 %changelog
+* Wed Oct 10 2007 Bernard Li <bernard@vanhpc.org>
+- Clean up comments -- they were affecting output of rpm -q --scripts
+- Spec by cleanup by darix, new package libganglia for common shared libraries
+- New package ganglia-gmond-modules-python
 * Tue Oct 9 2007 Brad Nicholes <bnicholes@novell.com>
 - Add tcpconn python metric module
 * Fri Jul 13 2007 Brad Nicholes <bnicholes@novell.com>
