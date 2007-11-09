@@ -1,7 +1,7 @@
 modules {
   module {
     name = "multicpu_module"
-    path = "/usr/lib/ganglia/modmulticpu.so" 
+    path = "@libdir@/ganglia/modmulticpu.so" 
   }
 }
 

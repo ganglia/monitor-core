@@ -111,6 +111,7 @@ AC_PREFIX_DEFAULT(/usr)
 dnl The following cpu_vendor_os string goes into config.h.
 dnl
 AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
+AC_DEFINE_UNQUOTED(ARCH, "$host_cpu", ARCH)
 AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
 AC_CYGWIN
 
@@ -515,6 +516,13 @@ dnl
 AC_SUBST(varstatedir)
 AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
+dnl Python module config files need to know where to look for libraries (/usr/lib vs /usr/lib64)
+AC_SUBST_FILE(libdir)
+if test "x$host_cpu" = "xx86_64"; then
+  libdir=/usr/lib64
+else
+  libdir=/usr/lib
+fi
 
 AC_OUTPUT(Makefile 
           ganglia-config
@@ -525,11 +533,14 @@ AC_OUTPUT(Makefile
           lib/Makefile 
           gmond/Makefile 
           gmond/gstat/Makefile 
-	  gmond/modules/Makefile
-	  gmond/modules/example/Makefile
-	  gmond/modules/cpu/Makefile
-	  gmond/modules/python/Makefile
-	  gmond/python_modules/Makefile
+          gmond/modules/Makefile
+          gmond/modules/conf.d/example.conf
+          gmond/modules/conf.d/modpython.conf
+          gmond/modules/conf.d/multicpu.conf
+          gmond/modules/example/Makefile
+          gmond/modules/cpu/Makefile
+          gmond/modules/python/Makefile
+          gmond/python_modules/Makefile
           gmetric/Makefile 
           web/version.php)
 
