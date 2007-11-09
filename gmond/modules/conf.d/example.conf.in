@@ -1,7 +1,7 @@
 modules {
   module {
     name = "example_module"
-    path = "/usr/lib/ganglia/modexample.so" 
+    path = "@libdir@/ganglia/modexample.so" 
     params = "An extra raw parameter"
     param RandomMax {
         value = 75
