@@ -227,8 +227,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
 
 # Copy the python metric modules and .conf files
 %__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/
-%__cp -f gmond/python_modules/disk/*.py $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
-%__cp -f gmond/python_modules/network/*.py $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
+%__cp -f gmond/python_modules/*/*.py* $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
 
 # Don't install the example modules
 %__rm -f $RPM_BUILD_ROOT/etc/ganglia/conf.d/example.conf
@@ -275,7 +274,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
 
 %files gmond-modules-python
 %dir %{_libdir}/ganglia/python_modules/
-%{_libdir}/ganglia/python_modules/*.py
+%{_libdir}/ganglia/python_modules/*.py*
 %{_libdir}/ganglia/modpython.so*
 %config(noreplace) /etc/ganglia/conf.d/modpython.conf
 %config(noreplace) /etc/ganglia/conf.d/*.pyconf*
@@ -332,6 +331,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Fri Nov 09 2007 Bernard Li <bernard@vanhpc.org>
+- Include .pyc files from /usr/lib/ganglia/python_modules
 * Thu Nov 08 2007 Bernard Li <bernard@vanhpc.org>
 - Clean up /etc/ganglia/conf.d/*.conf.in files
 * Wed Oct 10 2007 Bernard Li <bernard@vanhpc.org>
