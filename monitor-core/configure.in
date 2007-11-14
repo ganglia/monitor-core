@@ -518,10 +518,14 @@ AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
 dnl Python module config files need to know where to look for libraries (/usr/lib vs /usr/lib64)
 AC_SUBST_FILE(libdir)
+if test "x$prefix" = xNONE; then
+  prefix="$ac_default_prefix"
+fi
+
 if test "x$host_cpu" = "xx86_64"; then
-  libdir=/usr/lib64
+  libdir="$prefix/lib64"
 else
-  libdir=/usr/lib
+  libdir="$prefix/lib"
 fi
 
 AC_OUTPUT(Makefile 
