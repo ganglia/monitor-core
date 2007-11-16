@@ -12,13 +12,13 @@
 #
 Summary: Ganglia Distributed Monitoring System
 Name: @PACKAGE@
-Version: @VERSION@
+Version: @RPM_VERSION@
 URL: http://ganglia.info/
-Release: 1 
+Release: @RPM_RELEASE@
 License: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
-Source: %{name}-%{version}.tar.gz
+Source: %{name}-@VERSION@.tar.gz
 Buildroot: %{_tmppath}/%{name}-%{version}-buildroot
 BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel
 %if 0%{?suse_version}
@@ -133,7 +133,7 @@ gmetad packages
 %endif
 
 %prep
-%setup
+%setup -n %{name}-@VERSION@
 
 %build
 %configure --with-gmetad --enable-python
