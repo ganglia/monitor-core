@@ -5,7 +5,6 @@
 #include <sys/time.h>
 #include <gmetad.h>
 #include <string.h>
-#include <gmetad.h>
 
 extern hash_t *xml;
 
