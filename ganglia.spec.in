@@ -31,6 +31,7 @@ BuildRequires: rrdtool, expat
 %else
 BuildRequires: rrdtool-devel, freetype-devel, apr-devel > 1
 %endif
+%define conf_dir /etc/ganglia
 
 %description
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -148,6 +149,10 @@ make
 %post gmetad
 /sbin/chkconfig --add gmetad
 
+if [ -e /etc/gmetad.conf ]; then
+  %__mv /etc/gmetad.conf %{conf_dir}
+fi
+
 %post gmond
 /sbin/chkconfig --add gmond
 
@@ -168,6 +173,10 @@ if [[ $? != 0 ]]; then
   echo ""
   echo "This conversion was not made automatic to prevent unknowningly"
   echo "altering your configuration without your notice."
+else
+  if [ -e /etc/gmond.conf ]; then
+    %__mv /etc/gmond.conf %{conf_dir}
+  fi
 fi
    
 %preun gmetad
@@ -216,30 +225,30 @@ fi
    %__cp -f gmetad/gmetad.init $RPM_BUILD_ROOT/etc/init.d/gmetad
 %endif
 
-%__install -d -m 0755 $RPM_BUILD_ROOT/etc/ganglia
-%__install -d -m 0755 $RPM_BUILD_ROOT/etc/ganglia/conf.d
+%__install -d -m 0755 $RPM_BUILD_ROOT%{conf_dir}
+%__install -d -m 0755 $RPM_BUILD_ROOT%{conf_dir}/conf.d
 %__install -d -m 0755 $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules
 
 # We just output the default gmond.conf from gmond using the '-t' flag
-gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
-%__cp -f gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/ganglia/gmetad.conf
-%__cp -f gmond/modules/conf.d/* $RPM_BUILD_ROOT/etc/ganglia/conf.d
+gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
+%__cp -f gmetad/gmetad.conf $RPM_BUILD_ROOT%{conf_dir}/gmetad.conf
+%__cp -f gmond/modules/conf.d/* $RPM_BUILD_ROOT%{conf_dir}/conf.d
 
 # Copy the python metric modules and .conf files
-%__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/
+%__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/
 %__cp -f gmond/python_modules/*/*.py* $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
 
 # Don't install the example modules
-%__rm -f $RPM_BUILD_ROOT/etc/ganglia/conf.d/example.conf
-%__rm -f $RPM_BUILD_ROOT/etc/ganglia/conf.d/example.pyconf
+%__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/example.conf
+%__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/example.pyconf
 
 # Clean up the .conf.in files
-%__rm -f $RPM_BUILD_ROOT/etc/ganglia/conf.d/*.conf.in
+%__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/*.conf.in
 
 # Disable the diskusage module until it is configured properly
-%__mv $RPM_BUILD_ROOT/etc/ganglia/conf.d/diskusage.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/diskusage.pyconf.off
+%__mv $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf.off
 
-%__mv $RPM_BUILD_ROOT/etc/ganglia/conf.d/tcpconn.pyconf $RPM_BUILD_ROOT/etc/ganglia/conf.d/tcpconn.pyconf.off
+%__mv $RPM_BUILD_ROOT%{conf_dir}/conf.d/tcpconn.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/tcpconn.pyconf.off
 
 %__make DESTDIR=$RPM_BUILD_ROOT install
 %__make -C gmond gmond.conf.5
@@ -256,7 +265,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
 %attr(0755,nobody,nobody)@varstatedir@/ganglia/
 %{_sbindir}/gmetad
 /etc/init.d/gmetad
-%config(noreplace) /etc/ganglia/gmetad.conf
+%config(noreplace) %{conf_dir}/gmetad.conf
 
 %files gmond
 %defattr(-,root,root)
@@ -265,19 +274,19 @@ gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
 %{_sbindir}/gmond
 /etc/init.d/gmond
 %{_mandir}/man5/gmond.conf.5*
-%config(noreplace) /etc/ganglia/gmond.conf
-%dir /etc/ganglia/
-%dir /etc/ganglia/conf.d/
+%config(noreplace) %{conf_dir}/gmond.conf
+%dir %{conf_dir}
+%dir %{conf_dir}/conf.d/
 %dir %{_libdir}/ganglia/
 %{_libdir}/ganglia/modmulticpu.so*
-/etc/ganglia/conf.d/multicpu.conf
+%{conf_dir}/conf.d/multicpu.conf
 
 %files gmond-modules-python
 %dir %{_libdir}/ganglia/python_modules/
 %{_libdir}/ganglia/python_modules/*.py*
 %{_libdir}/ganglia/modpython.so*
-%config(noreplace) /etc/ganglia/conf.d/modpython.conf
-%config(noreplace) /etc/ganglia/conf.d/*.pyconf*
+%config(noreplace) %{conf_dir}/conf.d/modpython.conf
+%config(noreplace) %{conf_dir}/conf.d/*.pyconf*
 
 %files devel
 %defattr(-,root,root,-)
@@ -331,6 +340,9 @@ gmond/gmond -t > $RPM_BUILD_ROOT/etc/ganglia/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Fri Nov 16 2007 Bernard Li <bernard@vanhpc.org>
+- Set variable conf_dir to /etc/ganglia
+- Migrate /etc/{gmond,gmetad}.conf files to /etc/ganglia for upgrades etc.
 * Fri Nov 09 2007 Bernard Li <bernard@vanhpc.org>
 - Include .pyc files from /usr/lib/ganglia/python_modules
 * Thu Nov 08 2007 Bernard Li <bernard@vanhpc.org>
