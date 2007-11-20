@@ -12,6 +12,7 @@
 #include <cmdline.h>
 #include "daemon_init.h"
 
+#include "rrd_helpers.h"
 
 /* Holds our data sources. */
 hash_t *sources;
@@ -30,8 +31,6 @@ extern void* server_thread(void *);
 extern int parse_config_file ( char *config_file );
 extern int number_of_datasources ( char *config_file );
 extern struct type_tag* in_type_list (char *, unsigned int);
-extern int write_data_to_rrd( const char *source, const char *host, const char *metric,
-   const char *sum, const char *num, unsigned int step, unsigned int time_polled);
 
 struct gengetopt_args_info args_info;
 
@@ -244,7 +243,7 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
    /* err_msg("Writing Overall Summary for metric %s (%s)", name, sum); */
 
    /* Save the data to a round robin database */
-   rc = write_data_to_rrd( NULL, NULL, name, sum, num, 15, 0);
+   rc = write_data_to_rrd( NULL, NULL, name, sum, num, 15, 0, metric->slope);
    if (rc)
       {
          err_msg("Unable to write meta data for metric %s to RRD", name);

@@ -1870,8 +1870,9 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
             type = apr_pstrdup(gmetric->pool, host_metric_type(cb->info->type));
         
             errors = Ganglia_gmetric_set(gmetric, cb->info->name, val, type,
-                        cb->info->units, !strcmp(cb->info->slope,"zero")? 0: 3,
+                        cb->info->units, cstr_to_slope( cb->info->slope),
                         cb->info->tmax, 0);
+
             if (errors) 
               {
                 err_msg("Error %d setting the modular data for %s\n", errors, cb->name);

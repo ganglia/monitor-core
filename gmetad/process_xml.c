@@ -5,12 +5,9 @@
 #include <sys/time.h>
 #include "expat.h"
 #include "gmetad.h"
+#include "lib/ganglia.h"
+#include "rrd_helpers.h"
 
-
-
-extern int write_data_to_rrd( const char *source, const char *host, 
-                const char *metric, const char *sum, const char *num, 
-                unsigned int step, unsigned int time_polled);
 extern int zero_out_summary(datum_t *key, datum_t *val, void *arg);
 extern char* getfield(char *buf, short int index);
 
@@ -568,6 +565,7 @@ static int
 startElement_METRIC(void *data, const char *el, const char **attr)
 {
    xmldata_t *xmldata = (xmldata_t *)data;
+   ganglia_slope_t slope = GANGLIA_SLOPE_UNSPECIFIED;
    struct xml_tag *xt;
    struct type_tag *tt;
    datum_t *hash_datum = NULL;
@@ -602,6 +600,8 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                case TYPE_TAG:
                   type = attr[i+1];
                   break;
+  	       case SLOPE_TAG:
+		  slope = cstr_to_slope(attr[i+1]);
                default:
                   break;
             }
@@ -629,7 +629,8 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                                   xmldata->hostname, name);
                   xmldata->rval = write_data_to_rrd(xmldata->sourcename,
                         xmldata->hostname, name, metricval, NULL,
-                        xmldata->ds->step, xmldata->source.localtime);
+		        xmldata->ds->step, xmldata->source.localtime,
+		        slope);
             }
          metric->id = METRIC_NODE;
          metric->report_start = metric_report_start;
@@ -935,7 +936,9 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
 	       xmldata->sourcename, name);
 	
 	   xmldata->rval = write_data_to_rrd(xmldata->sourcename, NULL, name,
-	           sum, num, xmldata->ds->step, xmldata->source.localtime);
+					     sum, num, xmldata->ds->step,
+					     xmldata->source.localtime,
+					     cstr_to_slope(getfield(metric->strings, metric->slope)));
    }
 
    return xmldata->rval;
