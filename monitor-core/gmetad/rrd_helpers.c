@@ -11,6 +11,10 @@
 #include <pthread.h>
 #include <time.h>
 
+#include "lib/ganglia.h"
+
+#include "rrd_helpers.h"
+
 #define PATHSIZE 4096
 extern gmetad_config_t gmetad_config;
 
@@ -64,8 +68,10 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
 
 /* Warning: RRD_create will overwrite a RRdb if it already exists */
 static int
-RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time)
+RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time,
+	    ganglia_slope_t slope)
 {
+   const char *data_source_type = "GAUGE";
    char *argv[128];
    int  argc=0;
    int heartbeat;
@@ -77,6 +83,19 @@ RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time
    /* Our heartbeat is twice the step interval. */
    heartbeat = 8*step;
 
+   switch( slope) {
+   case GANGLIA_SLOPE_POSITIVE:
+     data_source_type = "COUNTER";
+     break;
+
+   case GANGLIA_SLOPE_ZERO:
+   case GANGLIA_SLOPE_NEGATIVE:
+   case GANGLIA_SLOPE_BOTH:
+   case GANGLIA_SLOPE_UNSPECIFIED:
+     data_source_type = "GAUGE";
+     break;
+   }
+
    argv[argc++] = "dummy";
    argv[argc++] = rrd;
    argv[argc++] = "--step";
@@ -85,10 +104,14 @@ RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time
    argv[argc++] = "--start";
    sprintf(start, "%u", process_time-1);
    argv[argc++] = start;
-   sprintf(sum,"DS:sum:GAUGE:%d:U:U", heartbeat);
+   sprintf(sum,"DS:sum:%s:%d:U:U",
+	   data_source_type,
+	   heartbeat);
    argv[argc++] = sum;
    if (summary) {
-      sprintf(num,"DS:num:GAUGE:%d:U:U", heartbeat);
+      sprintf(num,"DS:num:%s:%d:U:U", 
+	      data_source_type,
+	      heartbeat);
       argv[argc++] = num;
    }
 
@@ -125,7 +148,8 @@ RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time
    host rrds only have "sum" (since num is always 1) */
 static int
 push_data_to_rrd( char *rrd, const char *sum, const char *num, 
-   unsigned int step, unsigned int process_time)
+		  unsigned int step, unsigned int process_time,
+		  ganglia_slope_t slope)
 {
    int rval;
    int summary;
@@ -142,7 +166,7 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
 
    if( stat(rrd, &st) )
       {
-         rval = RRD_create( rrd, summary, step, process_time );
+         rval = RRD_create( rrd, summary, step, process_time, slope);
          if( rval )
             return rval;
       }
@@ -152,7 +176,8 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
 /* Assumes num argument will be NULL for a host RRD. */
 int
 write_data_to_rrd ( const char *source, const char *host, const char *metric, 
-   const char *sum, const char *num, unsigned int step, unsigned int process_time )
+		    const char *sum, const char *num, unsigned int step,
+		    unsigned int process_time, ganglia_slope_t slope)
 {
    char rrd[ PATHSIZE ];
    char *summary_dir = "__SummaryInfo__";
@@ -181,5 +206,5 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
    strncat(rrd, metric, PATHSIZE);
    strncat(rrd, ".rrd", PATHSIZE);
 
-   return push_data_to_rrd( rrd, sum, num, step, process_time );
+   return push_data_to_rrd( rrd, sum, num, step, process_time, slope);
 }
