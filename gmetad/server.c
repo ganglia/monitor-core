@@ -113,7 +113,7 @@ source_summary(Source_t *source, client_t *client)
 int
 metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 {
-   int rc;
+   int rc, i;
    char *name = (char*) key->data;
    Metric_t *metric = (Metric_t*) self;
    long tn = 0;
@@ -123,13 +123,30 @@ metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
 
    rc=xml_print(client, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
       "UNITS=\"%s\" TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" SLOPE=\"%s\" "
-      "SOURCE=\"%s\"/>\n",
+      "SOURCE=\"%s\">\n",
       name, getfield(metric->strings, metric->valstr),
       getfield(metric->strings, metric->type),
       getfield(metric->strings, metric->units), tn,
       metric->tmax, metric->dmax, getfield(metric->strings, metric->slope),
       getfield(metric->strings, metric->source));
+
+   for (i=0; !rc && i<metric->groupslen; i++) 
+     {
+       rc=xml_print(client, "<EXTRA_DATA GROUP=\"%s\"/>\n",
+                    getfield(metric->strings, metric->groups[i]));
+     }
+
+   if (!rc && metric->desc) 
+       rc=xml_print(client, "<EXTRA_DATA DESC=\"%s\"/>\n",
+                    getfield(metric->strings, metric->desc));
+
+   if (!rc && metric->title) 
+       rc=xml_print(client, "<EXTRA_DATA TITLE=\"%s\"/>\n",
+                    getfield(metric->strings, metric->title));
       
+   if (!rc) 
+       rc=xml_print(client, "</METRIC>\n");
+
    return rc;
 }
 

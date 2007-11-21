@@ -68,7 +68,8 @@ def metric_init(params):
         'units': 'N',
         'slope': 'both',
         'format': '%u',
-        'description': 'Example module metric (random numbers)'}
+        'description': 'Example module metric (random numbers)',
+        'groups': 'example,random'}
 
     d2 = {'name': 'PyConstant_Number',
         'call_back': Constant_Number,
