@@ -68,7 +68,11 @@ typedef enum
       DOWN_TAG,
       METRICS_TAG,
       SUM_TAG,
-      NUM_TAG
+      NUM_TAG,
+      DESC_TAG,
+      TITLE_TAG,
+      GROUP_TAG,
+      EXTRA_DATA_TAG
    }
 xml_tag_t;
 
@@ -216,6 +220,7 @@ typedef struct
       hash_t *leaf;  /* Always NULL. */
       struct timeval t0;
       metric_val_t val;
+      short int name;
       short int valstr;    /* An optimization to speed queries. */
       short int precision;    /* Number of decimal places for floats. */
       uint32_t num;
@@ -226,6 +231,10 @@ typedef struct
       uint32_t dmax;
       short int slope;
       short int source;
+      short int desc;
+      short int title;
+      short int groupslen;
+      short int groups[16];
       short int stringslen;
       char strings[GMETAD_FRAMESIZE];
    }

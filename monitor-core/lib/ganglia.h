@@ -32,15 +32,21 @@
 #define END_C_DECLS
 #endif
 
+#define SPOOF "SPOOF"
+#define SPOOF_HOST SPOOF"_HOST"
+#define SPOOF_HEARTBEAT SPOOF"_HEARTBEAT"
+
 typedef struct apr_pool_t *         Ganglia_pool;
 typedef struct cfg_t *              Ganglia_gmond_config;
 typedef struct apr_array_header_t * Ganglia_udp_send_channels;
 
-struct Ganglia_gmetric {
+struct Ganglia_metric {
    Ganglia_pool pool;
-   struct Ganglia_gmetric_message *msg; /* defined in ./lib/protocol.x */
+   struct Ganglia_metadata_message *msg; /* defined in ./lib/protocol.x */
+   char *value;
+   void *extra;
 };
-typedef struct Ganglia_gmetric * Ganglia_gmetric;
+typedef struct Ganglia_metric * Ganglia_metric;
 
 enum ganglia_slope {
 	GANGLIA_SLOPE_ZERO = 0,
@@ -69,12 +75,14 @@ void Ganglia_pool_destroy( Ganglia_pool pool );
 
 int Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len );
 
-Ganglia_gmetric Ganglia_gmetric_create( Ganglia_pool parent_pool );
-int Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *type, char *units, unsigned int slope, unsigned int tmax, unsigned int dmax);
-int Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_channels );
-// Yemi
-int Ganglia_gmetric_send_spoof( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_channels, char* spoof_info,int heartbeat);
-void Ganglia_gmetric_destroy( Ganglia_gmetric gmetric );
+Ganglia_metric Ganglia_metric_create( Ganglia_pool parent_pool );
+int Ganglia_metric_set( Ganglia_metric gmetric, char *name, char *value, char *type, char *units, unsigned int slope, unsigned int tmax, unsigned int dmax);
+int Ganglia_metric_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels );
+int Ganglia_metadata_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels );
+void Ganglia_metadata_add( Ganglia_metric gmetric, char *name, char *value );
+int Ganglia_value_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels );
+
+void Ganglia_metric_destroy( Ganglia_metric gmetric );
 
 void build_default_gmond_configuration(Ganglia_pool context);
 char *Ganglia_default_collection_groups(void);

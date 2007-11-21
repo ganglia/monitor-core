@@ -1,5 +1,7 @@
 #define __GANGLIA_MTU     1500
 #define __UDP_HEADER_SIZE 28
+#define __MAX_TITLE_LEN 32
+#define __MAX_GROUPS_LEN 128
 #define __MAX_DESC_LEN 128
 %#define UDP_HEADER_SIZE __UDP_HEADER_SIZE
 %#define MAX_DESC_LEN __MAX_DESC_LEN
@@ -18,26 +20,6 @@ enum Ganglia_value_types {
   GANGLIA_VALUE_DOUBLE
 };
 
-struct Ganglia_gmetric_message {
-  string type<>;
-  string name<>;
-  string value<>;
-  string units<>;
-  unsigned int slope;
-  unsigned int tmax;
-  unsigned int dmax;
-};
-
-/* Yemi */
-struct Ganglia_spoof_header {
-  string spoofName<>;
-  string spoofIP<>;
-};
-struct Ganglia_spoof_message {
-  struct Ganglia_spoof_header spheader;
-  struct Ganglia_gmetric_message gmetric;
-};
-
 /*
 ** When adding a new core metric you need to make three changes
 ** in this file:
@@ -53,6 +35,10 @@ struct Ganglia_spoof_message {
 ** In addition do not forget a matching "Ganglia_metric_cb_define"
 ** in gmond/gmond.c
 **
+** NOTE: These enums are only here temporarily to support the built
+**  in metrics. Once the built in metrics have been ported to 
+**  metric modules, the enums as well as the metric description
+**  array below, will go away.
 */
 enum Ganglia_message_formats {
    metric_user_defined = 0, /* gmetric message */
@@ -107,81 +93,120 @@ enum Ganglia_message_formats {
    metric_mem_avm,
    metric_mem_vm,
    GANGLIA_NUM_25_METRICS, /* this should always directly follow the last 25 metric_* */
-/* Yemi */
-   spoof_metric = 4096,
-   spoof_heartbeat = 4097,
    modular_metric = 4098
 };
 
-union Ganglia_message switch (Ganglia_message_formats id) {
-  case metric_user_defined:
-  case modular_metric:
-    Ganglia_gmetric_message gmetric;
-/* Yemi */
-  case spoof_metric:
-    Ganglia_spoof_message spmetric;
-  case spoof_heartbeat:
-    Ganglia_spoof_header spheader;
- 
-  case metric_cpu_num:       /* xdr_u_short */
-    unsigned short u_short;
+/* Structure for transporting extra metadata */
+struct Ganglia_extra_data {
+  string name<>;
+  string data<>;
+};
 
-  case metric_cpu_speed:     /* xdr_u_int */
-  case metric_mem_total:     /* xdr_u_int */
-  case metric_swap_total:    /* xdr_u_int */
-  case metric_boottime:      /* xdr_u_int */
-  case metric_sys_clock:     /* xdr_u_int */
-  case metric_proc_run:      /* xdr_u_int */
-  case metric_proc_total:    /* xdr_u_int */
-  case metric_mem_free:      /* xdr_u_int */
-  case metric_mem_shared:    /* xdr_u_int */
-  case metric_mem_buffers:   /* xdr_u_int */
-  case metric_mem_cached:    /* xdr_u_int */
-  case metric_swap_free:     /* xdr_u_int */
-  case metric_heartbeat:     /* xdr_u_int */
-  case metric_mtu:           /* xdr_u_int */
-  case metric_mem_arm:       /* xdr_u_int */
-  case metric_mem_rm:        /* xdr_u_int */
-  case metric_mem_avm:       /* xdr_u_int */
-  case metric_mem_vm:        /* xdr_u_int */
-    unsigned int u_int;  
+struct Ganglia_metadata_message {
+  string type<>;
+  string name<>;
+  string units<>;
+  unsigned int slope;
+  unsigned int tmax;
+  unsigned int dmax;
+  struct Ganglia_extra_data metadata<>;
+};
 
-  case metric_machine_type:  /* xdr_string */
-  case metric_os_name:       /* xdr_string */
-  case metric_os_release:    /* xdr_string */
-  case metric_gexec:         /* xdr_string */
-  case metric_location:      /* xdr_string */
-    string str<>;
+struct Ganglia_metric_id {
+  string host<>;
+  string name<>;
+  bool spoof;
+};
 
-  case metric_cpu_user:      /* xdr_float */
-  case metric_cpu_nice:      /* xdr_float */
-  case metric_cpu_system:    /* xdr_float */
-  case metric_cpu_idle:      /* xdr_float */
-  case metric_cpu_aidle:     /* xdr_float */
-  case metric_load_one:      /* xdr_float */
-  case metric_load_five:     /* xdr_float */
-  case metric_load_fifteen:  /* xdr_float */
-  case metric_bytes_in:      /* xdr_float */
-  case metric_bytes_out:     /* xdr_float */
-  case metric_pkts_in:       /* xdr_float */
-  case metric_pkts_out:      /* xdr_float */
-  case metric_part_max_used: /* xdr_float */
-  case metric_cpu_wio:       /* xdr_float */
-  case metric_bread_sec:     /* xdr_float */
-  case metric_bwrite_sec:    /* xdr_float */
-  case metric_lread_sec:     /* xdr_float */
-  case metric_lwrite_sec:    /* xdr_float */
-  case metric_rcache:        /* xdr_float */
-  case metric_wcache:        /* xdr_float */
-  case metric_phread_sec:    /* xdr_float */
-  case metric_phwrite_sec:   /* xdr_float */
-  case metric_cpu_intr:      /* xdr_float */
-  case metric_cpu_sintr:     /* xdr_float */
-    float f;
+struct Ganglia_metadatadef {
+  struct Ganglia_metric_id metric_id;
+  struct Ganglia_metadata_message metric;
+};
 
-  case metric_disk_total:    /* xdr_double */
-  case metric_disk_free:     /* xdr_double */
-    double d;
+struct Ganglia_metadatareq {
+  struct Ganglia_metric_id metric_id;
+};
+
+struct Ganglia_gmetric_ushort {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  unsigned short u_short;
+};
+
+struct Ganglia_gmetric_short {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  short s_short;
+};
+
+struct Ganglia_gmetric_int {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  int s_int;  
+};
+
+struct Ganglia_gmetric_uint {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  unsigned int u_int;  
+};
+
+struct Ganglia_gmetric_string {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  string str<>;
+};
+
+struct Ganglia_gmetric_float {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  float f;
+};
+
+struct Ganglia_gmetric_double {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  double d;
+};
+
+
+enum Ganglia_msg_formats {
+   gmetadata_full = 0,
+   gmetric_ushort,
+   gmetric_short,
+   gmetric_int,
+   gmetric_uint,
+   gmetric_string,
+   gmetric_float,
+   gmetric_double,
+   gmetadata_request
+};
+
+union Ganglia_metadata_msg switch (Ganglia_msg_formats id) {
+  case gmetadata_full:
+    Ganglia_metadatadef gfull;
+  case gmetadata_request:
+    Ganglia_metadatareq grequest;
+
+  default:
+    void;
+};
+
+union Ganglia_value_msg switch (Ganglia_msg_formats id) {
+  case gmetric_ushort:
+    Ganglia_gmetric_ushort gu_short;
+  case gmetric_short:
+    Ganglia_gmetric_short gs_short;
+  case gmetric_int:
+    Ganglia_gmetric_int gs_int;
+  case gmetric_uint:
+    Ganglia_gmetric_uint gu_int;
+  case gmetric_string:
+    Ganglia_gmetric_string gstr;
+  case gmetric_float:
+    Ganglia_gmetric_float gf;
+  case gmetric_double:
+    Ganglia_gmetric_double gd;
 
   default:
     void;
@@ -198,6 +223,7 @@ struct Ganglia_25metric
    string fmt<32>;
    int msg_size;
    string desc<__MAX_DESC_LEN>;
+   int *metadata;
 };
 
 #ifdef RPC_HDR

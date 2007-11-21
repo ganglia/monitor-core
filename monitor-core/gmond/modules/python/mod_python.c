@@ -74,6 +74,7 @@ typedef struct
     char slope[32];
     char format[64];
     char desc[512];
+    char groups[512];
     PyObject* pcb;
 }
 py_metric_init_t;
@@ -356,10 +357,15 @@ static void fill_metric_info(PyObject* pdict, py_metric_init_t* minfo)
         strcpy (minfo->desc, "unknown metric");
         err_msg("[PYTHON] No description given. Using %s.\n", minfo->desc);
     }
+    if (get_pydict_string_value(pdict, "groups", minfo->groups, sizeof(minfo->groups)) < 1) {
+        strcpy (minfo->groups, "");
+    }
 }
 
 static void fill_gmi(Ganglia_25metric* gmi, py_metric_init_t* minfo)
 {
+    char *s, *lasts;
+
     /* gmi->key will be automatically assigned by gmond */
     gmi->name = apr_pstrdup (pool, minfo->mname);
     gmi->tmax = minfo->tmax;
@@ -392,6 +398,12 @@ static void fill_gmi(Ganglia_25metric* gmi, py_metric_init_t* minfo)
     gmi->slope = apr_pstrdup(pool, minfo->slope);
     gmi->fmt = apr_pstrdup(pool, minfo->format);
     gmi->desc = apr_pstrdup(pool, minfo->desc);
+
+    MMETRIC_INIT_METADATA(gmi, pool);
+    for (s=(char *)apr_strtok(minfo->groups, ",", &lasts);
+          s!=NULL; s=(char *)apr_strtok(NULL, ",", &lasts)) {
+        MMETRIC_ADD_METADATA(gmi,MGROUP,s);
+    }
 }
 
 static cfg_t* find_module_config(char *modname)

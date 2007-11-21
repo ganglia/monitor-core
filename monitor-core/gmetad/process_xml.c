@@ -575,7 +575,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
    const char *metricval = NULL;
    const char *type = NULL;
    int do_summary;
-   int i;
+   int i, edge;
    hash_t *summary;
    Metric_t *metric;
 
@@ -637,6 +637,9 @@ startElement_METRIC(void *data, const char *el, const char **attr)
          metric->report_end = metric_report_end;
 
          fillmetric(attr, metric, type);
+         edge = metric->stringslen;
+         metric->name = addstring(metric->strings, &edge, name);
+         metric->stringslen = edge;
 
          /* Set local idea of T0. */
          metric->t0 = xmldata->now;
@@ -705,6 +708,61 @@ startElement_METRIC(void *data, const char *el, const char **attr)
          rdatum = hash_insert(&hashkey, &hashval, summary);
          if (!rdatum) err_msg("Could not insert %s metric", name);
       }
+   return 0;
+}
+
+
+static int
+startElement_EXTRA_DATA(void *data, const char *el, const char **attr)
+{
+   xmldata_t *xmldata = (xmldata_t *)data;
+   int edge = xmldata->metric.stringslen;
+   struct xml_tag *xt;
+   int i;
+   Metric_t *metric = &(xmldata->metric);
+   char *name = getfield(metric->strings, metric->name);
+   datum_t *rdatum;
+   datum_t hashkey, hashval;
+
+   if (!xmldata->host_alive) return 0;
+
+   /* Get name for hash key, and val/type for summaries. */
+   for(i = 0; attr[i]; i+=2)
+      {
+         xt = in_xml_list(attr[i], strlen(attr[i]));
+         if (!xt) continue;
+
+         switch (xt->tag)
+            {
+               case DESC_TAG:
+                  metric->desc = addstring(metric->strings, &edge, attr[i+1]);
+                  break;
+               case TITLE_TAG:
+                  metric->title = addstring(metric->strings, &edge, attr[i+1]);
+                  break;
+               case GROUP_TAG:
+                  metric->groups[metric->groupslen++] = addstring(metric->strings, &edge, attr[i+1]);
+                  break;
+               default:
+                  break;
+            }
+         xmldata->metric.stringslen = edge;
+
+         hashkey.data = (void*)name;
+         hashkey.size =  strlen(name) + 1;
+
+         /* Trim metric structure to the correct length. */
+         hashval.size = sizeof(*metric) - GMETAD_FRAMESIZE + metric->stringslen;
+         hashval.data = (void*) metric;
+
+         /* Update full metric in cluster host table. */
+         rdatum = hash_insert(&hashkey, &hashval, xmldata->host.metrics);
+         if (!rdatum)
+            {
+               err_msg("Could not insert %s metric", name);
+            }
+      }
+
    return 0;
 }
 
@@ -881,6 +939,10 @@ start (void *data, const char *el, const char **attr)
             rc = startElement_GANGLIA_XML(data, el, attr);
             break;
 
+         case EXTRA_DATA_TAG:
+            rc = startElement_EXTRA_DATA(data, el, attr);
+            break;
+    
          default:
             break;
       }  /* end switch */
