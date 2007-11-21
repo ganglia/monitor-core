@@ -52,7 +52,7 @@ foreach ($optional_graphs as $g) {
 	$tpl->newBlock('optional_graphs');
 	$tpl->assign('name',$g);
 	$tpl->assign('graph_args',$graph_args);
-	
+	$tpl->gotoBlock('_ROOT');
 }
 
 #
