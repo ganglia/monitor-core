@@ -174,6 +174,7 @@ globals {                    \n\
   host_dmax = 0 /*secs */ \n\
   cleanup_threshold = 300 /*secs */ \n\
   gexec = no             \n\
+  send_metadata_interval = 0     \n\
 } \n\
 \n\
 /* If a cluster attribute is specified, then all gmond hosts are wrapped inside \n\
