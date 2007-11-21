@@ -15,12 +15,15 @@
 #include <apr_tables.h>
 #include <apr_net.h>
 #include <apr_file_io.h>
+#include <apr_network_io.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <fnmatch.h>
 
 #include "protocol.h"  /* generated from ./lib/protocol.x */
+
+static char myhost[APRMAXHOSTLEN+1];
 
 /***** IMPORTANT ************
 Any changes that you make to this file need to be reconciled in ./conf.pod
@@ -56,6 +59,7 @@ static cfg_opt_t globals_opts[] = {
   CFG_INT("host_dmax", 0, CFGF_NONE),
   CFG_INT("cleanup_threshold", 300, CFGF_NONE),
   CFG_BOOL("gexec", 0, CFGF_NONE),
+  CFG_INT("send_metadata_interval", 0, CFGF_NONE),
   CFG_END()
 };
 
@@ -104,6 +108,7 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
 static cfg_opt_t metric_opts[] = {
   CFG_STR("name", NULL, CFGF_NONE ),
   CFG_FLOAT("value_threshold", -1, CFGF_NONE),
+  CFG_STR("title", NULL, CFGF_NONE ),
   CFG_END()
 };
 
@@ -689,16 +694,16 @@ Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len 
   return num_errors;
 }
 
-Ganglia_gmetric
-Ganglia_gmetric_create( Ganglia_pool parent_pool )
+Ganglia_metric
+Ganglia_metric_create( Ganglia_pool parent_pool )
 {
   Ganglia_pool pool = Ganglia_pool_create(parent_pool);
-  Ganglia_gmetric gmetric;
+  Ganglia_metric gmetric;
   if(!pool)
     {
       return NULL;
     }
-  gmetric = apr_pcalloc( pool, sizeof(struct Ganglia_gmetric));
+  gmetric = apr_pcalloc( pool, sizeof(struct Ganglia_metric));
   if(!gmetric)
     {
       Ganglia_pool_destroy(pool);
@@ -706,30 +711,70 @@ Ganglia_gmetric_create( Ganglia_pool parent_pool )
     }
 
   gmetric->pool = pool;
-  gmetric->msg  = apr_pcalloc( pool, sizeof(struct Ganglia_gmetric_message));
+  gmetric->msg  = apr_pcalloc( pool, sizeof(struct Ganglia_metadata_message));
   if(!gmetric->msg)
     {
       Ganglia_pool_destroy(pool);
       return NULL;
     }
+  gmetric->extra = (void*)apr_table_make(pool, 2);
 
   return gmetric;
 }
 
 int
-Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_channels )
+Ganglia_metadata_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels )
 {
-  int len;
+  int len, i;
   XDR x;
   char gmetricmsg[GANGLIA_MAX_MESSAGE_LEN];
-  Ganglia_message msg;
+  Ganglia_metadata_msg msg;
+  const apr_array_header_t *arr;
+  const apr_table_entry_t *elts;
+  const char *spoof = SPOOF;
 
-  msg.id = 0;
-  memcpy( &(msg.Ganglia_message_u.gmetric), gmetric->msg, sizeof(Ganglia_gmetric_message));
+  if (myhost[0] == '\0') 
+      apr_gethostname( (char*)myhost, APRMAXHOSTLEN+1, gmetric->pool);
+
+  msg.id = gmetadata_full;
+  memcpy( &(msg.Ganglia_metadata_msg_u.gfull.metric), gmetric->msg, sizeof(Ganglia_metadata_message));
+  msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gmetric->pool, (char*)myhost);
+  msg.Ganglia_metadata_msg_u.gfull.metric_id.name = apr_pstrdup (gmetric->pool, gmetric->msg->name);
+  msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = FALSE;
+
+  arr = apr_table_elts(gmetric->extra);
+  elts = (const apr_table_entry_t *)arr->elts;
+  msg.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len = arr->nelts;
+  msg.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val = 
+      (Ganglia_extra_data*)apr_pcalloc(gmetric->pool, sizeof(Ganglia_extra_data)*arr->nelts);
+
+  /* add all of the metadata to the packet */
+  for (i = 0; i < arr->nelts; ++i) {
+      if (elts[i].key == NULL)
+          continue;
+
+      /* Replace the host name with the spoof host if it exists in the metadata */
+      if ((elts[i].key[0] == spoof[0]) && strcasecmp(SPOOF_HOST, elts[i].key) == 0) 
+        {
+          msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gmetric->pool, elts[i].val);
+          msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = TRUE;
+        }
+      if ((elts[i].key[0] == spoof[0]) && strcasecmp(SPOOF_HEARTBEAT, elts[i].key) == 0) 
+        {
+          msg.Ganglia_metadata_msg_u.gfull.metric_id.name = apr_pstrdup (gmetric->pool, "heartbeat");
+          msg.Ganglia_metadata_msg_u.gfull.metric.name = msg.Ganglia_metadata_msg_u.gfull.metric_id.name;
+          msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = TRUE;
+        }
+
+      msg.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[i].name = 
+          apr_pstrdup(gmetric->pool, elts[i].key);
+      msg.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[i].data = 
+          apr_pstrdup(gmetric->pool, elts[i].val);
+  }
 
   /* Send the message */
   xdrmem_create(&x, gmetricmsg, GANGLIA_MAX_MESSAGE_LEN, XDR_ENCODE);
-  if(!xdr_Ganglia_message(&x, &msg))
+  if(!xdr_Ganglia_metadata_msg(&x, &msg))
     {
       return 1;
     }
@@ -738,61 +783,70 @@ Ganglia_gmetric_send( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_ch
   return Ganglia_udp_send_message( send_channels, gmetricmsg, len);
 }
 
-// Yemi
 int
-Ganglia_gmetric_send_spoof( Ganglia_gmetric gmetric, Ganglia_udp_send_channels send_channels, char* spoof_info, int heartbeat)
+Ganglia_value_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels )
 {
-  int len;
+  int len, i;
   XDR x;
   char gmetricmsg[GANGLIA_MAX_MESSAGE_LEN];
-  Ganglia_message msg;
-  char *spoofName;
-  char *spoofIP;
-  char *buff;
-  int spoof_info_len;
-  int result;
+  Ganglia_value_msg msg;
+  const apr_array_header_t *arr;
+  const apr_table_entry_t *elts;
+  const char *spoof = SPOOF;
 
-  spoof_info_len = strlen(spoof_info);
-  buff = malloc(spoof_info_len+1);
-  strcpy(buff,spoof_info);
-  spoofIP = buff;
-  if( !(spoofName = strchr(buff+1,':')) ){
-      err_msg("Incorrect format for spoof argument. exiting.\n");
-      exit(1);
-  }
-  *spoofName = 0;
-  spoofName++;
-  if(!(*spoofName)){
-      err_msg("Incorrect format for spoof argument. exiting.\n");
-      exit(1);
-  }
-  printf(" spoofName: %s    spoofIP: %s \n",spoofName,spoofIP);
+  if (myhost[0] == '\0') 
+      apr_gethostname( (char*)myhost, APRMAXHOSTLEN+1, gmetric->pool);
 
-  if(heartbeat){
-      msg.id = spoof_heartbeat;
-      msg.Ganglia_message_u.spheader.spoofName = spoofName;
-      msg.Ganglia_message_u.spheader.spoofIP = spoofIP;
-  }else{
-      msg.id = spoof_metric;
-      msg.Ganglia_message_u.spmetric.spheader.spoofName = spoofName;
-      msg.Ganglia_message_u.spmetric.spheader.spoofIP = spoofIP;
-      msg.Ganglia_message_u.spmetric.gmetric = *(gmetric->msg);
-  }
+  msg.id = gmetric_string;
+  msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gmetric->pool, (char*)myhost);
+  msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup (gmetric->pool, gmetric->msg->name);
+  msg.Ganglia_value_msg_u.gstr.metric_id.spoof = FALSE;
+  msg.Ganglia_value_msg_u.gstr.fmt = apr_pstrdup (gmetric->pool, "%s");
+  msg.Ganglia_value_msg_u.gstr.str = apr_pstrdup (gmetric->pool, gmetric->value);
 
-  // memcpy( &(msg.Ganglia_message_u.gmetric), gmetric->msg, sizeof(Ganglia_gmetric_message));
+  arr = apr_table_elts(gmetric->extra);
+  elts = (const apr_table_entry_t *)arr->elts;
+
+  /* add all of the metadata to the packet */
+  for (i = 0; i < arr->nelts; ++i) {
+      if (elts[i].key == NULL)
+          continue;
+
+      /* Replace the host name with the spoof host if it exists in the metadata */
+      if ((elts[i].key[0] == spoof[0]) && strcasecmp(SPOOF_HOST, elts[i].key) == 0) 
+        {
+          msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gmetric->pool, elts[i].val);
+          msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
+        }
+      if ((elts[i].key[0] == spoof[0]) && strcasecmp(SPOOF_HEARTBEAT, elts[i].key) == 0) 
+        {
+          msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup (gmetric->pool, "heartbeat");
+          msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
+        }
+  }
 
   /* Send the message */
   xdrmem_create(&x, gmetricmsg, GANGLIA_MAX_MESSAGE_LEN, XDR_ENCODE);
-  xdr_Ganglia_message(&x, &msg);
+  if(!xdr_Ganglia_value_msg(&x, &msg))
+    {
+      return 1;
+    }
   len = xdr_getpos(&x); 
-  result = Ganglia_udp_send_message( send_channels, gmetricmsg, len);
-  free(buff);
-  return result;
+  /* Send the encoded data along...*/
+  return Ganglia_udp_send_message( send_channels, gmetricmsg, len);
+}
 
+int
+Ganglia_metric_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels )
+{
+  int ret = Ganglia_metadata_send(gmetric, send_channels);
+  if (!ret)
+      ret = Ganglia_value_send(gmetric, send_channels);
+  return ret;
 }
 
 void
-Ganglia_gmetric_destroy( Ganglia_gmetric gmetric )
+Ganglia_metric_destroy( Ganglia_metric gmetric )
 {
   if(!gmetric)
     return;
@@ -818,7 +872,7 @@ int ret=1;
 }
 
 /*
- * struct Ganglia_gmetric_message {
+ * struct Ganglia_metadata_message {
  *   char *type;
  *   char *name;
  *   char *value;
@@ -829,7 +883,7 @@ int ret=1;
  * };
  */
 int
-Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *type, char *units, unsigned int slope, unsigned int tmax, unsigned int dmax)
+Ganglia_metric_set( Ganglia_metric gmetric, char *name, char *value, char *type, char *units, unsigned int slope, unsigned int tmax, unsigned int dmax)
 {
   /* Make sure all the params look ok */
   if(!gmetric||!name||!value||!type||!units||slope<0||slope>4)
@@ -857,7 +911,7 @@ Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *typ
 
   /* All the data is there and validated... copy it into the structure */
   gmetric->msg->name = apr_pstrdup( gmetric->pool, name);
-  gmetric->msg->value = apr_pstrdup( gmetric->pool, value);
+  gmetric->value = apr_pstrdup( gmetric->pool, value);
   gmetric->msg->type  = apr_pstrdup( gmetric->pool, type);
   gmetric->msg->units = apr_pstrdup( gmetric->pool, units);
   gmetric->msg->slope = slope;
@@ -865,6 +919,13 @@ Ganglia_gmetric_set( Ganglia_gmetric gmetric, char *name, char *value, char *typ
   gmetric->msg->dmax = dmax;
 
   return 0;
+}
+
+void
+Ganglia_metadata_add( Ganglia_metric gmetric, char *name, char *value)
+{
+  apr_table_add((apr_table_t*)gmetric->extra, name, value);
+  return;
 }
 
 ganglia_slope_t cstr_to_slope(const char* str)
@@ -936,7 +997,7 @@ int has_wildcard(const char *pattern)
                 }
                 break;
         
-            case '[':	
+            case '[':   
                 ++nesting;
                 break;
         

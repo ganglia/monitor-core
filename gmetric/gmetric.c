@@ -7,7 +7,7 @@
 #include "cmdline.h"
 
 Ganglia_pool global_context;
-Ganglia_gmetric gmetric;
+Ganglia_metric gmetric;
 Ganglia_gmond_config gmond_config;
 Ganglia_udp_send_channels send_channels;
 
@@ -44,25 +44,21 @@ main( int argc, char *argv[] )
     }
 
   /* create the message */
-  gmetric = Ganglia_gmetric_create(global_context);
+  gmetric = Ganglia_metric_create(global_context);
   if(!gmetric)
     {
       fprintf(stderr,"Unable to allocate gmetric structure. Exiting.\n");
       exit(1);
     }
-  // Yemi 
-  if(args_info.spoof_given && args_info.heartbeat_given){
-      rval = 0;
-  }else{
-      if( ! (args_info.name_given && args_info.value_given && 
-	     args_info.type_given)){
-          fprintf(stderr,"Incorrect options supplied, exiting.\n");
-          exit(1);
-      }
-      rval = Ganglia_gmetric_set( gmetric, args_info.name_arg, args_info.value_arg,
-			      args_info.type_arg, args_info.units_arg, cstr_to_slope(args_info.slope_arg),
-			      args_info.tmax_arg, args_info.dmax_arg);
-  }
+  if( ! (args_info.name_given && args_info.value_given && args_info.type_given))
+    {
+      fprintf(stderr,"Incorrect options supplied, exiting.\n");
+      exit(1);
+    }
+  rval = Ganglia_metric_set( gmetric, args_info.name_arg, args_info.value_arg,
+             args_info.type_arg, args_info.units_arg, cstr_to_slope(args_info.slope_arg),
+             args_info.tmax_arg, args_info.dmax_arg);
+
   /* TODO: make this less ugly later */
   switch(rval)
     {
@@ -80,21 +76,28 @@ main( int argc, char *argv[] )
       exit(1);
     }
 
-  /* send the message */
-  //Yemi
-  if(!strlen(args_info.spoof_arg))
+  /* TODO: Try to validate the spoof arg format.  A better validation could 
+   *  be done here. This is just checking for a colon. */
+  if( !strchr(args_info.spoof_arg,':'))
     {
-      rval = Ganglia_gmetric_send(gmetric, send_channels);
-    }else{
-      rval = Ganglia_gmetric_send_spoof(gmetric, send_channels,args_info.spoof_arg,args_info.heartbeat_given);
+      fprintf(stderr,"Incorrect format for spoof argument. exiting.\n");
+      exit(1);
     }
+
+  if(args_info.spoof_given)
+      Ganglia_metadata_add(gmetric, SPOOF_HOST, args_info.spoof_arg);
+  if(args_info.heartbeat_given)
+      Ganglia_metadata_add(gmetric, SPOOF_HEARTBEAT, "yes");
+
+  /* send the message */
+  rval = Ganglia_metric_send(gmetric, send_channels);
   if(rval)
     {
       fprintf(stderr,"There was an error sending to %d of the send channels.\n", rval);
     }
 
   /* cleanup */
-  Ganglia_gmetric_destroy(gmetric); /* not really necessary but for symmetry */
+  Ganglia_metric_destroy(gmetric); /* not really necessary but for symmetry */
   Ganglia_pool_destroy(global_context);
 
   return 0;

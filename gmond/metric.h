@@ -10,6 +10,8 @@
 #include <apr_pools.h>
 #include <apr_tables.h>
 
+#define MGROUP "GROUP"
+
 typedef void (*metric_info_func)(Ganglia_25metric *gmi);
 typedef g_val_t (*metric_func)(void);
 
@@ -89,6 +91,16 @@ struct mmodule_struct {
     /** Metric callback function */
     g_val_t (*handler)(int metric_index); /* callback function */
 };
+
+/* Convenience macros for adding metadata key/value pairs to a metric structure element */
+#define MMETRIC_INIT_METADATA(m,p) \
+    do {    \
+        void **t = (void**)&((m)->metadata);   \
+        *t = (void*)apr_table_make(p, 2);    \
+    } while (0)
+
+#define MMETRIC_ADD_METADATA(m,k,v) \
+    apr_table_add((apr_table_t*)(m)->metadata,k,v)
 
 /** Use this in all standard modules */
 #define STD_MMODULE_STUFF	MMODULE_MAGIC_NUMBER_MAJOR, \
