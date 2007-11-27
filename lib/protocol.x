@@ -169,9 +169,14 @@ struct Ganglia_gmetric_double {
   double d;
 };
 
-
+/* Start the refactored XDR packet ids at 128 to 
+** avoid confusing the new packets with the older ones.
+** this is to avoid trying to decode older XDR packets
+** as newer packets if an older version of gmond happens
+** to be talking on the same multicast channel.
+*/
 enum Ganglia_msg_formats {
-   gmetadata_full = 0,
+   gmetadata_full = 128,
    gmetric_ushort,
    gmetric_short,
    gmetric_int,
