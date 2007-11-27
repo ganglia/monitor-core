@@ -1307,6 +1307,10 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
 
   if (!data || !val)
       return APR_SUCCESS;
+  if (!strcasecmp(data->name, "heartbeat") || !strcasecmp(data->name, "location")) 
+	{
+	  return APR_SUCCESS;
+    }
   
   len = apr_snprintf(metricxml, 1024,
           "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\" SOURCE=\"gmond\">\n",
