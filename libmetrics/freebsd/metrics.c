@@ -211,7 +211,7 @@ mem_total_func ( void )
 {
    g_val_t val;
    size_t len;
-   long total;
+   u_long total;
 
    len = sizeof(total);
 
