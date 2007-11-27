@@ -168,8 +168,8 @@ struct Ganglia_metric_callback {
    float value_threshold;/* the value threshold */
    char *title;         /* Altername metric name or short description */
    Ganglia_25metric *info;/* the information about this metric */
-   g_val_t (*cb)(void); /* callback function */
-   g_val_t (*cbindexed)(int); /* multi-metric callback function */
+   metric_func_void cb; /* callback function (deprecated) */
+   metric_func cbindexed; /* multi-metric callback function */
    g_val_t now;         /* the current value */
    g_val_t last;        /* the last value */
    Ganglia_value_msg msg;     /* the message to send */
@@ -1308,9 +1308,7 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
   if (!data || !val)
       return APR_SUCCESS;
   if (!strcasecmp(data->name, "heartbeat") || !strcasecmp(data->name, "location")) 
-	{
-	  return APR_SUCCESS;
-    }
+      return APR_SUCCESS;
   
   len = apr_snprintf(metricxml, 1024,
           "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\" SOURCE=\"gmond\">\n",
@@ -1491,7 +1489,7 @@ send_message( char *buf, int len )
 }
 
 static Ganglia_metric_callback *
-Ganglia_metric_cb_define(  char *name, g_val_t (*cb)(void), int index, mmodule *modp)
+Ganglia_metric_cb_define(char *name, metric_func cb, int index, mmodule *modp)
 {
   Ganglia_metric_callback *metric = apr_pcalloc( global_context, sizeof(Ganglia_metric_callback));
   if(!metric)
@@ -1505,7 +1503,7 @@ Ganglia_metric_cb_define(  char *name, g_val_t (*cb)(void), int index, mmodule *
      callback functions.  This is to support metric modules or handlers
      that have the ability to gather more than one metric. */
   if (index == CB_NOINDEX) 
-      metric->cb = cb;
+      metric->cb = (metric_func_void)cb;
   else
       metric->cbindexed = cb;
 
@@ -1651,7 +1649,7 @@ setup_metric_callbacks( void )
   metric_callbacks = apr_hash_make( global_context );
 
   while (modp) {
-      Ganglia_25metric* metric_info;
+      const Ganglia_25metric* metric_info;
       int i;
 
       if (modp->init && modp->init(global_context)) {
@@ -1671,64 +1669,64 @@ setup_metric_callbacks( void )
   }
 
   /* All platforms support these metrics */
-  Ganglia_metric_cb_define("cpu_num",        cpu_num_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_speed",      cpu_speed_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_total",      mem_total_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("swap_total",     swap_total_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("boottime",       boottime_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("sys_clock",      sys_clock_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("machine_type",   machine_type_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("os_name",        os_name_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("os_release",     os_release_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mtu",            mtu_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_user",       cpu_user_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_nice",       cpu_nice_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_system",     cpu_system_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_wio",        cpu_wio_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_intr",       cpu_intr_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_sintr",      cpu_sintr_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_idle",       cpu_idle_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_aidle",      cpu_aidle_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("load_one",       load_one_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("load_five",      load_five_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("load_fifteen",   load_fifteen_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("proc_run",       proc_run_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("proc_total",     proc_total_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_free",       mem_free_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_shared",     mem_shared_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_buffers",    mem_buffers_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_cached",     mem_cached_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("swap_free",      swap_free_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("bytes_in",       bytes_in_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("bytes_out",      bytes_out_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("pkts_in",        pkts_in_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("pkts_out",       pkts_out_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("disk_total",     disk_total_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("disk_free",      disk_free_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("part_max_used",  part_max_used_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_num",        (metric_func)cpu_num_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_speed",      (metric_func)cpu_speed_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mem_total",      (metric_func)mem_total_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("swap_total",     (metric_func)swap_total_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("boottime",       (metric_func)boottime_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("sys_clock",      (metric_func)sys_clock_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("machine_type",   (metric_func)machine_type_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("os_name",        (metric_func)os_name_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("os_release",     (metric_func)os_release_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mtu",            (metric_func)mtu_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_user",       (metric_func)cpu_user_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_nice",       (metric_func)cpu_nice_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_system",     (metric_func)cpu_system_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_wio",        (metric_func)cpu_wio_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_intr",       (metric_func)cpu_intr_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_sintr",      (metric_func)cpu_sintr_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_idle",       (metric_func)cpu_idle_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("cpu_aidle",      (metric_func)cpu_aidle_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("load_one",       (metric_func)load_one_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("load_five",      (metric_func)load_five_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("load_fifteen",   (metric_func)load_fifteen_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("proc_run",       (metric_func)proc_run_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("proc_total",     (metric_func)proc_total_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mem_free",       (metric_func)mem_free_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mem_shared",     (metric_func)mem_shared_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mem_buffers",    (metric_func)mem_buffers_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mem_cached",     (metric_func)mem_cached_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("swap_free",      (metric_func)swap_free_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("bytes_in",       (metric_func)bytes_in_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("bytes_out",      (metric_func)bytes_out_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("pkts_in",        (metric_func)pkts_in_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("pkts_out",       (metric_func)pkts_out_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("disk_total",     (metric_func)disk_total_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("disk_free",      (metric_func)disk_free_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("part_max_used",  (metric_func)part_max_used_func, CB_NOINDEX, NULL);
 
   /* These are "internal" metrics for host heartbeat,location,gexec */
-  Ganglia_metric_cb_define("heartbeat",      heartbeat_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("location",       location_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("gexec",          gexec_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("heartbeat",      (metric_func)heartbeat_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("location",       (metric_func)location_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("gexec",          (metric_func)gexec_func, CB_NOINDEX, NULL);
 
   /* Add platform specific metrics here... */
 #if SOLARIS
-  Ganglia_metric_cb_define("bread_sec",      bread_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("bwrite_sec",     bwrite_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("lread_sec",      lread_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("lwrite_sec",     lwrite_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("phread_sec",     phread_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("phwrite_sec",    phwrite_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("rcache",         rcache_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("wcache",         wcache_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("bread_sec",      (metric_func)bread_sec_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("bwrite_sec",     (metric_func)bwrite_sec_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("lread_sec",      (metric_func)lread_sec_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("lwrite_sec",     (metric_func)lwrite_sec_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("phread_sec",     (metric_func)phread_sec_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("phwrite_sec",    (metric_func)phwrite_sec_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("rcache",         (metric_func)rcache_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("wcache",         (metric_func)wcache_func, CB_NOINDEX, NULL);
 #endif
 
 #if HPUX
-  Ganglia_metric_cb_define("mem_arm",        mem_arm_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_rm",         mem_rm_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_avm",        mem_avm_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_vm",         mem_vm_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mem_arm",        (metric_func)mem_arm_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mem_rm",         (metric_func)mem_rm_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mem_avm",        (metric_func)mem_avm_func, CB_NOINDEX, NULL);
+  Ganglia_metric_cb_define("mem_vm",         (metric_func)mem_vm_func, CB_NOINDEX, NULL);
 #endif
 
 }
