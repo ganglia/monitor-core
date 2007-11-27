@@ -646,13 +646,15 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
       spoofIP = buff;
       if( !(spoofName = strchr(buff+1,':')) ){
           err_msg("Incorrect format for spoof argument. exiting.\n");
-          exit(1);
+          if (buff) free(buff);
+          return NULL;
       }
       *spoofName = 0;
       spoofName++;
       if(!(*spoofName)){
           err_msg("Incorrect format for spoof argument. exiting.\n");
-          exit(1);
+          if (buff) free(buff);
+          return NULL;
       }
       debug_msg(" spoofName: %s    spoofIP: %s \n",spoofName,spoofIP);
 
@@ -1045,8 +1047,15 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   switch (id) 
     {
     case gmetadata_request:
-      xdr_Ganglia_metadata_msg(&x, &fmsg);
-      hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.grequest.metric_id));
+      ret = xdr_Ganglia_metadata_msg(&x, &fmsg);
+      if (ret)
+          hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.grequest.metric_id));
+      if(!ret || !hostdata)
+        {
+          /* Processing of this message is finished ... */
+          xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&fmsg);
+          break;
+        }
       debug_msg("Processing a metric metadata request message from %s", hostdata->hostname);
       Ganglia_metadata_request(hostdata, &fmsg);
       break;
