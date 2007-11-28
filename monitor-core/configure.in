@@ -210,6 +210,14 @@ AC_ARG_ENABLE( python,
 
 AM_CONDITIONAL(BUILD_PYTHON, test "$enable_python" = yes)
 
+AC_ARG_ENABLE( status,
+[  --enable-status         compile and install modgstatus to enable gmond status metric module support],
+[ enable_status="yes" 
+  AC_DEFINE(GSTATUS, 1, GSTATUS)], 
+[ enable_status="no" ] )
+
+AM_CONDITIONAL(BUILD_STATUS, test "$enable_status" = yes)
+
 dnl ##################################################################
 dnl Checks for libraries.
 dnl The order of these tests is the *reverse* order of the libraries in
@@ -550,6 +558,7 @@ AC_OUTPUT(Makefile
           gmond/modules/example/Makefile
           gmond/modules/cpu/Makefile
           gmond/modules/python/Makefile
+          gmond/modules/status/Makefile
           gmond/python_modules/Makefile
           gmetric/Makefile 
           web/version.php)

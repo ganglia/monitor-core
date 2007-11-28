@@ -32,6 +32,7 @@
 #include "g25_config.h" /* for converting old file formats to new */
 #include "daemon_init.h"
 #include "metric.h"
+#include "scoreboard.h"
 
 
 #if (APR_MAJOR_VERSION >= 1) && (APR_MINOR_VERSION >= 2)
@@ -800,6 +801,8 @@ Ganglia_metadata_check( apr_pool_t *p, Ganglia_host *host, Ganglia_value_msg *vm
         msg.Ganglia_metadata_msg_u.grequest.metric_id.spoof = FALSE;
 
         debug_msg("sending metadata request flag for metric: %s host: %s", metric_name, host->hostname);
+        ganglia_scoreboard_inc(PKTS_SENT_REQUEST);
+        ganglia_scoreboard_inc(PKTS_SENT_ALL);
 
         /* Send the message */
         xdrmem_create(&x, msgbuf, GANGLIA_MAX_MESSAGE_LEN, XDR_ENCODE);
@@ -1031,6 +1034,8 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       return;
     }
 
+  ganglia_scoreboard_inc(PKTS_RECVD_ALL);
+
   /* Create the XDR receive stream */
   xdrmem_create(&x, buf, max_udp_message_len, XDR_DECODE);
 
@@ -1047,11 +1052,13 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   switch (id) 
     {
     case gmetadata_request:
+      ganglia_scoreboard_inc(PKTS_RECVD_REQUEST);
       ret = xdr_Ganglia_metadata_msg(&x, &fmsg);
       if (ret)
           hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.grequest.metric_id));
       if(!ret || !hostdata)
         {
+          ganglia_scoreboard_inc(PKTS_RECVD_FAILED);
           /* Processing of this message is finished ... */
           xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&fmsg);
           break;
@@ -1060,11 +1067,13 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       Ganglia_metadata_request(hostdata, &fmsg);
       break;
     case gmetadata_full:
+      ganglia_scoreboard_inc(PKTS_RECVD_METADATA);
       ret = xdr_Ganglia_metadata_msg(&x, &fmsg);
       if (ret)
           hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.gfull.metric_id));
       if(!ret || !hostdata)
         {
+          ganglia_scoreboard_inc(PKTS_RECVD_FAILED);
           /* Processing of this message is finished ... */
           xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&fmsg);
           break;
@@ -1079,11 +1088,13 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
     case gmetric_string:
     case gmetric_float:
     case gmetric_double:
+      ganglia_scoreboard_inc(PKTS_RECVD_VALUE);
       ret = xdr_Ganglia_value_msg(&x, &vmsg);
       if (ret)
           hostdata = Ganglia_host_get(remoteip, remotesa, &(vmsg.Ganglia_value_msg_u.gstr.metric_id));
       if(!ret || !hostdata)
         {
+          ganglia_scoreboard_inc(PKTS_RECVD_FAILED);
           /* Processing of this message is finished ... */
           xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&fmsg);
           break;
@@ -1092,6 +1103,9 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       Ganglia_value_save(hostdata, &vmsg);
       Ganglia_update_vidals(hostdata, &vmsg);
       Ganglia_metadata_check( p, hostdata, &vmsg);
+      break;
+    default:
+      ganglia_scoreboard_inc(PKTS_RECVD_IGNORED);
       break;
   }
 
@@ -2083,14 +2097,18 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
 
                 debug_msg("\tsending metadata for metric: %s", cb->name);
 
+                ganglia_scoreboard_inc(PKTS_SENT_METADATA);
                 errors = Ganglia_metadata_send(gmetric, udp_send_channels);
                 if (errors) 
                   {
                     err_msg("Error %d sending the modular data for %s\n", errors, cb->name);
                     debug_msg("\tsent message '%s' with %d errors", cb->name, errors);
+                    ganglia_scoreboard_inc(PKTS_SENT_FAILED);
                   }
-                else
+                else 
+                  {
                     cb->metadata_last_sent = now; /* mark the metadata as sent */
+                  }
               }
 
             apr_pool_destroy(gmetric->pool);
@@ -2102,12 +2120,16 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
         len = xdr_getpos(&x); 
         errors = send_message( metricmsg, len );
         debug_msg("\tsent message '%s' of length %d with %d errors", cb->name, len, errors);
+        ganglia_scoreboard_inc(PKTS_SENT_VALUE);
+        ganglia_scoreboard_inc(PKTS_SENT_ALL);
 
         if(!errors)
           {
             /* If the message send ok. Schedule the next time threshold. */
             group->next_send = now + (group->time_threshold * APR_USEC_PER_SEC);
           }
+        else
+            ganglia_scoreboard_inc(PKTS_SENT_FAILED);
       }
 }
  
@@ -2269,6 +2291,21 @@ cleanup_data( Ganglia_pool pool, apr_time_t now)
   apr_pool_clear( pool );
 }
 
+void initialize_scoreboard()
+{
+    ganglia_scoreboard_init(global_context);
+    ganglia_scoreboard_add(PKTS_RECVD_ALL, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_RECVD_FAILED, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_RECVD_IGNORED, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_RECVD_METADATA, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_RECVD_VALUE, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_RECVD_REQUEST, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_SENT_ALL, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_SENT_METADATA, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_SENT_VALUE, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_SENT_REQUEST, GSB_READ_RESET);
+}
+
 int done = 0;
 void sig_handler(int i)
 {
@@ -2313,6 +2350,7 @@ main ( int argc, char *argv[] )
   if(args_info.metrics_flag)
     {
       load_metric_modules();
+      initialize_scoreboard();
       setup_metric_callbacks();
       print_metric_list();
       fflush( stdout );
@@ -2346,6 +2384,8 @@ main ( int argc, char *argv[] )
 
   apr_signal( SIGPIPE, SIG_IGN );
   apr_signal( SIGINT, sig_handler );
+
+  initialize_scoreboard();
 
   /* This must occur before we setuid_if_necessary() particularly on freebsd
    * where we need to be root to access /dev/mem to initialize metric collection */

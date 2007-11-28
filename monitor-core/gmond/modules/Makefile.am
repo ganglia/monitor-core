@@ -4,6 +4,9 @@ else
 if BUILD_PYTHON
 PYTHON_SUBDIR = python
 endif
-SUBDIRS = example cpu $(PYTHON_SUBDIR)
+if BUILD_STATUS
+STATUS_SUBDIR = status
+endif
+SUBDIRS = example cpu $(STATUS_SUBDIR) $(PYTHON_SUBDIR)
 endif
 
