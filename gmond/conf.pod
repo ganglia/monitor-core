@@ -73,8 +73,10 @@ instance of B<gmond>. Currently only the B<location> string attribute is
 supported. Example:
 
  host {
-   location = "(1,2,3)"
+   location = "1,2,3"
  }
+
+The numbers represent Rack, Rank and Plane respectively.
 
 =head2 globals
 
