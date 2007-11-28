@@ -365,10 +365,10 @@ function physical_racks()
    if (is_array($hosts_up)) {
       foreach ($hosts_up as $host=>$v) {
          # Try to find the node's location in the cluster.
-         list($rack, $rank) = findlocation($v);
+         list($rack, $rank, $plane) = findlocation($v);
 
-         if ($rack>=0 and $rank>=0) {
-            $racks[$rack][$rank]=$v['NAME'];
+         if ($rack>=0 and $rank>=0 and $plane>=0) {
+            $racks[$rack][]=$v['NAME'];
             continue;
          }
          else {
@@ -382,9 +382,9 @@ function physical_racks()
    }
    if (is_array($hosts_down)) {
       foreach ($hosts_down as $host=>$v) {
-         list($rack, $rank) = findlocation($v);
-         if ($rack>=0 and $rank>=0) {
-            $racks[$rack][$rank]=$v['NAME'];
+         list($rack, $rank, $plane) = findlocation($v);
+         if ($rack>=0 and $rank>=0 and $plane>=0) {
+            $racks[$rack][]=$v['NAME'];
             continue;
          }
          else {
