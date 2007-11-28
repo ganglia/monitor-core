@@ -1,0 +1,55 @@
+modules {
+  module {
+    name = "gstatus_module"
+    path = "@libdir@/ganglia/modgstatus.so" 
+  }
+}
+
+
+/* Gmond status metrics */ 
+collection_group { 
+  collect_every = 10 
+  time_threshold = 20 
+  metric { 
+    name = "gmond_pkts_recvd_all" 
+    value_threshold = 1.0 
+  } 
+  metric { 
+    name = "gmond_pkts_recvd_failed" 
+    value_threshold = 1.0 
+  } 
+  metric { 
+    name = "gmond_pkts_recvd_ignored" 
+    value_threshold = 1.0 
+  } 
+  metric { 
+    name = "gmond_pkts_recvd_metadata" 
+    value_threshold = 1.0 
+  } 
+  metric { 
+    name = "gmond_pkts_recvd_value" 
+    value_threshold = 1.0 
+  } 
+  metric { 
+    name = "gmond_pkts_recvd_request" 
+    value_threshold = 1.0 
+  } 
+  metric { 
+    name = "gmond_pkts_sent_all" 
+    value_threshold = 1.0 
+  } 
+  metric { 
+    name = "gmond_pkts_sent_metadata" 
+    value_threshold = 1.0 
+  } 
+  metric { 
+    name = "gmond_pkts_sent_value" 
+    value_threshold = 1.0 
+  } 
+  metric { 
+    name = "gmond_pkts_sent_request" 
+    value_threshold = 1.0 
+  } 
+}
+
+
