@@ -19,6 +19,7 @@ collection_group {
   time_threshold = 50 
   metric { 
     name = "Random_Numbers"
+    title = "Random Numbers Metric"
     value_threshold = 1.0 
   } 
 }
@@ -28,6 +29,7 @@ collection_group {
   time_threshold = 20 
   metric { 
     name = "Constant_Number"
+    title = "Constant Number Metric"
   } 
 } 
 
