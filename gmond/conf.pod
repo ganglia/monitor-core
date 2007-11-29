@@ -85,7 +85,7 @@ such as whether is should daemonize, what user it should run as,
 whether is should send/receive date and such.  The B<globals>
 section has the following attributes: B<daemonize>, B<setuid>, B<user>,
 B<debug_level>, B<mute>, B<deaf>, B<host_dmax>, B<cleanup_threshold>,
-and B<gexec>.
+B<gexec> and B<send_metadata_interval>.
 
 For example,
 
@@ -128,6 +128,17 @@ The B<gexec> boolean allows you to specify whether gmond will announce
 the hosts availability to run gexec jobs.  B<Note>: this requires
 the B<gexecd> is running on the host and the proper keys have been
 installed.  
+
+The B<send_metadata_interval> establishes an interval in which gmond
+will send or resend the metadata packets that describe each enabled 
+metric. This directive by default is set to 0 which means that gmond will
+only send the metadata packets at startup and upon request from other 
+gmond nodes running remotely. If a new machine running gmond is added
+to a cluster, it needs to announce itself and inform all other nodes of the
+metrics that it currently supports. In multicast mode, this isn't a problem
+because any node can request the metadata of all other nodes in the cluster.
+However in unicast mode, a resend interval must be established. The interval
+value is the minimum number of seconds between resends.
 
 =head2 udp_send_channel
 
@@ -274,9 +285,9 @@ the following attributes: B<collect_once>, B<collect_every>
 and B<time_threshold>.  A B<collection_group> must also contain one
 or more B<metric> sections.
 
-The B<metric> section has the following attributes: B<name> and
-B<value_threshold>.  For a list of available metric names, run
-the following command:
+The B<metric> section has the following attributes: B<name>,
+B<value_threshold> and B<title>.  For a list of available metric 
+names, run the following command:
 
   % gmond -m
 
@@ -287,6 +298,7 @@ Here is an example of a collection group for a static metric...
     time_threshold = 1800
     metric {
      name = "cpu_num"
+     title = "Number of CPUs"
     }
   }
 
@@ -311,10 +323,12 @@ Here is an example of a collection group for a volatile metric...
     metric {
       name = "cpu_user"
       value_threshold = 5.0
+      title = "CPU User"
     }
     metric {
       name = "cpu_idle"
       value_threshold = 10.0
+      title = "CPU Idle"
     }
   }
 
@@ -333,16 +347,50 @@ B<udp_send_channel>s defined.
 It's important to note that all metrics in a collection group are sent
 even when only a single B<value_threshold> is surpassed.
 
-=head2 include
+In addition a user friendly title can be substituted for the metric name
+by including a B<title> within the B<metric> section.
 
-Useful if you want to include another configuration file; for example:
+=head2 Modules
 
-  include("globals.conf")
+A B<modules> section contains the parameters that are necessary to load a
+metric module. A metric module is a dynamically loadable module that 
+extends the available metrics that gmond is able to collect. Each B<modules>
+section contains at least one B<module> section.  Within a B<module> section
+are the directives B<name>, B<path> and B<params>.  The module B<name> is the name
+of the module as determined by the module structure. The B<path> is the path
+from which gmond is expected load the module.  The B<params> directive can 
+be used to pass a single string parameter directly to the module initialization 
+function. Multiple parameters can be passed to the module's initialization 
+function by including one or more B<param> sections. Each B<param> section 
+must be named and contain a B<value> directive. Once a module as been loaded,
+the additional metrics can be discovered by invoking B<gmond -m>.
 
-  udp_send_channel {
-    mcast_join = 239.2.11.71
-    port       = 8649
-  }
+   modules {
+     module {
+       name = "example_module"
+       path = "/usr/lib/ganglia/modules/modexample.so"
+       params = "An extra raw parameter"
+       param RandomMax {
+         value = 75
+       }
+       param ConstantValue {
+         value = 25
+       }
+     }
+   }
+
+
+=head2 Include
+
+This directive allows the user to include additional configuration files
+rather than having add all gmond configuration directives to the gmond.conf 
+file. The following example includes any file with the extension of .conf 
+contained in the directory conf.d as if the contents of the included 
+configuration files were part of the original gmond.conf file. This allows 
+the user to modularize their configuration file.  One usage example might 
+be to load individual metric modules by including module specific .conf files.
+
+include ('/etc/ganglia/conf.d/*.conf')
 
 =head1 ACCESS CONTROL
 
