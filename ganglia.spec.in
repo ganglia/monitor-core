@@ -242,6 +242,9 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/example.conf
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/example.pyconf
 
+# Don't install the status modules
+%__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/modgstatus.conf
+
 # Clean up the .conf.in files
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/*.conf.in
 
@@ -291,6 +294,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/ganglia.h
+%{_includedir}/scoreboard.h
 %{_libdir}/libganglia*.so
 %{_libdir}/libganglia*.*a
 %{_bindir}/ganglia-config
@@ -340,6 +344,9 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Nov 29 2007 Brad Nicholes <bnicholes@novell.com>
+- Do not install the modgstatus.conf file
+- Add scoreboard.h to the -devel package
 * Fri Nov 16 2007 Bernard Li <bernard@vanhpc.org>
 - Set variable conf_dir to /etc/ganglia
 - Migrate /etc/{gmond,gmetad}.conf files to /etc/ganglia for upgrades etc.
