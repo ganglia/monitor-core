@@ -11,7 +11,7 @@ $gridname = isset($_GET["G"]) ?
 	escapeshellcmd(rawurldecode($_GET["G"])) : NULL;
 $hostname = isset($_GET["h"]) ?
 	escapeshellcmd(rawurldecode($_GET["h"])) : NULL;
-$range = isset($_GET["r"]) ?
+$range = in_array($_GET["r"],array("hour","day","week","month","year")) ?
 	escapeshellcmd(rawurldecode($_GET["r"])) : NULL;
 $metricname = isset($_GET["m"]) ?
 	escapeshellcmd(rawurldecode($_GET["m"])) : NULL;
