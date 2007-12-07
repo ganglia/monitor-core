@@ -78,7 +78,7 @@ main( int argc, char *argv[] )
 
   /* TODO: Try to validate the spoof arg format.  A better validation could 
    *  be done here. This is just checking for a colon. */
-  if( !strchr(args_info.spoof_arg,':'))
+  if(args_info.spoof_given && !strchr(args_info.spoof_arg,':'))
     {
       fprintf(stderr,"Incorrect format for spoof argument. exiting.\n");
       exit(1);
