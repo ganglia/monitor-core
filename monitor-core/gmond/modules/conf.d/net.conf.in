@@ -1,0 +1,29 @@
+modules {
+  module {
+    name = "net_module"
+    path = "@libdir@/ganglia/modnet.so" 
+  }
+}
+
+
+collection_group { 
+  collect_every = 40 
+  time_threshold = 300 
+  metric { 
+    name = "mbytes_out" 
+    value_threshold = 4096 
+  } 
+  metric { 
+    name = "mbytes_in" 
+    value_threshold = 4096 
+  } 
+  metric { 
+    name = "mpkts_in" 
+    value_threshold = 256 
+  } 
+  metric { 
+    name = "mpkts_out" 
+    value_threshold = 256 
+  } 
+}
+

@@ -1,0 +1,26 @@
+modules {
+  module {
+    name = "load_module"
+    path = "@libdir@/ganglia/modload.so" 
+  }
+}
+
+
+collection_group { 
+  collect_every = 20 
+  time_threshold = 90 
+  /* Load Averages */ 
+  metric { 
+    name = "mload_one" 
+    value_threshold = "1.0" 
+  } 
+  metric { 
+    name = "mload_five" 
+    value_threshold = "1.0" 
+  } 
+  metric { 
+    name = "mload_fifteen" 
+    value_threshold = "1.0" 
+  }
+} 
+
