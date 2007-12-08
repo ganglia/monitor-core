@@ -1,0 +1,22 @@
+modules {
+  module {
+    name = "proc_module"
+    path = "@libdir@/ganglia/modproc.so" 
+  }
+}
+
+
+/* This group collects the number of running and total processes */ 
+collection_group { 
+  collect_every = 80 
+  time_threshold = 950 
+  metric { 
+    name = "mproc_run" 
+    value_threshold = "1.0" 
+  } 
+  metric { 
+    name = "mproc_total" 
+    value_threshold = "1.0" 
+  } 
+}
+
