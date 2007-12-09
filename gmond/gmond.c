@@ -1102,7 +1102,9 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       debug_msg("Processing a metric value message from %s", hostdata->hostname);
       Ganglia_value_save(hostdata, &vmsg);
       Ganglia_update_vidals(hostdata, &vmsg);
+#ifdef USING_APR_12
       Ganglia_metadata_check( p, hostdata, &vmsg);
+#endif
       break;
     default:
       ganglia_scoreboard_inc(PKTS_RECVD_IGNORED);
