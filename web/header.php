@@ -46,7 +46,7 @@ else if ($gridwalk=="back")
             array_pop($gridstack);
          }
    }
-$gridstack_str = join(">", $gridstack);
+$gridstack_str = join(":", $gridstack);
 $gridstack_url = rawurlencode($gridstack_str);
 
 if ($initgrid or $gridwalk)
@@ -243,11 +243,7 @@ if( $context == "cluster" )
 # If there are graphs present, show ranges.
 #
 if (!$physical) {
-   $context_ranges[]="hour";
-   $context_ranges[]="day";
-   $context_ranges[]="week";
-   $context_ranges[]="month";
-   $context_ranges[]="year";
+   $context_ranges = array_keys( $time_ranges );
    if ($jobrange)
       $context_ranges[]="job";
 

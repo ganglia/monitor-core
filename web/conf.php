@@ -126,4 +126,62 @@ $default_metric = "load_one";
 #
 #$optional_graphs = array('packet');
 
+# 
+# Time ranges
+# Each value is the # of seconds in that range.
+#
+$time_ranges = array(
+   'hour'=>3600,
+   'day'=>86400,
+   'week'=>604800,
+   'month'=>2419200,
+   'year'=>31449600
+);
+
+# this key must exist in $time_ranges
+$default_time_range = 'hour';
+
+#
+# Graph sizes
+#
+$graph_sizes = array(
+   'small'=>array(
+     'height'=>40,
+     'width'=>130,
+     'fudge_0'=>0,
+     'fudge_1'=>0,
+     'fudge_2'=>0
+   ),
+   'medium'=>array(
+     'height'=>75,
+     'width'=>300,
+     'fudge_0'=>0,
+     'fudge_1'=>14,
+     'fudge_2'=>28
+   ),
+   'large'=>array(
+     'height'=>600,
+     'width'=>800,
+     'fudge_0'=>0,
+     'fudge_1'=>0,
+     'fudge_2'=>0
+   ),
+   'xlarge'=>array(
+     'height'=>1200,
+     'width'=>1600,
+     'fudge_2'=>0
+   ),
+   'default'=>array(
+     'height'=>100,
+     'width'=>400,
+     'fudge_0'=>0,
+     'fudge_1'=>0,
+     'fudge_2'=>0
+   )
+);
+
+# this key must exist in $graph_sizes
+$default_graph_size = 'default';
+
+$graph_sizes_keys = array_keys( $graph_sizes );
 ?>
