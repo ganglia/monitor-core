@@ -716,15 +716,26 @@ static int
 startElement_EXTRA_DATA(void *data, const char *el, const char **attr)
 {
    xmldata_t *xmldata = (xmldata_t *)data;
-   int edge = xmldata->metric.stringslen;
+   int edge;
    struct xml_tag *xt;
    int i;
-   Metric_t *metric = &(xmldata->metric);
-   char *name = getfield(metric->strings, metric->name);
+   Metric_t metric;
+   char *name = getfield(xmldata->metric.strings, xmldata->metric.name);
    datum_t *rdatum;
    datum_t hashkey, hashval;
+   datum_t *hash_datum = NULL;
 
    if (!xmldata->host_alive) return 0;
+
+   hashkey.data = (void*) name;
+   hashkey.size =  strlen(name) + 1;
+
+   hash_datum = hash_lookup (&hashkey, xmldata->host.metrics);
+   if (!hash_datum) return 0;
+
+   memcpy(&metric, hash_datum->data, hash_datum->size);
+   datum_free(hash_datum);
+   edge = metric.stringslen;
 
    /* Get name for hash key, and val/type for summaries. */
    for(i = 0; attr[i]; i+=2)
@@ -735,25 +746,25 @@ startElement_EXTRA_DATA(void *data, const char *el, const char **attr)
          switch (xt->tag)
             {
                case DESC_TAG:
-                  metric->desc = addstring(metric->strings, &edge, attr[i+1]);
+                  metric.desc = addstring(metric.strings, &edge, attr[i+1]);
                   break;
                case TITLE_TAG:
-                  metric->title = addstring(metric->strings, &edge, attr[i+1]);
+                  metric.title = addstring(metric.strings, &edge, attr[i+1]);
                   break;
                case GROUP_TAG:
-                  metric->groups[metric->groupslen++] = addstring(metric->strings, &edge, attr[i+1]);
+                  metric.groups[metric.groupslen++] = addstring(metric.strings, &edge, attr[i+1]);
                   break;
                default:
                   break;
             }
-         xmldata->metric.stringslen = edge;
+         metric.stringslen = edge;
 
          hashkey.data = (void*)name;
          hashkey.size =  strlen(name) + 1;
 
          /* Trim metric structure to the correct length. */
-         hashval.size = sizeof(*metric) - GMETAD_FRAMESIZE + metric->stringslen;
-         hashval.data = (void*) metric;
+         hashval.size = sizeof(metric) - GMETAD_FRAMESIZE + metric.stringslen;
+         hashval.data = (void*) &metric;
 
          /* Update full metric in cluster host table. */
          rdatum = hash_insert(&hashkey, &hashval, xmldata->host.metrics);
