@@ -31,6 +31,7 @@
 #include <sys/resource.h>
 #endif
 #include <sys/stat.h>
+#include <sys/vmmeter.h>
 #include <vm/vm_param.h>
 
 #include <sys/socket.h>
@@ -486,15 +487,18 @@ g_val_t
 proc_total_func ( void )
 {
    g_val_t val;
-   size_t len = 0;
+   struct vmtotal total;
+   size_t len;
 
-   sysctlbyname("kern.proc.all", NULL, &len, NULL, 0);
+   /* computed every 5 seconds */
+   len = sizeof(total);
+   sysctlbyname("vm.vmtotal", &total, &len, NULL, 0);
 
-   val.uint32 = (len / sizeof (struct kinfo_proc)); 
+   val.uint32 = total.t_rq + \
+      total.t_dw + total.t_pw + total.t_sl + total.t_sw; 
 
    return val;
 }
-
 
 g_val_t
 proc_run_func( void )
