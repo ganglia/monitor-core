@@ -10,10 +10,9 @@ instructions as in the UNIX platforms with some work arounds.
 Prerequisites
 ------------- 
 
--Latest version of Cygwin with the following packages autoconf, automake, 
-bison, gcc, sharutils, sunrpc, vim, make, flex, libtool, SVN to checkout 
-the source code.
- 
+Latest version of Cygwin with the following packages: autoconf, automake, 
+bison, gcc, sharutils, diffutils, sunrpc, vim, make, flex, libtool and
+svn to checkout the source code.
 
 CheckOut the source files of Ganglia in the Cygwin command console. 
 svn co https://ganglia.svn.sourceforge.net/svnroot/ganglia ganglia
