@@ -160,7 +160,8 @@ cpu_speed_func ( void )
    char buf[1024];
    char *curptr;
    size_t len;
-   long freq = 0, tmpfreq;
+   uint32_t freq = 0, tmpfreq;
+   uint64_t tscfreq;
 
    /*
     * If the system supports it, the cpufreq driver provides the best
@@ -195,8 +196,9 @@ cpu_speed_func ( void )
     * machdep.tsc_freq exists on some i386/amd64 machines and gives the
     * CPU speed in Hz.  If it exists it's a decent value.
     */
-   if (sysctlbyname("machdep.tsc_freq", &tmpfreq, &len, NULL, 0) != -1) {
-      freq = (double)tmpfreq / 1e6;
+   len = sizeof(tscfreq);
+   if (sysctlbyname("machdep.tsc_freq", &tscfreq, &len, NULL, 0) != -1) {
+      freq = (double)tscfreq / 1e6;
       goto done;
    }
 
