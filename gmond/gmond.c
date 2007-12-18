@@ -1589,7 +1589,7 @@ load_metric_modules( void )
     tmp = cfg_getsec( config_file, "modules");
     for (j = 0; j < cfg_size(tmp, "module"); j++) 
       {
-        apr_dso_handle_t *modHandle;
+        apr_dso_handle_t *modHandle = NULL;
         apr_dso_handle_sym_t modSym;
         mmodule *modp;
         char *modPath, *modName, *modparams;
@@ -1615,25 +1615,28 @@ load_metric_modules( void )
         /*
          * Load the file into the gmond address space
          */
-        if (apr_dso_load(&modHandle, modPath, global_context) != APR_SUCCESS) {
+        if (apr_dso_load(&modHandle, modPath, global_context) != APR_SUCCESS) 
+          {
             char my_error[256];
 
             err_msg("Cannot load %s metric module: %s\n", modPath,
                      apr_dso_error(modHandle, my_error, sizeof(my_error)));
             continue;
-        }
+          }
         debug_msg("loaded module: %s", modName);
 
         /*
          * Retrieve the pointer to the module structure through the module name.
          */
-        if (apr_dso_sym(&modSym, modHandle, modName) != APR_SUCCESS) {
+        if (apr_dso_sym(&modSym, modHandle, modName) != APR_SUCCESS) 
+          {
             char my_error[256];
 
             err_msg("Cannot locate internal module structure '%s' in file %s: %s\n", 
                      modName, modPath, apr_dso_error(modHandle, my_error, sizeof(my_error)));
             continue;
-        }
+          }
+
         modp = (mmodule*) modSym;
         modp->dynamic_load_handle = (apr_dso_handle_t *)modHandle;
         modp->module_name = apr_pstrdup (global_context, modName);
@@ -1692,68 +1695,6 @@ setup_metric_callbacks( void )
         }
       modp = modp->next;
   }
-
-  /* All platforms support these metrics */
-  Ganglia_metric_cb_define("cpu_num",        (metric_func)cpu_num_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_speed",      (metric_func)cpu_speed_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_total",      (metric_func)mem_total_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("swap_total",     (metric_func)swap_total_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("boottime",       (metric_func)boottime_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("sys_clock",      (metric_func)sys_clock_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("machine_type",   (metric_func)machine_type_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("os_name",        (metric_func)os_name_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("os_release",     (metric_func)os_release_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mtu",            (metric_func)mtu_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_user",       (metric_func)cpu_user_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_nice",       (metric_func)cpu_nice_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_system",     (metric_func)cpu_system_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_wio",        (metric_func)cpu_wio_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_intr",       (metric_func)cpu_intr_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_sintr",      (metric_func)cpu_sintr_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_idle",       (metric_func)cpu_idle_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("cpu_aidle",      (metric_func)cpu_aidle_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("load_one",       (metric_func)load_one_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("load_five",      (metric_func)load_five_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("load_fifteen",   (metric_func)load_fifteen_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("proc_run",       (metric_func)proc_run_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("proc_total",     (metric_func)proc_total_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_free",       (metric_func)mem_free_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_shared",     (metric_func)mem_shared_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_buffers",    (metric_func)mem_buffers_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_cached",     (metric_func)mem_cached_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("swap_free",      (metric_func)swap_free_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("bytes_in",       (metric_func)bytes_in_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("bytes_out",      (metric_func)bytes_out_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("pkts_in",        (metric_func)pkts_in_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("pkts_out",       (metric_func)pkts_out_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("disk_total",     (metric_func)disk_total_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("disk_free",      (metric_func)disk_free_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("part_max_used",  (metric_func)part_max_used_func, CB_NOINDEX, NULL);
-
-  /* These are "internal" metrics for host heartbeat,location,gexec */
-  Ganglia_metric_cb_define("heartbeat",      (metric_func)heartbeat_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("location",       (metric_func)location_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("gexec",          (metric_func)gexec_func, CB_NOINDEX, NULL);
-
-  /* Add platform specific metrics here... */
-#if SOLARIS
-  Ganglia_metric_cb_define("bread_sec",      (metric_func)bread_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("bwrite_sec",     (metric_func)bwrite_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("lread_sec",      (metric_func)lread_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("lwrite_sec",     (metric_func)lwrite_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("phread_sec",     (metric_func)phread_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("phwrite_sec",    (metric_func)phwrite_sec_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("rcache",         (metric_func)rcache_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("wcache",         (metric_func)wcache_func, CB_NOINDEX, NULL);
-#endif
-
-#if HPUX
-  Ganglia_metric_cb_define("mem_arm",        (metric_func)mem_arm_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_rm",         (metric_func)mem_rm_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_avm",        (metric_func)mem_avm_func, CB_NOINDEX, NULL);
-  Ganglia_metric_cb_define("mem_vm",         (metric_func)mem_vm_func, CB_NOINDEX, NULL);
-#endif
-
 }
 
 double
@@ -1808,7 +1749,7 @@ setup_collection_groups( void )
 
           Ganglia_metric_callback *metric_cb =  (Ganglia_metric_callback *)
                         apr_hash_get( metric_callbacks, name, APR_HASH_KEY_STRING );
-          Ganglia_25metric *metric_info = Ganglia_25metric_byname(name);
+          Ganglia_25metric *metric_info = NULL;
 
           if(!metric_cb)
             {
@@ -1816,115 +1757,121 @@ setup_collection_groups( void )
               exit(1);
             }
 
-          if(!metric_info)
+          if (metric_cb->modp) 
             {
-              if (metric_cb->modp) 
+              const Ganglia_25metric *mi = metric_cb->modp->metrics_info;
+              int k;
+
+              /*XXX Store the metric info in a hash_table so that this 
+                lookup can be done faster. */
+              metric_info = apr_pcalloc( global_context, sizeof(Ganglia_25metric));
+
+              for (k = 0; mi[k].name != NULL; k++) 
                 {
-                  const Ganglia_25metric *mi = metric_cb->modp->metrics_info;
-                  int k;
-    
-                  metric_info = apr_pcalloc( global_context, sizeof(Ganglia_25metric));
-    
-                  for (k = 0; mi[k].name != NULL; k++) 
+                  if (strcasecmp(name,  mi[k].name) == 0) 
                     {
-                      if (strcasecmp(name,  mi[k].name) == 0) 
-                        {
-                          memcpy (metric_info, &(mi[k]), sizeof(Ganglia_25metric));
-                        }
+                      memcpy (metric_info, &(mi[k]), sizeof(Ganglia_25metric));
                     }
-    
-                  metric_info->key = modular_metric;
                 }
-              else 
+
+              metric_info->key = modular_metric;
+            }
+          else 
+            {
+              err_msg("Unable to send metric '%s' (not in protocol.x). Exiting.\n", name);
+              exit(1);
+            }
+
+          if(metric_info)
+            {
+              /* Build the message */
+              switch(metric_info->type)
                 {
-                  err_msg("Unable to send metric '%s' (not in protocol.x). Exiting.\n", name);
-                  exit(1);
+                case GANGLIA_VALUE_UNKNOWN:
+                  /* The 2.5.x protocol doesn't allow for unknown values. :(  Do nothing. */
+                  continue;
+                case GANGLIA_VALUE_STRING:
+                  metric_info->key = gmetric_string; 
+                  metric_cb->msg.Ganglia_value_msg_u.gstr.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                  break;
+                case GANGLIA_VALUE_UNSIGNED_SHORT:
+                  metric_info->key = gmetric_ushort; 
+                  metric_cb->msg.Ganglia_value_msg_u.gu_short.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                  break;
+                case GANGLIA_VALUE_SHORT:
+                  metric_info->key = gmetric_short; 
+                  metric_cb->msg.Ganglia_value_msg_u.gs_short.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                  break;
+                case GANGLIA_VALUE_UNSIGNED_INT:
+                  metric_info->key = gmetric_uint; 
+                  metric_cb->msg.Ganglia_value_msg_u.gu_int.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                  break;
+                case GANGLIA_VALUE_INT:
+                  metric_info->key = gmetric_int; 
+                  metric_cb->msg.Ganglia_value_msg_u.gs_int.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                  break;
+                case GANGLIA_VALUE_FLOAT:
+                  metric_info->key = gmetric_float; 
+                  metric_cb->msg.Ganglia_value_msg_u.gf.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                  break;
+                case GANGLIA_VALUE_DOUBLE:
+                  metric_info->key = gmetric_double; 
+                  metric_cb->msg.Ganglia_value_msg_u.gd.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                  break;
+                default:
+                  metric_info->key = gmetric_uint; 
                 }
-            }
-
-          /* Build the message */
-          switch(metric_info->type)
-            {
-            case GANGLIA_VALUE_UNKNOWN:
-              /* The 2.5.x protocol doesn't allow for unknown values. :(  Do nothing. */
-              continue;
-            case GANGLIA_VALUE_STRING:
-              metric_info->key = gmetric_string; 
-              metric_cb->msg.Ganglia_value_msg_u.gstr.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-              break;
-            case GANGLIA_VALUE_UNSIGNED_SHORT:
-              metric_info->key = gmetric_ushort; 
-              metric_cb->msg.Ganglia_value_msg_u.gu_short.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-              break;
-            case GANGLIA_VALUE_SHORT:
-              metric_info->key = gmetric_short; 
-              metric_cb->msg.Ganglia_value_msg_u.gs_short.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-              break;
-            case GANGLIA_VALUE_UNSIGNED_INT:
-              metric_info->key = gmetric_uint; 
-              metric_cb->msg.Ganglia_value_msg_u.gu_int.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-              break;
-            case GANGLIA_VALUE_INT:
-              metric_info->key = gmetric_int; 
-              metric_cb->msg.Ganglia_value_msg_u.gs_int.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-              break;
-            case GANGLIA_VALUE_FLOAT:
-              metric_info->key = gmetric_float; 
-              metric_cb->msg.Ganglia_value_msg_u.gf.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-              break;
-            case GANGLIA_VALUE_DOUBLE:
-              metric_info->key = gmetric_double; 
-              metric_cb->msg.Ganglia_value_msg_u.gd.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-              break;
-            default:
-              metric_info->key = gmetric_uint; 
-            }
-
-          /* This sets the key for this particular metric.
-           * The value is set by the callback function later */
-          metric_cb->msg.id = metric_info->key;
-
-          metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup(global_context, myname);
-          metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup(global_context, metric_info->name);
-
-          /* Save the location of information about this particular metric */
-          metric_cb->info   = metric_info;
-
-          /* Set the value threshold for this particular metric */
-          metric_cb->value_threshold = value_threshold;
-
-          /* Fill in the title or short descriptive name of the metric if
-           * one had been given in the configuration file. Otherwise just
-           * copy the metric name as the title. */
-          if (title)
-            {
-              metric_cb->title = apr_pstrdup(global_context, title);
-            }
-          else  
-            {
-              metric_cb->title = apr_pstrdup(global_context, metric_info->name);
-            }
-
-          /* If this metric will only be collected once, run it now at setup... */
-          if(group->once)
-            {
-              if (metric_cb->multi_metric_index == CB_NOINDEX) 
-                  metric_cb->now = metric_cb->cb();
+    
+              /* This sets the key for this particular metric.
+               * The value is set by the callback function later */
+              metric_cb->msg.id = metric_info->key;
+    
+              metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup(global_context, myname);
+              metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup(global_context, metric_info->name);
+    
+              /* Save the location of information about this particular metric */
+              metric_cb->info   = metric_info;
+    
+              /* Set the value threshold for this particular metric */
+              metric_cb->value_threshold = value_threshold;
+    
+              /* Fill in the title or short descriptive name of the metric if
+               * one had been given in the configuration file. Otherwise just
+               * copy the metric name as the title. */
+              if (title)
+                {
+                  metric_cb->title = apr_pstrdup(global_context, title);
+                }
+              else  
+                {
+                  metric_cb->title = apr_pstrdup(global_context, metric_info->name);
+                }
+    
+              /* If this metric will only be collected once, run it now at setup... */
+              if(group->once)
+                {
+                  if (metric_cb->multi_metric_index == CB_NOINDEX) 
+                      metric_cb->now = metric_cb->cb();
+                  else
+                      metric_cb->now = metric_cb->cbindexed(metric_cb->multi_metric_index);
+                }
               else
-                  metric_cb->now = metric_cb->cbindexed(metric_cb->multi_metric_index);
+                {
+                  /* ... otherwise set it to zero */
+                  memset( &(metric_cb->now), 0, sizeof(g_val_t));
+                }
+              memset( &(metric_cb->last), 0, sizeof(g_val_t));
+    
+              /* Calculate the bandwidth this metric will use */
+              bytes_per_sec += ( (double)metric_info->msg_size / (double)group->time_threshold );
+    
+              /* Push this metric onto the metric_array for this group */
+              *(Ganglia_metric_callback **)apr_array_push(group->metric_array) = metric_cb;
             }
           else
             {
-              /* ... otherwise set it to zero */
-              memset( &(metric_cb->now), 0, sizeof(g_val_t));
+              err_msg("Unable to find the metric information for '%s'. Possible that the module has not been loaded.\n", name);
             }
-          memset( &(metric_cb->last), 0, sizeof(g_val_t));
-
-          /* Calculate the bandwidth this metric will use */
-          bytes_per_sec += ( (double)metric_info->msg_size / (double)group->time_threshold );
-
-          /* Push this metric onto the metric_array for this group */
-          *(Ganglia_metric_callback **)apr_array_push(group->metric_array) = metric_cb;
         }
 
       /* Save the collection group the collection group array */
@@ -2203,13 +2150,9 @@ print_metric_list( void )
 
       apr_hash_this(hi, NULL, NULL, &val);
       cb = val;
-      metric_info = Ganglia_25metric_byname(cb->name);
+      metric_info = NULL;
 
-      if(metric_info)
-        {
-          desc = metric_info->desc;
-        }
-      else if (cb->modp) 
+      if (cb->modp) 
         {
           int i;
 

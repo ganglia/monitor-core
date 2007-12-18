@@ -1,15 +1,21 @@
 SUBDIRS = gstat modules python_modules
 
 EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
-
 if STATIC_BUILD
 GCFLAGS = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/confuse/src/
-GLDADD = $(top_builddir)/srclib/apr/libapr-0.la $(top_builddir)/srclib/confuse/src/libconfuse.la
-GLDFLAGS = -static
+GLDADD = $(top_builddir)/srclib/apr/libapr-0.la $(top_builddir)/srclib/confuse/src/libconfuse.la \
+	modules/disk/.libs/mod_disk.o modules/cpu/.libs/mod_cpu.o modules/cpu/.libs/mod_load.o \
+	modules/memory/.libs/mod_mem.o modules/network/.libs/mod_net.o \
+	modules/system/.libs/mod_proc.o modules/system/.libs/mod_sys.o
+GLDFLAGS = -static -export-dynamic
+if BUILD_PYTHON
+GLDADD += modules/python/.libs/mod_python.o
+GLDFLAGS += -lpython@PYTHON_VERSION@
+endif
 else
 GCFLAGS = -D_LARGEFILE64_SOURCE
-GLDADD =
-GLDFLAGS =
+GLDADD = 
+GLDFLAGS = -export-dynamic
 INCLUDES = @APR_INCLUDES@
 endif
 
@@ -17,7 +23,7 @@ AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/libmetrics/ $(GCFLAGS)
 
 sbin_PROGRAMS = gmond
 # metric.h and dtd.h are for gmetad/gmetric for now....
-gmond_SOURCES = gmond.c cmdline.c cmdline.h dtd.h metric.h g25_config.c g25_config.h gm_mmn.h
+gmond_SOURCES = gmond.c cmdline.c cmdline.h dtd.h metric.h g25_config.c core_metrics.c g25_config.h gm_mmn.h
 
 noinst_MANS  = gmond.conf.5
 

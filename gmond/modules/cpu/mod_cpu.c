@@ -66,18 +66,18 @@ static g_val_t cpu_metric_handler ( int metric_index )
     return val;
 }
 
-static const Ganglia_25metric cpu_metric_info[] = 
+static Ganglia_25metric cpu_metric_info[] = 
 {
-    {0, "mcpu_num",    1200, GANGLIA_VALUE_UNSIGNED_SHORT, "CPUs", "zero", "%hu",  UDP_HEADER_SIZE+8, "Total number of CPUs"},
-    {0, "mcpu_speed",  1200, GANGLIA_VALUE_UNSIGNED_INT,   "MHz",  "zero", "%hu",  UDP_HEADER_SIZE+8, "CPU Speed in terms of MHz"},
-    {0, "mcpu_user",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of CPU utilization that occurred while executing at the user level"},
-    {0, "mcpu_nice",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of CPU utilization that occurred while executing at the user level with nice priority"},
-    {0, "mcpu_system",   90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of CPU utilization that occurred while executing at the system level"},
-    {0, "mcpu_idle",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of time that the CPU or CPUs were idle and the system did not have an outstanding disk I/O request"},
-    {0, "mcpu_aidle",  3800, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percent of time since boot idle CPU"},
-    {0, "mcpu_wio",      90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of time that the CPU or CPUs were idle during which the system had an outstanding disk I/O request"},
-    {0, "mcpu_intr",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_intr"},
-    {0, "mcpu_sintr",    90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_sintr"},
+    {0, "cpu_num",    1200, GANGLIA_VALUE_UNSIGNED_SHORT, "CPUs", "zero", "%hu",  UDP_HEADER_SIZE+8, "Total number of CPUs"},
+    {0, "cpu_speed",  1200, GANGLIA_VALUE_UNSIGNED_INT,   "MHz",  "zero", "%hu",  UDP_HEADER_SIZE+8, "CPU Speed in terms of MHz"},
+    {0, "cpu_user",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of CPU utilization that occurred while executing at the user level"},
+    {0, "cpu_nice",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of CPU utilization that occurred while executing at the user level with nice priority"},
+    {0, "cpu_system",   90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of CPU utilization that occurred while executing at the system level"},
+    {0, "cpu_idle",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of time that the CPU or CPUs were idle and the system did not have an outstanding disk I/O request"},
+    {0, "cpu_aidle",  3800, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percent of time since boot idle CPU"},
+    {0, "cpu_wio",      90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of time that the CPU or CPUs were idle during which the system had an outstanding disk I/O request"},
+    {0, "cpu_intr",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_intr"},
+    {0, "cpu_sintr",    90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_sintr"},
     {0, NULL}
 
 };

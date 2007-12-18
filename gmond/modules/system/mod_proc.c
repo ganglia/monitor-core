@@ -47,10 +47,10 @@ static g_val_t proc_metric_handler ( int metric_index )
     return val;
 }
 
-static const Ganglia_25metric proc_metric_info[] = 
+static Ganglia_25metric proc_metric_info[] = 
 {
-    {0, "mproc_run",   950, GANGLIA_VALUE_UNSIGNED_INT, " ", "both", "%u", UDP_HEADER_SIZE+8, "Total number of running processes"},
-    {0, "mproc_total", 950, GANGLIA_VALUE_UNSIGNED_INT, " ", "both", "%u", UDP_HEADER_SIZE+8, "Total number of processes"},
+    {0, "proc_run",   950, GANGLIA_VALUE_UNSIGNED_INT, " ", "both", "%u", UDP_HEADER_SIZE+8, "Total number of running processes"},
+    {0, "proc_total", 950, GANGLIA_VALUE_UNSIGNED_INT, " ", "both", "%u", UDP_HEADER_SIZE+8, "Total number of processes"},
     {0, NULL}
 
 };

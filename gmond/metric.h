@@ -63,7 +63,7 @@ struct mmodule_struct {
     void (*cleanup)(void); /* callback function */
 
     /** Metric info callback function */
-    const Ganglia_25metric *metrics_info;
+    Ganglia_25metric *metrics_info;
 
     /** Metric callback function */
 	metric_func handler;
