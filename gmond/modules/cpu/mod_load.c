@@ -49,11 +49,11 @@ static g_val_t load_metric_handler ( int metric_index )
     return val;
 }
 
-static const Ganglia_25metric load_metric_info[] = 
+static Ganglia_25metric load_metric_info[] = 
 {
-    {0, "mload_one",      70, GANGLIA_VALUE_FLOAT, " ", "both", "%.2f", UDP_HEADER_SIZE+8, "One minute load average"},
-    {0, "mload_five",    325, GANGLIA_VALUE_FLOAT, " ", "both", "%.2f", UDP_HEADER_SIZE+8, "Five minute load average"},
-    {0, "mload_fifteen", 950, GANGLIA_VALUE_FLOAT, " ", "both", "%.2f", UDP_HEADER_SIZE+8, "Fifteen minute load average"},
+    {0, "load_one",      70, GANGLIA_VALUE_FLOAT, " ", "both", "%.2f", UDP_HEADER_SIZE+8, "One minute load average"},
+    {0, "load_five",    325, GANGLIA_VALUE_FLOAT, " ", "both", "%.2f", UDP_HEADER_SIZE+8, "Five minute load average"},
+    {0, "load_fifteen", 950, GANGLIA_VALUE_FLOAT, " ", "both", "%.2f", UDP_HEADER_SIZE+8, "Fifteen minute load average"},
     {0, NULL}
 };
 

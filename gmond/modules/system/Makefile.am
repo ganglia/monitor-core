@@ -1,6 +1,10 @@
 AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/lib 
 
-pkglib_LTLIBRARIES    = modproc.la modsys.la
+if STATIC_BUILD
+noinst_LTLIBRARIES   = libmodsys.la
+libmodsys_la_SOURCES = mod_proc.c mod_sys.c 
+else
+pkglib_LTLIBRARIES   = modproc.la modsys.la
 
 modproc_la_SOURCES = mod_proc.c 
 modproc_la_LDFLAGS = -module 
@@ -10,7 +14,8 @@ modsys_la_SOURCES = mod_sys.c
 modsys_la_LDFLAGS = -module 
 modsys_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
 
-EXTRA_DIST = ../conf.d/proc.conf ../conf.d/sys.conf
+endif
+
 INCLUDES = @APR_INCLUDES@
 
 
