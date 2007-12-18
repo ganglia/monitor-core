@@ -54,14 +54,14 @@ static g_val_t sys_metric_handler ( int metric_index )
     return val;
 }
 
-static const Ganglia_25metric sys_metric_info[] = 
+static Ganglia_25metric sys_metric_info[] = 
 {
-    {0, "mboottime",     1200, GANGLIA_VALUE_UNSIGNED_INT, "s", "zero", "%u", UDP_HEADER_SIZE+8,  "The last time that the system was started"},
-    {0, "msys_clock",    1200, GANGLIA_VALUE_UNSIGNED_INT, "s", "zero", "%u", UDP_HEADER_SIZE+8,  "Time as reported by the system clock"},
-    {0, "mmachine_type", 1200, GANGLIA_VALUE_STRING,       "",  "zero", "%s", UDP_HEADER_SIZE+32, "System architecture"},
-    {0, "mos_name",      1200, GANGLIA_VALUE_STRING,       "",  "zero", "%s", UDP_HEADER_SIZE+32, "Operating system name"},
-    {0, "mos_release",   1200, GANGLIA_VALUE_STRING,       "",  "zero", "%s", UDP_HEADER_SIZE+32, "Operating system release date"},
-    {0, "mmtu",          1200, GANGLIA_VALUE_UNSIGNED_INT, "",  "both", "%u", UDP_HEADER_SIZE+8,  "Network maximum transmission unit"},
+    {0, "boottime",     1200, GANGLIA_VALUE_UNSIGNED_INT, "s", "zero", "%u", UDP_HEADER_SIZE+8,  "The last time that the system was started"},
+    {0, "sys_clock",    1200, GANGLIA_VALUE_UNSIGNED_INT, "s", "zero", "%u", UDP_HEADER_SIZE+8,  "Time as reported by the system clock"},
+    {0, "machine_type", 1200, GANGLIA_VALUE_STRING,       "",  "zero", "%s", UDP_HEADER_SIZE+32, "System architecture"},
+    {0, "os_name",      1200, GANGLIA_VALUE_STRING,       "",  "zero", "%s", UDP_HEADER_SIZE+32, "Operating system name"},
+    {0, "os_release",   1200, GANGLIA_VALUE_STRING,       "",  "zero", "%s", UDP_HEADER_SIZE+32, "Operating system release date"},
+    {0, "mtu",          1200, GANGLIA_VALUE_UNSIGNED_INT, "",  "both", "%u", UDP_HEADER_SIZE+8,  "Network maximum transmission unit"},
     {0, NULL}
 
 };

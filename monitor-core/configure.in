@@ -137,6 +137,7 @@ AC_ARG_ENABLE( static-build,
 [  --enable-static-build   Statically link libGanglia, APR, Expat and Confuse libraries (may disable some metric modules) ],
 [ enable_static_build=yes ],[ enable_static_build=no ])
 
+AC_SUBST(modpathstart)
 AM_CONDITIONAL(STATIC_BUILD, test x"$enable_static_build" = xyes)
 
 echo $ac_n "${nl}Configuring libmetrics ...${nl}"
@@ -157,6 +158,7 @@ if test x"$enable_static_build" = xyes ; then
   cd srclib/confuse && ./configure --cache-file=$ganglia_popdir/config.cache --disable-nls --prefix=$prefix 
   cd $ganglia_popdir
 
+  modpathstart="#"
 fi
 
 dnl ##################################################################
@@ -352,6 +354,7 @@ if test x"$enable_static_build" = xno ; then
   fi
   echo
 
+  modpathstart = ""
 fi
 
 AC_CHECK_LIB(rpc, xdr_string)
@@ -548,6 +551,7 @@ AC_OUTPUT(Makefile
           tests/Makefile 
           ganglia.spec 
           gmetad/Makefile 
+          lib/default_conf.h
           lib/Makefile 
           gmond/Makefile 
           gmond/gstat/Makefile 
@@ -558,8 +562,12 @@ AC_OUTPUT(Makefile
           gmond/modules/conf.d/modgstatus.conf
           gmond/modules/example/Makefile
           gmond/modules/cpu/Makefile
+          gmond/modules/disk/Makefile
+          gmond/modules/memory/Makefile
+          gmond/modules/network/Makefile
           gmond/modules/python/Makefile
           gmond/modules/status/Makefile
+          gmond/modules/system/Makefile
           gmond/python_modules/Makefile
           gmetric/Makefile 
           web/version.php)

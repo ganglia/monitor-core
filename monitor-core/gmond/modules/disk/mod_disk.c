@@ -43,6 +43,24 @@ static g_val_t disk_metric_handler ( int metric_index )
         return disk_free_func();
     case 2:
         return part_max_used_func();
+#ifdef SOLARIS
+    case 3:
+        return bread_sec_func();
+    case 4:
+        return bwrite_sec_func();
+    case 5:
+        return lread_sec_func();
+    case 6:
+        return lwrite_sec_func();
+    case 7:
+        return phread_sec_func();
+    case 8:
+        return phwrite_sec_func();
+    case 9:
+        return rcache_func();
+    case 10:
+        return wcache_func();
+#endif
     }
 
     /* default case */
@@ -50,11 +68,21 @@ static g_val_t disk_metric_handler ( int metric_index )
     return val;
 }
 
-static const Ganglia_25metric disk_metric_info[] = 
+static Ganglia_25metric disk_metric_info[] = 
 {
-    {0, "mdisk_total",    1200, GANGLIA_VALUE_DOUBLE, "GB", "both", "%.3f", UDP_HEADER_SIZE+16, "Total available disk space"},
-    {0, "mdisk_free",      180, GANGLIA_VALUE_DOUBLE, "GB", "both", "%.3f", UDP_HEADER_SIZE+16, "Total free disk space"},
-    {0, "mpart_max_used",  180, GANGLIA_VALUE_FLOAT,  "%",  "both", "%.1f", UDP_HEADER_SIZE+8,  "Maximum percent used for all partitions"},
+    {0, "disk_total",    1200, GANGLIA_VALUE_DOUBLE, "GB", "both", "%.3f", UDP_HEADER_SIZE+16, "Total available disk space"},
+    {0, "disk_free",      180, GANGLIA_VALUE_DOUBLE, "GB", "both", "%.3f", UDP_HEADER_SIZE+16, "Total free disk space"},
+    {0, "part_max_used",  180, GANGLIA_VALUE_FLOAT,  "%",  "both", "%.1f", UDP_HEADER_SIZE+8,  "Maximum percent used for all partitions"},
+#ifdef SOLARIS
+    {0, "bread_sec",       90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "bread_sec)"},
+    {0, "bwrite_sec",      90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "bwrite_sec)"}, 
+    {0, "lread_sec",       90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "lread_sec)"},
+    {0, "lwrite_sec",      90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "lwrite_sec"},
+    {0, "phread_sec",      90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "phread_sec"},
+    {0, "phwrite_sec",     90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "phwrite_sec"},
+    {0, "rcache",          90, GANGLIA_VALUE_FLOAT,  "%",     "both", "%.1f",UDP_HEADER_SIZE+8, "rcache"},
+    {0, "wcache",          90, GANGLIA_VALUE_FLOAT,  "%",     "both", "%.1f",UDP_HEADER_SIZE+8, "wcache"},
+#endif
     {0, NULL}
 
 };

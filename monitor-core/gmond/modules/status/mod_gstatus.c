@@ -49,7 +49,7 @@
 mmodule gstatus_module;
 
 static apr_array_header_t *metric_info = NULL;
-static const Ganglia_25metric gs_metric_info[] = 
+static Ganglia_25metric gs_metric_info[] = 
 {
     {0, NULL}
 };

@@ -460,7 +460,7 @@ static g_val_t multi_cpu_sintr_func (int cpu_index)
 }
 
 static apr_array_header_t *metric_info = NULL;
-static const Ganglia_25metric ex_metric_info[] = 
+static Ganglia_25metric ex_metric_info[] = 
 {
     {0, NULL}
 };

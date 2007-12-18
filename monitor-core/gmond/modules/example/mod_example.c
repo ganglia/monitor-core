@@ -111,7 +111,7 @@ static g_val_t ex_metric_handler ( int metric_index )
     return val;
 }
 
-static const Ganglia_25metric ex_metric_info[] = 
+static Ganglia_25metric ex_metric_info[] = 
 {
     {0, "Random_Numbers", 90, GANGLIA_VALUE_UNSIGNED_INT, "s", "both", "%u", UDP_HEADER_SIZE+8, "Example module metric (random numbers)"},
     {0, "Constant_Number", 90, GANGLIA_VALUE_UNSIGNED_INT, "Num", "zero", "%hu", UDP_HEADER_SIZE+8, "Example module metric (constant number)"},

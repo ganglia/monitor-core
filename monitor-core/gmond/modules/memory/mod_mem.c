@@ -50,6 +50,16 @@ static g_val_t mem_metric_handler ( int metric_index )
         return swap_free_func();
     case 6:
         return swap_total_func();
+#if HPUX
+    case 7:
+        return mem_arm_func();
+    case 8:
+        return mem_rm_func();
+    case 9:
+        return mem_avm_func();
+    case 10:
+        return mem_vm_func();
+#endif
     }
 
     /* default case */
@@ -57,15 +67,21 @@ static g_val_t mem_metric_handler ( int metric_index )
     return val;
 }
 
-static const Ganglia_25metric mem_metric_info[] = 
+static Ganglia_25metric mem_metric_info[] = 
 {
-    {0, "mmem_total",  1200, GANGLIA_VALUE_UNSIGNED_INT, "KB", "zero", "%u", UDP_HEADER_SIZE+8, "Total amount of memory displayed in KBs"},
-    {0, "mmem_free",    180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of available memory"},
-    {0, "mmem_shared",  180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of shared memory"},
-    {0, "mmem_buffers", 180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of buffered memory"},
-    {0, "mmem_cached",  180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of cached memory"},
-    {0, "mswap_free",   180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of available swap memory"},
-    {0, "mswap_total", 1200, GANGLIA_VALUE_UNSIGNED_INT, "KB", "zero", "%u", UDP_HEADER_SIZE+8, "Total amount of swap space displayed in KBs"},
+    {0, "mem_total",  1200, GANGLIA_VALUE_UNSIGNED_INT, "KB", "zero", "%u", UDP_HEADER_SIZE+8, "Total amount of memory displayed in KBs"},
+    {0, "mem_free",    180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of available memory"},
+    {0, "mem_shared",  180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of shared memory"},
+    {0, "mem_buffers", 180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of buffered memory"},
+    {0, "mem_cached",  180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of cached memory"},
+    {0, "swap_free",   180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of available swap memory"},
+    {0, "swap_total", 1200, GANGLIA_VALUE_UNSIGNED_INT, "KB", "zero", "%u", UDP_HEADER_SIZE+8, "Total amount of swap space displayed in KBs"},
+#if HPUX
+    {0, "mem_arm",     180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "mem_arm"},
+    {0, "mem_rm",      180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "mem_rm"},
+    {0, "mem_avm",     180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "mem_avm"},
+    {0, "mem_vm",      180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "mem_vm"}
+#endif
     {0, NULL}
 
 };

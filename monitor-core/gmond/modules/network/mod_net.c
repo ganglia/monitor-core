@@ -52,12 +52,12 @@ static g_val_t net_metric_handler ( int metric_index )
     return val;
 }
 
-static const Ganglia_25metric net_metric_info[] = 
+static Ganglia_25metric net_metric_info[] = 
 {
-    {0, "mbytes_out",  300, GANGLIA_VALUE_FLOAT,  "bytes/sec",   "both", "%.2f", UDP_HEADER_SIZE+8,  "Number of bytes out per second"},
-    {0, "mbytes_in",   300, GANGLIA_VALUE_FLOAT,  "bytes/sec",   "both", "%.2f", UDP_HEADER_SIZE+8,  "Number of bytes in per second"},
-    {0, "mpkts_in",    300, GANGLIA_VALUE_FLOAT,  "packets/sec", "both", "%.2f", UDP_HEADER_SIZE+8,  "Packets in per second"},
-    {0, "mpkts_out",   300, GANGLIA_VALUE_FLOAT,  "packets/sec", "both", "%.2f", UDP_HEADER_SIZE+8,  "Packets out per second"},
+    {0, "bytes_out",  300, GANGLIA_VALUE_FLOAT,  "bytes/sec",   "both", "%.2f", UDP_HEADER_SIZE+8,  "Number of bytes out per second"},
+    {0, "bytes_in",   300, GANGLIA_VALUE_FLOAT,  "bytes/sec",   "both", "%.2f", UDP_HEADER_SIZE+8,  "Number of bytes in per second"},
+    {0, "pkts_in",    300, GANGLIA_VALUE_FLOAT,  "packets/sec", "both", "%.2f", UDP_HEADER_SIZE+8,  "Packets in per second"},
+    {0, "pkts_out",   300, GANGLIA_VALUE_FLOAT,  "packets/sec", "both", "%.2f", UDP_HEADER_SIZE+8,  "Packets out per second"},
     {0, NULL}
 };
 
