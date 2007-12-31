@@ -4,6 +4,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <ctype.h>
+#define _WIN32_WINNT 0x0500
 #include <windows.h>
 #include <iphlpapi.h>
 #include <sys/types.h>
@@ -38,7 +39,6 @@ typedef struct {
 
 timely_file proc_stat    = { 0, 1, "/proc/stat" };
 timely_file proc_loadavg = { 0, 5, "/proc/loadavg" };
-timely_file proc_meminfo = { 0, 5, "/proc/meminfo" };
 
 static time_t
 get_netbw(double *in_bytes, double *out_bytes,
@@ -340,15 +340,18 @@ cpu_speed_func ( void )
 g_val_t
 mem_total_func ( void )
 {
-   char *p;
+   MEMORYSTATUSEX stat;
+   DWORDLONG size;
    g_val_t val;
 
-   p = strstr( update_file(&proc_meminfo), "MemTotal:");
-   if(p) {
-     p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 );
+   stat.dwLength = sizeof(stat);
+
+   if ( GlobalMemoryStatusEx (&stat)) {
+      size = stat.ullTotalPhys;
+      /* get the value in kB */ 
+      val.uint32 =  size / 1024;
    } else {
-     val.uint32 = 0;
+      val.uint32 = 0;
    }
 
    return val;
@@ -357,15 +360,18 @@ mem_total_func ( void )
 g_val_t
 swap_total_func ( void )
 {
-   char *p;
+   MEMORYSTATUSEX stat;
+   DWORDLONG size;
    g_val_t val;
- 
-   p = strstr( update_file(&proc_meminfo), "SwapTotal:" );
-   if(p) {
-     p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 );  
+
+   stat.dwLength = sizeof(stat);
+
+   if ( GlobalMemoryStatusEx (&stat)) {
+      size = stat.ullTotalPageFile;
+      /* get the value in kB */ 
+      val.uint32 =  size / 1024;
    } else {
-     val.uint32 = 0;
+      val.uint32 = 0;
    }
 
    return val;
@@ -853,30 +859,16 @@ proc_total_func ( void )
 g_val_t
 mem_free_func ( void )
 {
-   char *p;
+   MEMORYSTATUSEX stat;
+   DWORDLONG size;
    g_val_t val;
 
-   p = strstr( update_file(&proc_meminfo), "MemFree:" );
-   if(p) {
-     p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 );
-   } else {
-     val.uint32 = 0;
-   }
+   stat.dwLength = sizeof(stat);
 
-   return val;
-}
-
-g_val_t
-mem_shared_func ( void )
-{
-   char *p;
-   g_val_t val;
-
-   p = strstr( update_file(&proc_meminfo), "MemShared:" );
-   if (p) {
-      p = skip_token(p);
-      val.uint32 = strtol( p, (char **)NULL, 10 );
+   if ( GlobalMemoryStatusEx (&stat)) {
+      size = stat.ullAvailPhys;
+      /* get the value in kB */
+      val.uint32 =  size / 1024;
    } else {
       val.uint32 = 0;
    }
@@ -884,36 +876,35 @@ mem_shared_func ( void )
    return val;
 }
 
+/* FIXME */
 g_val_t
-mem_buffers_func ( void )
+mem_shared_func ( void )
 {
-   char *p;
    g_val_t val;
 
-   p = strstr( update_file(&proc_meminfo), "Buffers:" );
-   if(p) {
-     p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 ); 
-   } else {
-     val.uint32 = 0;
-   }
+   val.uint32 = 0;
 
    return val;
 }
 
+/* FIXME */
+g_val_t
+mem_buffers_func ( void )
+{
+   g_val_t val;
+
+   val.uint32 = 0;
+
+   return val;
+}
+
+/* FIXME */
 g_val_t
 mem_cached_func ( void )
 {
-   char *p;
    g_val_t val;
 
-   p = strstr( update_file(&proc_meminfo), "Cached:");
-   if(p) {
-     p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 );
-   } else {
-     val.uint32 = 0;
-   }
+   val.uint32 = 0;
 
    return val;
 }
@@ -921,15 +912,18 @@ mem_cached_func ( void )
 g_val_t
 swap_free_func ( void )
 {
-   char *p;
+   MEMORYSTATUSEX stat;
+   DWORDLONG size;
    g_val_t val;
 
-   p = strstr( update_file(&proc_meminfo), "SwapFree:" );
-   if(p) {
-     p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 ); 
+   stat.dwLength = sizeof(stat);
+
+   if ( GlobalMemoryStatusEx (&stat)) {
+      size = stat.ullAvailPageFile;
+      /* get the value in kB */
+      val.uint32 =  size / 1024;
    } else {
-     val.uint32 = 0;
+      val.uint32 = 0;
    }
 
    return val;
