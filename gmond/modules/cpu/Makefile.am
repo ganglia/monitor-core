@@ -1,6 +1,7 @@
 AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/lib 
 
 if STATIC_BUILD
+AM_CFLAGS += -I$(top_builddir)/srclib/apr/include/
 noinst_LTLIBRARIES    = libmodcpu.la
 libmodcpu_la_SOURCES = mod_cpu.c mod_load.c 
 else
@@ -18,8 +19,9 @@ modload_la_LDFLAGS = -module
 modload_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
 
 EXTRA_DIST = ../conf.d/multicpu.conf
-endif
 
 INCLUDES = @APR_INCLUDES@
+
+endif
 
 
