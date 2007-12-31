@@ -1,6 +1,7 @@
 AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/lib 
 
 if STATIC_BUILD
+AM_CFLAGS += -I$(top_builddir)/srclib/apr/include/
 noinst_LTLIBRARIES   = libmodsys.la
 libmodsys_la_SOURCES = mod_proc.c mod_sys.c 
 else
@@ -14,8 +15,8 @@ modsys_la_SOURCES = mod_sys.c
 modsys_la_LDFLAGS = -module 
 modsys_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
 
-endif
-
 INCLUDES = @APR_INCLUDES@
+
+endif
 
 

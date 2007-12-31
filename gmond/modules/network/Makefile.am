@@ -1,6 +1,7 @@
 AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/lib 
 
 if STATIC_BUILD
+AM_CFLAGS += -I$(top_builddir)/srclib/apr/include/
 noinst_LTLIBRARIES    = libmodnet.la
 libmodnet_la_SOURCES = mod_net.c
 else
@@ -10,8 +11,8 @@ modnet_la_SOURCES = mod_net.c
 modnet_la_LDFLAGS = -module 
 modnet_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
 
-endif
-
 INCLUDES = @APR_INCLUDES@
+
+endif
 
 
