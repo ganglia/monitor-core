@@ -782,7 +782,7 @@ Ganglia_update_vidals( Ganglia_host *host, Ganglia_value_msg *vmsg)
 }
 
 static void
-Ganglia_metadata_check( apr_pool_t *p, Ganglia_host *host, Ganglia_value_msg *vmsg )
+Ganglia_metadata_check(Ganglia_host *host, Ganglia_value_msg *vmsg )
 {
     char *metric_name = vmsg->Ganglia_value_msg_u.gstr.metric_id.name;
     Ganglia_metadata *metric = 
@@ -1102,9 +1102,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       debug_msg("Processing a metric value message from %s", hostdata->hostname);
       Ganglia_value_save(hostdata, &vmsg);
       Ganglia_update_vidals(hostdata, &vmsg);
-#ifdef USING_APR_12
-      Ganglia_metadata_check( p, hostdata, &vmsg);
-#endif
+      Ganglia_metadata_check(hostdata, &vmsg);
       break;
     default:
       ganglia_scoreboard_inc(PKTS_RECVD_IGNORED);
