@@ -1,50 +1,50 @@
 <?php
 /* $Id$ */
 
+include_once "./functions.php";
+  
 $meta_designator = "Grid";
 $cluster_designator = "Cluster Overview";
-
+  
 # Blocking malicious CGI input.
 $clustername = isset($_GET["c"]) ?
-	escapeshellcmd(rawurldecode($_GET["c"])) : NULL;
+  escapeshellcmd( clean_string( rawurldecode($_GET["c"]) ) ) : NULL;
 $gridname = isset($_GET["G"]) ?
-	escapeshellcmd(rawurldecode($_GET["G"])) : NULL;
+  escapeshellcmd( clean_string( rawurldecode($_GET["G"]) ) ) : NULL;
 $hostname = isset($_GET["h"]) ?
-	escapeshellcmd(rawurldecode($_GET["h"])) : NULL;
-$range = in_array($_GET["r"],array("hour","day","week","month","year")) ?
-	escapeshellcmd(rawurldecode($_GET["r"])) : NULL;
+  escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) : NULL;
+$range = in_array($_GET["r"], array_keys( $time_ranges ) ) ?
+  escapeshellcmd( rawurldecode($_GET["r"])) : NULL;
 $metricname = isset($_GET["m"]) ?
-	escapeshellcmd(rawurldecode($_GET["m"])) : NULL;
+  escapeshellcmd( clean_string( rawurldecode($_GET["m"]) ) ) : NULL;
 $sort = isset($_GET["s"]) ?
-	escapeshellcmd(rawurldecode($_GET["s"])) : NULL;
+  escapeshellcmd( clean_string( rawurldecode($_GET["s"]) ) ) : NULL;
 $controlroom = isset($_GET["cr"]) ?
-	escapeshellcmd(rawurldecode($_GET["cr"])) : NULL;
+  clean_number( rawurldecode($_GET["cr"]) ) : NULL;
 $hostcols = isset($_GET["hc"]) ?
-	escapeshellcmd($_GET["hc"]) : NULL;
-$showhosts = isset($_GET["sh"]) ?
-	escapeshellcmd($_GET["sh"]) : NULL;
+  clean_number( $_GET["hc"] ) : NULL;
+# Flag, whether or not to show a list of hosts
+$showhosts = isset($_GET["sh"]) ? 1 : NULL;
 # The 'p' variable specifies the verbosity level in the physical view.
 $physical = isset($_GET["p"]) ?
-	escapeshellcmd($_GET["p"]) : NULL;
-$tree = isset($_GET["t"]) ?
-	escapeshellcmd($_GET["t"] ) : NULL;
+  clean_number( $_GET["p"] ) : NULL;
 # A custom range value for job graphs, in -sec.
 $jobrange = isset($_GET["jr"]) ?
-	escapeshellcmd($_GET["jr"]) : NULL;
+  clean_number( $_GET["jr"] ) : NULL;
 # A red vertical line for various events. Value specifies the event time.
 $jobstart = isset($_GET["js"]) ?
-	escapeshellcmd($_GET["js"]) : NULL;
+  clean_number( $_GET["js"] ) : NULL;
 # The direction we are travelling in the grid tree
 $gridwalk = isset($_GET["gw"]) ?
-	escapeshellcmd($_GET["gw"]) : NULL;
+  escapeshellcmd( clean_string( $_GET["gw"] ) ) : NULL;
 # Size of the host graphs in the cluster view
-$clustergraphsize = isset($_GET["z"]) ?
+$clustergraphsize = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $graph_sizes_keys ) ?
     escapeshellcmd($_GET["z"]) : NULL;
 # A stack of grid parents. Prefer a GET variable, default to cookie.
 if (isset($_GET["gs"]) and $_GET["gs"])
-      $gridstack = explode(">", rawurldecode($_GET["gs"]));
+      $gridstack = explode(":", clean_string( rawurldecode($_GET["gs"] ) ) );
 else
-      $gridstack = explode(">", $_COOKIE["gs"] );
+      $gridstack = explode(":", clean_string( $_COOKIE["gs"] ) );
 
 # Assume we are the first grid visited in the tree if there are no CGI variables,
 # or gridstack is not well formed. Gridstack always has at least one element.
@@ -98,19 +98,13 @@ if (!$range)
 
 $end = "N";
 
-switch ($range)
-{
-   case "hour":  $start = -3600; break;
-   case "day":   $start = -86400; break;
-   case "week":  $start = -604800; break;
-   case "month": $start = -2419200; break;
-   case "year":  $start = -31449600; break;
-   case "job":
-      if ($jobrange) {
-        $start = $jobrange;
-        break;
-     }
-   default: $start = -3600;
+# $time_ranges defined in conf.php
+if( $range == 'job' && isSet( $jobrange ) ) {
+  $start = $jobrange;
+} else if( isSet( $time_ranges[ $range ] ) ) {
+  $start = $time_ranges[ $range ] * -1;
+} else {
+  $start = $time_ranges[ $default_time_range ] * -1;
 }
 
 if (!$metricname)
