@@ -5,6 +5,11 @@
 #
 include_once "./version.php";
 
+$get = print_r( $_GET, 1 );
+$fp = fopen( '/tmp/ganglia_vars.txt', 'a+' );
+fwrite( $fp, $_SERVER[ 'PHP_SELF'] . "\n" . $get . "\n\n" );
+fclose( $fp );
+
 #
 # The name of the directory in "./templates" which contains the
 # templates that you want to use. Templates are like a skin for the
@@ -23,7 +28,7 @@ $rrds = "$gmetad_root/rrds";
 
 # Leave this alone if rrdtool is installed in $gmetad_root,
 # otherwise, change it if it is installed elsewhere (like /usr/bin)
-define("RRDTOOL", "/usr/bin/rrdtool");
+define("RRDTOOL", "/sw/bin/rrdtool");
 
 #
 # If you want to grab data from a different ganglia source specify it here.
@@ -126,4 +131,57 @@ $default_metric = "load_one";
 #
 #$optional_graphs = array('packet');
 
+# 
+# Time ranges
+# Each value is the # of seconds in that range.
+#
+$time_ranges = array(
+   'hour'=>3600,
+   '2hour'=>7200,
+   'day'=>86400,
+   'week'=>604800,
+   'month'=>2419200,
+   'year'=>31449600
+);
+
+# this key must exist in $time_ranges
+$default_time_range = 'hour';
+
+#
+# Graph sizes
+#
+$graph_sizes = array(
+   'small'=>array(
+     'height'=>40,
+     'width'=>130,
+     'fudge_0'=>0,
+     'fudge_1'=>0,
+     'fudge_2'=>0
+   ),
+   'medium'=>array(
+     'height'=>75,
+     'width'=>300,
+     'fudge_0'=>0,
+     'fudge_1'=>14,
+     'fudge_2'=>28
+   ),
+   'large'=>array(
+     'height'=>600,
+     'width'=>800,
+     'fudge_0'=>0,
+     'fudge_1'=>0,
+     'fudge_2'=>0
+   ),
+   # this was the default value when no other size was provided.
+   # I wasn't sure what else to call it?
+   'default'=>array(
+     'height'=>100,
+     'width'=>400,
+     'fudge_0'=>0,
+     'fudge_1'=>0,
+     'fudge_2'=>0
+   )
+);
+$default_graph_size = 'default';
+$graph_sizes_keys = array_keys( $graph_sizes );
 ?>

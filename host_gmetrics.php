@@ -1,13 +1,15 @@
 <?php
 /* $Id$ */
 
-$clustername = escapeshellcmd(rawurldecode($_GET["c"]));
-$hostname = escapeshellcmd(rawurldecode($_GET["h"]));
+# ATD - functions.php needs to be first, as it defines clean_string()
+include_once "functions.php";
+# ATD - these must be defined before including ganglia.php
+$clustername = escapeshellcmd( clean_string( rawurldecode( $_GET["c"] ) ) );
+$hostname = escapeshellcmd( clean_string( rawurldecode($_GET["h"] ) ) );
 $context = "host";
-
+# ATD - the order of the rest of these doesn't matter AFAIK.
 include_once "conf.php";
 include_once "ganglia.php";
-include_once "functions.php";
 include_once "get_ganglia.php";
 include_once "./class.TemplatePower.inc.php";
 

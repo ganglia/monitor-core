@@ -411,4 +411,37 @@ function physical_racks()
    return $racks;
 }
 
+#-------------------------------------------------------------------------------
+# Return a version of the string which is safe for display on a web page.
+# Potentially dangerous characters are converted to HTML entities.  
+# Resulting string is not URL-encoded.
+function clean_string( $string )
+{
+  return htmlentities( $string );
+}
+
+#-------------------------------------------------------------------------------
+# If arg is entirely numeric, return it.  Otherwise, return null.
+function clean_number( $digit )
+{
+  $return_value = null;
+  if( ctype_digit( $digit ) ) {
+    $return_value = $digit;
+  }
+  return $return_value;
+}
+
+#-------------------------------------------------------------------------------
+# Return true if string is a 3 or 6 character hex color.  Return false otherwise.
+function is_valid_hex_color( $string )
+{
+  $return_value = false;
+  if( strlen( $string ) == 6 || strlen( $string ) == 3 ) {
+    if( preg_match( '/^[0-9a-fA-F]+$/', $string ) ) {
+      $return_value = true;
+    }
+  }
+  return $return_value;
+    
+}
 ?>

@@ -1,8 +1,9 @@
 <?php
 /* $Id$ */
 include_once "./conf.php";
-include_once "./get_context.php";
+# ATD - function.php must be included before get_context.php.  It defines some needed functions.
 include_once "./functions.php";
+include_once "./get_context.php";
 include_once "./ganglia.php";
 include_once "./get_ganglia.php";
 include_once "./class.TemplatePower.inc.php";
