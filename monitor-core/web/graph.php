@@ -2,33 +2,36 @@
 /* $Id$ */
 include_once "./conf.php";
 include_once "./get_context.php";
+include_once "./functions.php";
 
 # RFM - Added all the isset() tests to eliminate "undefined index"
 # messages in ssl_error_log.
 
 # Graph specific variables
-$size = isset($_GET["z"]) ?
-	escapeshellcmd( rawurldecode( $_GET["z"] )) : NULL;
-$graph = isset($_GET["g"]) ?
-	escapeshellcmd( rawurldecode( $_GET["g"] )) : NULL;
+# ATD - No need for escapeshellcmd or rawurldecode on $size or $graph.  Not used directly in rrdtool calls.
+$size = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $graph_sizes_keys ) ?
+	$_GET["z"] : NULL;
+# ATD - TODO, should encapsulate these custom graphs in some type of container, then this code could check list of defined containers for valid graph labels.
+$graph = isset($_GET["g"]) && in_array( $_GET['g'], array( 'cpu_report', 'mem_report', 'load_report', 'network_report', 'packet_report' ) ) ?
+	$_GET["g"] : NULL;
 $grid = isset($_GET["G"]) ?
-	escapeshellcmd( rawurldecode( $_GET["G"] )) : NULL;
+	escapeshellcmd( clean_string( rawurldecode( $_GET["G"] ) ) ) : NULL;
 $self = isset($_GET["me"]) ?
-	escapeshellcmd(rawurldecode($_GET["me"])) : NULL;
+	escapeshellcmd( clean_string( rawurldecode($_GET["me"] ) ) ) : NULL;
 $max = isset($_GET["x"]) ? 
-	escapeshellcmd( rawurldecode($_GET["x"] )) : NULL;
+	clean_number( rawurldecode($_GET["x"] ) ) : NULL;
 $min = isset($_GET["n"]) ?
-	escapeshellcmd( rawurldecode($_GET["n"] )) : NULL;
+	clean_number( rawurldecode($_GET["n"] ) ) : NULL;
 $value = isset($_GET["v"]) ?
-	escapeshellcmd( rawurldecode( $_GET["v"] )) : NULL;
-$load_color = isset($_GET["l"]) ?
-	escapeshellcmd( rawurldecode( $_GET["l"] )) : NULL;
+	clean_number( rawurldecode( $_GET["v"] ) ) : NULL;
+$load_color = isset($_GET["l"]) && is_valid_hex_color( rawurldecode( $_GET[ 'l' ] ) ) ?
+	escapeshellcmd( rawurldecode( $_GET["l"] ) ) : NULL;
 $vlabel = isset($_GET["vl"]) ?
-	escapeshellcmd( rawurldecode( $_GET["vl"] )) : NULL;
+	escapeshellcmd( clean_string( rawurldecode( $_GET["vl"] ) ) ) : NULL;
 $sourcetime = isset($_GET["st"]) ?
-	escapeshellcmd($_GET["st"]) : NULL;
-$summary = isset($_GET["su"]) ? 
-    escapeshellcmd($_GET["su"]) : NULL;
+	clean_number( $_GET["st"] ) : NULL;
+$summary = isset($_GET["su"]) ? 1 : 0;
+$debug = isset( $_GET[ 'debug' ] ) ? 1 : 0;
 
 # RFM - Define these variables to avoid "Undefined variable" errors being 
 # reported in ssl_error_log.
@@ -40,38 +43,20 @@ $background = "";
 $vertical_label = "";
 
 # Assumes we have a $start variable (set in get_context.php).
-if ($size == "small")
-    {
-      $height = 40;
-      $width = 130;
-      $fudge_0 = 0;
-      $fudge_1 = 0;
-      $fudge_2 = 0;
-    }
-else if ($size == "medium")
-    {
-      $height = 75;
-      $width = 300;
-      $fudge_0 = 0;
-      $fudge_1 = 14;
-      $fudge_2 = 28;
-    }
-else if ($size == "large")
-    {
-      $height = 600;
-      $width = 800;
-      $fudge_0 = 0;
-      $fudge_1 = 0;
-      $fudge_2 = 0;
-    }
-else
-    {
-      $height = 100;
-      $width = 400;
-      $fudge_0 = 0;
-      $fudge_1 = 0;
-      $fudge_2 = 0;
-    }
+# $graph_sizes and $graph_sizes_keys defined in conf.php.  Add custom sized there.
+if( in_array( $size, $graph_sizes_keys ) ) {
+  $height = $graph_sizes[ $size ][ 'height' ];
+  $width = $graph_sizes[ $size ][ 'width' ];
+  $fudge_0 = $graph_sizes[ $size ][ 'fudge_0' ];
+  $fudge_1 = $graph_sizes[ $size ][ 'fudge_1' ];
+  $fudge_2 = $graph_sizes[ $size ][ 'fudge_2' ];
+} else {
+  $height = $graph_sizes[ 'default' ][ 'height' ];
+  $width = $graph_sizes[ 'default' ][ 'width' ];
+  $fudge_0 = $graph_sizes[ 'default' ][ 'fudge_0' ];
+  $fudge_1 = $graph_sizes[ 'default' ][ 'fudge_1' ];
+  $fudge_2 = $graph_sizes[ 'default' ][ 'fudge_2' ];
+}
 
 
 # This security fix was brought to my attention by Peter Vreugdenhil <petervre@sci.kun.nl>
@@ -336,8 +321,6 @@ $command = RRDTOOL . " graph - --start $start --end $end ".
    "--title '$title' $vertical_label $extras $background ".
    $series;
 
-$debug=0;
-
 # Did we generate a command?   Run it.
 if($command)
  {
@@ -348,7 +331,7 @@ if($command)
    header ("Pragma: no-cache");                     // HTTP/1.0
    if ($debug) {
      header ("Content-type: text/html");
-     print "$command\n\n\n\n\n";
+     print htmlentities( $command ) . "\n\n\n\n\n";
     }
    else {
      header ("Content-type: image/gif");

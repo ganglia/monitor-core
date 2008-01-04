@@ -243,11 +243,7 @@ if( $context == "cluster" )
 # If there are graphs present, show ranges.
 #
 if (!$physical) {
-   $context_ranges[]="hour";
-   $context_ranges[]="day";
-   $context_ranges[]="week";
-   $context_ranges[]="month";
-   $context_ranges[]="year";
+   $context_ranges = array_keys( $time_ranges );
    if ($jobrange)
       $context_ranges[]="job";
 
@@ -255,7 +251,7 @@ if (!$physical) {
       ."<SELECT NAME=\"r\" OnChange=\"ganglia_form.submit();\">\n";
    foreach ($context_ranges as $v) {
       $url=rawurlencode($v);
-      $range_menu .= "<OPTION VALUE=\"$url\" ";
+      $range_menu .= "<OPTION VALUE=\"$url\"";
       if ($v == $range)
          $range_menu .= "SELECTED";
       $range_menu .= ">$v\n";
@@ -337,7 +333,7 @@ if ($context == "physical" or $context == "cluster")
       
       $size_menu = '<SELECT NAME="z" OnChange="ganglia_form.submit();">';
       
-      $size_arr = array("small","medium","large");
+      $size_arr = $graph_sizes_keys;
       foreach ($size_arr as $size) {
           $size_menu .= "<OPTION VALUE=\"$size\"";
           if (isset($clustergraphsize) && ($size === $clustergraphsize)) {
