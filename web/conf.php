@@ -28,7 +28,7 @@ $rrds = "$gmetad_root/rrds";
 
 # Leave this alone if rrdtool is installed in $gmetad_root,
 # otherwise, change it if it is installed elsewhere (like /usr/bin)
-define("RRDTOOL", "/sw/bin/rrdtool");
+define("RRDTOOL", "/usr/bin/rrdtool");
 
 #
 # If you want to grab data from a different ganglia source specify it here.
