@@ -13,7 +13,7 @@ $gridname = isset($_GET["G"]) ?
   escapeshellcmd( clean_string( rawurldecode($_GET["G"]) ) ) : NULL;
 $hostname = isset($_GET["h"]) ?
   escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) : NULL;
-$range = in_array($_GET["r"], array_keys( $time_ranges ) ) ?
+$range = isset($_GET["r"]) && in_array($_GET["r"], array_keys( $time_ranges ) ) ?
   escapeshellcmd( rawurldecode($_GET["r"])) : NULL;
 $metricname = isset($_GET["m"]) ?
   escapeshellcmd( clean_string( rawurldecode($_GET["m"]) ) ) : NULL;
@@ -28,6 +28,8 @@ $showhosts = isset($_GET["sh"]) ? 1 : NULL;
 # The 'p' variable specifies the verbosity level in the physical view.
 $physical = isset($_GET["p"]) ?
   clean_number( $_GET["p"] ) : NULL;
+$tree = isset($_GET["t"]) ?
+      escapeshellcmd($_GET["t"] ) : NULL;
 # A custom range value for job graphs, in -sec.
 $jobrange = isset($_GET["jr"]) ?
   clean_number( $_GET["jr"] ) : NULL;
