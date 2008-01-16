@@ -30,7 +30,7 @@
 #* Author: Brad Nicholes (bnicholes novell.com)
 #******************************************************************************/
 
-import os, sys, subprocess
+import os, sys, popen2
 import threading
 import time
 
@@ -210,7 +210,7 @@ class NetstatThread(threading.Thread):
                 tempconns[conn] = 0
 
             #Call the netstat utility and split the output into separate lines
-            netstat_output=subprocess.Popen(["netstat", '-t', '-a'],  stdout=subprocess.PIPE).communicate()[0]
+            netstat_output=popen2.popen2(["netstat", '-t', '-a'], mode='r')[0].read()
             lines = netstat_output.splitlines()
             
             #Iterate through the netstat output looking for the 'tcp' keyword in the tcp_at 
