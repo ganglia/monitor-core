@@ -43,7 +43,7 @@ $background = "";
 $vertical_label = "";
 
 # Assumes we have a $start variable (set in get_context.php).
-# $graph_sizes and $graph_sizes_keys defined in conf.php.  Add custom sized there.
+# $graph_sizes and $graph_sizes_keys defined in conf.php.  Add custom sizes there.
 if( in_array( $size, $graph_sizes_keys ) ) {
   $height = $graph_sizes[ $size ][ 'height' ];
   $width = $graph_sizes[ $size ][ 'width' ];
