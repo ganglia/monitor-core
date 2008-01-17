@@ -50,16 +50,26 @@
 </TD>
 
 <TD ALIGN="CENTER" VALIGN="TOP" WIDTH="395">
-<IMG ALT="{cluster_url} LOAD"
+<A HREF="./graph.php?g=load_report&z=large&c={cluster_url}&{graphargs}">
+<IMG BORDER=0 ALT="{cluster_url} LOAD"
    SRC="./graph.php?g=load_report&z=medium&c={cluster_url}&{graphargs}">
-<IMG ALT="{cluster_url} MEM"
+</A>
+<A HREF="./graph.php?g=mem_report&z=large&c={cluster_url}&{graphargs}">
+<IMG BORDER=0 ALT="{cluster_url} MEM"
    SRC="./graph.php?g=mem_report&z=medium&c={cluster_url}&{graphargs}">
-<IMG ALT="{cluster_url} CPU"
+</A>
+<A HREF="./graph.php?g=cpu_report&z=large&c={cluster_url}&{graphargs}">
+<IMG BORDER=0 ALT="{cluster_url} CPU"
    SRC="./graph.php?g=cpu_report&z=medium&c={cluster_url}&{graphargs}">
-<IMG ALT="{cluster_url} NETWORK"
+</A>
+<A HREF="./graph.php?g=network_report&z=large&c={cluster_url}&{graphargs}">
+<IMG BORDER=0 ALT="{cluster_url} NETWORK"
    SRC="./graph.php?g=network_report&z=medium&c={cluster_url}&{graphargs}">
-<IMG ALT="{cluster_url} PACKETS"
+</A>
+<A HREF="./graph.php?g=packet_report&z=large&c={cluster_url}&{graphargs}">
+<IMG BORDER=0 ALT="{cluster_url} PACKETS"
    SRC="./graph.php?g=packet_report&z=medium&c={cluster_url}&{graphargs}">
+</A>
 
 </TD>
 </TR>
@@ -82,7 +92,9 @@
  <TD>
 
 <!-- START BLOCK : vol_metric_info -->
-<IMG ALT="{alt}" SRC="./graph.php?{graphargs}">{br}
+<A HREF="./graph.php?&{graphargs}&z=large">
+<IMG BORDER=0 ALT="{alt}" SRC="./graph.php?{graphargs}">{br}
+</A>
 <!-- END BLOCK : vol_metric_info -->
 
  </TD>
