@@ -21,21 +21,24 @@
 
 <TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top>
 <A HREF="./graph.php?g=load_report&amp;z=large&amp;{graph_args}">
-<IMG BORDER=0 ALT="{cluster} LOAD" SRC="./graph.php?g=load_report&amp;z=medium&amp;{graph_args}">
+<IMG BORDER=0 ALT="{cluster} LOAD"
+   SRC="./graph.php?g=load_report&amp;z=medium&amp;{graph_args}">
 </A>
 <A HREF="./graph.php?g=cpu_report&amp;z=large&amp;{graph_args}">
-<IMG BORDER=0 ALT="{cluster} CPU" SRC="./graph.php?g=cpu_report&amp;z=medium&amp;{graph_args}">
-</A>   
+<IMG BORDER=0 ALT="{cluster} CPU"
+   SRC="./graph.php?g=cpu_report&amp;z=medium&amp;{graph_args}">
+</A>
 <A HREF="./graph.php?g=mem_report&amp;z=large&amp;{graph_args}">
-<IMG BORDER=0 ALT="{cluster} MEM" SRC="./graph.php?g=mem_report&amp;z=medium&amp;{graph_args}">
+<IMG BORDER=0 ALT="{cluster} MEM"
+   SRC="./graph.php?g=mem_report&amp;z=medium&amp;{graph_args}">
 </A>
 <A HREF="./graph.php?g=network_report&amp;z=large&amp;{graph_args}">
-<IMG BORDER=0 ALT="{cluster} NETWORK" SRC="./graph.php?g=network_report&amp;z=medium&amp;{graph_args}">
+<IMG BORDER=0 ALT="{cluster} NETWORK"
+    SRC="./graph.php?g=network_report&amp;z=medium&amp;{graph_args}">
 </A>
 <!-- START BLOCK : optional_graphs -->
-<A HREF="./graph.php?g={name}_report&amp;z=large&amp;{graph_args}">
-<IMG BORDER=0 ALT="{cluster} {name}" SRC="./graph.php?g={name}_report&amp;z=medium&amp;{graph_args}">
-</A>
+<IMG ALT="{cluster} {name}"
+   SRC="./graph.php?g={name}_report&amp;z=medium&amp;{graph_args}">
 <!-- END BLOCK : optional_graphs -->
 </TD>
 </TR>
