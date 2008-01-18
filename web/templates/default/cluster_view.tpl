@@ -37,8 +37,9 @@
     SRC="./graph.php?g=network_report&amp;z=medium&amp;{graph_args}">
 </A>
 <!-- START BLOCK : optional_graphs -->
-<IMG ALT="{cluster} {name}"
-   SRC="./graph.php?g={name}_report&amp;z=medium&amp;{graph_args}">
+<A HREF="./graph.php?g={name}_report&amp;z=large&amp;{graph_args}">
+<IMG BORDER=0 ALT="{cluster} {name}" SRC="./graph.php?g={name}_report&amp;z=medium&amp;{graph_args}">
+</A>
 <!-- END BLOCK : optional_graphs -->
 </TD>
 </TR>
