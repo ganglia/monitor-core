@@ -432,6 +432,14 @@ function clean_number( $digit )
 }
 
 #-------------------------------------------------------------------------------
+# If arg is a valid floating point number, return it.  Otherwise, return null.
+function clean_float( $value ) {
+  return preg_match('/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/', $value) ?
+        $value :
+        null;
+}
+
+#-------------------------------------------------------------------------------
 # Return true if string is a 3 or 6 character hex color.  Return false otherwise.
 function is_valid_hex_color( $string )
 {
