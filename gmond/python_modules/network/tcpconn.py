@@ -212,6 +212,7 @@ class NetstatThread(threading.Thread):
             #Call the netstat utility and split the output into separate lines
             netstat_output=popen2.popen2(["netstat", '-t', '-a'], mode='r')[0].read()
             lines = netstat_output.splitlines()
+            os.wait()
             
             #Iterate through the netstat output looking for the 'tcp' keyword in the tcp_at 
             # position and the state information in the tcp_state_at position. Count each 
