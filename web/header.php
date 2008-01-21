@@ -335,6 +335,8 @@ if ($context == "physical" or $context == "cluster")
       
       $size_arr = $graph_sizes_keys;
       foreach ($size_arr as $size) {
+          if ($size == "default")
+              continue;
           $size_menu .= "<OPTION VALUE=\"$size\"";
           if (isset($clustergraphsize) && ($size === $clustergraphsize)) {
               $size_menu .= " SELECTED";
