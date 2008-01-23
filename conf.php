@@ -137,7 +137,6 @@ $default_metric = "load_one";
 #
 $time_ranges = array(
    'hour'=>3600,
-   '2hour'=>7200,
    'day'=>86400,
    'week'=>604800,
    'month'=>2419200,
