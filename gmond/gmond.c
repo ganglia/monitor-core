@@ -1769,6 +1769,7 @@ setup_collection_groups( void )
                   if (strcasecmp(name,  mi[k].name) == 0) 
                     {
                       memcpy (metric_info, &(mi[k]), sizeof(Ganglia_25metric));
+                      break;
                     }
                 }
 
@@ -1959,7 +1960,6 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
         int len, errors;
         char metricmsg[max_udp_message_len];
         Ganglia_metric_callback *cb = ((Ganglia_metric_callback **)(group->metric_array->elts))[i];
-        apr_time_t now = apr_time_now();
         
         /* Build the message */
         switch(cb->info->type)
