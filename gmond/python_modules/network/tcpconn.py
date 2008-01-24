@@ -32,6 +32,7 @@
 
 import os, sys, popen2
 import threading
+import select
 import time
 
 _WorkerThread = None    #Worker thread object
@@ -179,9 +180,17 @@ class NetstatThread(threading.Thread):
         threading.Thread.__init__(self)
         self.running = False
         self.shuttingdown = False
+        self.popenChild = None
 
     def shutdown(self):
         self.shuttingdown = True
+        if self.popenChild != None:
+            try:
+                self.popenChild.wait()
+            except OSError, e:
+                if e.errno == 10: # No child processes
+                    pass
+
         if not self.running:
             return
         self.join()
@@ -210,9 +219,17 @@ class NetstatThread(threading.Thread):
                 tempconns[conn] = 0
 
             #Call the netstat utility and split the output into separate lines
-            netstat_output=popen2.popen2(["netstat", '-t', '-a'], mode='r')[0].read()
-            lines = netstat_output.splitlines()
-            os.wait()
+            fd_poll = select.poll()
+            self.popenChild = popen2.Popen3("netstat -t -a")
+            fd_poll.register(self.popenChild.fromchild)
+
+            poll_events = fd_poll.poll()
+
+            if (len(poll_events) == 0):             # Timeout
+                continue
+
+            for (fd, events) in poll_events:
+                lines = self.popenChild.fromchild.readlines()
             
             #Iterate through the netstat output looking for the 'tcp' keyword in the tcp_at 
             # position and the state information in the tcp_state_at position. Count each 
@@ -284,11 +301,16 @@ def metric_cleanup():
 
 #This code is for debugging and unit testing    
 if __name__ == '__main__':
-    params = {'Refresh': '20'}
-    metric_init(params)
-    while True:
-        for d in _descriptors:
-            v = d['call_back'](d['name'])
-            print 'value for %s is %u' % (d['name'],  v)
-        time.sleep(5)
+    try:
+        params = {'Refresh': '20'}
+        metric_init(params)
+        while True:
+            for d in _descriptors:
+                v = d['call_back'](d['name'])
+                print 'value for %s is %u' % (d['name'],  v)
+            time.sleep(5)
+    except KeyboardInterrupt:
+        time.sleep(0.2)
+        os._exit(1)
+
 
