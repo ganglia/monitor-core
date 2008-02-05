@@ -818,34 +818,6 @@ Ganglia_metadata_check(Ganglia_host *host, Ganglia_value_msg *vmsg )
     return;
 }
 
-static Ganglia_metadata *
-Ganglia_metadata_create( apr_pool_t *p )
-{
-  apr_status_t status;
-  Ganglia_metadata *metric = NULL;
-  apr_pool_t *pool = NULL;
-
-  if(!p)
-    return NULL;
-
-  /* Create the context for this metric */
-  status = apr_pool_create( &pool, p);
-  if(status != APR_SUCCESS)
-    return NULL;
-
-  /* Allocate a new metric from this context */
-  metric = apr_pcalloc( pool, sizeof(Ganglia_metadata));
-  if(!metric)
-    {
-      /* out of mem... kill context.. return null */
-      apr_pool_destroy(pool);
-      return NULL;
-    }
-
-  metric->pool = pool;
-  return metric;
-}
-
 #if 0
 static void
 Ganglia_metadata_free( Ganglia_metadata *metric )
@@ -856,80 +828,89 @@ Ganglia_metadata_free( Ganglia_metadata *metric )
 }
 #endif
 
-static Ganglia_metadata *
-Ganglia_message_find_value(Ganglia_host *host, Ganglia_value_msg *message)
-{
-  Ganglia_metadata *metric = 
-      (Ganglia_metadata *)apr_hash_get( host->gmetrics,
-                                      message->Ganglia_value_msg_u.gstr.metric_id.name,
-                                      APR_HASH_KEY_STRING);
-  if(!metric)
-    {
-      /* This is a new metric sent from this host... allocate space for this data */
-      metric = Ganglia_metadata_create( host->pool );
-      if(!metric)
-        {
-          /* no memory */
-          return NULL;
-        }
-
-      /* NOTE: In order for gmetric messages to be properly saved to the hash table
-       * based on the name of the gmetric sent...we need to strdup() the name
-       * since the xdr_free below will blast the value later (along with the other
-       * allocated structure elements).  This is only performed once at gmetric creation */
-      metric->name = apr_pstrdup( metric->pool, message->Ganglia_value_msg_u.gstr.metric_id.name );
-    }
-  return metric;
-}
-
-
-static Ganglia_metadata *
-Ganglia_message_find_metadata( Ganglia_host *host, Ganglia_metadata_msg *message)
-{
-  Ganglia_metadata *metric = 
-      (Ganglia_metadata *)apr_hash_get( host->metrics, 
-                                      message->Ganglia_metadata_msg_u.gfull.metric_id.name,
-                                      APR_HASH_KEY_STRING);
-  if(!metric)
-    {
-      /* This is a new metric sent from this host... allocate space for this data */
-      metric = Ganglia_metadata_create( host->pool );
-      if(!metric)
-        {
-          /* no memory */
-          return NULL;
-        }
-      
-      /* NOTE: In order for gmetric messages to be properly saved to the hash table
-       * based on the name of the gmetric sent...we need to strdup() the name
-       * since the xdr_free below will blast the value later (along with the other
-       * allocated structure elements).  This is only performed once at gmetric creation */
-      metric->name = apr_pstrdup( metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name );
-    }
-  return metric;
-}
-
 static void
 Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
 {
-  Ganglia_metadata *metric = NULL;
-  
-  if(!host || !message)
-    return;
+    /* Search for the Ganglia_metadata in the Ganglia_host */
+    Ganglia_metadata *metric = 
+        (Ganglia_metadata *)apr_hash_get(host->metrics, 
+                                         message->Ganglia_metadata_msg_u.gfull.metric_id.name,
+                                         APR_HASH_KEY_STRING);
+    if(!host || !message)
+        return;
+    
+    if(metric)
+      {
+        apr_pool_clear(metric->pool);
+      }
+    else
+      {
+        apr_status_t status;
 
-  /* Search for the Ganglia_metadata in the Ganglia_host */
-  metric = Ganglia_message_find_metadata(host, message);
+        /* This is a new metric sent from this host... allocate space for this data */
+        
+        /* Allocate a new metric from this context */
+        metric = apr_pcalloc(host->pool, sizeof(Ganglia_metadata));
+        if(!metric)
+            return;
 
-  if(metric)
-    {
-      memcpy(&(metric->message_u.f_message), message, sizeof(Ganglia_metadata_msg));
-      metric->last_heard_from = apr_time_now();
+        /* Create the context for this metric */
+        status = apr_pool_create(&(metric->pool), host->pool);
+        if(status != APR_SUCCESS)
+            return;
 
-      /* Save the full metric */
-      apr_hash_set(host->metrics, metric->name, APR_HASH_KEY_STRING, metric);
-      debug_msg("saving metadata for metric: %s host: %s", metric->name, host->hostname);
+        /* NOTE: In order for gmetric messages to be properly saved to the hash table
+        * based on the name of the gmetric sent...we need to strdup() the name
+        * since the xdr_free below will blast the value later (along with the other
+        * allocated structure elements).  This is only performed once at gmetric creation */
+        metric->name = apr_pstrdup(host->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
+        debug_msg("***Allocating metadata packet for host--%s-- and metric --%s-- ****\n", host->hostname, metric->name);
     }
-  xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&(message));
+    
+    if(metric)
+      {
+        Ganglia_metadata_msg *fmessage = &(metric->message_u.f_message);
+        u_int i,mlen = message->Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len;
+        
+        fmessage->id = message->id;
+        fmessage->Ganglia_metadata_msg_u.gfull.metric_id.host = 
+            apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.host);
+        fmessage->Ganglia_metadata_msg_u.gfull.metric_id.name = 
+            apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
+        fmessage->Ganglia_metadata_msg_u.gfull.metric_id.spoof = 
+            message->Ganglia_metadata_msg_u.gfull.metric_id.spoof;
+        fmessage->Ganglia_metadata_msg_u.gfull.metric.type = 
+            apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric.type);
+        fmessage->Ganglia_metadata_msg_u.gfull.metric.name = 
+            apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric.name);
+        fmessage->Ganglia_metadata_msg_u.gfull.metric.units = 
+            apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric.units);
+        fmessage->Ganglia_metadata_msg_u.gfull.metric.slope = 
+            message->Ganglia_metadata_msg_u.gfull.metric.slope;
+        fmessage->Ganglia_metadata_msg_u.gfull.metric.tmax = 
+            message->Ganglia_metadata_msg_u.gfull.metric.tmax;
+        fmessage->Ganglia_metadata_msg_u.gfull.metric.dmax = 
+            message->Ganglia_metadata_msg_u.gfull.metric.dmax;
+        fmessage->Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len = mlen;
+        
+        fmessage->Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val = 
+            apr_pcalloc(metric->pool, sizeof(Ganglia_extra_data)*mlen);
+        for (i = 0; i < mlen; i++) 
+          {
+            fmessage->Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[i].name = 
+                apr_pstrdup(metric->pool, 
+                            message->Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[i].name);
+            fmessage->Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[i].data = 
+                apr_pstrdup(metric->pool, 
+                            message->Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[i].data);
+          }
+    
+        metric->last_heard_from = apr_time_now();
+    
+        /* Save the full metric */
+        apr_hash_set(host->metrics, metric->name, APR_HASH_KEY_STRING, metric);
+        debug_msg("saving metadata for metric: %s host: %s", metric->name, host->hostname);
+      }
 }
 
 static void
@@ -945,31 +926,104 @@ Ganglia_metadata_request( Ganglia_host *host, Ganglia_metadata_msg *message )
   if (metric_cb) 
       metric_cb->metadata_last_sent = 0;
   debug_msg("setting metadata request flag for metric: %s host: %s", name, host->hostname);
-
-  xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&(message));
 }
 
 static void
 Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
 {
-  Ganglia_metadata *metric = NULL;
-  
+    /* Search for the Ganglia_metric in the Ganglia_host */
+    Ganglia_metadata *metric = 
+        (Ganglia_metadata *)apr_hash_get( host->gmetrics,
+                                        message->Ganglia_value_msg_u.gstr.metric_id.name,
+                                        APR_HASH_KEY_STRING);
   if(!host || !message)
     return;
 
-  /* Search for the Ganglia_metric in the Ganglia_host */
-  metric = Ganglia_message_find_value(host, message);
+  if(metric)
+    {
+      apr_pool_clear(metric->pool);
+    }
+  else
+    {
+      apr_status_t status;
+
+      /* This is a new metric sent from this host... allocate space for this data */
+
+      /* Allocate a new metric from this context */
+      metric = apr_pcalloc(host->pool, sizeof(Ganglia_metadata));
+      if(!metric)
+        {
+          /* no memory */
+          return;
+        }
+
+      /* Create the context for this metric */
+      status = apr_pool_create(&(metric->pool), host->pool);
+      if(status != APR_SUCCESS)
+          return;
+
+      /* NOTE: In order for gmetric messages to be properly saved to the hash table
+       * based on the name of the gmetric sent...we need to strdup() the name
+       * since the xdr_free below will blast the value later (along with the other
+       * allocated structure elements).  This is only performed once at gmetric creation */
+      metric->name = apr_pstrdup(host->pool, message->Ganglia_value_msg_u.gstr.metric_id.name );
+      debug_msg("***Allocating value packet for host--%s-- and metric --%s-- ****\n", host->hostname, metric->name);
+    }
+
 
   if(metric)
     {
-      memcpy(&(metric->message_u.v_message), message, sizeof(Ganglia_value_msg));
+      Ganglia_value_msg *vmessage = &(metric->message_u.v_message);
+
+      vmessage->id = message->id;
+      vmessage->Ganglia_value_msg_u.gstr.metric_id.host = 
+          apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.metric_id.host);
+      vmessage->Ganglia_value_msg_u.gstr.metric_id.name = 
+          apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.metric_id.name);
+      vmessage->Ganglia_value_msg_u.gstr.metric_id.spoof = 
+          message->Ganglia_value_msg_u.gstr.metric_id.spoof;
+      vmessage->Ganglia_value_msg_u.gstr.fmt = 
+          apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.fmt);
+
+      switch(message->id)
+        {
+        case gmetric_string:
+          vmessage->Ganglia_value_msg_u.gstr.str = 
+              apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.str);
+          break;
+        case gmetric_ushort:
+          vmessage->Ganglia_value_msg_u.gu_short.u_short = 
+              message->Ganglia_value_msg_u.gu_short.u_short;
+          break;
+        case gmetric_short:
+          vmessage->Ganglia_value_msg_u.gs_short.s_short = 
+              message->Ganglia_value_msg_u.gs_short.s_short;
+          break;
+        case gmetric_uint:
+          vmessage->Ganglia_value_msg_u.gu_int.u_int = 
+              message->Ganglia_value_msg_u.gu_int.u_int;
+          break;
+        case gmetric_int:
+          vmessage->Ganglia_value_msg_u.gs_int.s_int = 
+              message->Ganglia_value_msg_u.gs_int.s_int;
+          break;
+        case gmetric_float:
+          vmessage->Ganglia_value_msg_u.gf.f = 
+              message->Ganglia_value_msg_u.gf.f;
+          break;
+        case gmetric_double:
+          vmessage->Ganglia_value_msg_u.gd.d = 
+              message->Ganglia_value_msg_u.gd.d;
+          break;
+        default:
+          break;
+        }
+
       metric->last_heard_from = apr_time_now();
 
       /* Save the last update metric */
       apr_hash_set(host->gmetrics, metric->name, APR_HASH_KEY_STRING, metric);
     }
-
-  xdr_free((xdrproc_t)xdr_Ganglia_value_msg, (char *)&(message));
 }
 
 
@@ -1065,6 +1119,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
         }
       debug_msg("Processing a metric metadata request message from %s", hostdata->hostname);
       Ganglia_metadata_request(hostdata, &fmsg);
+      xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&fmsg);
       break;
     case gmetadata_full:
       ganglia_scoreboard_inc(PKTS_RECVD_METADATA);
@@ -1080,6 +1135,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
         }
       debug_msg("Processing a metric metadata message from %s", hostdata->hostname);
       Ganglia_metadata_save( hostdata, &fmsg );
+      xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&fmsg);
       break;
     case gmetric_ushort:
     case gmetric_short:
@@ -1096,13 +1152,14 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
         {
           ganglia_scoreboard_inc(PKTS_RECVD_FAILED);
           /* Processing of this message is finished ... */
-          xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&fmsg);
+          xdr_free((xdrproc_t)xdr_Ganglia_value_msg, (char *)&vmsg);
           break;
         }
       debug_msg("Processing a metric value message from %s", hostdata->hostname);
       Ganglia_value_save(hostdata, &vmsg);
       Ganglia_update_vidals(hostdata, &vmsg);
       Ganglia_metadata_check(hostdata, &vmsg);
+      xdr_free((xdrproc_t)xdr_Ganglia_value_msg, (char *)&vmsg);
       break;
     default:
       ganglia_scoreboard_inc(PKTS_RECVD_IGNORED);
@@ -2343,17 +2400,18 @@ main ( int argc, char *argv[] )
       setup_listen_channels_pollset();
     }
 
-  if(!mute)
-    {
-      setup_collection_groups();
-      udp_send_channels = Ganglia_udp_send_channels_create( global_context, config_file );
-    }
-
+  /* even if mute, a send channel may be needed to send a request for metadata */
+  udp_send_channels = Ganglia_udp_send_channels_create( global_context, config_file );
   if(!udp_send_channels)
     {
       /* if there are no send channels defined, we are equivalent to mute */
       mute = 1;
     }
+  if(!mute)
+    {
+      setup_collection_groups();
+    }
+
   if(!listen_channels)
     {
       /* if there are no listen channels defined, we are equivalent to deaf */
@@ -2390,7 +2448,7 @@ main ( int argc, char *argv[] )
       if(!deaf)
         {
           /* cleanup the data if the cleanup threshold has been met */
-          if( (now - last_cleanup) > cleanup_threshold )
+          if( (now - last_cleanup) > apr_time_make(cleanup_threshold,0))
             {
               cleanup_data( cleanup_context, now );
               last_cleanup = now;
