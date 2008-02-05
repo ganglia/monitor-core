@@ -146,7 +146,7 @@ static net_dev_stats *hash_lookup(char *name, const int enter,
       err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup()");
       return NULL;
     }
-    stats->name = name;
+    stats->name = strdup(name);
     stats->pkts_in   = pkts_in;
     stats->pkts_out  = pkts_out;
     stats->bytes_in  = bytes_in;
@@ -255,6 +255,7 @@ pkts_in_func ( void )
 			   val.f = 0.;
 			   debug_msg(" **********  BYTES_OUT RETURN:  %f", 
 				     val.f);
+               free (devname);
 			   return val;
 			}
 
@@ -279,6 +280,7 @@ pkts_in_func ( void )
 		     ns->pkts_in = temp;
 		  }
 	       p = index (p, '\n') + 1;    // skips a line
+           free(devname);
 	    }
 
 	 val.f = 0.;
@@ -343,6 +345,7 @@ pkts_out_func ( void )
 			   val.f = 0.;
 			   debug_msg(" **********  BYTES_OUT RETURN:  %f", 
 				     val.f);
+               free(devname);
 			   return val;
 			}
 
@@ -367,6 +370,7 @@ pkts_out_func ( void )
 		     ns->pkts_out = temp;
 		  }
 	       p = index (p, '\n') + 1;    // skips a line
+           free(devname);
 	    }
 
 	 val.f = 0.;
@@ -431,6 +435,7 @@ bytes_out_func ( void )
 			   val.f = 0.;
 			   debug_msg(" **********  BYTES_OUT RETURN:  %f", 
 				     val.f);
+               free(devname);
 			   return val;
 			}
 
@@ -455,6 +460,7 @@ bytes_out_func ( void )
 		     ns->bytes_out = temp;
 		  }
 	       p = index (p, '\n') + 1;    // skips a line
+           free(devname);
 	    }
 
 	 val.f = 0.;
@@ -519,6 +525,7 @@ bytes_in_func ( void )
 			   val.f = 0.;
 			   debug_msg(" **********  BYTES_OUT RETURN:  %f", 
 				     val.f);
+               free(devname);
 			   return val;
 			}
 
@@ -543,6 +550,7 @@ bytes_in_func ( void )
 		     ns->bytes_in = temp;
 		  }
 	       p = index (p, '\n') + 1;    // skips a line
+           free(devname);
 	    }
 
 	 val.f = 0.;
