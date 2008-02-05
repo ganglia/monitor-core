@@ -344,7 +344,7 @@ Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len 
   int num_errors = 0;
   apr_size_t size;
 
-  if(!buf || len<=0)
+  if(!channels || !buf || len<=0)
     return 1;
 
   for(i=0; i< channels->nelts; i++)
