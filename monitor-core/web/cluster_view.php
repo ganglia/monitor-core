@@ -22,7 +22,11 @@ else {
      $units = $metrics[key($metrics)][$metricname]['UNITS'];
   }
 
-$tpl->assign("num_nodes", intval($cluster['HOSTS_UP']));
+if(isset($cluster['HOSTS_UP'])) {
+    $tpl->assign("num_nodes", intval($cluster['HOSTS_UP']));
+} else {
+    $tpl->assign("num_nodes", 0);
+}
 if(isset($cluster['HOSTS_DOWN'])) {
     $tpl->assign("num_dead_nodes", intval($cluster['HOSTS_DOWN']));
 } else {
