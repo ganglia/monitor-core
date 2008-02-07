@@ -152,21 +152,20 @@ static void init_cpu_info (void)
  * Get the metric name and index from the original
  * metric name
  */
-static void get_metric_name_cpu (apr_pool_t *p, char *metric, char **name, int *index)
+static void get_metric_name_cpu (char *metric, char *name, int *index)
 {
-	/* The metric name contains both the name and the cpu id 
+	/* The metric name contains both the name and the cpu id. 
        Split the cpu id from the name so that we can use it to
-       decide which metric handler to call and for which cpu
-       whsuffix from the class tag and do a lookup in the 
+       decide which metric handler to call and for which cpu.
     */
 	size_t numIndex = strcspn (metric, "0123456789");
 
 	if (numIndex > 0) {
-        *name = apr_pstrmemdup(p, metric, numIndex);
+        strncpy (name, metric, numIndex);
         *index = atoi(&metric[numIndex]);
 	}
     else {
-        *name = NULL;
+        *name = '\0';
         *index = 0;
     }
 
@@ -540,12 +539,12 @@ static g_val_t ex_metric_handler ( int metric_index )
 {
     g_val_t val;
     int index;
-    char *name;
+    char name[64];
 
     /* Get the metric name and cpu index from the combined
        name that was passed in
     */
-    get_metric_name_cpu (pool, multicpu_module.metrics_info[metric_index].name, &name, &index);
+    get_metric_name_cpu (multicpu_module.metrics_info[metric_index].name, name, &index);
 
     if (strcmp(name, "multicpu_user") == 0) 
         return multi_cpu_user_func(index);
