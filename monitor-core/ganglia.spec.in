@@ -352,7 +352,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
-* Mon Feb 04 2007 Bernard Li <bernard@vanhpc.org>
+* Mon Feb 04 2008 Bernard Li <bernard@vanhpc.org>
 - Added php5-ctype package dependency for ganglia-web on SuSE distributions
   Reported by: Ulf Lange <mopp@gmx.net>
 * Tue Dec 18 2007 Brad Nicholes <bnicholes@novell.com>
