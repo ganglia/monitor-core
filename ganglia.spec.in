@@ -50,6 +50,7 @@ Provides: ganglia-webfrontend = %{version}
 #Requires: ganglia-gmetad >=  @VERSION@
 Requires: php-gd
 %if 0%{?suse_version}
+Requires: php5-ctype
 %define web_prefixdir /srv/www/htdocs/ganglia
 %else
 %define web_prefixdir /var/www/html/ganglia
@@ -351,6 +352,9 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Mon Feb 04 2007 Bernard Li <bernard@vanhpc.org>
+- Added php5-ctype package dependency for ganglia-web on SuSE distributions
+  Reported by: Ulf Lange <mopp@gmx.net>
 * Tue Dec 18 2007 Brad Nicholes <bnicholes@novell.com>
 - Remove all built in metrics and replace them with metric modules
 * Thu Nov 29 2007 Brad Nicholes <bnicholes@novell.com>
