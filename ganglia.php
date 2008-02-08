@@ -195,6 +195,7 @@ function start_cluster_summary ($parser, $tagname, $attrs)
 function start_host ($parser, $tagname, $attrs)
 {
    global $metrics, $cluster, $hosts_up, $hosts_down, $self, $grid;
+   global $metric_name;
 
    switch ($tagname)
       {
@@ -217,7 +218,12 @@ function start_host ($parser, $tagname, $attrs)
             break;
 
          case "METRIC":
-            $metrics[$attrs['NAME']] = $attrs;
+            $metric_name = $attrs['NAME'];
+            $metrics[$metric_name] = $attrs;
+            break;
+
+         case "EXTRA_DATA":
+            $metrics[$metric_name] = array_merge($metrics[$metric_name], $attrs);
             break;
 
          default:
