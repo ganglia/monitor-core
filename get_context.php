@@ -17,6 +17,8 @@ $range = isset($_GET["r"]) && in_array($_GET["r"], array_keys( $time_ranges ) ) 
   escapeshellcmd( rawurldecode($_GET["r"])) : NULL;
 $metricname = isset($_GET["m"]) ?
   escapeshellcmd( clean_string( rawurldecode($_GET["m"]) ) ) : NULL;
+$metrictitle = isset($_GET["ti"]) ?
+  escapeshellcmd( clean_string( rawurldecode($_GET["ti"]) ) ) : NULL;
 $sort = isset($_GET["s"]) ?
   escapeshellcmd( clean_string( rawurldecode($_GET["s"]) ) ) : NULL;
 $controlroom = isset($_GET["cr"]) ?
