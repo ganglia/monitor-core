@@ -421,22 +421,10 @@ function clean_string( $string )
 }
 
 #-------------------------------------------------------------------------------
-# If arg is entirely numeric, return it.  Otherwise, return null.
-function clean_number( $digit )
+# If arg is a valid number, return it.  Otherwise, return null.
+function clean_number( $value ) 
 {
-  $return_value = null;
-  if( ctype_digit( $digit ) ) {
-    $return_value = $digit;
-  }
-  return $return_value;
-}
-
-#-------------------------------------------------------------------------------
-# If arg is a valid floating point number, return it.  Otherwise, return null.
-function clean_float( $value ) {
-  return preg_match('/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/', $value) ?
-        $value :
-        null;
+  return is_numeric( $value ) ? $value : null;
 }
 
 #-------------------------------------------------------------------------------
