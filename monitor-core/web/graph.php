@@ -23,7 +23,7 @@ $max = isset($_GET["x"]) ?
 $min = isset($_GET["n"]) ?
 	clean_number( rawurldecode($_GET["n"] ) ) : NULL;
 $value = isset($_GET["v"]) ?
-	clean_float( rawurldecode( $_GET["v"] ) ) : NULL;
+	clean_number( rawurldecode( $_GET["v"] ) ) : NULL;
 $load_color = isset($_GET["l"]) && is_valid_hex_color( rawurldecode( $_GET[ 'l' ] ) ) ?
 	escapeshellcmd( rawurldecode( $_GET["l"] ) ) : NULL;
 $vlabel = isset($_GET["vl"]) ?
