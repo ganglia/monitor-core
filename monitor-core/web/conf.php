@@ -5,11 +5,6 @@
 #
 include_once "./version.php";
 
-$get = print_r( $_GET, 1 );
-$fp = fopen( '/tmp/ganglia_vars.txt', 'a+' );
-fwrite( $fp, $_SERVER[ 'PHP_SELF'] . "\n" . $get . "\n\n" );
-fclose( $fp );
-
 #
 # The name of the directory in "./templates" which contains the
 # templates that you want to use. Templates are like a skin for the
