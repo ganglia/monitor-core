@@ -31,6 +31,7 @@ if ($hosts_down)
    }
 
 $tpl->assign("ip", $hosts_up['IP']);
+$g_metrics_group = array();
 
 foreach ($metrics as $name => $v)
    {
@@ -57,7 +58,24 @@ foreach ($metrics as $name => $v)
                 $encodeUnits = rawurlencode($v['UNITS']);
                 $graphargs .= "&vl=$encodeUnits";
              }
+             if ($v['TITLE']) {
+                $title = $v['TITLE'];
+                $graphargs .= "&ti=$title";
+             }
              $g_metrics[$name]['graph'] = $graphargs;
+             $g_metrics[$name]['description'] = $v['DESC'];
+
+             # Setup an array of groups that can be used for sorting in group view
+             if ( isset($metrics[$name]['GROUP']) ) {
+                $group = $metrics[$name]['GROUP'];
+             } else {
+                $group = "";
+             }
+             if ( isset($g_metrics_group[$group]) ) {
+                $g_metrics_group[$group] = array_merge($g_metrics_group[$group], $name);
+             } else {
+                $g_metrics_group[$group] = array($name);
+             }
           }
    }
 # Add the uptime metric for this host. Cannot be done in ganglia.php,
@@ -106,19 +124,32 @@ if (is_array($c_metrics))
    }
 
 # Show graphs.
-if (is_array($g_metrics))
+if ( is_array($g_metrics) && is_array($g_metrics_group) )
    {
-      ksort($g_metrics);
+      ksort($g_metrics_group);
 
-      $i = 0;
-      foreach ( $g_metrics as $name => $v )
+      foreach ( $g_metrics_group as $group => $metric_array )
          {
-            $tpl->newBlock("vol_metric_info");
-            $tpl->assign("graphargs", $v['graph']);
-            $tpl->assign("alt", "$hostname $name");
-            if($i++ %2)
-               $tpl->assign("br", "<BR>");
+            if ( $group == "" ) {
+               $group = "no_group";
+	    }
+            $tpl->newBlock("vol_group_info");
+            $tpl->assign("group", $group);
+            $i = 0;
+            foreach ( $g_metrics as $name => $v )
+               {
+                  if ( in_array($name, $metric_array) ) {
+                     $tpl->newBlock("vol_metric_info");
+                     $tpl->assign("graphargs", $v['graph']);
+                     $tpl->assign("alt", "$hostname $name");
+                     if (isset($v['description']))
+                       $tpl->assign("desc", $v['description']);
+                     if($i++ %2)
+                        $tpl->assign("br", "<BR>");
+                  }
+               }
          }
+
    }
 
 $tpl->printToScreen();

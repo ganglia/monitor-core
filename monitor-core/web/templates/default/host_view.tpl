@@ -91,11 +91,20 @@
 <TR>
  <TD>
 
+<!-- START BLOCK : vol_group_info -->
+<TABLE BORDER="0" WIDTH="100%">
+<TR>
+  <TD CLASS=title>
+  {group} metrics
+  </TD>
+</TR>
+</TABLE>
 <!-- START BLOCK : vol_metric_info -->
 <A HREF="./graph.php?&{graphargs}&z=large">
-<IMG BORDER=0 ALT="{alt}" SRC="./graph.php?{graphargs}">{br}
+<IMG BORDER=0 ALT="{alt}" SRC="./graph.php?{graphargs}" TITLE="{desc}">{br}
 </A>
 <!-- END BLOCK : vol_metric_info -->
+<!-- END BLOCK : vol_group_info -->
 
  </TD>
 </TR>

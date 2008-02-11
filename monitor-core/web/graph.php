@@ -298,7 +298,7 @@ else
     else if ($summary)
        $title = "$hostname";
     else
-       $title = $metricname;
+       $title = $metrictitle;
    }
 
 # Calculate time range.
