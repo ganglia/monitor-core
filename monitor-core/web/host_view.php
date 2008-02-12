@@ -67,14 +67,17 @@ foreach ($metrics as $name => $v)
 
              # Setup an array of groups that can be used for sorting in group view
              if ( isset($metrics[$name]['GROUP']) ) {
-                $group = $metrics[$name]['GROUP'];
+                $groups = $metrics[$name]['GROUP'];
              } else {
-                $group = "";
+                $groups = array("");
              }
-             if ( isset($g_metrics_group[$group]) ) {
-                $g_metrics_group[$group] = array_merge($g_metrics_group[$group], (array)$name);
-             } else {
-                $g_metrics_group[$group] = array($name);
+
+             foreach ( $groups as $group) {
+                if ( isset($g_metrics_group[$group]) ) {
+                   $g_metrics_group[$group] = array_merge($g_metrics_group[$group], (array)$name);
+                } else {
+                   $g_metrics_group[$group] = array($name);
+                }
              }
           }
    }
@@ -136,6 +139,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
             $tpl->newBlock("vol_group_info");
             $tpl->assign("group", $group);
             $i = 0;
+            ksort($g_metrics);
             foreach ( $g_metrics as $name => $v )
                {
                   if ( in_array($name, $metric_array) ) {
