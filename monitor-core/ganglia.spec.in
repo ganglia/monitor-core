@@ -50,7 +50,6 @@ Provides: ganglia-webfrontend = %{version}
 #Requires: ganglia-gmetad >=  @VERSION@
 Requires: php-gd
 %if 0%{?suse_version}
-Requires: php5-ctype
 %define web_prefixdir /srv/www/htdocs/ganglia
 %else
 %define web_prefixdir /var/www/html/ganglia
