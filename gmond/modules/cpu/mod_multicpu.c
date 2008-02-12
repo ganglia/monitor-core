@@ -493,6 +493,8 @@ static cpu_util *init_metric (apr_pool_t *p, apr_array_header_t *ar, int cpu_cou
 
 static int ex_metric_init (apr_pool_t *p)
 {
+    int i;
+
     init_cpu_info ();
 
     /* Allocate a pool that will be used by this module */
@@ -527,6 +529,14 @@ static int ex_metric_init (apr_pool_t *p)
        dynamic array that we just created 
     */
     multicpu_module.metrics_info = (Ganglia_25metric *)metric_info->elts;
+
+    for (i = 0; multicpu_module.metrics_info[i].name != NULL; i++) {
+        /* Initialize the metadata storage for each of the metrics and then
+         *  store one or more key/value pairs.  The define MGROUPS defines
+         *  the key for the grouping attribute. */
+        MMETRIC_INIT_METADATA(&(multicpu_module.metrics_info[i]),p);
+        MMETRIC_ADD_METADATA(&(multicpu_module.metrics_info[i]),MGROUP,"cpu");
+    }
 
     return 0;
 }
