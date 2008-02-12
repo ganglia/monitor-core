@@ -223,7 +223,17 @@ function start_host ($parser, $tagname, $attrs)
             break;
 
          case "EXTRA_DATA":
-            $metrics[$metricname] = array_merge($metrics[$metricname], $attrs);
+            if ( isset($attrs['GROUP']) ) { 
+               if ( isset($metrics[$metricname]['GROUP']) ) {
+                  $group_array = array_merge( (array)$attrs['GROUP'], $metrics[$metricname]['GROUP'] );
+               } else {
+                  $group_array = (array)$attrs['GROUP'];
+               }
+               $metrics[$metricname] = array_merge($metrics[$metricname], $attrs);
+               $metrics[$metricname]['GROUP'] = $group_array;
+            } else {
+               $metrics[$metricname] = array_merge($metrics[$metricname], $attrs);
+            }
             break;
 
          default:
