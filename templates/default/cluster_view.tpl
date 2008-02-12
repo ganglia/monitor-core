@@ -64,11 +64,13 @@
   {cluster} <strong>{metric}</strong>
   last <strong>{range}</strong>
   sorted <strong>{sort}</strong>
+<!-- START BLOCK : columns_size_dropdown -->
   |
    <FONT SIZE="-1">
    Columns&nbsp;&nbsp;{cols_menu}
    Size&nbsp;&nbsp;{size_menu}
    </FONT>
+<!-- END BLOCK : columns_size_dropdown -->
   </TD>
 </TR>
 </TABLE>
