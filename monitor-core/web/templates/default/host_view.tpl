@@ -1,3 +1,21 @@
+<SCRIPT TYPE="text/javascript"><!--
+// Script taken from: http://www.netlobo.com/div_hiding.html
+function toggleLayer( whichLayer )
+{
+  var elem, vis;
+  if( document.getElementById ) // this is the way the standards work
+    elem = document.getElementById( whichLayer );
+  else if( document.all ) // this is the way old msie versions work
+      elem = document.all[whichLayer];
+  else if( document.layers ) // this is the way nn4 works
+    elem = document.layers[whichLayer];
+  vis = elem.style;
+  // if the style.display value is blank we try to figure it out here
+  if(vis.display==''&&elem.offsetWidth!=undefined&&elem.offsetHeight!=undefined)
+    vis.display = (elem.offsetWidth!=0&&elem.offsetHeight!=0)?'block':'none';
+  vis.display = (vis.display==''||vis.display=='block')?'none':'block';
+}
+--></SCRIPT>
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD COLSPAN="2" BGCOLOR="#EEEEEE" ALIGN="CENTER">
@@ -92,6 +110,7 @@
  <TD>
 
 <!-- START BLOCK : vol_group_info -->
+<A HREF="javascript:toggleLayer('{group}');" TITLE="Toggle {group} metrics group on/off">
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD CLASS=title>
@@ -99,11 +118,14 @@
   </TD>
 </TR>
 </TABLE>
+</A>
+<DIV ID="{group}">
 <!-- START BLOCK : vol_metric_info -->
 <A HREF="./graph.php?&{graphargs}&z=large">
 <IMG BORDER=0 ALT="{alt}" SRC="./graph.php?{graphargs}" TITLE="{desc}">{br}
 </A>
 <!-- END BLOCK : vol_metric_info -->
+</DIV>
 <!-- END BLOCK : vol_group_info -->
 
  </TD>
