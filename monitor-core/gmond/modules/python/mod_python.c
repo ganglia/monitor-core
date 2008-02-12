@@ -45,6 +45,7 @@
 
 #include <apr_tables.h>
 #include <apr_strings.h>
+#include <apr_lib.h>
 
 #include <Python.h>
 #include <dirent.h>
@@ -413,7 +414,12 @@ static void fill_gmi(Ganglia_25metric* gmi, py_metric_init_t* minfo)
     MMETRIC_INIT_METADATA(gmi, pool);
     for (s=(char *)apr_strtok(minfo->groups, ",", &lasts);
           s!=NULL; s=(char *)apr_strtok(NULL, ",", &lasts)) {
-        MMETRIC_ADD_METADATA(gmi,MGROUP,s);
+        char *d = s;
+        /* Strip the leading white space */
+        while (d && *d && apr_isspace(*d)) {
+            d++;
+        }
+        MMETRIC_ADD_METADATA(gmi,MGROUP,d);
     }
 }
 
