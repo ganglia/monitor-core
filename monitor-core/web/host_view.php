@@ -72,7 +72,7 @@ foreach ($metrics as $name => $v)
                 $group = "";
              }
              if ( isset($g_metrics_group[$group]) ) {
-                $g_metrics_group[$group] = array_merge($g_metrics_group[$group], $name);
+                $g_metrics_group[$group] = array_merge($g_metrics_group[$group], (array)$name);
              } else {
                 $g_metrics_group[$group] = array($name);
              }
