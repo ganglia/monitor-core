@@ -74,11 +74,6 @@ else {
 $tpl->assign("metric","$metricname $units");
 $tpl->assign("sort", $sort);
 $tpl->assign("range", $range);
-# Host columns menu defined in header.php
-if ($showhosts) {
-  $tpl->assign("cols_menu", $cols_menu);
-  $tpl->assign("size_menu", $size_menu);
-}
 $tpl->assign("checked$showhosts", "checked");
 
 $sorted_hosts = array();
@@ -128,6 +123,13 @@ if ($showhosts)
             $name_url = rawurlencode($name);
             $pie_args .= "&$name_url=$n,$color";
          }
+      $tpl->assign("pie_args", $pie_args);
+
+      # Host columns menu defined in header.php
+      $tpl->newBlock('columns_size_dropdown');
+      $tpl->assign("cols_menu", $cols_menu);
+      $tpl->assign("size_menu", $size_menu);
+
    }
 else
    {
@@ -138,8 +140,8 @@ else
       $down_color = $load_colors["down"];
       $pie_args .= "&amp;Up=$cluster[HOSTS_UP],$up_color";
       $pie_args .= "&amp;Down=$cluster[HOSTS_DOWN],$down_color";
+      $tpl->assign("pie_args", $pie_args);
    }
-$tpl->assign("pie_args", $pie_args);
 
 # No reason to go on if we have no up hosts.
 if (!is_array($hosts_up) or !$showhosts) {
