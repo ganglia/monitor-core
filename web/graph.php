@@ -287,14 +287,11 @@ else if ($context == "cluster")
    }
 else
    {
-    if ($size == "small")
-      {
-        # Value for this graph define a background color.
-        if (!$load_color) $load_color = "ffffff";
-        $background = "--color BACK#'$load_color'";
+    if ($load_color)
+       $background = "--color BACK#'$load_color'";
 
+    if ($size == "small")
         $title = $hostname;
-      }
     else if ($style)
        $title = "$hostname $style last $range";
     else if ($summary)
