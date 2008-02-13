@@ -110,7 +110,7 @@ function toggleLayer( whichLayer )
  <TD>
 
 <!-- START BLOCK : vol_group_info -->
-<A HREF="javascript:toggleLayer('{group}');" TITLE="Toggle {group} metrics group on/off">
+<A HREF="javascript:;" ONMOUSEDOWN="javascript:toggleLayer('{group}');" TITLE="Toggle {group} metrics group on/off">
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD CLASS=metric>
