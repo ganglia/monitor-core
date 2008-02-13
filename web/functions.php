@@ -421,10 +421,14 @@ function clean_string( $string )
 }
 
 #-------------------------------------------------------------------------------
-# If arg is a valid number, return it.  Otherwise, return null.
-function clean_number( $value )
+# If arg is entirely numeric, return it.  Otherwise, return null.
+function clean_number( $digit )
 {
-  return is_numeric( $value ) ? $value : null;
+  $return_value = null;
+  if( ctype_digit( $digit ) ) {
+    $return_value = $digit;
+  }
+  return $return_value;
 }
 
 #-------------------------------------------------------------------------------
