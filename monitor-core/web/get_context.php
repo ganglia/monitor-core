@@ -5,43 +5,43 @@ include_once "./functions.php";
   
 $meta_designator = "Grid";
 $cluster_designator = "Cluster Overview";
-  
+
 # Blocking malicious CGI input.
 $clustername = isset($_GET["c"]) ?
-  escapeshellcmd( clean_string( rawurldecode($_GET["c"]) ) ) : NULL;
+	escapeshellcmd( clean_string( rawurldecode($_GET["c"]) ) ) : NULL;
 $gridname = isset($_GET["G"]) ?
-  escapeshellcmd( clean_string( rawurldecode($_GET["G"]) ) ) : NULL;
+	escapeshellcmd( clean_string( rawurldecode($_GET["G"]) ) ) : NULL;
 $hostname = isset($_GET["h"]) ?
-  escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) : NULL;
-$range = isset($_GET["r"]) && in_array($_GET["r"], array_keys( $time_ranges ) ) ?
-  escapeshellcmd( rawurldecode($_GET["r"])) : NULL;
+	escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) : NULL;
+$range = isset( $_GET["r"] ) && in_array($_GET["r"], array_keys( $time_ranges ) ) ?
+	escapeshellcmd( rawurldecode($_GET["r"])) : NULL;
 $metricname = isset($_GET["m"]) ?
-  escapeshellcmd( clean_string( rawurldecode($_GET["m"]) ) ) : NULL;
+	escapeshellcmd( clean_string( rawurldecode($_GET["m"]) ) ) : NULL;
 $metrictitle = isset($_GET["ti"]) ?
-  escapeshellcmd( clean_string( rawurldecode($_GET["ti"]) ) ) : NULL;
+	escapeshellcmd( clean_string( rawurldecode($_GET["ti"]) ) ) : NULL;
 $sort = isset($_GET["s"]) ?
-  escapeshellcmd( clean_string( rawurldecode($_GET["s"]) ) ) : NULL;
+	escapeshellcmd( clean_string( rawurldecode($_GET["s"]) ) ) : NULL;
 $controlroom = isset($_GET["cr"]) ?
-  clean_number( rawurldecode($_GET["cr"]) ) : NULL;
+	clean_number( rawurldecode($_GET["cr"]) ) : NULL;
 $hostcols = isset($_GET["hc"]) ?
-  clean_number( $_GET["hc"] ) : NULL;
+	clean_number( $_GET["hc"] ) : NULL;
 # Flag, whether or not to show a list of hosts
 $showhosts = isset($_GET["sh"]) ?
-  clean_number( $_GET["sh"] ) : NULL;
+	clean_number( $_GET["sh"] ) : NULL;
 # The 'p' variable specifies the verbosity level in the physical view.
 $physical = isset($_GET["p"]) ?
-  clean_number( $_GET["p"] ) : NULL;
+	clean_number( $_GET["p"] ) : NULL;
 $tree = isset($_GET["t"]) ?
-      escapeshellcmd($_GET["t"] ) : NULL;
+	escapeshellcmd($_GET["t"] ) : NULL;
 # A custom range value for job graphs, in -sec.
 $jobrange = isset($_GET["jr"]) ?
-  clean_number( $_GET["jr"] ) : NULL;
+	clean_number( $_GET["jr"] ) : NULL;
 # A red vertical line for various events. Value specifies the event time.
 $jobstart = isset($_GET["js"]) ?
-  clean_number( $_GET["js"] ) : NULL;
+	clean_number( $_GET["js"] ) : NULL;
 # The direction we are travelling in the grid tree
 $gridwalk = isset($_GET["gw"]) ?
-  escapeshellcmd( clean_string( $_GET["gw"] ) ) : NULL;
+	escapeshellcmd( clean_string( $_GET["gw"] ) ) : NULL;
 # Size of the host graphs in the cluster view
 $clustergraphsize = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $graph_sizes_keys ) ?
     escapeshellcmd($_GET["z"]) : NULL;
