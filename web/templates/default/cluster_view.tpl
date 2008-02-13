@@ -85,6 +85,8 @@
 </TABLE>
 
 <p>
+<!-- START BLOCK : node_legend -->
 (Nodes colored by 1-minute load) | <A HREF="./node_legend.html">Legend</A>
+<!-- END BLOCK : node_legend -->
 
 </CENTER>
