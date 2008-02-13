@@ -331,7 +331,7 @@ if($command)
    header ("Pragma: no-cache");                     // HTTP/1.0
    if ($debug) {
      header ("Content-type: text/html");
-     print "$command\n\n\n\n\n";
+     print htmlentities( $command ) . "\n\n\n\n\n";
     }
    else {
      header ("Content-type: image/gif");

@@ -22,7 +22,8 @@ $controlroom = isset($_GET["cr"]) ?
 $hostcols = isset($_GET["hc"]) ?
 	clean_number( $_GET["hc"] ) : NULL;
 # Flag, whether or not to show a list of hosts
-$showhosts = isset($_GET["sh"]) ? 1 : NULL;
+$showhosts = isset($_GET["sh"]) ?
+	clean_number( $_GET["sh"] ) : NULL;
 # The 'p' variable specifies the verbosity level in the physical view.
 $physical = isset($_GET["p"]) ?
 	clean_number( $_GET["p"] ) : NULL;
