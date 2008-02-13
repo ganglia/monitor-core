@@ -113,7 +113,7 @@ function toggleLayer( whichLayer )
 <A HREF="javascript:toggleLayer('{group}');" TITLE="Toggle {group} metrics group on/off">
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
-  <TD CLASS=title>
+  <TD CLASS=metric>
   {group} metrics
   </TD>
 </TR>
