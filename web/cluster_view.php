@@ -129,7 +129,7 @@ if ($showhosts)
       $tpl->newBlock('columns_size_dropdown');
       $tpl->assign("cols_menu", $cols_menu);
       $tpl->assign("size_menu", $size_menu);
-
+      $tpl->newBlock('node_legend');
    }
 else
    {
