@@ -85,13 +85,16 @@ foreach ($metrics as $name => $v)
 # since it requires a fully-parsed XML tree. The classic contructor problem.
 $s_metrics['uptime']['TYPE'] = "string";
 $s_metrics['uptime']['VAL'] = uptime($cluster['LOCALTIME'] - $metrics['boottime']['VAL']);
+$s_metrics['uptime']['TITLE'] = "Uptime";
 
 # Add the gmond started timestamps & last reported time (in uptime format) from
 # the HOST tag:
 $s_metrics['gmond_started']['TYPE'] = "timestamp";
 $s_metrics['gmond_started']['VAL'] = $hosts_up['GMOND_STARTED'];
+$s_metrics['gmond_started']['TITLE'] = "Gmond Started";
 $s_metrics['last_reported']['TYPE'] = "string";
 $s_metrics['last_reported']['VAL'] = uptime($cluster['LOCALTIME'] - $hosts_up['REPORTED']);
+$s_metrics['last_reported']['TITLE'] = "Last Reported";
 
 # Show string metrics
 if (is_array($s_metrics))
@@ -102,7 +105,12 @@ if (is_array($s_metrics))
 	# RFM - If units aren't defined for metric, make it be the empty string
 	! array_key_exists('UNITS', $v) and $v['UNITS'] = "";
         $tpl->newBlock("string_metric_info");
-        $tpl->assign("name", $name);
+		if ($v['TITLE']) {
+			$tpl->assign("name", $v['TITLE']);
+		}
+		else {
+			$tpl->assign("name", $name);
+		}
         if( $v['TYPE']=="timestamp" or (isset($always_timestamp[$name]) and $always_timestamp[$name]))
            {
               $tpl->assign("value", date("r", $v['VAL']));
@@ -121,7 +129,12 @@ if (is_array($c_metrics))
       foreach ($c_metrics as $name => $v )
      {
         $tpl->newBlock("const_metric_info");
-        $tpl->assign("name", $name);
+		if ($v['TITLE']) {
+			$tpl->assign("name", $v['TITLE']);
+		}
+		else { 
+			$tpl->assign("name", $name);
+		}
         $tpl->assign("value", "$v[VAL] $v[UNITS]");
      }
    }
