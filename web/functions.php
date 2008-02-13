@@ -422,7 +422,7 @@ function clean_string( $string )
 
 #-------------------------------------------------------------------------------
 # If arg is a valid number, return it.  Otherwise, return null.
-function clean_number( $value ) 
+function clean_number( $value )
 {
   return is_numeric( $value ) ? $value : null;
 }
