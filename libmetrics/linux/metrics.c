@@ -120,7 +120,7 @@ static unsigned int hashval(const char *s)
   return hval % NHASH;
 }
 
-static net_dev_stats *hash_lookup(char *name, const int enter, 
+static net_dev_stats *hash_lookup(char *devname, size_t nlen, const int enter, 
 				  const double pkts_in, 
 				  const double pkts_out, 
 				  const double bytes_in, 
@@ -128,12 +128,15 @@ static net_dev_stats *hash_lookup(char *name, const int enter,
 {
   int hval;
   net_dev_stats *stats;
+  char *name=strndup(devname,nlen);
 
   hval = hashval(name);
   for (stats = netstats[hval]; stats != NULL; stats = stats->next)
   {
-    if (strcmp(name, stats->name) == 0)
+    if (strcmp(name, stats->name) == 0) {
+      free(name);
       return stats;
+    }
   }
 
   if (enter)
@@ -142,9 +145,10 @@ static net_dev_stats *hash_lookup(char *name, const int enter,
     if ( stats == NULL )
     {   
       err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup()");
+      free(name);
       return NULL;
     }
-    stats->name = name;
+    stats->name = strndup(devname,nlen);
     stats->pkts_in   = pkts_in;
     stats->pkts_out  = pkts_out;
     stats->bytes_in  = bytes_in;
@@ -152,6 +156,7 @@ static net_dev_stats *hash_lookup(char *name, const int enter,
     stats->next = netstats[hval];
     netstats[hval] = stats;
   }
+  free(name);
   return stats;
 }
 
@@ -222,7 +227,7 @@ pkts_in_func ( void )
 	    {
 	       /*  skip past the interface tag portion of this line */
 	       /*  but save the name of the interface (hash key) */
-	       char *devname, *src;
+	       char *src;
 	       size_t n = 0;
 
 	       while (p != 0x00 && isblank(*p))
@@ -233,7 +238,6 @@ pkts_in_func ( void )
 		     n++;
 		     p++;
 		  }
-	       devname = strndup(src, n);
 
 	       p = index(p, ':')+1;
 	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
@@ -243,7 +247,7 @@ pkts_in_func ( void )
 		     double temp = 0.;
 		     /* Check for data from the last read for this */
 		     /* interface.  If nothing exists, add to the table. */
-		     net_dev_stats *ns = hash_lookup(devname, 1, 
+		     net_dev_stats *ns = hash_lookup(src, n, 1, 
 						     0., 0., 0., 0.);
 		     if ( ns == NULL )
 		        {
@@ -310,7 +314,7 @@ pkts_out_func ( void )
 	    {
 	       /*  skip past the interface tag portion of this line */
 	       /*  but save the name of the interface (hash key) */
-	       char *devname, *src;
+	       char *src;
 	       size_t n = 0;
 
 	       while (p != 0x00 && isblank(*p))
@@ -321,7 +325,6 @@ pkts_out_func ( void )
 		     n++;
 		     p++;
 		  }
-	       devname = strndup(src, n);
 
 	       p = index(p, ':')+1;
 	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
@@ -331,7 +334,7 @@ pkts_out_func ( void )
 		     double temp = 0.;
 		     /* Check for data from the last read for this */
 		     /* interface.  If nothing exists, add to the table. */
-		     net_dev_stats *ns = hash_lookup(devname, 1, 
+		     net_dev_stats *ns = hash_lookup(src, n, 1, 
 						     0., 0., 0., 0.);
 		     if ( ns == NULL )
 		        {
@@ -398,7 +401,7 @@ bytes_out_func ( void )
 	    {
 	       /*  skip past the interface tag portion of this line */
 	       /*  but save the name of the interface (hash key) */
-	       char *devname, *src;
+	       char *src;
 	       size_t n = 0;
 
 	       while (p != 0x00 && isblank(*p))
@@ -409,7 +412,6 @@ bytes_out_func ( void )
 		     n++;
 		     p++;
 		  }
-	       devname = strndup(src, n);
 
 	       p = index(p, ':')+1;
 	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
@@ -419,7 +421,7 @@ bytes_out_func ( void )
 		     double temp = 0.;
 		     /* Check for data from the last read for this */
 		     /* interface.  If nothing exists, add to the table. */
-		     net_dev_stats *ns = hash_lookup(devname, 1, 
+		     net_dev_stats *ns = hash_lookup(src, n, 1, 
 						     0., 0., 0., 0.);
 		     if ( ns == NULL )
 		        {
@@ -486,7 +488,7 @@ bytes_in_func ( void )
 	    {
 	       /*  skip past the interface tag portion of this line */
 	       /*  but save the name of the interface (hash key) */
-	       char *devname, *src;
+	       char *src;
 	       size_t n = 0;
 
 	       while (p != 0x00 && isblank(*p))
@@ -497,7 +499,6 @@ bytes_in_func ( void )
 		     n++;
 		     p++;
 		  }
-	       devname = strndup(src, n);
 
 	       p = index(p, ':')+1;
 	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
@@ -507,7 +508,7 @@ bytes_in_func ( void )
 		     double temp = 0.;
 		     /* Check for data from the last read for this */
 		     /* interface.  If nothing exists, add to the table. */
-		     net_dev_stats *ns = hash_lookup(devname, 1, 
+		     net_dev_stats *ns = hash_lookup(src, n, 1, 
 						     0., 0., 0., 0.);
 		     if ( ns == NULL )
 		        {
