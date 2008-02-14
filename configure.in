@@ -38,10 +38,10 @@ AC_CONFIG_AUX_DIR(config)
 # increment GANGLIA_MAJOR_VERSION and set 
 # GANGLIA_MINOR_VERSION and GANGLIA_MICRO_VERSION
 # to 0 (zero) 
-GANGLIA_RELEASE_NAME="Foss"
+GANGLIA_RELEASE_NAME="Fossett"
 GANGLIA_MAJOR_VERSION=3
 GANGLIA_MINOR_VERSION=0
-GANGLIA_MICRO_VERSION=6
+GANGLIA_MICRO_VERSION=7
 
 # If we are releasing a snapshot (beta), set GANGLIA_SNAPSHOT to "yes"
 # If we are creating an official release, set it to "no" 
