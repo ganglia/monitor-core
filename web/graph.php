@@ -257,13 +257,16 @@ else
 
       if ($vlabel)
          $vertical_label = "--vertical-label '$vlabel'";
-      else if ($upper_limit or $lower_limit)
-         {
-            $max = $max>1000 ? number_format($max) : number_format($max, 2);
+      else if ($upper_limit or $lower_limit) {
+         if (!$min and !$max) {
+            $vertical_label = "--vertical-label ' '";
+         } else {
+            $max = $max>100 ? number_format($max) : number_format($max, 2);
             $min = $min>0 ? number_format($min,2) : $min;
 
             $vertical_label ="--vertical-label '$min - $max' ";
          }
+      }
 
       $rrd_file = "$rrd_dir/$metricname.rrd";
       $series = "DEF:'sum'='$rrd_file':'sum':AVERAGE "
