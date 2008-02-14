@@ -78,10 +78,10 @@ static int ex_metric_init ( apr_pool_t *p )
      *  the key for the grouping attribute. */
     MMETRIC_INIT_METADATA(&(example_module.metrics_info[0]),p);
     MMETRIC_ADD_METADATA(&(example_module.metrics_info[0]),MGROUP,"random");
-    MMETRIC_ADD_METADATA(&(example_module.metrics_info[0]),MGROUP,"examples");
+    MMETRIC_ADD_METADATA(&(example_module.metrics_info[0]),MGROUP,"example");
 
     MMETRIC_INIT_METADATA(&(example_module.metrics_info[1]),p);
-    MMETRIC_ADD_METADATA(&(example_module.metrics_info[1]),MGROUP,"examples");
+    MMETRIC_ADD_METADATA(&(example_module.metrics_info[1]),MGROUP,"example");
 
     return 0;
 }
