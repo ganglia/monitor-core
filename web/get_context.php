@@ -11,7 +11,7 @@ $gridname = isset($_GET["G"]) ?
 	escapeshellcmd( clean_string( rawurldecode($_GET["G"]) ) ) : NULL;
 $hostname = isset($_GET["h"]) ?
 	escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) : NULL;
-$range = isset( $_GET['r'] ) && in_array($_GET["r"], array_keys( $time_ranges ) ) ?
+$range = isset( $_GET["r"] ) && in_array($_GET["r"], array_keys( $time_ranges ) ) ?
 	escapeshellcmd( rawurldecode($_GET["r"])) : NULL;
 $metricname = isset($_GET["m"]) ?
 	escapeshellcmd( clean_string( rawurldecode($_GET["m"]) ) ) : NULL;
@@ -23,7 +23,7 @@ $hostcols = isset($_GET["hc"]) ?
 	clean_number( $_GET["hc"] ) : NULL;
 # Flag, whether or not to show a list of hosts
 $showhosts = isset($_GET["sh"]) ?
-       clean_number( $_GET["sh"] ) : NULL;
+	clean_number( $_GET["sh"] ) : NULL;
 # The 'p' variable specifies the verbosity level in the physical view.
 $physical = isset($_GET["p"]) ?
 	clean_number( $_GET["p"] ) : NULL;

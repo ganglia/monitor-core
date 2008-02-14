@@ -61,7 +61,6 @@ else if ($sort == "by name") {
       asort($sorted_sources);
 }
 
-
 # Display the sources. The first is ourself, the rest are our children.
 foreach ( $sorted_sources as $source => $val )
    {
