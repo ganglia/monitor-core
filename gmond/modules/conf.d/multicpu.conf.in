@@ -7,35 +7,46 @@ modules {
 
 
 #/* Multi CPU DSO metric */ 
+#/* Additional metrics should be added to the
+#    collection group to represent each CPU
+#    discovered on the system.  See available
+#    discovered metics through ./gmond -m command. */
 collection_group { 
   collect_every = 10 
   time_threshold = 50 
   metric { 
     name = "multicpu_user0" 
+    title = \"CPU-0 User\" \n\
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_nice0" 
+    title = \"CPU-0 Nice\" \n\
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_system0" 
+    title = \"CPU-0 System\" \n\
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_idle0" 
+    title = \"CPU-0 Idle\" \n\
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_wio0" 
+    title = \"CPU-0 wio\" \n\
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_intr0" 
+    title = \"CPU-0 intr\" \n\
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_sintr0" 
+    title = \"CPU-0 sintr\" \n\
     value_threshold = 1.0 
   } 
 }

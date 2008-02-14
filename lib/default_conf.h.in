@@ -123,31 +123,40 @@ collection_group { \n\
   time_threshold = 1200 \n\
   metric { \n\
     name = \"cpu_num\" \n\
+    title = \"CPU Count\" \n\
   } \n\
   metric { \n\
     name = \"cpu_speed\" \n\
+    title = \"CPU Speed\" \n\
   } \n\
   metric { \n\
     name = \"mem_total\" \n\
+    title = \"Memory Total\" \n\
   } \n\
   /* Should this be here? Swap can be added/removed between reboots. */ \n\
   metric { \n\
     name = \"swap_total\" \n\
+    title = \"Swap Space Total\" \n\
   } \n\
   metric { \n\
     name = \"boottime\" \n\
+    title = \"Last Boot Time\" \n\
   } \n\
   metric { \n\
     name = \"machine_type\" \n\
+    title = \"Machine Type\" \n\
   } \n\
   metric { \n\
     name = \"os_name\" \n\
+    title = \"Operating System\" \n\
   } \n\
   metric { \n\
     name = \"os_release\" \n\
+    title = \"Operating System Release\" \n\
   } \n\
   metric { \n\
     name = \"location\" \n\
+    title = \"Location\" \n\
   } \n\
 } \n\
 \n\
@@ -158,6 +167,7 @@ collection_group { \n\
   time_threshold = 300 \n\
   metric { \n\
     name = \"gexec\" \n\
+    title = \"Gexec Status\" \n\
   } \n\
 } \n\
 \n\
@@ -171,36 +181,44 @@ collection_group { \n\
   metric { \n\
     name = \"cpu_user\"  \n\
     value_threshold = \"1.0\" \n\
+    title = \"CPU User\" \n\
   } \n\
   metric { \n\
     name = \"cpu_system\"   \n\
     value_threshold = \"1.0\" \n\
+    title = \"CPU System\" \n\
   } \n\
   metric { \n\
     name = \"cpu_idle\"  \n\
     value_threshold = \"5.0\" \n\
+    title = \"CPU Idle\" \n\
   } \n\
   metric { \n\
     name = \"cpu_nice\"  \n\
     value_threshold = \"1.0\" \n\
+    title = \"CPU Nice\" \n\
   } \n\
   metric { \n\
     name = \"cpu_aidle\" \n\
     value_threshold = \"5.0\" \n\
+    title = \"CPU aidle\" \n\
   } \n\
   metric { \n\
     name = \"cpu_wio\" \n\
     value_threshold = \"1.0\" \n\
+    title = \"CPU wio\" \n\
   } \n\
   /* The next two metrics are optional if you want more detail... \n\
      ... since they are accounted for in cpu_system.  \n\
   metric { \n\
     name = \"cpu_intr\" \n\
     value_threshold = \"1.0\" \n\
+    title = \"CPU intr\" \n\
   } \n\
   metric { \n\
     name = \"cpu_sintr\" \n\
     value_threshold = \"1.0\" \n\
+    title = \"CPU sintr\" \n\
   } \n\
   */ \n\
 } \n\
@@ -212,14 +230,17 @@ collection_group { \n\
   metric { \n\
     name = \"load_one\" \n\
     value_threshold = \"1.0\" \n\
+    title = \"One Minute Load Average\" \n\
   } \n\
   metric { \n\
     name = \"load_five\" \n\
     value_threshold = \"1.0\" \n\
+    title = \"Five Minute Load Average\" \n\
   } \n\
   metric { \n\
     name = \"load_fifteen\" \n\
     value_threshold = \"1.0\" \n\
+    title = \"Fifteen Minute Load Average\" \n\
   }\n\
 } \n\
 \n\
@@ -230,10 +251,12 @@ collection_group { \n\
   metric { \n\
     name = \"proc_run\" \n\
     value_threshold = \"1.0\" \n\
+    title = \"Total Running Processes\" \n\
   } \n\
   metric { \n\
     name = \"proc_total\" \n\
     value_threshold = \"1.0\" \n\
+    title = \"Total Processes\" \n\
   } \n\
 }\n\
 \n\
@@ -246,22 +269,27 @@ collection_group { \n\
   metric { \n\
     name = \"mem_free\" \n\
     value_threshold = \"1024.0\" \n\
+    title = \"Free Memory\" \n\
   } \n\
   metric { \n\
     name = \"mem_shared\" \n\
     value_threshold = \"1024.0\" \n\
+    title = \"Shared Memory\" \n\
   } \n\
   metric { \n\
     name = \"mem_buffers\" \n\
     value_threshold = \"1024.0\" \n\
+    title = \"Memory Buffers\" \n\
   } \n\
   metric { \n\
     name = \"mem_cached\" \n\
     value_threshold = \"1024.0\" \n\
+    title = \"Cached Memory\" \n\
   } \n\
   metric { \n\
     name = \"swap_free\" \n\
     value_threshold = \"1024.0\" \n\
+    title = \"Free Swap Space\" \n\
   } \n\
 } \n\
 \n\
@@ -271,18 +299,22 @@ collection_group { \n\
   metric { \n\
     name = \"bytes_out\" \n\
     value_threshold = 4096 \n\
+    title = \"Bytes Sent\" \n\
   } \n\
   metric { \n\
     name = \"bytes_in\" \n\
     value_threshold = 4096 \n\
+    title = \"Bytes Received\" \n\
   } \n\
   metric { \n\
     name = \"pkts_in\" \n\
     value_threshold = 256 \n\
+    title = \"Packets Received\" \n\
   } \n\
   metric { \n\
     name = \"pkts_out\" \n\
     value_threshold = 256 \n\
+    title = \"Packets Sent\" \n\
   } \n\
 }\n\
 \n\
@@ -293,6 +325,7 @@ collection_group { \n\
   metric { \n\
     name = \"disk_total\" \n\
     value_threshold = 1.0 \n\
+    title = \"Total Disk Space\" \n\
   } \n\
 }\n\
 \n\
@@ -302,10 +335,12 @@ collection_group { \n\
   metric { \n\
     name = \"disk_free\" \n\
     value_threshold = 1.0 \n\
+    title = \"Disk Space Available\" \n\
   } \n\
   metric { \n\
     name = \"part_max_used\" \n\
     value_threshold = 1.0 \n\
+    title = \"Maximum Disk Space Used\" \n\
   } \n\
 }\n\
 \n\
