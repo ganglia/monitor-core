@@ -73,7 +73,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_STAT
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([getmntinfo getpagesize gettimeofday memset pstat_getdynamic strchr strdup strpbrk strstr strtol sysinfo uname])
+AC_CHECK_FUNCS([getmntinfo getpagesize gettimeofday memset pstat_getdynamic strchr strdup strndup strpbrk strstr strtol sysinfo uname])
 
 OS="unknown"
 case "$host" in
