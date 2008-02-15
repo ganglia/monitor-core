@@ -299,8 +299,10 @@ else
        $title = "$hostname $style last $range";
     else if ($summary)
        $title = "$hostname";
-    else
+    else if ($metrictitle)
        $title = $metrictitle;
+    else
+       $title = $metricname;
    }
 
 # Calculate time range.
