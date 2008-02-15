@@ -16,39 +16,37 @@ collection_group {
   time_threshold = 50 
   metric { 
     name = "multicpu_user0" 
-    title = \"CPU-0 User\" \n\
+    title = "CPU-0 User"
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_nice0" 
-    title = \"CPU-0 Nice\" \n\
+    title = "CPU-0 Nice"
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_system0" 
-    title = \"CPU-0 System\" \n\
+    title = "CPU-0 System"
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_idle0" 
-    title = \"CPU-0 Idle\" \n\
+    title = "CPU-0 Idle"
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_wio0" 
-    title = \"CPU-0 wio\" \n\
+    title = "CPU-0 wio"
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_intr0" 
-    title = \"CPU-0 intr\" \n\
+    title = "CPU-0 intr"
     value_threshold = 1.0 
   } 
   metric { 
     name = "multicpu_sintr0" 
-    title = \"CPU-0 sintr\" \n\
+    title = "CPU-0 sintr"
     value_threshold = 1.0 
   } 
 }
-
-
