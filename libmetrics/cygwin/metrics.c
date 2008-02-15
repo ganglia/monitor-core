@@ -942,46 +942,6 @@ mtu_func ( void )
    return val;
 }
 
-/* ===================================================== */
-/* Disk Usage. Using fsusage.c from the GNU fileutils-4.1.5 package. */
-#include <inttypes.h>
-
-/* Linux Specific, but we are in the Linux machine file. */
-#define MOUNTS "/proc/mounts"
-
-struct nlist {
-   struct nlist *next;
-   char *name;
-};
-
-#define DFHASHSIZE 101
-static struct nlist *DFhashvector[DFHASHSIZE];
-
-/* --------------------------------------------------------------------------- */
-unsigned int DFhash(const char *s)
-{
-   unsigned int hashval;
-   for (hashval=0; *s != '\0'; s++)
-      hashval = *s + 31 * hashval;
-   return hashval % DFHASHSIZE;
-}
-
-/* --------------------------------------------------------------------------- */
-void DFcleanup()
-{
-   struct nlist *np, *next;
-   int i;
-   for (i=0; i<DFHASHSIZE; i++) {
-      /* Non-standard for loop. Note the last clause happens at the end of the loop. */
-      for (np = DFhashvector[i]; np; np=next) {
-         next=np->next;
-         free(np->name);
-         free(np);
-      }
-      DFhashvector[i] = 0;
-   }
-}
-
 g_val_t
 disk_free_func( void )
 {
