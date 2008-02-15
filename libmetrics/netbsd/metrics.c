@@ -1044,16 +1044,6 @@ makenetvfslist(void)
 	}
 
 	cnt = 0;
-	/* XXX: use sysctl ? */
-	/* while ((ptr = getvfsent()) != NULL && cnt < maxvfsconf) {
-
-		listptr[cnt] = strdup(ptr->vfc_name);
-		if (listptr[cnt] == NULL) {
-			warnx("malloc failed");
-			goto done;
-		}
-		cnt++;
-	} */
 	if (cnt == 0)
 		goto done;
 	/*

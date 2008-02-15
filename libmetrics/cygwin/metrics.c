@@ -967,33 +967,6 @@ unsigned int DFhash(const char *s)
 }
 
 /* --------------------------------------------------------------------------- */
-/* From K&R C book, pp. 144-145 */
-struct nlist * seen_before(const char *name)
-{
-   struct nlist *found=0, *np;
-   unsigned int hashval;
-
-   /* lookup */
-   hashval=DFhash(name);
-   for (np=DFhashvector[hashval]; np; np=np->next) {
-      if (!strcmp(name,np->name)) {
-         found=np;
-         break;
-      }
-   }
-   if (!found) {    /* not found */
-      np = (struct nlist *) malloc(sizeof(*np));
-      if (!np || !(np->name = (char *) strdup(name)))
-         return NULL;
-      np->next = DFhashvector[hashval];
-      DFhashvector[hashval] = np;
-      return NULL;
-   }
-   else /* found name */
-      return found;
-}
-
-/* --------------------------------------------------------------------------- */
 void DFcleanup()
 {
    struct nlist *np, *next;
