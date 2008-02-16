@@ -137,8 +137,8 @@ gmetad packages
 %setup -n %{name}-@VERSION@
 
 %build
-%configure --with-gmetad --enable-python
 %ifnarch noarch
+%configure --with-gmetad --enable-python
 make
 %endif
 
@@ -236,7 +236,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 
 # Copy the python metric modules and .conf files
 %__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/
-%__cp -f gmond/python_modules/*/*.py* $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
+%__cp -f gmond/python_modules/*/*.{py,pyc} $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
 
 # Don't install the example modules
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/example.conf
@@ -250,8 +250,6 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 
 # Disable the diskusage module until it is configured properly
 %__mv $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf.off
-
-%__mv $RPM_BUILD_ROOT%{conf_dir}/conf.d/tcpconn.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/tcpconn.pyconf.off
 
 %__make DESTDIR=$RPM_BUILD_ROOT install
 %__make -C gmond gmond.conf.5
@@ -351,6 +349,10 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Fri Feb 15 2008 Bernard Li <bernard@vanhpc.org>
+- Fix bug where .pyconf files are copied to %{libdir}/ganglia/python_modules
+- Enable tcpconn.py by default since code is now compatible with Python 2.3.x
+- No longer need to run %configure when building ganglia-web (noarch)
 * Tue Dec 18 2007 Brad Nicholes <bnicholes@novell.com>
 - Remove all built in metrics and replace them with metric modules
 * Thu Nov 29 2007 Brad Nicholes <bnicholes@novell.com>
