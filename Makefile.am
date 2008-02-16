@@ -66,7 +66,7 @@ dist-hook:
 	  --exclude ".svn" --exclude="*.o"  --exclude="*.lo" \
 	  --exclude="*.la" --exclude=".deps" \
 	  --exclude="Makefile" --exclude="libtool" \
-	  --exclude="web/version.php" --exclude="config.h" \
+	  --exclude="config.h" \
 	  --exclude="*.spec" --exclude="stamp-h1" --exclude="*-config" \
 	  --exclude="autom4te.cache" --exclude="test-metrics" \
 	  --exclude="*.tar.gz" --exclude="config.status" \
