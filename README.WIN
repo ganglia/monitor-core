@@ -14,10 +14,11 @@ Latest version of Cygwin with the following packages: autoconf, automake,
 bison, diffutils, flex, gcc, libtool, make, sharutils, sunrpc and
 svn to checkout the source code.
 
-CheckOut the source files of Ganglia in the Cygwin command console. 
-svn co https://ganglia.svn.sourceforge.net/svnroot/ganglia ganglia
+CheckOut the source files of Ganglia in the Cygwin command console: 
 
-Go to trunk/monitor-core directory and type the following commands.
+svn co https://ganglia.svn.sourceforge.net/svnroot/ganglia/trunk/monitor-core ganglia
+
+Go to the ganglia directory and type the following commands.
 
 aclocal
 autoheader
@@ -54,7 +55,7 @@ Go to srclib/confuse and build the libconfuse library.
 make
 make install
 
-Go to monitor-core, and run the following command to build Ganglia
+Go to the ganglia directory, and run the following command to build Ganglia
 
 ./configure --with-libapr=/usr/local/apr --with-libconfuse=/usr/local
 
@@ -74,7 +75,7 @@ and transfer to cygwin.
 The command used in Linux is 
 rpcgen protocol.x
 
-protocol.x is present in the monitor-core/lib directory.
+protocol.x is present in the ganglia/lib directory.
 
 After copying again type the make command.
 
