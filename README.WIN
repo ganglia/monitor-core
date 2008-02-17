@@ -2,8 +2,8 @@
 Build Ganglia source from the repository using Cygwin on Windows 
 ================================================================
 
-Ganglia (Gmond and Gmetric) may be built in the Cygwin environment for use 
-by Cygwin applications. As with the Unix platform, Ganglia on  Cygwin uses 
+Ganglia (Gmond, Gmetric and Gstat) may be built in the Cygwin environment for
+use by Cygwin applications. As with the Unix platform, Ganglia on  Cygwin uses 
 GNU tools. Therefore Ganglia on Cygwin could be built using the same 
 instructions as in the UNIX platforms with some work arounds. 
 
@@ -11,7 +11,7 @@ Prerequisites
 ------------- 
 
 Latest version of Cygwin with the following packages: autoconf, automake, 
-bison, gcc, sharutils, diffutils, sunrpc, vim, make, flex, libtool and
+bison, diffutils, flex, gcc, libtool, make, sharutils, sunrpc and
 svn to checkout the source code.
 
 CheckOut the source files of Ganglia in the Cygwin command console. 
@@ -49,7 +49,6 @@ copy all the .h files from /usr/lib/apr/include/apr-1 to /usr/local/include
 cp /usr/local/apr/lib/libapr-1.a /usr/local/lib/
 cp /usr/local/apr/lib/libapr-1.la /usr/local/lib/
 
-
 Go to srclib/confuse and build the libconfuse library.
 ./configure
 make
@@ -58,7 +57,6 @@ make install
 Go to monitor-core, and run the following command to build Ganglia
 
 ./configure --with-libapr=/usr/local/apr --with-libconfuse=/usr/local
-
 
 When the make command is executed, this command will fail at the rpcgen 
 tool not able to generate the src files. This is because the rpcgen tool 
@@ -78,11 +76,11 @@ rpcgen protocol.x
 
 protocol.x is present in the monitor-core/lib directory.
 
-
 After copying again type the make command.
 
-If everything works right, then you should see a gmond.exe and gmetric.exe 
-created in the gmond and gmetric directories respectively. 
+If everything works right, then you should see a gmond.exe, gstat.exe and 
+gmetric.exe created in the gmond, gmond/gstat and gmetric directories
+respectively. 
 
-As of now gmetad cannot be built on Cygwin.
-
+gmetad cannot be built on Cygwin but you can use gmetad in any other supported
+architecture with the agents from Cygwin.
