@@ -9,6 +9,8 @@
 #include <iphlpapi.h>
 #include <sys/types.h>
 #include <sys/timeb.h>
+#include <mntent.h>
+#include <sys/vfs.h>
 
 /* From old ganglia 2.5.x... */
 #include "file.h"
@@ -942,27 +944,93 @@ mtu_func ( void )
    return val;
 }
 
+/* FIXME: hardcoded max number of disks */
+#define MAXDRIVES 4
+
+typedef struct {
+   double total;
+   double avail;
+} disk_t;
+
+static float
+find_disk_space(double *total, double *avail)
+{
+   FILE *mnttab;
+   disk_t drives[MAXDRIVES];
+   struct mntent *ent;
+   struct statfs fs;
+   const double reported_units = 1e9;
+   int drive;
+   float pct;
+   float most_full = 0.0;
+
+   *total = 0.0;
+   *avail = 0.0;
+   bzero(drives, sizeof(disk_t) * MAXDRIVES);
+
+   mnttab = setmntent(MOUNTED, "r");
+   while ((ent = getmntent(mnttab)) != NULL) {
+      if (islower(ent->mnt_fsname[0])) {
+         drive = ent->mnt_fsname[0] - 'a';
+         if (drives[drive].total == 0.0) {
+            statfs(ent->mnt_fsname, &fs);
+         
+            drives[drive].total = (double)fs.f_blocks * fs.f_bsize;
+            drives[drive].avail = (double)fs.f_bavail * fs.f_bsize;
+         
+            pct = (drives[drive].avail == 0) ? 100.0 : 
+               ((drives[drive].total - 
+               drives[drive].avail)/drives[drive].total) * 100.0;
+
+            if (pct > most_full)
+               most_full = pct;
+
+            *total += (drives[drive].total / reported_units);
+            *avail += (drives[drive].avail / reported_units);
+         }
+      }
+   }
+   endmntent(mnttab);
+
+   return most_full;
+}   
+
 g_val_t
 disk_free_func( void )
 {
+   double total_free = 0.0;
+   double total_size = 0.0;
    g_val_t val;
-   val.d = 0;
+
+   find_disk_space(&total_size, &total_free); 
+
+   val.d = total_free;
    return val;
 }
 
 g_val_t
 disk_total_func( void )
 {
+   double total_free = 0.0;
+   double total_size = 0.0;
    g_val_t val;
-   val.d = 0;
+
+   find_disk_space(&total_size, &total_free);
+
+   val.d = total_size;
    return val;
 }
 
-/* --------------------------------------------------------------------------- */
 g_val_t
 part_max_used_func( void )
 {
+   double total_free = 0.0;
+   double total_size = 0.0;
+   float most_full;
    g_val_t val;
-   val.f = 0.0;
+
+   most_full = find_disk_space(&total_size, &total_free);
+
+   val.f = most_full;
    return val;
 }

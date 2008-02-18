@@ -73,6 +73,12 @@ static const struct metricinfo
   "pkts_in", pkts_in_func, g_float},
   {
   "pkts_out", pkts_out_func, g_float},
+  {
+  "disk_free", disk_free_func, g_double},
+  {
+  "disk_total", disk_total_func, g_double},
+  {
+  "part_max_used", part_max_used_func, g_float}
 #endif
   {
   "", NULL}
