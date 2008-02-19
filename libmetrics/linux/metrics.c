@@ -23,10 +23,10 @@
 typedef struct net_dev_stats net_dev_stats;
 struct net_dev_stats {
   char *name;
-  double pkts_in;
-  double pkts_out;
-  double bytes_in;
-  double bytes_out;
+  unsigned long rpi;
+  unsigned long rpo;
+  unsigned long rbi;
+  unsigned long rbo;
   net_dev_stats *next;
 };
 #define NHASH 101
@@ -122,11 +122,7 @@ static unsigned int hashval(const char *s)
   return hval % NHASH;
 }
 
-static net_dev_stats *hash_lookup(char *devname, size_t nlen, const int enter, 
-				  const double pkts_in, 
-				  const double pkts_out, 
-				  const double bytes_in, 
-				  const double bytes_out)
+static net_dev_stats *hash_lookup(char *devname, size_t nlen) 
 {
   int hval;
   net_dev_stats *stats;
@@ -141,25 +137,114 @@ static net_dev_stats *hash_lookup(char *devname, size_t nlen, const int enter,
     }
   }
 
-  if (enter)
-  {
-    stats = (net_dev_stats *)malloc(sizeof(net_dev_stats));
-    if ( stats == NULL )
-    {   
-      err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup()");
-      free(name);
-      return NULL;
-    }
-    stats->name = strndup(devname,nlen);
-    stats->pkts_in   = pkts_in;
-    stats->pkts_out  = pkts_out;
-    stats->bytes_in  = bytes_in;
-    stats->bytes_out = bytes_out;
-    stats->next = netstats[hval];
-    netstats[hval] = stats;
+  stats = (net_dev_stats *)malloc(sizeof(net_dev_stats));
+  if ( stats == NULL )
+  {   
+    err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup(): %s",name);
+    free(name);
+    return NULL;
   }
+  stats->name = strndup(devname,nlen);
+  stats->rpi = 0;
+  stats->rpo = 0;
+  stats->rbi = 0;
+  stats->rbo = 0;
+  stats->next = netstats[hval];
+  netstats[hval] = stats;
+
   free(name);
   return stats;
+}
+
+static double bytes_in,bytes_out,pkts_in,pkts_out;
+void update_ifdata ( void )
+{
+   char *p;
+   int i;
+   static int stamp=0;
+   unsigned long rbi=0,rbo=0,rpi=0,rpo=0;
+
+
+   p = update_file(&proc_net_dev);
+   if (proc_net_dev.last_read != stamp)
+      {
+	 bytes_in = bytes_out = pkts_in = pkts_out = 0.;
+	 /*  skip past the two-line header ... */
+	 p = index (p, '\n')+1;
+	 p = index (p, '\n')+1;
+
+	 while (*p != 0x00 )
+	    {
+	       /*  skip past the interface tag portion of this line */
+	       /*  but save the name of the interface (hash key) */
+	       char *src;
+	       size_t n = 0;
+
+	       while (p != 0x00 && isblank(*p))
+		  p++;
+	       src = p;
+	       while (p != 0x00 && *p != ':')
+		  {
+		     n++;
+		     p++;
+		  }
+
+	       p = index(p, ':')+1;
+	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
+		    ((*(p-3) != 'd') && (*(p-4) != 'n') && 
+		     (*(p-5) != 'o') && (*(p-6) != 'b')) )
+		  { 
+		     /* Check for data from the last read for this */
+		     /* interface.  If nothing exists, add to the table. */
+		     net_dev_stats *ns = hash_lookup(src, n); 
+		     if ( !ns ) return;
+
+		     rbi = strtoul( p, &p ,10);
+		     if ( rbi >= ns->rbi ) {
+			bytes_in += rbi - ns->rbi;
+		     } else {
+			bytes_in += ULONG_MAX - ns->rbi + rbi;
+		     }
+		     ns->rbi = rbi;
+
+		     rpi = strtoul( p, &p ,10);
+		     if ( rpi >= ns->rpi ) {
+			pkts_in += rpi - ns->rpi;
+		     } else {
+			pkts_in += ULONG_MAX - ns->rpi + rpi;
+		     }
+		     ns->rpi = rpi;
+
+		     for (i = 0; i < 6; i++) strtol(p, &p, 10);
+		     rbo = strtoul( p, &p ,10);
+		     if ( rbo >= ns->rbo ) {
+			bytes_out += rbo - ns->rbo;
+		     } else {
+			bytes_out += ULONG_MAX - ns->rbo + rbo;
+		     }
+		     ns->rbo = rbo;
+
+		     rpo = strtoul( p, &p ,10);
+		     if ( rpo >= ns->rpo ) {
+			pkts_out += rpo - ns->rpo;
+		     } else {
+			pkts_out += ULONG_MAX - ns->rpo + rpo;
+		     }
+		     ns->rpo = rpo;
+		  }
+	       p = index (p, '\n') + 1;    // skips a line
+	    }
+
+	 int t = proc_net_dev.last_read - stamp;
+	 bytes_in /= t;
+	 pkts_in /= t;
+	 bytes_out /= t;
+	 pkts_out /= t;
+
+	 stamp = proc_net_dev.last_read;
+      }
+
+   return;
 }
 
 /*
@@ -208,6 +293,8 @@ metric_init(void)
          return rval;
       } 
 
+   update_ifdata();
+
    rval.int32 = SYNAPSE_SUCCESS;
    return rval;
 }
@@ -215,348 +302,44 @@ metric_init(void)
 g_val_t
 pkts_in_func ( void )
 {
-   char *p;
-   register int i;
-   static g_val_t val;
-   static int stamp;
-   double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
+   g_val_t val;
 
-   p = update_file(&proc_net_dev);
-   if (proc_net_dev.last_read != stamp)
-      {
-	 /*  skip past the two-line header ... */
-	 p = index (p, '\n')+1;
-	 p = index (p, '\n')+1;
-
-	 while (*p != 0x00 )
-	    {
-	       /*  skip past the interface tag portion of this line */
-	       /*  but save the name of the interface (hash key) */
-	       char *src;
-	       size_t n = 0;
-
-	       while (p != 0x00 && isblank(*p))
-		  p++;
-	       src = p;
-	       while (p != 0x00 && *p != ':')
-		  {
-		     n++;
-		     p++;
-		  }
-
-	       p = index(p, ':')+1;
-	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
-		    ((*(p-3) != 'd') && (*(p-4) != 'n') && 
-		     (*(p-5) != 'o') && (*(p-6) != 'b')) )
-		  { 
-		     double temp = 0.;
-		     /* Check for data from the last read for this */
-		     /* interface.  If nothing exists, add to the table. */
-		     net_dev_stats *ns = hash_lookup(src, n, 1, 
-						     0., 0., 0., 0.);
-		     if ( ns == NULL )
-		        {
-			   val.f = 0.;
-			   debug_msg(" **********  BYTES_OUT RETURN:  %f", 
-				     val.f);
-			   return val;
-			}
-
-		     t = strtod( p, &p ) - ns->bytes_in;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     bytes_in += t;
-		     temp = strtod( p, &p );
-		     t = temp - ns->pkts_in;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     pkts_in += t;
-		     for (i = 0; i < 6; i++) strtol(p, &p, 10);
-		     /* Fixed 2003 by Dr Michael Wirtz <m.wirtz@tinnit.de>
-			and Phil Radden <P.Radden@rl.ac.uk> */
-		     t = strtod( p, &p ) - ns->bytes_out;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     bytes_out += t;
-		     t = strtod( p, &p ) - ns->pkts_out;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     pkts_out += t;
-
-		     /* Update the hash for this measurement */
-		     ns->pkts_in = temp;
-		  }
-	       p = index (p, '\n') + 1;    // skips a line
-	    }
-
-	 val.f = 0.;
-	 if ( pkts_in >= 1. )
-	    {
-	       t = proc_net_dev.last_read - stamp;
-	       val.f = pkts_in / t;
-	    }
-
-	 stamp = proc_net_dev.last_read;
-      }
-
-   debug_msg(" **********  PKTS_IN RETURN:  %f", val.f);
+   update_ifdata();
+   val.f = pkts_in;
+   debug_msg(" ********** pkts_in:  %f", pkts_in);
    return val;
 }
 
 g_val_t
 pkts_out_func ( void )
 {
-   char *p;
-   register int i;
-   static g_val_t val;
-   static int stamp;
-   double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
+   g_val_t val;
 
-   p = update_file(&proc_net_dev);
-   if (proc_net_dev.last_read != stamp)
-      {
-	 /*  skip past the two-line header ... */
-	 p = index (p, '\n')+1;
-	 p = index (p, '\n')+1;
-
-	 while (*p != 0x00 )
-	    {
-	       /*  skip past the interface tag portion of this line */
-	       /*  but save the name of the interface (hash key) */
-	       char *src;
-	       size_t n = 0;
-
-	       while (p != 0x00 && isblank(*p))
-		  p++;
-	       src = p;
-	       while (p != 0x00 && *p != ':')
-		  {
-		     n++;
-		     p++;
-		  }
-
-	       p = index(p, ':')+1;
-	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
-		    ((*(p-3) != 'd') && (*(p-4) != 'n') && 
-		     (*(p-5) != 'o') && (*(p-6) != 'b')) )
-		  { 
-		     double temp = 0.;
-		     /* Check for data from the last read for this */
-		     /* interface.  If nothing exists, add to the table. */
-		     net_dev_stats *ns = hash_lookup(src, n, 1, 
-						     0., 0., 0., 0.);
-		     if ( ns == NULL )
-		        {
-			   val.f = 0.;
-			   debug_msg(" **********  BYTES_OUT RETURN:  %f", 
-				     val.f);
-			   return val;
-			}
-
-		     t = strtod( p, &p ) - ns->bytes_in;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     bytes_in += t;
-		     t = strtod( p, &p ) - ns->pkts_in;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     pkts_in += t;
-		     for (i = 0; i < 6; i++) strtol(p, &p, 10);
-		     /* Fixed 2003 by Dr Michael Wirtz <m.wirtz@tinnit.de>
-			and Phil Radden <P.Radden@rl.ac.uk> */
-		     t = strtod( p, &p ) - ns->bytes_out;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     bytes_out += t;
-		     temp = strtod( p, &p );
-		     t = temp - ns->pkts_out;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     pkts_out += t;
-
-		     /* Update the hash for this measurement */
-		     ns->pkts_out = temp;
-		  }
-	       p = index (p, '\n') + 1;    // skips a line
-	    }
-
-	 val.f = 0.;
-	 if ( pkts_out >= 1. )
-	    {
-	       t = proc_net_dev.last_read - stamp;
-	       val.f = pkts_out / t;
-	    }
-
-	 stamp = proc_net_dev.last_read;
-      }
-
-   debug_msg(" **********  PKTS_OUT RETURN:  %f", val.f);
+   update_ifdata();
+   val.f = pkts_out;
+   debug_msg(" ********** pkts_out:  %f", pkts_out);
    return val;
 }
 
 g_val_t
 bytes_out_func ( void )
 {
-   char *p;
-   register int i;
-   static g_val_t val;
-   static int stamp;
-   double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
+   g_val_t val;
 
-   p = update_file(&proc_net_dev);
-   if (proc_net_dev.last_read != stamp)
-      {
-	 /*  skip past the two-line header ... */
-	 p = index (p, '\n')+1;
-	 p = index (p, '\n')+1;
-
-	 while (*p != 0x00 )
-	    {
-	       /*  skip past the interface tag portion of this line */
-	       /*  but save the name of the interface (hash key) */
-	       char *src;
-	       size_t n = 0;
-
-	       while (p != 0x00 && isblank(*p))
-		  p++;
-	       src = p;
-	       while (p != 0x00 && *p != ':')
-		  {
-		     n++;
-		     p++;
-		  }
-
-	       p = index(p, ':')+1;
-	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
-		    ((*(p-3) != 'd') && (*(p-4) != 'n') && 
-		     (*(p-5) != 'o') && (*(p-6) != 'b')) )
-		  { 
-		     double temp = 0.;
-		     /* Check for data from the last read for this */
-		     /* interface.  If nothing exists, add to the table. */
-		     net_dev_stats *ns = hash_lookup(src, n, 1, 
-						     0., 0., 0., 0.);
-		     if ( ns == NULL )
-		        {
-			   val.f = 0.;
-			   debug_msg(" **********  BYTES_OUT RETURN:  %f", 
-				     val.f);
-			   return val;
-			}
-
-		     t = strtod( p, &p ) - ns->bytes_in;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     bytes_in += t;
-		     t = strtod( p, &p ) - ns->pkts_in;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     pkts_in += t;
-		     for (i = 0; i < 6; i++) strtol(p, &p, 10);
-		     /* Fixed 2003 by Dr Michael Wirtz <m.wirtz@tinnit.de>
-			and Phil Radden <P.Radden@rl.ac.uk> */
-		     temp = strtod( p, &p );
-		     t = temp - ns->bytes_out;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     bytes_out += t;
-		     t = strtod( p, &p ) - ns->pkts_out;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     pkts_out += t;
-
-		     /* Update the hash for this measurement */
-		     ns->bytes_out = temp;
-		  }
-	       p = index (p, '\n') + 1;    // skips a line
-	    }
-
-	 val.f = 0.;
-	 if ( bytes_out >= 1. )
-	    {
-	       t = proc_net_dev.last_read - stamp;
-	       val.f = bytes_out / t;
-	    }
-
-	 stamp = proc_net_dev.last_read;
-      }
-
-   debug_msg(" **********  BYTES_OUT RETURN:  %f", val.f);
+   update_ifdata();
+   val.f = bytes_out;
+   debug_msg(" ********** bytes_out:  %f", bytes_out);
    return val;
 }
 
 g_val_t
 bytes_in_func ( void )
 {
-   char *p;
-   register int i;
-   static g_val_t val;
-   static int stamp;
-   double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0, t = 0;
+   g_val_t val;
 
-   p = update_file(&proc_net_dev);
-   if (proc_net_dev.last_read != stamp)
-      {
-	 /*  skip past the two-line header ... */
-	 p = index (p, '\n')+1;
-	 p = index (p, '\n')+1;
-
-	 while (*p != 0x00 )
-	    {
-	       /*  skip past the interface tag portion of this line */
-	       /*  but save the name of the interface (hash key) */
-	       char *src;
-	       size_t n = 0;
-
-	       while (p != 0x00 && isblank(*p))
-		  p++;
-	       src = p;
-	       while (p != 0x00 && *p != ':')
-		  {
-		     n++;
-		     p++;
-		  }
-
-	       p = index(p, ':')+1;
-	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
-		    ((*(p-3) != 'd') && (*(p-4) != 'n') && 
-		     (*(p-5) != 'o') && (*(p-6) != 'b')) )
-		  { 
-		     double temp = 0.;
-		     /* Check for data from the last read for this */
-		     /* interface.  If nothing exists, add to the table. */
-		     net_dev_stats *ns = hash_lookup(src, n, 1, 
-						     0., 0., 0., 0.);
-		     if ( ns == NULL )
-		        {
-			   val.f = 0.;
-			   debug_msg(" **********  BYTES_OUT RETURN:  %f", 
-				     val.f);
-			   return val;
-			}
-
-		     temp = strtod( p, &p );
-		     t = temp - ns->bytes_in;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     bytes_in += t;
-		     t = strtod( p, &p ) - ns->pkts_in;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     pkts_in += t;
-		     for (i = 0; i < 6; i++) strtol(p, &p, 10);
-		     /* Fixed 2003 by Dr Michael Wirtz <m.wirtz@tinnit.de>
-			and Phil Radden <P.Radden@rl.ac.uk> */
-		     t = strtod( p, &p ) - ns->bytes_out;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     bytes_out += t;
-		     t = strtod( p, &p ) - ns->pkts_out;
-		     if ( t < 0. ) { t += ULONG_MAX; }
-		     pkts_out += t;
-
-		     /* Update the hash for this measurement */
-		     ns->bytes_in = temp;
-		  }
-	       p = index (p, '\n') + 1;    // skips a line
-	    }
-
-	 val.f = 0.;
-	 if ( bytes_in >= 1. )
-	    {
-	       t = proc_net_dev.last_read - stamp;
-	       val.f = bytes_in / t;
-	    }
-
-	 stamp = proc_net_dev.last_read;
-      }
-
-   debug_msg(" **********  BYTES_IN RETURN:  %f", val.f);
+   update_ifdata();
+   val.f = bytes_in;
+   debug_msg(" ********** bytes_in:  %f", bytes_in);
    return val;
 }
 
