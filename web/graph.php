@@ -240,7 +240,8 @@ else
           else
               $prefix = $hostname;
 
-          $value = $value>1000 ? number_format($value) : number_format($value, 2);
+          if ( is_float($value) )
+             $value = $value>1000 ? number_format($value) : number_format($value, 2);
 
           if ($range=="job") {
                $hrs = intval( -$jobrange / 3600 );
