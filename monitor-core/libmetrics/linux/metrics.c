@@ -45,22 +45,35 @@ char sys_devices_system_cpu[32];
 int cpufreq;
 
 typedef struct {
-  uint32_t last_read;
+  struct timeval last_read;
   uint32_t thresh;
   char *name;
   char buffer[BUFFSIZE];
 } timely_file;
 
-timely_file proc_stat    = { 0, 1, "/proc/stat" };
-timely_file proc_loadavg = { 0, 5, "/proc/loadavg" };
-timely_file proc_meminfo = { 0, 5, "/proc/meminfo" };
-timely_file proc_net_dev = { 0, 1, "/proc/net/dev" };
+timely_file proc_stat    = { {0,0} , 1, "/proc/stat" };
+timely_file proc_loadavg = { {0,0} , 5, "/proc/loadavg" };
+timely_file proc_meminfo = { {0,0} , 5, "/proc/meminfo" };
+timely_file proc_net_dev = { {0,0} , 1, "/proc/net/dev" };
+
+float timediff(const struct timeval *thistime, const struct timeval *lasttime)
+{
+  float diff;
+
+  diff = ((double) thistime->tv_sec * 1.0e6 +
+          (double) thistime->tv_usec -
+          (double) lasttime->tv_sec * 1.0e6 -
+          (double) lasttime->tv_usec) / 1.0e6;
+
+  return diff;
+}
 
 char *update_file(timely_file *tf)
 {
-  int now,rval;
-  now = time(0);
-  if(now - tf->last_read > tf->thresh) {
+  int rval;
+  struct timeval now;
+  gettimeofday(&now, NULL);
+  if(timediff(&now,&tf->last_read) > tf->thresh) {
     rval = slurpfile(tf->name, tf->buffer, BUFFSIZE);
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
@@ -85,9 +98,11 @@ num_cpustates_func ( void )
    char *p;
    unsigned int i=0;
 
-   proc_stat.last_read=0;
+   proc_stat.last_read.tv_sec=0;
+   proc_stat.last_read.tv_usec=0;
    p = update_file(&proc_stat);
-   proc_stat.last_read=0;
+   proc_stat.last_read.tv_sec=0;
+   proc_stat.last_read.tv_usec=0;
 
 /*
 ** Skip initial "cpu" token
@@ -140,7 +155,7 @@ static net_dev_stats *hash_lookup(char *devname, size_t nlen)
   stats = (net_dev_stats *)malloc(sizeof(net_dev_stats));
   if ( stats == NULL )
   {   
-    err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup(): %s",name);
+    err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup(%s,%d)",name,nlen);
     free(name);
     return NULL;
   }
@@ -161,12 +176,13 @@ void update_ifdata ( void )
 {
    char *p;
    int i;
-   static int stamp=0;
+   static struct timeval stamp={0,0};
    unsigned long rbi=0,rbo=0,rpi=0,rpo=0;
 
 
    p = update_file(&proc_net_dev);
-   if (proc_net_dev.last_read != stamp)
+   if ((proc_net_dev.last_read.tv_sec != stamp.tv_sec) &&
+       (proc_net_dev.last_read.tv_usec != stamp.tv_usec))
       {
 	 bytes_in = bytes_out = pkts_in = pkts_out = 0.;
 	 /*  skip past the two-line header ... */
@@ -235,7 +251,7 @@ void update_ifdata ( void )
 	       p = index (p, '\n') + 1;    // skips a line
 	    }
 
-	 int t = proc_net_dev.last_read - stamp;
+	 float t = timediff(&proc_net_dev.last_read,&stamp);
 	 bytes_in /= t;
 	 pkts_in /= t;
 	 bytes_out /= t;
@@ -587,12 +603,13 @@ cpu_user_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp={0,0};
    static double last_user_jiffies,  user_jiffies, 
                  last_total_jiffies, total_jiffies, diff;
    
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+      (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
      
      p = skip_token(p);
@@ -618,12 +635,13 @@ cpu_nice_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp={0,0};
    static double last_nice_jiffies,  nice_jiffies,
                  last_total_jiffies, total_jiffies, diff;
  
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+      (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
  
      p = skip_token(p);
@@ -650,12 +668,13 @@ cpu_system_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp={0,0};
    static double last_system_jiffies,  system_jiffies,
                  last_total_jiffies, total_jiffies, diff;
  
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+      (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
      
      p = skip_token(p);
@@ -691,12 +710,13 @@ cpu_idle_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp={0,0};
    static double last_idle_jiffies,  idle_jiffies,
                  last_total_jiffies, total_jiffies, diff;
  
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+      (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
      
      p = skip_token(p);
@@ -746,7 +766,7 @@ cpu_wio_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp={0,0};
    static double last_wio_jiffies,  wio_jiffies,
                  last_total_jiffies, total_jiffies, diff;
  
@@ -756,7 +776,8 @@ cpu_wio_func ( void )
      }
 
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+      (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
      
      p = skip_token(p);
@@ -787,7 +808,7 @@ cpu_intr_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp={0,0};
    static double last_intr_jiffies,  intr_jiffies,
                  last_total_jiffies, total_jiffies, diff;
  
@@ -797,7 +818,8 @@ cpu_intr_func ( void )
      }
 
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+      (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
      
      p = skip_token(p);
@@ -829,7 +851,7 @@ cpu_sintr_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp={0,0};
    static double last_sintr_jiffies,  sintr_jiffies,
                  last_total_jiffies, total_jiffies, diff;
  
@@ -839,7 +861,8 @@ cpu_sintr_func ( void )
      }
 
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+      (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
      
      p = skip_token(p);
