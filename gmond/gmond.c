@@ -831,11 +831,13 @@ Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
   /* Copy in the data */
   // Yemi
   if(message->id == spoof_metric){
-    // Store data as regular gmetric in hash table!!
+      /* Store data as regular gmetric in hash table!!
+       * Free the Spoof-related strings.
+       */
 
-      metric->message.id = metric_user_defined;   
+      metric->message.id = metric_user_defined;
       metric->message.Ganglia_message_u.gmetric = message->Ganglia_message_u.spmetric.gmetric;
-
+      xdr_free(xdr_Ganglia_spoof_header, &message->Ganglia_message_u.spmetric.spheader);
 
   }else{
       memcpy(&(metric->message), message, sizeof(Ganglia_message));
