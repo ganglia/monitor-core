@@ -64,7 +64,6 @@ static const struct metricinfo
   "swap_free", swap_free_func, g_uint32},
   {
   "mtu", mtu_func, g_uint32},
-#ifndef CYGWIN
   {
   "bytes_out", bytes_out_func, g_float},
   {
@@ -79,7 +78,6 @@ static const struct metricinfo
   "disk_total", disk_total_func, g_double},
   {
   "part_max_used", part_max_used_func, g_float},
-#endif
   {
   "", NULL}
 };
