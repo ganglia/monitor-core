@@ -520,7 +520,7 @@ readline(int fd, char *buf, int maxlen)
 void *
 server_thread (void *arg)
 {
-   int interactive = (int) arg;
+   int interactive = (arg != NULL);
    socklen_t len;
    client_t client;
    char remote_ip[16];
