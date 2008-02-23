@@ -5,6 +5,6 @@ DIST_SUBDIRS= aix cygwin darwin freebsd hpux irix linux netbsd openbsd osf solar
 
 noinst_LTLIBRARIES    = libmetrics.la
 libmetrics_la_SOURCES = libmetrics.c libmetrics.h \
-error.c interface.c interface.h \
-get_ifi_info.c unpifi.h error.h
+interface.c interface.h \
+get_ifi_info.c unpifi.h
 libmetrics_la_LIBADD  = @OS@/libmetric25.la
