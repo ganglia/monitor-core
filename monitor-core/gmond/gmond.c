@@ -251,7 +251,7 @@ daemonize_if_necessary( char *argv[] )
 
       /* enable errmsg logging to syslog */
       daemon_proc = 1;  
-      openlog ("GMOND", LOG_PID, LOG_DAEMON);
+      openlog (argv[0], LOG_PID, LOG_DAEMON);
     }
 }
 
