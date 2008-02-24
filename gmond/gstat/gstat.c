@@ -29,10 +29,8 @@ int main(int argc, char *argv[])
    gexec_host_t *host;
    llist_entry *li;
 
-/*
    debug_level = 1;
    set_debug_msg_level(debug_level);
-*/
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
