@@ -16,6 +16,7 @@ AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
+AC_CHECK_LIB(kinfo, kinfo_get_cpus)
 AC_CHECK_LIB(kstat, kstat_open)
 AC_CHECK_LIB(kvm, kvm_open)
 AC_CHECK_LIB(odm, odm_initialize)
@@ -127,6 +128,9 @@ dnl  LIBS="-lpthread $LIBS"
 *freebsd*)      OS="freebsd"
 		AC_DEFINE(FREEBSD, 1, FREEBSD)
 		;; 
+*dragonfly*)	OS="dragonfly"
+		AC_DEFINE(DRAGONFLYBSD, 1, DRAGONFLYBSD)
+		;;
 *netbsd*)       OS="netbsd"
 		AC_DEFINE(NETBSD, 1, NETBSD)
 		;; 
@@ -145,6 +149,7 @@ AC_CONFIG_FILES([Makefile
                  aix/Makefile
                  cygwin/Makefile
                  darwin/Makefile
+                 dragonfly/Makefile
                  freebsd/Makefile
                  hpux/Makefile
                  irix/Makefile
