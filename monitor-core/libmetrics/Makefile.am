@@ -1,7 +1,7 @@
 SUBDIRS=@OS@ . tests
 DIST_SUBDIRS= aix cygwin darwin dragonfly freebsd hpux irix linux netbsd openbsd osf solaris tests
 
-#AM_CFLAGS  = -I$(top_builddir)/lib 
+AM_CFLAGS  = -I$(top_builddir)/lib 
 
 noinst_LTLIBRARIES    = libmetrics.la
 libmetrics_la_SOURCES = libmetrics.c libmetrics.h \
