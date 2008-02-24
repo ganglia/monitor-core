@@ -1,7 +1,7 @@
 AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/lib 
 
 if STATIC_BUILD
-AM_CFLAGS += -I$(top_builddir)/srclib/apr/include/ @PYTHON_INCLUDES@
+AM_CFLAGS += -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/confuse/src/ @PYTHON_INCLUDES@
 noinst_LTLIBRARIES    = libmodpython.la
 libmodpython_la_SOURCES = mod_python.c 
 else
