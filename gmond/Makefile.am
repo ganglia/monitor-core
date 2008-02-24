@@ -4,12 +4,12 @@ EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.h
 if STATIC_BUILD
 GCFLAGS = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/confuse/src/
 GLDADD = $(top_builddir)/srclib/apr/libapr-0.la $(top_builddir)/srclib/confuse/src/libconfuse.la \
-	modules/disk/.libs/mod_disk.o modules/cpu/.libs/mod_cpu.o modules/cpu/.libs/mod_load.o \
-	modules/memory/.libs/mod_mem.o modules/network/.libs/mod_net.o \
-	modules/system/.libs/mod_proc.o modules/system/.libs/mod_sys.o
+	modules/disk/mod_disk.lo modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
+	modules/memory/mod_mem.lo modules/network/mod_net.lo \
+	modules/system/mod_proc.lo modules/system/mod_sys.lo
 GLDFLAGS = -static -export-dynamic
 if BUILD_PYTHON
-GLDADD += modules/python/.libs/mod_python.o
+GLDADD += modules/python/mod_python.lo
 GLDFLAGS += -lpython@PYTHON_VERSION@
 endif
 else
