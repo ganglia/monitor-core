@@ -1,5 +1,5 @@
 SUBDIRS=@OS@ . tests
-DIST_SUBDIRS= aix cygwin darwin freebsd hpux irix linux netbsd openbsd osf solaris tests
+DIST_SUBDIRS= aix cygwin darwin dragonfly freebsd hpux irix linux netbsd openbsd osf solaris tests
 
 #AM_CFLAGS  = -I$(top_builddir)/lib 
 
