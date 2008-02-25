@@ -837,7 +837,7 @@ Ganglia_message_save( Ganglia_host *host, Ganglia_message *message )
 
       metric->message.id = metric_user_defined;
       metric->message.Ganglia_message_u.gmetric = message->Ganglia_message_u.spmetric.gmetric;
-      xdr_free(xdr_Ganglia_spoof_header, &message->Ganglia_message_u.spmetric.spheader);
+      xdr_free((xdrproc_t)xdr_Ganglia_spoof_header, (char *)&(message->Ganglia_message_u.spmetric.spheader));
 
   }else{
       memcpy(&(metric->message), message, sizeof(Ganglia_message));
