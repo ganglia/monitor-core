@@ -216,7 +216,7 @@ machine_type_func ( void )
    long size;
    
    size = sysinfo(SI_MACHINE, val.str, MAX_G_STRING_SIZE);
-   /* strncpy( val.str, "x86", MAX_G_STRING_SIZE ); */
+
    return val;
 }
 
@@ -227,7 +227,7 @@ os_name_func ( void )
    long size;
    
    size = sysinfo(SI_SYSNAME, val.str, MAX_G_STRING_SIZE);
-   /* strncpy( val.str, "FreeBSD", MAX_G_STRING_SIZE ); */
+
    return val;
 }        
 
