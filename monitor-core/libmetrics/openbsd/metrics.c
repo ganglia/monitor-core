@@ -1,5 +1,5 @@
 /*
- *  First stab at support for metrics in NetBSD
+ *  First stab at support for metrics in OpenBSD
  *  by Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
  *  based on the NetBSD metrics by Jan Schaumann <jschauma@netbsd.org>
  *

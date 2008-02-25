@@ -107,7 +107,7 @@ metric_init(void)
       kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "metric_init()");
    } else {
       /*
-       * RELEASE versions of FreeBSD with the swap mib have a version
+       * RELEASE versions of DragonFlyBSD with the swap mib have a version
        * of libkvm that doesn't need root for simple proc access so we
        * just open /dev/null to give us a working handle here.
        */
@@ -372,7 +372,7 @@ cpu_idle_func ( void )
 }
 
 /*
-** FIXME - This metric is not valid on FreeBSD.
+** FIXME - This metric is not valid on DragonFlyBSD.
 */
 g_val_t 
 cpu_wio_func ( void )
@@ -406,7 +406,7 @@ cpu_intr_func ( void )
 }
 
 /*
-** FIXME - This metric is not valid on FreeBSD.
+** FIXME - This metric is not valid on DragonFlyBSD.
 */
 g_val_t 
 cpu_sintr_func ( void )
@@ -498,10 +498,10 @@ mem_free_func ( void )
 }
 
 /*
-** FreeBSD don't seem to report this anywhere.  It's actually quite
-** complicated as there is SysV shared memory, POSIX shared memory,
-** and mmap shared memory at a minimum.
-*/
+ * FIXME: DragonFlyBSD don't seem to report this anywhere.  It's actually
+ * quite complicated as there is SysV shared memory, POSIX shared memory,
+ * and mmap shared memory at a minimum.
+ */
 g_val_t
 mem_shared_func ( void )
 {

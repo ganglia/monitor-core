@@ -130,8 +130,7 @@ num_cpustates_func ( void )
    p = skip_whitespace(p);
 /*
 ** Loop over file until next "cpu" token is found.
-** i=4 : Linux 2.4.x
-** i=7 : Linux 2.6.x
+** i=4 : Cygwin
 */
    while (strncmp(p,"cpu",3)) {
      p = skip_token(p);
