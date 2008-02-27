@@ -177,6 +177,7 @@ static void get_metric_name_cpu (char *metric, char *name, int *index)
 
 	if (numIndex > 0) {
         strncpy (name, metric, numIndex);
+        name[numIndex] = '\0';
         *index = atoi(&metric[numIndex]);
 	}
     else {
@@ -277,7 +278,7 @@ static g_val_t multi_cpu_user_func (int cpu_index)
 {
     char *p;
     cpu_util *cpu = &(cpu_user[cpu_index]);
-    
+
     p = update_file(&proc_stat);
     if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
        (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
