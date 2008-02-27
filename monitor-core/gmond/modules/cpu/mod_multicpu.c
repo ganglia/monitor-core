@@ -55,17 +55,17 @@ mmodule multicpu_module;
 #endif
 
 typedef struct {
-  uint32_t last_read;
+  struct timeval last_read;
   uint32_t thresh;
   char *name;
   char buffer[BUFFSIZE];
 } timely_file;
 
-timely_file proc_stat    = { 0, 1, "/proc/stat" };
+timely_file proc_stat    = { {0,0} , 1, "/proc/stat" };
 
 struct cpu_util {
    g_val_t val;
-   int stamp;
+   struct timeval stamp;
    double last_jiffies;
    double curr_jiffies;
    double last_total_jiffies;
@@ -88,11 +88,24 @@ static cpu_util *cpu_wio = NULL;
 static cpu_util *cpu_intr = NULL;
 static cpu_util *cpu_sintr = NULL;
 
+float timediff(const struct timeval *thistime, const struct timeval *lasttime)
+{
+  float diff;
+
+  diff = ((double) thistime->tv_sec * 1.0e6 +
+          (double) thistime->tv_usec -
+          (double) lasttime->tv_sec * 1.0e6 -
+          (double) lasttime->tv_usec) / 1.0e6;
+
+  return diff;
+}
+
 static char *update_file(timely_file *tf)
 {
-    int now,rval;
-    now = time(0);
-    if(now - tf->last_read > tf->thresh) {
+    int rval;
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    if(timediff(&now,&tf->last_read) > tf->thresh) {
         rval = slurpfile(tf->name, tf->buffer, BUFFSIZE);
         if(rval == SYNAPSE_FAILURE) {
             err_msg("update_file() got an error from slurpfile() reading %s",
@@ -114,9 +127,11 @@ static void init_cpu_info (void)
     char *p;
     unsigned int i=0;
     
-    proc_stat.last_read=0;
+    proc_stat.last_read.tv_sec=0;
+    proc_stat.last_read.tv_usec=0;
     p = update_file(&proc_stat);
-    proc_stat.last_read=0;
+    proc_stat.last_read.tv_sec=0;
+    proc_stat.last_read.tv_usec=0;
     
     /*
     ** Skip initial "cpu" token
@@ -264,7 +279,8 @@ static g_val_t multi_cpu_user_func (int cpu_index)
     cpu_util *cpu = &(cpu_user[cpu_index]);
     
     p = update_file(&proc_stat);
-    if (proc_stat.last_read != cpu->stamp) {
+    if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
         p = find_cpu (p, cpu_index);
@@ -280,7 +296,8 @@ static g_val_t multi_cpu_nice_func (int cpu_index)
     cpu_util *cpu = &(cpu_nice[cpu_index]);
     
     p = update_file(&proc_stat);
-    if(proc_stat.last_read != cpu->stamp) {
+    if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
         p = find_cpu (p, cpu_index);
@@ -299,7 +316,8 @@ static g_val_t multi_cpu_system_func (int cpu_index)
     cpu_util *cpu = &(cpu_system[cpu_index]);
     
     p = update_file(&proc_stat);
-    if(proc_stat.last_read != cpu->stamp) {
+    if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
         p = find_cpu (p, cpu_index);
@@ -339,7 +357,8 @@ static g_val_t multi_cpu_idle_func (int cpu_index)
     cpu_util *cpu = &(cpu_idle[cpu_index]);
     
     p = update_file(&proc_stat);
-    if(proc_stat.last_read != cpu->stamp) {
+    if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
         p = find_cpu (p, cpu_index);
@@ -385,7 +404,8 @@ static g_val_t multi_cpu_wio_func (int cpu_index)
     }
     
     p = update_file(&proc_stat);
-    if(proc_stat.last_read != cpu->stamp) {
+    if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
         p = find_cpu (p, cpu_index);
@@ -412,7 +432,8 @@ static g_val_t multi_cpu_intr_func (int cpu_index)
     }
     
     p = update_file(&proc_stat);
-    if(proc_stat.last_read != cpu->stamp) {
+    if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
         p = find_cpu (p, cpu_index);
@@ -440,7 +461,8 @@ static g_val_t multi_cpu_sintr_func (int cpu_index)
     }
     
     p = update_file(&proc_stat);
-    if(proc_stat.last_read != cpu->stamp) {
+    if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
         p = find_cpu (p, cpu_index);
