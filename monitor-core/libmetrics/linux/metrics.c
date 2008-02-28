@@ -46,15 +46,15 @@ int cpufreq;
 
 typedef struct {
   struct timeval last_read;
-  uint32_t thresh;
+  float thresh;
   char *name;
   char buffer[BUFFSIZE];
 } timely_file;
 
-timely_file proc_stat    = { {0,0} , 1, "/proc/stat" };
-timely_file proc_loadavg = { {0,0} , 5, "/proc/loadavg" };
-timely_file proc_meminfo = { {0,0} , 5, "/proc/meminfo" };
-timely_file proc_net_dev = { {0,0} , 1, "/proc/net/dev" };
+timely_file proc_stat    = { {0,0} , 1., "/proc/stat" };
+timely_file proc_loadavg = { {0,0} , 5., "/proc/loadavg" };
+timely_file proc_meminfo = { {0,0} , 5., "/proc/meminfo" };
+timely_file proc_net_dev = { {0,0} , 1., "/proc/net/dev" };
 
 float timediff(const struct timeval *thistime, const struct timeval *lasttime)
 {
@@ -171,20 +171,20 @@ static net_dev_stats *hash_lookup(char *devname, size_t nlen)
   return stats;
 }
 
-static double bytes_in,bytes_out,pkts_in,pkts_out;
-void update_ifdata ( void )
+static double bytes_in=0,bytes_out=0,pkts_in=0,pkts_out=0;
+void update_ifdata ( char *caller )
 {
    char *p;
    int i;
    static struct timeval stamp={0,0};
    unsigned long rbi=0,rbo=0,rpi=0,rpo=0;
-
+   unsigned long l_bytes_in=0,l_bytes_out=0,l_pkts_in=0,l_pkts_out=0;
+   int data_ok=1;
 
    p = update_file(&proc_net_dev);
    if ((proc_net_dev.last_read.tv_sec != stamp.tv_sec) &&
        (proc_net_dev.last_read.tv_usec != stamp.tv_usec))
       {
-	 bytes_in = bytes_out = pkts_in = pkts_out = 0.;
 	 /*  skip past the two-line header ... */
 	 p = index (p, '\n')+1;
 	 p = index (p, '\n')+1;
@@ -217,47 +217,84 @@ void update_ifdata ( void )
 
 		     rbi = strtoul( p, &p ,10);
 		     if ( rbi >= ns->rbi ) {
-			bytes_in += rbi - ns->rbi;
+			l_bytes_in += rbi - ns->rbi;
 		     } else {
-			bytes_in += ULONG_MAX - ns->rbi + rbi;
+			data_ok = 0;
+			err_msg("update_ifdata(%s) - Overflow in rbi: %lu -> %lu",caller,ns->rbi,rbi);
+			l_bytes_in += ULONG_MAX - ns->rbi + rbi;
 		     }
 		     ns->rbi = rbi;
 
 		     rpi = strtoul( p, &p ,10);
 		     if ( rpi >= ns->rpi ) {
-			pkts_in += rpi - ns->rpi;
+			l_pkts_in += rpi - ns->rpi;
 		     } else {
-			pkts_in += ULONG_MAX - ns->rpi + rpi;
+			data_ok = 0;
+			err_msg("updata_ifdata(%s) - Overflow in rpi: %lu -> %lu",caller,ns->rpi,rpi);
+			l_pkts_in += ULONG_MAX - ns->rpi + rpi;
 		     }
 		     ns->rpi = rpi;
 
 		     for (i = 0; i < 6; i++) strtol(p, &p, 10);
 		     rbo = strtoul( p, &p ,10);
 		     if ( rbo >= ns->rbo ) {
-			bytes_out += rbo - ns->rbo;
+			l_bytes_out += rbo - ns->rbo;
 		     } else {
-			bytes_out += ULONG_MAX - ns->rbo + rbo;
+			data_ok = 0;
+			err_msg("update_ifdata(%s) - Overflow in rbo: %lu -> %lu",caller,ns->rbo,rbo);
+			l_bytes_out += ULONG_MAX - ns->rbo + rbo;
 		     }
 		     ns->rbo = rbo;
 
 		     rpo = strtoul( p, &p ,10);
 		     if ( rpo >= ns->rpo ) {
-			pkts_out += rpo - ns->rpo;
+			l_pkts_out += rpo - ns->rpo;
 		     } else {
-			pkts_out += ULONG_MAX - ns->rpo + rpo;
+			data_ok = 0;
+			err_msg("update_ifdata(%s) - Overflow in rpo: %lu -> %lu",caller,ns->rpo,rpo);
+			l_pkts_out += ULONG_MAX - ns->rpo + rpo;
 		     }
 		     ns->rpo = rpo;
 		  }
 	       p = index (p, '\n') + 1;    // skips a line
 	    }
 
+	 /*
+	 ** Compute timediff. Check for bogus delta-t
+	 */
 	 float t = timediff(&proc_net_dev.last_read,&stamp);
-	 bytes_in /= t;
-	 pkts_in /= t;
-	 bytes_out /= t;
-	 pkts_out /= t;
-
+	 if ( t <  proc_net_dev.thresh) {
+	   err_msg("update_ifdata(%s) - Dubious delta-t: %f",caller,t);
+           return;
+	 }
 	 stamp = proc_net_dev.last_read;
+
+	 /*
+	 ** No data update if one of the counters did overflow
+	 **
+	 ** This will work great for 64-bit. In 32-bit, the network
+	 ** counters can overflow in ~40 seconds for a fully saturated
+	 ** 1GBit link. In that case we may need to sample at higher
+	 ** rate.
+	 */
+	 if ( data_ok ) {
+	   bytes_in = l_bytes_in / t;
+	   pkts_in = l_pkts_in / t;
+	   bytes_out = l_bytes_out / t;
+	   pkts_out = l_pkts_out / t;
+	 }
+
+	 /*
+	 ** Check for "invalid" data, caused by HW error [on certain BCM5807 devicves]
+	 **
+	 ** We could drop bogus packets here, but how to define the threshhold ?
+	 **
+	 */	
+	 if ((bytes_in > 1.0e8) ||
+             (pkts_in > 1.0e8) ||
+             (bytes_out > 1.0e8) ||
+             (pkts_out > 1.0e8))
+		 err_msg("update_ifdata(%s): %g %g %g %g / %g",caller,bytes_in,bytes_out,pkts_in,pkts_out,t);
       }
 
    return;
@@ -309,7 +346,7 @@ metric_init(void)
          return rval;
       } 
 
-   update_ifdata();
+   update_ifdata("metric_inint");
 
    rval.int32 = SYNAPSE_SUCCESS;
    return rval;
@@ -320,7 +357,7 @@ pkts_in_func ( void )
 {
    g_val_t val;
 
-   update_ifdata();
+   update_ifdata("PI");
    val.f = pkts_in;
    debug_msg(" ********** pkts_in:  %f", pkts_in);
    return val;
@@ -331,7 +368,7 @@ pkts_out_func ( void )
 {
    g_val_t val;
 
-   update_ifdata();
+   update_ifdata("PO");
    val.f = pkts_out;
    debug_msg(" ********** pkts_out:  %f", pkts_out);
    return val;
@@ -342,7 +379,7 @@ bytes_out_func ( void )
 {
    g_val_t val;
 
-   update_ifdata();
+   update_ifdata("BO");
    val.f = bytes_out;
    debug_msg(" ********** bytes_out:  %f", bytes_out);
    return val;
@@ -353,7 +390,7 @@ bytes_in_func ( void )
 {
    g_val_t val;
 
-   update_ifdata();
+   update_ifdata("BI");
    val.f = bytes_in;
    debug_msg(" ********** bytes_in:  %f", bytes_in);
    return val;
