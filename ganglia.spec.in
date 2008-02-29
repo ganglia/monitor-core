@@ -14,7 +14,7 @@ Summary: Ganglia Distributed Monitoring System
 Name: @PACKAGE@
 Version: @RPM_VERSION@
 URL: http://ganglia.info/
-Release: @RPM_RELEASE@
+Release: 1 
 License: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
