@@ -904,24 +904,4 @@ mtu_func ( void )
    return val;
 }
 
-#ifdef STAND_ALONE_TEST
-main()
-{
-g_val_t tval;
-
-metric_init();
-
-tval = mem_cached_func();
-printf("mem_cached: %d\n",tval.uint32);
-tval = mem_rm_func();
-printf("mem_rm: %d\n",tval.uint32);
-tval = mem_arm_func();
-printf("mem_arm: %d\n",tval.uint32);
-tval = mem_vm_func();
-printf("mem_vm: %d\n",tval.uint32);
-tval = mem_avm_func();
-printf("mem_avm: %d\n",tval.uint32);
-}
-#endif
-
 /* EOF - hpux.c */
