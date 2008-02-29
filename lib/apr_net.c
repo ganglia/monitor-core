@@ -15,7 +15,7 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 
-#ifdef SOLARIS2
+#ifdef SOLARIS
 #include <sys/sockio.h>  /* for SIOCGIFADDR */
 #endif
 
