@@ -135,9 +135,9 @@ mem_total_func ( void )
 
   sysctl(mib, 2, &physmem, &len, NULL, 0);
 
-  val.uint32 = (unsigned long) (physmem / 1024);
+  val.f = physmem / 1024;
 #else
-  val.uint32 = 0;
+  val.f = 0;
 #endif
   return val;
 } 
@@ -789,7 +789,7 @@ mem_free_func ( void )
                         (host_info_t)&vm_stat, &host_count);
 
    free_size = (unsigned long long) vm_stat.free_count   * pagesize;
-   val.uint32 = (unsigned int) free_size / 1024;
+   val.f = free_size / 1024;
 
    return val;
 }
@@ -803,7 +803,7 @@ mem_shared_func ( void )
 {
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 
@@ -814,7 +814,7 @@ g_val_t
 mem_buffers_func ( void )
 {
    g_val_t val;
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 
@@ -825,7 +825,7 @@ g_val_t
 mem_cached_func ( void )
 {
    g_val_t val;
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 
@@ -836,7 +836,7 @@ g_val_t
 swap_free_func ( void )
 {
    g_val_t val;
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 

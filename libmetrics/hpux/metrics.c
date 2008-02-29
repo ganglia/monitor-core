@@ -611,7 +611,7 @@ mem_total_func ( void )
    g_val_t val;
 
    /* assumes page size is a multiple of 1024 */
-   val.uint32 = staticinfo.physical_memory * (staticinfo.page_size / 1024);
+   val.f = staticinfo.physical_memory * (staticinfo.page_size / 1024);
 
    return val;
 }  
@@ -625,12 +625,12 @@ mem_free_func ( void )
    if( -1 == pstat_getdynamic( &p, sizeof(struct pst_dynamic), 1, 0))
       {
       err_ret("mem_free_func() got an error from pstat_getdynamic()");
-      val.uint32 = 0;
+      val.f = 0;
       }
    else
       {
       /* assumes page size is a multiple of 1024 */
-      val.uint32 = p.psd_free * (staticinfo.page_size / 1024); 
+      val.f = p.psd_free * (staticinfo.page_size / 1024); 
       }
    return val;
 }
@@ -644,12 +644,12 @@ mem_rm_func ( void )
    if( -1 == pstat_getdynamic( &p, sizeof(struct pst_dynamic), 1, 0))
       {
       err_ret("mem_rm_func() got an error from pstat_getdynamic()");
-      val.uint32 = 0;
+      val.f = 0;
       }
    else
       {
       /* assumes page size is a multiple of 1024 */
-      val.uint32 = p.psd_rm * (staticinfo.page_size / 1024); 
+      val.f = p.psd_rm * (staticinfo.page_size / 1024); 
       }
    return val;
 }
@@ -663,12 +663,12 @@ mem_arm_func ( void )
    if( -1 == pstat_getdynamic( &p, sizeof(struct pst_dynamic), 1, 0))
       {
       err_ret("mem_arm_func() got an error from pstat_getdynamic()");
-      val.uint32 = 0;
+      val.f = 0;
       }
    else
       {
       /* assumes page size is a multiple of 1024 */
-      val.uint32 = p.psd_arm * (staticinfo.page_size / 1024); 
+      val.f = p.psd_arm * (staticinfo.page_size / 1024); 
       }
    return val;
 }
@@ -682,12 +682,12 @@ mem_vm_func ( void )
    if( -1 == pstat_getdynamic( &p, sizeof(struct pst_dynamic), 1, 0))
       {
       err_ret("mem_vm_func() got an error from pstat_getdynamic()");
-      val.uint32 = 0;
+      val.f = 0;
       }
    else
       {
       /* assumes page size is a multiple of 1024 */
-      val.uint32 = p.psd_vm * (staticinfo.page_size / 1024); 
+      val.f = p.psd_vm * (staticinfo.page_size / 1024); 
       }
    return val;
 }
@@ -701,12 +701,12 @@ mem_avm_func ( void )
    if( -1 == pstat_getdynamic( &p, sizeof(struct pst_dynamic), 1, 0))
       {
       err_ret("mem_avm_func() got an error from pstat_getdynamic()");
-      val.uint32 = 0;
+      val.f = 0;
       }
    else
       {
       /* assumes page size is a multiple of 1024 */
-      val.uint32 = p.psd_avm * (staticinfo.page_size / 1024); 
+      val.f = p.psd_avm * (staticinfo.page_size / 1024); 
       }
    return val;
 }
@@ -719,7 +719,7 @@ mem_shared_func ( void )
    int i, got, index = 0;
    struct pst_shminfo p[SHMEM_BUFFERSIZE];
 
-   val.uint32 = 0;
+   val.f = 0;
    do {
 
       if( -1 == ( got = pstat_getshm(p,sizeof(struct pst_shminfo), SHMEM_BUFFERSIZE, index)))
@@ -730,14 +730,14 @@ mem_shared_func ( void )
 
       for( i = 0; i < got; i++)
          {
-            val.uint32 += p[i].psh_segsz; /* size in bytes */
+            val.f += p[i].psh_segsz; /* size in bytes */
          }
 
       if( got) /* make sure we actually got something (we might have got 0) */
          index = p[got-1].psh_idx + 1;
 
    } while ( got == SHMEM_BUFFERSIZE);
-   val.uint32 /= 1024;  /* KB */ 
+   val.f /= 1024;  /* KB */ 
    return val;
 }
 
@@ -747,7 +747,7 @@ mem_buffers_func ( void )
    g_val_t val;
 
    /* FIXME HPUX */
-   val.uint32 = 0;
+   val.f = 0;
 
    return val;
 }
@@ -761,13 +761,13 @@ mem_cached_func ( void )
    if ( -1 == pstat_getdynamic(&p, sizeof(struct pst_dynamic), (size_t)1, 0)) 
       {
       err_ret("mem_cached_func() got an error from pstat_getdynamic()");
-      val.uint32 = 0;
+      val.f = 0;
       }
    else
       {
       /* This was Martin Knoblauch's solution... don't know about correctness - JKP */
       /* assumes page size is a multiple of 1024 */
-      val.uint32 = (staticinfo.physical_memory - p.psd_free - p.psd_rm) * (staticinfo.page_size / 1024);
+      val.f = (staticinfo.physical_memory - p.psd_free - p.psd_rm) * (staticinfo.page_size / 1024);
       }
 
    return val;
@@ -792,7 +792,7 @@ swap_func( int which)
 
    /* assumes page size is a multiple of 1024 */
    kpp = staticinfo.page_size / 1024;
-   val.uint32 = 0;
+   val.f = 0;
    do {
 
       if( -1 == ( got = pstat_getswap(p,sizeof(struct pst_swapinfo), SWAP_BUFFERSIZE, index)))
@@ -808,14 +808,14 @@ swap_func( int which)
             switch( which)
                {
                case SWAP_FREE:  
-                  val.uint32 += p[i].pss_nfpgs * kpp; 
+                  val.f += p[i].pss_nfpgs * kpp; 
                   break;
                case SWAP_TOTAL: 
                   if( p[i].pss_flags & SW_BLOCK)
-                     val.uint32 += p[i].pss_nblksenabled   /* * p[i].pss_swapchunk / 1024) */;
+                     val.f += p[i].pss_nblksenabled   /* * p[i].pss_swapchunk / 1024) */;
                   else if( p[i].pss_flags & SW_FS)
                      /* THIS IS A GUESS AND HAS NOT BEEN TESTED */
-                     val.uint32 += p[i].pss_allocated * p[i].pss_swapchunk / 1024;
+                     val.f += p[i].pss_allocated * p[i].pss_swapchunk / 1024;
                   else
                      {
                      err_msg("swap_func() - unknow swap type - pss_flags=0x%x", p[i].pss_flags);
@@ -845,7 +845,7 @@ swap_func( int which)
    g_val_t val;
    struct pst_vminfo p;
 
-   val.uint32 = 0;
+   val.f = 0;
    if ( -1 == pstat_getvminfo(&p, sizeof(struct pst_vminfo), 1, 0))
       {
          err_ret("swap_func() got an error from pstat_getswap()");
@@ -856,19 +856,19 @@ swap_func( int which)
          {
          case SWAP_FREE:
             /* assumes page size is a multiple of 1024 */
-            val.uint32 = p.psv_swapspc_cnt;
+            val.f = p.psv_swapspc_cnt;
 #ifdef SWAP_COUNTMEM
-            val.uint32 += p.psv_swapmem_cnt;
+            val.f += p.psv_swapmem_cnt;
 #endif
-            val.uint32 *= (staticinfo.page_size / 1024);
+            val.f *= (staticinfo.page_size / 1024);
             break;
          case SWAP_TOTAL:
             /* assumes page size is a multiple of 1024 */
-            val.uint32 = p.psv_swapspc_max;
+            val.f = p.psv_swapspc_max;
 #ifdef SWAP_COUNTMEM
-            val.uint32 += p.psv_swapmem_max;
+            val.f += p.psv_swapmem_max;
 #endif
-            val.uint32 *= (staticinfo.page_size / 1024);
+            val.f *= (staticinfo.page_size / 1024);
             break;
          default:
             err_sys("swap_func() - invalid value for which = %d", which);

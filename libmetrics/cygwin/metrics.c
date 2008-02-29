@@ -350,9 +350,9 @@ mem_total_func ( void )
    if ( GlobalMemoryStatusEx (&stat)) {
       size = stat.ullTotalPhys;
       /* get the value in kB */ 
-      val.uint32 =  size / 1024;
+      val.f =  size / 1024;
    } else {
-      val.uint32 = 0;
+      val.f = 0;
    }
 
    return val;
@@ -370,9 +370,9 @@ swap_total_func ( void )
    if ( GlobalMemoryStatusEx (&stat)) {
       size = stat.ullTotalPageFile;
       /* get the value in kB */ 
-      val.uint32 =  size / 1024;
+      val.f =  size / 1024;
    } else {
-      val.uint32 = 0;
+      val.f = 0;
    }
 
    return val;
@@ -389,9 +389,9 @@ boottime_func ( void )
    p = strstr ( p, "btime" );
    if(p) { 
      p = skip_token ( p );
-     val.uint32 = strtod ( p, (char **)NULL );
+     val.f = strtod ( p, (char **)NULL );
    } else {
-     val.uint32 = 0;
+     val.f = 0;
    }
 
    return val;
@@ -869,9 +869,9 @@ mem_free_func ( void )
    if ( GlobalMemoryStatusEx (&stat)) {
       size = stat.ullAvailPhys;
       /* get the value in kB */
-      val.uint32 =  size / 1024;
+      val.f =  size / 1024;
    } else {
-      val.uint32 = 0;
+      val.f = 0;
    }
 
    return val;
@@ -883,7 +883,7 @@ mem_shared_func ( void )
 {
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
 
    return val;
 }
@@ -894,7 +894,7 @@ mem_buffers_func ( void )
 {
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
 
    return val;
 }
@@ -905,7 +905,7 @@ mem_cached_func ( void )
 {
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
 
    return val;
 }
@@ -922,9 +922,9 @@ swap_free_func ( void )
    if ( GlobalMemoryStatusEx (&stat)) {
       size = stat.ullAvailPageFile;
       /* get the value in kB */
-      val.uint32 =  size / 1024;
+      val.f =  size / 1024;
    } else {
-      val.uint32 = 0;
+      val.f = 0;
    }
 
    return val;

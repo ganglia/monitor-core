@@ -146,7 +146,7 @@ mem_total_func ( void )
    mib[1] = HW_PHYSMEM;
    sysctl(mib, 2, &total, &len, NULL, 0);
    total /= 1024;
-   val.uint32 = total;
+   val.f = total;
    return val;
 }
 
@@ -159,7 +159,7 @@ swap_total_func ( void )
    int mib[2];
    struct uvmexp uvmexp;
 
-   val.uint32 = 0;
+   val.f = 0;
    totswap = 0;
 
    mib[0] = CTL_VM;
@@ -172,7 +172,7 @@ swap_total_func ( void )
    else
 	totswap = uvmexp.swpages;
 
-   val.uint32 = totswap * (pagesize / 1024);
+   val.f = totswap * (pagesize / 1024);
 
    return val;
 }
@@ -487,9 +487,9 @@ mem_free_func ( void )
 	mib[0] = CTL_VM;
 	mib[1] = VM_METER;
 	if (sysctl(mib, 2, &vminfo, &len, NULL, 0) < 0)
-		val.uint32 = 0;
+		val.f = 0;
 	else
-		val.uint32 = vminfo.t_free * (pagesize / 1024);
+		val.f = vminfo.t_free * (pagesize / 1024);
 	return val;
 }
 
@@ -505,9 +505,9 @@ mem_shared_func ( void )
 	mib[0] = CTL_VM;
 	mib[1] = VM_METER;
 	if (sysctl(mib, 2, &vminfo, &len, NULL, 0) < 0)
-		val.uint32 = 0;
+		val.f = 0;
 	else
-		val.uint32 = (vminfo.t_vmshr + vminfo.t_rmshr) * (pagesize / 1024);
+		val.f = (vminfo.t_vmshr + vminfo.t_rmshr) * (pagesize / 1024);
 	return val;
 }
 
@@ -527,7 +527,7 @@ mem_buffers_func ( void )
 		buffers = 0; 
    buffers /= 1024;
 
-   val.uint32 = buffers;
+   val.f = buffers;
    return val;
 }
 
@@ -550,7 +550,7 @@ mem_cached_func ( void )
    else
       cache = uvmexp.vnodepages + uvmexp.vtextpages;
 
-   val.uint32 = cache * (pagesize / 1024);
+   val.f = cache * (pagesize / 1024);
    return val;
 }
 
@@ -574,7 +574,7 @@ swap_free_func ( void )
    else
       totswapf = uvmexp.swpages - uvmexp.swpginuse;
 
-   val.uint32 = totswapf * (pagesize / 1024);
+   val.f = totswapf * (pagesize / 1024);
    return val;
 }
 
