@@ -485,9 +485,9 @@ mem_total_func ( void )
    p = strstr( update_file(&proc_meminfo), "MemTotal:");
    if(p) {
      p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 );
+     val.f = atof( p );
    } else {
-     val.uint32 = 0;
+     val.f = 0;
    }
 
    return val;
@@ -502,9 +502,9 @@ swap_total_func ( void )
    p = strstr( update_file(&proc_meminfo), "SwapTotal:" );
    if(p) {
      p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 );  
+     val.f = atof( p );  
    } else {
-     val.uint32 = 0;
+     val.f = 0;
    }
 
    return val;
@@ -1013,9 +1013,9 @@ mem_free_func ( void )
    p = strstr( update_file(&proc_meminfo), "MemFree:" );
    if(p) {
      p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 );
+     val.f = atof( p );
    } else {
-     val.uint32 = 0;
+     val.f = 0;
    }
 
    return val;
@@ -1033,9 +1033,9 @@ mem_shared_func ( void )
    p = strstr( update_file(&proc_meminfo), "MemShared:" );
    if (p) {
       p = skip_token(p);
-      val.uint32 = strtol( p, (char **)NULL, 10 );
+      val.f = atof( p );
    } else {
-      val.uint32 = 0;
+      val.f = 0;
    }
 
    return val;
@@ -1050,9 +1050,9 @@ mem_buffers_func ( void )
    p = strstr( update_file(&proc_meminfo), "Buffers:" );
    if(p) {
      p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 ); 
+     val.f = atof( p ); 
    } else {
-     val.uint32 = 0;
+     val.f = 0;
    }
 
    return val;
@@ -1067,9 +1067,9 @@ mem_cached_func ( void )
    p = strstr( update_file(&proc_meminfo), "Cached:");
    if(p) {
      p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 );
+     val.f = atof( p );
    } else {
-     val.uint32 = 0;
+     val.f = 0;
    }
 
    return val;
@@ -1084,9 +1084,9 @@ swap_free_func ( void )
    p = strstr( update_file(&proc_meminfo), "SwapFree:" );
    if(p) {
      p = skip_token(p);
-     val.uint32 = strtol( p, (char **)NULL, 10 ); 
+     val.f = atof( p ); 
    } else {
-     val.uint32 = 0;
+     val.f = 0;
    }
 
    return val;

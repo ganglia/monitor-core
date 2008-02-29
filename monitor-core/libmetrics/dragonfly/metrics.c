@@ -167,7 +167,7 @@ mem_total_func ( void )
 
    if (sysctlbyname("hw.physmem", &total, &len, NULL, 0) == -1)
 	total = 0;
-   val.uint32 = total / 1024;
+   val.f = total / 1024;
 
    return val;
 }
@@ -180,7 +180,7 @@ swap_total_func ( void )
    struct xswdev xsw;
    size_t size;
    int totswap, n;
-   val.uint32 = 0;
+   val.f = 0;
    totswap = 0;
 
    if (use_vm_swap_info) {
@@ -196,12 +196,12 @@ swap_total_func ( void )
    } else if(kd != NULL) {
       n = kvm_getswapinfo(kd, swap, 1, 0);
       if (n < 0 || swap[0].ksw_total == 0) {
-         val.uint32 = 0;
+         val.f = 0;
       }
       totswap = swap[0].ksw_total;
     }
    
-   val.uint32 = totswap * (pagesize / 1024);
+   val.f = totswap * (pagesize / 1024);
    return val;
 }
 
@@ -493,7 +493,7 @@ mem_free_func ( void )
    if((sysctlbyname("vm.stats.vm.v_free_count", &free_pages, &len, NULL, 0) 
 	== -1) || !len) free_pages = 0; 
 
-   val.uint32 = free_pages * (pagesize / 1024);
+   val.f = free_pages * (pagesize / 1024);
    return val;
 }
 
@@ -507,7 +507,7 @@ mem_shared_func ( void )
 {
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
 
    return val;
 }
@@ -528,7 +528,7 @@ mem_buffers_func ( void )
 		buffers = 0; 
    buffers /= 1024;
 
-   val.uint32 = buffers;
+   val.f = buffers;
    return val;
 }
 
@@ -548,7 +548,7 @@ mem_cached_func ( void )
 	|| !len)
       cache = 0; 
 
-   val.uint32 = cache * (pagesize / 1024);
+   val.f = cache * (pagesize / 1024);
    return val;
 }
 
@@ -561,7 +561,7 @@ swap_free_func ( void )
    struct xswdev xsw;
    size_t size;
    int totswap, usedswap, freeswap, n;
-   val.uint32 = 0;
+   val.f = 0;
    totswap = 0;
    usedswap = 0;
    if (use_vm_swap_info) {
@@ -581,7 +581,7 @@ swap_free_func ( void )
       usedswap = swap[0].ksw_used;
    }
    freeswap = totswap - usedswap;
-   val.uint32 = freeswap * (pagesize / 1024);
+   val.f = freeswap * (pagesize / 1024);
    return val;
 }
 

@@ -599,7 +599,7 @@ mem_total_func ( void )
   
    perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
 
-   val.uint32 = minfo.real_total*MEM_PAGESIZE;
+   val.f = minfo.real_total*MEM_PAGESIZE;
    
    return val;
 }
@@ -611,7 +611,7 @@ mem_free_func ( void )
   
    perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
    
-   val.uint32 = minfo.real_free*MEM_PAGESIZE; 
+   val.f = minfo.real_free*MEM_PAGESIZE; 
    return val;
 }
 
@@ -623,7 +623,7 @@ g_val_t
 mem_shared_func ( void )
 {
    g_val_t val;
-   val.uint32 = 0;
+   val.f = 0;
 
    return val;
 }
@@ -636,7 +636,7 @@ g_val_t
 mem_buffers_func ( void )
 {
    g_val_t val;
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 
@@ -647,7 +647,7 @@ mem_cached_func ( void )
 
    perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
    
-   val.uint32 = minfo.numperm*MEM_PAGESIZE;
+   val.f = minfo.numperm*MEM_PAGESIZE;
    return val;
 }
 
@@ -658,7 +658,7 @@ swap_total_func ( void )
 
    perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
    
-   val.uint32 =minfo.pgsp_total*MEM_PAGESIZE;
+   val.f =minfo.pgsp_total*MEM_PAGESIZE;
    return val;
    
 }
@@ -669,7 +669,7 @@ swap_free_func ( void )
    g_val_t val;
    perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
    
-   val.uint32 =minfo.pgsp_free*MEM_PAGESIZE;
+   val.f =minfo.pgsp_free*MEM_PAGESIZE;
 
    return val;
 }

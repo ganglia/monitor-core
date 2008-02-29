@@ -185,8 +185,8 @@ swap_total_func ( void )
    off_t swaptotal;
 
    swapctl(SC_GETSWAPTOT, &swaptotal);
-   val.uint32 = swaptotal / 2;
-/*   val.uint32 = 0; */
+   val.f = swaptotal / 2;
+
    return val;
 }
 
@@ -587,7 +587,7 @@ mem_func( int which )
   g_val_t val;
   struct rminfo rmi;
 
-  val.uint32 = 0;
+  val.f = 0;
   if (sysmp(MP_SAGET, MPSA_RMINFO, &rmi, sizeof(struct rminfo)) == -1)
   {
      perror("sysmp failed in mem_func");
@@ -596,11 +596,11 @@ mem_func( int which )
   {
     switch (which)
     {
-      case MEM_TOTAL:   val.uint32 = rmi.physmem*multiplier; break;
-      case MEM_FREE:    val.uint32 = rmi.freemem*multiplier; break;
-      case MEM_SHARED:  val.uint32 = (rmi.dchunkpages+rmi.dpages)*multiplier; break;
-      case MEM_BUFFERS: val.uint32 = rmi.bufmem*multiplier; break;
-      case MEM_CACHED:  val.uint32 = (rmi.chunkpages-rmi.dchunkpages)*multiplier; break;
+      case MEM_TOTAL:   val.f = rmi.physmem*multiplier; break;
+      case MEM_FREE:    val.f = rmi.freemem*multiplier; break;
+      case MEM_SHARED:  val.f = (rmi.dchunkpages+rmi.dpages)*multiplier; break;
+      case MEM_BUFFERS: val.f = rmi.bufmem*multiplier; break;
+      case MEM_CACHED:  val.f = (rmi.chunkpages-rmi.dchunkpages)*multiplier; break;
       default:
         err_msg("mem_func() - invalid value for which = %d", which);
     }
@@ -653,7 +653,7 @@ swap_free_func ( void )
    off_t swapfree;
 
    swapctl(SC_GETFREESWAP, &swapfree);
-   val.uint32 = swapfree / 2;
+   val.f = swapfree / 2;
    return val;
 }
 
@@ -682,15 +682,15 @@ proc_func ( 0 );
 mem_func(0);
 
 tval = mem_total_func();
-printf("Total Memory:  %f\n",tval.uint32/1024.);
+printf("Total Memory:  %f\n",tval.f/1024.);
 tval = mem_free_func();
-printf("Free Memory:   %f\n",tval.uint32/1024.);
+printf("Free Memory:   %f\n",tval.f/1024.);
 tval = mem_shared_func();
-printf("Shared Memory: %f\n",tval.uint32/1024.);
+printf("Shared Memory: %f\n",tval.f/1024.);
 tval = mem_buffers_func();
-printf("Buffer Memory: %f\n",tval.uint32/1024.);
+printf("Buffer Memory: %f\n",tval.f/1024.);
 tval = mem_cached_func();
-printf("Cached Memory: %f\n",tval.uint32/1024.);
+printf("Cached Memory: %f\n",tval.f/1024.);
 
 tval = proc_total_func();
 printf("Tot proc: %d\n",tval.uint32);
