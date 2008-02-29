@@ -882,7 +882,7 @@ mem_total_func ( void )
 {
    g_val_t val;
 
-   val.uint32 = metriclist.mem_total.uint32;
+   val.f = metriclist.mem_total.uint32;
 //   val.uint32 = pagetok(sysconf(_SC_PHYS_PAGES));
    return val;
 }
@@ -892,7 +892,7 @@ swap_total_func ( void )
 {
    g_val_t val;
    metric_tick();
-   val.uint32 = metriclist.swap_total.uint32;
+   val.f = metriclist.swap_total.uint32;
    return val;
 }
 
@@ -1085,7 +1085,7 @@ mem_free_func ( void )
    g_val_t val;
 
    metric_tick();
-   val.uint32 = metriclist.mem_free.uint32;
+   val.f = metriclist.mem_free.uint32;
    return val;
 }
 
@@ -1098,7 +1098,7 @@ mem_shared_func ( void )
 
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 
@@ -1111,7 +1111,7 @@ mem_buffers_func ( void )
 
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 
@@ -1124,7 +1124,7 @@ mem_cached_func ( void )
 
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 
@@ -1134,7 +1134,7 @@ swap_free_func ( void )
    g_val_t val;
 
    metric_tick();
-   val.uint32 = metriclist.swap_free.uint32;
+   val.f = metriclist.swap_free.uint32;
    return val;
 }
 

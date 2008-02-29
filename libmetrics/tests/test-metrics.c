@@ -17,9 +17,9 @@ static const struct metricinfo
   {
   "cpu_speed", cpu_speed_func, g_uint32},
   {
-  "mem_total", mem_total_func, g_uint32},
+  "mem_total", mem_total_func, g_float},
   {
-  "swap_total", swap_total_func, g_uint32},
+  "swap_total", swap_total_func, g_float},
   {
   "boottime", boottime_func, g_timestamp},
   {
@@ -53,15 +53,15 @@ static const struct metricinfo
   {
   "proc_total", proc_total_func, g_uint32},
   {
-  "mem_free", mem_free_func, g_uint32},
+  "mem_free", mem_free_func, g_float},
   {
-  "mem_shared", mem_shared_func, g_uint32},
+  "mem_shared", mem_shared_func, g_float},
   {
-  "mem_buffers", mem_buffers_func, g_uint32},
+  "mem_buffers", mem_buffers_func, g_float},
   {
-  "mem_cached", mem_cached_func, g_uint32},
+  "mem_cached", mem_cached_func, g_float},
   {
-  "swap_free", swap_free_func, g_uint32},
+  "swap_free", swap_free_func, g_float},
   {
   "mtu", mtu_func, g_uint32},
   {

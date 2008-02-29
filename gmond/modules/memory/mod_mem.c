@@ -69,18 +69,18 @@ static g_val_t mem_metric_handler ( int metric_index )
 
 static Ganglia_25metric mem_metric_info[] = 
 {
-    {0, "mem_total",  1200, GANGLIA_VALUE_UNSIGNED_INT, "KB", "zero", "%u", UDP_HEADER_SIZE+8, "Total amount of memory displayed in KBs"},
-    {0, "mem_free",    180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of available memory"},
-    {0, "mem_shared",  180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of shared memory"},
-    {0, "mem_buffers", 180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of buffered memory"},
-    {0, "mem_cached",  180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of cached memory"},
-    {0, "swap_free",   180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "Amount of available swap memory"},
-    {0, "swap_total", 1200, GANGLIA_VALUE_UNSIGNED_INT, "KB", "zero", "%u", UDP_HEADER_SIZE+8, "Total amount of swap space displayed in KBs"},
+    {0, "mem_total",  1200, GANGLIA_VALUE_FLOAT, "KB", "zero", "%.3f", UDP_HEADER_SIZE+8, "Total amount of memory displayed in KBs"},
+    {0, "mem_free",    180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "Amount of available memory"},
+    {0, "mem_shared",  180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "Amount of shared memory"},
+    {0, "mem_buffers", 180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "Amount of buffered memory"},
+    {0, "mem_cached",  180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "Amount of cached memory"},
+    {0, "swap_free",   180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "Amount of available swap memory"},
+    {0, "swap_total", 1200, GANGLIA_VALUE_FLOAT, "KB", "zero", "%.3f", UDP_HEADER_SIZE+8, "Total amount of swap space displayed in KBs"},
 #if HPUX
-    {0, "mem_arm",     180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "mem_arm"},
-    {0, "mem_rm",      180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "mem_rm"},
-    {0, "mem_avm",     180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "mem_avm"},
-    {0, "mem_vm",      180, GANGLIA_VALUE_UNSIGNED_INT, "KB", "both", "%u", UDP_HEADER_SIZE+8, "mem_vm"}
+    {0, "mem_arm",     180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "mem_arm"},
+    {0, "mem_rm",      180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "mem_rm"},
+    {0, "mem_avm",     180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "mem_avm"},
+    {0, "mem_vm",      180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "mem_vm"}
 #endif
     {0, NULL}
 

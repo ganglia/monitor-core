@@ -318,7 +318,7 @@ mem_total_func ( void )
 
    struct tbl_pmemstats pmbuf;
 
-   val.uint32 = metriclist.mem_total.uint32;
+   val.f = metriclist.mem_total.uint32;
    return val;
 }
 
@@ -330,7 +330,7 @@ swap_total_func ( void )
    struct tbl_swapinfo swainfo;
    
    table(TBL_SWAPINFO,-1,&swainfo,1,sizeof(struct tbl_swapinfo) );
-   val.uint32 = swainfo.size;
+   val.f = swainfo.size;
 
    return val;
 }
@@ -619,7 +619,7 @@ mem_free_func ( void )
    g_val_t val;
 
    get_mem_stats();
-   val.uint32 = metriclist.mem_free.uint32;
+   val.f = metriclist.mem_free.uint32;
    return val;
 }
 
@@ -628,7 +628,7 @@ mem_shared_func ( void )
 {
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 
@@ -637,7 +637,7 @@ mem_buffers_func ( void )
 {
    g_val_t val;
 
-   val.uint32 = ( 10 * multiplier);
+   val.f = ( 10 * multiplier);
    return val;
 }
 
@@ -646,7 +646,7 @@ mem_cached_func ( void )
 {
    g_val_t val;
 
-   val.uint32 = 0;
+   val.f = 0;
    return val;
 }
 
@@ -657,7 +657,7 @@ swap_free_func ( void )
 
    struct tbl_swapinfo swainfo;
    table(TBL_SWAPINFO,-1,&swainfo,1,sizeof(swainfo) );
-   val.uint32 = swainfo.free;
+   val.f = swainfo.free;
 
    return val;
 }
