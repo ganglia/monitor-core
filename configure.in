@@ -145,10 +145,6 @@ if test x"$enable_static_build" = xyes ; then
   cd srclib/apr && ./configure --cache-file=$ganglia_popdir/config.cache --prefix=$prefix
   cd $ganglia_popdir
 
-  echo $ac_n "${nl}Configuring expat ...${nl}"
-  cd srclib/expat && ./configure --cache-file=$ganglia_popdir/config.cache --prefix=$prefix 
-  cd $ganglia_popdir
-
   echo $ac_n "${nl}Configuring libconfuse ...${nl}"
   cd srclib/confuse && ./configure --cache-file=$ganglia_popdir/config.cache --disable-nls --prefix=$prefix 
   cd $ganglia_popdir
