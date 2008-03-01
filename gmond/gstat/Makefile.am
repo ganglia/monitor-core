@@ -1,6 +1,5 @@
 if STATIC_BUILD
-GCFLAGS = -I$(top_builddir)/srclib/expat/lib/
-GLDADD = $(top_builddir)/srclib/expat/lib/libexpat.la
+GLDADD = /usr/lib/libexpat.la
 GLDFLAGS = -static
 else
 GCFLAGS = 
