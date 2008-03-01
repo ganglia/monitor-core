@@ -10,6 +10,7 @@
 
 #include "ganglia.h"
 #include "llist.h"
+#include "debug_msg.h"
 #include <getopt.h>
 #include "cmdline.h"
 
