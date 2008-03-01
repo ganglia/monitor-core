@@ -2,7 +2,7 @@ SUBDIRS = gstat modules python_modules
 
 EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
 if STATIC_BUILD
-GCFLAGS = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/expat/lib/ -I$(top_builddir)/srclib/confuse/src/
+GCFLAGS = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/confuse/src/
 GLDADD = $(top_builddir)/srclib/apr/libapr-0.la $(top_builddir)/srclib/confuse/src/libconfuse.la \
 	modules/disk/mod_disk.lo modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
 	modules/memory/mod_mem.lo modules/network/mod_net.lo \

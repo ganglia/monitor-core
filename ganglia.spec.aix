@@ -74,10 +74,6 @@ can use to build scalable cluster or grid applications.
 export CC=xlc_r
 export CFLAGS="-O"
 ./configure --prefix=/opt/freeware --disable-shared --enable-static CFLAGS="-I/opt/freeware/include" CPPFLAGS="-I/opt/freeware/include" LDFLAGS="-L/opt/freeware/lib" --with-gmetad
-## this is necessary to get around the stupid gmetad shared library link to expat
-cd srclib/expat
-./configure --prefix=/opt/freeware --disable-shared --enable-static
-cd ../..
 ## now we can start the make process...
 make
 
