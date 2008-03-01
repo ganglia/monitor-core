@@ -1,6 +1,6 @@
 
 if STATIC_BUILD
-SUBDIRS = expat apr confuse
+SUBDIRS = apr confuse
 else
 SUBDIRS = 
 endif
