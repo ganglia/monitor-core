@@ -1,5 +1,4 @@
 if STATIC_BUILD
-GLDADD = /usr/lib/libexpat.la
 GLDFLAGS = -static
 else
 GCFLAGS = 
