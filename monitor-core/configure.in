@@ -312,23 +312,6 @@ if test x"$enable_static_build" = xno ; then
   fi
 
   echo
-  echo Checking for expat
-  if test x"$libexpatpath" != x && test x"$libexpatpath" != xyes ; then
-    CFLAGS="$CFLAGS -I$libexpatpath/include"
-    LDFLAGS="$LDFLAGS -L$libexpatpath/lib"
-    echo "Added -I$libexpatpath/include to CFLAGS"
-    echo "Added -I$libexpatpath/lib to LDLAGS"
-  fi
-  AC_CHECK_LIB(expat, XML_ParserCreate)
-  if test $ac_cv_lib_expat_XML_ParserCreate = yes; then
-    echo "Found a suitable Expat library"
-  else
-    echo "libexpat not found"
-    exit;
-  fi
-  echo
-
-  echo
   echo Checking for confuse
   if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes ; then
     CFLAGS="$CFLAGS -I$libconfusepath/include"
@@ -347,6 +330,23 @@ if test x"$enable_static_build" = xno ; then
 
   modpathstart = ""
 fi
+
+echo
+echo Checking for expat
+if test x"$libexpatpath" != x && test x"$libexpatpath" != xyes ; then
+  CFLAGS="$CFLAGS -I$libexpatpath/include"
+  LDFLAGS="$LDFLAGS -L$libexpatpath/lib"
+  echo "Added -I$libexpatpath/include to CFLAGS"
+  echo "Added -I$libexpatpath/lib to LDLAGS"
+fi
+AC_CHECK_LIB(expat, XML_ParserCreate)
+if test $ac_cv_lib_expat_XML_ParserCreate = yes; then
+  echo "Found a suitable Expat library"
+else
+  echo "libexpat not found"
+  exit;
+fi
+echo
 
 AC_CHECK_LIB(rpc, xdr_string)
 AC_CHECK_LIB(socket, socket)
