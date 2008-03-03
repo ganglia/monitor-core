@@ -415,6 +415,7 @@ dnl ##################################################################
 dnl Checks for library functions.
 dnl
 dnl AC_FUNC_MEMCMP
+AC_CHECK_FUNCS([vsnprintf])
 
 dnl ##################################################################
 dnl Check for function prototypes in headers.
