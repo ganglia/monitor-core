@@ -4,7 +4,7 @@
 if STATIC_BUILD
 GCFLAGS = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/apr/include/arch/unix/ -I$(top_builddir)/srclib/confuse/src
 GLDADD =
-GLDFLAGS = 
+GLDFLAGS = -static
 else
 GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD = 
