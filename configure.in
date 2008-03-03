@@ -282,7 +282,6 @@ dnl   AC_CHECK_LIB(python{PyVERSION}, set_python_path, [echo "The ganglia python
 fi
 
 AM_CONDITIONAL(USE_DYNAMIC_APR, test x$libapr = xyes)
-AM_CONDITIONAL(USE_DYNAMIC_EXPAT, test x$libexpat = xyes)
 
 if test x"$enable_static_build" = xno ; then
 
