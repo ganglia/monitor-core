@@ -643,7 +643,8 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
 
       spoof_info_len = strlen(metric_id->host);
       buff = malloc(spoof_info_len+1);
-      strcpy(buff,metric_id->host);
+      strncpy(buff, metric_id->host, spoof_info_len);
+      buff[spoof_info_len + 1] = '\0';
       spoofIP = buff;
       if( !(spoofName = strchr(buff+1,':')) ){
           err_msg("Incorrect format for spoof argument. exiting.\n");
