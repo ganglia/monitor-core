@@ -69,10 +69,8 @@ typedef enum
       METRICS_TAG,
       SUM_TAG,
       NUM_TAG,
-      DESC_TAG,
-      TITLE_TAG,
-      GROUP_TAG,
-      EXTRA_DATA_TAG
+      EXTRA_DATA_TAG,
+      EXTRA_ELEMENT_TAG
    }
 xml_tag_t;
 
@@ -206,6 +204,8 @@ typedef struct
 Host_t;
 
 
+#define MAX_EXTRA_ELEMENTS  32
+
 /* sacerdoti: Since we don't know the length of the string fields,
  * we place them sequentially in the strings buffer. The
  * order of strings in the buffer is usually:
@@ -231,10 +231,10 @@ typedef struct
       uint32_t dmax;
       short int slope;
       short int source;
-      short int desc;
-      short int title;
-      short int groupslen;
-      short int groups[16];
+      short int ednameslen;
+      short int edvalueslen;
+      short int ednames[MAX_EXTRA_ELEMENTS];
+      short int edvalues[MAX_EXTRA_ELEMENTS];
       short int stringslen;
       char strings[GMETAD_FRAMESIZE];
    }

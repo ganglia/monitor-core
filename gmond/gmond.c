@@ -643,8 +643,7 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
 
       spoof_info_len = strlen(metric_id->host);
       buff = malloc(spoof_info_len+1);
-      strncpy(buff, metric_id->host, spoof_info_len);
-      buff[spoof_info_len + 1] = '\0';
+      strcpy(buff,metric_id->host);
       spoofIP = buff;
       if( !(spoofName = strchr(buff+1,':')) ){
           err_msg("Incorrect format for spoof argument. exiting.\n");
@@ -1405,13 +1404,17 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
   if (ret == APR_SUCCESS) 
     {
       int extra_len = data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len;
+	  len = apr_snprintf(metricxml, 1024, "<EXTRA_DATA>\n");
+	  apr_socket_send(client, metricxml, &len);
       for (; extra_len > 0; extra_len--) 
         {
-          len = apr_snprintf(metricxml, 1024, "<EXTRA_DATA %s=\"%s\"/>\n", 
+          len = apr_snprintf(metricxml, 1024, "<EXTRA_ELEMENT NAME=\"%s\" VAL=\"%s\"/>\n", 
                  data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[extra_len-1].name,
                  data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[extra_len-1].data);
           apr_socket_send(client, metricxml, &len);
         }
+	  len = apr_snprintf(metricxml, 1024, "</EXTRA_DATA>\n");
+	  apr_socket_send(client, metricxml, &len);
     }
   /* Send the closing tag */
   len = apr_snprintf(metricxml, 1024, "</METRIC>\n");
@@ -2217,9 +2220,7 @@ print_metric_list( void )
             {
               if (strcasecmp(cb->name,  metric_info[i].name) == 0) 
                 {
-                  snprintf (modular_desc, sizeof(modular_desc),
-                    "%s (module %s)",
-                    metric_info[i].desc, cb->modp->module_name);
+                  sprintf (modular_desc, "%s (module %s)", metric_info[i].desc, cb->modp->module_name);
                   desc = (char*)modular_desc;
                   break;
                 }
