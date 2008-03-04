@@ -205,11 +205,13 @@ void update_ifdata ( char *caller )
 		     p++;
 		  }
 
-	       p = index(p, ':')+1;
-	       if ( ((*(p-2) != 'o') && (*(p-3) != 'l')) && 
-		    ((*(p-3) != 'd') && (*(p-4) != 'n') && 
-		     (*(p-5) != 'o') && (*(p-6) != 'b')) )
+	       p = index(p, ':');
+
+	       /* Ignore 'lo' and 'bond*' interfaces (but sanely) */
+	       if (p && strncmp (src, "lo", 2) &&
+		   strncmp (src, "bond", 4))
 		  { 
+		     p++;
 		     /* Check for data from the last read for this */
 		     /* interface.  If nothing exists, add to the table. */
 		     net_dev_stats *ns = hash_lookup(src, n); 
