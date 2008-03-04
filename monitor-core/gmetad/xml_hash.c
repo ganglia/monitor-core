@@ -1,14 +1,14 @@
-/* C code produced by gperf version 3.0.1 */
+/* C code produced by gperf version 3.0.2 */
 /* Command-line: gperf -l -H xml_hash -t -F ', 0' -N in_xml_list -k '1,$' -W xml_tags ./xml_hash.gperf  */
 /* $Id$ */
 #include <gmetad.h>
 
-#define TOTAL_KEYWORDS 34
+#define TOTAL_KEYWORDS 32
 #define MIN_WORD_LENGTH 2
 #define MAX_WORD_LENGTH 13
 #define MIN_HASH_VALUE 3
-#define MAX_HASH_VALUE 55
-/* maximum key range = 53, duplicates = 0 */
+#define MAX_HASH_VALUE 44
+/* maximum key range = 42, duplicates = 0 */
 
 #ifdef __GNUC__
 __inline
@@ -24,32 +24,32 @@ xml_hash (str, len)
 {
   static unsigned char asso_values[] =
     {
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56,  0, 56,  5, 15,  0,
-      56,  0, 35, 15, 56, 56,  0, 20, 10,  5,
-      30, 56, 20, 15,  0,  5,  0, 56, 30, 35,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56, 56, 56, 56, 56,
-      56, 56, 56, 56, 56, 56
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45,  5, 45,  0, 15,  0,
+      45,  0, 30, 10, 45, 45,  0, 20, 10,  0,
+      25, 45, 15,  0,  0,  5,  0, 45, 20, 30,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45, 45, 45, 45, 45,
+      45, 45, 45, 45, 45, 45
     };
   return len + asso_values[(unsigned char)str[len - 1]] + asso_values[(unsigned char)str[0]];
 }
@@ -64,58 +64,52 @@ in_xml_list (str, len)
 {
   static unsigned char lengthtable[] =
     {
-       0,  0,  0,  3,  4,  5,  0,  7,  3,  9, 10, 11,  2,  0,
-       4,  0,  0,  7,  8,  4,  5,  6,  0,  0,  4,  5,  0,  0,
-      13,  4,  5,  6,  7,  3,  4,  5,  0,  2,  3,  4,  0,  0,
-       7,  8,  9,  0,  0,  2,  0,  4,  0,  0,  0,  0,  0,  5
+       0,  0,  0,  3,  4,  5,  6,  7,  3,  9,  5, 11,  2, 13,
+       4, 10,  0,  7,  8,  4,  5,  0,  7,  3,  4,  0,  6,  7,
+      13,  4,  0,  0,  2,  3,  4,  5,  0,  2,  8,  4,  0,  0,
+       0,  0,  9
     };
   static struct xml_tag xml_tags[] =
     {
       {"", 0}, {"", 0}, {"", 0},
       {"VAL", VAL_TAG},
       {"TYPE", TYPE_TAG},
-      {"TITLE", TITLE_TAG,},
-      {"", 0},
+      {"SLOPE", SLOPE_TAG},
+      {"SOURCE", SOURCE_TAG},
       {"LATLONG", LATLONG_TAG,},
       {"URL", URL_TAG,},
       {"LOCALTIME", LOCALTIME_TAG},
-      {"EXTRA_DATA", EXTRA_DATA_TAG},
+      {"UNITS", UNITS_TAG},
       {"GANGLIA_XML", GANGLIA_XML_TAG},
       {"TN", TN_TAG},
-      {"", 0},
+      {"EXTRA_ELEMENT", EXTRA_ELEMENT_TAG},
       {"NAME", NAME_TAG},
-      {"", 0}, {"", 0},
+      {"EXTRA_DATA", EXTRA_DATA_TAG},
+      {"", 0},
       {"VERSION", VERSION_TAG},
       {"LOCATION", LOCATION_TAG},
       {"GRID", GRID_TAG},
-      {"SLOPE", SLOPE_TAG},
-      {"SOURCE", SOURCE_TAG},
-      {"", 0}, {"", 0},
-      {"DESC", DESC_TAG,},
-      {"UNITS", UNITS_TAG},
-      {"", 0}, {"", 0},
+      {"OWNER", OWNER_TAG,},
+      {"", 0},
+      {"CLUSTER", CLUSTER_TAG},
+      {"SUM", SUM_TAG,},
+      {"TMAX", TMAX_TAG},
+      {"", 0},
+      {"METRIC", METRIC_TAG},
+      {"METRICS", METRICS_TAG},
       {"GMOND_STARTED", STARTED_TAG},
       {"DOWN", DOWN_TAG,},
-      {"OWNER", OWNER_TAG,},
-      {"METRIC", METRIC_TAG},
-      {"CLUSTER", CLUSTER_TAG},
-      {"NUM", NUM_TAG,},
-      {"TMAX", TMAX_TAG},
-      {"GROUP", GROUP_TAG},
-      {"", 0},
+      {"", 0}, {"", 0},
       {"UP", UP_TAG,},
-      {"SUM", SUM_TAG,},
+      {"NUM", NUM_TAG,},
       {"HOST", HOST_TAG},
-      {"", 0}, {"", 0},
-      {"METRICS", METRICS_TAG},
-      {"REPORTED", REPORTED_TAG},
-      {"AUTHORITY", AUTHORITY_TAG},
-      {"", 0}, {"", 0},
-      {"IP", IP_TAG},
+      {"HOSTS", HOSTS_TAG,},
       {"", 0},
+      {"IP", IP_TAG},
+      {"REPORTED", REPORTED_TAG},
       {"DMAX", DMAX_TAG},
-      {"", 0}, {"", 0}, {"", 0}, {"", 0}, {"", 0},
-      {"HOSTS", HOSTS_TAG,}
+      {"", 0}, {"", 0}, {"", 0}, {"", 0},
+      {"AUTHORITY", AUTHORITY_TAG}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
