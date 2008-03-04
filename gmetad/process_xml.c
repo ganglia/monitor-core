@@ -715,68 +715,93 @@ startElement_METRIC(void *data, const char *el, const char **attr)
 static int
 startElement_EXTRA_DATA(void *data, const char *el, const char **attr)
 {
-   xmldata_t *xmldata = (xmldata_t *)data;
-   int edge;
-   struct xml_tag *xt;
-   int i;
-   Metric_t metric;
-   char *name = getfield(xmldata->metric.strings, xmldata->metric.name);
-   datum_t *rdatum;
-   datum_t hashkey, hashval;
-   datum_t *hash_datum = NULL;
-
-   if (!xmldata->host_alive) return 0;
-
-   hashkey.data = (void*) name;
-   hashkey.size =  strlen(name) + 1;
-
-   hash_datum = hash_lookup (&hashkey, xmldata->host.metrics);
-   if (!hash_datum) return 0;
-
-   memcpy(&metric, hash_datum->data, hash_datum->size);
-   datum_free(hash_datum);
-   edge = metric.stringslen;
-
-   /* Get name for hash key, and val/type for summaries. */
-   for(i = 0; attr[i]; i+=2)
-      {
-         xt = in_xml_list(attr[i], strlen(attr[i]));
-         if (!xt) continue;
-
-         switch (xt->tag)
-            {
-               case DESC_TAG:
-                  metric.desc = addstring(metric.strings, &edge, attr[i+1]);
-                  break;
-               case TITLE_TAG:
-                  metric.title = addstring(metric.strings, &edge, attr[i+1]);
-                  break;
-               case GROUP_TAG:
-                  metric.groups[metric.groupslen++] = addstring(metric.strings, &edge, attr[i+1]);
-                  break;
-               default:
-                  break;
-            }
-         metric.stringslen = edge;
-
-         hashkey.data = (void*)name;
-         hashkey.size =  strlen(name) + 1;
-
-         /* Trim metric structure to the correct length. */
-         hashval.size = sizeof(metric) - GMETAD_FRAMESIZE + metric.stringslen;
-         hashval.data = (void*) &metric;
-
-         /* Update full metric in cluster host table. */
-         rdatum = hash_insert(&hashkey, &hashval, xmldata->host.metrics);
-         if (!rdatum)
-            {
-               err_msg("Could not insert %s metric", name);
-            }
-      }
-
    return 0;
 }
 
+/* XXX - There is an issue which will cause a failure if there are more than 16
+  EXTRA_ELEMENTs.  This is a problem with the size of the data structure that
+  is used to hold the metric information.
+*/
+static int
+startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
+{
+    xmldata_t *xmldata = (xmldata_t *)data;
+    int edge;
+    struct xml_tag *xt;
+    int i, name_off, value_off;
+    Metric_t metric;
+    char *name = getfield(xmldata->metric.strings, xmldata->metric.name);
+    datum_t *rdatum;
+    datum_t hashkey, hashval;
+    datum_t *hash_datum = NULL;
+    
+    if (!xmldata->host_alive) 
+        return 0;
+    
+    /* Check to make sure that we don't try to add more
+        extra elements than the array can handle.
+    */  
+    if (metric.ednameslen >= MAX_EXTRA_ELEMENTS) 
+    {
+        debug_msg("Can not add more extra elements for [%s].  Capacity of %d reached[%s].",
+                  name, MAX_EXTRA_ELEMENTS);
+        return 0;
+    }
+
+    hashkey.data = (void*) name;
+    hashkey.size =  strlen(name) + 1;
+    
+    hash_datum = hash_lookup (&hashkey, xmldata->host.metrics);
+    if (!hash_datum) 
+        return 0;
+    
+    memcpy(&metric, hash_datum->data, hash_datum->size);
+    datum_free(hash_datum);
+    edge = metric.stringslen;
+    
+    name_off = value_off = -1;
+    for(i = 0; attr[i]; i+=2)
+    {
+        xt = in_xml_list(attr[i], strlen(attr[i]));
+        if (!xt) 
+            continue;
+        switch (xt->tag)
+        {
+        case NAME_TAG:
+            name_off = i;
+            break;
+        case VAL_TAG:
+            value_off = i;
+            break;
+        default:
+            break;
+        }
+    }
+    
+    if ((name_off >= 0) && (value_off >= 0)) 
+    {
+        metric.ednames[metric.ednameslen++] = addstring(metric.strings, &edge, attr[name_off+1]);
+        metric.edvalues[metric.edvalueslen++] = addstring(metric.strings, &edge, attr[value_off+1]);
+    
+        metric.stringslen = edge;
+    
+        hashkey.data = (void*)name;
+        hashkey.size =  strlen(name) + 1;
+    
+        /* Trim metric structure to the correct length. */
+        hashval.size = sizeof(metric) - GMETAD_FRAMESIZE + metric.stringslen;
+        hashval.data = (void*) &metric;
+    
+        /* Update full metric in cluster host table. */
+        rdatum = hash_insert(&hashkey, &hashval, xmldata->host.metrics);
+        if (!rdatum)
+        {
+            err_msg("Could not insert %s metric", name);
+        }
+    }
+    
+    return 0;
+}
 
 static int
 startElement_METRICS(void *data, const char *el, const char **attr)
@@ -953,6 +978,10 @@ start (void *data, const char *el, const char **attr)
          case EXTRA_DATA_TAG:
             rc = startElement_EXTRA_DATA(data, el, attr);
             break;
+
+		 case EXTRA_ELEMENT_TAG:
+			rc = startElement_EXTRA_ELEMENT(data, el, attr);
+			break;
     
          default:
             break;

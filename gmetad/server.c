@@ -130,22 +130,17 @@ metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
       metric->tmax, metric->dmax, getfield(metric->strings, metric->slope),
       getfield(metric->strings, metric->source));
 
-   for (i=0; !rc && i<metric->groupslen; i++) 
+   rc = xml_print(client, "<EXTRA_DATA>\n");
+
+   for (i=0; !rc && i<metric->ednameslen; i++) 
      {
-       rc=xml_print(client, "<EXTRA_DATA GROUP=\"%s\"/>\n",
-                    getfield(metric->strings, metric->groups[i]));
+       rc=xml_print(client, "<EXTRA_ELEMENT NAME=\"%s\" VAL=\"%s\"/>\n",
+                    getfield(metric->strings, metric->ednames[i]),
+                    getfield(metric->strings, metric->edvalues[i]));
      }
 
-   if (!rc && metric->desc) 
-       rc=xml_print(client, "<EXTRA_DATA DESC=\"%s\"/>\n",
-                    getfield(metric->strings, metric->desc));
-
-   if (!rc && metric->title) 
-       rc=xml_print(client, "<EXTRA_DATA TITLE=\"%s\"/>\n",
-                    getfield(metric->strings, metric->title));
-      
-   if (!rc) 
-       rc=xml_print(client, "</METRIC>\n");
+   rc = xml_print(client, "</EXTRA_DATA>\n");
+   rc=xml_print(client, "</METRIC>\n");
 
    return rc;
 }
