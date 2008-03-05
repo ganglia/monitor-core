@@ -639,9 +639,9 @@ g_val_t
 cpu_aidle_func ( void )
 {
    g_val_t val;
-   
-   val.f = 0;
-   
+
+   val.f = 0.0;
+
    return val;
 }
 
@@ -651,8 +651,8 @@ cpu_wio_func ( void )
 {
    g_val_t val;
  
-   val.f = 0.;
-  
+   val.f = 0.0;
+
    return val;
 }
 
@@ -661,9 +661,9 @@ g_val_t
 cpu_intr_func ( void )
 {
    g_val_t val;
-   
+
    val.f = 0.0;
-   
+
    return val;
 }
 
@@ -674,45 +674,40 @@ cpu_sintr_func ( void )
    g_val_t val;
 
    val.f = 0.0;
-   
+
    return val;
 }
 
+/* FIXME? */
 g_val_t
 load_one_func ( void )
 {
    g_val_t val;
 
-   val.f = strtod( update_file(&proc_loadavg), (char **)NULL);
+   val.f = 0.0;
 
    return val;
 }
 
+/* FIXME? */
 g_val_t
 load_five_func ( void )
 {
-   char *p;
    g_val_t val;
 
-   p = update_file(&proc_loadavg);
-   p = skip_token(p);
-   val.f = strtod( p, (char **)NULL);
+   val.f = 0.0;
  
    return val;
 }
 
+/* FIXME? */
 g_val_t
 load_fifteen_func ( void )
 {
-   char *p;
    g_val_t val;
 
-   p = update_file(&proc_loadavg);
+   val.f = 0.0;
  
-   p = skip_token(p);
-   p = skip_token(p);
-   val.f = strtod( p, (char **)NULL);
-
    return val;
 }
 
