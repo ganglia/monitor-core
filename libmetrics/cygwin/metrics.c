@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <iphlpapi.h>
 #include <sys/types.h>
+#include <sys/utsname.h>
 #include <sys/timeb.h>
 #include <mntent.h>
 #include <sys/vfs.h>
@@ -30,7 +31,7 @@
 #define BUFFSIZE 8192
 #endif
 char proc_cpuinfo[BUFFSIZE];
-char proc_sys_kernel_osrelease[BUFFSIZE];
+char proc_sys_kernel_osrelease[MAX_G_STRING_SIZE];
 
 typedef struct {
   uint32_t last_read;
@@ -147,18 +148,19 @@ num_cpustates_func ( void )
 g_val_t
 metric_init(void)
 {
+   struct utsname u;
    g_val_t rval;
 
    num_cpustates = num_cpustates_func();
 
    rval.int32 = slurpfile("/proc/cpuinfo", proc_cpuinfo, BUFFSIZE);
-   if ( rval.int32 == SYNAPSE_FAILURE )
-      {
+   if ( rval.int32 == SYNAPSE_FAILURE ) {
          err_msg("metric_init() got an error from slurpfile() /proc/cpuinfo");
          return rval;
-      }  
+   }  
 
-   strcpy( proc_sys_kernel_osrelease, "cygwin" );
+   uname(&u);
+   strncpy(proc_sys_kernel_osrelease, u.release, MAX_G_STRING_SIZE);
 
    rval.int32 = SYNAPSE_SUCCESS;
    return rval;
@@ -456,7 +458,9 @@ g_val_t
 os_release_func ( void )
 {
    g_val_t val;
+
    snprintf(val.str, MAX_G_STRING_SIZE, "%s", proc_sys_kernel_osrelease);
+
    return val;
 }
 
