@@ -479,8 +479,7 @@ unsigned long
 total_jiffies_func ( void )
 {
    char *p;
-   unsigned long user_jiffies, nice_jiffies, system_jiffies, idle_jiffies,
-                 wio_jiffies, irq_jiffies, sirq_jiffies;
+   unsigned long user_jiffies, nice_jiffies, system_jiffies, idle_jiffies;
 
    p = update_file(&proc_stat);
    p = skip_token(p);
@@ -493,20 +492,8 @@ total_jiffies_func ( void )
    p = skip_whitespace(p);
    idle_jiffies = strtod( p , &p );
 
-   if(num_cpustates == NUM_CPUSTATES_24X)
-     return user_jiffies + nice_jiffies + system_jiffies + idle_jiffies;
-
-   p = skip_whitespace(p);
-   wio_jiffies = strtod( p , &p );
-   p = skip_whitespace(p);
-   irq_jiffies = strtod( p , &p );
-   p = skip_whitespace(p);
-   sirq_jiffies = strtod( p , &p );
-  
-   return user_jiffies + nice_jiffies + system_jiffies + idle_jiffies +
-          wio_jiffies + irq_jiffies + sirq_jiffies; 
+   return user_jiffies + nice_jiffies + system_jiffies + idle_jiffies;
 }   
-
 
 g_val_t
 cpu_user_func ( void )
