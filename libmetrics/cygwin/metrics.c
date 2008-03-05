@@ -161,7 +161,7 @@ metric_init(void)
    if (uname(&u) == -1) {
       strncpy(sys_osname, "unknown", MAX_G_STRING_SIZE);
       strncpy(sys_osrelease, "unknown", MAX_G_STRING_SIZE);
-   } slse {
+   } else {
       strncpy(sys_osname, u.sysname, MAX_G_STRING_SIZE);
       sys_osname[MAX_G_STRING_SIZE - 1] = '\0';
       strncpy(sys_osrelease, u.release, MAX_G_STRING_SIZE);
