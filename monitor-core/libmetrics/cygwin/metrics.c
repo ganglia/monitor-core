@@ -23,14 +23,13 @@
 #undef max
 #include "interface.h"
 
-#define OSNAME "Cygwin"
-#define OSNAME_LEN strlen(OSNAME)
-
 /* Never changes */
 #ifndef BUFFSIZE
 #define BUFFSIZE 8192
 #endif
 char proc_cpuinfo[BUFFSIZE];
+
+char sys_osname[MAX_G_STRING_SIZE];
 char proc_sys_kernel_osrelease[MAX_G_STRING_SIZE];
 
 typedef struct {
@@ -160,6 +159,7 @@ metric_init(void)
    }  
 
    uname(&u);
+   strncpy(sys_osname, u.sysname, MAX_G_STRING_SIZE);
    strncpy(proc_sys_kernel_osrelease, u.release, MAX_G_STRING_SIZE);
 
    rval.int32 = SYNAPSE_SUCCESS;
@@ -450,7 +450,9 @@ g_val_t
 os_name_func ( void )
 {
    g_val_t val;
-   snprintf(val.str, MAX_G_STRING_SIZE, "Cygwin");
+
+   snprintf(val.str, MAX_G_STRING_SIZE, "%s", sys_osname);
+
    return val;
 }
 
