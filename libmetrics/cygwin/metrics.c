@@ -492,7 +492,7 @@ total_jiffies_func ( void )
    p = skip_whitespace(p);
    idle_jiffies = strtod( p , &p );
 
-   return user_jiffies + nice_jiffies + system_jiffies + idle_jiffies;
+   return (user_jiffies + nice_jiffies + system_jiffies + idle_jiffies);
 }   
 
 g_val_t
@@ -634,148 +634,46 @@ cpu_idle_func ( void )
    return val;
 }
 
+/* FIXME? */
 g_val_t 
 cpu_aidle_func ( void )
 {
-   char *p;
    g_val_t val;
-   double idle_jiffies, total_jiffies;
    
-   p = update_file(&proc_stat);
-
-   p = skip_token(p);
-   p = skip_token(p);
-   p = skip_token(p);
-   p = skip_token(p);
-   idle_jiffies  = strtod( p , (char **)NULL );
-   total_jiffies = total_jiffies_func();
+   val.f = 0;
    
-   val.f = (idle_jiffies/total_jiffies)*100;
    return val;
 }
 
+/* FIXME? */
 g_val_t 
 cpu_wio_func ( void )
 {
-   char *p;
-   static g_val_t val;
-   static int stamp;
-   static double last_wio_jiffies,  wio_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
+   g_val_t val;
  
-   if (num_cpustates == NUM_CPUSTATES_24X) {
-     val.f = 0.;
-     return val;
-     }
-
-   p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
-     stamp = proc_stat.last_read;
-     
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     wio_jiffies  = strtod( p , (char **)NULL );
-     total_jiffies = total_jiffies_func();
-     
-     diff = wio_jiffies - last_wio_jiffies;
-     
-     if ( diff ) 
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
-     else
-       val.f = 0.0;
-     
-     last_wio_jiffies  = wio_jiffies;
-     last_total_jiffies = total_jiffies;
-     
-   }
-   
+   val.f = 0.;
+  
    return val;
 }
 
+/* FIXME? */
 g_val_t 
 cpu_intr_func ( void )
 {
-   char *p;
-   static g_val_t val;
-   static int stamp;
-   static double last_intr_jiffies,  intr_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
- 
-   if (num_cpustates == NUM_CPUSTATES_24X) {
-     val.f = 0.;
-     return val;
-     }
-
-   p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
-     stamp = proc_stat.last_read;
-     
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     intr_jiffies  = strtod( p , (char **)NULL );
-     total_jiffies = total_jiffies_func();
-     
-     diff = intr_jiffies - last_intr_jiffies;
-     
-     if ( diff ) 
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
-     else
-       val.f = 0.0;
-     
-     last_intr_jiffies  = intr_jiffies;
-     last_total_jiffies = total_jiffies;
-     
-   }
+   g_val_t val;
+   
+   val.f = 0.0;
    
    return val;
 }
 
+/* FIXME? */
 g_val_t 
 cpu_sintr_func ( void )
 {
-   char *p;
-   static g_val_t val;
-   static int stamp;
-   static double last_sintr_jiffies,  sintr_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
- 
-   if (num_cpustates == NUM_CPUSTATES_24X) {
-     val.f = 0.;
-     return val;
-     }
+   g_val_t val;
 
-   p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
-     stamp = proc_stat.last_read;
-     
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     p = skip_token(p);
-     sintr_jiffies  = strtod( p , (char **)NULL );
-     total_jiffies = total_jiffies_func();
-     
-     diff = sintr_jiffies - last_sintr_jiffies;
-     
-     if ( diff ) 
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
-     else
-       val.f = 0.0;
-     
-     last_sintr_jiffies  = sintr_jiffies;
-     last_total_jiffies = total_jiffies;
-     
-   }
+   val.f = 0.0;
    
    return val;
 }
