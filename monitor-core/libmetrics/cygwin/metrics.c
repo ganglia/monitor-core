@@ -30,7 +30,7 @@
 char proc_cpuinfo[BUFFSIZE];
 
 char sys_osname[MAX_G_STRING_SIZE];
-char proc_sys_kernel_osrelease[MAX_G_STRING_SIZE];
+char sys_osrelease[MAX_G_STRING_SIZE];
 
 typedef struct {
   uint32_t last_read;
@@ -158,9 +158,15 @@ metric_init(void)
          return rval;
    }  
 
-   uname(&u);
-   strncpy(sys_osname, u.sysname, MAX_G_STRING_SIZE);
-   strncpy(proc_sys_kernel_osrelease, u.release, MAX_G_STRING_SIZE);
+   if (uname(&u) == -1) {
+      strncpy(sys_osname, "unknown", MAX_G_STRING_SIZE);
+      strncpy(sys_osrelease, "unknown", MAX_G_STRING_SIZE);
+   } slse {
+      strncpy(sys_osname, u.sysname, MAX_G_STRING_SIZE);
+      sys_osname[MAX_G_STRING_SIZE - 1] = '\0';
+      strncpy(sys_osrelease, u.release, MAX_G_STRING_SIZE);
+      sys_osrelease[MAX_G_STRING_SIZE - 1] = '\0';
+   }
 
    rval.int32 = SYNAPSE_SUCCESS;
    return rval;
@@ -461,11 +467,10 @@ os_release_func ( void )
 {
    g_val_t val;
 
-   snprintf(val.str, MAX_G_STRING_SIZE, "%s", proc_sys_kernel_osrelease);
+   snprintf(val.str, MAX_G_STRING_SIZE, "%s", sys_osrelease);
 
    return val;
 }
-
 
 /*
  * A helper function to return the total number of cpu jiffies
