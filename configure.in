@@ -327,7 +327,7 @@ if test x"$enable_static_build" = xno ; then
   fi
   echo
 
-  modpathstart = ""
+  modpathstart=""
 fi
 
 echo
