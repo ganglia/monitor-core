@@ -16,32 +16,32 @@ svn to checkout the source code.
 
 CheckOut the source files of Ganglia in the Cygwin command console: 
 
-svn co https://ganglia.svn.sourceforge.net/svnroot/ganglia/trunk/monitor-core ganglia
+  svn co http://ganglia.svn.sourceforge.net/svnroot/ganglia/trunk/monitor-core ganglia
 
-Go to the ganglia directory and type the following commands.
+Go to the ganglia directory and type the following commands:
 
-aclocal
-autoheader
-automake --add-missing
-autoconf
+  aclocal
+  autoheader
+  automake --add-missing
+  autoconf
 
 The steps above generate the configure file.
 
 Go to libmetrics directory and type the following commands
 
-aclocal
-autoheader
-automake
-autoconf
+  aclocal
+  autoheader
+  automake --add-missing
+  autoconf
 
 The steps above generates the configure file for libmetrics.
 
 Download the APR project from http://apr.apache.org/download.cgi. Build 
 the project with the following commands.
 
-./configure
-make
-make install - this command installs APR in the /usr/local directory.
+  ./configure
+  make
+  make install - this command installs APR in the /usr/local directory.
 
 There is a older version of APR project in the srclib directory. Building 
 APR from the srclib would not work. 
