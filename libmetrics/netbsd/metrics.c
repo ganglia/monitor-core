@@ -3,6 +3,9 @@
  *  by Jan Schaumann <jschauma@netbsd.org>
  *  Thu Feb  3 22:33:36 EST 2005
  *
+ *  Tested on NetBSD 3.1 (amd64 and i386)
+ *  Tested on NetBSD 3.0 (i386)
+ *  Tested on NetBSD 2.0.2 (i386)
  */
 
 #include <kvm.h>
@@ -34,6 +37,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <paths.h>
+#include <stdlib.h>
 
 #include "interface.h"
 #include "libmetrics.h"
@@ -924,7 +928,7 @@ find_disk_space(double *total, double *tot_avail)
 	*total = 0.0;
 	*tot_avail = 0.0;
 
-	fstype = "ufs";
+	fstype = "ffs";
 
 	netvfslist = makenetvfslist();
 	vfslist = makevfslist(netvfslist);
@@ -933,7 +937,8 @@ find_disk_space(double *total, double *tot_avail)
 	mntsize = getmntinfo(&mntbuf, MNT_NOWAIT);
 	mntsize = regetmntinfo(&mntbuf, mntsize, vfslist);
 	for (i = 0; i < mntsize; i++) {
-		if ((mntbuf[i].f_flags & MNT_IGNORE) == 0) {
+		if (((mntbuf[i].f_flags & MNT_IGNORE) == 0) && 
+		    (strcmp(mntbuf[i].f_fstypename, fstype) == 0)) {
 			used = mntbuf[i].f_blocks - mntbuf[i].f_bfree;
 			availblks = mntbuf[i].f_bavail + used;
 			pct = (availblks == 0 ? 100.0 :

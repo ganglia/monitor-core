@@ -10,11 +10,16 @@ void libmetrics_init( void );
 #define SYNAPSE_FAILURE -1
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <sys/types.h>
+#ifdef HAVE_RPC_RPC_H
 #include <rpc/rpc.h>
+#endif
 
-
-#ifdef  HAVE_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
