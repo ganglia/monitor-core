@@ -14,5 +14,3 @@ EXTRA_DIST = ../conf.d/modpython.conf
 INCLUDES = @APR_INCLUDES@ @PYTHON_INCLUDES@
 
 endif 
-
-

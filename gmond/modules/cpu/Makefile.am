@@ -23,5 +23,3 @@ EXTRA_DIST = ../conf.d/multicpu.conf
 INCLUDES = @APR_INCLUDES@
 
 endif
-
-

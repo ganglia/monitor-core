@@ -18,5 +18,3 @@ modsys_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
 INCLUDES = @APR_INCLUDES@
 
 endif
-
-
