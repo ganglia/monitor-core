@@ -12,7 +12,6 @@ AC_CANONICAL_HOST
 
 # Checks for programs.
 AC_PROG_CC
-AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
@@ -32,6 +31,8 @@ AC_HAVE_LIBRARY(nsl)
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h nlist.h paths.h stdlib.h strings.h sys/filsys.h sys/fs/s5param.h sys/mount.h sys/param.h sys/socket.h sys/statfs.h sys/statvfs.h sys/systeminfo.h sys/time.h sys/vfs.h unistd.h utmp.h sys/sockio.h])
+AC_CHECK_HEADERS([rpc/rpc.h],, 
+   [AC_MSG_ERROR([your system is missing the Sun RPC (ONC/RPC) libraries])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
@@ -74,7 +75,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_STAT
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([getmntinfo getpagesize gettimeofday memset pstat_getdynamic strchr strdup strndup strpbrk strstr strtol sysinfo uname])
+AC_CHECK_FUNCS([getmntinfo getpagesize gettimeofday memset pstat_getdynamic strchr strdup strndup strpbrk strstr strtol sysinfo uname vsnprintf strlcat])
 
 OS="unknown"
 case "$host" in

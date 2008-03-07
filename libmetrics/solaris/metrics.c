@@ -304,12 +304,12 @@ update_metric_data ( void )
  * stuff to match.
  */
 
-long percentages(int cnt, int *out, register unsigned long *new, register unsigned long *old, long unsigned *diffs)
+long percentages(int cnt, int *out, register unsigned long *new, register unsigned long *old, unsigned long *diffs)
 {
     register int i;
     register long change;
     register long total_change;
-    register long *dp;
+    register unsigned long *dp;
     long half_total;
 
     /* initialization */
@@ -952,6 +952,7 @@ cpu_user_func ( void )
    return val;
 }
 
+/* FIXME: ? */
 g_val_t
 cpu_nice_func ( void )
 {
@@ -979,6 +980,7 @@ cpu_idle_func ( void )
    return val;
 }
 
+/* FIXME: always 0? */
 g_val_t 
 cpu_wio_func ( void )
 {
