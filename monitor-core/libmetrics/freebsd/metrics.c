@@ -5,9 +5,14 @@
  *  Improved by Brooks Davis <brooks@one-eyed-alien.net>,
  *  Fixed libkvm code.
  *  Tue Jul 15 16:42:22 EST 2003
+ *  All bugs added by Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
  *
- * $Id: metrics.c 645 2006-04-14 20:16:06Z brooks_en_davis $
+ * Tested on FreeBSD 7 (amd64)
+ * Tested on FreeBSD 6.2 (amd64 and i386)
+ * Tested on FreeBSD 5.5 (i386)
+ *
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -190,7 +195,7 @@ cpu_speed_func ( void )
 	 curptr++;
    }
    freq = tmpfreq;
-   if (tmpfreq != 0)
+   if (freq != 0)
       goto done;
 
    /*
@@ -850,6 +855,7 @@ part_max_used_func( void )
  * at ftp://ftp.cs.berkeley.edu/pub/4bsd/README.Impt.License.Change.
  */
 
+/* FIXME: doesn't filter out devfs, bad reporting in amd64 */
 static float
 find_disk_space(double *total, double *tot_avail)
 {
