@@ -404,7 +404,7 @@ disk_free_func ( void )
    g_val_t val;
    
    perfstat_disk_total(NULL, &dinfo, sizeof(perfstat_disk_total_t), 1);
-   val.d = dinfo.free;
+   val.d = dinfo.free / 1024;
    return val;
 }
 
@@ -414,7 +414,7 @@ disk_total_func ( void )
 {
    g_val_t val;
    perfstat_disk_total(NULL, &dinfo, sizeof(perfstat_disk_total_t), 1);
-   val.d =dinfo.size ;
+   val.d =dinfo.size / 1024;
    return val;
 }
 
