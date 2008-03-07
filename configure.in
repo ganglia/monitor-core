@@ -301,7 +301,7 @@ if test x"$enable_static_build" = xno ; then
     AC_SUBST(APR_INCLUDES)
   fi
 
-  AC_CHECK_LIB(apr-1, apr_socket_send)
+  AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$APR_CONFIG --link-ld --libs`])
   if test $ac_cv_lib_apr_1_apr_socket_send = yes; then
     echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
     echo "Found a suitable libapr1 library"
