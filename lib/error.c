@@ -145,7 +145,11 @@ err_doit (int errnoflag, int level, const char *fmt, va_list ap)
    n = strlen (buf);
    if (errnoflag)
       snprintf (buf + n, sizeof (buf) - n, ": %s", strerror (errno_save));
+#ifdef HAVE_STRLCAT
+   strlcat (buf, "\n", MAXLINE);
+#else
    strcat (buf, "\n");
+#endif
 
    if (daemon_proc)
      {

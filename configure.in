@@ -115,7 +115,7 @@ dnl
 AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
 AC_DEFINE_UNQUOTED(ARCH, "$host_cpu", ARCH)
 AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
-AC_CYGWIN
+dnl AC_CYGWIN
 
 # Configuring the source in the ./srclib...
 nl='
@@ -351,7 +351,7 @@ AC_CHECK_LIB(rpc, xdr_string)
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, inet_addr)
 AC_CHECK_LIB(nsl, gethostbyaddr_r)
-AC_CHECK_LIB(resolv, inet_aton)
+AC_CHECK_FUNC(inet_aton, , [AC_CHECK_LIB(resolv, inet_aton)])
 AC_CHECK_LIB(kstat, kstat_open)
 AC_CHECK_LIB(kvm, kvm_open)
 AC_CHECK_LIB(odm, odm_initialize)
@@ -415,7 +415,7 @@ dnl ##################################################################
 dnl Checks for library functions.
 dnl
 dnl AC_FUNC_MEMCMP
-AC_CHECK_FUNCS([vsnprintf])
+AC_CHECK_FUNCS([snprintf vsnprintf strlcat])
 
 dnl ##################################################################
 dnl Check for function prototypes in headers.
