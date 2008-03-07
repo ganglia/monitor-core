@@ -373,6 +373,7 @@ mem_total_func ( void )
    return val;
 }
 
+/* FIXME?: should be using PERFORMANCE_INFORMATION.CommitLimit */
 g_val_t
 swap_total_func ( void )
 {
@@ -826,6 +827,7 @@ mem_cached_func ( void )
    return val;
 }
 
+/* FIXME: should be using PERFORMANCE_INFORMATION.CommitTotal */
 g_val_t
 swap_free_func ( void )
 {
