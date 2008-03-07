@@ -1,4 +1,3 @@
-
 if BUILD_PYTHON
 PYTHON_SUBDIR = python
 endif
@@ -11,4 +10,3 @@ STATUS_SUBDIR = status
 endif
 SUBDIRS = example cpu disk memory network system $(STATUS_SUBDIR) $(PYTHON_SUBDIR)
 endif
-
