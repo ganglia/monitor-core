@@ -10,19 +10,12 @@ void libmetrics_init( void );
 #define SYNAPSE_FAILURE -1
 #endif
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <sys/types.h>
-#ifdef HAVE_RPC_RPC_H
 #include <rpc/rpc.h>
-#endif
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-
 
 #ifdef AIX
   void *malloc(size_t size);
@@ -39,10 +32,6 @@ void libmetrics_init( void );
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-
-
-
-
 
 enum g_type_t {
    g_string,  /* huh uh.. he said g string */
