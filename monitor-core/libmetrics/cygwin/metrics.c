@@ -1,3 +1,10 @@
+/*
+ * This file contains all the metrics gathering code from Windows using cygwin
+ * or native Windows calls when possible.
+ * 
+ * Tested with cygwin 1.5.23-2 in Windows XP Home SP2 (i386)
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +19,7 @@
 #include <sys/timeb.h>
 #include <mntent.h>
 #include <sys/vfs.h>
+#include <psapi.h>
 
 /* From old ganglia 2.5.x... */
 #include "file.h"
@@ -40,7 +48,6 @@ typedef struct {
 } timely_file;
 
 timely_file proc_stat    = { 0, 1, "/proc/stat" };
-timely_file proc_loadavg = { 0, 5, "/proc/loadavg" };
 
 static time_t
 get_netbw(double *in_bytes, double *out_bytes,
@@ -711,39 +718,57 @@ load_fifteen_func ( void )
    return val;
 }
 
+#define MAXPROCESSES 1024
+
+/* FIXME */
 g_val_t
 proc_run_func( void )
 {
-   char *p;
+   DWORD aProcesses[MAXPROCESSES], cbNeeded, cProcesses;
+   unsigned int i, running = 0;
+   HANDLE hProcess;
+   BOOL bResult;
    g_val_t val;
 
-   p = update_file(&proc_loadavg);
-   p = skip_token(p);
-   p = skip_token(p);
-   p = skip_token(p);
-   val.uint32 = strtol( p, (char **)NULL, 10 );
+   if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded)) {
+      cProcesses = 0;
+   } else {
+      cProcesses = cbNeeded / sizeof(DWORD);
+   }
+#if (_WIN32_WINNT >= 0x0501)
+   /* Only for XP or newer */
+   for (i = 0; i < cProcesses; i++)
+      if (aProcesses[i] != 0) {
+         hProcess = OpenProcess (PROCESS_QUERY_INFORMATION, 
+            FALSE, aProcesses[i]);
+         if (hProcess != NULL) {
+            if (IsProcessInJob(hProcess, NULL, &bResult)) {
+               if (bResult)
+                  running++;
+            }
+            CloseHandle(hProcess);
+         }
+      }
+#endif
 
-   if(val.uint32)
-     val.uint32--;/* don't count ourselves? */ 
+   val.uint32 = running;
 
    return val;
 }
 
+/* FIXME */
 g_val_t
 proc_total_func ( void )
 {
-   char *p;
+   DWORD aProcesses[MAXPROCESSES], cbNeeded, cProcesses;   
    g_val_t val;
 
-   p = update_file(&proc_loadavg);
-   p = skip_token(p);
-   p = skip_token(p);
-   p = skip_token(p); 
-   p = skip_whitespace(p);
-   while ( isdigit(*p) )
-      p++;
-   p++;  /* skip the slash-/ */ 
-   val.uint32 = strtol( p, (char **)NULL, 10 ); 
+   if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded)) {
+      cProcesses = 0;
+   } else {
+      cProcesses = cbNeeded / sizeof(DWORD);
+   }
+   val.uint32 = cProcesses; 
 
    return val;
 }
