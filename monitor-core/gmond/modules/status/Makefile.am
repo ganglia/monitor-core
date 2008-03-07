@@ -14,4 +14,3 @@ EXTRA_DIST = ../conf.d/modgstatus.conf
 INCLUDES = @APR_INCLUDES@
 
 endif
-
