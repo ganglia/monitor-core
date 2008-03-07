@@ -1,5 +1,5 @@
 if BUILD_PYTHON
-pys := ./example/*.py ./disk/*.py ./network/*.py
+pys := $(wildcard */*.py)
 pycs := $(patsubst %.py, %.pyc, $(pys))
 
 $(pycs): %.pyc: %.py
