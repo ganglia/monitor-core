@@ -33,6 +33,7 @@
 #include <metric.h>
 #include <gm_mmn.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 #include "debug_msg.h"
