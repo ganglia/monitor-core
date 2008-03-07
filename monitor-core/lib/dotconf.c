@@ -1064,9 +1064,11 @@ int dotconf_handle_question_mark(command_t* cmd, char* path, char* pre, char* ex
 					}
 
 				}
-
+#ifdef HAVE_SNPRINTF
+				snprintf(new_path, new_path_len, "%s%s", path, dirptr->d_name);
+#else
 				sprintf(new_path,"%s%s",path,dirptr->d_name);
-
+#endif
 				if (access(new_path, R_OK))
 				{
 					dotconf_warning(cmd->configfile, DCLOG_WARNING, ERR_INCLUDE_ERROR,
@@ -1207,7 +1209,11 @@ int dotconf_handle_star(command_t* cmd, char* path, char* pre, char* ext)
 
 					strncpy(new_pre,dirptr->d_name,(sub_count+t_ext_count));
 					new_pre[sub_count+t_ext_count] = '\0';
+#ifdef HAVE_STRLCAT
+  					strlcat(new_pre,new_ext,CFG_MAX_FILENAME);
+#else
 					strcat(new_pre,new_ext);
+#endif
 
 					sprintf(new_path,"%s%s%s",path,new_pre,t_ext);
 
