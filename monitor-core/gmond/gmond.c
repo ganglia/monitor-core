@@ -260,7 +260,9 @@ setuid_if_necessary( void )
 {
   cfg_t *tmp;
   int setuid;
+#ifndef CYGWIN
   char *user;
+#endif
 
   tmp    = cfg_getsec( config_file, "globals");
   setuid = cfg_getbool( tmp, "setuid" );
