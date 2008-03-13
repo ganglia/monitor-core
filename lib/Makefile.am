@@ -2,7 +2,7 @@
 #.c.x: rpcgen $<
 
 if STATIC_BUILD
-GCFLAGS = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/apr/include/arch/unix/ -I$(top_builddir)/srclib/confuse/src
+GCFLAGS = 
 GLDADD =
 GLDFLAGS = -static
 else

@@ -2,9 +2,8 @@ SUBDIRS = gstat modules python_modules
 
 EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
 if STATIC_BUILD
-GCFLAGS = -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/confuse/src/
-GLDADD = $(top_builddir)/srclib/apr/libapr-0.la $(top_builddir)/srclib/confuse/src/libconfuse.la \
-	modules/disk/mod_disk.lo modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
+GCFLAGS = 
+GLDADD = modules/disk/mod_disk.lo modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
 	modules/memory/mod_mem.lo modules/network/mod_net.lo \
 	modules/system/mod_proc.lo modules/system/mod_sys.lo
 GLDFLAGS = -static -export-dynamic
@@ -35,7 +34,6 @@ gmond.conf.html: conf.pod
 
 #monitor.c server.c listen.c cleanup.c \
 #metric.h dtd.h 
-# Add -lintl??? for libconfuse on cygwin?
 gmond_LDADD   = $(top_builddir)/libmetrics/libmetrics.la \
 		$(top_builddir)/lib/libganglia.la \
 	        $(top_builddir)/lib/libgetopthelper.a \
