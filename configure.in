@@ -117,7 +117,6 @@ AC_DEFINE_UNQUOTED(ARCH, "$host_cpu", ARCH)
 AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
 dnl AC_CYGWIN
 
-# Configuring the source in the ./srclib...
 nl='
 '
 ganglia_popdir=`pwd`

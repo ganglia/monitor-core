@@ -6,22 +6,13 @@ else
 GMETAD_SUBDIR = 
 endif
 
-if STATIC_BUILD
-SRCLIB_SUBDIR = srclib
-EXTRA_SUBDIRS = "./$(SRCLIB_SUBDIR) ./web"
-EXTRA_DIST_FILES = 
-else
-SRCLIB_SUBDIR = 
 EXTRA_SUBDIRS = "./web"
-EXTRA_DIST_FILES = srclib/Makefile.am srclib/Makefile.in
+EXTRA_DIST_FILES = 
 INCLUDES = @APR_INCLUDES@
-endif
 
 AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-shar dist-zip
 
-# Make sure we run the srclib but don't distribute it.  That
-# is handled in the "dist-hook" below...
-GANGLIA_SUBDIRS = $(SRCLIB_SUBDIR) lib libmetrics tests $(GMETAD_SUBDIR) gmond gmetric
+GANGLIA_SUBDIRS = lib libmetrics tests $(GMETAD_SUBDIR) gmond gmetric
 SUBDIRS = $(GANGLIA_SUBDIRS)
 # Make sure that no matter the setting for --with-gmetad
 # that the gmetad directory gets distributed
@@ -54,11 +45,7 @@ CLEANFILES = ganglia.sub pod2htm*
 dist-local: README ganglia.html ChangeLog
 
 
-# We handle distributing the ./srclib directory here
-# since the packages in that directory might not
-# handle a "make dist" correctly
-#
-# We also go through and make sure all the files have
+# We go through and make sure all the files have
 # the same timestamp with the last command here...
 dist-hook:
 	for subdir in $(EXTRA_SUBDIRS); do \
@@ -78,16 +65,4 @@ dist-hook:
 	touch $(distdir)/Makefile.am
 	find $(distdir) -exec touch -r $(distdir)/Makefile.am {} \;
 
-if STATIC_BUILD
-#
-# Make sure distclean is done in the scrlib tree
-#
-distclean-local:
-	cd srclib &&  $(MAKE) $(AM_MAKEFLAGS) distclean
-	-rm -f configure ganglia.html ChangeLog README *.tar.gz aclocal.m4 Makefile.in config.h.in
-	-rm config/depcomp config/missing config/config.guess config/config.sub config/install-sh
-	-find . -name "autom4te.cache" -exec rm -rf {} \;
-	-find gmond gmetad gmetric lib tests libmetrics -name "Makefile.in" -exec rm -f {} \;
-#
-endif
 bin_SCRIPTS = ganglia-config
