@@ -1,6 +1,6 @@
 if STATIC_BUILD
-GCFLAGS = -I$(top_builddir)/srclib/apr/include/
-GLDADD = $(top_builddir)/srclib/apr/libapr-0.la $(top_builddir)/srclib/confuse/src/libconfuse.la
+GCFLAGS = 
+GLDADD = 
 GLDFLAGS = -static
 else
 GCFLAGS = -D_LARGEFILE64_SOURCE

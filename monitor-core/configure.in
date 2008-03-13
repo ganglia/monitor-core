@@ -139,16 +139,8 @@ echo $ac_n "${nl}Configuring libmetrics ...${nl}"
 cd libmetrics && ./configure --cache-file=$ganglia_popdir/config.cache
 cd $ganglia_popdir
 
+modpathstart=""
 if test x"$enable_static_build" = xyes ; then
-
-  echo $ac_n "${nl}Configuring apr ...${nl}"
-  cd srclib/apr && ./configure --cache-file=$ganglia_popdir/config.cache --prefix=$prefix
-  cd $ganglia_popdir
-
-  echo $ac_n "${nl}Configuring libconfuse ...${nl}"
-  cd srclib/confuse && ./configure --cache-file=$ganglia_popdir/config.cache --disable-nls --prefix=$prefix 
-  cd $ganglia_popdir
-
   modpathstart="#"
 fi
 
@@ -281,53 +273,46 @@ dnl   AC_CHECK_LIB(python{PyVERSION}, set_python_path, [echo "The ganglia python
    fi
 fi
 
-AM_CONDITIONAL(USE_DYNAMIC_APR, test x$libapr = xyes)
-
-if test x"$enable_static_build" = xno ; then
-
-  echo
-  echo Checking for apr
-  if test x"$libaprpath" != x && test x"$libaprpath" != xyes ; then
-    CFLAGS="$CFLAGS -I$libaprpath/include"
-    LDFLAGS="$LDFLAGS -L$libaprpath/lib"
-    echo "Added -I$libaprpath/include to CFLAGS"
-    echo "Added -I$libaprpath/lib to LDLAGS"
-  else
-    AC_PATH_PROG(APR_CONFIG, apr-1-config)
-    if test -z "$APR_CONFIG"; then
-      AC_MSG_ERROR(apr-1-config binary not found in path)
-    fi
-    APR_INCLUDES=`$APR_CONFIG --includes`
-    AC_SUBST(APR_INCLUDES)
+echo
+echo Checking for apr
+if test x"$libaprpath" != x && test x"$libaprpath" != xyes ; then
+  CFLAGS="$CFLAGS -I$libaprpath/include"
+  LDFLAGS="$LDFLAGS -L$libaprpath/lib"
+  echo "Added -I$libaprpath/include to CFLAGS"
+  echo "Added -I$libaprpath/lib to LDLAGS"
+  AC_CHECK_LIB(apr-1, apr_socket_send)
+else
+  AC_PATH_PROG(APR_CONFIG, apr-1-config)
+  if test -z "$APR_CONFIG"; then
+    AC_MSG_ERROR(apr-1-config binary not found in path)
   fi
-
+  APR_INCLUDES=`$APR_CONFIG --includes`
+  AC_SUBST(APR_INCLUDES)
   AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$APR_CONFIG --link-ld --libs`])
-  if test $ac_cv_lib_apr_1_apr_socket_send = yes; then
-    echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
-    echo "Found a suitable libapr1 library"
-  else
-    echo "libapr not found"
-    exit;
-  fi
+fi
 
-  echo
-  echo Checking for confuse
-  if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes ; then
-    CFLAGS="$CFLAGS -I$libconfusepath/include"
-    LDFLAGS="$LDFLAGS -L$libconfusepath/lib"
-    echo "Added -I$libconfusepath/include to CFLAGS"
-    echo "Added -L$libconfusepath/lib to LDLAGS"
-  fi
-  AC_CHECK_LIB(confuse, cfg_parse)
-  if test $ac_cv_lib_confuse_cfg_parse = yes; then
-    echo "Found a suitable Confuse library"
-  else
-    echo "libconfuse not found"
-    exit;
-  fi
-  echo
+if test $ac_cv_lib_apr_1_apr_socket_send = yes; then
+  echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
+  echo "Found a suitable libapr1 library"
+else
+  echo "libapr not found"
+  exit;
+fi
 
-  modpathstart=""
+echo
+echo Checking for confuse
+if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes ; then
+  CFLAGS="$CFLAGS -I$libconfusepath/include"
+  LDFLAGS="$LDFLAGS -L$libconfusepath/lib"
+  echo "Added -I$libconfusepath/include to CFLAGS"
+  echo "Added -L$libconfusepath/lib to LDLAGS"
+fi
+AC_CHECK_LIB(confuse, cfg_parse)
+if test $ac_cv_lib_confuse_cfg_parse = yes; then
+  echo "Found a suitable Confuse library"
+else
+  echo "libconfuse not found"
+  exit;
 fi
 
 echo

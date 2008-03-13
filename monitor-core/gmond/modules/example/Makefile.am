@@ -1,7 +1,6 @@
 AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/lib 
 
 if STATIC_BUILD
-AM_CFLAGS += -I$(top_builddir)/srclib/apr/include/ -I$(top_builddir)/srclib/confuse/src/
 noinst_LTLIBRARIES    = libmodexample.la
 libmodexample_la_SOURCES = mod_example.c 
 else
