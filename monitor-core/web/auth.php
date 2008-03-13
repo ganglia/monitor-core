@@ -30,7 +30,20 @@ function embarrassed ()
 #-------------------------------------------------------------------------------
 function authenticate()
 {
-   header("WWW-authenticate: basic realm=\"Ganglia Private Cluster\"");
+   global $clustername, $cluster;
+
+   $private_clusters = array_keys( embarrassed() );
+
+   if( in_array( $clustername, $private_clusters ) && ( $clustername == $cluster['NAME'] ) )
+   {
+      $auth_header	= "WWW-authenticate: basic realm=\"Ganglia Private Cluster: " . $clustername . "\"";
+   }
+   else
+   {
+      $auth_header	= "WWW-authenticate: basic realm=\"Ganglia Private Cluster\"";
+   }
+
+   header( $auth_header );
    header("HTTP/1.0 401 Unauthorized");
    #print "<HTML><HEAD><META HTTP-EQUIV=refresh CONTENT=1 URL=\"../?c=\"></HEAD>";
    print "<H1>You are unauthorized to view the details of this Cluster</H1>";
