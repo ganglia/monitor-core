@@ -11,7 +11,7 @@ Prerequisites
 ------------- 
 
 Latest version of Cygwin with the following packages: autoconf, automake, 
-bison, diffutils, flex, gcc, libtool, make, sharutils, sunrpc and
+bison, expat, diffutils, flex, gcc, libtool, make, sharutils, sunrpc and
 svn to checkout the source code.
 
 CheckOut the source files of Ganglia in the Cygwin command console: 
