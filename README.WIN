@@ -50,7 +50,7 @@ copy all the .h files from /usr/lib/apr/include/apr-1 to /usr/local/include
 cp /usr/local/apr/lib/libapr-1.a /usr/local/lib/
 cp /usr/local/apr/lib/libapr-1.la /usr/local/lib/
 
-Go to srclib/confuse and build the libconfuse library.
+Download libconfuse, build it and install the libconfuse library.
 ./configure
 make
 make install
