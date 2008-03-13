@@ -326,6 +326,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %{web_prefixdir}/ganglia.php
 %{web_prefixdir}/get_context.php
 %{web_prefixdir}/get_ganglia.php
+%{web_prefixdir}/graph.d
 %{web_prefixdir}/graph.php
 %{web_prefixdir}/grid_tree.php
 %{web_prefixdir}/header.php
@@ -349,6 +350,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Mar 13 2008 Jesse Becker <hawson@gmail.com>
+- Add web/graph.d directory and contents to %files.
 * Fri Feb 15 2008 Bernard Li <bernard@vanhpc.org>
 - Fix bug where .pyconf files are copied to %{libdir}/ganglia/python_modules
 - Enable tcpconn.py by default since code is now compatible with Python 2.3.x
