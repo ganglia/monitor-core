@@ -9,64 +9,52 @@ include_once "./functions.php";
 
 # Graph specific variables
 # ATD - No need for escapeshellcmd or rawurldecode on $size or $graph.  Not used directly in rrdtool calls.
-$size = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $graph_sizes_keys ) ?
-	$_GET["z"] : NULL;
+$size = isset($_GET["z"])  &&  in_array( $_GET[ 'z' ], $graph_sizes_keys ) 
+             ? $_GET["z"] 
+             : NULL;
+             
 # ATD - TODO, should encapsulate these custom graphs in some type of container, then this code could check list of defined containers for valid graph labels.
-$graph = isset($_GET["g"]) && in_array( $_GET['g'], array( 'cpu_report', 'mem_report', 'load_report', 'network_report', 'packet_report' ) ) ?
-	$_GET["g"] : NULL;
-$grid = isset($_GET["G"]) ?
-	escapeshellcmd( clean_string( rawurldecode( $_GET["G"] ) ) ) : NULL;
-$self = isset($_GET["me"]) ?
-	escapeshellcmd( clean_string( rawurldecode($_GET["me"] ) ) ) : NULL;
-$max = isset($_GET["x"]) ? 
-	clean_number( rawurldecode($_GET["x"] ) ) : NULL;
-$min = isset($_GET["n"]) ?
-	clean_number( rawurldecode($_GET["n"] ) ) : NULL;
-$value = isset($_GET["v"]) ?
-	clean_number( rawurldecode( $_GET["v"] ) ) : NULL;
-$load_color = isset($_GET["l"]) && is_valid_hex_color( rawurldecode( $_GET[ 'l' ] ) ) ?
-	escapeshellcmd( rawurldecode( $_GET["l"] ) ) : NULL;
-$vlabel = isset($_GET["vl"]) ?
-	escapeshellcmd( clean_string( rawurldecode( $_GET["vl"] ) ) ) : NULL;
-$sourcetime = isset($_GET["st"]) ?
-	clean_number( $_GET["st"] ) : NULL;
-$summary = isset($_GET["su"]) ? 1 : 0;
-$debug = isset( $_GET[ 'debug' ] ) ? 1 : 0;
+$graph      = isset($_GET["g"])  ?  sanitize ( $_GET["g"] )   : NULL;
+$grid       = isset($_GET["G"])  ?  sanitize ( $_GET["G"] )   : NULL;
+$self       = isset($_GET["me"]) ?  sanitize ( $_GET["me"] )  : NULL;
+$vlabel     = isset($_GET["vl"]) ?  sanitize ( $_GET["vl"] )  : NULL;
+$value      = isset($_GET["v"])  ?  sanitize ( $_GET["v"] )   : NULL;
 
-# RFM - Define these variables to avoid "Undefined variable" errors being 
-# reported in ssl_error_log.
-$command = "";
-$extras = "";
-$upper_limit = "";
-$lower_limit = "";
-$background = "";
-$vertical_label = "";
+$max        = isset($_GET["x"])  ?  clean_number ( sanitize ($_GET["x"] ) ) : NULL;
+$min        = isset($_GET["n"])  ?  clean_number ( sanitize ($_GET["n"] ) ) : NULL;
+$sourcetime = isset($_GET["st"]) ?  clean_number ( sanitize( $_GET["st"] ) ) : NULL;
+ 
+$load_color = isset($_GET["l"]) && is_valid_hex_color( rawurldecode( $_GET[ 'l' ] ) ) 
+                                 ?  sanitize ( $_GET["l"] )   : NULL;
+
+$summary    = isset( $_GET["su"] )    ? 1 : 0;
+$debug      = isset( $_GET['debug'] ) ? 1 : 0;
+$command    = '';
 
 # Assumes we have a $start variable (set in get_context.php).
 # $graph_sizes and $graph_sizes_keys defined in conf.php.  Add custom sizes there.
-if( in_array( $size, $graph_sizes_keys ) ) {
-  $height = $graph_sizes[ $size ][ 'height' ];
-  $width = $graph_sizes[ $size ][ 'width' ];
-  $fudge_0 = $graph_sizes[ $size ][ 'fudge_0' ];
-  $fudge_1 = $graph_sizes[ $size ][ 'fudge_1' ];
-  $fudge_2 = $graph_sizes[ $size ][ 'fudge_2' ];
-} else {
-  $height = $graph_sizes[ 'default' ][ 'height' ];
-  $width = $graph_sizes[ 'default' ][ 'width' ];
-  $fudge_0 = $graph_sizes[ 'default' ][ 'fudge_0' ];
-  $fudge_1 = $graph_sizes[ 'default' ][ 'fudge_1' ];
-  $fudge_2 = $graph_sizes[ 'default' ][ 'fudge_2' ];
-}
 
+$size = in_array( $size, $graph_sizes_keys ) ? $size : 'default';
+ 
+$height  = $graph_sizes[ $size ][ 'height' ];
+$width   = $graph_sizes[ $size ][ 'width' ];
+$fudge_0 = $graph_sizes[ $size ][ 'fudge_0' ];
+$fudge_1 = $graph_sizes[ $size ][ 'fudge_1' ];
+$fudge_2 = $graph_sizes[ $size ][ 'fudge_2' ];        
+ 
 
+#
+# Since the $command variable is explicitly set to an empty string, above, do we really need
+# this check anymore?  --jb Jan 2008
+#
 # This security fix was brought to my attention by Peter Vreugdenhil <petervre@sci.kun.nl>
 # Dont want users specifying their own malicious command via GET variables e.g.
 # http://ganglia.mrcluster.org/graph.php?graph=blob&command=whoami;cat%20/etc/passwd
 #
-if($command)
-    {
-      exit();
-    }
+if($command) {
+    error_log("Command variable sent, exiting!");
+    exit();
+}
 
 switch ($context)
 {
@@ -86,224 +74,66 @@ switch ($context)
       exit;
 }
 
-$fudge = 0;
-if ($graph)   /* Canned graph request */
-    {
-      if($graph == "cpu_report")
-         {
-            $fudge = $fudge_1;
-            $style = "CPU";
+# Set some standard defaults that don't need to change much
+$rrdtool_graph = array(
+    'start'  => $start,
+    'end'    => $end,
+    'width'  => $width,
+    'height' => $height,
+);
 
-            $upper_limit = "--upper-limit 100 --rigid";
-            $lower_limit = "--lower-limit 0";
 
-            $vertical_label = "--vertical-label Percent ";
+//error_log("Graph [$graph] in context [$context]");
 
-            if($context != "host" )
-               {
-                  /* If we are not in a host context, then we need to calculate the average */
-                  $series =
-                  "DEF:'num_nodes'='${rrd_dir}/cpu_user.rrd':'num':AVERAGE "
-                  ."DEF:'cpu_user'='${rrd_dir}/cpu_user.rrd':'sum':AVERAGE "
-                  ."CDEF:'ccpu_user'=cpu_user,num_nodes,/ "
-                  ."DEF:'cpu_nice'='${rrd_dir}/cpu_nice.rrd':'sum':AVERAGE "
-                  ."CDEF:'ccpu_nice'=cpu_nice,num_nodes,/ "
-                  ."DEF:'cpu_system'='${rrd_dir}/cpu_system.rrd':'sum':AVERAGE "
-                  ."CDEF:'ccpu_system'=cpu_system,num_nodes,/ "
-                  ."DEF:'cpu_idle'='${rrd_dir}/cpu_idle.rrd':'sum':AVERAGE "
-                  ."CDEF:'ccpu_idle'=cpu_idle,num_nodes,/ "
-                  ."AREA:'ccpu_user'#$cpu_user_color:'User CPU' "
-                  ."STACK:'ccpu_nice'#$cpu_nice_color:'Nice CPU' "
-                  ."STACK:'ccpu_system'#$cpu_system_color:'System CPU' ";
-                  if (file_exists("$rrd_dir/cpu_wio.rrd")) {
-                     $series .= "DEF:'cpu_wio'='${rrd_dir}/cpu_wio.rrd':'sum':AVERAGE "
-                     ."CDEF:'ccpu_wio'=cpu_wio,num_nodes,/ "
-                     ."STACK:'ccpu_wio'#$cpu_wio_color:'WAIT CPU' ";
-                  }
-                  $series .= "STACK:'ccpu_idle'#$cpu_idle_color:'Idle CPU' ";
-               }
-            else
-               {
-                  $series ="DEF:'cpu_user'='${rrd_dir}/cpu_user.rrd':'sum':AVERAGE "
-                  ."DEF:'cpu_nice'='${rrd_dir}/cpu_nice.rrd':'sum':AVERAGE "
-                  ."DEF:'cpu_system'='${rrd_dir}/cpu_system.rrd':'sum':AVERAGE "
-                  ."DEF:'cpu_idle'='${rrd_dir}/cpu_idle.rrd':'sum':AVERAGE "
-                  ."AREA:'cpu_user'#$cpu_user_color:'User CPU' "
-                  ."STACK:'cpu_nice'#$cpu_nice_color:'Nice CPU' "
-                  ."STACK:'cpu_system'#$cpu_system_color:'System CPU' ";
-                  if (file_exists("$rrd_dir/cpu_wio.rrd")) {
-                     $series .= "DEF:'cpu_wio'='${rrd_dir}/cpu_wio.rrd':'sum':AVERAGE "
-                     ."STACK:'cpu_wio'#$cpu_wio_color:'WAIT CPU' ";
-                  }
-                  $series .= "STACK:'cpu_idle'#$cpu_idle_color:'Idle CPU' ";
-               }
-         }
-      else if ($graph == "mem_report")
-         {
-            $fudge = $fudge_0;
-            $style = "Memory";
+/* If we have $graph, then a specific report was requested, such as "network_report" or 
+ * "cpu_report.  These graphs usually have some special logic and custom handling required,
+ * instead of simply plotting a single metric.  If $graph is not set, then we are (hopefully),
+ * plotting a single metric, and will use the commands in the metric.php file.
+ *
+ * With modular graphs, we look for a "${graph}.php" file, and if it exists, we
+ * source it, and call a pre-defined function name.  The current scheme for the function
+ * names is:   'graph_' + <name_of_report>.  So a 'cpu_report' would call graph_cpu_report(), 
+ * which would be found in the cpu_report.php file.
+ * 
+ * These functions take the $rrdtool_graph array as an argument.  This variable is 
+ * PASSED BY REFERENCE, and will be modified by the various functions.  Each key/value
+ * pair represents an option/argument, as passed to the rrdtool program.  Thus, 
+ * $rrdtool_graph['title'] will refer to the --title option for rrdtool, and pass the array
+ * value accordingly.  
+ *
+ * There are two exceptions to:  the 'extras' and 'series' keys in $rrdtool_graph.  These are
+ * assigned to $extras and $series respectively, and are treated specially.  $series will contain
+ * the various DEF, CDEF, RULE, LINE, AREA, etc statements that actually plot the charts.  The 
+ * rrdtool program requires that this come *last* in the argument string; we make sure that it
+ * is put in it's proper place.  The $extras variable is used for other arguemnts that may not
+ * fit nicely for other reasons.  Complicated requests for --color, or adding --ridgid, for example.
+ * It is simply a way for the graph writer to add an arbitrary options when calling rrdtool, and to 
+ * forcibly override other settings, since rrdtool will use the last version of an option passed.
+ * (For example, if you call 'rrdtool' with two --title statements, the second one will be used.)
+ *
+ * See $graphdir/sample.php for more documentation, and details on the 
+ * common variables passed and used.
+ */
 
-            $lower_limit = "--lower-limit 0 --rigid";
-            $extras = "--base 1024";
-            $vertical_label = "--vertical-label Bytes";
+// No report requested, so use 'metric'
+if (!$graph) {
+    $graph = 'metric';
+}
 
-            $series = "DEF:'mem_total'='${rrd_dir}/mem_total.rrd':'sum':AVERAGE "
-               ."CDEF:'bmem_total'=mem_total,1024,* "
-               ."DEF:'mem_shared'='${rrd_dir}/mem_shared.rrd':'sum':AVERAGE "
-               ."CDEF:'bmem_shared'=mem_shared,1024,* "
-               ."DEF:'mem_free'='${rrd_dir}/mem_free.rrd':'sum':AVERAGE "
-               ."CDEF:'bmem_free'=mem_free,1024,* "
-               ."DEF:'mem_cached'='${rrd_dir}/mem_cached.rrd':'sum':AVERAGE "
-               ."CDEF:'bmem_cached'=mem_cached,1024,* "
-               ."DEF:'mem_buffers'='${rrd_dir}/mem_buffers.rrd':'sum':AVERAGE "
-               ."CDEF:'bmem_buffers'=mem_buffers,1024,* "
-               ."CDEF:'bmem_used'='bmem_total','bmem_shared',-,'bmem_free',-,'bmem_cached',-,'bmem_buffers',- "
-               ."AREA:'bmem_used'#$mem_used_color:'Memory Used' "
-               ."STACK:'bmem_shared'#$mem_shared_color:'Memory Shared' "
-               ."STACK:'bmem_cached'#$mem_cached_color:'Memory Cached' "
-               ."STACK:'bmem_buffers'#$mem_buffered_color:'Memory Buffered' ";
-            if (file_exists("$rrd_dir/swap_total.rrd")) {
-               $series .= "DEF:'swap_total'='${rrd_dir}/swap_total.rrd':'sum':AVERAGE "
-               ."DEF:'swap_free'='${rrd_dir}/swap_free.rrd':'sum':AVERAGE "
-               ."CDEF:'bmem_swapped'='swap_total','swap_free',-,1024,* "
-               ."STACK:'bmem_swapped'#$mem_swapped_color:'Memory Swapped' ";
-            }
-            $series .= "LINE2:'bmem_total'#$cpu_num_color:'Total In-Core Memory' ";
-         }
-      else if ($graph == "load_report")
-         {
-            $fudge = $fudge_2;
-            $style = "Load";
+$graph_file = "$graphdir/$graph.php";
 
-            $lower_limit = "--lower-limit 0 --rigid";
-            $vertical_label = "--vertical-label 'Load/Procs'";
-
-            $series = "DEF:'load_one'='${rrd_dir}/load_one.rrd':'sum':AVERAGE "
-               ."DEF:'proc_run'='${rrd_dir}/proc_run.rrd':'sum':AVERAGE "
-               ."DEF:'cpu_num'='${rrd_dir}/cpu_num.rrd':'sum':AVERAGE ";
-            if( $context != "host" )
-               {
-                  $series .="DEF:'num_nodes'='${rrd_dir}/cpu_num.rrd':'num':AVERAGE ";
-               }
-            $series .="AREA:'load_one'#$load_one_color:'1-min Load' ";
-            if( $context != "host" )
-               {
-                  $series .= "LINE2:'num_nodes'#$num_nodes_color:'Nodes' ";
-               }
-            $series .="LINE2:'cpu_num'#$cpu_num_color:'CPUs' ";
-            $series .="LINE2:'proc_run'#$proc_run_color:'Running Processes' ";
-         }
-      else if ($graph == "network_report")
-         {
-            $fudge = $fudge_2;
-            $style = "Network";
-
-            $lower_limit = "--lower-limit 0 --rigid";
-            $extras = "--base 1024";
-            $vertical_label = "--vertical-label 'Bytes/sec'";
-
-            $series = "DEF:'bytes_in'='${rrd_dir}/bytes_in.rrd':'sum':AVERAGE "
-               ."DEF:'bytes_out'='${rrd_dir}/bytes_out.rrd':'sum':AVERAGE "
-               ."LINE2:'bytes_in'#$mem_cached_color:'In' "
-               ."LINE2:'bytes_out'#$mem_used_color:'Out' ";
-         }
-      else if ($graph == "packet_report")
-         {
-            $fudge = $fudge_2;
-            $style = "Packets";
-
-            $lower_limit = "--lower-limit 0 --rigid";
-            $extras = "--base 1024";
-            $vertical_label = "--vertical-label 'Packets/sec'";
-
-            $series = "DEF:'bytes_in'='${rrd_dir}/pkts_in.rrd':'sum':AVERAGE "
-               ."DEF:'bytes_out'='${rrd_dir}/pkts_out.rrd':'sum':AVERAGE "
-               ."LINE2:'bytes_in'#$mem_cached_color:'In' "
-               ."LINE2:'bytes_out'#$mem_used_color:'Out' ";
-         }
-      else
-         {
-            /* Got a strange value for $graph */
-            exit();
-         }
-    }
-else
-    {
-      /* Custom graph */
-      $style = "";
-
-      $subtitle = $metricname;
-      if ($context == "host") 
-      {
-          if ($summary)
-              $prefix = $metricname;
-          else
-              $prefix = $hostname;
-
-          $value = $value>1000 ? number_format($value) : number_format($value, 2);
-
-          if ($range=="job") {
-               $hrs = intval( -$jobrange / 3600 );
-               $subtitle = "$prefix last ${hrs}h (now $value)";
-          }
-          else
-              $subtitle = "$prefix last $range (now $value)";
-      }
-
-      if (is_numeric($max))
-         $upper_limit = "--upper-limit '$max' ";
-      if (is_numeric($min))
-         $lower_limit ="--lower-limit '$min' ";
-
-      if ($vlabel)
-         $vertical_label = "--vertical-label '$vlabel'";
-      else if ($upper_limit or $lower_limit) {
-         if (!$min and !$max) {
-            $vertical_label = "--vertical-label ' '";
-         } else {
-            $max = $max>100 ? number_format($max) : number_format($max, 2);
-            $min = $min>0 ? number_format($min,2) : $min;
-
-            $vertical_label ="--vertical-label '$min - $max' ";
-         }
-      }
-
-      $rrd_file = "$rrd_dir/$metricname.rrd";
-      $series = "DEF:'sum'='$rrd_file':'sum':AVERAGE "
-         ."AREA:'sum'#$default_metric_color:'$subtitle' ";
-      if ($jobstart)
-         $series .= "VRULE:$jobstart#$jobstart_color ";
-    }
-
-# Set the graph title.
-if($context == "meta")
-   {
-     $title = "$self $meta_designator $style last $range";
-   }
-else if ($context == "grid")
-  {
-     $title = "$grid $meta_designator $style last $range";
-  }
-else if ($context == "cluster")
-   {
-      $title = "$clustername $style last $range";
-   }
-else
-   {
-    if ($load_color)
-       $background = "--color BACK#'$load_color'";
-
-    if ($size == "small")
-        $title = $hostname;
-    else if ($style)
-       $title = "$hostname $style last $range";
-    else if ($summary)
-       $title = "$hostname";
-    else if ($metrictitle)
-       $title = $metrictitle;
-    else
-       $title = $metricname;
-   }
+if ( is_readable($graph_file) ) {
+    include_once($graph_file);
+    
+    $graph_function = "graph_${graph}";
+    $graph_function($rrdtool_graph);  // Pass by reference call, $rrdtool_graph modified inplace
+}
+else {
+    /* Bad stuff happened. */
+    error_log("Tried to load graph file [$graph_file], but failed.  Invalid graph, aborting.");
+    exit();
+}
+ 
 
 # Calculate time range.
 if ($sourcetime)
@@ -314,16 +144,46 @@ if ($sourcetime)
    }
 # Fix from Phil Radden, but step is not always 15 anymore.
 if ($range=="month")
-   $end = floor($end / 672) * 672;
+   $rrdtool_graph['end'] = floor($rrdtool_graph['end'] / 672) * 672;
 
-#
-# Generate the rrdtool graph command.
-#
-$fudge += $height;
-$command = RRDTOOL . " graph - --start $start --end $end ".
-   "--width $width --height $fudge $upper_limit $lower_limit ".
-   "--title '$title' $vertical_label $extras $background ".
-   $series;
+# Tidy up the title a bit
+if ($context != 'host')
+    $rrdtool_graph['title'] = "$clustername " . $rrdtool_graph['title'] . " last $range";
+
+//--------------------------------------------------------------------------------------
+
+// We must have a 'series' value, or this is all for naught
+if (!array_key_exists('series', $rrdtool_graph) || !strlen($rrdtool_graph['series']) ) {
+    error_log("\$series invalid for this graph request ".$_SERVER['PHP_SELF']);
+    exit();
+}
+
+$command = RRDTOOL . " graph - ";
+
+// The order of the other arguments isn't important, except for the
+// 'extras' and 'series' values.  These two require special handling.
+// Otherwise, we just loop over them later, and tack $extras and 
+// $series onto the end of the command.
+foreach ( array_keys ( $rrdtool_graph) as $key) {
+
+    if ( preg_match('/extras|series/', $key ))
+        continue;    
+        
+    $value = $rrdtool_graph[$key];
+
+    if (preg_match('/\W/', $value)) {
+        //more than alphanumerics in value, so quote it
+        $value = "'$value'";
+    }
+    $command .= " --$key $value";
+}
+
+// And finish up with the two variables that need special handling.
+// See above for how these are created
+$command .=  array_key_exists('extras', $rrdtool_graph) ? ' '.$rrdtool_graph['extras'].' ' : '';
+$command .=  " $rrdtool_graph[series]";
+
+//error_log("Final command:  $command");
 
 # Did we generate a command?   Run it.
 if($command)
@@ -344,4 +204,3 @@ if($command)
  }
 
 ?>
-

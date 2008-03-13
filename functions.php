@@ -419,6 +419,10 @@ function clean_string( $string )
 {
   return htmlentities( $string );
 }
+#-------------------------------------------------------------------------------
+function sanitize ( $string ) {
+  return  escapeshellcmd( clean_string( rawurldecode( $string ) ) ) ;
+}
 
 #-------------------------------------------------------------------------------
 # If arg is a valid number, return it.  Otherwise, return null.

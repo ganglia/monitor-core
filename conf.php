@@ -25,6 +25,9 @@ $rrds = "$gmetad_root/rrds";
 # otherwise, change it if it is installed elsewhere (like /usr/bin)
 define("RRDTOOL", "/usr/bin/rrdtool");
 
+
+# Location for modular-graph files.
+$graphdir='./graph.d';
 #
 # If you want to grab data from a different ganglia source specify it here.
 # Although, it would be strange to alter the IP since the Round-Robin
