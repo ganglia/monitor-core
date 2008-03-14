@@ -9,7 +9,6 @@ pkglib_LTLIBRARIES    = modmem.la
 modmem_la_SOURCES = mod_mem.c 
 modmem_la_LDFLAGS = -module 
 modmem_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
+endif
 
 INCLUDES = @APR_INCLUDES@
-
-endif
