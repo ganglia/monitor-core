@@ -2,7 +2,7 @@
 #.c.x: rpcgen $<
 
 if STATIC_BUILD
-GCFLAGS = 
+GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD =
 GLDFLAGS = -static
 else
