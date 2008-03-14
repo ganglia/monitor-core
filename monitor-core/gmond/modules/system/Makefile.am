@@ -13,7 +13,6 @@ modproc_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
 modsys_la_SOURCES = mod_sys.c 
 modsys_la_LDFLAGS = -module 
 modsys_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
+endif
 
 INCLUDES = @APR_INCLUDES@
-
-endif
