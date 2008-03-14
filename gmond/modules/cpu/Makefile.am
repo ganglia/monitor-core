@@ -18,7 +18,6 @@ modload_la_LDFLAGS = -module
 modload_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
 
 EXTRA_DIST = ../conf.d/multicpu.conf
+endif
 
 INCLUDES = @APR_INCLUDES@
-
-endif

@@ -9,10 +9,9 @@ modexample_la_SOURCES = mod_example.c
 modexample_la_LDFLAGS = -module
 
 EXTRA_DIST = ../conf.d/example.conf
+endif
 
 INCLUDES = @APR_INCLUDES@
-
-endif
 
 install:
 	echo

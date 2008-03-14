@@ -15,9 +15,9 @@ else
 GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD = 
 GLDFLAGS = -export-dynamic
-INCLUDES = @APR_INCLUDES@
 endif
 
+INCLUDES = @APR_INCLUDES@
 AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/libmetrics/ $(GCFLAGS) 
 
 sbin_PROGRAMS = gmond

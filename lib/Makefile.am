@@ -9,9 +9,9 @@ else
 GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD = 
 GLDFLAGS =
-INCLUDES = @APR_INCLUDES@
 endif
 
+INCLUDES = @APR_INCLUDES@
 AM_CFLAGS = -I.. -I. -I$(top_builddir)/libmetrics/ $(GCFLAGS)  
 
 include_HEADERS = ganglia.h scoreboard.h
