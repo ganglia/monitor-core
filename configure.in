@@ -276,10 +276,18 @@ fi
 echo
 echo Checking for apr
 if test x"$libaprpath" != x && test x"$libaprpath" != xyes ; then
-  CFLAGS="$CFLAGS -I$libaprpath/include"
-  LDFLAGS="$LDFLAGS -L$libaprpath/lib"
-  echo "Added -I$libaprpath/include to CFLAGS"
-  echo "Added -I$libaprpath/lib to LDLAGS"
+  if test -f "$libaprpath" ; then
+    APR_INCLUDES=`$libaprpath --includes`
+    APR_LIBS=`$libaprpath --link-libtool`
+    AC_SUBST(APR_INCLUDES)
+    AC_SUBST(APR_LIBS)
+    AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$libaprpath --link-ld --libs`])
+  else
+    CFLAGS="$CFLAGS -I$libaprpath/include"
+    LDFLAGS="$LDFLAGS -L$libaprpath/lib"
+    echo "Added -I$libaprpath/include to CFLAGS"
+    echo "Added -I$libaprpath/lib to LDLAGS"
+  fi
   AC_CHECK_LIB(apr-1, apr_socket_send)
 else
   AC_PATH_PROG(APR_CONFIG, apr-1-config)
