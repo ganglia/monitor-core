@@ -279,9 +279,7 @@ class piechart
 
       for( $j = ($this->center_y+$PIE_THICKNESS); $j > $this->center_y; $j-- ) {
 
-        $from = 0;
-
-        for( $p = 0; $p < $pie_count; $p++ ) {
+        for( $from = 0, $p = 0; $p < $pie_count; $p++, $from = $to ) {
 
           $to = $from + $angles[$p];
 
@@ -299,13 +297,10 @@ class piechart
         
           ImageFilledArc( $this->im, $this->center_x, $j, $this->diameter, $this->diameter, $from, $to, $new_color, IMG_ARC_PIE );
 
-          $from += $angles[$p];
         }
       }
    
-      $from = 0;
-  
-      for( $p = 0; $p < $pie_count; $p++ ) {
+      for( $from = 0, $p = 0; $p < $pie_count; $p++, $from = $to ) {
 
         $to = $from + $angles[$p];
         
@@ -313,10 +308,6 @@ class piechart
 
         if( $to > 360 )
           $to = 360;
-
-        if ($to > 360) {
-          $to = 360;
-        }
 
         ImageFilledArc( $this->im, $this->center_x, $this->center_y, $this->diameter, $this->diameter, $from, $to, $color, IMG_ARC_PIE );
 
