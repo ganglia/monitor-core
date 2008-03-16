@@ -280,13 +280,13 @@ if test x"$libaprpath" != x && test x"$libaprpath" != xyes ; then
     APR_INCLUDES=`$libaprpath --includes`
     APR_LIBS=`$libaprpath --link-libtool`
     AC_SUBST(APR_INCLUDES)
-    AC_SUBST(APR_LIBS)
+    LD_FLAGS="$LD_FLAGS $APR_LIBS"
     AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$libaprpath --link-ld --libs`])
   else
     CFLAGS="$CFLAGS -I$libaprpath/include"
     LDFLAGS="$LDFLAGS -L$libaprpath/lib"
     echo "Added -I$libaprpath/include to CFLAGS"
-    echo "Added -I$libaprpath/lib to LDLAGS"
+    echo "Added -L$libaprpath/lib to LDFLAGS"
   fi
   AC_CHECK_LIB(apr-1, apr_socket_send)
 else
@@ -313,7 +313,7 @@ if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes ; then
   CFLAGS="$CFLAGS -I$libconfusepath/include"
   LDFLAGS="$LDFLAGS -L$libconfusepath/lib"
   echo "Added -I$libconfusepath/include to CFLAGS"
-  echo "Added -L$libconfusepath/lib to LDLAGS"
+  echo "Added -L$libconfusepath/lib to LDFLAGS"
 fi
 AC_CHECK_LIB(confuse, cfg_parse)
 if test $ac_cv_lib_confuse_cfg_parse = yes; then
@@ -329,7 +329,7 @@ if test x"$libexpatpath" != x && test x"$libexpatpath" != xyes ; then
   CFLAGS="$CFLAGS -I$libexpatpath/include"
   LDFLAGS="$LDFLAGS -L$libexpatpath/lib"
   echo "Added -I$libexpatpath/include to CFLAGS"
-  echo "Added -I$libexpatpath/lib to LDLAGS"
+  echo "Added -L$libexpatpath/lib to LDFLAGS"
 fi
 AC_CHECK_LIB(expat, XML_ParserCreate)
 if test $ac_cv_lib_expat_XML_ParserCreate = yes; then
