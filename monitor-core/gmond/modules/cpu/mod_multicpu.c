@@ -56,12 +56,12 @@ mmodule multicpu_module;
 
 typedef struct {
   struct timeval last_read;
-  uint32_t thresh;
+  float thresh;
   char *name;
   char buffer[BUFFSIZE];
 } timely_file;
 
-timely_file proc_stat    = { {0,0} , 1, "/proc/stat" };
+timely_file proc_stat    = { {0,0} , 1., "/proc/stat" };
 
 struct cpu_util {
    g_val_t val;
