@@ -2,12 +2,12 @@
 # $Id$
 if [ -x /usr/bin/autoreconf ]; then {
 echo "Bootstrapping libmetrics"
-cd libmetrics && autoreconf --verbose --force --install --make
+cd libmetrics && autoreconf --verbose --install --make
 cd ..
 
 echo "Create distribution timestamp"
 touch Makefile.am
-autoreconf --verbose --force --install --make
+autoreconf --verbose --install --make
 } else {
 echo "Bootstrapping libmetrics"
 cd libmetrics && ./bootstrap
@@ -27,4 +27,5 @@ echo "Running autoconf" &&
 autoconf
 }; fi
 
+echo &&
 echo "To begin installation, run \"./configure\" now" 
