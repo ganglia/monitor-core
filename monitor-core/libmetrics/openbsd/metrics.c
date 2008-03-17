@@ -32,6 +32,7 @@
 #include <limits.h>
 #include <paths.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "interface.h"
 #include "libmetrics.h"
@@ -72,9 +73,6 @@ static float	find_disk_space(double *, double *);
 // XXX
 //static int	vm_state(int);
 
-static int 	use_vm_swap_info = 0;
-static int 	mibswap[MIB_SWAPINFO_SIZE];
-static size_t 	mibswap_size;
 static kvm_t 	*kd = NULL;
 static int 	pagesize;
 static int	skipvfs;
@@ -845,7 +843,6 @@ makenetvfslist(void)
 
 	int mib[3], maxvfsconf;
 	size_t miblen;
-	struct ovfsconf *ptr;
 
 	mib[0] = CTL_VFS; mib[1] = VFS_GENERIC; mib[2] = VFS_MAXTYPENUM;
 	miblen=sizeof(maxvfsconf);
