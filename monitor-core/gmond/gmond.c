@@ -34,10 +34,6 @@
 #include "scoreboard.h"
 
 
-#if (APR_MAJOR_VERSION >= 1) && (APR_MINOR_VERSION >= 2)
-#define USING_APR_12
-#endif
-
 /* Specifies a single value metric callback */
 #define CB_NOINDEX -1
 
@@ -1042,9 +1038,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   Ganglia_metadata_msg fmsg;
   Ganglia_value_msg vmsg;
   Ganglia_host *hostdata = NULL;
-#ifdef USING_APR_12
   apr_pool_t *p = NULL;
-#endif
   Ganglia_msg_formats id;
   bool_t ret;
 
@@ -1053,7 +1047,6 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
    * to have per socket user data .. see APR docs */
   channel       = desc->client_data;
 
-#ifdef USING_APR_12
   /* We need to create a copy of the local sockaddr so that the
      recvfrom call has a place holder to put the remote information.
      Getting the remote sockaddr might not work since a SOCK_DGRAM
@@ -1061,17 +1054,12 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   apr_pool_create(&p, global_context);
   status = apr_socket_addr_get(&remotesa, APR_LOCAL, socket);
   status = apr_sockaddr_info_get(&remotesa, NULL, remotesa->family, remotesa->port, 0, p);
-#else
-  status = apr_socket_addr_get(&remotesa, APR_REMOTE, socket);
-#endif
 
   /* Grab the data */
   status = apr_socket_recvfrom(remotesa, socket, 0, buf, &len);
   if(status != APR_SUCCESS)
     {
-#ifdef USING_APR_12
       apr_pool_destroy(p);
-#endif
       return;
     }  
 
@@ -1083,9 +1071,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   /* Check the ACL */
   if(Ganglia_acl_action( channel->acl, remotesa) != GANGLIA_ACCESS_ALLOW)
     {
-#ifdef USING_APR_12
       apr_pool_destroy(p);
-#endif
       return;
     }
 
@@ -1167,9 +1153,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       break;
   }
 
-#ifdef USING_APR_12
   apr_pool_destroy(p);
-#endif
 
   return;
 }
@@ -1451,11 +1435,7 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
   apr_pool_create(&client_context, global_context);
 
   /* Accept the connection */
-#ifdef USING_APR_12
   status = apr_socket_accept(&client, server, client_context);
-#else
-  status = apr_accept(&client, server, client_context);
-#endif
   if(status != APR_SUCCESS)
     {
       goto close_accept_socket;
@@ -1520,11 +1500,7 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
 
   /* Close down the accepted socket */
 close_accept_socket:
-#ifdef USING_APR_12
-    apr_socket_shutdown(client, APR_SHUTDOWN_READ);
-#else
-  apr_shutdown(client, APR_SHUTDOWN_READ);
-#endif
+  apr_socket_shutdown(client, APR_SHUTDOWN_READ);
   apr_socket_close(client);
   apr_pool_destroy(client_context);
 }

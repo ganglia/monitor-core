@@ -21,10 +21,6 @@
 
 #include "error.h"
 
-#if (APR_MAJOR_VERSION >= 1) && (APR_MINOR_VERSION >= 2)
-#define USING_APR_12
-#endif
-
 const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
 
 /* This function is copied directly from the 
@@ -80,22 +76,14 @@ create_net_client(apr_pool_t *context, int type, char *host, apr_port_t port)
   family = remotesa->sa.sin.sin_family;
 
   /* Created the socket */
-#ifdef USING_APR_12
   status = apr_socket_create(&sock, family, type, 0, context);
-#else
-  status = apr_socket_create(&sock, family, type, context);
-#endif
   if(status != APR_SUCCESS)
     {
       return NULL;
     }
 
   /* Connect the socket to the address */
-#ifdef USING_APR_12
   status = apr_socket_connect(sock, remotesa);
-#else
-  status = apr_connect(sock, remotesa);
-#endif
   if(status != APR_SUCCESS)
     {
       apr_socket_close(sock);
@@ -133,21 +121,13 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t por
       family = localsa->sa.sin.sin_family;
     }
 
-#ifdef USING_APR_12
   stat = apr_socket_create(&sock, family, type, 0, context);
-#else
-  stat = apr_socket_create(&sock, family, type, context);
-#endif
   if( stat != APR_SUCCESS )
     return NULL;
 
   if(!blocking){
      /* This is a non-blocking server */
-#ifdef USING_APR_12
-      stat = apr_socket_opt_set(sock, APR_SO_NONBLOCK, 1);
-#else
-     stat = apr_setsocketopt(sock, APR_SO_NONBLOCK, 1);
-#endif
+     stat = apr_socket_opt_set(sock, APR_SO_NONBLOCK, 1);
      if (stat != APR_SUCCESS)
      {
            apr_socket_close(sock);
@@ -155,11 +135,7 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t por
      }
   }
 
-#ifdef USING_APR_12
   stat = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
-#else
-  stat = apr_setsocketopt(sock, APR_SO_REUSEADDR, 1);
-#endif
   if (stat != APR_SUCCESS)
     {
       apr_socket_close(sock);
@@ -169,11 +145,7 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t por
   if(!localsa)
     {
       apr_socket_addr_get(&localsa, APR_LOCAL, sock);
-#ifdef USING_APR_12
       apr_sockaddr_vars_set(localsa, localsa->family, port);
-#else
-      apr_sockaddr_port_set(localsa, port);
-#endif
     }
 
 #if APR_HAVE_IPV6
@@ -192,11 +164,7 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t por
      }
 #endif
 
-#ifdef USING_APR_12
   stat = apr_socket_bind(sock, localsa);
-#else
-  stat = apr_bind(sock, localsa);
-#endif
   if( stat != APR_SUCCESS)
     {
        apr_socket_close(sock);
@@ -223,60 +191,12 @@ create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port,
     {
       return NULL;
     }
-#ifdef USING_APR_12
   if(apr_socket_listen(sock, 5) != APR_SUCCESS) 
-#else
-  if(apr_listen(sock, 5) != APR_SUCCESS) 
-#endif
     {
       return NULL;
     }
   return sock;
 }
-
-#ifndef USING_APR_12
-int
-mcast_set_ttl(apr_socket_t *socket, int val)
-{
-  apr_sockaddr_t *sa;
-  apr_os_sock_t s;
-
-  apr_socket_addr_get(&sa, APR_LOCAL, socket);
-  if(!sa)
-    {
-      return -1;
-    }
-
-  apr_os_sock_get(&s, socket);
-
-  switch (sa->family)
-    {
-    case APR_INET: 
-      {
-        u_char ttl;
-    
-        ttl = val;
-        return(setsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL,
-                          &ttl, sizeof(ttl)));
-      }
-
-#if	APR_HAVE_IPV6
-    case APR_INET6: 
-      {
-        int hop;
-    
-        hop = val;
-        return(setsockopt(s, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-                          &hop, sizeof(hop)));
-      }
-#endif
-
-    default:
-        errno = EPROTONOSUPPORT;
-        return(-1);
-    }
-}
-#endif
 
 /*XXX This should really be replaced by the APR mcast functions */
 static apr_status_t
@@ -373,11 +293,7 @@ create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int tt
       {
         return NULL;
       }
-#ifdef USING_APR_12
     apr_mcast_hops(socket, ttl);
-#else
-    mcast_set_ttl(socket, ttl);
-#endif
 
     return socket;
 }
