@@ -27,7 +27,6 @@
 #include "apr_net.h"   /* our private network functions based on apr */
 #include "debug_msg.h" 
 #include "error.h" 
-#include "protocol.h"  /* generated header from ./lib/protocol.x xdr definition file */
 #include "dtd.h"       /* the DTD definition for our XML */
 #include "g25_config.h" /* for converting old file formats to new */
 #include "daemon_init.h"
