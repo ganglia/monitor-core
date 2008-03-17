@@ -21,6 +21,7 @@
 #include <dirent.h>
 #include <fnmatch.h>
 
+#include <rpc/rpc.h>
 #include "protocol.h"  /* generated from ./lib/protocol.x */
 
 #include "default_conf.h"
