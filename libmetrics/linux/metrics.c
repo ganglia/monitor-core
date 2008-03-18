@@ -171,6 +171,9 @@ static net_dev_stats *hash_lookup(char *devname, size_t nlen)
   return stats;
 }
 
+/*
+** FIXME: this routine should be rewritten to do per-interface statistics
+*/
 static double bytes_in=0,bytes_out=0,pkts_in=0,pkts_out=0;
 void update_ifdata ( char *caller )
 {
@@ -179,7 +182,7 @@ void update_ifdata ( char *caller )
    static struct timeval stamp={0,0};
    unsigned long rbi=0,rbo=0,rpi=0,rpo=0;
    unsigned long l_bytes_in=0,l_bytes_out=0,l_pkts_in=0,l_pkts_out=0;
-   int data_ok=1;
+   double l_bin,l_bout,l_pin,l_pout;
 
    p = update_file(&proc_net_dev);
    if ((proc_net_dev.last_read.tv_sec != stamp.tv_sec) &&
@@ -221,8 +224,7 @@ void update_ifdata ( char *caller )
 		     if ( rbi >= ns->rbi ) {
 			l_bytes_in += rbi - ns->rbi;
 		     } else {
-			data_ok = 0;
-			err_msg("update_ifdata(%s) - Overflow in rbi: %lu -> %lu",caller,ns->rbi,rbi);
+			debug_msg("update_ifdata(%s) - Overflow in rbi: %lu -> %lu",caller,ns->rbi,rbi);
 			l_bytes_in += ULONG_MAX - ns->rbi + rbi;
 		     }
 		     ns->rbi = rbi;
@@ -231,8 +233,7 @@ void update_ifdata ( char *caller )
 		     if ( rpi >= ns->rpi ) {
 			l_pkts_in += rpi - ns->rpi;
 		     } else {
-			data_ok = 0;
-			err_msg("updata_ifdata(%s) - Overflow in rpi: %lu -> %lu",caller,ns->rpi,rpi);
+			debug_msg("updata_ifdata(%s) - Overflow in rpi: %lu -> %lu",caller,ns->rpi,rpi);
 			l_pkts_in += ULONG_MAX - ns->rpi + rpi;
 		     }
 		     ns->rpi = rpi;
@@ -242,8 +243,7 @@ void update_ifdata ( char *caller )
 		     if ( rbo >= ns->rbo ) {
 			l_bytes_out += rbo - ns->rbo;
 		     } else {
-			data_ok = 0;
-			err_msg("update_ifdata(%s) - Overflow in rbo: %lu -> %lu",caller,ns->rbo,rbo);
+			debug_msg("update_ifdata(%s) - Overflow in rbo: %lu -> %lu",caller,ns->rbo,rbo);
 			l_bytes_out += ULONG_MAX - ns->rbo + rbo;
 		     }
 		     ns->rbo = rbo;
@@ -252,8 +252,7 @@ void update_ifdata ( char *caller )
 		     if ( rpo >= ns->rpo ) {
 			l_pkts_out += rpo - ns->rpo;
 		     } else {
-			data_ok = 0;
-			err_msg("update_ifdata(%s) - Overflow in rpo: %lu -> %lu",caller,ns->rpo,rpo);
+			debug_msg("update_ifdata(%s) - Overflow in rpo: %lu -> %lu",caller,ns->rpo,rpo);
 			l_pkts_out += ULONG_MAX - ns->rpo + rpo;
 		     }
 		     ns->rpo = rpo;
@@ -272,31 +271,32 @@ void update_ifdata ( char *caller )
 	 stamp = proc_net_dev.last_read;
 
 	 /*
-	 ** No data update if one of the counters did overflow
-	 **
-	 ** This will work great for 64-bit. In 32-bit, the network
-	 ** counters can overflow in ~40 seconds for a fully saturated
-	 ** 1GBit link. In that case we may need to sample at higher
-	 ** rate.
+	 ** Compute rates in local variables
 	 */
-	 if ( data_ok ) {
-	   bytes_in = l_bytes_in / t;
-	   pkts_in = l_pkts_in / t;
-	   bytes_out = l_bytes_out / t;
-	   pkts_out = l_pkts_out / t;
-	 }
+	 l_bin = l_bytes_in / t;
+	 l_bout = l_bytes_out / t;
+	 l_pin = l_pkts_in / t;
+	 l_pout = l_pkts_out / t;
 
+#ifdef REMOVE_BOGUS_SPIKES
 	 /*
-	 ** Check for "invalid" data, caused by HW error [on certain BCM5807 devicves]
-	 **
-	 ** We could drop bogus packets here, but how to define the threshhold ?
-	 **
+	 ** Check for "invalid" data, caused by HW error. Throw away dubious data points
+	 ** FIXME: This should be done per-interface, with threshholds depending on actual link speed
 	 */	
-	 if ((bytes_in > 1.0e8) ||
-             (pkts_in > 1.0e8) ||
-             (bytes_out > 1.0e8) ||
-             (pkts_out > 1.0e8))
-		 err_msg("update_ifdata(%s): %g %g %g %g / %g",caller,bytes_in,bytes_out,pkts_in,pkts_out,t);
+	 if ((l_bin > 1.0e13) || (l_bout > 1.0e13) ||
+             (l_pin > 1.0e8)  || (l_pout > 1.0e8)) {
+		err_msg("update_ifdata(%s): %g %g %g %g / %g",caller,l_bin,l_bout,l_pin,l_pout,t);
+		return;
+	}
+#endif
+
+        /*
+        ** Finally return Values
+        */
+        bytes_in  = l_bin;
+        bytes_out = l_bout;
+        pkts_in   = l_pin;
+        pkts_out  = l_pout;
       }
 
    return;
@@ -478,6 +478,9 @@ cpu_speed_func ( void )
    return val;
 }
 
+/*
+** FIXME: all functions using /proc/meminfo sould use a central routine like networking
+*/
 g_val_t
 mem_total_func ( void )
 {
@@ -600,6 +603,9 @@ os_release_func ( void )
    return val;
 }
 
+/*
+** FIXME: all functions using /proc/stat should be rewritten to use a central function like networking
+*/
 
 /*
  * A helper function to return the total number of cpu jiffies
