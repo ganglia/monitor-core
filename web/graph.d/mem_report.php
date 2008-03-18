@@ -15,7 +15,6 @@ function graph_mem_report ( &$rrdtool_graph ) {
            $rrd_dir,
            $size;
     
-    $rrdtool_graph['height']        += $size == 'medium' ? 19 : 0 ;  // Two lines of text in the legend
     $rrdtool_graph['title']          = 'Memory';
     $rrdtool_graph['lower-limit']    = '0';
     $rrdtool_graph['vertical-label'] = 'Bytes';

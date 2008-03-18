@@ -14,7 +14,7 @@ function graph_cpu_report ( &$rrdtool_graph ) {
            $rrd_dir,
            $size;
     
-    $rrdtool_graph['height']        += $size == 'medium' ? 28 : 0 ;
+    $rrdtool_graph['height']        += $size == 'medium' ? 14 : 0 ;
     $rrdtool_graph['title']          = 'CPU';
     $rrdtool_graph['upper-limit']    = '100';
     $rrdtool_graph['lower-limit']    = '0';
