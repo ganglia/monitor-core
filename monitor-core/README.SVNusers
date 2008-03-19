@@ -8,12 +8,12 @@ script "./bootstrap".
 
 To build a distribution tarball, run:
 
-./configure --enable-python
+./configure
 make dist-gzip
 
 To prepare a distribution tree, run:
 
-./configure --enable-python
+./configure
 make distdir
 
 To build RPMs after building the tarball:
