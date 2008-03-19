@@ -1,11 +1,6 @@
 if BUILD_PYTHON
-pys := $(wildcard */*.py)
-pycs := $(patsubst %.py, %.pyc, $(pys))
 
-$(pycs): %.pyc: %.py
-	$(PYTHON_BIN) -c "import py_compile; py_compile.compile( '$<' )"
+SUBDIRS = disk example network
+EXTRA_DIST = ./conf.d/*.pyconf
 
-EXTRA_DIST = ./conf.d/*.pyconf \
-	$(pys) \
-	$(pycs)
 endif
