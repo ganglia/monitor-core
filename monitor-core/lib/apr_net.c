@@ -7,7 +7,12 @@
 #include <apr_strings.h>
 #include <apr_network_io.h>
 #include <apr_portable.h>
-//#include "apr_arch_networkio.h"
+
+/* 
+ * FIXME: apr_arch_networkio.h is not public
+ *        define apr_sockaddr_vars_set locally so it can be used
+ */
+void apr_sockaddr_vars_set(apr_sockaddr_t *, int, apr_port_t);
 
 #include <apr_net.h>
 #include <apr_version.h>
