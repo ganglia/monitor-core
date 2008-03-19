@@ -374,26 +374,6 @@ static g_val_t multi_cpu_idle_func (int cpu_index)
     return cpu->val;
 }
 
-static g_val_t multi_cpu_aidle_func (int cpu_index)
-{
-   char *p;
-   g_val_t val;
-   double idle_jiffies, total_jiffies;
-   
-   p = update_file(&proc_stat);
-
-   p = find_cpu (p, cpu_index);
-   p = skip_token(p);
-   p = skip_token(p);
-   p = skip_token(p);
-   p = skip_whitespace(p);
-   idle_jiffies  = strtod(p , (char **)NULL);
-   total_jiffies = total_jiffies_func();
-   
-   val.f = (idle_jiffies/total_jiffies)*100;
-   return val;
-}
-
 static g_val_t multi_cpu_wio_func (int cpu_index)
 {
     char *p;
