@@ -10,7 +10,7 @@ instructions as in the UNIX platforms with some work arounds.
 Prerequisites
 ------------- 
 
-Latest version of Cygwin with the following packages: autoconf, automake, 
+Latest version of Cygwin with the following packages: apr1, autoconf, automake, 
 bison, expat, diffutils, flex, gcc, libtool, make, sharutils, sunrpc and
 svn to checkout the source code.
 
@@ -36,17 +36,6 @@ Go to libmetrics directory and type the following commands
 
 The steps above generates the configure file for libmetrics.
 
-Download the APR project from http://apr.apache.org/download.cgi. Build 
-the project with the following commands.
-
-  ./configure
-  make
-  make install - this command installs APR in the /usr/local directory.
-
-copy all the .h files from /usr/lib/apr/include/apr-1 to /usr/local/include
-cp /usr/local/apr/lib/libapr-1.a /usr/local/lib/
-cp /usr/local/apr/lib/libapr-1.la /usr/local/lib/
-
 Download libconfuse, build it and install the libconfuse library.
 ./configure
 make
@@ -54,7 +43,7 @@ make install
 
 Go to the ganglia directory, and run the following command to build Ganglia
 
-./configure --with-libapr=/usr/local/apr --with-libconfuse=/usr/local
+./configure --with-libconfuse=/usr/local
 
 When the make command is executed, this command will fail at the rpcgen 
 tool not able to generate the src files. This is because the rpcgen tool 
