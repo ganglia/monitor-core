@@ -148,13 +148,15 @@ sum_metrics(datum_t *key, datum_t *val, void *arg)
          tt = in_type_list(type, strlen(type));
          if (!tt) return 0;
 
+	 /* We do all our sums in double which does not suffer from
+	    wraparound errors: for example memory KB exceeding 4TB. -twitham */
          switch (tt->type)
             {
                case INT:
-                  rootmetric->val.int32 += metric->val.int32;
+                  rootmetric->val.d += metric->val.int32;
                   break;
                case UINT:
-                  rootmetric->val.uint32 += metric->val.uint32;
+                  rootmetric->val.d += metric->val.uint32;
                   break;
                case FLOAT:
                   rootmetric->val.d += metric->val.d;
@@ -223,20 +225,9 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
    tt = in_type_list(type, strlen(type));
    if (!tt) return 0;
 
-   switch (tt->type)
-      {
-         case INT:
-            sprintf(sum, "%d", metric->val.int32);
-            break;
-         case UINT:
-            sprintf(sum, "%u", metric->val.uint32);
-            break;
-         case FLOAT:
-            sprintf(sum, "%.5f", metric->val.d);
-            break;
-         default:
-            break;
-      }
+   /* We log all our sums in double which does not suffer from
+      wraparound errors: for example memory KB exceeding 4TB. -twitham */
+   sprintf(sum, "%.5f", metric->val.d);
 
    sprintf(num, "%u", metric->num);
 
