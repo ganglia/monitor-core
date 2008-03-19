@@ -14,7 +14,7 @@ endif
 INCLUDES = @APR_INCLUDES@
 AM_CFLAGS = -I.. -I. -I$(top_builddir)/libmetrics/ $(GCFLAGS)  
 
-include_HEADERS = ganglia.h scoreboard.h
+include_HEADERS = ganglia.h
 
 EXTRA_DIST=protocol.x
 protocol_xdr.c: protocol.x
