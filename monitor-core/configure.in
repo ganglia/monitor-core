@@ -555,6 +555,9 @@ AC_OUTPUT(Makefile
           gmond/modules/status/Makefile
           gmond/modules/system/Makefile
           gmond/python_modules/Makefile
+          gmond/python_modules/disk/Makefile
+          gmond/python_modules/example/Makefile
+          gmond/python_modules/network/Makefile
           gmetric/Makefile 
           web/version.php)
 
