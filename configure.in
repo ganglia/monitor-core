@@ -430,6 +430,20 @@ if test "$ac_cv_gcc" = yes; then
    CFLAGS="$CFLAGS -Wall -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes"
 fi
 
+dnl disable type punning optimization until verified safe
+if test "$ac_cv_prog_cc_g" = yes; then
+   SAVE_CFLAGS="$CFLAGS"
+   CFLAGS="$CFLAGS -fno-strict-aliasing"
+   AC_MSG_CHECKING([whether disabling type punning in gcc is possible])
+   AC_TRY_COMPILE([], [], type_punning=yes, type_punning=no)
+   if test $type_punning = no; then
+      CFLAGS="$SAVE_CFLAGS"
+   fi
+   AC_MSG_RESULT($type_punning)
+   unset type_punning
+   unset SAVE_CFLAGS
+fi
+
 if test "$enable_memcheck" = yes; then
    echo "Setting up for memory checking via mpatrol"
    CFLAGS="$CFLAGS -fcheck-memory-usage "
