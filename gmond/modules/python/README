@@ -130,7 +130,6 @@ a specific python module is at follows:
 modules {
   pymodule {
     name = "example"
-    params = "Raw string parameter"
     param YouNameIt {
         value = Whatever
     }
