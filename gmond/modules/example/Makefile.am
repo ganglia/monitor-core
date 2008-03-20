@@ -6,7 +6,7 @@ libmodexample_la_SOURCES = mod_example.c
 else
 pkglib_LTLIBRARIES    = modexample.la
 modexample_la_SOURCES = mod_example.c 
-modexample_la_LDFLAGS = -module
+modexample_la_LDFLAGS = -module -avoid-version
 
 EXTRA_DIST = ../conf.d/example.conf
 endif

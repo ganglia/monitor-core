@@ -7,7 +7,7 @@ else
 pkglib_LTLIBRARIES    = modnet.la
 
 modnet_la_SOURCES = mod_net.c 
-modnet_la_LDFLAGS = -module 
+modnet_la_LDFLAGS = -module -avoid-version
 modnet_la_LIBADD = $(top_builddir)/libmetrics/libmetrics.la
 endif
 
