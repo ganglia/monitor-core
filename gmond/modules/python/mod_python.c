@@ -429,10 +429,18 @@ static cfg_t* find_module_config(char *modname)
     int j;
 
     modules_cfg = cfg_getsec(python_module.config_file, "modules");
-    for (j = 0; j < cfg_size(modules_cfg, "pymodule"); j++) {
-        char *modName;
+    for (j = 0; j < cfg_size(modules_cfg, "module"); j++) {
+        char *modName, *modLanguage;
 
-        cfg_t *pymodule = cfg_getnsec(modules_cfg, "pymodule", j);
+        cfg_t *pymodule = cfg_getnsec(modules_cfg, "module", j);
+
+        /* Check the module language to make sure that
+           the language designation is python.
+        */
+        modLanguage = cfg_getstr(pymodule, "language");
+        if (!modLanguage || strcasecmp(modLanguage, "python")) 
+            continue;
+
         modName = cfg_getstr(pymodule, "name");
         if (strcasecmp(modname, modName)) {
             continue;

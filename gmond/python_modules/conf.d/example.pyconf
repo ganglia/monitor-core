@@ -1,6 +1,7 @@
 modules {
-  pymodule {
+  module {
     name = "example"
+    language = "python"
     param RandomMax {
         value = 600
     }

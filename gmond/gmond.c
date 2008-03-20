@@ -1628,11 +1628,20 @@ load_metric_modules( void )
         apr_dso_handle_t *modHandle = NULL;
         apr_dso_handle_sym_t modSym;
         mmodule *modp;
-        char *modPath, *modName, *modparams;
+        char *modPath=NULL, *modName=NULL, *modparams=NULL, *modLanguage=NULL;
         apr_array_header_t *modParams_list = NULL;
         int k;
 
         cfg_t *module = cfg_getnsec(tmp, "module", j);
+
+        /* Check the module language to make sure that
+           the module is loaded correctly or should be
+           delegated to an alternate module interface
+        */
+        modLanguage = cfg_getstr(module, "language");
+        if (modLanguage && strcasecmp(modLanguage, "C/C++")) 
+            continue;
+
         modPath = cfg_getstr(module, "path");
         modName = cfg_getstr(module, "name");
         modparams = cfg_getstr(module, "params");
@@ -1655,8 +1664,11 @@ load_metric_modules( void )
           {
             char my_error[256];
 
-            err_msg("Cannot load %s metric module: %s\n", modPath,
+            err_msg("Cannot load %s metric module: %s", modPath,
                      apr_dso_error(modHandle, my_error, sizeof(my_error)));
+            if (!modPath) 
+                err_msg("No load path specified for module: %s or incorrect module language designation [%s].\n", 
+                        modName, modLanguage);
             continue;
           }
         debug_msg("loaded module: %s", modName);
@@ -1668,8 +1680,8 @@ load_metric_modules( void )
           {
             char my_error[256];
 
-            err_msg("Cannot locate internal module structure '%s' in file %s: %s\n", 
-                     modName, modPath, apr_dso_error(modHandle, my_error, sizeof(my_error)));
+            err_msg("Cannot locate internal module structure '%s' in file %s: %s\nPossibly an incorrect module language designation [%s].\n", 
+                     modName, modPath, apr_dso_error(modHandle, my_error, sizeof(my_error)), modLanguage);
             continue;
           }
 
