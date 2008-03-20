@@ -299,7 +299,6 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/ganglia.h
-%{_includedir}/scoreboard.h
 %{_libdir}/libganglia*.so
 %{_libdir}/libganglia*.*a
 %{_bindir}/ganglia-config
