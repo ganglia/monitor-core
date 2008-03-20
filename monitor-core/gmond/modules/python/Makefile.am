@@ -6,7 +6,7 @@ libmodpython_la_SOURCES = mod_python.c
 else
 pkglib_LTLIBRARIES    = modpython.la
 modpython_la_SOURCES = mod_python.c 
-modpython_la_LDFLAGS = -module -lpython@PYTHON_VERSION@
+modpython_la_LDFLAGS = -module -avoid-version -lpython@PYTHON_VERSION@
 
 EXTRA_DIST = ../conf.d/modpython.conf
 endif 
