@@ -129,22 +129,16 @@ static cfg_opt_t metric_module_param[] = {
 };
 
 static cfg_opt_t metric_module_opts[] = {
-  CFG_STR("name", NULL, CFGF_NONE ),
+  CFG_STR("name", NULL, CFGF_NONE),
+  CFG_STR("language", NULL, CFGF_NONE),
   CFG_STR("path", NULL, CFGF_NONE),
   CFG_STR("params", NULL, CFGF_NONE),
   CFG_SEC("param", metric_module_param, CFGF_TITLE | CFGF_MULTI),
   CFG_END()
 };
 
-static cfg_opt_t metric_pymodule_opts[] = {
-  CFG_STR("name", NULL, CFGF_NONE ),
-  CFG_SEC("param", metric_module_param, CFGF_TITLE | CFGF_MULTI),
-  CFG_END()
-};
-
 static cfg_opt_t metric_modules_opts[] = {
   CFG_SEC("module", metric_module_opts, CFGF_MULTI),
-  CFG_SEC("pymodule", metric_pymodule_opts, CFGF_MULTI),
   CFG_END()
 };
 
