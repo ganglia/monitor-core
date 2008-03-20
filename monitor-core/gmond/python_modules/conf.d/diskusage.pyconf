@@ -1,5 +1,12 @@
 #/* Disk usage collection groups for 
 #    multidisk python module */
+modules {
+  module {
+    name = "multidisk"
+    language = "python"
+  }
+}
+
 collection_group {
   collect_every = 10
   time_threshold = 50
