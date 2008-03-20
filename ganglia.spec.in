@@ -12,7 +12,7 @@
 #
 Summary: Ganglia Distributed Monitoring System
 Name: @PACKAGE@
-Version: @RPM_VERSION@
+Version: @VERSION@
 URL: http://ganglia.info/
 Release: 1 
 License: BSD
