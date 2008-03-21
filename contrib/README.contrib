@@ -3,7 +3,7 @@ Ganglia users' community.  While the various files and scripts are
 believed to work, they are *NOT* supported by core Ganglia development
 team.  Use at your own risk, YMMV, etc, etc.
 
-If you have any quetions about the files, please contact the original
+If you have any questions about the files, please contact the original
 authors or try emailing the ganglia-general mailing list.  Information
 about joining this list can be found at:
 
@@ -20,9 +20,10 @@ ganglia_gmond.xml
 ganglia_gmetad.xml    
     Contributed by Ben Rockwood (benr {@} joyent . com)
     Solaris/X86 SMF Manifest files.  Both manifests assume that
-    Ganglia was installed with the prefix /opt/ganglia, and you'd
-    load them like so:
-        svccfg import ganglia_gmond.xml
+    Ganglia was installed with the prefix /opt/ganglia.  To load
+    load them (for example for gmond) run :
+    
+        # svccfg import ganglia_gmond.xml
 
 
 diskfree_report.php 
