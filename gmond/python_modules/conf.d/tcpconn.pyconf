@@ -1,5 +1,5 @@
 modules {
-  pymodule {
+  module {
     name = "tcpconn"
     language = "python"
     param RefreshRate {
