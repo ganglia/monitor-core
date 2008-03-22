@@ -111,8 +111,8 @@ function graph_metric ( &$rrdtool_graph ) {
   */ 
 
     //# the actual graph...
-    $series  = "DEF:sum=$rrd_dir/$metricname.rrd:sum:AVERAGE ";
-    $series .= "AREA:sum#$default_metric_color:'$subtitle' ";
+    $series  = "DEF:'sum'='$rrd_dir/$metricname.rrd:sum':AVERAGE ";
+    $series .= "AREA:'sum'#$default_metric_color:'$subtitle' ";
 
     if ($jobstart) {
         $series .= "VRULE:$jobstart#$jobstart_color ";
