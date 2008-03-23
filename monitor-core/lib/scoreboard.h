@@ -9,7 +9,7 @@ enum ganglia_scoreboard_types {
 	GSB_UNKNOWN = 0,
 	GSB_COUNTER = 1,
 	GSB_READ_RESET = 2,
-	GSB_STATE = 3,
+	GSB_STATE = 3
 };
 typedef enum ganglia_scoreboard_types ganglia_scoreboard_types;
 

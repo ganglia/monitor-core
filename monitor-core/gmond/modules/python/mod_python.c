@@ -82,7 +82,6 @@ py_metric_init_t;
 
 
 static apr_pool_t *pool;
-//static FILE *config_file;
 static PyThreadState* gtstate = NULL;
 
 static apr_array_header_t *metric_info = NULL;
@@ -264,7 +263,7 @@ get_python_float_value(PyObject* dv, double* pnum)
         *pnum = (double)v;
     }
     else if (PyString_Check(dv)) {
-        // Convert from string to int
+        /* Convert from string to int */
         double tid;
         char *endptr;
         char* p = PyString_AsString(dv);
@@ -330,7 +329,6 @@ static void fill_metric_info(PyObject* pdict, py_metric_init_t* minfo, char *mod
 
     memset(minfo, 0, sizeof(*minfo));
     if (get_pydict_string_value(pdict, "name", minfo->mname, sizeof(minfo->mname)) < 1) {
-//XXX       sprintf (minfo->mname, "Unknown%d", i++);
         err_msg("[PYTHON] No metric name given in module [%s].\n", modname);
     }
     else
@@ -528,7 +526,7 @@ static int pyth_metric_init (apr_pool_t *p)
         if (modname == NULL)
             continue;
 
-        PyEval_RestoreThread(gtstate); // TEST
+        PyEval_RestoreThread(gtstate);
 
         pmod = PyImport_ImportModule(modname);
         if (!pmod) {
