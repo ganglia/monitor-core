@@ -573,9 +573,9 @@ setup_listen_channels_pollset( void )
 
       sock_family = get_sock_family(family);
 
-      /* Create the socket for the channel */
+      /* Create the socket for the channel, blocking w/timeout */
       socket = create_tcp_server(pool, sock_family, port, bindaddr, 
-                                 interface, 1);// blocking w/timeout 
+                                 interface, 1);
       if(!socket)
         {
           err_msg("Unable to create tcp_accept_channel. Exiting.\n");

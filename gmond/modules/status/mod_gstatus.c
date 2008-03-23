@@ -57,14 +57,14 @@ static Ganglia_25metric gs_metric_info[] =
 static int gs_metric_init (apr_pool_t *p)
 {
     void *sbi = ganglia_scoreboard_iterator();
+    Ganglia_25metric *gmi;
     char *name;
-    int i = 0;
 
     metric_info = apr_array_make(p, 2, sizeof(Ganglia_25metric));
 
     while (sbi) {
         name = ganglia_scoreboard_next(&sbi);
-        Ganglia_25metric *gmi = apr_array_push(metric_info);
+        gmi = apr_array_push(metric_info);
 
         /* gmi->key will be automatically assigned by gmond */
         gmi->name = apr_pstrdup (p, name);
@@ -79,7 +79,6 @@ static int gs_metric_init (apr_pool_t *p)
         MMETRIC_INIT_METADATA(gmi,p);
         MMETRIC_ADD_METADATA(gmi,MGROUP,"gstatus");
     }
-
 
     /* Replace the empty static metric definition array with the
        dynamic array that we just created 

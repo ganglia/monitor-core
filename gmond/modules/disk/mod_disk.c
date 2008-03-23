@@ -3,10 +3,7 @@
 
 #include <libmetrics.h>
 
-//#include "utils.h"
-
 mmodule disk_module;
-
 
 static int disk_metric_init ( apr_pool_t *p )
 {

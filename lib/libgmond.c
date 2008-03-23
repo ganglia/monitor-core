@@ -611,18 +611,20 @@ ganglia_slope_t cstr_to_slope(const char* str)
         return GANGLIA_SLOPE_BOTH;
     }
     
-    // well, it might just be _wrong_ too
-    // but we'll handle that situation another time
+    /*
+     * well, it might just be _wrong_ too
+     * but we'll handle that situation another time
+     */
     return GANGLIA_SLOPE_UNSPECIFIED;
 }
 
 const char* slope_to_cstr(unsigned int slope)
 {
-    // this function takes a raw int, not a
-    // ganglia_slope_t in order to help future
-    // unit testing (where any value can be passed
-    // in)
-    
+    /* 
+     * this function takes a raw int, not a
+     * ganglia_slope_t in order to help future
+     * unit testing (where any value can be passed in)
+     */
     switch (slope) {
     case GANGLIA_SLOPE_ZERO:
         return "zero";
@@ -635,9 +637,11 @@ const char* slope_to_cstr(unsigned int slope)
     case GANGLIA_SLOPE_UNSPECIFIED:
         return "unspecified";
     }
-    // by NOT using a default in the switch statement
-    // the compiler will complain if anyone adds
-    // to the enum without changing this function.
+    /*
+     * by NOT using a default in the switch statement
+     * the compiler will complain if anyone adds
+     * to the enum without changing this function.
+     */
     return "unspecified";
 }
 
