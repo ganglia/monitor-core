@@ -6,7 +6,7 @@ GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD = modules/disk/mod_disk.lo modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
 	modules/memory/mod_mem.lo modules/network/mod_net.lo \
 	modules/system/mod_proc.lo modules/system/mod_sys.lo
-GLDFLAGS = -static -export-dynamic
+GLDFLAGS = -static @EXPORT_SYMBOLS@
 if BUILD_PYTHON
 GLDADD += modules/python/mod_python.lo
 GLDFLAGS += -lpython@PYTHON_VERSION@
