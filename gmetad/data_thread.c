@@ -90,7 +90,7 @@ data_thread ( void *arg )
                if( rval < 0 )
                   {
                      /* Error */
-		    err_msg("poll() error in data_thread for [%s] data source after %d bytes read", d->name, read_index);
+                     err_msg("poll() error in data_thread for [%s] data source after %d bytes read", d->name, read_index);
                      d->dead = 1;
                      goto take_a_break;
                   }
@@ -172,9 +172,9 @@ data_thread ( void *arg )
        take_a_break:
          g_tcp_socket_delete(sock);
 
-	 /* Don't remember this host if there was a problem */
-	 if(d->dead)
-           d->last_good_index = -1;
+         /* Don't remember this host if there was a problem */
+         if(d->dead)
+            d->last_good_index = -1;
 
          gettimeofday(&end, NULL);
          /* Sleep somewhere between (step +/- 5sec.) */
