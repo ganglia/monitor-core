@@ -120,8 +120,6 @@ data_source_list_t;;
  * metric_t to compute summaries. */
 typedef union
    {
-      int32_t int32;
-      uint32_t uint32;
       double d;
       int str;
    }
