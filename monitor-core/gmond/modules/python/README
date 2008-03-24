@@ -128,8 +128,9 @@ file to a python module.  The syntax for passing parameters to
 a specific python module is at follows:
 
 modules {
-  pymodule {
+  module {
     name = "example"
+    language = "python"
     param YouNameIt {
         value = Whatever
     }
@@ -139,13 +140,14 @@ modules {
   }
 }
 
-The "pymodule" section must contain a "name" directive.  The value
-of this directive must match the file name of the python module's 
-.py file.  The section can then take either a "params" directive
-whose value is a single string parameter and/or multiple "param"
-sections.  each "param" section must include a name which will be
-the name of the value when it is passed to the python module, and
-a "value" directive.  The "value" directive will always be passed
-as a string to the python module.  It is up to the module itself
-to determine the actual value type.
+The "module" section must contain a "name" directive and a 
+"language" directive.  The value of the "name" directive must 
+match the file name of the python module's .py file and the 
+value of the "language" directive must be "python".  The section 
+can take multiple "param" sections.  Each "param" section must 
+include a name which will be the name of the value when it is 
+passed to the python module, and a "value" directive.  The 
+"value" directive will always be passed as a string to the 
+python module.  It is up to the module itself to determine the 
+actual value type.
 

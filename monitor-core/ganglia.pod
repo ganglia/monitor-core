@@ -215,7 +215,7 @@ and the default was to announce gexec as on.
 
 Once you have successfully run
 
-  % ./configure
+  % ./configure <options>
   % make
   % make install
 
@@ -589,6 +589,31 @@ Note: gstat with no option will only show gexec-enabled hosts.  To see all hosts
 of their gexec state) you need to add the B<--all> flag.
 
   % gstat --all
+
+=head1 Extending Ganglia through metric modules
+
+There are currently two ways in which metric modules can be written and plugged into Gmond in order 
+to extend the types of metrics that Ganglia is able to monitor.  As of Ganglia 3.1, a pluggable 
+interface has been added to allow the Gmond metric gathering agent to collect any type of metric 
+that can be acquired through programatic means.  The primary metric module interface is C with a 
+secondary python interface.  This means that pluggable modules can either be written and compiled 
+into dynamically loadable C based language modules or written and deployed as python pluggable modules.  
+
+The basic steps when writting a pluggable module either in C or in python, is as follows:
+
+=over 4
+
+=item 1. Create a module definition structure that contains callback data and metric information
+
+=item 2. Implement 3 callback functions that will serve as the links between the Gmond metric 
+gathering agent and the metric module.  These callback functions include module initialization, 
+metric handler and module cleanup.
+
+=back
+
+There are simple metric module examples for both a C based and a python based module under the 
+gmond/modules and gmond/python_modules source code sub-trees.  Please see these module examples for
+more details.
 
 =head1 Frequently Asked Questions (FAQ)
 
@@ -977,6 +1002,7 @@ The B<Ganglia Development Team>...
  Federico David Sacerdoti sacerdoti 	Developer 	sacerdoti at users.sourceforge.net 	
  Tim Cera 	        timcera 	Developer 	timcera at users.sourceforge.net 	
  Mathew Benson 	        wintermute11 	Developer 	wintermute11 at users.sourceforge.net 	
+ Brad Nicholes          bnicholes       Developer       bnicholes at users.sourceforge.net
 
 =head1 Contributors
 
