@@ -3,6 +3,7 @@ AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/lib
 if STATIC_BUILD
 noinst_LTLIBRARIES    = libmodnet.la
 libmodnet_la_SOURCES = mod_net.c
+libmodnet_la_LDFLAGS = -export-all-symbols
 else
 pkglib_LTLIBRARIES    = modnet.la
 
