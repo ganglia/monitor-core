@@ -1,4 +1,3 @@
-
 Build Ganglia source from the repository using Cygwin on Windows 
 ================================================================
 
@@ -18,56 +17,31 @@ CheckOut the source files of Ganglia in the Cygwin command console:
 
   svn co http://ganglia.svn.sourceforge.net/svnroot/ganglia/trunk/monitor-core ganglia
 
-Go to the ganglia directory and type the following commands:
+Go to the ganglia directory and bootstrap your sources:
 
-  aclocal
-  autoheader
-  automake --add-missing
-  autoconf
+  ./bootstrap
 
-The steps above generate the configure file.
+The steps above generate the configure file
 
-Go to libmetrics directory and type the following commands
+Download libconfuse, build it and install the libconfuse library (this will
+be linked statically and will only be needed in the build machine)
 
-  aclocal
-  autoheader
-  automake --add-missing
-  autoconf
-
-The steps above generates the configure file for libmetrics.
-
-Download libconfuse, build it and install the libconfuse library.
-./configure
-make
-make install
+  ./configure
+  make
+  make install
 
 Go to the ganglia directory, and run the following command to build Ganglia
 
-./configure --with-libconfuse=/usr/local
-
-When the make command is executed, this command will fail at the rpcgen 
-tool not able to generate the src files. This is because the rpcgen tool 
-for Cygwin does not support some of the language constructs. This is the 
-error which you will get.
-
-rpcgen protocol.x
-  case modular_metric:
-^^^^^^
-protocol.x, line 118: expected type specifier
-
-So the current work around would be to use the generated files from linux 
-and transfer to cygwin. 
-
-The command used in Linux is 
-rpcgen protocol.x
-
-protocol.x is present in the ganglia/lib directory.
-
-After copying again type the make command.
+  ./configure --with-libconfuse=/usr/local --disable-python \
+      --enable-static-build
 
 If everything works right, then you should see a gmond.exe, gstat.exe and 
 gmetric.exe created in the gmond, gmond/gstat and gmetric directories
 respectively. 
+
+The binaries generated depend on cygwin (cygwin1.dll) and the apr cygwin
+library (cygapr-1-0.dll) and so if you want to use them in a different
+system you'll need to copy them as well.
 
 gmetad cannot be built on Cygwin but you can use gmetad in any other supported
 architecture with the agents from Cygwin.
