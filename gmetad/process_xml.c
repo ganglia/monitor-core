@@ -100,16 +100,10 @@ fillmetric(const char** attr, Metric_t *metric, const char* type)
                   switch (tt->type)
                      {
                         case INT:
-                           metric->val.int32 = (long) 
-                                   strtol(metricval, (char**) NULL, 10);
-                           break;
                         case TIMESTAMP:
                         case UINT:
-                           metric->val.uint32 = (unsigned long) 
-                                   strtoul(metricval, (char**) NULL, 10);
-                           break;
                         case FLOAT:
-                           metric->val.d = (double) 
+                           metric->val.d = (double)
                                    strtod(metricval, (char**) NULL);
                            p = strrchr(metricval, '.');
                            if (p) metric->precision = (short int) strlen(p+1);
@@ -600,8 +594,8 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                case TYPE_TAG:
                   type = attr[i+1];
                   break;
-  	       case SLOPE_TAG:
-		  slope = cstr_to_slope(attr[i+1]);
+               case SLOPE_TAG:
+                  slope = cstr_to_slope(attr[i+1]);
                default:
                   break;
             }
@@ -629,8 +623,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                                   xmldata->hostname, name);
                   xmldata->rval = write_data_to_rrd(xmldata->sourcename,
                         xmldata->hostname, name, metricval, NULL,
-		        xmldata->ds->step, xmldata->source.localtime,
-		        slope);
+                        xmldata->ds->step, xmldata->source.localtime, slope);
             }
          metric->id = METRIC_NODE;
          metric->report_start = metric_report_start;
@@ -681,15 +674,9 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                switch (tt->type)
                   {
                      case INT:
-                        metric->val.int32 += (long) 
-                                strtol(metricval, (char**) NULL, 10);
-                        break;
                      case UINT:
-                        metric->val.uint32 += (unsigned long) 
-                                strtoul(metricval, (char**) NULL, 10);
-                        break;
                      case FLOAT:
-                        metric->val.d += (double) 
+                        metric->val.d += (double)
                                 strtod(metricval, (char**) NULL);
                         break;
                      default:
@@ -868,15 +855,9 @@ startElement_METRICS(void *data, const char *el, const char **attr)
          switch (tt->type)
                {
                   case INT:
-                     metric->val.int32 += (long) 
-                             strtol(metricval, (char**) NULL, 10);
-                     break;
                   case UINT:
-                     metric->val.uint32 += (unsigned long) 
-                             strtoul(metricval, (char**) NULL, 10);
-                     break;
                   case FLOAT:
-                     metric->val.d += (double) 
+                     metric->val.d += (double)
                              strtod(metricval, (char**) NULL);
                      break;
                   default:
@@ -1017,10 +998,8 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
    switch (tt->type)
       {
          case INT:
-            sprintf(sum, "%d", metric->val.int32);
-            break;
          case UINT:
-            sprintf(sum, "%u", metric->val.uint32);
+            sprintf(sum, "%.f", metric->val.d);
             break;
          case FLOAT:
             sprintf(sum, "%.*f", (int) metric->precision, metric->val.d);
@@ -1032,16 +1011,17 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
 
    /* Save the data to a round robin database if this data source is 
     * alive. */
-   if (!xmldata->ds->dead && !xmldata->rval) {
+   if (!xmldata->ds->dead && !xmldata->rval) 
+     {
    
-	   debug_msg("Writing Summary data for source %s, metric %s",
-	       xmldata->sourcename, name);
-	
-	   xmldata->rval = write_data_to_rrd(xmldata->sourcename, NULL, name,
-					     sum, num, xmldata->ds->step,
-					     xmldata->source.localtime,
-					     cstr_to_slope(getfield(metric->strings, metric->slope)));
-   }
+       debug_msg("Writing Summary data for source %s, metric %s",
+                 xmldata->sourcename, name);
+
+       xmldata->rval = write_data_to_rrd(xmldata->sourcename, NULL, name,
+                                         sum, num, xmldata->ds->step,
+                                         xmldata->source.localtime,
+                                         cstr_to_slope(getfield(metric->strings, metric->slope)));
+     }
 
    return xmldata->rval;
 }

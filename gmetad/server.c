@@ -72,13 +72,14 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
    tt = in_type_list(type, strlen(type));
    if (!tt) return 0;
 
+   /* We sum everything in double to properly combine integer sources
+      (3.0) with float sources (3.1).  This also avoids wraparound
+      errors: for example memory KB exceeding 4TB. */
    switch (tt->type)
       {
          case INT:
-            sprintf(sum, "%d", metric->val.int32);
-            break;
          case UINT:
-            sprintf(sum, "%u", metric->val.uint32);
+            sprintf(sum, "%.f", metric->val.d);
             break;
          case FLOAT:
             sprintf(sum, "%.*f", (int) metric->precision, metric->val.d);
@@ -90,7 +91,7 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
    return xml_print(client, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
       "TYPE=\"%s\" UNITS=\"%s\" SLOPE=\"%s\" SOURCE=\"%s\"/>\n",
       name, sum, metric->num,
-      getfield(metric->strings, metric->type),
+      "double",         /* we always report double sums */
       getfield(metric->strings, metric->units),
       getfield(metric->strings, metric->slope),
       getfield(metric->strings, metric->source));

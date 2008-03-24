@@ -148,16 +148,13 @@ sum_metrics(datum_t *key, datum_t *val, void *arg)
          tt = in_type_list(type, strlen(type));
          if (!tt) return 0;
 
-	 /* We do all our sums in double which does not suffer from
-	    wraparound errors: for example memory KB exceeding 4TB. -twitham */
+         /* We sum everything in double to properly combine integer sources
+            (3.0) with float sources (3.1).  This also avoids wraparound
+            errors: for example memory KB exceeding 4TB. */
          switch (tt->type)
             {
                case INT:
-                  rootmetric->val.d += metric->val.int32;
-                  break;
                case UINT:
-                  rootmetric->val.d += metric->val.uint32;
-                  break;
                case FLOAT:
                   rootmetric->val.d += metric->val.d;
                   break;
