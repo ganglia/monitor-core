@@ -458,6 +458,7 @@ dnl default VARSTATEDIR to /var/lib since that's the traditional location.
 dnl
 varstatedir="/var/lib"
 
+EXPORT_SYMBOLS="-export-dynamic"
 case "$host" in
 *linux*)
                 CFLAGS="$CFLAGS -D_REENTRANT"
@@ -523,8 +524,11 @@ dnl
 		varstatedir="/var/db"
 		AC_DEFINE(OPENBSD, 1, OPENBSD);;
 *cygwin*)      	LDFLAGS="-liphlpapi"
+		EXPORT_SYMBOLS="-export-all-symbols"
 		AC_DEFINE(CYGWIN, 1, CYGWIN)
 esac
+
+AC_SUBST(EXPORT_SYMBOLS)
 
 dnl Define VARSTATEDIR in config.h
 dnl

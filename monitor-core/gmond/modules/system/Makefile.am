@@ -3,6 +3,7 @@ AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/lib
 if STATIC_BUILD
 noinst_LTLIBRARIES   = libmodsys.la
 libmodsys_la_SOURCES = mod_proc.c mod_sys.c 
+libmodsys_la_LDFLAGS = -export-all-symbols
 else
 pkglib_LTLIBRARIES   = modproc.la modsys.la
 
