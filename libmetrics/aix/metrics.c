@@ -103,7 +103,6 @@ int ni_flag=0;
 
 perfstat_cpu_total_t cpu_total_buffer;
 perfstat_memory_total_t minfo;
-perfstat_disk_total_t dinfo;
 perfstat_netinterface_total_t ninfo[2],*last_ninfo, *cur_ninfo ;
 
 
@@ -151,7 +150,6 @@ metric_init(void)
    get_cpuinfo();
 
    perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);  
-   perfstat_disk_total(NULL, &dinfo, sizeof(perfstat_disk_total_t), 1);
 
    update_ifdata();
 
@@ -397,30 +395,35 @@ pkts_out_func ( void )
    return val;
 }
 
-
 g_val_t 
 disk_free_func ( void )
 {
    g_val_t val;
+   perfstat_disk_total_t d;
    
-   perfstat_disk_total(NULL, &dinfo, sizeof(perfstat_disk_total_t), 1);
-   val.d = dinfo.free / 1024;
+   if (perfstat_disk_total(NULL, &d, sizeof(perfstat_disk_total_t), 1) == -1)
+      val.d = 0.0;
+   else
+      val.d = (double)d.free / 1024;
+
    return val;
 }
-
 
 g_val_t 
 disk_total_func ( void )
 {
    g_val_t val;
-   perfstat_disk_total(NULL, &dinfo, sizeof(perfstat_disk_total_t), 1);
-   val.d =dinfo.size / 1024;
+   pefstat_disk_total_t d;
+
+   if (perfstat_disk_total(NULL, &d, sizeof(perfstat_disk_total_t), 1) == -1)
+      val.d = 0.0;
+   else
+      val.d = (double)d.size / 1024;
+
    return val;
 }
 
-/* most used Partition dose not make sense to me 
-** FIXME
-*/
+/* FIXME */
 g_val_t 
 part_max_used_func ( void )
 {
@@ -428,8 +431,6 @@ part_max_used_func ( void )
    val.f = 0.0;
    return val;
 }
-
-
 
 g_val_t
 load_one_func ( void )
