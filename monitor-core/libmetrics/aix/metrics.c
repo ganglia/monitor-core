@@ -123,7 +123,6 @@ struct cpu_info cpu_info[2],
 
 int aixver, aixrel, aixlev, aixfix;
 static time_t boottime;
-struct utsname unames;
 
 
 /* Prototypes
@@ -152,7 +151,6 @@ metric_init(void)
    cur_cpu_info->total_ticks = 0;
    
    update_ifdata();
-   uname(&unames);
    
    get_cpuinfo();
    sleep(CPU_INFO_TIMEOUT+1);
@@ -235,7 +233,11 @@ g_val_t
 os_name_func ( void )
 {
    g_val_t val;
-   strncpy( val.str, unames.sysname, MAX_G_STRING_SIZE );
+   struct utsname uts;
+
+   uname (&uts);
+   strncpy (val.str, uts.sysname, MAX_G_STRING_SIZE);
+
    return val;
 }        
 
