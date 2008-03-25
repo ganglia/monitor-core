@@ -582,6 +582,7 @@ To get help with the commandline options, simply pass C<gstat> the C<--help> opt
      -m         --mpifile          Print a load-balanced mpifile (default=off)
      -1         --single_line      Print host and information all on one line (default=off)
      -l         --list             Print ONLY the host list (default=off)
+     -n         --numeric          Print numeric addresses instead of hostnames (default=off)
      -iSTRING   --gmond_ip=STRING  Specify the ip address of the gmond to query (default='127.0.0.1')
      -pINT      --gmond_port=INT   Specify the gmond port to query (default=8649)
 
