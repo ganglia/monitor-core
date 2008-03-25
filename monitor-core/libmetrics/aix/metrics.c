@@ -211,18 +211,19 @@ sys_clock_func ( void )
    return val;
 }
 
-
-
 g_val_t
 machine_type_func ( void )
 {
    g_val_t val;
+   perfstat_cpu_total_t c;
 
+   if (perfstat_cpu_total (NULL, &c, sizeof( perfstat_cpu_total_t), 1) == -1)
+      strcpy (val.str, "unknown");
+   else
+      strncpy( val.str, c.description, MAX_G_STRING_SIZE );
 
-   strncpy( val.str,cpu_total_buffer.description , MAX_G_STRING_SIZE );
    return val;
 }
-
 
 g_val_t
 os_name_func ( void )
