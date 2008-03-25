@@ -122,6 +122,7 @@ struct cpu_info cpu_info[2],
   
 
 int aixver, aixrel, aixlev, aixfix;
+static time_t boottime;
 struct utsname unames;
 
 
@@ -183,22 +184,27 @@ g_val_t
 boottime_func ( void )
 {
    g_val_t val;
-   int boottime = 0;
    struct utmp buf;
-   FILE *utmp = fopen(UTMP_FILE, "r");
+   FILE *utmp;
+   
+   if (!boottime) {
+      utmp = fopen(UTMP_FILE, "r");
 
-   if (utmp == NULL) {
-     /* Can't open utmp, use current time as boottime */
-     boottime = time(NULL);
-   } else {
-     while (fread((char *) &buf, sizeof(buf), 1, utmp) == 1) {
-        if (buf.ut_type == BOOT_TIME) {
-            boottime = buf.ut_time;
-            break;
-        }
-     }
+      if (utmp == NULL) {
+         /* Can't open utmp, use current time as boottime */
+         boottime = time(NULL);
+      } else {
+         while (fread((char *) &buf, sizeof(buf), 1, utmp) == 1) {
+            if (buf.ut_type == BOOT_TIME) {
+               boottime = buf.ut_time;
+               break;
+            }
+         }
+	 fclose (utmp);
+      }
    }
    val.uint32 = boottime;
+
    return val;
 }
 
