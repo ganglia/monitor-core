@@ -35,6 +35,7 @@
 #include <odmi.h>
 #include <cf.h>
 #include <sys/utsname.h>
+#include <sys/proc.h>
 
 #include <libperfstat.h>
 
@@ -67,7 +68,15 @@ struct product {
         char *supersedes;        /* [512] offset: 0xf4 ( 244) */
 };
 
-
+#if defined(_AIX43)
+#ifndef SBITS
+/*
+ * For multiplication of fractions that are stored as integers, including
+ * p_pctcpu.  Not allowed to do floating point arithmetic in the kernel.
+ */
+#define SBITS   16
+#endif
+#endif
 
 #define MAX_CPUS  64
 
@@ -433,9 +442,12 @@ g_val_t
 load_one_func ( void )
 {
    g_val_t val;
+   perfstat_cpu_total_t c;
    
-   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
-   val.f =(1.0*cpu_total_buffer.loadavg[0])/(1<<SBITS) ;
+   if (perfstat_cpu_total(NULL,  &c, sizeof(perfstat_cpu_total_t), 1) == -1)
+      val.f = 0.0;
+   else
+      val.f = (float)c.loadavg[0]/(float)(1<<SBITS);
    return val;
 }
 
@@ -443,9 +455,12 @@ g_val_t
 load_five_func ( void )
 {  
    g_val_t val;
+   perfstat_cpu_total_t c;
 
-   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
-   val.f =(1.0*cpu_total_buffer.loadavg[1])/(1<<SBITS) ;
+   if (perfstat_cpu_total(NULL,  &c, sizeof(perfstat_cpu_total_t), 1) == -1)
+      val.f = 0.0;
+   else
+      val.f = (float)c.loadavg[1]/(float)(1<<SBITS);
    return val;
 }
 
@@ -453,9 +468,12 @@ g_val_t
 load_fifteen_func ( void )
 {
    g_val_t val;
+   perfstat_cpu_total_t c;
 
-   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
-   val.f =(1.0*cpu_total_buffer.loadavg[2])/(1<<SBITS)*1.0 ;
+   if (perfstat_cpu_total(NULL, &c, sizeof(perfstat_cpu_total_t), 1) == -1)
+      val.f = 0.0;
+   else
+      val.f = (float)c.loadavg[2]/(float)(1<<SBITS);
 
    return val;
 }
