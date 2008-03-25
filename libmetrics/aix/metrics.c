@@ -165,19 +165,19 @@ metric_init(void)
    return val;
 }
 
-
-
 g_val_t
 cpu_speed_func ( void )
 {
    g_val_t val;
+   perfstat_cpu_total_t c;
 
-   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
-   val.uint32 = cpu_total_buffer.processorHZ/1000000;
+   if (perfstat_cpu_total(NULL,  &c, sizeof(perfstat_cpu_total_t), 1) == -1)
+      val.uint32 = 0;
+   else
+      val.uint32 = c.processorHZ/1000000;
 
    return val;
 }
-
 
 g_val_t
 boottime_func ( void )
