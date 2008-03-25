@@ -523,7 +523,7 @@ dnl
 *openbsd*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		varstatedir="/var/db"
 		AC_DEFINE(OPENBSD, 1, OPENBSD);;
-*cygwin*)      	LDFLAGS="-liphlpapi"
+*cygwin*)      	LDFLAGS="-L/bin"
 		EXPORT_SYMBOLS="-export-all-symbols"
 		AC_DEFINE(CYGWIN, 1, CYGWIN)
 esac
