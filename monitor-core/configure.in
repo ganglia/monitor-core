@@ -312,11 +312,16 @@ if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes ; then
   echo "Added -L$libconfusepath/lib to LDFLAGS"
 fi
 AC_CHECK_LIB(confuse, cfg_parse)
-if test $ac_cv_lib_confuse_cfg_parse = yes; then
-  echo "Found a suitable Confuse library"
+if test $ac_cv_lib_confuse_cfg_parse = no; then
+  echo Trying harder including gettext and friends
+  unset ac_cv_lib_confuse_cfg_parse
+  LDFLAGS="$LDFLAGS -lintl -liconv"
+  AC_CHECK_LIB(confuse, cfg_parse)
+  if test $ac_cv_lib_confuse_cfg_parse = no; then
+    echo "libconfuse not found"
+  fi
 else
-  echo "libconfuse not found"
-  exit;
+  echo "Found a suitable Confuse library"
 fi
 
 echo
