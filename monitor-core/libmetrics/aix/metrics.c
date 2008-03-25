@@ -483,9 +483,13 @@ g_val_t
 cpu_num_func ( void )
 {
    g_val_t val;
+   perfstat_cpu_total_t c;
 
-   perfstat_cpu_total(NULL,  &cpu_total_buffer, sizeof(perfstat_cpu_total_t), 1);
-   val.uint16 =  cpu_total_buffer.ncpus;
+   if (perfstat_cpu_total(NULL,  &c, sizeof(perfstat_cpu_total_t), 1) == -1)
+      val.uint16 = 0;
+   else
+      val.uint16 = c.ncpus;
+
    return val;
 }
 
