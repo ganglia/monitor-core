@@ -13,6 +13,7 @@ function graph_metric ( &$rrdtool_graph ) {
            $max,
            $meta_designator,
            $metricname,
+           $metrictitle,
            $min,
            $range,
            $rrd_dir,
@@ -32,8 +33,12 @@ function graph_metric ( &$rrdtool_graph ) {
             $prefix = $metricname;
         }
         else {
-            $rrdtool_graph['title'] = $metricname;
             $prefix = $hostname;
+            if ($metrictitle) {
+               $rrdtool_graph['title'] = $metrictitle;
+            } else {
+               $rrdtool_graph['title'] = $metricname;
+            }
         }
 
         $prefix = $summary ? $metricname : $hostname;
