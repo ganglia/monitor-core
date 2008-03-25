@@ -8,13 +8,15 @@ script "./bootstrap".
 
 To build a distribution tarball, run:
 
-./configure
+./configure (--with-gmetad)
 make dist-gzip
 
 To prepare a distribution tree, run:
 
-./configure
+./configure (--with-gmetad)
 make distdir
+
+(For full configure options, run ./configure --help)
 
 To build RPMs after building the tarball:
 
