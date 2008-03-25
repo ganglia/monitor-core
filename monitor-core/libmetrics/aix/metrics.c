@@ -74,7 +74,7 @@ struct product {
 #define INFO_TIMEOUT   10
 #define CPU_INFO_TIMEOUT INFO_TIMEOUT
 
-#define MEM_PAGESIZE 4096/1024
+#define MEM_KB_PER_PAGE (4096/1024)
 
 
 struct cpu_info {
@@ -102,7 +102,6 @@ int ci_flag=0;
 int ni_flag=0;
 
 perfstat_cpu_total_t cpu_total_buffer;
-perfstat_memory_total_t minfo;
 perfstat_netinterface_total_t ninfo[2],*last_ninfo, *cur_ninfo ;
 
 
@@ -148,8 +147,6 @@ metric_init(void)
    get_cpuinfo();
    sleep(CPU_INFO_TIMEOUT+1);
    get_cpuinfo();
-
-   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);  
 
    update_ifdata();
 
@@ -586,21 +583,20 @@ proc_run_func( void )
   g_val_t val;
 
   val.uint32 = count_procs(1);
-
  
   return val;
 }
-
-
 
 g_val_t
 mem_total_func ( void )
 {
    g_val_t val;
+   perfstat_memory_total_t m;
   
-   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
-
-   val.f = minfo.real_total*MEM_PAGESIZE;
+   if (perfstat_memory_total(NULL, &m, sizeof(perfstat_memory_total_t), 1) == -1)
+      val.f = 0;
+   else
+      val.f = m.real_total * MEM_KB_PER_PAGE;
    
    return val;
 }
@@ -609,35 +605,35 @@ g_val_t
 mem_free_func ( void )
 {
    g_val_t val;
+   perfstat_memory_total_t m;
   
-   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
+   if (perfstat_memory_total(NULL, &m, sizeof(perfstat_memory_total_t), 1) == -1)
+      val.f = 0;
+   else
+      val.f = m.real_free * MEM_KB_PER_PAGE;
    
-   val.f = minfo.real_free*MEM_PAGESIZE; 
    return val;
 }
 
-/*
-** AIX does not have this
-** FIXME --
-*/
+/* FIXME? */
 g_val_t
 mem_shared_func ( void )
 {
    g_val_t val;
+   
    val.f = 0;
 
    return val;
 }
 
-/*
-** AIX does not have this
-** FIXME --
-*/
+/* FIXME? */
 g_val_t
 mem_buffers_func ( void )
 {
    g_val_t val;
+   
    val.f = 0;
+
    return val;
 }
 
@@ -645,10 +641,13 @@ g_val_t
 mem_cached_func ( void )
 {
    g_val_t val;
+   perfstat_memory_total_t m;
 
-   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
-   
-   val.f = minfo.numperm*MEM_PAGESIZE;
+   if (perfstat_memory_total(NULL, &m, sizeof(perfstat_memory_total_t), 1) == -1)
+      val.f = 0;
+   else
+      val.f = m.numperm * MEM_KB_PER_PAGE;
+
    return val;
 }
 
@@ -656,10 +655,13 @@ g_val_t
 swap_total_func ( void )
 {
    g_val_t val;
+   perfstat_memory_total_t m;
 
-   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
+   if (perfstat_memory_total(NULL, &m, sizeof(perfstat_memory_total_t), 1) == -1)
+      val.f = 0;
+   else
+      val.f = m.pgsp_total * MEM_KB_PER_PAGE;
    
-   val.f =minfo.pgsp_total*MEM_PAGESIZE;
    return val;
    
 }
@@ -668,13 +670,15 @@ g_val_t
 swap_free_func ( void )
 {
    g_val_t val;
-   perfstat_memory_total(NULL, &minfo, sizeof(perfstat_memory_total_t), 1);
-   
-   val.f =minfo.pgsp_free*MEM_PAGESIZE;
+   perfstat_memory_total_t m;
+
+   if (perfstat_memory_total(NULL, &m, sizeof(perfstat_memory_total_t), 1) == -1)
+      val.f = 0;
+   else
+      val.f =m.pgsp_free * MEM_KB_PER_PAGE;
 
    return val;
 }
-
 
 g_val_t
 mtu_func ( void )
