@@ -325,7 +325,7 @@ if test $ac_cv_lib_confuse_cfg_parse = no; then
     fi
   fi
 fi
-if test $ac_cv_lib_confuse_cfg_parse = yes
+if test $ac_cv_lib_confuse_cfg_parse = yes; then
   echo "Found a suitable Confuse library"
 fi
 
