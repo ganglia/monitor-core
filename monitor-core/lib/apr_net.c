@@ -22,6 +22,8 @@ void apr_sockaddr_vars_set(apr_sockaddr_t *, int, apr_port_t);
 
 #ifdef SOLARIS
 #include <sys/sockio.h>  /* for SIOCGIFADDR */
+#include <unistd.h>      /* for ioctl */
+#include <stropts.h>
 #endif
 
 #include "error.h"
