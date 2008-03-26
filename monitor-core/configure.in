@@ -316,6 +316,7 @@ if test $ac_cv_lib_confuse_cfg_parse = no; then
   AC_CHECK_LIB(confuse, cfg_parse)
   if test $ac_cv_lib_confuse_cfg_parse = no; then
     echo "libconfuse not found"
+    exit
   fi
 else
   echo "Found a suitable Confuse library"
