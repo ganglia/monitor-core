@@ -310,15 +310,22 @@ if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes ; then
 fi
 AC_CHECK_LIB(confuse, cfg_parse)
 if test $ac_cv_lib_confuse_cfg_parse = no; then
-  echo Trying harder including gettext and friends
+  echo Trying harder including gettext
   unset ac_cv_lib_confuse_cfg_parse
-  LDFLAGS="$LDFLAGS -lintl -liconv"
+  LDFLAGS="$LDFLAGS -lintl"
   AC_CHECK_LIB(confuse, cfg_parse)
   if test $ac_cv_lib_confuse_cfg_parse = no; then
-    echo "libconfuse not found"
-    exit
+    echo Trying harder including iconv
+    unset ac_cv_lib_confuse_cfg_parse
+    LDFLAGS="$LDFLAGS -liconv"
+    AC_CHECK_LIB(confuse, cfg_parse)
+    if test $ac_cv_lib_confuse_cfg_parse = no; then
+      echo "libconfuse not found"
+      exit
+    fi
   fi
-else
+fi
+if test $ac_cv_lib_confuse_cfg_parse = yes
   echo "Found a suitable Confuse library"
 fi
 
