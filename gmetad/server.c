@@ -286,7 +286,17 @@ applyfilter(client_t *client, Generic_t *node)
          return 0;
 
       case SUMMARY:
-         return source_summary((Source_t*) node, client);
+
+/* use the mutex to avoid reporting incomplete sums -twitham (bug#76) */
+	 if (((Source_t*)node)->sum_finished)
+	   pthread_mutex_lock(((Source_t*)node)->sum_finished);
+
+	 int i = source_summary((Source_t*) node, client);
+
+	 if (((Source_t*)node)->sum_finished)
+	   pthread_mutex_unlock(((Source_t*)node)->sum_finished);
+
+         return i;
 
       default:
          break;
