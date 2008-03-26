@@ -3,6 +3,7 @@
  *  by Jan Schaumann <jschauma@netbsd.org>
  *  Thu Feb  3 22:33:36 EST 2005
  *
+ *  Tested on NetBSD 4.0 (i386)
  *  Tested on NetBSD 3.1 (amd64 and i386)
  *  Tested on NetBSD 3.0 (i386)
  *  Tested on NetBSD 2.0.2 (i386)
@@ -37,6 +38,8 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <paths.h>
+#include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 
 #include "interface.h"
