@@ -214,6 +214,7 @@ fi
 # Create the directory structure
 %__install -d -m 0755 $RPM_BUILD_ROOT/etc/init.d
 %__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
+%__install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man1
 %__install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man5
 
 # Move the files into the structure
@@ -253,6 +254,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 
 %__make DESTDIR=$RPM_BUILD_ROOT install
 %__make -C gmond gmond.conf.5
+%__install -m 0644 mans/*.1* $RPM_BUILD_ROOT%{_mandir}/man1/
 %__install -m 0644 gmond/gmond.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/gmond.conf.5
 
 # cleanup section
@@ -266,6 +268,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %attr(0755,nobody,nobody)@varstatedir@/ganglia/
 %{_sbindir}/gmetad
 /etc/init.d/gmetad
+%{_mandir}/man1/gmetad.1*
 %config(noreplace) %{conf_dir}/gmetad.conf
 
 %files gmond
@@ -274,6 +277,9 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %attr(0555,root,root)%{_bindir}/gstat
 %{_sbindir}/gmond
 /etc/init.d/gmond
+%{_mandir}/man1/gmetric.1*
+%{_mandir}/man1/gmond.1*
+%{_mandir}/man1/gstat.1*
 %{_mandir}/man5/gmond.conf.5*
 %config(noreplace) %{conf_dir}/gmond.conf
 %dir %{conf_dir}
@@ -349,6 +355,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Mar 27 2008 Bernard Li <bernard@vanhpc.org>
+- Added man1 pages gmetad, gmetric, gmond, gstat
 * Thu Mar 13 2008 Jesse Becker <hawson@gmail.com>
 - Add web/graph.d directory and contents to %files.
 * Fri Feb 15 2008 Bernard Li <bernard@vanhpc.org>
