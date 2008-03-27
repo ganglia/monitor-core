@@ -21,7 +21,7 @@
 
 #include "cmdline.h"
 
-const char *gengetopt_args_info_purpose = "Purpose\n  The Ganglia Monitoring Daemon (gmond) listens to the cluster\n  message channel, stores the data in-memory and when requested\n  will output an XML description of the state of the cluster";
+const char *gengetopt_args_info_purpose = "Purpose:\n  The Ganglia Monitoring Daemon (gmond) listens to the cluster\n  message channel, stores the data in-memory and when requested\n  will output an XML description of the state of the cluster";
 
 const char *gengetopt_args_info_usage = "Usage: gmond [OPTIONS]...";
 
