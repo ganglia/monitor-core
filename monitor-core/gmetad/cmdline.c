@@ -21,7 +21,7 @@
 
 #include "cmdline.h"
 
-const char *gengetopt_args_info_purpose = "The Ganglia Meta Daemon (gmetad) collects information from\nmultiple gmond or gmetad data sources, saves the information to local\nround-robin databases, and exports XML which is the concatentation of\nall data sources";
+const char *gengetopt_args_info_purpose = "Purpose:\n  The Ganglia Meta Daemon (gmetad) collects information from\n  multiple gmond or gmetad data sources, saves the information to local\n  round-robin databases, and exports XML which is the concatentation of\n  all data sources";
 
 const char *gengetopt_args_info_usage = "Usage: gmetad [OPTIONS]...";
 
@@ -30,8 +30,8 @@ const char *gengetopt_args_info_description = "";
 const char *gengetopt_args_info_help[] = {
   "  -h, --help             Print help and exit",
   "  -V, --version          Print version and exit",
-  "  -c, --conf=STRING      Location of gmetad configuration file  \n                           (default=`/etc/ganglia/gmetad.conf')",
-  "  -d, --debug=INT        Debug level. If greater than zero, daemon will stay in \n                           foreground.  (default=`0')",
+  "  -c, --conf=STRING      Location of gmetad configuration file  \n                           (default='/etc/ganglia/gmetad.conf')",
+  "  -d, --debug=INT        Debug level. If greater than zero, daemon will stay in \n                           foreground.  (default='0')",
   "  -p, --pid-file=STRING  Write process-id to file",
     0
 };
@@ -348,11 +348,11 @@ int update_arg(void *field, char **orig_field,
   if (!multiple_option && prev_given && (*prev_given || (check_ambiguity && *field_given)))
     {
       if (short_opt != '-')
-        fprintf (stderr, "%s: `--%s' (`-%c') option given more than once%s\n", 
+        fprintf (stderr, "%s: '--%s' ('-%c') option given more than once%s\n", 
                package_name, long_opt, short_opt,
                (additional_error ? additional_error : ""));
       else
-        fprintf (stderr, "%s: `--%s' option given more than once%s\n", 
+        fprintf (stderr, "%s: '--%s' option given more than once%s\n", 
                package_name, long_opt,
                (additional_error ? additional_error : ""));
       return 1; /* failure */
@@ -462,7 +462,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
 
       c = getopt_long (argc, argv, "hVc:d:p:", long_options, &option_index);
 
-      if (c == -1) break;	/* Exit from `while (1)' loop.  */
+      if (c == -1) break;	/* Exit from 'while (1)' loop.  */
 
       switch (c)
         {
@@ -515,7 +515,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
 
         case 0:	/* Long option with no short option */
         case '?':	/* Invalid option.  */
-          /* `getopt_long' already printed an error message.  */
+          /* 'getopt_long' already printed an error message.  */
           goto failure;
 
         default:	/* bug: option not considered.  */
