@@ -9,6 +9,7 @@ all data sources"
 
 option "conf" c "Location of gmetad configuration file" string default="/etc/ganglia/gmetad.conf" no
 option "debug" d "Debug level. If greater than zero, daemon will stay in foreground." int default="0" no
+option "pid-file" p "Write process-id to file" string no
 
 #Usage (a little tutorial)
 #
