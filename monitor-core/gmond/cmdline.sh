@@ -1,4 +1,4 @@
-#!/usr/bin/gengetopt --input
+#!/usr/local/bin/gengetopt --input
 # See http://www.gnu.org/software/gengetopt/gengetopt.html for details
 
 package "gmond"
@@ -13,7 +13,8 @@ option "foreground" f "Run in foreground (don't daemonize)" flag off
 option "default_config" t "Print the default configuration to stdout and exit" flag off
 option "metrics" m "Print the list of metrics this gmond supports" flag off
 option "bandwidth" b "Calculate minimum bandwidth use for configuration" flag off
-option "convert" r "Convert a 2.5.x configuration file to the new 2.6 format" string no
+option "convert" r "Convert a 2.5.x configuration file to the new 3.x format" string no
+option "pid-file" p "Write process-id to file" string no
 
 #Usage (a little tutorial)
 #
