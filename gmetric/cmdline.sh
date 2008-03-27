@@ -1,4 +1,4 @@
-#!/usr/bin/gengetopt --input
+#!/usr/local/bin/gengetopt --input
 # See http://www.gnu.org/software/gengetopt/gengetopt.html for details
 
 package "gmetric"
