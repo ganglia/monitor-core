@@ -17,7 +17,7 @@ AM_CFLAGS = -I.. -I. -I$(top_builddir)/include/ $(GCFLAGS)
 include_HEADERS = gm_protocol.h
 
 EXTRA_DIST=gm_protocol.x
-gm_protocol_xdr.c: gm_protocol.x
+gm_protocol_xdr.c gm_protocol.h: gm_protocol.x
 	rpcgen $<
 
 lib_LTLIBRARIES       = libganglia.la
