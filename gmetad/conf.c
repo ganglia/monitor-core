@@ -307,6 +307,9 @@ number_of_datasources ( char *config_file )
    configfile_t *configfile;
 
    configfile = dotconf_create( config_file, gmetad_options, 0, CASE_INSENSITIVE );
+   if (!configfile) {
+      err_quit("Unable to open config file: %s\n", config_file);
+   }
 
    while (! dotconf_get_next_line( buf, 1024, configfile ))
       {
