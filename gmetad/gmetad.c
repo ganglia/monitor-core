@@ -187,7 +187,7 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
       return 0;
 
    /* Need to be sure the source has a complete sum for its metrics. */
-   pthread_mutex_lock(source->sum_finished);
+   pthread_mutex_lock(&source->sum_finished);
 
     /* err_msg("Doing root summary for source %s", source->ds->name); */
 
@@ -198,7 +198,7 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    root.hosts_up += source->hosts_up;
    root.hosts_down += source->hosts_down;
 
-   pthread_mutex_unlock(source->sum_finished);
+   pthread_mutex_unlock(&source->sum_finished);
 
    return rc;
 }
@@ -380,6 +380,9 @@ main ( int argc, char *argv[] )
          exit(1);
       }
    debug_msg("interactive xml listening on port %d", c->interactive_port);
+
+   /* initialize summary mutex */
+   pthread_mutex_init(&root.sum_finished, NULL);
 
    pthread_attr_init( &attr );
    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
