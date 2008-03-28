@@ -31,8 +31,8 @@
 *         Jon Carey (jcarey novell.com)
 ******************************************************************************/
 
-#include <metric.h>
-#include <gm_mmn.h>
+#include <gm_metric.h>
+#include <ganglia.h>
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -41,7 +41,6 @@
 #include <unistd.h>
 
 #include "file.h"
-#include "error.h"
 
 #include <apr_tables.h>
 #include <apr_strings.h>

@@ -2,7 +2,7 @@
 #include "config.h"
 #endif
 
-#include "debug_msg.h"
+#include "ganglia_priv.h"
 #include "error.h"
 #include "scoreboard.h"
 #include <apr_hash.h>

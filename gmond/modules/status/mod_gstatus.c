@@ -30,14 +30,12 @@
 * Author: Brad Nicholes (bnicholes novell.com)
 ******************************************************************************/
 
-#include <metric.h>
-#include <gm_mmn.h>
+#include <gm_metric.h>
+#include <ganglia_priv.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "file.h"
-#include "debug_msg.h"
-#include "error.h"
 #include "scoreboard.h"
 
 #include <apr_strings.h>

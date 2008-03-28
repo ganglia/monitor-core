@@ -8,7 +8,7 @@ GLDADD =
 GLDFLAGS = 
 endif
 
-AM_CFLAGS = -I../lib -I../gmond -I$(top_builddir)/libmetrics $(GCFLAGS)
+AM_CFLAGS = -I../lib -I../include $(GCFLAGS)
 
 bin_PROGRAMS = gmetric
 gmetric_SOURCES =  gmetric.c cmdline.c cmdline.h

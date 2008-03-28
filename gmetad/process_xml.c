@@ -5,7 +5,6 @@
 #include <sys/time.h>
 #include "expat.h"
 #include "gmetad.h"
-#include "lib/ganglia.h"
 #include "rrd_helpers.h"
 
 extern int zero_out_summary(datum_t *key, datum_t *val, void *arg);

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "hash.h"
-#include "debug_msg.h"
+#include "ganglia.h"
 
 datum_t *
 datum_new ( void *data, size_t size )

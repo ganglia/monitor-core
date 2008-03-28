@@ -26,7 +26,7 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
-#include "lib/ganglia.h"
+#include "ganglia.h"
 #include "gmetad.h"
 
 #include "conf.h"

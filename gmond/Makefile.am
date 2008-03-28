@@ -18,7 +18,7 @@ GLDFLAGS = -export-dynamic
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/libmetrics/ $(GCFLAGS) 
+AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/include/ -I$(top_builddir)/libmetrics $(GCFLAGS) 
 
 sbin_PROGRAMS = gmond
 # metric.h and dtd.h are for gmetad/gmetric for now....

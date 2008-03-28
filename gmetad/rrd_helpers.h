@@ -1,5 +1,5 @@
 
-#include "lib/ganglia.h"
+#include "ganglia.h"
 
 int
 write_data_to_rrd ( const char *source, const char *host, const char *metric, 

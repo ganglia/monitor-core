@@ -13,7 +13,7 @@
 #include <ctype.h>
 
 #include "error.h"
-#include "ganglia.h"
+#include "ganglia_priv.h"
 
 
 /**
