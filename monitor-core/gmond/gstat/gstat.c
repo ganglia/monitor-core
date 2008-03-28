@@ -8,9 +8,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "ganglia.h"
+#include "ganglia_priv.h"
 #include "llist.h"
-#include "debug_msg.h"
 #include <getopt.h>
 #include "cmdline.h"
 

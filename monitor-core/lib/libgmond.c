@@ -6,10 +6,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "ganglia.h"
+
+#include "ganglia_priv.h"
 #include "confuse.h"
-#include "debug_msg.h"
 #include "error.h"
+#include "default_conf.h"
+
 #include <apr_pools.h>
 #include <apr_strings.h>
 #include <apr_tables.h>
@@ -20,11 +22,6 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <fnmatch.h>
-
-#include <rpc/rpc.h>
-#include "protocol.h"  /* generated from ./lib/protocol.x */
-
-#include "default_conf.h"
 
 static char myhost[APRMAXHOSTLEN+1];
 

@@ -1,7 +1,7 @@
 /* $Id$ */
 #include <stdio.h>
 #include <dotconf.h>
-#include "ganglia.h"
+#include "ganglia_priv.h"
 #include "g25_config.h"
 
 gmond_config_t gmond_config;

@@ -8,12 +8,10 @@
 #include <time.h>
 
 
+#include "ganglia_priv.h"
 #include "net.h"
 #include "llist.h"
 #include "hash.h"
-#include "ganglia.h"
-#include "ganglia_priv.h"
-#include "debug_msg.h"
 #include "error.h"
 #include "expat.h"
 
