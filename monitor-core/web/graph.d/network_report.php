@@ -18,9 +18,6 @@ function graph_network_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'Bytes/sec';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
 
-    if ($context == 'host')
-        $rrdtool_graph['title'] .= " - $hostname";
-
     $series = "DEF:'bytes_in'='${rrd_dir}/bytes_in.rrd':'sum':AVERAGE "
        ."DEF:'bytes_out'='${rrd_dir}/bytes_out.rrd':'sum':AVERAGE "
        ."LINE2:'bytes_in'#$mem_cached_color:'In' "

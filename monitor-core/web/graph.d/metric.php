@@ -50,7 +50,7 @@ function graph_metric ( &$rrdtool_graph ) {
             $hrs = intval (-$jobrange / 3600);
             $subtitle = "$prefix last ${hrs} (now $value)";
         } else {
-            $subtitle = "$prefix last $range (now $value)";
+            $subtitle = "$metricname (now $value)";
         }
 
         break;
