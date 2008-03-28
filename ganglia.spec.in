@@ -305,6 +305,9 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/ganglia.h
+%{_includedir}/gm_metric.h
+%{_includedir}/gm_mmn.h
+%{_includedir}/gm_protocol.h
 %{_libdir}/libganglia*.so
 %{_libdir}/libganglia*.*a
 %{_bindir}/ganglia-config
@@ -355,6 +358,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Mar 28 2008 Brad Nicholes <bnicholes@novell.com>
+- Add the headers file in the include directory
 * Thu Mar 27 2008 Bernard Li <bernard@vanhpc.org>
 - Added man1 pages gmetad, gmetric, gmond, gstat
 * Thu Mar 13 2008 Jesse Becker <hawson@gmail.com>
