@@ -20,10 +20,6 @@ function graph_mem_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'Bytes';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
 
-    if ($context == 'host')
-        $rrdtool_graph['title'] .= " - $hostname";
-
-
     $series = "DEF:'mem_total'='${rrd_dir}/mem_total.rrd':'sum':AVERAGE "
         ."CDEF:'bmem_total'=mem_total,1024,* "
         ."DEF:'mem_shared'='${rrd_dir}/mem_shared.rrd':'sum':AVERAGE "

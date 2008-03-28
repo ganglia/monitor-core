@@ -147,8 +147,25 @@ if ($range=="month")
    $rrdtool_graph['end'] = floor($rrdtool_graph['end'] / 672) * 672;
 
 # Tidy up the title a bit
-if ($context != 'host')
-    $rrdtool_graph['title'] = "$clustername " . $rrdtool_graph['title'] . " last $range";
+switch ($context) {
+    case 'meta':
+        $title = "$self Grid";
+        break;
+
+    case 'cluster':
+        $title  = $clustername ;
+        break;
+
+    case 'host':
+        $title  = isset($graph) ? $hostname : '' ;
+        break;
+        
+    default:
+        $title = $clustername;
+        break;
+}
+
+$rrdtool_graph['title'] =  $title . ' ' . $rrdtool_graph['title'] . " last $range";
 
 //--------------------------------------------------------------------------------------
 

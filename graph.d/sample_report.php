@@ -114,8 +114,6 @@ function graph_sample_report ( &$rrdtool_graph ) {
     // Context is not "host"
     else {
 
-        $rrdtool_graph['title'] .= " - $hostname";
-
         $series ="DEF:'cpu_user'='${rrd_dir}/cpu_user.rrd':'sum':AVERAGE "
         . "DEF:'cpu_nice'='${rrd_dir}/cpu_nice.rrd':'sum':AVERAGE "
         . "DEF:'cpu_system'='${rrd_dir}/cpu_system.rrd':'sum':AVERAGE "
