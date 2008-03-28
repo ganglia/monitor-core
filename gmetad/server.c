@@ -107,7 +107,11 @@ source_summary(Source_t *source, client_t *client)
       source->hosts_up, source->hosts_down);
    if (rc) return 1;
 
-   return hash_foreach(source->metric_summary, metric_summary, (void*) client);
+   pthread_mutex_lock(&source->sum_finished);
+   rc = hash_foreach(source->metric_summary, metric_summary, (void*) client);
+   pthread_mutex_unlock(&source->sum_finished);
+   
+   return rc;
 }
 
 
@@ -267,7 +271,6 @@ applicable(filter_type_t filter, Generic_t *node)
    return 0;
 }
 
-
 int
 applyfilter(client_t *client, Generic_t *node)
 {
@@ -286,15 +289,7 @@ applyfilter(client_t *client, Generic_t *node)
          return 0;
 
       case SUMMARY:
-
-/* use the mutex to avoid reporting incomplete sums -twitham (bug#76) */
-	 pthread_mutex_lock(((Source_t*)node)->sum_finished);
-
-	 int i = source_summary((Source_t*) node, client);
-
-	 pthread_mutex_unlock(((Source_t*)node)->sum_finished);
-
-         return i;
+	 return source_summary((Source_t*) node, client);
 
       default:
          break;

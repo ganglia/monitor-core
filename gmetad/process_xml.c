@@ -207,13 +207,11 @@ startElement_GRID(void *data, const char *el, const char **attr)
                source->ds = xmldata->ds;
 
                /* Initialize the partial sum lock */
-               source->sum_finished = (pthread_mutex_t*) 
-                       malloc(sizeof(pthread_mutex_t));
-               pthread_mutex_init(source->sum_finished, NULL);
+               pthread_mutex_init(&source->sum_finished, NULL);
 
                /* Grab the "partial sum" mutex until we are finished
                 * summarizing. */
-               pthread_mutex_lock(source->sum_finished);
+               pthread_mutex_lock(&source->sum_finished);
             }
          else
             {  /* Found Cluster. Put into our Source buffer in xmldata. */
@@ -224,7 +222,7 @@ startElement_GRID(void *data, const char *el, const char **attr)
 
                /* Grab the "partial sum" mutex until we are finished
                 * summarizing. Needs to be done asap.*/
-               pthread_mutex_lock(source->sum_finished);
+               pthread_mutex_lock(&source->sum_finished);
 
                hash_foreach(source->metric_summary, zero_out_summary, NULL);
             }
@@ -323,12 +321,10 @@ startElement_CLUSTER(void *data, const char *el, const char **attr)
          source->ds = xmldata->ds;
          
          /* Initialize the partial sum lock */
-         source->sum_finished = (pthread_mutex_t*) 
-                 malloc(sizeof(pthread_mutex_t));
-         pthread_mutex_init(source->sum_finished, NULL);
+         pthread_mutex_init(&source->sum_finished, NULL);
 
          /* Grab the "partial sum" mutex until we are finished summarizing. */
-         pthread_mutex_lock(source->sum_finished);
+         pthread_mutex_lock(&source->sum_finished);
       }
    else
       {
@@ -339,7 +335,7 @@ startElement_CLUSTER(void *data, const char *el, const char **attr)
          source->hosts_down = 0;
 
          /* We need this lock before zeroing metric sums. */
-         pthread_mutex_lock(source->sum_finished);
+         pthread_mutex_lock(&source->sum_finished);
 
          hash_foreach(source->metric_summary, zero_out_summary, NULL);
       }
@@ -1057,7 +1053,7 @@ endElement_CLUSTER(void *data, const char *el)
          summary = xmldata->source.metric_summary;
 
          /* Release the partial sum mutex */
-         pthread_mutex_unlock(source->sum_finished);
+         pthread_mutex_unlock(&source->sum_finished);
          /*err_msg("%s releasing lock", xmldata->sourcename);*/
 
          hashkey.data = (void*) xmldata->sourcename;
@@ -1069,7 +1065,6 @@ endElement_CLUSTER(void *data, const char *el)
 
          /* We insert here to get an accurate hosts up/down value. */
          rdatum = hash_insert( &hashkey, &hashval, xmldata->root);
-         source->sum_finished = NULL; /* remember that we released the lock */
          if (!rdatum) {
                err_msg("Could not insert source %s", xmldata->sourcename);
                return 1;
@@ -1143,14 +1138,6 @@ process_xml(data_source_list_t *d, char *buf)
                          XML_GetCurrentLineNumber (xml_parser),
                          XML_ErrorString (XML_GetErrorCode (xml_parser)));
          xmldata.rval = 1;
-      }
-
-   /* Release lock again for good measure (required under certain errors). */
-   if (xmldata.source.sum_finished)
-      {
-         rval = pthread_mutex_unlock(xmldata.source.sum_finished);
-         if (rval!=0)
-            err_msg("Could not release summary lock for %s", d->name);
       }
 
    /* Free memory that might have been allocated in xmldata */
