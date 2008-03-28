@@ -58,12 +58,12 @@ foreach ($metrics as $name => $v)
                 $encodeUnits = rawurlencode($v['UNITS']);
                 $graphargs .= "&vl=$encodeUnits";
              }
-             if ($v['TITLE']) {
+             if (isset($v['TITLE'])) {
                 $title = $v['TITLE'];
                 $graphargs .= "&ti=$title";
              }
              $g_metrics[$name]['graph'] = $graphargs;
-             $g_metrics[$name]['description'] = $v['DESC'];
+             $g_metrics[$name]['description'] = isset($v['DESC']) ? $v['DESC'] : '';
 
              # Setup an array of groups that can be used for sorting in group view
              if ( isset($metrics[$name]['GROUP']) ) {
@@ -105,7 +105,7 @@ if (is_array($s_metrics))
 	# RFM - If units aren't defined for metric, make it be the empty string
 	! array_key_exists('UNITS', $v) and $v['UNITS'] = "";
         $tpl->newBlock("string_metric_info");
-		if ($v['TITLE']) {
+		if (isset($v['TITLE'])) {
 			$tpl->assign("name", $v['TITLE']);
 		}
 		else {
@@ -129,7 +129,7 @@ if (is_array($c_metrics))
       foreach ($c_metrics as $name => $v )
      {
         $tpl->newBlock("const_metric_info");
-		if ($v['TITLE']) {
+		if (isset($v['TITLE'])) {
 			$tpl->assign("name", $v['TITLE']);
 		}
 		else { 
