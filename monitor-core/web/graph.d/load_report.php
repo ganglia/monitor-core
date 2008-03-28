@@ -24,17 +24,17 @@ function graph_load_report ( &$rrdtool_graph ) {
         ."DEF:'proc_run'='${rrd_dir}/proc_run.rrd':'sum':AVERAGE "
         ."DEF:'cpu_num'='${rrd_dir}/cpu_num.rrd':'sum':AVERAGE ";
 
-    if( $context != 'host' ) {
-        $series .="DEF:'num_nodes'='${rrd_dir}/cpu_num.rrd':'num':AVERAGE ";
-        $series .= "LINE2:'num_nodes'#$num_nodes_color:'Nodes' ";
-    }
-    
     if ($context == 'host')
         $rrdtool_graph['title'] .= " - $hostname";
 
 
     $series .="AREA:'load_one'#$load_one_color:'1-min Load' ";
 
+    if( $context != 'host' ) {
+        $series .="DEF:'num_nodes'='${rrd_dir}/cpu_num.rrd':'num':AVERAGE ";
+        $series .= "LINE2:'num_nodes'#$num_nodes_color:'Nodes' ";
+    }
+    
     $series .="LINE2:'cpu_num'#$cpu_num_color:'CPUs' ";
     $series .="LINE2:'proc_run'#$proc_run_color:'Running Processes' ";
 
