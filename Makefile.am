@@ -16,7 +16,7 @@ GANGLIA_SUBDIRS = lib libmetrics tests $(GMETAD_SUBDIR) gmond gmetric include
 SUBDIRS = $(GANGLIA_SUBDIRS)
 # Make sure that no matter the setting for --with-gmetad
 # that the gmetad directory gets distributed
-GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gmetric
+GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gmetric include
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
 EXTRA_DIST = README.WIN README.AIX config ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html mans $(EXTRA_DIST_FILES)

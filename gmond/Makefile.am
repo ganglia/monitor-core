@@ -22,7 +22,7 @@ AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/include/ -I$(top_builddir)/l
 
 sbin_PROGRAMS = gmond
 # metric.h and dtd.h are for gmetad/gmetric for now....
-gmond_SOURCES = gmond.c cmdline.c cmdline.h dtd.h metric.h g25_config.c core_metrics.c g25_config.h gm_mmn.h
+gmond_SOURCES = gmond.c cmdline.c cmdline.h dtd.h g25_config.c core_metrics.c g25_config.h
 
 noinst_MANS  = gmond.conf.5
 
