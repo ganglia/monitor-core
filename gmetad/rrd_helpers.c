@@ -11,8 +11,6 @@
 #include <pthread.h>
 #include <time.h>
 
-#include "lib/ganglia.h"
-
 #include "rrd_helpers.h"
 
 #define PATHSIZE 4096

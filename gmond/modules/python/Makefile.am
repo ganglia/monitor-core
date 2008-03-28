@@ -1,4 +1,4 @@
-AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/lib 
+AM_CFLAGS  = -D_LARGEFILE64_SOURCE -I$(top_builddir)/include -I$(top_builddir)/lib 
 
 if STATIC_BUILD
 noinst_LTLIBRARIES    = libmodpython.la

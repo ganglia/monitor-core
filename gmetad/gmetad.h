@@ -5,9 +5,9 @@
 #include "config.h"
 #endif
 
+#include "ganglia_priv.h"
 #include "net.h"
 #include "hash.h"
-#include "debug_msg.h"
 #include "error.h"
 #include "llist.h"
 #include "conf.h"

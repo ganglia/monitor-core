@@ -1,8 +1,5 @@
-#include <metric.h>
-#include <gm_mmn.h>
-
+#include <gm_metric.h>
 #include <libmetrics.h>
-
 
 mmodule core_metrics;
 

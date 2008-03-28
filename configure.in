@@ -583,7 +583,8 @@ AC_OUTPUT(Makefile
           gmond/python_modules/disk/Makefile
           gmond/python_modules/example/Makefile
           gmond/python_modules/network/Makefile
-          gmetric/Makefile 
+          gmetric/Makefile
+          include/Makefile 
           web/version.php)
 
 

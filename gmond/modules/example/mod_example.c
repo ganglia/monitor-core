@@ -30,13 +30,11 @@
 * Author: Brad Nicholes (bnicholes novell.com)
 ******************************************************************************/
 
-#include <metric.h>
-#include <gm_mmn.h>
+#include <gm_metric.h>
+#include <ganglia.h> /* Only need for the debug and error message prototypes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
-#include "debug_msg.h"
 
 /*
  * Declare ourselves so the configuration routines can find and know us.
