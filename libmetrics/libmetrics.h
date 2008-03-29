@@ -33,7 +33,7 @@ void libmetrics_init( void );
 #include <config.h>
 #endif
 
-#include <gm_metric.h>
+#include <gm_value.h>
 
  g_val_t metric_init(void);
  g_val_t cpu_num_func(void);

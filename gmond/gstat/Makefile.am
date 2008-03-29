@@ -6,7 +6,7 @@ GLDADD =
 GLDFLAGS = 
 endif
 
-AM_CFLAGS = -I$(top_builddir)/lib  -I$(top_builddir)/include $(GCFLAGS)
+AM_CFLAGS = -D_LARGEFILE64_SOURCE -I$(top_builddir)/lib  -I$(top_builddir)/include $(GCFLAGS)
 
 bin_PROGRAMS = gstat
 gstat_SOURCES =  gstat.c cmdline.c cmdline.h
