@@ -1,8 +1,9 @@
-#ifndef METRIC_H
-#define METRIC_H 1
+#ifndef GM_METRIC_H
+#define GM_METRIC_H 1
 
 #include "gm_mmn.h"
 #include "gm_protocol.h"
+#include "gm_value.h"
 #include "confuse.h"   /* header for libconfuse */
 
 #include <apr.h>
@@ -10,34 +11,6 @@
 #include <apr_tables.h>
 
 #define MGROUP "GROUP"
-
-enum g_type_t {
-   g_string,  /* huh uh.. he said g string */
-   g_int8,
-   g_uint8,
-   g_int16,
-   g_uint16,
-   g_int32,
-   g_uint32,
-   g_float,
-   g_double,
-   g_timestamp    /* a uint32 */
-};
-typedef enum g_type_t g_type_t;
- 
-#define MAX_G_STRING_SIZE 32
- 
-typedef union {
-    int8_t   int8;
-   uint8_t  uint8;
-   int16_t  int16;
-  uint16_t uint16;
-   int32_t  int32;
-  uint32_t uint32;
-   float   f; 
-   double  d;
-   char str[MAX_G_STRING_SIZE];
-} g_val_t;         
 
 typedef void (*metric_info_func)(Ganglia_25metric *gmi);
 typedef g_val_t (*metric_func)(int metric_index);
@@ -120,4 +93,4 @@ struct mmodule_struct {
 				MMODULE_MAGIC_COOKIE
 
 
-#endif  /* METRIC_H */
+#endif  /* GM_METRIC_H */
