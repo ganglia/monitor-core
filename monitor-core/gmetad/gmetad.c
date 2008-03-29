@@ -187,7 +187,7 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
       return 0;
 
    /* Need to be sure the source has a complete sum for its metrics. */
-   pthread_mutex_lock(&source->sum_finished);
+   pthread_mutex_lock(source->sum_finished);
 
    /* We know that all these metrics are numeric. */
    rc = hash_foreach(source->metric_summary, sum_metrics, arg);
@@ -197,7 +197,7 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    root.hosts_down += source->hosts_down;
 
    /* summary completed for source */
-   pthread_mutex_unlock(&source->sum_finished);
+   pthread_mutex_unlock(source->sum_finished);
 
    return rc;
 }
@@ -381,7 +381,9 @@ main ( int argc, char *argv[] )
    debug_msg("interactive xml listening on port %d", c->interactive_port);
 
    /* initialize summary mutex */
-   pthread_mutex_init(&root.sum_finished, NULL);
+   root.sum_finished = (pthread_mutex_t *) 
+                          malloc(sizeof(pthread_mutex_t));
+   pthread_mutex_init(root.sum_finished, NULL);
 
    pthread_attr_init( &attr );
    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
@@ -408,7 +410,7 @@ main ( int argc, char *argv[] )
          sleep(sleep_time);
 
          /* Need to be sure root is locked while doing summary */
-         pthread_mutex_lock(&root.sum_finished);
+         pthread_mutex_lock(root.sum_finished);
 
          /* Flush the old values */
          hash_foreach(root.metric_summary, zero_out_summary, NULL);
@@ -419,7 +421,7 @@ main ( int argc, char *argv[] )
          hash_foreach(root.authority, do_root_summary, NULL );
 
 	 /* summary completed */
-         pthread_mutex_unlock(&root.sum_finished);
+         pthread_mutex_unlock(root.sum_finished);
 
          /* Save them to RRD */
          hash_foreach(root.metric_summary, write_root_summary, NULL);
