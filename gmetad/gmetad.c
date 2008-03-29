@@ -189,8 +189,6 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    /* Need to be sure the source has a complete sum for its metrics. */
    pthread_mutex_lock(&source->sum_finished);
 
-    /* err_msg("Doing root summary for source %s", source->ds->name); */
-
    /* We know that all these metrics are numeric. */
    rc = hash_foreach(source->metric_summary, sum_metrics, arg);
 
@@ -198,6 +196,7 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    root.hosts_up += source->hosts_up;
    root.hosts_down += source->hosts_down;
 
+   /* summary completed for source */
    pthread_mutex_unlock(&source->sum_finished);
 
    return rc;
@@ -408,6 +407,9 @@ main ( int argc, char *argv[] )
          sleep_time = 10 + ((30-10)*1.0) * rand()/(RAND_MAX + 1.0);
          sleep(sleep_time);
 
+         /* Need to be sure root is locked while doing summary */
+         pthread_mutex_lock(&root.sum_finished);
+
          /* Flush the old values */
          hash_foreach(root.metric_summary, zero_out_summary, NULL);
          root.hosts_up = 0;
@@ -416,10 +418,12 @@ main ( int argc, char *argv[] )
          /* Sum the new values */
          hash_foreach(root.authority, do_root_summary, NULL );
 
+	 /* summary completed */
+         pthread_mutex_unlock(&root.sum_finished);
+
          /* Save them to RRD */
          hash_foreach(root.metric_summary, write_root_summary, NULL);
       }
 
    return 0;
 }
-
