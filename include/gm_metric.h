@@ -1,5 +1,6 @@
 #ifndef GM_METRIC_H
 #define GM_METRIC_H 1
+#include <rpc/rpc.h>
 
 #include "gm_mmn.h"
 #include "gm_protocol.h"
