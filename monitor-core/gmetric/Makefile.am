@@ -8,6 +8,7 @@ GLDADD =
 GLDFLAGS = 
 endif
 
+INCLUDES = @APR_INCLUDES@
 AM_CFLAGS = -I../lib -I../include $(GCFLAGS)
 
 bin_PROGRAMS = gmetric
