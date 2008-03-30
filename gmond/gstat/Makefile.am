@@ -6,6 +6,7 @@ GLDADD =
 GLDFLAGS = 
 endif
 
+INCLUDES = @APR_INCLUDES@
 AM_CFLAGS = -D_LARGEFILE64_SOURCE -I$(top_builddir)/lib  -I$(top_builddir)/include $(GCFLAGS)
 
 bin_PROGRAMS = gstat
