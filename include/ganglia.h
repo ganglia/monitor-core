@@ -1,5 +1,6 @@
 #ifndef GANGLIA_H
 #define GANGLIA_H 1
+#include <rpc/rpc.h>
 
 #include "gm_protocol.h"
 
