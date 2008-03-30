@@ -29,7 +29,7 @@
 #include "g25_config.h" /* for converting old file formats to new */
 #include "daemon_init.h"
 #include "scoreboard.h"
-
+#include "ganglia_priv.h"
 
 /* Specifies a single value metric callback */
 #define CB_NOINDEX -1
