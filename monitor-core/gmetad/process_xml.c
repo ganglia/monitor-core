@@ -1034,7 +1034,7 @@ endElement_GRID(void *data, const char *el)
    Source_t *source = &xmldata->source;
 
    /*release the partial sum mutex */
-   pthread_mutex_unlock(&source->sum_finished);
+   pthread_mutex_unlock(source->sum_finished);
 
    if (gmetad_config.scalable_mode)
       {
