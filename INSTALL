@@ -10,6 +10,7 @@ Dependencies
 * python (http://www.python.org/)
 * RRDtool (http://oss.oetiker.ch/rrdtool/)
 * GNU Make (http://www.gnu.org/software/make/)
+* GNU C Compiler (http://gcc.gnu.org/)
 
 Basic Installation
 ==================
