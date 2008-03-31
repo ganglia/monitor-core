@@ -898,7 +898,6 @@ g_val_t
 mtu_func ( void )
 {
    /* We want to find the minimum MTU (Max packet size) over all UP interfaces. */
-   unsigned int min=0;
    g_val_t val;
    val.uint32 = get_min_mtu();
    /* A val of 0 means there are no UP interfaces. Shouldn't happen. */
