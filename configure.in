@@ -275,13 +275,14 @@ if test x"$libaprpath" != x && test x"$libaprpath" != xyes ; then
     AC_SUBST(APR_INCLUDES)
     APR_LIBPATH=`$libaprpath --link-ld`
     LDFLAGS="$LDFLAGS -L`expr "x$APR_LIBPATH" : '.*-L\(.*\) '`"
+    AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$libaprpath --libs`])
   else
     CFLAGS="$CFLAGS -I$libaprpath/include"
     LDFLAGS="$LDFLAGS -L$libaprpath/lib"
     echo "Added -I$libaprpath/include to CFLAGS"
     echo "Added -L$libaprpath/lib to LDFLAGS"
+    AC_CHECK_LIB(apr-1, apr_socket_send)
   fi
-  AC_CHECK_LIB(apr-1, apr_socket_send)
 else
   AC_PATH_PROG(APR_CONFIG, apr-1-config)
   if test -z "$APR_CONFIG"; then
