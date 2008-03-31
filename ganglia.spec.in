@@ -308,6 +308,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %{_includedir}/gm_metric.h
 %{_includedir}/gm_mmn.h
 %{_includedir}/gm_protocol.h
+%{_includedir}/gm_value.h
 %{_libdir}/libganglia*.so
 %{_libdir}/libganglia*.*a
 %{_bindir}/ganglia-config
@@ -358,6 +359,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Mon Mar 31 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- Add gm_value.h
 * Thu Mar 28 2008 Brad Nicholes <bnicholes@novell.com>
 - Add the headers file in the include directory
 * Thu Mar 27 2008 Bernard Li <bernard@vanhpc.org>
