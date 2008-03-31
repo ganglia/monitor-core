@@ -9,7 +9,7 @@
 
 #include "ganglia_priv.h"
 #include "confuse.h"
-#include "error.h"
+#include "error_msg.h"
 #include "default_conf.h"
 
 #include <apr_pools.h>

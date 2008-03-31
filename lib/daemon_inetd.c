@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include <syslog.h>
 
-extern int daemon_proc;		/* defined in error.c */
+extern int daemon_proc;		/* defined in error_msg.c */
 
 /**
  * @fn void daemon_inetd (const char *pname, int facility)

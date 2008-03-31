@@ -1,5 +1,5 @@
 /**
- * @file error.c Error Handling Functions
+ * @file error_msg.c Error Handling Functions
  */
 /* $Id$ */
 
