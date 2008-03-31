@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include "become_a_nobody.h"
-#include "error_msg.h"
+#include <gm_msg.h>
 
 void
 become_a_nobody( const char *username )
