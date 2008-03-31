@@ -24,7 +24,7 @@
  */
 #include <unistd.h>
 
-#include "error_msg.h"
+#include <gm_msg.h>
 #include "net.h"
 
 g_tcp_socket*

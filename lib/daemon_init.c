@@ -15,7 +15,7 @@
 #include <errno.h>
 
 #include "daemon_init.h"
-#include "error_msg.h"
+#include <gm_msg.h>
 
 #define MAXFD 64
 

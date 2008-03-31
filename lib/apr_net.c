@@ -26,7 +26,7 @@ void apr_sockaddr_vars_set(apr_sockaddr_t *, int, apr_port_t);
 #include <stropts.h>
 #endif
 
-#include "error_msg.h"
+#include <gm_msg.h>
 
 const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
 
