@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 
-#include "error.h"
+#include "error_msg.h"
 #include "ganglia_priv.h"
 
 

@@ -12,7 +12,7 @@
 #include "net.h"
 #include "llist.h"
 #include "hash.h"
-#include "error.h"
+#include "error_msg.h"
 #include "expat.h"
 
 int gexec_errno = 0;

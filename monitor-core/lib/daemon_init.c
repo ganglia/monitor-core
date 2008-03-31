@@ -15,7 +15,7 @@
 #include <errno.h>
 
 #include "daemon_init.h"
-#include "error.h"
+#include "error_msg.h"
 
 #define MAXFD 64
 
@@ -62,7 +62,7 @@ update_pidfile (char *pidfile)
 }
 
 
-extern int daemon_proc;		/* defined in error.c */
+extern int daemon_proc;		/* defined in error_msg.c */
 
 /**
  * @fn void daemon_init (const char *pname, int facility)
