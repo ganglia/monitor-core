@@ -1,3 +1,3 @@
 
-include_HEADERS = ganglia.h gm_mmn.h gm_metric.h gm_value.h
+include_HEADERS = ganglia.h gm_mmn.h gm_metric.h gm_value.h gm_msg.h
 

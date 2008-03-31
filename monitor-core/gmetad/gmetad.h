@@ -8,7 +8,6 @@
 #include "ganglia_priv.h"
 #include "net.h"
 #include "hash.h"
-#include "error_msg.h"
 #include "llist.h"
 #include "conf.h"
 #include "become_a_nobody.h"

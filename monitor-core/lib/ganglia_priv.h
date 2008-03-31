@@ -12,7 +12,7 @@
 #endif
 #endif
 
-#include "ganglia.h"
+#include <gm_msg.h>
 
 #include <errno.h>
 #ifndef SYS_CALL
@@ -78,12 +78,7 @@ typedef struct
 	}
 gexec_cluster_t;
 
-BEGIN_C_DECLS
-void build_default_gmond_configuration(Ganglia_pool context);
-char *Ganglia_default_collection_groups(void);
-
 int gexec_cluster_free ( gexec_cluster_t *cluster );
 int gexec_cluster (gexec_cluster_t *cluster, char *ip, unsigned short port);
-END_C_DECLS
 
 #endif

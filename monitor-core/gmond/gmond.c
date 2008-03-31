@@ -45,7 +45,7 @@ cfg_t *config_file;
 /* The debug level (in debug_msg.c) */
 static int debug_level;
 /* The global context */
-Ganglia_pool global_context = NULL;
+apr_pool_t *global_context = NULL;
 /* Deaf mode boolean */
 int deaf;
 /* Mute mode boolean */
@@ -196,7 +196,7 @@ process_configuration_file(void)
   cfg_t *tmp;
 
   /* this is a global for now */
-  config_file = Ganglia_gmond_config_create( args_info.conf_arg, !args_info.conf_given );
+  config_file = (cfg_t*)Ganglia_gmond_config_create( args_info.conf_arg, !args_info.conf_given );
 
   /* Initialize a few variables */
   tmp = cfg_getsec( config_file, "globals");
@@ -2044,8 +2044,9 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
         if (!cb->metadata_last_sent || (send_metadata_interval && 
             (cb->metadata_last_sent < (now - apr_time_make(send_metadata_interval,0))))) 
           {
-            Ganglia_metric gmetric = Ganglia_metric_create(global_context);
+            Ganglia_metric gmetric = Ganglia_metric_create((Ganglia_pool)global_context);
             char *val, *type;
+            apr_pool_t *gm_pool = (apr_pool_t*)gmetric->pool;
 
             if(!gmetric)
               {
@@ -2053,8 +2054,8 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
                 return;
               }
         
-            val = apr_pstrdup(gmetric->pool, host_metric_value(cb->info, &(cb->msg)));
-            type = apr_pstrdup(gmetric->pool, host_metric_type(cb->info->type));
+            val = apr_pstrdup(gm_pool, host_metric_value(cb->info, &(cb->msg)));
+            type = apr_pstrdup(gm_pool, host_metric_type(cb->info->type));
         
             errors = Ganglia_metric_set(gmetric, cb->info->name, val, type,
                         cb->info->units, cstr_to_slope( cb->info->slope),
@@ -2102,7 +2103,7 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
                   }
               }
 
-            apr_pool_destroy(gmetric->pool);
+            Ganglia_metric_destroy(gmetric);
           }
 
         /* Send the updated value packet ever time it is collected */
@@ -2220,7 +2221,7 @@ print_metric_list( void )
 }
 
 static void
-cleanup_data( Ganglia_pool pool, apr_time_t now)
+cleanup_data( apr_pool_t *pool, apr_time_t now)
 {
   apr_hash_index_t *hi, *metric_hi;
 
@@ -2303,7 +2304,7 @@ int
 main ( int argc, char *argv[] )
 {
   apr_time_t now, next_collection, last_cleanup;
-  Ganglia_pool cleanup_context;
+  apr_pool_t *cleanup_context;
 
   if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
@@ -2314,16 +2315,16 @@ main ( int argc, char *argv[] )
     }
 
   /* Create the global context */
-  global_context = Ganglia_pool_create(NULL);
+  global_context = (apr_pool_t*)Ganglia_pool_create(NULL);
 
   /* Create the cleanup context from the global context */
-  cleanup_context = Ganglia_pool_create(global_context);
+  cleanup_context = (apr_pool_t*)Ganglia_pool_create((Ganglia_pool)global_context);
 
   /* Mark the time this gmond started */
   started = apr_time_now();
 
   /* Builds a default configuration based on platform */
-  build_default_gmond_configuration(global_context);
+  build_default_gmond_configuration((Ganglia_pool)global_context);
 
   if(args_info.default_config_flag)
     {
@@ -2388,7 +2389,8 @@ main ( int argc, char *argv[] )
     }
 
   /* even if mute, a send channel may be needed to send a request for metadata */
-  udp_send_channels = Ganglia_udp_send_channels_create( global_context, config_file );
+  udp_send_channels = Ganglia_udp_send_channels_create((Ganglia_pool)global_context, 
+                                                       (Ganglia_gmond_config)config_file);
   if(!udp_send_channels)
     {
       /* if there are no send channels defined, we are equivalent to mute */

@@ -8,8 +8,8 @@
 #include <string.h>
 
 #include "ganglia_priv.h"
+#include "ganglia.h"
 #include "confuse.h"
-#include "error_msg.h"
 #include "default_conf.h"
 
 #include <apr_pools.h>
@@ -30,7 +30,7 @@ Any changes that you make to this file need to be reconciled in ./conf.pod
 in order for the documentation to be in order with the code 
 ****************************/
 
-void build_default_gmond_configuration(apr_pool_t *context);
+void build_default_gmond_configuration(Ganglia_pool p);
 static int Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
                           const char **argv);
 
@@ -159,8 +159,10 @@ Ganglia_default_collection_groups(void)
 }
 
 void
-build_default_gmond_configuration(apr_pool_t *context)
+build_default_gmond_configuration(Ganglia_pool p)
 {
+  apr_pool_t *context=(apr_pool_t*)p;
+
   default_gmond_configuration = apr_pstrdup(context, BASE_GMOND_CONFIGURATION);
   default_gmond_configuration = apr_pstrcat(context, default_gmond_configuration, COLLECTION_GROUP_LIST, NULL);
 #if SOLARIS
@@ -183,10 +185,10 @@ cleanup_configuration_file(void)
 int libgmond_apr_lib_initialized = 0;
 
 Ganglia_pool
-Ganglia_pool_create( Ganglia_pool parent )
+Ganglia_pool_create( Ganglia_pool p )
 {
   apr_status_t status;
-  Ganglia_pool pool = NULL;
+  apr_pool_t *pool=NULL, *parent=(apr_pool_t*)p;
 
   if(!libgmond_apr_lib_initialized)
     {
@@ -204,19 +206,19 @@ Ganglia_pool_create( Ganglia_pool parent )
     {
       return NULL;
     }
-  return pool;
+  return (Ganglia_pool)pool;
 }
 
 void
 Ganglia_pool_destroy( Ganglia_pool pool )
 {
-  apr_pool_destroy(pool);
+  apr_pool_destroy((apr_pool_t*)pool);
 }
 
 Ganglia_gmond_config
 Ganglia_gmond_config_create(char *path, int fallback_to_default)
 {
-  Ganglia_gmond_config config = NULL;
+  cfg_t *config = NULL;
   /* Make sure we process ~ in the filename if the shell doesn't */
   char *tilde_expanded = cfg_tilde_expand( path );
   config = cfg_init( gmond_opts, CFGF_NOCASE );
@@ -254,18 +256,20 @@ Ganglia_gmond_config_create(char *path, int fallback_to_default)
 #if 0
   atexit(cleanup_configuration_file);
 #endif
-  return config;
+  return (Ganglia_gmond_config)config;
 }
 
 Ganglia_udp_send_channels
-Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config config )
+Ganglia_udp_send_channels_create( Ganglia_pool p, Ganglia_gmond_config config )
 {
-  Ganglia_udp_send_channels send_channels = NULL;
-  int i, num_udp_send_channels = cfg_size( config, "udp_send_channel");
+  apr_array_header_t *send_channels = NULL;
+  cfg_t *cfg=(cfg_t *)config;
+  int i, num_udp_send_channels = cfg_size( cfg, "udp_send_channel");
+  apr_pool_t *context = (apr_pool_t*)p;
 
   /* Return null if there are no send channels specified */
   if(num_udp_send_channels <= 0)
-    return send_channels;
+    return (Ganglia_udp_send_channels)send_channels;
 
   /* Create my UDP send array */
   send_channels = apr_array_make( context, num_udp_send_channels, 
@@ -279,7 +283,7 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
       apr_socket_t *socket = NULL;
       apr_pool_t *pool = NULL;
 
-      udp_send_channel = cfg_getnsec( config, "udp_send_channel", i);
+      udp_send_channel = cfg_getnsec( cfg, "udp_send_channel", i);
       host           = cfg_getstr( udp_send_channel, "host" );
       mcast_join     = cfg_getstr( udp_send_channel, "mcast_join" );
       mcast_if       = cfg_getstr( udp_send_channel, "mcast_if" );
@@ -323,7 +327,7 @@ Ganglia_udp_send_channels_create( Ganglia_pool context, Ganglia_gmond_config con
       *(apr_socket_t **)apr_array_push(send_channels) = socket;
     }
 
-  return send_channels;
+  return (Ganglia_udp_send_channels)send_channels;
 }
 
 
@@ -335,13 +339,14 @@ Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len 
   int i;
   int num_errors = 0;
   apr_size_t size;
+  apr_array_header_t *chnls=(apr_array_header_t*)channels;
 
-  if(!channels || !buf || len<=0)
+  if(!chnls || !buf || len<=0)
     return 1;
 
-  for(i=0; i< channels->nelts; i++)
+  for(i=0; i< chnls->nelts; i++)
     {
-      apr_socket_t *socket = ((apr_socket_t **)(channels->elts))[i];
+      apr_socket_t *socket = ((apr_socket_t **)(chnls->elts))[i];
       size   = len;
       status = apr_socket_send( socket, buf, &size );
       if(status != APR_SUCCESS)
@@ -355,7 +360,7 @@ Ganglia_udp_send_message(Ganglia_udp_send_channels channels, char *buf, int len 
 Ganglia_metric
 Ganglia_metric_create( Ganglia_pool parent_pool )
 {
-  Ganglia_pool pool = Ganglia_pool_create(parent_pool);
+  apr_pool_t *pool = (apr_pool_t*)Ganglia_pool_create(parent_pool);
   Ganglia_metric gmetric;
   if(!pool)
     {
@@ -364,15 +369,15 @@ Ganglia_metric_create( Ganglia_pool parent_pool )
   gmetric = apr_pcalloc( pool, sizeof(struct Ganglia_metric));
   if(!gmetric)
     {
-      Ganglia_pool_destroy(pool);
+      Ganglia_pool_destroy((Ganglia_pool)pool);
       return NULL;
     }
 
-  gmetric->pool = pool;
+  gmetric->pool = (Ganglia_pool)pool;
   gmetric->msg  = apr_pcalloc( pool, sizeof(struct Ganglia_metadata_message));
   if(!gmetric->msg)
     {
-      Ganglia_pool_destroy(pool);
+      Ganglia_pool_destroy((Ganglia_pool)pool);
       return NULL;
     }
   gmetric->extra = (void*)apr_table_make(pool, 2);
@@ -390,21 +395,22 @@ Ganglia_metadata_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_ch
   const apr_array_header_t *arr;
   const apr_table_entry_t *elts;
   const char *spoof = SPOOF;
+  apr_pool_t *gm_pool=(apr_pool_t*)gmetric->pool;
 
   if (myhost[0] == '\0') 
-      apr_gethostname( (char*)myhost, APRMAXHOSTLEN+1, gmetric->pool);
+      apr_gethostname( (char*)myhost, APRMAXHOSTLEN+1, gm_pool);
 
   msg.id = gmetadata_full;
   memcpy( &(msg.Ganglia_metadata_msg_u.gfull.metric), gmetric->msg, sizeof(Ganglia_metadata_message));
-  msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gmetric->pool, (char*)myhost);
-  msg.Ganglia_metadata_msg_u.gfull.metric_id.name = apr_pstrdup (gmetric->pool, gmetric->msg->name);
+  msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gm_pool, (char*)myhost);
+  msg.Ganglia_metadata_msg_u.gfull.metric_id.name = apr_pstrdup (gm_pool, gmetric->msg->name);
   msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = FALSE;
 
   arr = apr_table_elts(gmetric->extra);
   elts = (const apr_table_entry_t *)arr->elts;
   msg.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len = arr->nelts;
   msg.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val = 
-      (Ganglia_extra_data*)apr_pcalloc(gmetric->pool, sizeof(Ganglia_extra_data)*arr->nelts);
+      (Ganglia_extra_data*)apr_pcalloc(gm_pool, sizeof(Ganglia_extra_data)*arr->nelts);
 
   /* add all of the metadata to the packet */
   for (i = 0; i < arr->nelts; ++i) {
@@ -414,20 +420,20 @@ Ganglia_metadata_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_ch
       /* Replace the host name with the spoof host if it exists in the metadata */
       if ((elts[i].key[0] == spoof[0]) && strcasecmp(SPOOF_HOST, elts[i].key) == 0) 
         {
-          msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gmetric->pool, elts[i].val);
+          msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gm_pool, elts[i].val);
           msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = TRUE;
         }
       if ((elts[i].key[0] == spoof[0]) && strcasecmp(SPOOF_HEARTBEAT, elts[i].key) == 0) 
         {
-          msg.Ganglia_metadata_msg_u.gfull.metric_id.name = apr_pstrdup (gmetric->pool, "heartbeat");
+          msg.Ganglia_metadata_msg_u.gfull.metric_id.name = apr_pstrdup (gm_pool, "heartbeat");
           msg.Ganglia_metadata_msg_u.gfull.metric.name = msg.Ganglia_metadata_msg_u.gfull.metric_id.name;
           msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = TRUE;
         }
 
       msg.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[i].name = 
-          apr_pstrdup(gmetric->pool, elts[i].key);
+          apr_pstrdup(gm_pool, elts[i].key);
       msg.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[i].data = 
-          apr_pstrdup(gmetric->pool, elts[i].val);
+          apr_pstrdup(gm_pool, elts[i].val);
   }
 
   /* Send the message */
@@ -451,16 +457,17 @@ Ganglia_value_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_chann
   const apr_array_header_t *arr;
   const apr_table_entry_t *elts;
   const char *spoof = SPOOF;
+  apr_pool_t *gm_pool=(apr_pool_t*)gmetric->pool;
 
   if (myhost[0] == '\0') 
-      apr_gethostname( (char*)myhost, APRMAXHOSTLEN+1, gmetric->pool);
+      apr_gethostname( (char*)myhost, APRMAXHOSTLEN+1, gm_pool);
 
   msg.id = gmetric_string;
-  msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gmetric->pool, (char*)myhost);
-  msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup (gmetric->pool, gmetric->msg->name);
+  msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gm_pool, (char*)myhost);
+  msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup (gm_pool, gmetric->msg->name);
   msg.Ganglia_value_msg_u.gstr.metric_id.spoof = FALSE;
-  msg.Ganglia_value_msg_u.gstr.fmt = apr_pstrdup (gmetric->pool, "%s");
-  msg.Ganglia_value_msg_u.gstr.str = apr_pstrdup (gmetric->pool, gmetric->value);
+  msg.Ganglia_value_msg_u.gstr.fmt = apr_pstrdup (gm_pool, "%s");
+  msg.Ganglia_value_msg_u.gstr.str = apr_pstrdup (gm_pool, gmetric->value);
 
   arr = apr_table_elts(gmetric->extra);
   elts = (const apr_table_entry_t *)arr->elts;
@@ -473,12 +480,12 @@ Ganglia_value_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_chann
       /* Replace the host name with the spoof host if it exists in the metadata */
       if ((elts[i].key[0] == spoof[0]) && strcasecmp(SPOOF_HOST, elts[i].key) == 0) 
         {
-          msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gmetric->pool, elts[i].val);
+          msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gm_pool, elts[i].val);
           msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
         }
       if ((elts[i].key[0] == spoof[0]) && strcasecmp(SPOOF_HEARTBEAT, elts[i].key) == 0) 
         {
-          msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup (gmetric->pool, "heartbeat");
+          msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup (gm_pool, "heartbeat");
           msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
         }
   }
@@ -543,9 +550,13 @@ int ret=1;
 int
 Ganglia_metric_set( Ganglia_metric gmetric, char *name, char *value, char *type, char *units, unsigned int slope, unsigned int tmax, unsigned int dmax)
 {
+  apr_pool_t *gm_pool;
+
   /* Make sure all the params look ok */
   if(!gmetric||!name||!value||!type||!units||slope<0||slope>4)
     return 1;
+
+  gm_pool = (apr_pool_t*)gmetric->pool;
 
   /* Make sure none of the string params have a '"' in them (breaks the xml) */
   if(strchr(name, '"')||strchr(value,'"')||strchr(type,'"')||strchr(units,'"'))
@@ -568,10 +579,10 @@ Ganglia_metric_set( Ganglia_metric gmetric, char *name, char *value, char *type,
     }
 
   /* All the data is there and validated... copy it into the structure */
-  gmetric->msg->name = apr_pstrdup( gmetric->pool, name);
-  gmetric->value = apr_pstrdup( gmetric->pool, value);
-  gmetric->msg->type  = apr_pstrdup( gmetric->pool, type);
-  gmetric->msg->units = apr_pstrdup( gmetric->pool, units);
+  gmetric->msg->name = apr_pstrdup( gm_pool, name);
+  gmetric->value = apr_pstrdup( gm_pool, value);
+  gmetric->msg->type  = apr_pstrdup( gm_pool, type);
+  gmetric->msg->units = apr_pstrdup( gm_pool, units);
   gmetric->msg->slope = slope;
   gmetric->msg->tmax = tmax;
   gmetric->msg->dmax = dmax;
@@ -699,7 +710,7 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
         char *path = calloc(sizeof(char), strlen(fname)+1);
         char *pattern = NULL;
         char *idx = strrchr(fname, '/');
-        Ganglia_pool p;
+        apr_pool_t *p;
         apr_file_t *ftemp;
         char *dirname = NULL;
         char tn[] = "gmond.tmp.XXXXXX";
@@ -717,9 +728,10 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
             pattern = idx + 1;
         }
 
-        p = Ganglia_pool_create(NULL);
+        apr_pool_create(&p, NULL);
         if (apr_temp_dir_get((const char**)&dirname, p) != APR_SUCCESS) {
             cfg_error(cfg, "failed to determine the temp dir");
+            apr_pool_destroy(p);
             return 1;
         }
         dirname = apr_psprintf(p, "%s/%s", dirname, tn);
@@ -728,6 +740,7 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
                             APR_CREATE | APR_READ | APR_WRITE | APR_DELONCLOSE, 
                             p) != APR_SUCCESS) {
             cfg_error(cfg, "unable to create a temporary file %s", dirname);
+            apr_pool_destroy(p);
             return 1;
         }
 
@@ -761,7 +774,7 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
         }
 
         apr_file_close(ftemp);
-        Ganglia_pool_destroy(p);
+        apr_pool_destroy(p);
 
         argv[0] = fname;
     }
