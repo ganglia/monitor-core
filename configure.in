@@ -439,7 +439,7 @@ if test "$ac_cv_gcc" = yes; then
 fi
 
 dnl disable type punning optimization until verified safe
-if test "$ac_cv_prog_cc_g" = yes; then
+if test "$ac_cv_c_compiler_gnu" = yes; then
    SAVE_CFLAGS="$CFLAGS"
    CFLAGS="$CFLAGS -fno-strict-aliasing"
    AC_MSG_CHECKING([whether disabling type punning in gcc is possible])
@@ -450,17 +450,13 @@ if test "$ac_cv_prog_cc_g" = yes; then
    AC_MSG_RESULT($type_punning)
    unset type_punning
    unset SAVE_CFLAGS
+   CFLAGS="$CFLAGS -Wall"
 fi
 
 if test "$enable_memcheck" = yes; then
    echo "Setting up for memory checking via mpatrol"
    CFLAGS="$CFLAGS -fcheck-memory-usage "
    LDFLAGS="$LDFLAGS -lmpatrol -lbfd -liberty "
-fi
-
-dnl Always use -Wall, even though its annoying. Like eating your vegetables.
-if test "$ac_cv_prog_cc_g" = yes; then
-   CFLAGS="$CFLAGS -Wall"
 fi
 
 dnl Some system-specific stuff ...
