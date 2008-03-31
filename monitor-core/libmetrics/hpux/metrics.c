@@ -61,6 +61,7 @@
 #include <sys/pstat.h>
 #include <sys/utsname.h>
 #include "libmetrics.h"
+#include "interface.h"
 
 /* buffer and keep global some info */
 struct pst_static staticinfo;
