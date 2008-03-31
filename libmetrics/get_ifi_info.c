@@ -15,7 +15,7 @@
 #include <signal.h>
 
 #include "unpifi.h"
-#include "error.h"
+#include "error_msg.h"
 
 /* HP-UX, Solaris */
 #if !defined(ifr_mtu) && defined(ifr_metric)
