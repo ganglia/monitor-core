@@ -66,7 +66,7 @@
 /* buffer and keep global some info */
 struct pst_static staticinfo;
 int cpu_num_func_cpu_num = 0;
-unsigned long clk_ticks;
+long clk_ticks;
 
 g_val_t cpu_func( int );  /* prototype to make metric_init() happy */
 
@@ -381,6 +381,9 @@ cpu_sintr_func ( void )
    return cpu_func(CP_SSYS);
 }
 
+/*
+ * FIXME?
+ */
 g_val_t 
 cpu_aidle_func ( void )
 {
