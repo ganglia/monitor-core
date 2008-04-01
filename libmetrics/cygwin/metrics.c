@@ -25,8 +25,6 @@
 #include "file.h"
 #include "libmetrics.h"
 /* End old ganglia 2.5.x headers */
-#include "error_msg.h"
-#include "ganglia_priv.h"
 #undef min
 #undef max
 #include "interface.h"
