@@ -9,9 +9,9 @@
 
 #include "ganglia_priv.h"
 #include "ganglia.h"
-#include "confuse.h"
 #include "default_conf.h"
 
+#include <confuse.h>
 #include <apr_pools.h>
 #include <apr_strings.h>
 #include <apr_tables.h>
