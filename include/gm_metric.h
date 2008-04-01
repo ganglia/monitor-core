@@ -6,8 +6,8 @@
 #include "gm_protocol.h"
 #include "gm_value.h"
 #include "gm_msg.h"
-#include "confuse.h"   /* header for libconfuse */
 
+#include <confuse.h>   /* header for libconfuse */
 #include <apr.h>
 #include <apr_pools.h>
 #include <apr_tables.h>
