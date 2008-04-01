@@ -66,6 +66,7 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
    char sum[256];
    Metric_t *metric = (Metric_t*) val->data;
    struct type_tag *tt;
+   int rc,i;
 
    type = getfield(metric->strings, metric->type);
 
@@ -88,13 +89,26 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
             break;
       }
 
-   return xml_print(client, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
-      "TYPE=\"%s\" UNITS=\"%s\" SLOPE=\"%s\" SOURCE=\"%s\"/>\n",
+   rc = xml_print(client, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
+      "TYPE=\"%s\" UNITS=\"%s\" SLOPE=\"%s\" SOURCE=\"%s\">\n",
       name, sum, metric->num,
       "double",         /* we always report double sums */
       getfield(metric->strings, metric->units),
       getfield(metric->strings, metric->slope),
       getfield(metric->strings, metric->source));
+
+   rc = xml_print(client, "<EXTRA_DATA>\n");
+
+   for (i=0; !rc && i<metric->ednameslen; i++) 
+     {
+       rc=xml_print(client, "<EXTRA_ELEMENT NAME=\"%s\" VAL=\"%s\"/>\n",
+                    getfield(metric->strings, metric->ednames[i]),
+                    getfield(metric->strings, metric->edvalues[i]));
+     }
+
+   rc = xml_print(client, "</EXTRA_DATA>\n");
+   rc=xml_print(client, "</METRICS>\n");
+   return rc;
 }
 
 
