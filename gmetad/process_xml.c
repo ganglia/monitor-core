@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-#include "expat.h"
+#include <expat.h>
 #include "gmetad.h"
 #include "rrd_helpers.h"
 
