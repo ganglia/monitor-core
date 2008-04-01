@@ -24,7 +24,7 @@ lib_LTLIBRARIES       = libganglia.la
 libganglia_la_SOURCES = gm_protocol_xdr.c gm_protocol.h \
 become_a_nobody.c become_a_nobody.h \
 debug_msg.c daemon_init.c daemon_init.h file.c file.h \
-dotconf.c dotconf.h error_msg.c error_msg.h ganglia_priv.h \
+dotconf.c dotconf.h error_msg.c ganglia_priv.h \
 ganglia.c hash.c hash.h inetaddr.c llist.c llist.h \
 my_inet_ntop.c my_inet_ntop.h net.h rdwr.c rdwr.h readdir.c readdir.h tcp.c \
 scoreboard.c scoreboard.h apr_net.c apr_net.h libgmond.c
