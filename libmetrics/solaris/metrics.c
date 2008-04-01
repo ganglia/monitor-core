@@ -1,6 +1,5 @@
 #include "interface.h"
 #include "libmetrics.h"
-#include "ganglia_priv.h"
 
 /* This is file is an amended version of solaris.c included in ganglia 2.5.4 
  * and ganglia 2.5.5. It has been modified by Adeyemi Adesanya 
