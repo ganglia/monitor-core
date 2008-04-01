@@ -725,6 +725,16 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
     if (!xmldata->host_alive) 
         return 0;
     
+    hashkey.data = (void*) name;
+    hashkey.size =  strlen(name) + 1;
+    
+    hash_datum = hash_lookup (&hashkey, xmldata->host.metrics);
+    if (!hash_datum) 
+        return 0;
+    
+    memcpy(&metric, hash_datum->data, hash_datum->size);
+    datum_free(hash_datum);
+
     /* Check to make sure that we don't try to add more
         extra elements than the array can handle.
     */  
@@ -735,15 +745,6 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
         return 0;
     }
 
-    hashkey.data = (void*) name;
-    hashkey.size =  strlen(name) + 1;
-    
-    hash_datum = hash_lookup (&hashkey, xmldata->host.metrics);
-    if (!hash_datum) 
-        return 0;
-    
-    memcpy(&metric, hash_datum->data, hash_datum->size);
-    datum_free(hash_datum);
     edge = metric.stringslen;
     
     name_off = value_off = -1;
