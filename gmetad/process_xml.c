@@ -786,6 +786,25 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
         {
             err_msg("Could not insert %s metric", name);
         }
+        else
+        {
+            hash_t *summary = xmldata->source.metric_summary;
+            Metric_t *sum_metric;
+
+            /* Update the metric definition in the summary hash table. */
+            memcpy(&(xmldata->metric.ednameslen), &(metric.ednameslen), 
+                   sizeof(Metric_t) - offsetof(Metric_t, ednameslen));
+            sum_metric = &(xmldata->metric);
+            
+            /* Trim metric structure to the correct length. Tricky. */
+            hashval.size = sizeof(*sum_metric) - GMETAD_FRAMESIZE + sum_metric->stringslen;
+            hashval.data = (void*) sum_metric;
+            
+            /* Update metric in summary table. */
+            rdatum = hash_insert(&hashkey, &hashval, summary);
+            if (!rdatum) 
+                err_msg("Could not insert summary %s metric", name);
+        }
     }
     
     return 0;
