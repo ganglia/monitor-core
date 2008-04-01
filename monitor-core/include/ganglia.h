@@ -66,7 +66,6 @@ ganglia_slope_t cstr_to_slope(const char* str);
 const char*     slope_to_cstr(unsigned int slope);
 
 void build_default_gmond_configuration(Ganglia_pool p);
-char *Ganglia_default_collection_groups(void);
 
 #define END_C_DECLS
 

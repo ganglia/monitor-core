@@ -80,5 +80,6 @@ gexec_cluster_t;
 
 int gexec_cluster_free ( gexec_cluster_t *cluster );
 int gexec_cluster (gexec_cluster_t *cluster, char *ip, unsigned short port);
+char *Ganglia_default_collection_groups(void);
 
 #endif
