@@ -77,7 +77,7 @@ static Ganglia_25metric mem_metric_info[] =
     {0, "mem_arm",     180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "mem_arm"},
     {0, "mem_rm",      180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "mem_rm"},
     {0, "mem_avm",     180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "mem_avm"},
-    {0, "mem_vm",      180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "mem_vm"}
+    {0, "mem_vm",      180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.3f", UDP_HEADER_SIZE+8, "mem_vm"},
 #endif
     {0, NULL}
 
