@@ -553,7 +553,7 @@ Ganglia_metric_set( Ganglia_metric gmetric, char *name, char *value, char *type,
   apr_pool_t *gm_pool;
 
   /* Make sure all the params look ok */
-  if(!gmetric||!name||!value||!type||!units||slope<0||slope>4)
+  if(!gmetric||!name||!value||!type||!units||slope>4)
     return 1;
 
   gm_pool = (apr_pool_t*)gmetric->pool;
