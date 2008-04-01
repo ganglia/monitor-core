@@ -6,13 +6,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
-
+#include <expat.h>
 
 #include "ganglia_priv.h"
 #include "net.h"
 #include "llist.h"
 #include "hash.h"
-#include "expat.h"
 
 int gexec_errno = 0;
 
