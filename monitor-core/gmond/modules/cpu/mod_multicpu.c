@@ -31,7 +31,6 @@
 ******************************************************************************/
 
 #include <gm_metric.h>
-#include <ganglia.h>
 
 #include <stdio.h>
 #include <time.h>
