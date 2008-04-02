@@ -50,13 +50,11 @@ if (isset($_GET["gs"]) and $_GET["gs"])
     $gridstack = explode(":", clean_string( rawurldecode($_GET["gs"] ) ) );
 else if ( isset($_COOKIE['gs']) and $_COOKIE['gs'])
     $gridstack = explode(":", clean_string( $_COOKIE["gs"] ) );
-else
-    $gridstack = array(); 
 
 # Assume we are the first grid visited in the tree if there are no CGI variables,
 # or gridstack is not well formed. Gridstack always has at least one element.
-if (!count($_GET) or !strstr($gridstack[0], "http://"))
-      $initgrid=TRUE;
+if ( !count($_GET) or !isset($gridstack) or !strstr($gridstack[0], "http://"))
+    $initgrid=TRUE;
 
 # Default values
 if (!is_numeric($hostcols)) $hostcols = 4;
