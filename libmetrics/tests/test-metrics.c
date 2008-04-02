@@ -131,7 +131,7 @@ main (void)
 		  fprintf (stderr, "%d (g_int32)", (int) val.int32);
 		  break;
 		case g_uint32:
-		  fprintf (stderr, "%d (g_uint32)", (int) val.uint32);
+		  fprintf (stderr, "%u (g_uint32)", val.uint32);
 		  break;
 		case g_float:
 		  fprintf (stderr, "%f (g_float)", val.f);
@@ -140,7 +140,7 @@ main (void)
 		  fprintf (stderr, "%f (g_double)", val.d);
 		  break;
 		case g_timestamp:
-		  fprintf (stderr, "%d (g_timestamp)", val.uint32);
+		  fprintf (stderr, "%u (g_timestamp)", val.uint32);
 		  break;
 		}
 	    }
