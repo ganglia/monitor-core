@@ -26,7 +26,7 @@ function graph_metric ( &$rrdtool_graph ) {
 
     switch ($context) {
     
-    case 'host':
+        case 'host':
     
             if ($summary) {
                 $rrdtool_graph['title'] = $hostname;
@@ -55,19 +55,19 @@ function graph_metric ( &$rrdtool_graph ) {
 
             break;
             
-            case 'meta':
-                $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";;
-                break;
-                
-            case 'grid':
-                $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";
-                break;
+        case 'meta':
+            $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";;
+            break;
+            
+        case 'grid':
+            $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";
+            break;
 
-            case 'cluster':
-                $rrdtool_graph['title'] = "$clustername "    . $rrdtool_graph['title'] ."last $range";
-                break;
+        case 'cluster':
+            $rrdtool_graph['title'] = "$clustername "    . $rrdtool_graph['title'] ."last $range";
+            break;
 
-            default:
+        default:
             
             if ($size == 'small') {
                 $rrdtool_graph['title'] = $hostname;
@@ -75,7 +75,7 @@ function graph_metric ( &$rrdtool_graph ) {
                 $rrdtool_graph['title'] = $hostname;
             } else {
                 $rrdtool_graph['title'] = $metricname;
-        }
+            }
             
             break;
         
