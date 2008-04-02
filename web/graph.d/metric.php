@@ -28,56 +28,56 @@ function graph_metric ( &$rrdtool_graph ) {
     
     case 'host':
     
-        if ($summary) {
-            $rrdtool_graph['title'] = $hostname;
-            $prefix = $metricname;
-        }
-        else {
-            $prefix = $hostname;
-            if ($metrictitle) {
-               $rrdtool_graph['title'] = $metrictitle;
-            } else {
-               $rrdtool_graph['title'] = $metricname;
+            if ($summary) {
+                $rrdtool_graph['title'] = $hostname;
+                $prefix = $metricname;
             }
+            else {
+                $prefix = $hostname;
+                if ($metrictitle) {
+                   $rrdtool_graph['title'] = $metrictitle;
+                } else {
+                   $rrdtool_graph['title'] = $metricname;
+                }
+            }
+
+            $prefix = $summary ? $metricname : $hostname;
+            $value = $value > 1000 
+                        ? number_format($value) 
+                        : number_format($value,2);
+
+            if ($range == 'job') {
+                $hrs = intval (-$jobrange / 3600);
+                $subtitle = "$prefix last ${hrs} (now $value)";
+            } else {
+                $subtitle = "$metricname (now $value)";
+            }
+
+            break;
+            
+            case 'meta':
+                $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";;
+                break;
+                
+            case 'grid':
+                $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";
+                break;
+
+            case 'cluster':
+                $rrdtool_graph['title'] = "$clustername "    . $rrdtool_graph['title'] ."last $range";
+                break;
+
+            default:
+            
+            if ($size == 'small') {
+                $rrdtool_graph['title'] = $hostname;
+            } else if ($summary) {
+                $rrdtool_graph['title'] = $hostname;
+            } else {
+                $rrdtool_graph['title'] = $metricname;
         }
-
-        $prefix = $summary ? $metricname : $hostname;
-        $value = $value > 1000 
-                    ? number_format($value) 
-                    : number_format($value,2);
-
-        if ($range == 'job') {
-            $hrs = intval (-$jobrange / 3600);
-            $subtitle = "$prefix last ${hrs} (now $value)";
-        } else {
-            $subtitle = "$metricname (now $value)";
-        }
-
-        break;
-        
-    case 'meta':
-        $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";;
-        break;
-        
-    case 'grid':
-        $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";
-        break;
-
-    case 'cluster':
-        $rrdtool_graph['title'] = "$clustername "    . $rrdtool_graph['title'] ."last $range";
-        break;
-
-    default:
-        
-        if ($size == 'small') {
-            $rrdtool_graph['title'] = $hostname;
-        } else if ($summary) {
-            $rrdtool_graph['title'] = $hostname;
-        } else {
-            $rrdtool_graph['title'] = $metricname;
-        }
-        
-        break;
+            
+            break;
         
     }
 
