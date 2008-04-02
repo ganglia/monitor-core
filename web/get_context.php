@@ -47,9 +47,11 @@ $clustergraphsize = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $graph_sizes_ke
     escapeshellcmd($_GET["z"]) : NULL;
 # A stack of grid parents. Prefer a GET variable, default to cookie.
 if (isset($_GET["gs"]) and $_GET["gs"])
-      $gridstack = explode(":", clean_string( rawurldecode($_GET["gs"] ) ) );
+    $gridstack = explode(":", clean_string( rawurldecode($_GET["gs"] ) ) );
+else if ( isset($_COOKIE['gs']) and $_COOKIE['gs'])
+    $gridstack = explode(":", clean_string( $_COOKIE["gs"] ) );
 else
-      $gridstack = explode(":", clean_string( $_COOKIE["gs"] ) );
+    $gridstack = array(); 
 
 # Assume we are the first grid visited in the tree if there are no CGI variables,
 # or gridstack is not well formed. Gridstack always has at least one element.
