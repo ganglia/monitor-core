@@ -20,6 +20,11 @@ else
 $tpl = new TemplatePower( template("$header.tpl") );
 $tpl->prepare();
 
+# Skip the "ganglia_header" block (Logo + "Grid Report for ...") when redirecting
+if ( !strstr($clustername, "http://") && $header == "header" ) {
+   $tpl->newBlock("ganglia_header");
+}
+
 #
 # sacerdoti: beginning of Grid tree state handling
 #

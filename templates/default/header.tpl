@@ -8,6 +8,7 @@
 </HEAD>
 <BODY BGCOLOR="#FFFFFF">
 
+<!-- START BLOCK : ganglia_header -->
 <FORM ACTION="{page}" METHOD="GET" NAME="ganglia_form">
 <TABLE WIDTH="100%">
 <TR>
@@ -49,3 +50,4 @@
 {node_menu}
 </FONT>
 <HR SIZE="1" NOSHADE>
+<!-- END BLOCK : ganglia_header -->
