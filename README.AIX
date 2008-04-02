@@ -21,7 +21,7 @@ You still need some "tricks" to use ganglia on a AIX system:
    a) remove "-Wall" from all Makefiles, especially:
 
      lib/Makefile
-     gmond/gstat/Makefile
+     gstat/Makefile
      gmond/Makefile
      gmetric/Makefile
      gmetad/Makefile  (see below)
