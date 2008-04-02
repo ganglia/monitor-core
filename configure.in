@@ -291,7 +291,10 @@ else
   APR_INCLUDES=`$APR_CONFIG --includes`
   AC_SUBST(APR_INCLUDES)
   APR_LIBPATH=`$APR_CONFIG --link-ld`
-  LDFLAGS="$LDFLAGS -L`expr "x$APR_LIBPATH" : '.*-L\(.*\) '`"
+  APR_LIBPATH=`expr "x$APR_LIBPATH" : '.*-L\(.*\) '`
+  if test x$APR_LIBPATH != x; then
+    LDFLAGS="$LDFLAGS -L$APR_LIBPATH"
+  if
   AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$APR_CONFIG --libs`])
 fi
 
