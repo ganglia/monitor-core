@@ -11,9 +11,7 @@ ganglia_exec_prefix="$exec_prefix"
 ganglia_bindir="@bindir@"
 ganglia_libdir="@libdir@"
 ganglia_includedir="@includedir@"
-ganglia_mandir="@mandir@"
-ganglia_datadir="@datadir@"
-ganglia_acdir="@datadir@/aclocal"
+ganglia_datarootdir="@varstatedir@/ganglia"
 ganglia_cflags="@CFLAGS@"
 ganglia_ldflags="@LDFLAGS@"
 ganglia_libs="@LIBS@"
@@ -24,7 +22,7 @@ version=no
 
 usage="ganglia-config"
 usage="$usage [--help] [--version] [--all]"
-usage="$usage [--prefix] [--exec-prefix] [--bindir] [--libdir] [--includedir] [--mandir] [--datadir] [--acdir]"
+usage="$usage [--prefix] [--exec-prefix] [--bindir] [--libdir] [--includedir] [--datarootdir]"
 usage="$usage [--cflags] [--ldflags] [--libs]"
 if [ $# -eq 0 ]; then
     echo "ganglia-config:Error: Invalid option" 1>&2
@@ -75,15 +73,9 @@ do
         --includedir)
             output="$output $ganglia_includedir"
             ;;
-        --mandir)
-            output="$output $ganglia_mandir"
-            ;;
-        --datadir)
-            output="$output $ganglia_datadir"
-            ;;
-        --acdir)
-            output="$output $ganglia_acdir"
-            ;;
+	--datarootdir)
+	    output="$output $ganglia_datarootdir"
+	    ;;
         --cflags)
             output="$output -I$ganglia_includedir"
             output_extra="$output_extra $ganglia_cflags"
