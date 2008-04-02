@@ -152,15 +152,15 @@ if test "$withval" = yes; then gmetad=yes; fi)
 AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
 
 AC_ARG_WITH( libapr,
-[  --with-libapr=DIR       Specify alternate location for libapr-1],
+[  --with-libapr=PATH      Specify location for libapr-1 or full path to apr-1-config],
 [if test x"$withval" != xno; then libapr=yes; libaprpath=$withval; fi])
 
 AC_ARG_WITH( libexpat,
-[  --with-libexpat=DIR     Specify alternate location for libexpat],
+[  --with-libexpat=DIR     Specify location for libexpat],
 [if test x"$withval" != xno; then libexpat=yes; libexpatpath=$withval; fi])
 
 AC_ARG_WITH( libconfuse,
-[  --with-libconfuse=DIR   Specify alternate location for libconfuse],
+[  --with-libconfuse=DIR   Specify location for libconfuse],
 [if test x"$withval" != xno; then libconfuse=yes; libconfusepath=$withval; fi])
 
 AC_ARG_ENABLE(debug,
