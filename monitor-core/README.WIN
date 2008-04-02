@@ -36,7 +36,7 @@ Go to the ganglia directory, and run the following command to build Ganglia
   ./configure --with-libconfuse=/usr/local --enable-static-build
 
 If everything works right, then you should see a gmond.exe, gstat.exe and 
-gmetric.exe created in the gmond, gmond/gstat and gmetric directories
+gmetric.exe created in the gmond, gstat and gmetric directories
 respectively. 
 
 The binaries generated depend on cygwin (cygwin1.dll), the apr cygwin

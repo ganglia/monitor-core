@@ -569,7 +569,7 @@ AC_OUTPUT(Makefile
           lib/default_conf.h
           lib/Makefile 
           gmond/Makefile 
-          gmond/gstat/Makefile 
+          gstat/Makefile 
           gmond/modules/Makefile
           gmond/modules/conf.d/example.conf
           gmond/modules/conf.d/modpython.conf
