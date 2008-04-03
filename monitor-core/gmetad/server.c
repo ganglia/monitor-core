@@ -122,11 +122,9 @@ source_summary(Source_t *source, client_t *client)
    if (rc) return 1;
 
    pthread_mutex_unlock(root.sum_finished);
-   if (source->ds) {
-      pthread_mutex_lock(source->sum_finished);
-      rc = hash_foreach(source->metric_summary, metric_summary, (void*) client);
-      pthread_mutex_unlock(source->sum_finished);
-   }
+   pthread_mutex_lock(source->sum_finished);
+   rc = hash_foreach(source->metric_summary, metric_summary, (void*) client);
+   pthread_mutex_unlock(source->sum_finished);
    pthread_mutex_unlock(root.sum_finished);
    
    return rc;
