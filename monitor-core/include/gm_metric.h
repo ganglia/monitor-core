@@ -3,7 +3,9 @@
 #include <rpc/rpc.h>
 
 #include "gm_mmn.h"
+#ifndef GM_PROTOCOL_GUARD
 #include "gm_protocol.h"
+#endif
 #include "gm_value.h"
 #include "gm_msg.h"
 
