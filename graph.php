@@ -83,7 +83,7 @@ $rrdtool_graph = array(
 );
 
 
-error_log("Graph [$graph] in context [$context]");
+//error_log("Graph [$graph] in context [$context]");
 
 /* If we have $graph, then a specific report was requested, such as "network_report" or 
  * "cpu_report.  These graphs usually have some special logic and custom handling required,
