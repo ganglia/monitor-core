@@ -7,7 +7,7 @@ checkcontrol();
 checkprivate();
 
 # RFM - These definitions are here to eliminate "undefined variable"
-# error maessages in ssl_error_log.
+# error messages in ssl_error_log.
 !isset($initgrid) and $initgrid = 0;
 !isset($metric) and $metric = "";
 !isset($context_metrics) and $context_metrics = "";
