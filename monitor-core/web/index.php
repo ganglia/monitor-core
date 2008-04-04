@@ -24,25 +24,25 @@ else if ($context == "tree")
    }
 else if ($context == "cluster" or $context == "cluster-summary")
    {
-      $title = "Cluster Report";
+      $title = "$clustername Cluster Report";
       include_once "./header.php";
       include_once "./cluster_view.php";
    }
 else if ($context == "physical")
    {
-      $title = "Physical View";
+      $title = "$clustername Physical View";
       include_once "./header.php";
       include_once "./physical_view.php";
    }
 else if ($context == "node")
    {
-      $title = "Node View";
+      $title = "$hostname Node View";
       include_once "./header.php";
       include_once "./show_node.php";
    }
 else if ($context == "host")
    {
-      $title = "Host Report";
+      $title = "$hostname Host Report";
       include_once "./header.php";
       include_once "./host_view.php";
    }
