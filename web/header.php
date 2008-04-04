@@ -19,6 +19,8 @@ else
 
 $tpl = new TemplatePower( template("$header.tpl") );
 $tpl->prepare();
+$tpl->assign( "page_title", $title );
+$tpl->assign("refresh", $default_refresh);
 
 # Skip the "ganglia_header" block (Logo + "Grid Report for ...") when redirecting
 if ( !strstr($clustername, "http://") && $header == "header" ) {
@@ -82,11 +84,9 @@ if (strstr($clustername, "http://"))
       $tpl->printToScreen();
       exit;
    }
-$tpl->assign("refresh", $default_refresh);
 
 $tpl->assign( "date", date("r"));
 $tpl->assign( "page_title", $title );
-
 
 # The page to go to when "Get Fresh Data" is pressed.
 if (isset($page))
