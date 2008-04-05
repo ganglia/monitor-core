@@ -153,6 +153,9 @@ switch ($context) {
         break;
 
     case 'cluster':
+        $title  = "$clustername Cluster";
+        break;
+
     case 'grid':
         $title  = $clustername ;
         break;
