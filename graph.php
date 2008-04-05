@@ -162,7 +162,7 @@ switch ($context) {
 
     case 'host':
         if (!$summary)
-            $title  = isset($graph) ? $hostname : '' ;
+            $title  = isset($graph) ? $hostname : null ;
         break;
         
     default:
@@ -170,7 +170,13 @@ switch ($context) {
         break;
 }
 
-$rrdtool_graph['title'] =  $title . ' ' . $rrdtool_graph['title'] . " last $range";
+//$rrdtool_graph['title'] =  $title . ' ' . $rrdtool_graph['title'] . " last $range";
+
+$rrdtool_graph['title'] = $rrdtool_graph['title'] . " last $range";
+
+if (isset($title)) {
+    $rrdtool_graph['title'] = "$title " . $rrdtool_graph['title'];
+}
 
 //--------------------------------------------------------------------------------------
 
