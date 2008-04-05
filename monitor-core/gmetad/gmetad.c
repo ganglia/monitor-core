@@ -219,7 +219,9 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
 
    /* Summarize all numeric metrics */
    tt = in_type_list(type, strlen(type));
-   if (!tt) return 0;
+   /* Don't write a summary for an unknown or STRING type. */
+   if (!tt || (tt->type == STRING)) 
+       return 0;
 
    /* We log all our sums in double which does not suffer from
       wraparound errors: for example memory KB exceeding 4TB. -twitham */
