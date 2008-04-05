@@ -28,7 +28,7 @@ $load_color = isset($_GET["l"]) && is_valid_hex_color( rawurldecode( $_GET[ 'l' 
                                  ?  sanitize ( $_GET["l"] )   : NULL;
 
 $summary    = isset( $_GET["su"] )    ? 1 : 0;
-$debug      = isset( $_GET['debug'] ) ? 1 : 0;
+$debug      = isset( $_GET['debug'] ) ? clean_number ( sanitize( $_GET["debug"] ) ) :  0;
 $command    = '';
 
 # Assumes we have a $start variable (set in get_context.php).
@@ -82,8 +82,9 @@ $rrdtool_graph = array(
     'height' => $height,
 );
 
-
-//error_log("Graph [$graph] in context [$context]");
+if ($debug) {
+    error_log("Graph [$graph] in context [$context]");
+}
 
 /* If we have $graph, then a specific report was requested, such as "network_report" or 
  * "cpu_report.  These graphs usually have some special logic and custom handling required,
@@ -214,21 +215,17 @@ $command .=  " $rrdtool_graph[series]";
 //error_log("Final command:  $command");
 
 # Did we generate a command?   Run it.
-if($command)
- {
-   /*Make sure the image is not cached*/
-   header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");   // Date in the past
-   header ("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
-   header ("Cache-Control: no-cache, must-revalidate");   // HTTP/1.1
-   header ("Pragma: no-cache");                     // HTTP/1.0
-   if ($debug) {
-     header ("Content-type: text/html");
-     print htmlentities( $command ) . "\n\n\n\n\n";
+if($command) {
+    /*Make sure the image is not cached*/
+    header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");   // Date in the past
+    header ("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
+    header ("Cache-Control: no-cache, must-revalidate");   // HTTP/1.1
+    header ("Pragma: no-cache");                     // HTTP/1.0
+    if ($debug>2) {
+        print htmlentities( $command ) . "\n\n\n\n\n";
     }
-   else {
-     header ("Content-type: image/gif");
-     passthru($command);
-    }
- }
+    header ("Content-type: image/gif");
+    passthru($command);
+}
 
 ?>
