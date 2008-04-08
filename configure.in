@@ -23,7 +23,7 @@ dnl
 
 AC_REVISION([$Revision$])
 AC_INIT(gmond/gmond.c)
-AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_AUX_DIR(build)
 
 ### BEGIN RELEASE VARIABLES ############################
 # On making a release...
