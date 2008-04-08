@@ -1,0 +1,42 @@
+GANGLIA 3.1 STATUS:                                           -*-text-*-
+Last modified at [$Date: 2007-12-03 13:06:37 -0700 (Mon, 03 Dec 2007) $]
+
+The current version of this file can be found at:
+
+  * http://ganglia.svn.sourceforge.net/svnroot/ganglia/trunk/monitor-core/STATUS
+
+Release history:
+
+    3.1.0   : in development
+
+
+Contributors looking for a mission:
+
+  * Just do an egrep on "TODO" or "XXX" in the source.
+
+  * Review the bug database at: http://issues.apache.org/bugzilla/
+
+  * Open bugs in the bug database.
+
+
+CURRENT RELEASE NOTES:
+
+
+RELEASE SHOWSTOPPERS:
+ <TEMPLATE>
+  * <Brief description of showstopper bug>
+    <http:// link to email list or bugzilla bug describing the issue>
+    <Comments prefixed with user id of comment author>
+
+
+BACKPORT PROPOSALS:
+ <TEMPLATE>
+  * <Brief description of proposal or bug>
+    <http:// link to email list or bugzilla bug describing the issue -optional>
+    <http:// link to committed patch in the trunk repository>
+    +1: <userid>
+     0: <userid>
+    -1: <userid>
+    <Optional comments prefixed with user id of comment author>
+
+
