@@ -19,7 +19,7 @@ SUBDIRS = $(GANGLIA_SUBDIRS)
 GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gstat gmetric include
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
-EXTRA_DIST = README.WIN README.AIX config ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html mans $(EXTRA_DIST_FILES)
+EXTRA_DIST = README.WIN README.AIX ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html mans $(EXTRA_DIST_FILES)
 
 ganglia.sub: ganglia.pod
 	sed -e 's/GANGLIA_VERSION/@VERSION@/' < $(srcdir)/ganglia.pod > ganglia.sub
