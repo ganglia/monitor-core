@@ -151,6 +151,10 @@ if test "$withval" = yes; then gmetad=yes; fi)
 
 AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
 
+AC_ARG_WITH( librrd,
+[  --with-librrd=PATH      Specify location for librrd],
+[if test x"$withval" != xno; then librrd=yes; librrdpath=$withval; fi])
+
 AC_ARG_WITH( libapr,
 [  --with-libapr=PATH      Specify location for libapr-1 or full path to apr-1-config],
 [if test x"$withval" != xno; then libapr=yes; libaprpath=$withval; fi])
@@ -214,6 +218,11 @@ dnl    if test "$ac_cv_lib_pthreads_pthread_create" = yes ; then
 dnl       CFLAGS="$CFLAGS -D_REENTRANT"
 dnl    fi
 dnl fi
+
+if test x"$librrdpath" != x && test x"$librrdpath" != xyes ; then
+  CFLAGS="$CFLAGS -I$librrdpath/include"
+  LDFLAGS="$LDFLAGS -L$librrdpath/lib"
+fi
 
 if test "$gmetad" = yes ; then
    AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], [echo "rrd lib not found"], [-lm])
