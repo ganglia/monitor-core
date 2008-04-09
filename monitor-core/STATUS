@@ -1,5 +1,5 @@
 GANGLIA 3.1 STATUS:                                           -*-text-*-
-Last modified at [$Date: 2007-12-03 13:06:37 -0700 (Mon, 03 Dec 2007) $]
+Last modified at [$Date$]
 
 The current version of this file can be found at:
 
@@ -9,12 +9,11 @@ Release history:
 
     3.1.0   : in development
 
-
 Contributors looking for a mission:
 
-  * Just do an egrep on "TODO" or "XXX" in the source.
+  * Just do an egrep on "TODO", "XXX" or "FIXME" in the source.
 
-  * Review the bug database at: http://issues.apache.org/bugzilla/
+  * Review the bug database at: http://bugzilla.ganglia.info/
 
   * Open bugs in the bug database.
 
