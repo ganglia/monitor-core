@@ -60,8 +60,7 @@ if ($initgrid or $gridwalk)
    {
       # Use cookie so we dont have to pass gridstack around within this site.
       # Cookie values are automatically urlencoded. Expires in a day.
-      $gscookie = $_COOKIE["gs"];
-      if (! isset($gscookie))
+      if ( !isset($_COOKIE["gs"]) or $_COOKIE["gs"] != $gridstack_str )
             setcookie("gs", $gridstack_str, time() + 86400);
    }
 
