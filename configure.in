@@ -230,13 +230,9 @@ if test "$gmetad" = yes ; then
    if test "$ac_cv_lib_rrd_rrd_create" != yes; then
       echo
       echo "The Ganglia Meta Daemon uses the Round-Robin Database Tool (rrdtool)"
-      echo "for storing historical information.  You have chosen to compile the "
-      echo "monitoring core with gmetad but librrd.a could not be found.  Please"
+      echo "for storing historical information.  You have chosen to compile the"
+      echo "monitoring core with gmetad but librrd could not be found.  Please"
       echo "visit http://www.rrdtool.org/, download rrdtool and then try again"
-      echo
-      echo "NOTE: the rrdtool library (librrd) will NOT need to be installed on "
-      echo "every machine running gmetad only the machine you are compiling gmetad"
-      echo "on since librrd is statically linked."
       echo
       exit;
    fi
