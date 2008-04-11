@@ -73,6 +73,9 @@ if(count($gridstack) > 1) {
   list($parentgrid, $parentlink) = explode("@", $gridstack[count($gridstack)-2]);
 }
 
+# Templated Logo image
+$tpl->assign("images","./templates/$template_name/images");
+
 # Setup a redirect to a remote server if you choose a grid from pulldown menu.
 # Tell destination server that we're walking foward in the grid tree.
 if (strstr($clustername, "http://")) 
@@ -92,9 +95,6 @@ if (isset($page))
       $tpl->assign("page",$page);
 else
       $tpl->assign("page","./");
-
-# Templated Logo image
-$tpl->assign("images","./templates/$template_name/images");
 
 #
 # Used when making graphs via graph.php. Included in most URLs
