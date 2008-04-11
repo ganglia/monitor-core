@@ -809,6 +809,7 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
                 rdatum = hash_insert(&hashkey, &hashval, summary);
                 if (!rdatum)
                     err_msg("Could not insert summary %s metric", name);
+                datum_free(hash_datum);
             }
         }
     }
