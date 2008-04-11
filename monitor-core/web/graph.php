@@ -158,7 +158,7 @@ switch ($context) {
         break;
 
     case 'grid':
-        $title  = $clustername ;
+        $title  = $gridname;
         break;
 
     case 'host':
@@ -170,8 +170,6 @@ switch ($context) {
         $title = $clustername;
         break;
 }
-
-//$rrdtool_graph['title'] =  $title . ' ' . $rrdtool_graph['title'] . " last $range";
 
 $rrdtool_graph['title'] = $rrdtool_graph['title'] . " last $range";
 
