@@ -56,10 +56,10 @@ if (isset($gridstack) and $gridstack) {
       $gridstack[ $key ] = clean_string( $value );
 }
 
-# Assume we are the first grid visited in the tree if there are no CGI variables,
+# Assume we are the first grid visited in the tree if there is no gridwalk
 # or gridstack is not well formed. Gridstack always has at least one element.
-if ( !count($_GET) or !isset($gridstack) or !strstr($gridstack[0], "http://"))
-    $initgrid=TRUE;
+if ( !isset($gridstack) or !strstr($gridstack[0], "http://"))
+    $initgrid = TRUE;
 
 # Default values
 if (!is_numeric($hostcols)) $hostcols = 4;
