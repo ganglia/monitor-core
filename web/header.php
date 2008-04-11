@@ -76,6 +76,9 @@ if(count($gridstack) > 1) {
 # Templated Logo image
 $tpl->assign("images","./templates/$template_name/images");
 
+$tpl->assign( "date", date("r"));
+$tpl->assign( "page_title", $title );
+
 # Setup a redirect to a remote server if you choose a grid from pulldown menu.
 # Tell destination server that we're walking foward in the grid tree.
 if (strstr($clustername, "http://")) 
@@ -86,9 +89,6 @@ if (strstr($clustername, "http://"))
       $tpl->printToScreen();
       exit;
    }
-
-$tpl->assign( "date", date("r"));
-$tpl->assign( "page_title", $title );
 
 # The page to go to when "Get Fresh Data" is pressed.
 if (isset($page))
