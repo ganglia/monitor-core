@@ -8,9 +8,9 @@ static int mem_metric_init ( apr_pool_t *p )
 {
     int i;
 
-	libmetrics_init();
+    libmetrics_init();
 
-	for (i = 0; mem_module.metrics_info[i].name != NULL; i++) {
+    for (i = 0; mem_module.metrics_info[i].name != NULL; i++) {
         /* Initialize the metadata storage for each of the metrics and then
          *  store one or more key/value pairs.  The define MGROUPS defines
          *  the key for the grouping attribute. */

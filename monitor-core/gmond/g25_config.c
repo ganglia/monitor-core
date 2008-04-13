@@ -128,7 +128,7 @@ static DOTCONF_CB(cb_trusted_hosts)
    
    for (i = 0; i < cmd->arg_count; i++)
       {
-	c->trusted_hosts[i] = strdup(cmd->data.list[i]);
+         c->trusted_hosts[i] = strdup(cmd->data.list[i]);
       }
    c->trusted_hosts[i] = NULL;
    return NULL;
@@ -244,25 +244,25 @@ print_config(char *path, gmond_config_t *config)
 
   fprintf(stdout,"/* global variables */\n");
   fprintf(stdout,"globals {\n  mute = \"%s\"\n  deaf = \"%s\"\n  debug_level = \"%ld\"\n  setuid = \"%s\"\n  user=\"%s\"\n  gexec = \"%s\"\n  host_dmax = \"%ld\"\n}\n\n",
-	  config->mute? "yes":"no", 
-	  config->deaf? "yes":"no", 
-	  config->debug_level, 
-	  config->no_setuid? "no":"yes",
-	  config->setuid,
-	  config->no_gexec? "no":"yes",
-	  config->host_dmax);
+          config->mute? "yes":"no", 
+          config->deaf? "yes":"no", 
+          config->debug_level, 
+          config->no_setuid? "no":"yes",
+          config->setuid,
+          config->no_gexec? "no":"yes",
+          config->host_dmax);
 
   fprintf(stdout,"/* info about cluster  */\n");
   fprintf(stdout,"cluster {\n  name = \"%s\"\n  owner = \"%s\"\n  latlong = \"%s\"\n  url=\"%s\"\n}\n\n",
-	  config->name, config->owner, config->latlong, config->url);
+          config->name, config->owner, config->latlong, config->url);
 
   fprintf(stdout,"/* info about host */\n");
   fprintf(stdout,"host {\n  location = \"%s\"\n}\n\n",
-	  config->location);
+          config->location);
 
   fprintf(stdout,"/* channel to send multicast on mcast_channel:mcast_port */\n");
   fprintf(stdout,"udp_send_channel {\n  mcast_join = \"%s\"\n  port = \"%hd\"\n  ttl=\"%ld\"\n",
-	  config->mcast_channel, config->mcast_port, config->mcast_ttl);
+          config->mcast_channel, config->mcast_port, config->mcast_ttl);
   if(config->mcast_if_given)
     {
       fprintf(stdout,"  mcast_if = \"%s\"\n", config->mcast_if);
@@ -271,7 +271,7 @@ print_config(char *path, gmond_config_t *config)
 
   fprintf(stdout,"/* channel to receive multicast from mcast_channel:mcast_port */\n");
   fprintf(stdout,"udp_recv_channel {\n  mcast_join = \"%s\"\n  port = \"%hd\"\n  bind = \"%s\"\n",
-	  config->mcast_channel, config->mcast_port, config->mcast_channel);
+          config->mcast_channel, config->mcast_port, config->mcast_channel);
   if(config->mcast_if_given)
     {
       fprintf(stdout,"  mcast_if = \"%s\"\n", config->mcast_if);
@@ -285,9 +285,9 @@ print_config(char *path, gmond_config_t *config)
       fprintf(stdout,"/* your trusted_hosts assuming ipv4 mask*/\n");
       fprintf(stdout,"acl{\n  default=\"deny\"\n");
       for(i = 0, p = config->trusted_hosts[i]; p; i++, p = config->trusted_hosts[i])
-	{
-	  fprintf(stdout, "  access {\n  ip=\"%s\"\n  mask = 32\n  action = \"allow\"\n  }\n", p);
-	}
+        {
+          fprintf(stdout, "  access {\n  ip=\"%s\"\n  mask = 32\n  action = \"allow\"\n  }\n", p);
+        }
       fprintf(stdout,"}\n");/* close acl */
     }
   fprintf(stdout,"}\n\n"); /* close tcp_accept_channel */
