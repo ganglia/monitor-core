@@ -135,7 +135,7 @@ start (void *data, const char *el, const char **attr)
                   cluster->host->gexec_on = 1;
             }
       }
-}				
+}
 
 static void
 end (void *data, const char *el)
@@ -187,7 +187,7 @@ end (void *data, const char *el)
          cluster->num_dead_hosts++;
          llist_add((llist_entry **) &(cluster->dead_hosts), e);
       }
-}				
+}
 
 int
 gexec_cluster_free ( gexec_cluster_t *cluster )
@@ -313,8 +313,8 @@ gexec_cluster (gexec_cluster_t *cluster, char *ip, unsigned short port)
            {
               gexec_errno = 7;
               err_msg ("gexec_cluster() XML_ParseBuffer() error at line %d:\n%s\n",
-		                   XML_GetCurrentLineNumber (xml_parser),
-		                   XML_ErrorString (XML_GetErrorCode (xml_parser)));
+              XML_GetCurrentLineNumber (xml_parser),
+              XML_ErrorString (XML_GetErrorCode (xml_parser)));
               goto error;
            }
 

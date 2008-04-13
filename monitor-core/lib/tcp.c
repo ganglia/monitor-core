@@ -200,7 +200,7 @@ g_tcp_socket_server_new_interface (const g_inet_addr* iface)
   return s;
   
  error:
-  if (s)    		free(s);
+  if (s) free(s);
   return NULL;
 }
 
