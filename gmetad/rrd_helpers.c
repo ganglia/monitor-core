@@ -25,7 +25,7 @@ my_mkdir ( const char *dir )
    pthread_mutex_lock( &rrd_mutex );
    if ( mkdir ( dir, 0755 ) < 0 && errno != EEXIST)
       {
-	 pthread_mutex_unlock(&rrd_mutex);
+         pthread_mutex_unlock(&rrd_mutex);
          err_sys("Unable to mkdir(%s)",dir);
       }
    pthread_mutex_unlock( &rrd_mutex );
@@ -66,8 +66,8 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
 
 /* Warning: RRD_create will overwrite a RRdb if it already exists */
 static int
-RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time,
-	    ganglia_slope_t slope)
+RRD_create( char *rrd, int summary, unsigned int step, 
+            unsigned int process_time, ganglia_slope_t slope)
 {
    const char *data_source_type = "GAUGE";
    char *argv[128];
@@ -103,13 +103,13 @@ RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time
    sprintf(start, "%u", process_time-1);
    argv[argc++] = start;
    sprintf(sum,"DS:sum:%s:%d:U:U",
-	   data_source_type,
-	   heartbeat);
+           data_source_type,
+           heartbeat);
    argv[argc++] = sum;
    if (summary) {
       sprintf(num,"DS:num:%s:%d:U:U", 
-	      data_source_type,
-	      heartbeat);
+              data_source_type,
+              heartbeat);
       argv[argc++] = num;
    }
 
@@ -145,9 +145,9 @@ RRD_create( char *rrd, int summary, unsigned int step, unsigned int process_time
 /* A summary RRD has a "num" and a "sum" DS (datasource) whereas the
    host rrds only have "sum" (since num is always 1) */
 static int
-push_data_to_rrd( char *rrd, const char *sum, const char *num, 
-		  unsigned int step, unsigned int process_time,
-		  ganglia_slope_t slope)
+push_data_to_rrd( char *rrd, const char *sum, const char *num,
+                  unsigned int step, unsigned int process_time,
+                  ganglia_slope_t slope)
 {
    int rval;
    int summary;
@@ -174,8 +174,8 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
 /* Assumes num argument will be NULL for a host RRD. */
 int
 write_data_to_rrd ( const char *source, const char *host, const char *metric, 
-		    const char *sum, const char *num, unsigned int step,
-		    unsigned int process_time, ganglia_slope_t slope)
+                    const char *sum, const char *num, unsigned int step,
+                    unsigned int process_time, ganglia_slope_t slope)
 {
    char rrd[ PATHSIZE ];
    char *summary_dir = "__SummaryInfo__";
