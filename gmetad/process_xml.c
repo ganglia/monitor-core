@@ -1089,7 +1089,6 @@ endElement_CLUSTER(void *data, const char *el)
 
          /* Release the partial sum mutex */
          pthread_mutex_unlock(source->sum_finished);
-         /*err_msg("%s releasing lock", xmldata->sourcename);*/
 
          hashkey.data = (void*) xmldata->sourcename;
          hashkey.size = strlen(xmldata->sourcename) + 1;
