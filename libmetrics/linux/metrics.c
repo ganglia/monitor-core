@@ -78,7 +78,7 @@ char *update_file(timely_file *tf)
     rval = slurpfile(tf->name, tf->buffer, BUFFSIZE);
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
-	      tf->name);
+              tf->name);
       return (char *)SYNAPSE_FAILURE;
     }
     else tf->last_read = now;
@@ -345,7 +345,7 @@ metric_init(void)
    if ( dummy == (char *)SYNAPSE_FAILURE )
       {
          err_msg("metric_init() got an error from update_file()");
-	 rval.int32 = SYNAPSE_FAILURE;
+         rval.int32 = SYNAPSE_FAILURE;
          return rval;
       } 
 

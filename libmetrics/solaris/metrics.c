@@ -187,9 +187,9 @@ get_kstat_val(g_val_t *val, char *km_name, char *ks_name, char *name)
    ** Get a kstat_ctl handle, or update the kstat chain.
    */
    if (kc == NULL)
-	kc = kstat_open();
+      kc = kstat_open();
    else
-	kstat_chain_update(kc);
+      kstat_chain_update(kc);
 
    if (kc == NULL)
       {
@@ -395,9 +395,9 @@ determine_cpu_percentages ( void )
 
    if (lasttime.tv_sec)
      timediff = ((double) thistime.tv_sec * 1.0e7 +
-		 ((double) thistime.tv_usec * 10.0)) -
-	((double) lasttime.tv_sec * 1.0e7 +
-	 ((double) lasttime.tv_usec * 10.0));
+                ((double) thistime.tv_usec * 10.0)) -
+                ((double) lasttime.tv_sec * 1.0e7 +
+                ((double) lasttime.tv_usec * 10.0));
    else
      timediff = 1.0e7;
 
@@ -494,12 +494,12 @@ determine_cpu_percentages ( void )
      
       /* sum up to the wait state counter, the last two we determine ourselves */
       for (j = 0; j < CPU_WAIT; j++){
-	   cpu_now[j] += (unsigned long) cpuKstats.cpu_sysinfo.cpu[j];
+         cpu_now[j] += (unsigned long) cpuKstats.cpu_sysinfo.cpu[j];
       }
       
 
       cpu_now[CPUSTATE_IOWAIT] += (unsigned long) cpuKstats.cpu_sysinfo.wait[W_IO] +
-				  (unsigned long) cpuKstats.cpu_sysinfo.wait[W_PIO];
+                                  (unsigned long) cpuKstats.cpu_sysinfo.wait[W_PIO];
       cpu_now[CPUSTATE_SWAP] += (unsigned long) cpuKstats.cpu_sysinfo.wait[W_SWAP];
       
       buffers[0].bread += (long)cpuKstats.cpu_sysinfo.bread;
@@ -537,16 +537,13 @@ determine_cpu_percentages ( void )
 /* decay stuff
  * semi-stolen from top.  :)  added by swagner on 8/20/02
  */
-   if (time_delta < 30)
-	{
-	alpha = 0.5 * (time_delta / 30);
-	beta = 1.0 - alpha;
-	}
-   else
-	{
-	alpha = 0.5;
-	beta = 0.5;
-	}
+   if (time_delta < 30) {
+      alpha = 0.5 * (time_delta / 30);
+      beta = 1.0 - alpha;
+   } else {
+      alpha = 0.5;
+      beta = 0.5;
+   }
    metriclist.bread_sec.f = (float)buffers[2].bread / (float)time_delta;
    if (buffers[1].bread == buffers[0].bread)
       metriclist.bread_sec.f = 0.;
@@ -575,7 +572,7 @@ determine_cpu_percentages ( void )
            metriclist.bread_sec.f, metriclist.bwrite_sec.f,
            metriclist.lread_sec.f, metriclist.lwrite_sec.f,
            metriclist.phread_sec.f, metriclist.phwrite_sec.f,
-	   time_delta
+           time_delta
    );
 
    buffers[1].bread = buffers[0].bread;
@@ -751,9 +748,9 @@ update_if_data(void)
    gettimeofday (&thistime, NULL);
    if (lasttime.tv_sec)
      timediff = ((double) thistime.tv_sec * 1.0e6 +
-		 (double) thistime.tv_usec -
-		 (double) lasttime.tv_sec * 1.0e6 -
-		 (double) lasttime.tv_usec) / 1.0e6;
+                 (double) thistime.tv_usec -
+                 (double) lasttime.tv_sec * 1.0e6 -
+                 (double) lasttime.tv_usec) / 1.0e6;
    else
      timediff = 1.0;
 
@@ -768,9 +765,9 @@ update_if_data(void)
    ** Get a kstat_ctl handle, or update the kstat chain.
    */
    if (kc == NULL)
-	kc = kstat_open();
+      kc = kstat_open();
    else
-	kstat_chain_update(kc);
+      kstat_chain_update(kc);
 
    if (kc == NULL)
       {

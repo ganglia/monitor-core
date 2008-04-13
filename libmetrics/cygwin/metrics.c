@@ -104,7 +104,7 @@ char *update_file(timely_file *tf)
     rval = slurpfile(tf->name, tf->buffer, BUFFSIZE);
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
-	      tf->name);
+              tf->name);
     }
     else tf->last_read = now;
   }
