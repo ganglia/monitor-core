@@ -147,8 +147,8 @@ cleanup_source ( datum_t *key, datum_t *val, void *arg )
    /* Our "authority" is a list of children hash tables, NULL for 
     * a grid. */
    if (!source->authority)
-   	return 0;
-   	
+       return 0;
+
    /* Clean up hosts */
    cleanup.tv = tv;
    cleanup.key = 0;
@@ -206,7 +206,7 @@ cleanup_thread(void *arg)
             source = (Source_t *) cleanup.val->data;
             hash_destroy(source->metric_summary);
             if (source->authority)
-            	hash_destroy(source->authority);
+                hash_destroy(source->authority);
 
             cleanup.hashval = hashval(cleanup.key, root.authority);
             rv=hash_delete(cleanup.key, root.authority);

@@ -51,14 +51,14 @@ data_thread ( void *arg )
    for (;;)
       {
          gettimeofday(&start, NULL);
-	 sock = NULL;
-	 
-	 /* If we successfully read from a good data source last time then try the same host again first. */
-	 if(d->last_good_index >= 0)
-	   sock = g_tcp_socket_new ( d->sources[d->last_good_index] );
+         sock = NULL;
+         
+         /* If we successfully read from a good data source last time then try the same host again first. */
+         if(d->last_good_index >= 0)
+           sock = g_tcp_socket_new ( d->sources[d->last_good_index] );
 
-	 /* If there was no good connection last time or the above connect failed then try each host in the list. */
-	 if(!sock)
+         /* If there was no good connection last time or the above connect failed then try each host in the list. */
+         if(!sock)
            {
              for(i=0; i < d->num_sources; i++)
                {

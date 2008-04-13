@@ -303,7 +303,7 @@ applyfilter(client_t *client, Generic_t *node)
          return 0;
 
       case SUMMARY:
-	 return source_summary((Source_t*) node, client);
+         return source_summary((Source_t*) node, client);
 
       default:
          break;
