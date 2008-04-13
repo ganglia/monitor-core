@@ -90,20 +90,20 @@ getfield(char* buf, short int index)
 int
 addstring(char *strings, int *edge, const char *s)
 {
-	int e = *edge;
-	int end = e + strlen(s) + 1;
+   int e = *edge;
+   int end = e + strlen(s) + 1;
 
-	/* I wish C had real exceptions. */
-	if (e > GMETAD_FRAMESIZE || end > GMETAD_FRAMESIZE)
-	{
-		err_msg("Field is too big!!");
-		return -1;
-	}
+   /* I wish C had real exceptions. */
+   if (e > GMETAD_FRAMESIZE || end > GMETAD_FRAMESIZE)
+   {
+      err_msg("Field is too big!!");
+      return -1;
+   }
 
-	strcpy(strings + e, s);
-	*edge = end;
+   strcpy(strings + e, s);
+   *edge = end;
 
-	return e;
+   return e;
 }
 
 
@@ -422,7 +422,7 @@ main ( int argc, char *argv[] )
          /* Sum the new values */
          hash_foreach(root.authority, do_root_summary, NULL );
 
-	 /* summary completed */
+         /* summary completed */
          pthread_mutex_unlock(root.sum_finished);
 
          /* Save them to RRD */

@@ -987,9 +987,9 @@ start (void *data, const char *el, const char **attr)
             rc = startElement_EXTRA_DATA(data, el, attr);
             break;
 
-		 case EXTRA_ELEMENT_TAG:
-			rc = startElement_EXTRA_ELEMENT(data, el, attr);
-			break;
+         case EXTRA_ELEMENT_TAG:
+            rc = startElement_EXTRA_ELEMENT(data, el, attr);
+            break;
     
          default:
             break;
