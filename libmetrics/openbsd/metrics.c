@@ -126,7 +126,7 @@ cpu_speed_func ( void )
    mib[0] = CTL_HW;
    mib[1] = HW_CPUSPEED;
    if (sysctl(mib, 2, &cpu_speed, &len, NULL, 0) == -1 || !len)
-   	cpu_speed = 0;
+      cpu_speed = 0;
 
    val.uint32 = cpu_speed;
    return val;
@@ -166,9 +166,9 @@ swap_total_func ( void )
    len = sizeof(uvmexp);
 
    if((sysctl(mib, 2, &uvmexp, &len, NULL, 0) < 0) || !len)
-   	totswap = 0;
+      totswap = 0;
    else
-	totswap = uvmexp.swpages;
+      totswap = uvmexp.swpages;
 
    val.f = totswap * (pagesize / 1024);
 
@@ -522,10 +522,11 @@ mem_buffers_func ( void )
 
    len = sizeof (buffers);
    if((sysctl(mib, 2, &buffers, &len, NULL, 0) == -1) || !len)
-		buffers = 0; 
-   buffers /= 1024;
+      buffers = 0; 
 
+   buffers /= 1024;
    val.f = buffers;
+
    return val;
 }
 
@@ -1072,14 +1073,14 @@ counterdiff(uint64_t oldval, uint64_t newval, uint64_t maxval, uint64_t maxdiff)
 		return (newval - oldval);
 
 	/*
-         * Now the tricky part.  If we assume counters never get reset,
-         * this is easy.  Unfortunaly, they do get reset on some
-         * systems, so we need to try and deal with that.  Our huristic
-         * is that if out difference is greater then maxdiff and newval
-         * is less or equal to maxdiff, then we've probably been reset
-         * rather then actually wrapping.  Obviously, you need to be
-         * careful to poll often enough that you won't exceed maxdiff or
-         * you will get undersized numbers when you do wrap.
+	 * Now the tricky part.  If we assume counters never get reset,
+	 * this is easy.  Unfortunaly, they do get reset on some
+	 * systems, so we need to try and deal with that.  Our huristic
+	 * is that if out difference is greater then maxdiff and newval
+	 * is less or equal to maxdiff, then we've probably been reset
+	 * rather then actually wrapping.  Obviously, you need to be
+	 * careful to poll often enough that you won't exceed maxdiff or
+	 * you will get undersized numbers when you do wrap.
 	 */
 	diff = maxval - oldval + newval;
 	if (diff > maxdiff && newval <= maxdiff)

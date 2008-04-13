@@ -138,7 +138,7 @@ cpu_speed_func ( void )
 
 #if (__NetBSD_Version__ > 299000000)
    if (sysctlbyname("machdep.est.frequency.target", &cpu_speed, &len, NULL, 0) == -1)
-	val.uint32 = 0;
+      val.uint32 = 0;
 #endif
 
    val.uint32 = cpu_speed /= 1000000;
@@ -339,9 +339,9 @@ cpu_user_func ( void )
    if (sysctl(mib, 2, &cp_time, &len, NULL, 0) == -1 || !len)
       res = 0.0;
    else {
-	   /* Use percentages function lifted from top(1) to figure percentages */
-	   tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
-	   res = cpu_states[CP_USER];
+      /* Use percentages function lifted from top(1) to figure percentages */
+      tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
+      res = cpu_states[CP_USER];
    }
    val.f = (float)res/10;
    return val;
@@ -370,9 +370,9 @@ cpu_nice_func ( void )
    if (sysctl(mib, 2, &cp_time, &len, NULL, 0) == -1 || !len)
       res = 0.0;
    else {
-	   /* Use percentages function lifted from top(1) to figure percentages */
-	   tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
-	   res = cpu_states[CP_NICE];
+      /* Use percentages function lifted from top(1) to figure percentages */
+      tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
+      res = cpu_states[CP_NICE];
    }
    val.f = (float)res/10;
    return val;
@@ -401,9 +401,9 @@ cpu_system_func ( void )
    if (sysctl(mib, 2, &cp_time, &len, NULL, 0) == -1 || !len)
       res = 0.0;
    else {
-	   /* Use percentages function lifted from top(1) to figure percentages */
-	   tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
-	   res = cpu_states[CP_SYS];
+      /* Use percentages function lifted from top(1) to figure percentages */
+      tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
+      res = cpu_states[CP_SYS];
    }
    val.f = (float)res/10;
    return val;
@@ -432,9 +432,9 @@ cpu_idle_func ( void )
    if (sysctl(mib, 2, &cp_time, &len, NULL, 0) == -1 || !len)
       res = 0.0;
    else {
-	   /* Use percentages function lifted from top(1) to figure percentages */
-	   tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
-	   res = cpu_states[CP_IDLE];
+      /* Use percentages function lifted from top(1) to figure percentages */
+      tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
+      res = cpu_states[CP_IDLE];
    }
    val.f = (float)res/10;
    return val;
@@ -483,9 +483,9 @@ cpu_intr_func ( void )
    if (sysctl(mib, 2, &cp_time, &len, NULL, 0) == -1 || !len)
       res = 0.0;
    else {
-	   /* Use percentages function lifted from top(1) to figure percentages */
-	   tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
-	   res = cpu_states[CP_INTR];
+      /* Use percentages function lifted from top(1) to figure percentages */
+      tot = percentages(CPUSTATES, cpu_states, cp_time, cp_old, cp_diff);
+      res = cpu_states[CP_INTR];
    }
 
    val.f = (float)res/10;
@@ -587,19 +587,19 @@ proc_run_func( void )
 #endif
       switch(state) {
 #if (__NetBSD_Version__ >= 200000000)
-	 case SACTIVE:
+         case SACTIVE:
 #else
-	 case SRUN:
-	 case SONPROC:
+         case SRUN:
+         case SONPROC:
 #endif
-	 case SIDL:
-		val.uint32++;
-		break;
+         case SIDL:
+            val.uint32++;
+            break;
       }
    }
 
    if (val.uint32 > 0)
-	val.uint32--;
+      val.uint32--;
 
 output:
    return val;
@@ -653,11 +653,13 @@ mem_buffers_func ( void )
    mib[1] = VM_NKMEMPAGES;
 
    len = sizeof (buffers);
-   if((sysctl(mib, 2, &buffers, &len, NULL, 0) == -1) || !len)
-		buffers = 0; 
-   buffers /= 1024;
 
+   if((sysctl(mib, 2, &buffers, &len, NULL, 0) == -1) || !len)
+      buffers = 0; 
+
+   buffers /= 1024;
    val.f = buffers;
+
    return val;
 }
 
@@ -1266,14 +1268,14 @@ counterdiff(uint64_t oldval, uint64_t newval, uint64_t maxval, uint64_t maxdiff)
 		return (newval - oldval);
 
 	/*
-         * Now the tricky part.  If we assume counters never get reset,
-         * this is easy.  Unfortunaly, they do get reset on some
-         * systems, so we need to try and deal with that.  Our huristic
-         * is that if out difference is greater then maxdiff and newval
-         * is less or equal to maxdiff, then we've probably been reset
-         * rather then actually wrapping.  Obviously, you need to be
-         * careful to poll often enough that you won't exceed maxdiff or
-         * you will get undersized numbers when you do wrap.
+	 * Now the tricky part.  If we assume counters never get reset,
+	 * this is easy.  Unfortunaly, they do get reset on some
+	 * systems, so we need to try and deal with that.  Our huristic
+	 * is that if out difference is greater then maxdiff and newval
+	 * is less or equal to maxdiff, then we've probably been reset
+	 * rather then actually wrapping.  Obviously, you need to be
+	 * careful to poll often enough that you won't exceed maxdiff or
+	 * you will get undersized numbers when you do wrap.
 	 */
 	diff = maxval - oldval + newval;
 	if (diff > maxdiff && newval <= maxdiff)

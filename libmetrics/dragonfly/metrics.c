@@ -166,7 +166,8 @@ mem_total_func ( void )
    len = sizeof(total);
 
    if (sysctlbyname("hw.physmem", &total, &len, NULL, 0) == -1)
-	total = 0;
+      total = 0;
+
    val.f = total / 1024;
 
    return val;
@@ -491,7 +492,7 @@ mem_free_func ( void )
 
    len = sizeof (free_pages);
    if((sysctlbyname("vm.stats.vm.v_free_count", &free_pages, &len, NULL, 0) 
-	== -1) || !len) free_pages = 0; 
+      == -1) || !len) free_pages = 0; 
 
    val.f = free_pages * (pagesize / 1024);
    return val;
@@ -525,10 +526,11 @@ mem_buffers_func ( void )
 
    len = sizeof (buffers);
    if((sysctlbyname("vfs.bufspace", &buffers, &len, NULL, 0) == -1) || !len)
-		buffers = 0; 
-   buffers /= 1024;
+      buffers = 0; 
 
+   buffers /= 1024;
    val.f = buffers;
+
    return val;
 }
 
@@ -545,7 +547,7 @@ mem_cached_func ( void )
 
    len = sizeof (cache);
    if((sysctlbyname("vm.stats.vm.v_cache_count", &cache, &len, NULL, 0) == -1) 
-	|| !len)
+      || !len)
       cache = 0; 
 
    val.f = cache * (pagesize / 1024);
@@ -1100,14 +1102,14 @@ counterdiff(uint64_t oldval, uint64_t newval, uint64_t maxval, uint64_t maxdiff)
 		return (newval - oldval);
 
 	/*
-         * Now the tricky part.  If we assume counters never get reset,
-         * this is easy.  Unfortunaly, they do get reset on some
-         * systems, so we need to try and deal with that.  Our huristic
-         * is that if out difference is greater then maxdiff and newval
-         * is less or equal to maxdiff, then we've probably been reset
-         * rather then actually wrapping.  Obviously, you need to be
-         * careful to poll often enough that you won't exceed maxdiff or
-         * you will get undersized numbers when you do wrap.
+	 * Now the tricky part.  If we assume counters never get reset,
+	 * this is easy.  Unfortunaly, they do get reset on some
+	 * systems, so we need to try and deal with that.  Our huristic
+	 * is that if out difference is greater then maxdiff and newval
+	 * is less or equal to maxdiff, then we've probably been reset
+	 * rather then actually wrapping.  Obviously, you need to be
+	 * careful to poll often enough that you won't exceed maxdiff or
+	 * you will get undersized numbers when you do wrap.
 	 */
 	diff = maxval - oldval + newval;
 	if (diff > maxdiff && newval <= maxdiff)
