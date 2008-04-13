@@ -11,7 +11,7 @@ static int cpu_metric_init ( apr_pool_t *p )
 {
     int i;
 
-	libmetrics_init();
+    libmetrics_init();
 
     for (i = 0; cpu_module.metrics_info[i].name != NULL; i++) {
         /* Initialize the metadata storage for each of the metrics and then
