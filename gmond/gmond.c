@@ -1386,8 +1386,8 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
   if (ret == APR_SUCCESS) 
     {
       int extra_len = data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len;
-	  len = apr_snprintf(metricxml, 1024, "<EXTRA_DATA>\n");
-	  apr_socket_send(client, metricxml, &len);
+      len = apr_snprintf(metricxml, 1024, "<EXTRA_DATA>\n");
+      apr_socket_send(client, metricxml, &len);
       for (; extra_len > 0; extra_len--) 
         {
           len = apr_snprintf(metricxml, 1024, "<EXTRA_ELEMENT NAME=\"%s\" VAL=\"%s\"/>\n", 
@@ -1395,8 +1395,8 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
                  data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[extra_len-1].data);
           apr_socket_send(client, metricxml, &len);
         }
-	  len = apr_snprintf(metricxml, 1024, "</EXTRA_DATA>\n");
-	  apr_socket_send(client, metricxml, &len);
+        len = apr_snprintf(metricxml, 1024, "</EXTRA_DATA>\n");
+        apr_socket_send(client, metricxml, &len);
     }
   /* Send the closing tag */
   len = apr_snprintf(metricxml, 1024, "</METRIC>\n");

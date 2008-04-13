@@ -169,23 +169,22 @@ static void init_cpu_info (void)
  */
 static void get_metric_name_cpu (char *metric, char *name, int *index)
 {
-	/* The metric name contains both the name and the cpu id. 
+    /* The metric name contains both the name and the cpu id. 
        Split the cpu id from the name so that we can use it to
        decide which metric handler to call and for which cpu.
     */
-	size_t numIndex = strcspn (metric, "0123456789");
+    size_t numIndex = strcspn (metric, "0123456789");
 
-	if (numIndex > 0) {
+    if (numIndex > 0) {
         strncpy (name, metric, numIndex);
         name[numIndex] = '\0';
         *index = atoi(&metric[numIndex]);
-	}
-    else {
+    } else {
         *name = '\0';
         *index = 0;
     }
 
-	return;
+    return;
 }
 
 /*
