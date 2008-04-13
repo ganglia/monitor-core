@@ -70,7 +70,7 @@ struct mmodule_struct {
     Ganglia_25metric *metrics_info;
 
     /** Metric callback function */
-	metric_func handler;
+    metric_func handler;
 };
 
 /* Convenience macros for adding metadata key/value pairs to a metric structure element */
@@ -85,16 +85,16 @@ struct mmodule_struct {
 
 /** Use this in all standard modules */
 #define STD_MMODULE_STUFF	MMODULE_MAGIC_NUMBER_MAJOR, \
-				MMODULE_MAGIC_NUMBER_MINOR, \
-				__FILE__, \
-				NULL, \
-				NULL, \
-				NULL, \
+                MMODULE_MAGIC_NUMBER_MINOR, \
+                __FILE__, \
                 NULL, \
                 NULL, \
                 NULL, \
                 NULL, \
-				MMODULE_MAGIC_COOKIE
+                NULL, \
+                NULL, \
+                NULL, \
+                MMODULE_MAGIC_COOKIE
 
 
 #endif  /* GM_METRIC_H */
