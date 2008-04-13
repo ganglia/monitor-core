@@ -75,7 +75,7 @@ typedef struct
       gexec_host_t *host;
       int host_up;
       int start;
-	}
+   }
 gexec_cluster_t;
 
 int gexec_cluster_free ( gexec_cluster_t *cluster );
