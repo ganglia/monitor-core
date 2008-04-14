@@ -123,6 +123,7 @@ dnl ##################################################################
 dnl Checks for programs.
 dnl
 AC_PROG_CC
+AC_PROG_CC_STDC
 AM_PROG_LIBTOOL
 
 AC_ARG_ENABLE( static-build,
