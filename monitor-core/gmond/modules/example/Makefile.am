@@ -14,6 +14,6 @@ endif
 INCLUDES = @APR_INCLUDES@
 
 install:
-	echo
-	echo "Examples should be installed manually"
-	echo
+	@echo
+	@echo "Examples should be installed manually"
+	@echo
