@@ -12,6 +12,7 @@ AC_CANONICAL_HOST
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_STDC
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
