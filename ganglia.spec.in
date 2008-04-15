@@ -257,8 +257,6 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__install -m 0644 mans/*.1* $RPM_BUILD_ROOT%{_mandir}/man1/
 %__install -m 0644 gmond/gmond.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/gmond.conf.5
 
-# cleanup section
-%__rm -v $RPM_BUILD_ROOT%{_libdir}/ganglia/*.{la,a}
 %endif
 
 %ifnarch noarch
@@ -360,6 +358,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Apr 15 2008 Bernard Li <bernard@vanhpc.org>
+- Cleanup of *.{la,a} in %{_libdir}/ganglia is not needed anymore
 * Mon Mar 31 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
 - Add gm_value.h and gm_msg.h
 * Thu Mar 28 2008 Brad Nicholes <bnicholes@novell.com>
