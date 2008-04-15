@@ -32,7 +32,7 @@ $tpl->assign("name", $hostname);
 # $metrics is an array of [Metrics][Hostname][NAME|VAL|TYPE|UNITS|SOURCE].
 
 # Find the host's physical location in the cluster.
-$hostattrs = (is_array($hosts_up)) ? $hosts_up : $hosts_down;
+$hostattrs = ($up) ? $hosts_up : $hosts_down;
 list($rack,$rank,$plane) = findlocation($hostattrs);
 $location = ($rack<0) ? "Unknown" : "Rack $rack, Rank $rank, Plane $plane.";
 $tpl->assign("location",$location);
