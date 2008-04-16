@@ -71,8 +71,8 @@ $heartbeat=$hostattrs['REPORTED'];
 $age = $clustertime - $heartbeat;
 $s = ($age>1) ? "s" : "";
 $tpl->assign("age","$age second$s");
-if (!$up) {
-   $tpl->assign("down","<br><b>This node is down.</b>");
+if ((!$up) && ($cluster['HOSTS_UP'] == 0)) {
+   $tpl->assign("message","<b>This cluster is down.</b>");
 }
 
 # The these hardware units should be more flexible.

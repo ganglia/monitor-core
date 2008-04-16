@@ -15,8 +15,9 @@
    <i>{ip}</i><br>
    <em>Location:</em> {location}<p>
 
-   Last heartbeat received {age} ago.{down}<br>
-   Uptime {uptime}
+   Last heartbeat received {age} ago.<br>
+   Uptime {uptime}<br>
+   {message}
 
    </td>
    <td align=right valign=top>
