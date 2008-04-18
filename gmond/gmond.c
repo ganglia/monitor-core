@@ -1700,6 +1700,14 @@ load_metric_modules( void )
             continue;
         }
 
+        /* Validate that the module was built against a compatible module interface API. */
+        if (modp->version != MMODULE_MAGIC_NUMBER_MAJOR) {
+            err_msg("Module \"%s\" is not compatible with this "
+                    "version of Gmond (found %d, need %d).",
+                    modName, modp->version, MMODULE_MAGIC_NUMBER_MAJOR);
+            continue;
+        }
+
         if (metric_modules != NULL) {
             modp->next = metric_modules;
         }
