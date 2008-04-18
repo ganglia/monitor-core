@@ -1114,10 +1114,6 @@ mtu_func ( void )
    return val;
 }
 
-/* ===================================================== */
-/* Disk Usage. Using fsusage.c from the GNU fileutils-4.1.5 package. */
-#include <inttypes.h>
-
 /* Linux Specific, but we are in the Linux machine file. */
 #define MOUNTS "/proc/mounts"
 
