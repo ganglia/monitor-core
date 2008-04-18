@@ -3,12 +3,11 @@
 <HEAD>
 <TITLE>Ganglia:: {page_title}</TITLE>
 <META http-equiv="Content-type" content="text/html; charset=utf-8">
-<META http-equiv="refresh" content="{refresh}{redirect}">
+<META http-equiv="refresh" content="{refresh}">
 <LINK rel="stylesheet" href="./styles.css" type="text/css">
 </HEAD>
 <BODY BGCOLOR="#FFFFFF">
 
-<!-- START BLOCK : ganglia_header -->
 <FORM ACTION="{page}" METHOD="GET" NAME="ganglia_form">
 <TABLE WIDTH="100%">
 <TR>
@@ -50,4 +49,3 @@
 {node_menu}
 </FONT>
 <HR SIZE="1" NOSHADE>
-<!-- END BLOCK : ganglia_header -->

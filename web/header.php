@@ -17,16 +17,6 @@ if ( $context == "control" && $controlroom < 0 )
 else
       $header = "header";
 
-$tpl = new TemplatePower( template("$header.tpl") );
-$tpl->prepare();
-$tpl->assign( "page_title", $title );
-$tpl->assign("refresh", $default_refresh);
-
-# Skip the "ganglia_header" block (Logo + "Grid Report for ...") when redirecting
-if ( !strstr($clustername, "http://") && $header == "header" ) {
-   $tpl->newBlock("ganglia_header");
-}
-
 #
 # sacerdoti: beginning of Grid tree state handling
 #
@@ -56,6 +46,10 @@ else if ($gridwalk=="back")
 $gridstack_str = join(">", $gridstack);
 $gridstack_url = rawurlencode($gridstack_str);
 
+if (strstr($clustername, "http://")) {
+   header("Location: $clustername?gw=fwd&amp;gs=$gridstack_url");
+}
+
 if ($initgrid or $gridwalk)
    {
       # Use cookie so we dont have to pass gridstack around within this site.
@@ -73,22 +67,15 @@ if(count($gridstack) > 1) {
   list($parentgrid, $parentlink) = explode("@", $gridstack[count($gridstack)-2]);
 }
 
+$tpl = new TemplatePower( template("$header.tpl") );
+$tpl->prepare();
+$tpl->assign("page_title", $title);
+$tpl->assign("refresh", $default_refresh);
+
 # Templated Logo image
 $tpl->assign("images","./templates/$template_name/images");
 
 $tpl->assign( "date", date("r"));
-$tpl->assign( "page_title", $title );
-
-# Setup a redirect to a remote server if you choose a grid from pulldown menu.
-# Tell destination server that we're walking foward in the grid tree.
-if (strstr($clustername, "http://")) 
-   {
-      $tpl->assign("refresh", "0");
-      $tpl->assign("redirect", ";URL=$clustername?gw=fwd&amp;gs=$gridstack_url");
-      echo "<h2>Redirecting, please wait...</h2>";
-      $tpl->printToScreen();
-      exit;
-   }
 
 # The page to go to when "Get Fresh Data" is pressed.
 if (isset($page))
