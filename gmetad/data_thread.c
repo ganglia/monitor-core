@@ -28,7 +28,7 @@ data_thread ( void *arg )
  
    if(get_debug_msg_level())
       {
-         fprintf(stderr,"Data thread %d is monitoring [%s] data source\n", (int) pthread_self(), d->name);
+         fprintf(stderr,"Data thread %lu is monitoring [%s] data source\n", (unsigned long)pthread_self(), d->name);
          for(i = 0; i < d->num_sources; i++)
             {
                addr = d->sources[i];
