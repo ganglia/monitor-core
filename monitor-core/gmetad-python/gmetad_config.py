@@ -127,14 +127,15 @@ class GmetadConfig:
         self.cfg[GgmetadConfig.LOGFILE] = logfile.strip().strip('"')
             
     def parseDataSource(self, args):
-        a = args.split()
-        name = a[0].strip().strip('"')
-        interval = 15
-        if a[1].strip().isdigit():
-            interval = int(a[1].strip())
-            hosts = a[2:]
-        else:
+        a = args.split('"')
+        name = a[1]
+        a = a[2].strip().split()
+        if a[0].isdigit():
+            interval = int(a[0])
             hosts = a[1:]
+        else:
+            interval = 15
+            hosts = a[0:]
         self.cfg[GmetadConfig.DATA_SOURCE].append(GmetadDataSource(name, hosts, interval))
         
     def parseRRAs(self, args):
