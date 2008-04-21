@@ -1,0 +1,52 @@
+Matt Ryan (mryan at novell dot com) - Initial Version
+
+This represents the initial version of the rewritten gmetad in python.
+Files are:
+
+- gmetad_config.py
+- gmetad_daemon.py
+- gmetad_data.py
+- gmetad_gmondReader.py
+- gmetad.py
+- gmetad_random.py
+- gmetad_xmlWriter.py
+- gmetad_consistency_test.py (test script)
+
+This version should function generally as a gmetad replacement for reading
+gmond data and providing aggregate data on XML ports only.
+
+Advertised capabilities of this version include:
+
+- Support of current gmetad configuration files - should "just work" by
+  pointing it directly to an existing gmetad.conf file.
+- Most current gmetad command-line options, plus a few others.
+- Six log levels as per the python "logging" module.  Two of these - FATAL and
+  CRITICAL - are functionally equivalent but indicated separately in the
+  command-line parameters.  The default logging or debug level is 2, meaning
+  that all messages ERROR level and higher will be logged.  A specified debug
+  level of 5 or higher means all debug messages are shown and that the
+  application stays in the foreground.
+- Logging is done to syslog, optionally by appending to a log file in addition
+  to syslog.  If the debug level is 5 or higher, logging is also done to the
+  console.
+- At a logging level of 4 or below, the application will go through the
+  daemonizing process (setuid to another user, fork twice, set session id,
+  change working dir to "/" and set umask to 0, close all open file descriptors
+  except the logging file descriptors, and redirect all other I/O to /dev/null.
+- Writes a PID file that can be used for graceful shutdowns later (kill -TERM).
+- Creates a reader thread for every data source specified in the configuration.
+  All data is stored internally in a single data structure which is updated on
+  every read.
+- Readers honor the polling interval specified in the data source configuration
+  but vary the interval by +- 5 seconds.
+- Listens on the XML and Interactive ports.  XML port is a dump of all stored
+  data in a single XML file.  Interactive waits for input from the user then
+  dumps the XML.
+- Interactive port supports basic pathing filters, such as /Gridname/
+  Clustername/Hostname/Metricname.
+- Interactive port ignores filters that don't match the corresponding level in
+  the XML - in other words, all data at that level will be sent, and no
+  filtering applied, if the specified filter doesn't match any of the tags at
+  that level.
+- Shuts down gracefully at SIGTERM (generally this is true, unless an exception
+  occurs - and even then, it usually works...).
