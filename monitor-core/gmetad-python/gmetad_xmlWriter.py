@@ -105,4 +105,7 @@ class XmlWriter:
             filterList = None
         else:
             filterList = filter.split('/')
-        return '%s\n%s\n%s' % (self._xml_starttag, self._xml_dtd, self._getXmlImpl(DataStore().rootElement, filterList))
+        rbuf = '%s\n%s\n' % (self._xml_starttag, self._xml_dtd)
+        if DataStore().rootElement is not None:
+            rbuf += self._getXmlImpl(DataStore().rootElement, filterList)
+        return rbuf
