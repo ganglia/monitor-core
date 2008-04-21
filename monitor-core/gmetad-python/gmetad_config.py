@@ -49,7 +49,7 @@ class GmetadConfig:
                     GmetadRRA('AVERAGE:0.5:5760:374')
             ],
             SCALABLE : True,
-            GRIDNAME : '',
+            GRIDNAME : 'unspecified',
             AUTHORITY : 'http://%s/ganglia/' % getfqdn(),
             TRUSTED_HOSTS : [],
             ALL_TRUSTED : False,
