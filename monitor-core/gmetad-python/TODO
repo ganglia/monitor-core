@@ -1,0 +1,23 @@
+Certainly there are hundreds of features not in this version, but of the more
+obvious:
+
+- The filter querystring on the interactive port is not currently supported,
+  i.e. "/Gridname?filter=summary".
+- No current support for summary data.
+- No current support for any type of data handling or output modules or
+  plugins of any kind.
+- No writing of RRD files or any other type of permanent data storage.
+- The "scalable" configuration attribute is not currently supported.
+- The "trusted_hosts" configuration attribute is not currently supported.
+- The "all_trusted" configuration attribute is not currently supported.
+- The "server_threads" configuration attribute is not currently supported.
+
+In addition, we don't currently have any data on the following:
+
+- Comparative data to compare disk and runtime footprint to current gmetad.
+- Throughput and performance data as compared to current gmetad.
+- Stability data - memory usage over time, ability to continue running for
+  long periods of time, etc.
+- Correctness testing - honoring of all configuration parameters and
+  command-line parameters, generation of correct data, etc.
+- Cross-platform capabilities.
