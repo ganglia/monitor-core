@@ -1,5 +1,6 @@
 import thread
 import time
+import logging
 
 from gmetad_config import GmetadConfig
 from gmetad_data import DataStore, Element
@@ -68,7 +69,56 @@ class XmlWriter:
         self.authority = cfg[GmetadConfig.AUTHORITY]
         self.localtime = time.time()
         
-    def _getXmlImpl(self, element, filterList=None):
+    def _getNumHostsForCluster(self, clusternode):
+        #Returns a tuple of the form (hosts_up, hosts_down).
+        hosts_up = 0
+        hosts_down = 0
+        for c in clusternode.children.values():
+            if 'HOST' == c.id:
+                try:
+                    if int(c.tn) < int(c.tmax)*4:
+                        hosts_up += 1
+                    else:
+                        hosts_down += 1
+                except AttributeError:
+                    pass
+        return (hosts_up, hosts_down)
+        
+    def _getGridSummary(self, gridnode, filterList, queryargs):
+        totalHostsUp = 0
+        totalHostsDown = 0
+        cbuf = ''
+        for c in gridnode.children.values():
+            if 'CLUSTER' == c.id:
+                hosts = self._getNumHostsForCluster(c)
+                totalHostsUp += hosts[0]
+                totalHostsDown += hosts[1]
+                cbuf += self._getXmlImpl(c, filterList, queryargs)
+        rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n' % (totalHostsUp, totalHostsDown)
+        rbuf += '%s</HOSTS>\n' % cbuf
+        return rbuf
+        
+    def _getClusterSummary(self, clusternode):
+        rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n' % self._getNumHostsForCluster(clusternode)
+        metrics = {}
+        for h in clusternode.children.values():
+            if 'HOST' == h.id:
+                for m in h.children.values():
+                    if 'METRIC' == m.id and 'zero' != m.slope:
+                        if not metrics.has_key(m.name):
+                            metrics[m.name] = {'SUM':0.0, 'NUM':1, 'TYPE':m.type, 'UNITS':'double', 'SLOPE':m.slope, 'SOURCE':m.source}
+                        else:
+                            metrics[m.name]['NUM'] += 1
+                            metrics[m.name]['SUM'] += float(m.val)
+        for mn, md in metrics.items():
+            rbuf += '<METRICS NAME="%s"' % mn
+            for k, v in md.items():
+                rbuf += ' %s="%s"' % (k, v)
+            rbuf += ' />\n'
+        rbuf += '</HOSTS>\n'
+        return rbuf
+        
+    def _getXmlImpl(self, element, filterList=None, queryargs=None):
         rbuf = '<%s' % element.id
         foundName = False
         try:
@@ -80,25 +130,37 @@ class XmlWriter:
             if k == 'id' or k == 'children' or (foundName and k == 'name'):
                 continue
             rbuf += ' %s="%s"' % (k.upper(), v)
+        if queryargs is not None:
+            if ('GRID' == element.id or 'CLUSTER' == element.id) and (filterList is None or not len(filterList)):
+                try:
+                    if queryargs['filter'].lower().strip() == 'summary':
+                        if 'GRID' == element.id:
+                            rbuf += '>\n%s</GRID>\n' % self._getGridSummary(element, filterList, queryargs)
+                            return rbuf
+                        elif 'CLUSTER' == element.id:
+                            rbuf += '>\n%s</CLUSTER>\n' % self._getClusterSummary(element)
+                            return rbuf
+                except ValueError:
+                    pass
         if 0 < len(element.children):
             rbuf += '>\n'
             showAllChildren = True
             if filterList is not None and len(filterList):
                 try:
                     key = Element.generateKey([self._pcid_map[element.id], filterList[0]])
-                    rbuf += self._getXmlImpl(element.children[key], filterList[1:])
+                    rbuf += self._getXmlImpl(element.children[key], filterList[1:], queryargs)
                     showAllChildren = False
                 except KeyError:
                     pass
             if showAllChildren:
                 for c in element.children.values():
-                    rbuf += self._getXmlImpl(c, filterList)
+                    rbuf += self._getXmlImpl(c, filterList, queryargs)
             rbuf += '</%s>\n' % element.id
         else:
             rbuf += ' />\n'
         return rbuf
             
-    def getXml(self, filter=None):
+    def getXml(self, filter=None, queryargs=None):
         if filter is None:
             filterList = None
         elif not len(filter.strip()):
@@ -107,5 +169,5 @@ class XmlWriter:
             filterList = filter.split('/')
         rbuf = '%s\n%s\n' % (self._xml_starttag, self._xml_dtd)
         if DataStore().rootElement is not None:
-            rbuf += self._getXmlImpl(DataStore().rootElement, filterList)
+            rbuf += self._getXmlImpl(DataStore().rootElement, filterList, queryargs)
         return rbuf

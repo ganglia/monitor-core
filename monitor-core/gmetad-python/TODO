@@ -1,8 +1,6 @@
 Certainly there are hundreds of features not in this version, but of the more
 obvious:
 
-- The filter querystring on the interactive port is not currently supported,
-  i.e. "/Gridname?filter=summary".
 - No current support for summary data.
 - No current support for any type of data handling or output modules or
   plugins of any kind.
