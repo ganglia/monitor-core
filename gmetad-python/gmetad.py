@@ -57,8 +57,19 @@ class InteractiveConnectionHandler(asyncore.dispatcher_with_send):
             rbuf = rbuf.strip().strip('/')
             if 0 == len(rbuf):
                 rbuf = None
+            queryargs = None
+            if rbuf is not None and -1 != rbuf.find('?'):
+                queryargs = {}
+                try:
+                    rbuf, query = rbuf.split('?')
+                    query = query.split('&')
+                    for q in query:
+                        k,v = q.split('=')
+                        queryargs[k] = v
+                except ValueError:
+                    pass
             writer = XmlWriter()
-            self.buffer = writer.getXml(rbuf)
+            self.buffer = writer.getXml(rbuf, queryargs)
             self.amt_to_write = len(self.buffer)
         
     def handle_write(self):
