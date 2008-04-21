@@ -81,6 +81,7 @@ static size_t	  regetmntinfo(struct statfs **, long, const char **);
 static int	  checkvfsname(const char *, const char **);
 static const char **makevfslist(char *);
 static float	  find_disk_space(double *, double *);
+static int cpu_state(int which);
 
 static int use_vm_swap_info = 0;
 static int mibswap[MIB_SWAPINFO_SIZE];
@@ -282,7 +283,6 @@ int cpu_state(int which) {
 
    struct kinfo_cputime cp_time;
    struct timeval time_diff;
-   int i;
 
    if (which == -1) {
       bzero(&cp_old, sizeof(cp_old));
