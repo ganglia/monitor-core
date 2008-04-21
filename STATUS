@@ -38,10 +38,5 @@ BACKPORT PROPOSALS:
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
 
-  * Add a check to Gmond to make sure that the major module magic 
-     numbers match. This indicates that the interface that the module
-     was built with is actually compatible with the gmond that is loading
-     the module.
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1255
-    +1: bnicholes
+
 
