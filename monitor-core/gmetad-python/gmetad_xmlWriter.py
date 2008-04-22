@@ -94,8 +94,7 @@ class XmlWriter:
                 totalHostsUp += hosts[0]
                 totalHostsDown += hosts[1]
                 cbuf += self._getXmlImpl(c, filterList, queryargs)
-        rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n' % (totalHostsUp, totalHostsDown)
-        rbuf += '%s</HOSTS>\n' % cbuf
+        rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />%s\n' % (totalHostsUp, totalHostsDown, cbuf)
         return rbuf
         
     def _getClusterSummary(self, clusternode):
@@ -115,7 +114,6 @@ class XmlWriter:
             for k, v in md.items():
                 rbuf += ' %s="%s"' % (k, v)
             rbuf += ' />\n'
-        rbuf += '</HOSTS>\n'
         return rbuf
         
     def _getXmlImpl(self, element, filterList=None, queryargs=None):
