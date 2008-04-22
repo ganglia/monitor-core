@@ -45,7 +45,7 @@ BACKPORT PROPOSALS:
   * gmond: use fabs[f] values for floating metrics absolute calculation
     Reference: http://sourceforge.net/mailarchive/forum.php?thread_name=20080421220317.GA1971%40golem.rich-paul.net&forum_name=ganglia-developers
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmond/gmond.c?r1=1275&r2=1274&pathrev=1275
-    +1: 
+    +1: bnicholes
      0: 
     -1: 
 
