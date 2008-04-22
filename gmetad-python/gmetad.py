@@ -26,21 +26,42 @@ class GmetadListenSocket(asyncore.dispatcher):
         logging.info('Opening query interface on %s:%d' % (host, port))
         self.bind((interface,port))
         self.listen(5)
+        
+    def _connIsAllowedFrom(self, remoteHost):
+        cfg = getConfig()
+        if '127.0.0.1' == remoteHost: return True
+        if 'localhost' == remoteHost: return True
+        if cfg[GmetadConfig.ALL_TRUSTED]: return True
+        trustedHosts = cfg[GmetadConfig.TRUSTED_HOSTS]
+        if trustedHosts.count(remoteHost): return True
+        hostname, aliases, ips = socket.gethostbyaddr(remoteHost)
+        if trustedHosts.count(hostname): return True
+        for alias in aliases:
+            if trustedHosts.count(alias): return True
+        for ip in ips:
+            if trustedHosts.count(ips): return True
+        return False
 
 class XmlSocket(GmetadListenSocket):
     def handle_accept(self):
         newsock, addr = self.accept()
-        logging.debug('Replying to XML dump query from %s' % addr[0])
-        writer = XmlWriter()
-        newsock.sendall(writer.getXml())
-        newsock.close()
+        if self._connIsAllowedFrom(addr[0]):
+            logging.debug('Replying to XML dump query from %s' % addr[0])
+            writer = XmlWriter()
+            newsock.sendall(writer.getXml())
+            newsock.close()
+        else:
+            logging.info('XML dump query from %s rejected by rule' % addr[0])
 
 
 class InteractiveSocket(GmetadListenSocket):        
     def handle_accept(self):
         newsock, addr = self.accept()
-        logging.debug('Replying to interactive query from %s' % addr[0])
-        InteractiveConnectionHandler(newsock)
+        if self._connIsAllowedFrom(addr[0]):
+            logging.debug('Replying to interactive query from %s' % addr[0])
+            InteractiveConnectionHandler(newsock)
+        else:
+            logging.info('Interactive query from %s rejected by rule' % addr[0])
         
 class InteractiveConnectionHandler(asyncore.dispatcher_with_send):
     def __init__(self, sock):
