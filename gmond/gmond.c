@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <math.h>
 
 #include <apr.h>
 #include <apr_strings.h>
@@ -1976,11 +1977,11 @@ Ganglia_collection_group_collect( Ganglia_collection_group *group, apr_time_t no
                   group->next_send = 0; /* send immediately */
               break;
             case GANGLIA_VALUE_FLOAT:
-              if( abs( cb->last.f - cb->now.f ) >= cb->value_threshold )
+              if( fabsf( cb->last.f - cb->now.f ) >= cb->value_threshold )
                   group->next_send = 0; /* send immediately */
               break;
             case GANGLIA_VALUE_DOUBLE:
-              if( abs( cb->last.d - cb->now.d ) >= cb->value_threshold )
+              if( fabs( cb->last.d - cb->now.d ) >= cb->value_threshold )
                   group->next_send = 0; /* send immediately */
               break;
             default:
