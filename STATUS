@@ -38,5 +38,6 @@ BACKPORT PROPOSALS:
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
 
-
-
+  * documentation: automake >= 1.8.3 required for DragonFlyBSD
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/README.SVNusers?r1=1128&r2=1263
+    +1: carenas
