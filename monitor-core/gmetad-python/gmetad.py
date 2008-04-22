@@ -40,7 +40,7 @@ class GmetadListenSocket(asyncore.dispatcher):
             for alias in aliases:
                 if trustedHosts.count(alias): return True
             for ip in ips:
-                if trustedHosts.count(ips): return True
+                if trustedHosts.count(ip): return True
         return False
 
 class XmlSocket(GmetadListenSocket):
