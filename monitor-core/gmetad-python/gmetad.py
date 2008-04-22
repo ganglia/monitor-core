@@ -35,11 +35,12 @@ class GmetadListenSocket(asyncore.dispatcher):
         trustedHosts = cfg[GmetadConfig.TRUSTED_HOSTS]
         if trustedHosts.count(remoteHost): return True
         hostname, aliases, ips = socket.gethostbyaddr(remoteHost)
-        if trustedHosts.count(hostname): return True
-        for alias in aliases:
-            if trustedHosts.count(alias): return True
-        for ip in ips:
-            if trustedHosts.count(ips): return True
+        if trustedHosts:
+            if trustedHosts.count(hostname): return True
+            for alias in aliases:
+                if trustedHosts.count(alias): return True
+            for ip in ips:
+                if trustedHosts.count(ips): return True
         return False
 
 class XmlSocket(GmetadListenSocket):
