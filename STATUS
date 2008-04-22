@@ -40,4 +40,12 @@ BACKPORT PROPOSALS:
 
   * documentation: automake >= 1.8.3 required for DragonFlyBSD
     http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/README.SVNusers?r1=1128&r2=1263
-    +1: carenas
+    +1: carenas, bnicholes
+
+  * gmond: use fabs[f] values for floating metrics absolute calculation
+    Reference: http://sourceforge.net/mailarchive/forum.php?thread_name=20080421220317.GA1971%40golem.rich-paul.net&forum_name=ganglia-developers
+    Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmond/gmond.c?r1=1275&r2=1274&pathrev=1275
+    +1: 
+     0: 
+    -1: 
+
