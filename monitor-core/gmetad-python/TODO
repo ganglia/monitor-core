@@ -6,8 +6,6 @@ obvious:
   plugins of any kind.
 - No writing of RRD files or any other type of permanent data storage.
 - The "scalable" configuration attribute is not currently supported.
-- The "trusted_hosts" configuration attribute is not currently supported.
-- The "all_trusted" configuration attribute is not currently supported.
 - The "server_threads" configuration attribute is not currently supported.
 
 In addition, we don't currently have any data on the following:

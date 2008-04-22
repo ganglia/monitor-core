@@ -33,9 +33,9 @@ class GmetadListenSocket(asyncore.dispatcher):
         if 'localhost' == remoteHost: return True
         if cfg[GmetadConfig.ALL_TRUSTED]: return True
         trustedHosts = cfg[GmetadConfig.TRUSTED_HOSTS]
-        if trustedHosts.count(remoteHost): return True
-        hostname, aliases, ips = socket.gethostbyaddr(remoteHost)
         if trustedHosts:
+            if trustedHosts.count(remoteHost): return True
+            hostname, aliases, ips = socket.gethostbyaddr(remoteHost)
             if trustedHosts.count(hostname): return True
             for alias in aliases:
                 if trustedHosts.count(alias): return True
