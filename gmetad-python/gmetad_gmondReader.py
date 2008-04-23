@@ -4,7 +4,7 @@ import socket
 import time
 import logging
 
-from gmetad_config import GmetadConfig
+from gmetad_config import GmetadConfig, getConfig
 from gmetad_random import getRandomInterval
 from gmetad_data import DataStore, Element
 
@@ -19,9 +19,10 @@ class GmondContentHandler(xml.sax.ContentHandler):
         e = Element(tag, attrs)
         if 'GANGLIA_XML' == tag:
             ds.lock.acquire()
-            self._elemStack.append(ds.setNode(e))
+            self._elemStack.append(ds.getNode()) # Fetch the root node.  It has already been set into the tree.
             self._elemStackLen += 1
-            cfg = GmetadConfig()
+            cfg = getConfig()
+            # We'll go ahead and update any existing GRID tag with a new one (new time) even if one already exists.
             e = Element('GRID', {'NAME':cfg[GmetadConfig.GRIDNAME], 'AUTHORITY':cfg[GmetadConfig.AUTHORITY], 'LOCALTIME':'%d' % time.time()})
         self._elemStack.append(ds.setNode(e, self._elemStack[self._elemStackLen-1]))
         self._elemStackLen += 1
