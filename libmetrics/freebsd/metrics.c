@@ -202,9 +202,10 @@ cpu_speed_func ( void )
     * machdep.tsc_freq exists on some i386/amd64 machines and gives the
     * CPU speed in Hz.  If it exists it's a decent value.
     */
+   tscfreq = 0;
    len = sizeof(tscfreq);
    if (sysctlbyname("machdep.tsc_freq", &tscfreq, &len, NULL, 0) != -1) {
-      freq = (double)tscfreq / 1e6;
+      freq = tscfreq / 1e6;
       goto done;
    }
 
