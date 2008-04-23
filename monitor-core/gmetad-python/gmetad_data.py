@@ -1,5 +1,8 @@
 import thread
 import logging
+import time
+
+from gmetad_config import getConfig, GmetadConfig
 
 class DataStore:
     _shared_state = {}
@@ -10,7 +13,16 @@ class DataStore:
         self.__dict__ = DataStore._shared_state
         if not DataStore._initialized:
             self.lock = thread.allocate_lock()
+            self.lock.acquire()
             self.rootElement = None
+            # Initialize the data store with the GANGLIA_XML and GRID tags.
+            # Data store should never be completely empty.  Even if there are
+            # no reporting data sources the web front end depends on having
+            # at least a GANGLIA_XML tag and a nested GRID tag.
+            self.setNode(Element('GANGLIA_XML', {}))
+            cfg = getConfig()
+            self.setNode(Element('GRID', {'NAME':cfg[GmetadConfig.GRIDNAME], 'AUTHORITY':cfg[GmetadConfig.AUTHORITY], 'LOCALTIME':'%d' % time.time()}), self.rootElement)
+            self.lock.release()
             DataStore._initialized = True
             
     def setNode(self, node, parent=None):
@@ -22,7 +34,9 @@ class DataStore:
         parent[str(node)] = node
         return parent[str(node)]
         
-    def getNode(self, ancestry):
+    def getNode(self, ancestry=[]):
+        if not len(ancestry):
+            return self.rootElement
         node = None
         while ancestry:
             nodeId = ancestry.pop(0)
