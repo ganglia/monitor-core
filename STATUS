@@ -44,10 +44,3 @@ BACKPORT PROPOSALS:
     +1: bnicholes
      0: 
     -1: 
-
-  * gmond: gmond: define correctly ATTLIST for EXTRA_ELEMENT in DTD
-    Reference: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04117.html
-    Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmond/dtd.h?r1=1185&r2=1288
-    +1: carenas, bnicholes
-     0:
-    -1:
