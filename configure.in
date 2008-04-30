@@ -152,8 +152,12 @@ if test "$withval" = yes; then gmetad=yes; fi)
 
 AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
 
+AC_ARG_WITH( python,
+[  --with-python=PATH      Specify prefix for python or full path to interpreter],
+[if test x"$withval" != xno; then enable_python="yes"; PYTHON_BIN=$withval; fi])
+
 AC_ARG_WITH( librrd,
-[  --with-librrd=PATH      Specify location for librrd],
+[  --with-librrd=DIR       Specify location for librrd],
 [if test x"$withval" != xno; then librrd=yes; librrdpath=$withval; fi])
 
 AC_ARG_WITH( libapr,
@@ -246,32 +250,41 @@ if test "$enable_python" = yes ; then
   # check for Python executable
   if test -z "$PYTHON_BIN"; then
     AC_PATH_PROG(PYTHON_BIN, python)
-    if test -z "$PYTHON_BIN"; then
-      AC_MSG_ERROR(python binary not found in path)
+  else
+    if test -d $PYTHON_BIN; then
+      PYTHON_BIN="$PYTHON_BIN/bin/python"
     fi
   fi
 
-  # find out python version
-  AC_MSG_CHECKING(Python version)
-  PyVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:3]'`]
-  PyMAJVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:1]'`]
-  AC_MSG_RESULT($PyVERSION)
-  PYTHON_VERSION=$PyVERSION
-  AC_SUBST(PYTHON_VERSION)
+  if test -n "$PYTHON_BIN"; then
+    # find out python version
+    AC_MSG_CHECKING(Python version)
+    PyVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:3]'`]
+    PyMAJVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:1]'`]
+    AC_MSG_RESULT($PyVERSION)
+    PYTHON_VERSION=$PyVERSION
+    AC_SUBST(PYTHON_VERSION)
 
-dnl   AC_CHECK_LIB(python{PyVERSION}, set_python_path, [echo "The ganglia python support module requires Python to compile"], [echo "Python library not found"], [-lm])
-   AC_CHECK_HEADERS(python$PyVERSION/Python.h python/Python.h, [ found_python_header=yes ])
-   if test "$found_python_header" = yes; then
-      if test -d "/usr/include/python"; then
-         PYTHON_INCLUDES="-I/usr/include/python"
+    PyEXEC_INSTALLDIR=`$PYTHON_BIN -c "import sys; print sys.exec_prefix"`
+    if test -d "$PyEXEC_INSTALLDIR/include/python"; then
+      PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python"
+    else 
+      if test -d "$PyEXEC_INSTALLDIR/include/python$PyVERSION"; then
+        PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python$PyVERSION"
       else
-         PYTHON_INCLUDES="-I/usr/include/python$PyVERSION"
+        PYTHON_INCLUDES=""
+        enable_python="no"
       fi
-      AC_SUBST(PYTHON_INCLUDES)
-   fi
+    fi
+    AC_SUBST(PYTHON_INCLUDES)
+  else
+    enable_python="no"
+  fi
 fi
 
-AM_CONDITIONAL(BUILD_PYTHON, test "$enable_python" = yes -a "$found_python_header" = yes)
+AC_MSG_CHECKING(Python support)
+AC_MSG_RESULT($enable_python)
+AM_CONDITIONAL(BUILD_PYTHON, test "$enable_python" = "yes")
 
 echo
 echo Checking for apr
