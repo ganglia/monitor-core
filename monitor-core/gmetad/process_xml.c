@@ -653,6 +653,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
    /* Always update summary for numeric metrics. */
    if (do_summary)
       {
+         Metric_t sum_metric;
          summary = xmldata->source.metric_summary;
          hash_datum = hash_lookup(&hashkey, summary);
          if (!hash_datum)
@@ -664,19 +665,20 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                      fillmetric(attr, metric, type);
                   }
                /* else we have already filled in the metric above. */
+               /* make a copy of the existing metric. */
+               memcpy(&sum_metric, &(xmldata->metric), sizeof(Metric_t));
             }
          else
             {
-               memcpy(&xmldata->metric, hash_datum->data, hash_datum->size);
+               memcpy(&sum_metric, hash_datum->data, hash_datum->size);
                datum_free(hash_datum);
-               metric = &(xmldata->metric);
 
                switch (tt->type)
                   {
                      case INT:
                      case UINT:
                      case FLOAT:
-                        metric->val.d += (double)
+                        sum_metric.val.d += (double)
                                 strtod(metricval, (char**) NULL);
                         break;
                      default:
@@ -684,12 +686,12 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                   }
             }
 
-         metric->num++;
-         metric->t0 = xmldata->now; /* tell cleanup thread we are using this */
+         sum_metric.num++;
+         sum_metric.t0 = xmldata->now; /* tell cleanup thread we are using this */
 
          /* Trim metric structure to the correct length. Tricky. */
-         hashval.size = sizeof(*metric) - GMETAD_FRAMESIZE + metric->stringslen;
-         hashval.data = (void*) metric;
+         hashval.size = sizeof(sum_metric) - GMETAD_FRAMESIZE + sum_metric.stringslen;
+         hashval.data = (void*) &sum_metric;
 
          /* Update metric in summary table. */
          rdatum = hash_insert(&hashkey, &hashval, summary);
@@ -729,8 +731,10 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
     hashkey.size =  strlen(name) + 1;
     
     hash_datum = hash_lookup (&hashkey, xmldata->host.metrics);
-    if (!hash_datum) 
+    if (!hash_datum) {
+        err_msg("No hash_datum for metric [%s][%s].",name, xmldata->hostname);
         return 0;
+    }
     
     memcpy(&metric, hash_datum->data, hash_datum->size);
     datum_free(hash_datum);
@@ -789,27 +793,28 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
         else
         {
             hash_t *summary = xmldata->source.metric_summary;
-            Metric_t *sum_metric;
+            Metric_t sum_metric;
 
             /* only update summary if metric is in hash */
             hash_datum = hash_lookup(&hashkey, summary);
 
             if (hash_datum) {
 
+                memcpy(&sum_metric, hash_datum->data, hash_datum->size);
+                datum_free(hash_datum);
+
                 /* Update the metric definition in the summary hash table. */
-                memcpy(&(xmldata->metric.ednameslen), &(metric.ednameslen), 
+                memcpy(&(sum_metric.ednameslen), &(metric.ednameslen), 
                    sizeof(Metric_t) - offsetof(Metric_t, ednameslen));
-                sum_metric = &(xmldata->metric);
 
                 /* Trim metric structure to the correct length. Tricky. */
-                hashval.size = sizeof(*sum_metric) - GMETAD_FRAMESIZE + sum_metric->stringslen;
-                hashval.data = (void*) sum_metric;
+                hashval.size = sizeof(Metric_t) - GMETAD_FRAMESIZE + sum_metric.stringslen;
+                hashval.data = (void*) &sum_metric;
 
                 /* Update metric in summary table. */
                 rdatum = hash_insert(&hashkey, &hashval, summary);
                 if (!rdatum)
                     err_msg("Could not insert summary %s metric", name);
-                datum_free(hash_datum);
             }
         }
     }
