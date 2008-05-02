@@ -44,3 +44,14 @@ BACKPORT PROPOSALS:
     +1: bnicholes
      0: 
     -1: 
+
+  * gmetad: Don't overwrite the metric struct that is being built in 
+     memory during the XML parsing with the summary metric structure.  
+     Since multiple extra_data_element tags can exists for each metric, 
+     the metric structure needs to be preserved until the last 
+     extra_data_element tag is read. At the same time the summary metric 
+     data needs to also be calculated and written to the hash table.  
+     But they both can not use the same memory.
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmetad/process_xml.c?r1=1238&r2=1301
+    +1: bnicholes
+
