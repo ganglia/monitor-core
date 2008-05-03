@@ -78,6 +78,7 @@ static int	checkvfsname(const char *, const char **);
 static const char **makevfslist(char *);
 static float	find_disk_space(double *, double *);
 
+static int	cpu_state(int which);
 // XXX
 //static int	vm_state(int);
 
