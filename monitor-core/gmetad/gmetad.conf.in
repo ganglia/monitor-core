@@ -110,5 +110,5 @@ data_source "my cluster" localhost
 #
 #-------------------------------------------------------------------------------
 # Where gmetad stores its round-robin databases
-# default: "/var/lib/ganglia/rrds"
+# default: "@varstatedir@/ganglia/rrds"
 # rrd_rootdir "/some/other/place"
