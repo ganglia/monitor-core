@@ -82,9 +82,6 @@ static int	cpu_state(int which);
 // XXX
 //static int	vm_state(int);
 
-static int 	use_vm_swap_info = 0;
-static int 	mibswap[MIB_SWAPINFO_SIZE];
-static size_t 	mibswap_size;
 static kvm_t 	*kd = NULL;
 static int 	pagesize;
 static int	skipvfs;
@@ -289,7 +286,6 @@ cpu_state(int which)
 	static struct timeval this_time, last_time;
 	struct timeval time_diff;
 	size_t len = sizeof(cp_time);
-	int i;
 
 	if (which == -1) {
 		bzero(cp_old, sizeof(cp_old));
@@ -1039,7 +1035,6 @@ makenetvfslist(void)
 
 	int mib[3], maxvfsconf;
 	size_t miblen;
-	struct ovfsconf *ptr;
 
 	mib[0] = CTL_VFS; mib[1] = VFS_GENERIC; mib[2] = VFS_MAXTYPENUM;
 	miblen=sizeof(maxvfsconf);
