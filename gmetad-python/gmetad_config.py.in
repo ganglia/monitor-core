@@ -35,6 +35,7 @@ class GmetadConfig:
     INTERACTIVE_PORT = 'interactive_port'
     SERVER_THREADS = 'server_threads'
     RRD_ROOTDIR = 'rrd_rootdir'
+    VERSION = '@GANGLIA_VERSION@'
     
     _cfgDefaults = {
             DEBUG_LEVEL : 2,
@@ -59,7 +60,6 @@ class GmetadConfig:
             INTERACTIVE_PORT : 8652,
             SERVER_THREADS : 4,
             RRD_ROOTDIR : '@varstatedir@/ganglia/rrds',
-            VERSION : '@GANGLIA_VERSION@'
     }
     
     
@@ -205,9 +205,7 @@ def getConfig(args=sys.argv):
     dbgLevelDefault = GmetadConfig._cfgDefaults[GmetadConfig.DEBUG_LEVEL]
     iPortDefault = GmetadConfig._cfgDefaults[GmetadConfig.INTERACTIVE_PORT]
     xPortDefault = GmetadConfig._cfgDefaults[GmetadConfig.XML_PORT]
-    parser = optparse.OptionParser()
-    parser.add_option('-V', '--version', action='version',
-            help='Print version and exit')
+    parser = optparse.OptionParser(version = GmetadConfig.VERSION)
     parser.add_option('-d', '--debug', action='store',
             help='Debug level. If five (5) or greater, daemon will stay in foreground.  Values are:\n\
             0 - FATAL\n\
