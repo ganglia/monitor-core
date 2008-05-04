@@ -19,8 +19,8 @@ class DataStore:
             # Data store should never be completely empty.  Even if there are
             # no reporting data sources the web front end depends on having
             # at least a GANGLIA_XML tag and a nested GRID tag.
-            self.setNode(Element('GANGLIA_XML', {}))
             cfg = getConfig()
+            self.setNode(Element('GANGLIA_XML', {'VERSION':cfg[GmetadConfig.VERSION]}))
             self.setNode(Element('GRID', {'NAME':cfg[GmetadConfig.GRIDNAME], 'AUTHORITY':cfg[GmetadConfig.AUTHORITY], 'LOCALTIME':'%d' % time.time()}), self.rootElement)
             self.lock.release()
             DataStore._initialized = True
