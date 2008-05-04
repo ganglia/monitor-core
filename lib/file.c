@@ -128,17 +128,16 @@ slurpfile ( char * filename, char *buffer, int buflen )
 
 
 char * 
-skip_whitespace ( const char *p)
+skip_whitespace (const char *p)
 {
-    while (isspace(*p)) p++;
+    while (isspace((unsigned char)*p)) p++;
     return (char *)p;
 }
  
 char * 
-skip_token ( const char *p)
+skip_token (const char *p)
 {
-    while (isspace(*p)) p++;
-    while (*p && !isspace(*p)) p++;
+    while (isspace((unsigned char)*p)) p++;
+    while (*p && !isspace((unsigned char)*p)) p++;
     return (char *)p;
 }         
-
