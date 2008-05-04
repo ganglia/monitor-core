@@ -231,12 +231,12 @@ fi
 
 if test x"$gmetad" = xyes ; then
    AC_CHECK_HEADERS(rrd.h)
-   AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], , [-lm])
+   AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], [], [-lm])
    if test x"$ac_cv_lib_rrd_rrd_create" != xyes; then
       echo "Trying harder by including the X library path"
       unset ac_cv_lib_rrd_rrd_create
-      LDFLAGS="-L/usr/X11R6/lib $LDFLAGS"
-      AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], ,[-lm]))
+      LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/X11R6/lib"
+      AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], [], [-lm])
       if test x"$ac_cv_lib_rrd_rrd_create" != xyes; then
          echo
          echo "The Ganglia Meta Daemon uses the Round-Robin Database Tool (rrdtool)"
