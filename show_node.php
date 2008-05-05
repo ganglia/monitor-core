@@ -70,10 +70,10 @@ $clustertime=$cluster['LOCALTIME'];
 $heartbeat=$hostattrs['REPORTED'];
 $age = $clustertime - $heartbeat;
 if ($age > 3600) {
-  $tpl->assign("age", uptime($age));
+   $tpl->assign("age", uptime($age));
 } else {
-  $s = ($age > 1) ? "s" : "";
-  $tpl->assign("age", "$age second$s");
+   $s = ($age > 1) ? "s" : "";
+   $tpl->assign("age", "$age second$s");
 }
 if ((!$up) && ($cluster['HOSTS_UP'] == 0)) {
    $tpl->assign("message","<b>This cluster is down.</b>");
