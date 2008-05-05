@@ -118,6 +118,8 @@ class XmlWriter:
         
     def _getXmlImpl(self, element, filterList=None, queryargs=None):
         rbuf = '<%s' % element.id
+        if 'GRID' == element.id:
+            element.localtime = '%d' % time.time()
         foundName = False
         try:
             rbuf += ' NAME="%s"' % element.name
@@ -166,6 +168,9 @@ class XmlWriter:
         else:
             filterList = filter.split('/')
         rbuf = '%s\n%s\n' % (self._xml_starttag, self._xml_dtd)
-        if DataStore().rootElement is not None:
-            rbuf += self._getXmlImpl(DataStore().rootElement, filterList, queryargs)
+        ds = DataStore()
+        if ds.rootElement is not None:
+            ds.lock().acquire()
+            rbuf += self._getXmlImpl(ds.rootElement, filterList, queryargs)
+            ds.lock().release()
         return rbuf
