@@ -534,14 +534,11 @@ dnl
 		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
                 AC_DEFINE(OSF,1,OSF);;
 *darwin*) 	AC_DEFINE(DARWIN,1,DARWIN);;
-*solaris*)	echo " *** WARNING:  Please make sure you use a 64-bit compiler, linker and *** "
-                echo " *** library set if you are running a 64-bit Solaris kernel!  This    *** "
-                echo " *** applies if you are running Solaris 7 or later!                   *** "
-		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+*solaris*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		if test "$ac_cv_prog_gcc" = yes; then
-		   CFLAGS="$CFLAGS -D__EXTENSIONS__ -DHAVE_STRERROR"
+		   CFLAGS="$CFLAGS -D__EXTENSIONS__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"
 		else
-		   CFLAGS="$CFLAGS -D__STDC__ -DHAVE_STRERROR"
+		   CFLAGS="$CFLAGS -D__STDC__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"
 		fi 
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
 *freebsd*)      CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
