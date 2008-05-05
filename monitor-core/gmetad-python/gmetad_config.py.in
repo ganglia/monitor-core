@@ -36,6 +36,7 @@ class GmetadConfig:
     SERVER_THREADS = 'server_threads'
     RRD_ROOTDIR = 'rrd_rootdir'
     VERSION = '@GANGLIA_VERSION@'
+    PLUGINS_DIR = 'plugins_dir'
     
     _cfgDefaults = {
             DEBUG_LEVEL : 2,
@@ -60,6 +61,7 @@ class GmetadConfig:
             INTERACTIVE_PORT : 8652,
             SERVER_THREADS : 4,
             RRD_ROOTDIR : '@varstatedir@/ganglia/rrds',
+            PLUGINS_DIR : '/usr/lib/ganglia/gmetad/plugins'
     }
     
     
@@ -85,7 +87,8 @@ class GmetadConfig:
                 GmetadConfig.XML_PORT : self.parseXmlPort,
                 GmetadConfig.INTERACTIVE_PORT : self.parseInteractivePort,
                 GmetadConfig.SERVER_THREADS : self.parseServerThreads,
-                GmetadConfig.RRD_ROOTDIR : self.parseRrdRootdir
+                GmetadConfig.RRD_ROOTDIR : self.parseRrdRootdir,
+                GmetadConfig.PLUGINS_DIR : self.parsePluginsDir
             }
             self.updateConfig()
             GmetadConfig._isInitialized = True
@@ -115,6 +118,9 @@ class GmetadConfig:
         
     def __getitem__(self, k):
         return self.cfg[k]
+        
+    def getSection(self, id):
+        pass
         
     def resetToDefaults(self):
         self.cfg = GmetadConfig._cfgDefaults
@@ -191,12 +197,17 @@ class GmetadConfig:
     def parseServerThreads(self, arg):
         v = arg.strip()
         if v.isdigit():
-            self.cfg[GmetadConfigSERVER_THREADS] = int(v)
+            self.cfg[GmetadConfig.SERVER_THREADS] = int(v)
         
     def parseRrdRootdir(self, arg):
         v = arg.strip().strip('"')
         if os.path.isdir(v):
-            self.cfg[GmetadConfig] = v
+            self.cfg[GmetadConfig.RRD_ROOTDIR] = v
+            
+    def parsePluginsDir(self, arg):
+        v = arg.strip().strip('"')
+        if os.path.isdir(v):
+            self.cfg[GmetadConfig.PLUGINS_DIR] = v
         
 
 def getConfig(args=sys.argv):
@@ -253,9 +264,9 @@ def getConfig(args=sys.argv):
     # Update configuration if non-default values were provided.
     if dbgLevelDefault != options.debug:
         cfg[GmetadConfig.DEBUG_LEVEL] = options.debug
-    if iPortDefault != options.interactive_port:
+    if int(iPortDefault) != int(options.interactive_port):
         cfg[GmetadConfig.INTERACTIVE_PORT] = options.interactive_port
-    if xPortDefault != options.xml_port:
+    if int(xPortDefault) != int(options.xml_port):
         cfg[GmetadConfig.XML_PORT] = options.xml_port
     if options.logfile is not None:
         cfg[GmetadConfig.LOGFILE] = options.logfile
