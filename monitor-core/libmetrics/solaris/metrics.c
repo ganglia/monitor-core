@@ -1273,7 +1273,6 @@ float find_disk_space(double *total_size, double *total_free)
 {
    FILE *mounts;
    struct mnttab mp;
-   struct statvfs buf;
    char *mount, *device, *type;
    /* We report in GB = 1 thousand million bytes */
    const double reported_units = 1e9;
