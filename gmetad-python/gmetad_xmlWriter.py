@@ -170,7 +170,7 @@ class XmlWriter:
         rbuf = '%s\n%s\n' % (self._xml_starttag, self._xml_dtd)
         ds = DataStore()
         if ds.rootElement is not None:
-            ds.lock().acquire()
+            ds.lock.acquire()
             rbuf += self._getXmlImpl(ds.rootElement, filterList, queryargs)
-            ds.lock().release()
+            ds.lock.release()
         return rbuf
