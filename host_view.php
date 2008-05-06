@@ -38,8 +38,7 @@ foreach ($metrics as $name => $v)
        if ($v['TYPE'] == "string" or $v['TYPE']=="timestamp" or
            (isset($always_timestamp[$name]) and $always_timestamp[$name]))
           {
-             # Long gmetric name/values will disrupt the display here.
-             if ($v['SOURCE'] == "gmond") $s_metrics[$name] = $v;
+             $s_metrics[$name] = $v;
           }
        elseif ($v['SLOPE'] == "zero" or
                (isset($always_constant[$name]) and $always_constant[$name]))
