@@ -52,14 +52,6 @@ function toggleLayer( whichLayer )
  <TD CLASS=footer WIDTH=30%>{name}</TD><TD>{value}</TD>
 </TR>
 <!-- END BLOCK : const_metric_info -->
-
-<TR><TD>&nbsp;</TD></TR>
-
-<TR>
- <TD COLSPAN=2 CLASS=title>
- <a href="host_gmetrics.php?c={cluster_url}&h={host}">Gmetrics</a>
- </TD>
-</TR>
 </TABLE>
 
  <HR>
