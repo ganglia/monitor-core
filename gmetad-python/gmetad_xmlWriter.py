@@ -39,7 +39,7 @@ class XmlWriter:
       <!ATTLIST METRIC TMAX CDATA #IMPLIED>
       <!ATTLIST METRIC DMAX CDATA #IMPLIED>
       <!ATTLIST METRIC SLOPE (zero | positive | negative | both | unspecified) #IMPLIED>
-      <!ATTLIST METRIC SOURCE (gmond | gmetric) #REQUIRED>
+      <!ATTLIST METRIC SOURCE (gmond) 'gmond'>
    <!ELEMENT EXTRA_DATA (EXTRA_ELEMENT*)>
    <!ELEMENT EXTRA_ELEMENT EMPTY>
       <!ATTLIST EXTRA_ELEMENT NAME CDATA #REQUIRED>
@@ -47,7 +47,7 @@ class XmlWriter:
    <!ELEMENT HOSTS EMPTY>
       <!ATTLIST HOSTS UP CDATA #REQUIRED>
       <!ATTLIST HOSTS DOWN CDATA #REQUIRED>
-      <!ATTLIST HOSTS SOURCE (gmond | gmetric | gmetad) #REQUIRED>
+      <!ATTLIST HOSTS SOURCE (gmond | gmetad) #REQUIRED>
    <!ELEMENT METRICS (EXTRA_DATA*)>
       <!ATTLIST METRICS NAME CDATA #REQUIRED>
       <!ATTLIST METRICS SUM CDATA #REQUIRED>
@@ -55,7 +55,7 @@ class XmlWriter:
       <!ATTLIST METRICS TYPE (string | int8 | uint8 | int16 | uint16 | int32 | uint32 | float | double | timestamp) #REQUIRED>
       <!ATTLIST METRICS UNITS CDATA #IMPLIED>
       <!ATTLIST METRICS SLOPE (zero | positive | negative | both | unspecified) #IMPLIED>
-      <!ATTLIST METRICS SOURCE (gmond | gmetric) #REQUIRED>
+      <!ATTLIST METRICS SOURCE (gmond) 'gmond'>
 ]>'''
     _pcid_map = {'GANGLIA_XML' : 'GRID',
             'GRID' : 'CLUSTER',
