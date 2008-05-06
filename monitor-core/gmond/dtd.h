@@ -35,7 +35,7 @@
       <!ATTLIST METRIC TMAX CDATA #IMPLIED>\n\
       <!ATTLIST METRIC DMAX CDATA #IMPLIED>\n\
       <!ATTLIST METRIC SLOPE (zero | positive | negative | both | unspecified) #IMPLIED>\n\
-      <!ATTLIST METRIC SOURCE (gmond | gmetric) #REQUIRED>\n\
+      <!ATTLIST METRIC SOURCE (gmond) 'gmond'>\n\
    <!ELEMENT EXTRA_DATA (EXTRA_ELEMENT*)>\n\
    <!ELEMENT EXTRA_ELEMENT EMPTY>\n\
       <!ATTLIST EXTRA_ELEMENT NAME CDATA #REQUIRED>\n\
@@ -43,7 +43,7 @@
    <!ELEMENT HOSTS EMPTY>\n\
       <!ATTLIST HOSTS UP CDATA #REQUIRED>\n\
       <!ATTLIST HOSTS DOWN CDATA #REQUIRED>\n\
-      <!ATTLIST HOSTS SOURCE (gmond | gmetric | gmetad) #REQUIRED>\n\
+      <!ATTLIST HOSTS SOURCE (gmond | gmetad) #REQUIRED>\n\
    <!ELEMENT METRICS (EXTRA_DATA*)>\n\
       <!ATTLIST METRICS NAME CDATA #REQUIRED>\n\
       <!ATTLIST METRICS SUM CDATA #REQUIRED>\n\
@@ -51,7 +51,7 @@
       <!ATTLIST METRICS TYPE (string | int8 | uint8 | int16 | uint16 | int32 | uint32 | float | double | timestamp) #REQUIRED>\n\
       <!ATTLIST METRICS UNITS CDATA #IMPLIED>\n\
       <!ATTLIST METRICS SLOPE (zero | positive | negative | both | unspecified) #IMPLIED>\n\
-      <!ATTLIST METRICS SOURCE (gmond | gmetric) #REQUIRED>\n\
+      <!ATTLIST METRICS SOURCE (gmond) 'gmond'>\n\
 ]>\n"
 
 #endif
