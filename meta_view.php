@@ -85,7 +85,7 @@ foreach ( $sorted_sources as $source => $val )
                   $name = "$source $meta_designator";
                   $graph_url = "G=$sourceurl&amp;$get_metric_string&amp;st=$localtime";
                   $authority = $grid[$source]['AUTHORITY'];
-                  $url = "$authority?gw=fwd&amp;gs=$gridstack_url";
+                  $url = "$authority?gw=fwd&amp;gs=$gridstack_url&amp;$get_metric_string";
                }
             $alt_url = "<a href=\"./?t=yes&amp;$get_metric_string\">(tree view)</a>";
             $class = "grid";

@@ -122,7 +122,7 @@ $node_menu = "";
 
 if ($parentgrid) 
    {
-      $node_menu .= "<B><A HREF=\"$parentlink?gw=back&amp;gs=$gridstack_url\">".
+      $node_menu .= "<B><A HREF=\"$parentlink?gw=back&amp;gs=$gridstack_url&amp;$get_metric_string\">".
          "$parentgrid $meta_designator</A></B> ";
       $node_menu .= "<B>&gt;</B>\n";
    }
