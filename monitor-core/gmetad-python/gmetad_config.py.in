@@ -1,12 +1,41 @@
+#/*******************************************************************************
+#* Portions Copyright (C) 2008 Novell, Inc. All rights reserved.
+#*
+#* Redistribution and use in source and binary forms, with or without
+#* modification, are permitted provided that the following conditions are met:
+#*
+#*  - Redistributions of source code must retain the above copyright notice,
+#*    this list of conditions and the following disclaimer.
+#*
+#*  - Redistributions in binary form must reproduce the above copyright notice,
+#*    this list of conditions and the following disclaimer in the documentation
+#*    and/or other materials provided with the distribution.
+#*
+#*  - Neither the name of Novell, Inc. nor the names of its
+#*    contributors may be used to endorse or promote products derived from this
+#*    software without specific prior written permission.
+#*
+#* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS''
+#* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#* ARE DISCLAIMED. IN NO EVENT SHALL Novell, Inc. OR THE CONTRIBUTORS
+#* BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#* POSSIBILITY OF SUCH DAMAGE.
+#*
+#* Authors: Matt Ryan (mrayn novell.com)
+#*                  Brad Nicholes (bnicholes novell.com)
+#******************************************************************************/
+
 from socket import getfqdn
 import os
 import sys
 import optparse
 
-class GmetadRRA:
-    def __init__(self, args):
-        self.args = args
-        
 class GmetadDataSource:
     def  __init__(self, name, hosts=['localhost'], interval=15):
         self.name = name
@@ -43,13 +72,13 @@ class GmetadConfig:
             LOGFILE : None,
             PIDFILE : None,
             DATA_SOURCE : [],
-            RRAS : [
-                    GmetadRRA('AVERAGE:0.5:1:244'),
-                    GmetadRRA('AVERAGE:0.5:24:244'),
-                    GmetadRRA('AVERAGE:0.5:168:244'),
-                    GmetadRRA('AVERAGE:0.5:672:244'),
-                    GmetadRRA('AVERAGE:0.5:5760:374')
-            ],
+            #RRAS : [
+            #        GmetadRRA('AVERAGE:0.5:1:244'),
+            #        GmetadRRA('AVERAGE:0.5:24:244'),
+            #        GmetadRRA('AVERAGE:0.5:168:244'),
+            #        GmetadRRA('AVERAGE:0.5:672:244'),
+            #        GmetadRRA('AVERAGE:0.5:5760:374')
+            #],
             SCALABLE : True,
             GRIDNAME : 'unspecified',
             AUTHORITY : 'http://%s/ganglia/' % getfqdn(),
@@ -71,12 +100,13 @@ class GmetadConfig:
         if cfgpath is not None:
             self.path = cfgpath
             self.resetToDefaults()
+            self.sections = {}
             
             self.kwHandlers = {
                 GmetadConfig.DEBUG_LEVEL : self.parseDbgLevel,
                 GmetadConfig.LOGFILE : self.parseLogfile,
                 GmetadConfig.DATA_SOURCE : self.parseDataSource,
-                GmetadConfig.RRAS : self.parseRRAs,
+            #    GmetadConfig.RRAS : self.parseRRAs,
                 GmetadConfig.SCALABLE : self.parseScalable,
                 GmetadConfig.GRIDNAME : self.parseGridname,
                 GmetadConfig.AUTHORITY : self.parseAuthority,
@@ -87,16 +117,20 @@ class GmetadConfig:
                 GmetadConfig.XML_PORT : self.parseXmlPort,
                 GmetadConfig.INTERACTIVE_PORT : self.parseInteractivePort,
                 GmetadConfig.SERVER_THREADS : self.parseServerThreads,
-                GmetadConfig.RRD_ROOTDIR : self.parseRrdRootdir,
+            #    GmetadConfig.RRD_ROOTDIR : self.parseRrdRootdir,
                 GmetadConfig.PLUGINS_DIR : self.parsePluginsDir
             }
             self.updateConfig()
             GmetadConfig._isInitialized = True
         
-    def updateConfig(self):
-        f = open(self.path, 'r')
+    def GmetadReadline(self, f):
         prev_line = None
-        for line in f.readlines():
+        kw = None
+        args = None
+        while 1:
+            line = f.readline()
+            if not line:
+                break
             if line.startswith('#'): continue
             if 0 >= len(line.strip()): continue
             if line.strip().endswith('\\'):
@@ -109,9 +143,28 @@ class GmetadConfig:
                 prev_line += line.strip()
                 line = prev_line
                 prev_line = None
-            kw, args = line.strip().split(None,1)
+            try:
+                kw, args = line.strip().split(None,1)
+            except ValueError:
+                print 'Invalid syntax: %s' % line
+                kw = line
+                pass
+            break
+        return kw, args
+
+    def updateConfig(self):
+        f = open(self.path, 'r')
+        prev_line = None
+        while 1:
+            kw, args = self.GmetadReadline(f)
+            if kw is None:
+                break
+            if args is None:
+                continue
             if self.kwHandlers.has_key(kw):
                 self.kwHandlers[kw](args)
+            elif (args.strip().startswith('{')):
+                self._setSection(kw,f)
                 
     def __setitem__(self, k, v):
         self.cfg[k] = v
@@ -120,8 +173,25 @@ class GmetadConfig:
         return self.cfg[k]
         
     def getSection(self, id):
-        pass
+        ret = None
+        try:
+            ret = self.sections[id]
+        except KeyError:
+            pass
+        return ret
         
+    def _setSection(self, id, f):
+        kw = ''
+        self.sections[id] = []
+        while kw.strip() != '}':
+            kw,args = self.GmetadReadline(f)
+            if kw is None:
+                break
+            if args is None:
+                continue
+            self.sections[id].append( [kw,args])
+        
+
     def resetToDefaults(self):
         self.cfg = GmetadConfig._cfgDefaults
         
@@ -145,11 +215,11 @@ class GmetadConfig:
             hosts = a[0:]
         self.cfg[GmetadConfig.DATA_SOURCE].append(GmetadDataSource(name, hosts, interval))
         
-    def parseRRAs(self, args):
-        self.cfg[GmetadConfig.RRAS] = []
-        for rraspec in args:
-            self.cfg[GmetadConfig.RRAS].append(GmetadRRA(rraspec.strip().strip('"').split(':',1)[1]))
-            
+    #def parseRRAs(self, args):
+    #    self.cfg[GmetadConfig.RRAS] = []
+    #    for rraspec in args:
+    #        self.cfg[GmetadConfig.RRAS].append(GmetadRRA(rraspec.strip().strip('"').split(':',1)[1]))
+
     def parseScalable(self, arg):
         v = arg.strip().lower()
         if v == 'off' or v == 'false' or v == 'no':
@@ -199,16 +269,20 @@ class GmetadConfig:
         if v.isdigit():
             self.cfg[GmetadConfig.SERVER_THREADS] = int(v)
         
-    def parseRrdRootdir(self, arg):
-        v = arg.strip().strip('"')
-        if os.path.isdir(v):
-            self.cfg[GmetadConfig.RRD_ROOTDIR] = v
-            
+    #def parseRrdRootdir(self, arg):
+    #    v = arg.strip().strip('"')
+    #    if os.path.isdir(v):
+    #        self.cfg[GmetadConfig.RRD_ROOTDIR] = v
+
     def parsePluginsDir(self, arg):
         v = arg.strip().strip('"')
         if os.path.isdir(v):
             self.cfg[GmetadConfig.PLUGINS_DIR] = v
         
+    def parseSection(self, name, fhandle):
+        v = arg.strip().strip('"')
+        if os.path.isdir(v):
+            self.cfg[GmetadConfig.PLUGINS_DIR] = v
 
 def getConfig(args=sys.argv):
     if GmetadConfig._isInitialized:
