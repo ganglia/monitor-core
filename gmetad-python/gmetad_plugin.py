@@ -30,7 +30,19 @@ def load_plugins(pdir):
                 logging.warning('Failed to load plugin %s (caught exception %s)' % (plugin_name, e))
         finally:
             if fp: fp.close()
-            
+    
+def start_plugins():
+    global _plugins
+    
+    for plugin in _plugins:
+        plugin.start()
+
+def stop_plugins():
+    global _plugins
+    
+    for plugin in _plugins:
+        plugin.stop()
+    
 class GmetadPlugin:  
     def __init__(self, cfgid):
         self.cfgid = cfgid
