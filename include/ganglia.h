@@ -2,9 +2,9 @@
 #define GANGLIA_H 1
 #include <rpc/rpc.h>
 
-#include "gm_msg.h"
+#include <gm_msg.h>
 #ifndef GM_PROTOCOL_GUARD
-#include "gm_protocol.h"
+#include <gm_protocol.h>
 #endif
 
 /* For C++ */
