@@ -2,12 +2,12 @@
 #define GM_METRIC_H 1
 #include <rpc/rpc.h>
 
-#include "gm_mmn.h"
+#include <gm_mmn.h>
 #ifndef GM_PROTOCOL_GUARD
-#include "gm_protocol.h"
+#include <gm_protocol.h>
 #endif
-#include "gm_value.h"
-#include "gm_msg.h"
+#include <gm_value.h>
+#include <gm_msg.h>
 
 #include <confuse.h>   /* header for libconfuse */
 #include <apr.h>
