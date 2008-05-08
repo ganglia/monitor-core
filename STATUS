@@ -55,3 +55,10 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmetad/process_xml.c?r1=1238&r2=1301
     +1: bnicholes
 
+  * gmetric: metrics generated with gmetric are being tagged in the XML
+     as coming from gmond instead.
+    Reference: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04135.html
+    Patches:
+     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1324
+     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1325
+     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1327
