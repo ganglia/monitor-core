@@ -39,13 +39,15 @@ import logging
 
 from gmetad_config import GmetadConfig, getConfig
 from gmetad_random import getRandomInterval
-from gmetad_data import DataStore, Element
+from gmetad_data import DataStore
+from gmetad_data import Element
 
 class GmondContentHandler(xml.sax.ContentHandler):
     def __init__(self):
         xml.sax.ContentHandler.__init__(self)
         self._elemStack = []
         self._elemStackLen = 0
+        self._ancestry = []
         
     def startElement(self, tag, attrs):
         ds = DataStore()
@@ -57,7 +59,10 @@ class GmondContentHandler(xml.sax.ContentHandler):
             cfg = getConfig()
             # We'll go ahead and update any existing GRID tag with a new one (new time) even if one already exists.
             e = Element('GRID', {'NAME':cfg[GmetadConfig.GRIDNAME], 'AUTHORITY':cfg[GmetadConfig.AUTHORITY], 'LOCALTIME':'%d' % time.time()})
+            self._ancestry.append('GANGLIA_XML')
         self._elemStack.append(ds.setNode(e, self._elemStack[self._elemStackLen-1]))
+        if (self._ancestry[len(self._ancestry)-1].startswith('CLUSTER') == False):
+            self._ancestry.append('%s:%s'%(e.id,e.name))
         self._elemStackLen += 1
         
     def endElement(self, tag):
@@ -65,6 +70,9 @@ class GmondContentHandler(xml.sax.ContentHandler):
             DataStore().lock.release()
         self._elemStack.pop()
         self._elemStackLen -= 1
+        
+    def getClusterAncestry(self):
+        return self._ancestry
 
 class GmondReader(threading.Thread):
     def __init__(self,dataSource,name=None,target=None,args=(),kwargs={}):
@@ -114,7 +122,9 @@ class GmondReader(threading.Thread):
             sock.close()
             if self._shuttingDown:
                 break
-            xml.sax.parseString(xmlbuf, GmondContentHandler())
+            gch = GmondContentHandler()
+            xml.sax.parseString(xmlbuf, gch)
+            DataStore().updateFinished(gch.getClusterAncestry())
             self._cond.acquire()
             self._cond.wait(getRandomInterval(self.dataSource.interval))
             self._cond.release()        
