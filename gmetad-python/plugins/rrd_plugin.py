@@ -92,6 +92,6 @@ class RRDPlugin(GmetadPlugin):
         '''Called by the engine during shutdown to allow the plugin to shutdown.'''
         print "RRD stop called"
 
-    def notify(self):
+    def notify(self, clusterNode):
         '''Called by the engine when the internal data structure has changed.'''
-        pass
+        print "RRD notify called"

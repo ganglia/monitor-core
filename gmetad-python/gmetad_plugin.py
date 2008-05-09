@@ -75,6 +75,12 @@ def stop_plugins():
     
     for plugin in _plugins:
         plugin.stop()
+
+def notify_plugins(clusterNode):
+    global _plugins
+    
+    for plugin in _plugins:
+        plugin.notify(clusterNode)
     
 class GmetadPlugin:  
     def __init__(self, cfgid):
@@ -85,7 +91,7 @@ class GmetadPlugin:
         '''Should be overridden by subclasses to parse configuration data, if any.'''
         pass
         
-    def notify(self):
+    def notify(self, clusterNode):
         '''Called by the engine when the internal data structure has changed.
         Should be overridden by subclasses that should be pulling data out of
         the data structure when the data structure is updated.'''

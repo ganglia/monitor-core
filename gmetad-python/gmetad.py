@@ -44,7 +44,7 @@ from gmetad_gmondReader import GmondReader
 from gmetad_xmlWriter import XmlWriter
 from gmetad_config import getConfig, GmetadConfig
 from gmetad_daemon import daemonize
-from gmetad_plugin import load_plugins, start_plugins, stop_plugins
+from gmetad_data import DataStore
 
 
 class GmetadListenSocket(asyncore.dispatcher):
@@ -185,10 +185,7 @@ if __name__ == '__main__':
             logger.error('Unable to write PID %d to %s (%s)' % (os.getpid(), gmetadConfig[GmetadConfig.PIDFILE], e))
             sys.exit()
          
-         
-    # load modules here, when we support modules.
-    load_plugins(gmetadConfig[GmetadConfig.PLUGINS_DIR])
-    start_plugins()
+    dataStore = DataStore()
     
     readers = []
     xmlSocket = XmlSocket()
@@ -208,10 +205,10 @@ if __name__ == '__main__':
             logging.error('Caught exception: %s' % e)
             raise
     finally:
-        stop_plugins()
         logging.debug('Shutting down all data source readers...')
         for gr in readers:
             gr.shutdown()
+        dataStore.shutdown()
         logging.debug('Closing all query ports...')
         xmlSocket.close()
         interactiveSocket.close()
