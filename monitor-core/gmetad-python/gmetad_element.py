@@ -66,3 +66,7 @@ class Element:
         if self.__dict__.has_key('name'):
             return Element.generateKey([self.id,self.name])
         return Element.generateKey(self.id)
+        
+    def __iter__(self):
+        return self.children.itervalues()
+        
