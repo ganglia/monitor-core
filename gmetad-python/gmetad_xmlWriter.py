@@ -160,7 +160,7 @@ class XmlWriter:
         except AttributeError:
             pass
         for k,v in element.__dict__.items():
-            if k == 'id' or k == 'children' or (foundName and k == 'name'):
+            if k == 'id' or k == 'children' or k == 'summary' or (foundName and k == 'name'):
                 continue
             rbuf += ' %s="%s"' % (k.upper(), v)
         if queryargs is not None:
