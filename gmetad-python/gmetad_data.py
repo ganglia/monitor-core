@@ -34,6 +34,7 @@
 import thread
 import logging
 import time
+import copy
 
 from gmetad_element import Element
 from gmetad_config import getConfig, GmetadConfig
@@ -63,6 +64,22 @@ class DataStore:
             self.notifier.start()
             DataStore._initialized = True
             
+    def _doSummary(self, clusterNode):
+        clusterNode.summary = {}
+        for hostNode in clusterNode:
+            for metricNode in hostNode:
+                #if metricNode.type in ['string', 'timestamp'] or metricNode.slope == 'zero':
+                if metricNode.type in ['string', 'timestamp']:
+                    continue
+                try:
+                    summaryNode = clusterNode.summary[str(metricNode)]
+                    summaryNode.val = float(summaryNode.val) + float(metricNode.val)
+                except KeyError:
+                    summaryNode = copy.copy(metricNode)
+                    clusterNode.summary[str(summaryNode)] = summaryNode
+                    summaryNode.num = 0
+                summaryNode.num += 1
+    
     def shutdown(self):
         self.notifier.shutdown()
         
@@ -93,6 +110,7 @@ class DataStore:
         return node
 
     def updateFinished(self, clusterPath=[]):
-        node = self.getNode(clusterPath)
-        self.notifier.insertTransaction(node)
+        clusterNode = self.getNode(clusterPath)
+        self._doSummary(clusterNode);
+        self.notifier.insertTransaction(clusterNode)
         
