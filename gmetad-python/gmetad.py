@@ -210,8 +210,13 @@ if __name__ == '__main__':
             gr.shutdown()
         dataStore.shutdown()
         logging.debug('Closing all query ports...')
-        xmlSocket.close()
-        interactiveSocket.close()
+        try:
+            xmlSocket.close()
+            interactiveSocket.close()
+        except AttributeError, e:
+            logging.error ('Problem closing socket: %s'% e)
+        except Exception, e:
+            logging.error('Caught exception: %s' % e)
         if pffd is not None:
             pffd.close()
             os.unlink(gmetadConfig[GmetadConfig.PIDFILE])
