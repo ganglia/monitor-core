@@ -38,7 +38,7 @@ from gmetad_plugin import GmetadPlugin
 from gmetad_config import getConfig, GmetadConfig
 
 def get_plugin():
-    return RRDPlugin()
+    return RRDPlugin('rrd')
 
 class RRDPlugin(GmetadPlugin):
 
@@ -56,7 +56,16 @@ class RRDPlugin(GmetadPlugin):
             RRD_ROOTDIR : '@varstatedir@/ganglia/rrds',
     }
 
-    def __init__(self):
+    def __init__(self, cfgid):
+        self.rrdpath = None
+        self.cfg = None
+        self.kwHandlers = None
+        self._resetConfig()
+        
+        # The call to the parent class __init__ must be last
+        GmetadPlugin.__init__(self, cfgid)
+
+    def _resetConfig(self):
         self.rrdpath = None
         self.cfg = RRDPlugin._cfgDefaults
         
@@ -64,9 +73,7 @@ class RRDPlugin(GmetadPlugin):
             RRDPlugin.RRAS : self._parseRRAs,
             RRDPlugin.RRD_ROOTDIR : self._parseRrdRootdir
         }
-        # The call to the parent class __init__ must be last
-        GmetadPlugin.__init__(self, 'rrd')
-
+    
     def _parseConfig(self, cfgdata):
         '''Should be overridden by subclasses to parse configuration data, if any.'''
         for kw,args in cfgdata:
@@ -87,7 +94,7 @@ class RRDPlugin(GmetadPlugin):
         if not os.path.isdir(dir):
             os.mkdir(dir, 0755)
             
-    def _createRRD(self, clusterNode, metricNode, rrdPath, step):
+    def _createRRD(self, clusterNode, metricNode, rrdPath, step, summary):
         if metricNode.slope.lower() == 'positive':
             dsType = 'COUNTER'
         else:
@@ -96,6 +103,9 @@ class RRDPlugin(GmetadPlugin):
         heartbeat = 8*step
         dsString = 'DS:sum:%s:%d:U:U'%(dsType,heartbeat)
         args = [str(rrdPath), '-b', str(clusterNode.localtime), '-s', str(step), str(dsString)]
+        if summary is True:
+            dsString = 'DS:num:%s:%d:U:U'%(dsType,heartbeat)
+            args.append(str(dsString))
         for rra in self.cfg[RRDPlugin.RRAS]:
             args.append(rra)
         try:
@@ -104,8 +114,11 @@ class RRDPlugin(GmetadPlugin):
         except Exception, e:
             logging.info('Error creating rrd %s - %s'%(rrdPath, str(e)))
         
-    def _updateRRD(self, clusterNode, metricNode, rrdPath):
-        args = [str(rrdPath), '%s:%s'%(str(clusterNode.localtime),str(metricNode.val))]
+    def _updateRRD(self, clusterNode, metricNode, rrdPath, summary):
+        if summary is True:
+            args = [str(rrdPath), '%s:%s:%s'%(str(clusterNode.localtime),str(metricNode.val),str(metricNode.num))]
+        else:
+            args = [str(rrdPath), '%s:%s'%(str(clusterNode.localtime),str(metricNode.val))]
         try:
             rrdtool.update(*args)
             #logging.debug('Updated rrd %s with value %s'%(rrdPath, str(metricNode.val)))
@@ -135,11 +148,12 @@ class RRDPlugin(GmetadPlugin):
             hostPath = '%s/%s'%(clusterPath,hostNode.name)
             self._checkDir(hostPath)
             for metricNode in hostNode:
-                if metricNode.type in ['string', 'timestamp'] or metricNode.slope == 'zero':
+                #if metricNode.type in ['string', 'timestamp'] or metricNode.slope == 'zero':
+                if metricNode.type in ['string', 'timestamp']:
                     continue
                 rrdPath = '%s/%s.rrd'%(hostPath, metricNode.name)
                 if not os.path.isfile(rrdPath):
-                    self._createRRD(clusterNode, metricNode, rrdPath, ds.interval)
+                    self._createRRD(clusterNode, metricNode, rrdPath, ds.interval, False)
                 #need to do some error checking here if the createRRD failed
-                self._updateRRD(clusterNode, metricNode, rrdPath)
+                self._updateRRD(clusterNode, metricNode, rrdPath, False)
         print "RRD notify called"
