@@ -31,6 +31,8 @@
 #*                  Brad Nicholes (bnicholes novell.com)
 #******************************************************************************/
 
+import copy
+
 class Element:
     def generateKey(vals):
         if isinstance(vals,list):
@@ -70,3 +72,15 @@ class Element:
     def __iter__(self):
         return self.children.itervalues()
         
+    def __copy__(self):
+        cp = Element(str(self), {})
+        for k in self.__dict__.keys():
+            if k == 'children':
+                cp.children = {}
+                continue
+            try:
+                cp.__dict__[k.lower()] = copy.copy(self.__dict__[k])
+            except ValueError:
+                pass
+        return cp
+    
