@@ -49,6 +49,7 @@ BACKPORT PROPOSALS:
      structure rather than trying to memcpy() the entire strings field.
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=132&action=view
     +1: bnicholes
+    +1: bernardli [this also fix memory leak mentioned here: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04148.html]
 
   * gmetric: metrics generated with gmetric are being tagged in the XML
      as coming from gmond instead.
