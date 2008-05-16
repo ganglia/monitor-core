@@ -768,8 +768,11 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
     
     if ((name_off >= 0) && (value_off >= 0)) 
     {
-        metric.ednames[metric.ednameslen++] = addstring(metric.strings, &edge, attr[name_off+1]);
-        metric.edvalues[metric.edvalueslen++] = addstring(metric.strings, &edge, attr[value_off+1]);
+        char *new_name = attr[name_off+1];
+        char *new_value = attr[value_off+1];
+
+        metric.ednames[metric.ednameslen++] = addstring(metric.strings, &edge, new_name);
+        metric.edvalues[metric.edvalueslen++] = addstring(metric.strings, &edge, new_value);
     
         metric.stringslen = edge;
     
@@ -789,27 +792,43 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
         else
         {
             hash_t *summary = xmldata->source.metric_summary;
-            Metric_t *sum_metric;
+            Metric_t sum_metric;
 
             /* only update summary if metric is in hash */
             hash_datum = hash_lookup(&hashkey, summary);
 
             if (hash_datum) {
+                int found = FALSE;
 
-                /* Update the metric definition in the summary hash table. */
-                memcpy(&(xmldata->metric.ednameslen), &(metric.ednameslen), 
-                   sizeof(Metric_t) - offsetof(Metric_t, ednameslen));
-                sum_metric = &(xmldata->metric);
+                memcpy(&sum_metric, hash_datum->data, hash_datum->size);
+                datum_free(hash_datum);
 
-                /* Trim metric structure to the correct length. Tricky. */
-                hashval.size = sizeof(*sum_metric) - GMETAD_FRAMESIZE + sum_metric->stringslen;
-                hashval.data = (void*) sum_metric;
+                for (i = 0; i < sum_metric.ednameslen; i++) {
+                    char *chk_name = getfield(sum_metric.strings, sum_metric.ednames[i]);
+                    char *chk_value = getfield(sum_metric.strings, sum_metric.edvalues[i]);
+
+                    /* If the name and value already exists, skip adding the strings. */
+                    if (!strcasecmp(chk_name, new_name) && !strcasecmp(chk_value, new_value)) {
+                        found = TRUE;
+                        break;
+                    }
+                }
+                if (!found) {
+                    edge = sum_metric.stringslen;
+                    sum_metric.ednames[sum_metric.ednameslen++] = addstring(sum_metric.strings, &edge, new_name);
+                    sum_metric.edvalues[sum_metric.edvalueslen++] = addstring(sum_metric.strings, &edge, new_value);
+                    sum_metric.stringslen = edge;
+                }
+
+                /* Trim graph display sum_metric at (352, 208) now or when in startElement_EXTRA_ELEMENT
+metric structure to the correct length. Tricky. */
+                hashval.size = sizeof(sum_metric) - GMETAD_FRAMESIZE + sum_metric.stringslen;
+                hashval.data = (void*) &sum_metric;
 
                 /* Update metric in summary table. */
                 rdatum = hash_insert(&hashkey, &hashval, summary);
                 if (!rdatum)
                     err_msg("Could not insert summary %s metric", name);
-                datum_free(hash_datum);
             }
         }
     }
