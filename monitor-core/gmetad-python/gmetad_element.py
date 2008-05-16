@@ -40,8 +40,12 @@ class Element:
         return vals
     generateKey = staticmethod(generateKey)
     
-    def __init__(self, id, attrs):
+    def __init__(self, id, attrs, tag=None):
         self.id = id
+        if tag is None:
+            self.tag = id
+        else:
+            self.tag = tag
         for k,v in attrs.items():
             self.__dict__[k.lower()] = v
         self.children = {}
@@ -84,14 +88,14 @@ class Element:
                 pass
         return cp
     
-    def summaryCopy(self, id=None):
-        if id is None:
-            id = self.id
-        cp = Element(id, {})
+    def summaryCopy(self, id=None, tag=None):
+        attrs = {}
         for k in self.__dict__.keys():
             try:
-                if k.lower() in ['name', 'sum', 'num', 'type', 'units', 'slop', 'source', 'children']:
-                    cp.__dict__[k.lower()] = copy.copy(self.__dict__[k])
+                if k.lower() in ['name', 'sum', 'num', 'type', 'units', 'slop', 'source']:
+                    attrs[k.lower()] = self.__dict__[k]
             except ValueError:
                 pass
+        cp = Element(self.id, attrs, tag)
+        cp.children = self.children
         return cp
