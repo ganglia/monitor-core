@@ -134,7 +134,7 @@ class XmlWriter:
         return rbuf
         
     def _getXmlImpl(self, element, filterList=None, queryargs=None):
-        rbuf = '<%s' % element.id
+        rbuf = '<%s' % element.tag
         if 'GRID' == element.id:
             element.localtime = '%d' % time.time()
         foundName = False
@@ -144,7 +144,7 @@ class XmlWriter:
         except AttributeError:
             pass
         for k,v in element.__dict__.items():
-            if k == 'id' or k == 'children' or k == 'summaryData' or (foundName and k == 'name'):
+            if k == 'id' or k == 'tag' or k == 'children' or k == 'summaryData' or (foundName and k == 'name'):
                 continue
             rbuf += ' %s="%s"' % (k.upper(), v)
         if queryargs is not None:
@@ -172,7 +172,7 @@ class XmlWriter:
             if showAllChildren:
                 for c in element.children.values():
                     rbuf += self._getXmlImpl(c, filterList, queryargs)
-            rbuf += '</%s>\n' % element.id
+            rbuf += '</%s>\n' % element.tag
         else:
             rbuf += ' />\n'
         return rbuf

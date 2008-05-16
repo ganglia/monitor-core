@@ -92,7 +92,7 @@ class DataStore:
                     summaryNode = clusterNode.summaryData['summary'][str(metricNode)]
                     summaryNode.sum += float(metricNode.val)
                 except KeyError:
-                    summaryNode = metricNode.summaryCopy('METRICS')
+                    summaryNode = metricNode.summaryCopy(tag='METRICS')
                     summaryNode.sum = float(metricNode.val)
                     summaryNode.type = 'double'
                     clusterNode.summaryData['summary'][str(summaryNode)] = summaryNode
@@ -187,7 +187,7 @@ class DataStoreGridSummary(threading.Thread):
                             summaryNode = gridNode.summaryData['summary'][str(metricNode)]
                             summaryNode.sum += metricNode.sum
                         except KeyError:
-                            summaryNode = metricNode.summaryCopy()
+                            summaryNode = metricNode.summaryCopy(tag=metricNode.tag)
                             gridNode.summaryData['summary'][str(summaryNode)] = summaryNode
                             summaryNode.num = 0
                         summaryNode.num += 1
