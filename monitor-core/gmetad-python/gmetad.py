@@ -99,6 +99,7 @@ class InteractiveSocket(GmetadListenSocket):
             logging.info('Interactive query from %s rejected by rule' % addr[0])
         
 class InteractiveConnectionHandler(asyncore.dispatcher_with_send):
+    ''' This class handles the interactive gmetad ports.'''
     def __init__(self, sock):
         asyncore.dispatcher_with_send.__init__(self, sock)
         self.buffer = ''
@@ -149,8 +150,10 @@ def getLoggingLevel(lspec):
         return logging.DEBUG
 
 if __name__ == '__main__':
+    # Read and store the configuration
     gmetadConfig = getConfig()
     
+    # Initialize the application
     ignore_fds = [] # Remembers log file descriptors we create, so they aren't closed when we daemonize.
     logging.basicConfig(level=getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]),
             format='%(levelname)-8s %(message)s')    
@@ -168,11 +171,13 @@ if __name__ == '__main__':
         ignore_fds.append(fileHandler.stream.fileno())
         logging.getLogger().addHandler(fileHandler)
 
+    # Determine if the service should be daemonized based on the debug level.
     if 5 > int(gmetadConfig[GmetadConfig.DEBUG_LEVEL]):
         daemonize(ignore_fds)
         
     logging.info('Gmetad application started.')
     
+    # Create a PID file if the command line parameter was specified.
     pffd = None
     if gmetadConfig[GmetadConfig.PIDFILE] is not None:
         try:
@@ -185,6 +190,7 @@ if __name__ == '__main__':
             logger.error('Unable to write PID %d to %s (%s)' % (os.getpid(), gmetadConfig[GmetadConfig.PIDFILE], e))
             sys.exit()
          
+    # Initialize the data store with the notifier and summery threads and plugins
     dataStore = DataStore()
     
     readers = []
@@ -192,12 +198,15 @@ if __name__ == '__main__':
     interactiveSocket = InteractiveSocket()
     try:
         try:
+            # Create the gmond data source reader threads.
             for ds in gmetadConfig[GmetadConfig.DATA_SOURCE]:
                 readers.append(GmondReader(ds))
                 gr = readers[len(readers)-1]
                 gr.start()
+            # Open the XML ports
             xmlSocket.open(port=int(gmetadConfig[GmetadConfig.XML_PORT]))
             interactiveSocket.open(port=int(gmetadConfig[GmetadConfig.INTERACTIVE_PORT]))
+            # Use asyncore to handle all of the network socket traffic
             asyncore.loop()
         except KeyboardInterrupt:
             logging.info('Shutting down...')
@@ -205,10 +214,13 @@ if __name__ == '__main__':
             logging.error('Caught exception: %s' % e)
             raise
     finally:
+        # Shut down the reader threads
         logging.debug('Shutting down all data source readers...')
         for gr in readers:
             gr.shutdown()
+        # Shut down the data store.
         dataStore.shutdown()
+        # Shut down the XML ports
         logging.debug('Closing all query ports...')
         try:
             xmlSocket.close()

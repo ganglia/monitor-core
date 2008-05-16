@@ -38,22 +38,32 @@ import sys
 
 from gmetad_config import getConfig
 
-_plugins = []
+_plugins = []  # Holds a list of all of the plugins
 
 def load_plugins(pdir):
+    ''' This method is called to discover and load all of the plugins that are 
+        contained in the specified plugin directory. '''
     global _plugins
+    # Make sure we have a valid plugin directory
     if not os.path.isdir(pdir):
         logger.warning('No such plugin directory "%s", no plugins loaded' % pdir)
         return
+    # Add the plugin directory to the python search path
     sys.path.append(pdir)
+    # Iterate through all of the files in the plugin directory to try to find gmetad modules.
+    #  All gmetad modules will be derived from the GmetadPlugin base class.
     for plugin_candidate in os.listdir(pdir):
         if plugin_candidate.startswith('.'): continue
         if not plugin_candidate.endswith('.py'): continue
         plugin_name = plugin_candidate[:len(plugin_candidate)-3]
+        # Tell python to find the module from the file path
         fp, pathname, description = imp.find_module(plugin_name)
         try:
             try:
+                # Tell python to load the module.
                 _module = imp.load_module(plugin_name, fp, pathname, description)
+                # All modules should have a get_plugin() factory function.  This function creates a
+                #  new instance of the module class
                 plugin = _module.get_plugin()
                 if not isinstance(plugin, GmetadPlugin):
                     logging.warning('Plugin %s is not a gmetad plugin' % plugin_name)
@@ -67,23 +77,30 @@ def load_plugins(pdir):
 def start_plugins():
     global _plugins
     
+    # Call the start method. All modules should have a start method.  
     for plugin in _plugins:
         plugin.start()
 
 def stop_plugins():
     global _plugins
     
+    # Call the stop method. All modules should have a stop method.  
     for plugin in _plugins:
         plugin.stop()
 
 def notify_plugins(clusterNode):
     global _plugins
     
+    # Call the notify method. All modules should have a notify method.  
     for plugin in _plugins:
         plugin.notify(clusterNode)
     
 class GmetadPlugin:  
+    ''' This is the base class for all gmetad plugins. '''
+    
     def __init__(self, cfgid):
+        # All modules are intialized with a module id that should match a section id
+        #  found in the configuration file.
         self.cfgid = cfgid
         self._parseConfig(getConfig().getSection(cfgid))
         

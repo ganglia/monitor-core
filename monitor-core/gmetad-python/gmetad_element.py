@@ -34,32 +34,41 @@
 import copy
 
 class Element:
+    ''' This class implements the node element that is used to create the data store tree structure.'''
+    
     def generateKey(vals):
+        ''' This methods generates a node key based on the node id and name'''
         if isinstance(vals,list):
             return ':'.join(vals)
         return vals
     generateKey = staticmethod(generateKey)
     
     def __init__(self, id, attrs, tag=None):
+        ''' This is the initialization method '''
+        # Initialize the id and tag for the node
         self.id = id
         if tag is None:
             self.tag = id
         else:
             self.tag = tag
+        # If any attributes where given during intialization, add them here.
         for k,v in attrs.items():
             self.__dict__[k.lower()] = v
         self.children = {}
         
     def __setitem__(self, k, v):
+        ''' This method adds or updates an attribute for the node. '''
         try:
             self.children[k].update(v)
         except KeyError:
             self.children[k] = v
             
     def __getitem__(self, k):
+        ''' This method retrieves a specific child node. '''
         return self.children[k]
         
     def update(self, elem):
+        ''' This method updates an existing chld node based on a new node. '''
         for k in self.__dict__.keys():
             if k == 'children' or k == 'id' or k == 'name':
                 continue
@@ -69,14 +78,17 @@ class Element:
                 pass
         
     def __str__(self):
+        ''' This method generates a string representation of a node. '''
         if self.__dict__.has_key('name'):
             return Element.generateKey([self.id,self.name])
         return Element.generateKey(self.id)
         
     def __iter__(self):
+        ''' This method allow the class to be an interator over it's children. '''
         return self.children.itervalues()
         
     def __copy__(self):
+        ''' Shallow copy method, may not be used. '''
         cp = Element(self.id, {})
         for k in self.__dict__.keys():
             if k == 'children':
@@ -89,13 +101,17 @@ class Element:
         return cp
     
     def summaryCopy(self, id=None, tag=None):
+        '''  This method creates a copy of the node that can be used as a summary node. '''
         attrs = {}
+        # Copy all of the attributes that are necessary for a summary node.
         for k in self.__dict__.keys():
             try:
                 if k.lower() in ['name', 'sum', 'num', 'type', 'units', 'slop', 'source']:
                     attrs[k.lower()] = self.__dict__[k]
             except ValueError:
                 pass
+        # Create a new node from the attributes that were copied from the existing node.
         cp = Element(self.id, attrs, tag)
+        # Make sure that the summary node references the original children
         cp.children = self.children
         return cp
