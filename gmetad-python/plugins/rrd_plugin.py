@@ -39,13 +39,19 @@ from gmetad_plugin import GmetadPlugin
 from gmetad_config import getConfig, GmetadConfig
 
 def get_plugin():
+    ''' All plugins are required to implement this method.  It is used as the factory
+        function that instanciates a new plugin instance. '''
+    # The plugin configuration ID that is passed in must match the section name 
+    #  in the configuration file.
     return RRDPlugin('rrd')
 
 class RRDPlugin(GmetadPlugin):
+    ''' This class implements the RRD plugin that stores metric data to RRD files.'''
 
     RRAS = 'RRAs'
     RRD_ROOTDIR = 'rrd_rootdir'
 
+    # Default RRAs
     _cfgDefaults = {
             RRAS : [
                     'RRA:AVERAGE:0.5:1:244',
@@ -76,32 +82,43 @@ class RRDPlugin(GmetadPlugin):
         }
     
     def _parseConfig(self, cfgdata):
-        '''Should be overridden by subclasses to parse configuration data, if any.'''
+        '''This method overrides the plugin base class method.  It is used to
+            parse the plugin specific configuration directives.'''
         for kw,args in cfgdata:
             if self.kwHandlers.has_key(kw):
                 self.kwHandlers[kw](args)
 
     def _parseRrdRootdir(self, arg):
+        ''' Parse the RRD root directory directive. '''
         v = arg.strip().strip('"')
         if os.path.isdir(v):
             self.cfg[RRDPlugin.RRD_ROOTDIR] = v
 
     def _parseRRAs(self, args):
+        ''' Parse the RRAs directive. '''
         self.cfg[RRDPlugin.RRAS] = []
         for rraspec in args.split():
             self.cfg[RRDPlugin.RRAS].append(rraspec.strip().strip('"'))
             
     def _checkDir(self, dir):
+        ''' This method validates that an RRD directory exists or creates the directory
+            if it doesn't exist. '''
         if not os.path.isdir(dir):
             os.mkdir(dir, 0755)
             
     def _createRRD(self, clusterNode, metricNode, rrdPath, step, summary):
+        ''' This method creates a new metric RRD file.'''
+        
+        # Determine the RRD data source type.
         if metricNode.slope.lower() == 'positive':
             dsType = 'COUNTER'
         else:
             dsType = 'GAUGE'
             
+        # Calculate the heartbeat.
         heartbeat = 8*step
+        # Format the data source string and add all of the RRDTool arguments to the
+        #  args list.
         dsString = 'DS:sum:%s:%d:U:U'%(dsType,heartbeat)
         args = [str(rrdPath), '-b', str(clusterNode.localtime), '-s', str(step), str(dsString)]
         if summary is True:
@@ -110,21 +127,27 @@ class RRDPlugin(GmetadPlugin):
         for rra in self.cfg[RRDPlugin.RRAS]:
             args.append(rra)
         try:
+            # Create the RRD file with the supplied args.
             rrdtool.create(*args)
             logging.debug('Created rrd %s'%rrdPath)
         except Exception, e:
             logging.info('Error creating rrd %s - %s'%(rrdPath, str(e)))
         
     def _updateRRD(self, clusterNode, metricNode, rrdPath, summary):
+        ''' This method updates an RRD file with current metric values. '''
+        # If the node has a time stamp then use it to update the RRD.  Otherwise get
+        #  the current timestamp.
         if hasattr(clusterNode, 'localtime'):
             processTime = clusterNode.localtime
         else:
             processTime = int(time())
+        # If this is a summary RRD, format the summary entry.  Otherwise just use a standard entry
         if summary is True:
             args = [str(rrdPath), '%s:%s:%s'%(str(processTime),str(metricNode.sum),str(metricNode.num))]
         else:
             args = [str(rrdPath), '%s:%s'%(str(processTime),str(metricNode.val))]
         try:
+            # Update the RRD file with the current timestamp and value
             rrdtool.update(*args)
             #logging.debug('Updated rrd %s with value %s'%(rrdPath, str(metricNode.val)))
         except Exception, e:
@@ -132,33 +155,44 @@ class RRDPlugin(GmetadPlugin):
 
     def start(self):
         '''Called by the engine during initialization to get the plugin going.'''
-        print "RRD start called"
+        #print "RRD start called"
+        pass
     
     def stop(self):
         '''Called by the engine during shutdown to allow the plugin to shutdown.'''
-        print "RRD stop called"
+        #print "RRD stop called"
+        pass
 
     def notify(self, clusterNode):
-        '''Called by the engine when the internal data structure has changed.'''
+        '''Called by the engine when the internal data source has changed.'''
+        # Get the current configuration
         gmetadConfig = getConfig()
+        # Find the data source configuration entry that matches the cluster name
         for ds in gmetadConfig[GmetadConfig.DATA_SOURCE]:
             if ds.name == clusterNode.name:
                 break
         if ds is None:
             logging.info('No matching data source for %s'%clusterNode.name)
             return
+        # Create the cluster RRD base path and validate it
         clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.name)
         self._checkDir(clusterPath)
+        # Update metrics for each host in the cluster
         for hostNode in clusterNode:
+            # Create the host RRD base path and validate it.
             hostPath = '%s/%s'%(clusterPath,hostNode.name)
             self._checkDir(hostPath)
+            # Update metrics for each host
             for metricNode in hostNode:
-                #if metricNode.type in ['string', 'timestamp'] or metricNode.slope == 'zero':
+                # Don't update metrics that are numeric values.
                 if metricNode.type in ['string', 'timestamp']:
                     continue
+                # Create the RRD final path and validate it.
                 rrdPath = '%s/%s.rrd'%(hostPath, metricNode.name)
+                # Create the RRD metric file if it doesn't exist
                 if not os.path.isfile(rrdPath):
                     self._createRRD(clusterNode, metricNode, rrdPath, ds.interval, False)
                 #need to do some error checking here if the createRRD failed
+                # Update the RRD file.
                 self._updateRRD(clusterNode, metricNode, rrdPath, False)
-        print "RRD notify called"
+        #print "RRD notify called"
