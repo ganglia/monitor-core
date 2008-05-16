@@ -45,12 +45,6 @@ BACKPORT PROPOSALS:
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmond/gmond.c?r1=1275&r2=1274&pathrev=1275
     +1: bnicholes
 
-  * gmetad: Write each extra data element individually to the summary metric
-     structure rather than trying to memcpy() the entire strings field.
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=132&action=view
-    +1: bnicholes
-    +1: bernardli [this also fix memory leak mentioned here: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04148.html]
-
   * gmetric: metrics generated with gmetric are being tagged in the XML
      as coming from gmond instead.
     Reference: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04135.html
