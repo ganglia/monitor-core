@@ -41,13 +41,23 @@ from gmetad_notifier import GmetadNotifier
 from gmetad_random import getRandomInterval
 
 class DataStore:
-    _shared_state = {}
+    '''The Datastore object stores all of the metric data
+       as well as summary data for all data sources. It is
+       a singleton object which guarantees that all instances
+       of the object will produce the same data store. '''
+    _shared_state = {} #Storage for a singleton object
     _initialized = False
     lock = thread.allocate_lock()
     
     def __init__(self):
+        # Replace the objects attributes with the original
+        #  attributes and data.
         self.__dict__ = DataStore._shared_state
+
+        # Make sure that the DataStore object is only initialized once.
         if not DataStore._initialized:
+            # Allocate a lock that will be used by all threads
+            #  that are reading or writing to the data store.
             self.lock = thread.allocate_lock()
             self.lock.acquire()
             self.rootElement = None
@@ -59,19 +69,31 @@ class DataStore:
             self.setNode(Element('GANGLIA_XML', {'VERSION':cfg.VERSION}))
             self.setNode(Element('GRID', {'NAME':cfg[GmetadConfig.GRIDNAME], 'AUTHORITY':cfg[GmetadConfig.AUTHORITY], 'LOCALTIME':'%d' % time.time()}), self.rootElement)
             self.lock.release()
-            
+
+            # Start up the grid summary thread. 
             self.gridSummary = DataStoreGridSummary()
             self.gridSummary.start()
+
+            # Start up the plugin notifier.
             self.notifier = GmetadNotifier()
             self.notifier.start()
             DataStore._initialized = True
 
     def _doSummary(self, clusterNode):
+        '''This private function will calculate the summaries for a
+            single cluster.  It is called each time that new data
+            has been read for a specific cluster.  All summary data
+            is placed in the summaryData dictionary. '''
         self.acquireLock(self)
+
+        # Clear out the summaryData from the last run and initialize
+        #  the dictionary for new summaries.
         clusterNode.summaryData = {}
         clusterNode.summaryData['summary'] = {}
         clusterNode.summaryData['hosts_up'] = 0
         clusterNode.summaryData['hosts_down'] = 0
+
+        # Summarize over each host contained by the cluster
         for hostNode in clusterNode:
             # Sum up the status of all of the hosts
             if 'HOST' == hostNode.id:
@@ -84,28 +106,40 @@ class DataStore:
                     pass
                 except KeyError:
                     pass
+            # Summarize over each metric within a host
             for metricNode in hostNode:
-                #if metricNode.type in ['string', 'timestamp'] or metricNode.slope == 'zero':
+                # Don't include metrics that can not be summarized
                 if metricNode.type in ['string', 'timestamp']:
                     continue
                 try:
+                    # Pull the existing summary node from the summary data
+                    # dictionary. If one doesn't exist, add it in the exception.
                     summaryNode = clusterNode.summaryData['summary'][str(metricNode)]
                     summaryNode.sum += float(metricNode.val)
                 except KeyError:
+                    # Since summary metrics use a different tag, create the new 
+                    #  summary node with correct tag.
                     summaryNode = metricNode.summaryCopy(tag='METRICS')
+                    # Initialize the first summary value and change the data type
+                    # to double for all metric summaries
                     summaryNode.sum = float(metricNode.val)
                     summaryNode.type = 'double'
+                    # Add the summary node to the summary dictionary
                     clusterNode.summaryData['summary'][str(summaryNode)] = summaryNode
                     summaryNode.num = 0
                 summaryNode.num += 1
         self.releaseLock(self)
     
     def shutdown(self):
+        # Shut down the notifier and the grid summary threads
         self.notifier.shutdown()
         self.gridSummary.shutdown()
         
     def setNode(self, node, parent=None):
+        ''' Add a new node to the data store in the appropriate
+            position in the tree. '''
         if parent is None:
+            # If there isn't a root node, the new node becomes the root
             if self.rootElement is None:
                 self.rootElement = node
                 self.rootElement.source = 'gmetad'
@@ -119,13 +153,18 @@ class DataStore:
                 node.summaryData = parent[str(node)].summaryData
             except AttributeError:
                 pass
+        # Add the new node as a child of the parent
         parent[str(node)] = node
         return parent[str(node)]
         
     def getNode(self, ancestry=[]):
+        ''' Find a node in the data store based on a node path '''
+        # If no path was given, just return the root node.
         if not len(ancestry):
             return self.rootElement
         node = None
+        # Follow the path given in the ancestry list until the 
+        #  correct node is found.
         while ancestry:
             nodeId = ancestry.pop(0)
             if node is None:
@@ -140,20 +179,30 @@ class DataStore:
         return node
 
     def updateFinished(self, clusterPath=[]):
+        ''' This method is called when the gmond reader has finished updating
+            a cluster.  It indicates that a summary can be done over the
+            entire cluster and than the cluster transaction needs to be
+            entered and passed to the plugins. '''
         clusterNode = self.getNode(clusterPath)
         self._doSummary(clusterNode);
         self.notifier.insertTransaction(clusterNode)
         
     def acquireLock(self, obj):
-       self.lock.acquire()
-       logging.debug('DataStore lock acquired %s'%str(obj))
+        ''' Acquire a data store lock. '''
+        self.lock.acquire()
+        logging.debug('DataStore lock acquired %s'%str(obj))
 
     def releaseLock(self, obj):
+        ''' Release the data store lock. ''' 
         self.lock.release()
         logging.debug('DataStore lock released%s'%str(obj))
         
 class DataStoreGridSummary(threading.Thread):
+    ''' This class implments the thread the periodically runs a summary over all of the clusters.
+        It bases it's summary data on the summaries that have been previously calculated 
+        for each cluster. '''
     def __init__(self):
+        # Initialize the thread
         threading.Thread.__init__(self)
 
         self._cond = threading.Condition()
@@ -161,12 +210,20 @@ class DataStoreGridSummary(threading.Thread):
         self._shuttingDown = False
 
     def _doGridSummary(self):
+        ''' The methods summarizes the entire grid based on summary data
+            acquired from the cluster summaries. '''
         ds = DataStore()
         rootNode = ds.rootElement
+        # If the data store doesn't contain a root node yet, then there is no
+        #  reason to do a grid summary.
         if rootNode is None: return
+        # Lock the data store before starting the summary.
         ds.acquireLock(self)
         try:
+            # Summarize each grid.  There should only be one for now.
             for gridNode in rootNode:
+                # Clear out the summaryData for the grid from the last run and initialize
+                #  the dictionary for new summaries.
                 gridNode.summaryData = {}
                 gridNode.summaryData['summary'] = {}
                 gridNode.summaryData['hosts_up'] = 0
@@ -180,14 +237,20 @@ class DataStoreGridSummary(threading.Thread):
                         pass
                     except KeyError:
                         pass
+                    # Summarize over all of the metrics in the cluster node summary.
                     for metricNode in clusterNode.summaryData['summary'].itervalues():
+                        # Don't include metrics that can not be summarized
                         if metricNode.type in ['string', 'timestamp']:
                             continue
                         try:
+                            # Pull the existing summary node from the summary data
+                            #   dictionary. If one doesn't exist, add it in the exception.
                             summaryNode = gridNode.summaryData['summary'][str(metricNode)]
                             summaryNode.sum += metricNode.sum
                         except KeyError:
+                            # Create the new summary node with correct tag.
                             summaryNode = metricNode.summaryCopy(tag=metricNode.tag)
+                            # Add the new summary node to the grid summary dictionary
                             gridNode.summaryData['summary'][str(summaryNode)] = summaryNode
                             summaryNode.num = 0
                         summaryNode.num += 1
@@ -208,6 +271,7 @@ class DataStoreGridSummary(threading.Thread):
                 self._doGridSummary()
 
     def shutdown(self):
+        # Release all locks and tell the thread to shut down.
         self._shuttingDown = True
         self._cond.acquire()
         self._cond.notifyAll()

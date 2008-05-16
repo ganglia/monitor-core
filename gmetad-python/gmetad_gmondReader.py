@@ -43,15 +43,20 @@ from gmetad_data import DataStore
 from gmetad_data import Element
 
 class GmondContentHandler(xml.sax.ContentHandler):
+    ''' This class implements the XML parser used to parse XML data from a gmond cluster. '''
     def __init__(self):
+        # Initialize the parser and the class object.
         xml.sax.ContentHandler.__init__(self)
         self._elemStack = []
         self._elemStackLen = 0
         self._ancestry = []
         
     def startElement(self, tag, attrs):
+        ''' This methods creates an element based on XML tags and inserts it into the data store. '''
         ds = DataStore()
+        # Create a new node based on the XML attributes.
         e = Element(tag, attrs)
+        # If this is the head tag for the XML dump, initialize the data store 
         if 'GANGLIA_XML' == tag:
             ds.acquireLock(self)
             self._elemStack.append(ds.getNode()) # Fetch the root node.  It has already been set into the tree.
@@ -60,12 +65,15 @@ class GmondContentHandler(xml.sax.ContentHandler):
             # We'll go ahead and update any existing GRID tag with a new one (new time) even if one already exists.
             e = Element('GRID', {'NAME':cfg[GmetadConfig.GRIDNAME], 'AUTHORITY':cfg[GmetadConfig.AUTHORITY], 'LOCALTIME':'%d' % time.time()})
             self._ancestry.append('GANGLIA_XML')
+        # Insert the new node into the data store at the appropriate location
         self._elemStack.append(ds.setNode(e, self._elemStack[self._elemStackLen-1]))
+        # If this is a cluster node, then keep track of the data store path to this node.
         if (self._ancestry[len(self._ancestry)-1].startswith('CLUSTER') == False):
             self._ancestry.append('%s:%s'%(e.id,e.name))
         self._elemStackLen += 1
         
     def endElement(self, tag):
+        # Release the data store lock of we hit the end of the XML dump
         if tag == 'GANGLIA_XML':
             DataStore().releaseLock(self)
         self._elemStack.pop()
@@ -75,7 +83,10 @@ class GmondContentHandler(xml.sax.ContentHandler):
         return self._ancestry
 
 class GmondReader(threading.Thread):
+    ''' This class implements a cluster reader thread that will periodically ping the cluster
+        for all of it's data. '''
     def __init__(self,dataSource,name=None,target=None,args=(),kwargs={}):
+        # Intialize the thread
         threading.Thread.__init__(self,name,target,args,kwargs)
         self._cond = threading.Condition()
         self._shuttingDown = False
@@ -91,10 +102,13 @@ class GmondReader(threading.Thread):
         
     def run(self):
         while not self._shuttingDown:
+            # Create a socket and connect to the cluster data source.
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 sock.connect( self._getEndpoint(self.dataSource.hosts[self.lastKnownGoodHost]) )
             except socket.error:
+                # Keep track of the last good data source within the cluster. If we can't reconnect to the
+                #  same data source, try the next one in the list.
                 curidx = self.lastKnownGoodHost
                 connected=False
                 while True:
@@ -115,6 +129,7 @@ class GmondReader(threading.Thread):
             logging.info('Quering data source %s via host %s' % (self.dataSource.name, self.dataSource.hosts[self.lastKnownGoodHost]))
             xmlbuf = ''
             while True:
+                # Read all of the XML data from the data source.
                 buf = sock.recv(8192)
                 if not buf:
                     break
@@ -122,14 +137,18 @@ class GmondReader(threading.Thread):
             sock.close()
             if self._shuttingDown:
                 break
+            # Create an XML parser and parse the buffer
             gch = GmondContentHandler()
             xml.sax.parseString(xmlbuf, gch)
+            # Notify the data store that all updates for the cluster are finished.
             DataStore().updateFinished(gch.getClusterAncestry())
+            # Go to sleep for a while.
             self._cond.acquire()
             self._cond.wait(getRandomInterval(self.dataSource.interval))
             self._cond.release()        
             
     def shutdown(self):
+        # Release all locks and shut down the thread.
         self._shuttingDown = True
         self._cond.acquire()
         self._cond.notifyAll()

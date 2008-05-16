@@ -106,43 +106,59 @@ class XmlWriter:
         #Returns a tuple of the form (hosts_up, hosts_down).
         hosts_up = 0
         hosts_down = 0
+        # If there is summary data, then pull the host status counts.
         if hasattr(clusternode, 'summaryData'):
             hosts_up = clusternode.summaryData['hosts_up']
             hosts_down = clusternode.summaryData['hosts_down']
         return (hosts_up, hosts_down)
         
     def _getGridSummary(self, gridnode, filterList, queryargs):
+        ''' This method will generate a grid XML dump for the given grid node.'''
         cbuf = ''
+        # Pull the host status summaries from the grid node.
         hosts = self._getNumHostsForCluster(gridnode)
+        # If we have summary data, then interate through all of the metric nodes and generate XML for each.
         if hasattr(gridnode, 'summaryData'):
             for m in gridnode.summaryData['summary'].itervalues():
                 cbuf += self._getXmlImpl(m, filterList, queryargs)
+        # Format the XML based on all of the results.
         rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n%s' % (hosts[0], hosts[1], cbuf)
         cbuf = ''
+        # Generate the XML for each cluster node.
         for c in gridnode.children.values():
             if 'CLUSTER' == c.id:
                 rbuf += self._getXmlImpl(c, filterList, queryargs)
         return rbuf
         
     def _getClusterSummary(self, clusternode, filterList, queryargs):
+        ''' This method will generate a cluster XML dump for the given cluster node.'''
         cbuf = ''
+        # Pull the host status summaries from the cluster node.
         hosts = self._getNumHostsForCluster(clusternode)
+        # If we have summary data, then interate through all of the metric nodes and generate XML for each.
         if hasattr(clusternode, 'summaryData'):
             for m in clusternode.summaryData['summary'].itervalues():
                 cbuf += self._getXmlImpl(m, filterList, queryargs)
+        # Format the XML based on all of the results.
         rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n%s' % (hosts[0], hosts[1], cbuf)
         return rbuf
         
     def _getXmlImpl(self, element, filterList=None, queryargs=None):
+        ''' This method can be called recursively to traverse the data store and produce XML
+            for specific nodes. It also respects the filter and query args when generating the XML.'''
+        # Add the XML tag
         rbuf = '<%s' % element.tag
+        # If this is a grid tag, then get the local time since a time stamp was never provided by gmond.
         if 'GRID' == element.id:
             element.localtime = '%d' % time.time()
         foundName = False
+        # Try to add a name attribute if one exists in the node.
         try:
             rbuf += ' NAME="%s"' % element.name
             foundName = True
         except AttributeError:
             pass
+        # Add each attribute that is contained in the.  By pass some specific attributes.
         for k,v in element.__dict__.items():
             if k == 'id' or k == 'tag' or k == 'children' or k == 'summaryData' or (foundName and k == 'name'):
                 continue
@@ -150,7 +166,11 @@ class XmlWriter:
         if queryargs is not None:
             if ('GRID' == element.id or 'CLUSTER' == element.id) and (filterList is None or not len(filterList)):
                 try:
+                    # If the filter specifies that this is a summary rather than a regular XML dump, generate the 
+                    #  summary XML.
                     if queryargs['filter'].lower().strip() == 'summary':
+                        # A summary XML dump will contain a grid summary as well as each cluster summary.  Each will
+                        #  be added during recusive calls to this method.
                         if 'GRID' == element.id:
                             rbuf += '>\n%s</GRID>\n' % self._getGridSummary(element, filterList, queryargs)
                             return rbuf
@@ -159,17 +179,23 @@ class XmlWriter:
                             return rbuf
                 except ValueError:
                     pass
+        # If there aren't any children, then no reason to continue.
         if 0 < len(element.children):
+            # Close the last tag
             rbuf += '>\n'
             showAllChildren = True
+            # If there was a specific filter specified, then only include the appropriate children.  Otherwise
+            #  show all of the children.
             if filterList is not None and len(filterList):
                 try:
+                    # Get the key and call this method recusively for the child
                     key = Element.generateKey([self._pcid_map[element.id], filterList[0]])
                     rbuf += self._getXmlImpl(element.children[key], filterList[1:], queryargs)
                     showAllChildren = False
                 except KeyError:
                     pass
             if showAllChildren:
+                # For each child, call this method recusively.  This will produce a complete dump of all children
                 for c in element.children.values():
                     rbuf += self._getXmlImpl(c, filterList, queryargs)
             rbuf += '</%s>\n' % element.tag
@@ -178,6 +204,8 @@ class XmlWriter:
         return rbuf
             
     def getXml(self, filter=None, queryargs=None):
+        ''' This method generates the output XML for either the entire data store or 
+            specified portions based on the filter and query args.'''
         if filter is None:
             filterList = None
         elif not len(filter.strip()):

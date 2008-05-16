@@ -44,31 +44,45 @@ _decode = lambda x: (pickle.loads(zlib.decompress(x)))
 _encode = lambda x: buffer(zlib.compress(pickle.dumps(x, pickle.HIGHEST_PROTOCOL)))
 
 class GmetadNotifier(threading.Thread):
+    ''' This class implements a notifier thread.  This create receives transactions from the data store
+        that represent cluster data updates.  It then notifies each of the plugins that a cluster transaction
+        is ready to be processed. '''
     def __init__(self):
         threading.Thread.__init__(self)
 
+        # Load and start all of the plugins that are found in the plugin directory
         gmetadConfig = getConfig()
         load_plugins(gmetadConfig[GmetadConfig.PLUGINS_DIR])
         start_plugins()
     
+        # Intialize the thread
         self._cond = threading.Condition()
         self._running = False
         self._shuttingDown = False
         self._transQueue = []
         
     def insertTransaction(self, node):
+        ''' This method is called by the data store when a new transaction needs to be
+            inserted into the transaction queue.'''
         if node is not None:
+            # Pickle and insert the node so that we are dealing with a complete copy of the cluster node
+            #  and all of it's children rather than risking that data will change while the 
+            #  plugins are processing the cluster data.
             transNode = _encode(node)
             self._transQueue.append( transNode)
             logging.debug('Inserted transaction %s in to the queue' % str(node))
 
     def run(self):
+        # Make sure that this thread is only run once.
         if self._running:
             return
         self._running = True
         while not self._shuttingDown:
+            # Wait for 1 second before checking the queue for new transactions.
             self._cond.acquire()
             self._cond.wait(1)
+            # If there is a transaction in the queue, then pop it off, unpickle it and 
+            #  notify the plugins.
             if len(self._transQueue) > 0:
                 transNode = self._transQueue.pop(0)
                 node = _decode(transNode)
@@ -77,6 +91,7 @@ class GmetadNotifier(threading.Thread):
             self._cond.release()        
             
     def shutdown(self):
+        # Release all of the locks and shut down the thread.
         self._shuttingDown = True
         self._cond.acquire()
         self._cond.notifyAll()
