@@ -29,6 +29,10 @@ RELEASE SHOWSTOPPERS:
 
   * Ganglia Web Frontend conflicting license for Templating class
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04072.html
+    bnicholes: I don't consider this to be a showstopper since it is not a regression
+      from previously released versions of Ganglia. We should get this fixed in order
+      to resolve any licensing conflicts in the web front end, but the affects are
+      no worse than any previously released code.
 
 BACKPORT PROPOSALS:
  <TEMPLATE>
@@ -57,17 +61,17 @@ BACKPORT PROPOSALS:
   * web: report correctly uptime in shownode when host is down
     Reference: http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=36
     Patch: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04137.html
-    +1: carenas
+    +1: carenas, bnicholes
 
   * build: aix support
     Reference: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04086.html
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/libmetrics/aix/metrics.c?r1=1119&r2=1267
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/configure.in?r1=1319&r2=1343
-    +1: carenas
+    +1: carenas, bnicholes
 
   * build: solaris support
     Reference:
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/configure.in?r1=1314&r2=1315
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/configure.in?r1=1315&r2=1319
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/include/gm_value.h?r1=1178&r2=1329
-    +1: carenas
+    +1: carenas, bnicholes
