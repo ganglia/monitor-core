@@ -106,47 +106,31 @@ class XmlWriter:
         #Returns a tuple of the form (hosts_up, hosts_down).
         hosts_up = 0
         hosts_down = 0
-        for c in clusternode.children.values():
-            if 'HOST' == c.id:
-                try:
-                    if int(c.tn) < int(c.tmax)*4:
-                        hosts_up += 1
-                    else:
-                        hosts_down += 1
-                except AttributeError:
-                    pass
+        if hasattr(clusternode, 'summaryData'):
+            hosts_up = clusternode.summaryData['hosts_up']
+            hosts_down = clusternode.summaryData['hosts_down']
         return (hosts_up, hosts_down)
         
     def _getGridSummary(self, gridnode, filterList, queryargs):
-        totalHostsUp = 0
-        totalHostsDown = 0
+        cbuf = ''
+        hosts = self._getNumHostsForCluster(gridnode)
+        if hasattr(gridnode, 'summaryData'):
+            for m in gridnode.summaryData['summary'].itervalues():
+                cbuf += self._getXmlImpl(m, filterList, queryargs)
+        rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n%s' % (hosts[0], hosts[1], cbuf)
         cbuf = ''
         for c in gridnode.children.values():
             if 'CLUSTER' == c.id:
-                hosts = self._getNumHostsForCluster(c)
-                totalHostsUp += hosts[0]
-                totalHostsDown += hosts[1]
-                cbuf += self._getXmlImpl(c, filterList, queryargs)
-        rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />%s\n' % (totalHostsUp, totalHostsDown, cbuf)
+                rbuf += self._getXmlImpl(c, filterList, queryargs)
         return rbuf
         
-    def _getClusterSummary(self, clusternode):
-        rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n' % self._getNumHostsForCluster(clusternode)
-        metrics = {}
-        for h in clusternode.children.values():
-            if 'HOST' == h.id:
-                for m in h.children.values():
-                    if 'METRIC' == m.id and 'zero' != m.slope:
-                        if not metrics.has_key(m.name):
-                            metrics[m.name] = {'SUM':0.0, 'NUM':1, 'TYPE':m.type, 'UNITS':'double', 'SLOPE':m.slope, 'SOURCE':m.source}
-                        else:
-                            metrics[m.name]['NUM'] += 1
-                            metrics[m.name]['SUM'] += float(m.val)
-        for mn, md in metrics.items():
-            rbuf += '<METRICS NAME="%s"' % mn
-            for k, v in md.items():
-                rbuf += ' %s="%s"' % (k, v)
-            rbuf += ' />\n'
+    def _getClusterSummary(self, clusternode, filterList, queryargs):
+        cbuf = ''
+        hosts = self._getNumHostsForCluster(clusternode)
+        if hasattr(clusternode, 'summaryData'):
+            for m in clusternode.summaryData['summary'].itervalues():
+                cbuf += self._getXmlImpl(m, filterList, queryargs)
+        rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n%s' % (hosts[0], hosts[1], cbuf)
         return rbuf
         
     def _getXmlImpl(self, element, filterList=None, queryargs=None):
@@ -160,7 +144,7 @@ class XmlWriter:
         except AttributeError:
             pass
         for k,v in element.__dict__.items():
-            if k == 'id' or k == 'children' or k == 'summary' or (foundName and k == 'name'):
+            if k == 'id' or k == 'children' or k == 'summaryData' or (foundName and k == 'name'):
                 continue
             rbuf += ' %s="%s"' % (k.upper(), v)
         if queryargs is not None:
@@ -171,7 +155,7 @@ class XmlWriter:
                             rbuf += '>\n%s</GRID>\n' % self._getGridSummary(element, filterList, queryargs)
                             return rbuf
                         elif 'CLUSTER' == element.id:
-                            rbuf += '>\n%s</CLUSTER>\n' % self._getClusterSummary(element)
+                            rbuf += '>\n%s</CLUSTER>\n' % self._getClusterSummary(element, filterList, queryargs)
                             return rbuf
                 except ValueError:
                     pass
@@ -203,7 +187,7 @@ class XmlWriter:
         rbuf = '%s\n%s\n' % (self._xml_starttag, self._xml_dtd)
         ds = DataStore()
         if ds.rootElement is not None:
-            ds.lock.acquire()
+            ds.acquireLock(self)
             rbuf += self._getXmlImpl(ds.rootElement, filterList, queryargs)
-            ds.lock.release()
+            ds.releaseLock(self)
         return rbuf
