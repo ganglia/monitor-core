@@ -63,7 +63,6 @@ class GmetadConfig:
     XML_PORT = 'xml_port'
     INTERACTIVE_PORT = 'interactive_port'
     SERVER_THREADS = 'server_threads'
-    RRD_ROOTDIR = 'rrd_rootdir'
     VERSION = '@GANGLIA_VERSION@'
     PLUGINS_DIR = 'plugins_dir'
     
@@ -72,13 +71,6 @@ class GmetadConfig:
             LOGFILE : None,
             PIDFILE : None,
             DATA_SOURCE : [],
-            #RRAS : [
-            #        GmetadRRA('AVERAGE:0.5:1:244'),
-            #        GmetadRRA('AVERAGE:0.5:24:244'),
-            #        GmetadRRA('AVERAGE:0.5:168:244'),
-            #        GmetadRRA('AVERAGE:0.5:672:244'),
-            #        GmetadRRA('AVERAGE:0.5:5760:374')
-            #],
             SCALABLE : True,
             GRIDNAME : 'unspecified',
             AUTHORITY : 'http://%s/ganglia/' % getfqdn(),
@@ -106,7 +98,6 @@ class GmetadConfig:
                 GmetadConfig.DEBUG_LEVEL : self.parseDbgLevel,
                 GmetadConfig.LOGFILE : self.parseLogfile,
                 GmetadConfig.DATA_SOURCE : self.parseDataSource,
-            #    GmetadConfig.RRAS : self.parseRRAs,
                 GmetadConfig.SCALABLE : self.parseScalable,
                 GmetadConfig.GRIDNAME : self.parseGridname,
                 GmetadConfig.AUTHORITY : self.parseAuthority,
@@ -117,7 +108,6 @@ class GmetadConfig:
                 GmetadConfig.XML_PORT : self.parseXmlPort,
                 GmetadConfig.INTERACTIVE_PORT : self.parseInteractivePort,
                 GmetadConfig.SERVER_THREADS : self.parseServerThreads,
-            #    GmetadConfig.RRD_ROOTDIR : self.parseRrdRootdir,
                 GmetadConfig.PLUGINS_DIR : self.parsePluginsDir
             }
             self.updateConfig()
@@ -146,7 +136,6 @@ class GmetadConfig:
             try:
                 kw, args = line.strip().split(None,1)
             except ValueError:
-                print 'Invalid syntax: %s' % line
                 kw = line
                 pass
             break
@@ -174,22 +163,24 @@ class GmetadConfig:
         
     def getSection(self, id):
         ret = None
+        secID = id.lower()
         try:
-            ret = self.sections[id]
+            ret = self.sections[secID]
         except KeyError:
             pass
         return ret
         
     def _setSection(self, id, f):
         kw = ''
-        self.sections[id] = []
+        secID = id.lower()
+        self.sections[secID] = []
         while kw.strip() != '}':
             kw,args = self.GmetadReadline(f)
             if kw is None:
                 break
             if args is None:
                 continue
-            self.sections[id].append( [kw,args])
+            self.sections[secID].append( [kw,args])
         
 
     def resetToDefaults(self):
@@ -215,11 +206,6 @@ class GmetadConfig:
             hosts = a[0:]
         self.cfg[GmetadConfig.DATA_SOURCE].append(GmetadDataSource(name, hosts, interval))
         
-    #def parseRRAs(self, args):
-    #    self.cfg[GmetadConfig.RRAS] = []
-    #    for rraspec in args:
-    #        self.cfg[GmetadConfig.RRAS].append(GmetadRRA(rraspec.strip().strip('"').split(':',1)[1]))
-
     def parseScalable(self, arg):
         v = arg.strip().lower()
         if v == 'off' or v == 'false' or v == 'no':
@@ -269,11 +255,6 @@ class GmetadConfig:
         if v.isdigit():
             self.cfg[GmetadConfig.SERVER_THREADS] = int(v)
         
-    #def parseRrdRootdir(self, arg):
-    #    v = arg.strip().strip('"')
-    #    if os.path.isdir(v):
-    #        self.cfg[GmetadConfig.RRD_ROOTDIR] = v
-
     def parsePluginsDir(self, arg):
         v = arg.strip().strip('"')
         if os.path.isdir(v):

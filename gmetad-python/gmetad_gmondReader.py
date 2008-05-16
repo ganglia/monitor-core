@@ -53,7 +53,7 @@ class GmondContentHandler(xml.sax.ContentHandler):
         ds = DataStore()
         e = Element(tag, attrs)
         if 'GANGLIA_XML' == tag:
-            ds.lock.acquire()
+            ds.acquireLock(self)
             self._elemStack.append(ds.getNode()) # Fetch the root node.  It has already been set into the tree.
             self._elemStackLen += 1
             cfg = getConfig()
@@ -67,7 +67,7 @@ class GmondContentHandler(xml.sax.ContentHandler):
         
     def endElement(self, tag):
         if tag == 'GANGLIA_XML':
-            DataStore().lock.release()
+            DataStore().releaseLock(self)
         self._elemStack.pop()
         self._elemStackLen -= 1
         

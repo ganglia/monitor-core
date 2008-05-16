@@ -73,7 +73,7 @@ class Element:
         return self.children.itervalues()
         
     def __copy__(self):
-        cp = Element(str(self), {})
+        cp = Element(self.id, {})
         for k in self.__dict__.keys():
             if k == 'children':
                 cp.children = {}
@@ -84,3 +84,14 @@ class Element:
                 pass
         return cp
     
+    def summaryCopy(self, id=None):
+        if id is None:
+            id = self.id
+        cp = Element(id, {})
+        for k in self.__dict__.keys():
+            try:
+                if k.lower() in ['name', 'sum', 'num', 'type', 'units', 'slop', 'source', 'children']:
+                    cp.__dict__[k.lower()] = copy.copy(self.__dict__[k])
+            except ValueError:
+                pass
+        return cp

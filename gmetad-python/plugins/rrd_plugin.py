@@ -34,6 +34,7 @@
 import os
 import rrdtool
 import logging
+from time import time
 from gmetad_plugin import GmetadPlugin
 from gmetad_config import getConfig, GmetadConfig
 
@@ -115,10 +116,14 @@ class RRDPlugin(GmetadPlugin):
             logging.info('Error creating rrd %s - %s'%(rrdPath, str(e)))
         
     def _updateRRD(self, clusterNode, metricNode, rrdPath, summary):
-        if summary is True:
-            args = [str(rrdPath), '%s:%s:%s'%(str(clusterNode.localtime),str(metricNode.val),str(metricNode.num))]
+        if hasattr(clusterNode, 'localtime'):
+            processTime = clusterNode.localtime
         else:
-            args = [str(rrdPath), '%s:%s'%(str(clusterNode.localtime),str(metricNode.val))]
+            processTime = int(time())
+        if summary is True:
+            args = [str(rrdPath), '%s:%s:%s'%(str(processTime),str(metricNode.sum),str(metricNode.num))]
+        else:
+            args = [str(rrdPath), '%s:%s'%(str(processTime),str(metricNode.val))]
         try:
             rrdtool.update(*args)
             #logging.debug('Updated rrd %s with value %s'%(rrdPath, str(metricNode.val)))

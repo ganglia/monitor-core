@@ -31,14 +31,14 @@
 #*                  Brad Nicholes (bnicholes novell.com)
 #******************************************************************************/
 
-import thread
+import thread, threading
 import logging
 import time
-import copy
 
 from gmetad_element import Element
 from gmetad_config import getConfig, GmetadConfig
 from gmetad_notifier import GmetadNotifier
+from gmetad_random import getRandomInterval
 
 class DataStore:
     _shared_state = {}
@@ -60,28 +60,49 @@ class DataStore:
             self.setNode(Element('GRID', {'NAME':cfg[GmetadConfig.GRIDNAME], 'AUTHORITY':cfg[GmetadConfig.AUTHORITY], 'LOCALTIME':'%d' % time.time()}), self.rootElement)
             self.lock.release()
             
+            self.gridSummary = DataStoreGridSummary()
+            self.gridSummary.start()
             self.notifier = GmetadNotifier()
             self.notifier.start()
             DataStore._initialized = True
-            
+
     def _doSummary(self, clusterNode):
-        clusterNode.summary = {}
+        self.acquireLock(self)
+        clusterNode.summaryData = {}
+        clusterNode.summaryData['summary'] = {}
+        clusterNode.summaryData['hosts_up'] = 0
+        clusterNode.summaryData['hosts_down'] = 0
         for hostNode in clusterNode:
+            # Sum up the status of all of the hosts
+            if 'HOST' == hostNode.id:
+                try:
+                    if int(hostNode.tn) < int(hostNode.tmax)*4:
+                        clusterNode.summaryData['hosts_up'] += 1
+                    else:
+                        clusterNode.summaryData['hosts_down'] += 1
+                except AttributeError:
+                    pass
+                except KeyError:
+                    pass
             for metricNode in hostNode:
                 #if metricNode.type in ['string', 'timestamp'] or metricNode.slope == 'zero':
                 if metricNode.type in ['string', 'timestamp']:
                     continue
                 try:
-                    summaryNode = clusterNode.summary[str(metricNode)]
-                    summaryNode.val = float(summaryNode.val) + float(metricNode.val)
+                    summaryNode = clusterNode.summaryData['summary'][str(metricNode)]
+                    summaryNode.sum += float(metricNode.val)
                 except KeyError:
-                    summaryNode = copy.copy(metricNode)
-                    clusterNode.summary[str(summaryNode)] = summaryNode
+                    summaryNode = metricNode.summaryCopy('METRICS')
+                    summaryNode.sum = float(metricNode.val)
+                    summaryNode.type = 'double'
+                    clusterNode.summaryData['summary'][str(summaryNode)] = summaryNode
                     summaryNode.num = 0
                 summaryNode.num += 1
+        self.releaseLock(self)
     
     def shutdown(self):
         self.notifier.shutdown()
+        self.gridSummary.shutdown()
         
     def setNode(self, node, parent=None):
         if parent is None:
@@ -89,6 +110,15 @@ class DataStore:
                 self.rootElement = node
                 self.rootElement.source = 'gmetad'
             return self.rootElement
+        if str(node) in parent.children:
+            try:
+                node.children = parent[str(node)].children
+            except AttributeError:
+                pass
+            try:
+                node.summaryData = parent[str(node)].summaryData
+            except AttributeError:
+                pass
         parent[str(node)] = node
         return parent[str(node)]
         
@@ -113,4 +143,74 @@ class DataStore:
         clusterNode = self.getNode(clusterPath)
         self._doSummary(clusterNode);
         self.notifier.insertTransaction(clusterNode)
+        
+    def acquireLock(self, obj):
+       self.lock.acquire()
+       logging.debug('DataStore lock acquired %s'%str(obj))
+
+    def releaseLock(self, obj):
+        self.lock.release()
+        logging.debug('DataStore lock released%s'%str(obj))
+        
+class DataStoreGridSummary(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+        self._cond = threading.Condition()
+        self._running = False
+        self._shuttingDown = False
+
+    def _doGridSummary(self):
+        ds = DataStore()
+        rootNode = ds.rootElement
+        if rootNode is None: return
+        ds.acquireLock(self)
+        try:
+            for gridNode in rootNode:
+                gridNode.summaryData = {}
+                gridNode.summaryData['summary'] = {}
+                gridNode.summaryData['hosts_up'] = 0
+                gridNode.summaryData['hosts_down'] = 0
+                for clusterNode in gridNode:
+                    # Sum up the status of all of the hosts
+                    try:
+                        gridNode.summaryData['hosts_up'] += clusterNode.summaryData['hosts_up']
+                        gridNode.summaryData['hosts_down'] += clusterNode.summaryData['hosts_down']
+                    except AttributeError:
+                        pass
+                    except KeyError:
+                        pass
+                    for metricNode in clusterNode.summaryData['summary'].itervalues():
+                        if metricNode.type in ['string', 'timestamp']:
+                            continue
+                        try:
+                            summaryNode = gridNode.summaryData['summary'][str(metricNode)]
+                            summaryNode.sum += metricNode.sum
+                        except KeyError:
+                            summaryNode = metricNode.summaryCopy()
+                            gridNode.summaryData['summary'][str(summaryNode)] = summaryNode
+                            summaryNode.num = 0
+                        summaryNode.num += 1
+        except Exception, e:
+            print e
+        ds.releaseLock(self)
+
+    def run(self):
+        if self._running:
+            return
+        self._running = True
+        while not self._shuttingDown:
+            self._cond.acquire()
+            # wait a random time between 10 and 30 seconds
+            self._cond.wait(getRandomInterval(20, 10))
+            self._cond.release()     
+            if not self._shuttingDown:
+                self._doGridSummary()
+
+    def shutdown(self):
+        self._shuttingDown = True
+        self._cond.acquire()
+        self._cond.notifyAll()
+        self._cond.release()
+        self.join()
         
