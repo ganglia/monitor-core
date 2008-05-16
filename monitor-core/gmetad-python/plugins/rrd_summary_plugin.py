@@ -42,52 +42,70 @@ from gmetad_config import getConfig, GmetadConfig
 from gmetad_data import DataStore
 
 def get_plugin():
+    ''' All plugins are required to implement this method.  It is used as the factory
+        function that instanciates a new plugin instance. '''
+    # The plugin configuration ID that is passed in must match the section name 
+    #  in the configuration file.
     return RRDSummaryPlugin('rrdsummary')
 
 def getRandomInterval(midpoint, range=5):
     return randrange(max(midpoint-range,0), midpoint+range)
 
 class RRDSummaryPlugin(RRDPlugin):
+    ''' This class implements the RRD plugin that stores metric summary data to RRD files.
+        It is derived from the RRDPlugin class.'''
 
     def __init__(self, cfgid):
         RRDPlugin.__init__(self, 'RRD')
 
     def start(self):
         '''Called by the engine during initialization to get the plugin going.'''
+        # Start the RRD root summary thread that will periodically update the summary RRDs
         self.rootSummary = RRDRootSummary()
         self.rootSummary.start()
-        print "RRDSummary start called"
+        #print "RRDSummary start called"
     
     def stop(self):
         '''Called by the engine during shutdown to allow the plugin to shutdown.'''
+        # Shut down the RRD root summary thread
         self.rootSummary.shutdown()
-        print "RRDSummary stop called"
+        #print "RRDSummary stop called"
 
     def notify(self, clusterNode):
         '''Called by the engine when the internal data structure has changed.'''
         gmetadConfig = getConfig()
+        # Find the data source configuration entry that matches the cluster name
         for ds in gmetadConfig[GmetadConfig.DATA_SOURCE]:
             if ds.name == clusterNode.name:
                 break
         if ds is None:
             logging.info('No matching data source for %s'%clusterNode.name)
             return
+        # Create the summary RRD base path and validate it
         clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.name)
         self._checkDir(clusterPath)
         clusterPath = '%s/__SummaryInfo__'%clusterPath
         self._checkDir(clusterPath)
+        # Update metrics for each cluster
         for metricNode in clusterNode.summaryData['summary'].itervalues():
+            # Create the summary RRD final path and validate it
             rrdPath = '%s/%s.rrd'%(clusterPath,metricNode.name)
+            # Create the RRD metric summary file if it doesn't exist
             if not os.path.isfile(rrdPath):
                 self._createRRD(clusterNode, metricNode, rrdPath, ds.interval, True)
                 #need to do some error checking here if the createRRD failed
+            # Update the RRD file.
             self._updateRRD(clusterNode, metricNode, rrdPath, True)
-        print "RRDSummary notify called"
+        #print "RRDSummary notify called"
 
 
 class RRDRootSummary(threading.Thread, RRDPlugin):
+    ''' This class writes the root summaries for all of the clusters in the grid. It is a thread class that is
+        also derived from the RRDPlugin class. '''
+    
     def __init__(self):
         threading.Thread.__init__(self)
+        # Call the base class init so that we have access to its configuration directives.
         RRDPlugin.__init__(self, 'RRD')
 
         self._cond = threading.Condition()
@@ -95,23 +113,33 @@ class RRDRootSummary(threading.Thread, RRDPlugin):
         self._shuttingDown = False
 
     def writeRootSummary(self):
+        ''' This method updates the RRD summary files.'''
         ds = DataStore()
         rootNode = ds.rootElement
+        # If there isn't a root node then there is not need to continue.
         if rootNode is None: return
+        # Get a lock on the data store.
         ds.acquireLock(self)
         try:
             gmetadConfig = getConfig()
+            # Create the summary RRD base path and validate it
             rootPath = '%s/__SummaryInfo__'%self.cfg[RRDPlugin.RRD_ROOTDIR]
             self._checkDir(rootPath)
+            # Update metrics for each grid node (there should only be one.)
             for gridNode in rootNode:
+                # If there isn't any summary data, then no need to continue.
                 if not hasattr(gridNode, 'summaryData'): 
                     continue
             
+                # Update metrics RRDs for each cluster summary in the grid
                 for metricNode in gridNode.summaryData['summary'].itervalues():
+                    # Create the summary RRD final path and validate it.
                     rrdPath = '%s/%s.rrd'%(rootPath,metricNode.name)
+                    # if the RRD file doesn't exist then create it
                     if not os.path.isfile(rrdPath):
                         self._createRRD(rootNode, metricNode, rrdPath, 15, True)
                         #need to do some error checking here if the createRRD failed
+                    # Update the RRD file.
                     self._updateRRD(rootNode, metricNode, rrdPath, True)
         except Exception, e:
             print e
@@ -127,6 +155,7 @@ class RRDRootSummary(threading.Thread, RRDPlugin):
             # wait a random time between 10 and 30 seconds
             self._cond.wait(getRandomInterval(20, 10))
             self._cond.release()        
+            # If we aren't shutting down then do the grid summary
             if not self._shuttingDown:
                 self.writeRootSummary()
 
