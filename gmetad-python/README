@@ -1,4 +1,4 @@
-Matt Ryan (mryan at novell dot com) - Initial Version
+Gmetad Python - Initial Version
 
 This represents the initial version of the rewritten gmetad in python.
 Files are:
@@ -6,19 +6,25 @@ Files are:
 - gmetad_config.py
 - gmetad_daemon.py
 - gmetad_data.py
+- gmetad_element.py
 - gmetad_gmondReader.py
+- gmetad_notifier.py
+- gmetad_plugin.py
 - gmetad.py
 - gmetad_random.py
 - gmetad_xmlWriter.py
 - gmetad_consistency_test.py (test script)
 
 This version should function generally as a gmetad replacement for reading
-gmond data and providing aggregate data on XML ports only.
+gmond data, providing aggregate data on XML ports and writing individual
+and summary metric RRD files.
 
 Advertised capabilities of this version include:
 
 - Support of current gmetad configuration files - should "just work" by
-  pointing it directly to an existing gmetad.conf file.
+  pointing it directly to an existing gmetad.conf file. However the RRD
+  support requires the addition of the RRDplugin and RRDSummary plugins.
+  These plugins require some additional configuration.
 - Most current gmetad command-line options, plus a few others.
 - Six log levels as per the python "logging" module.  Two of these - FATAL and
   CRITICAL - are functionally equivalent but indicated separately in the
@@ -50,3 +56,142 @@ Advertised capabilities of this version include:
   that level.
 - Shuts down gracefully at SIGTERM (generally this is true, unless an exception
   occurs - and even then, it usually works...).
+- Plugin module support provides the ability to write gmetad plugins. These plugins
+  are handed a cluster transaction each time that data is read from a cluster. The
+  transaction contains the current data for all nodes in a cluster.
+- RRD and RRD summary plugins that write the individual and summary metrics to 
+  RRD files.
+
+
+
+
+How To Write And Use A Gmetad Python Plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A new version of Gmetad did has been rewrite completely in
+the Python scription language.  This rewrite is functionally
+equivalent to the original Gmetad daemon however it provides
+a plugable interface so that Gmetad can be extended. The Gmetad
+daemon itself is only responsible for reading cluster data and 
+storing the raw data in memory as in an internal data store.  Plugins
+are responsible for processing the raw cluster data and providing 
+Gmetad with extended storage and analysis capability.  For example,
+Gmetad itself no longer writes data to an RRD file.  The RRD storage
+functionality has been moved to an RRD plugin storage module.  This 
+same plugin capability could also be used to process and analyze
+the cluster in order to produce events or alerts based on the 
+metric data.
+
+
+Writing a python Gmetad plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Every python Gmetad plugin must be derived from the GmetadPlugin
+base class.  The resulting .py file must also be placed in a
+specified Gmetad plugin directory before Gmetad is started.
+The plugin directory can be specified in the gmetad.conf file
+or a default location will be used.  When Gmetad is started, it
+will attempt to load all .py files that are found in the plugin
+directory and then determine if it is a valid gmetad plugin by
+verifying that the implemented plugin is based on the GmetadPlugin
+base class.  Every plugin must implement an __init__(), 
+_parseConfig() and notify() methods.  In addition, the plugin must
+also supply a factory function that creates an instance of the 
+plugin class.  Optionally, the plugin can also implement a start()
+and stop() methods that can be used to start up or shutdown any
+module specific functionality.  The following is an explanation
+of the various methods can be mandatory or optionally implemented
+for each plugin:
+
+def get_plugin():
+  Each plugin must implmenent a factory function that instantiates
+  the plugin class.  The class instance must be passed the configuration
+  ID that corresponds to the plugin section of the configuration file
+  contains configuration information for the plugin.  For example, the 
+  follwoing would return an instance of the RRD plugin and specify the
+  configuration ID of the plugin:
+
+    return RRDPlugin('rrd')
+
+def __init__(self, cfgid):
+  This function will be called once when the plugin class in
+  first instantiated.  The cfgid parameter will contain the 
+  configuration ID for the module.  This configuration ID should
+  be passed to the at parent's __init__() method and represents
+  the ID that is used to locate the plugin specific configuration
+  section in the gmetad.conf file. As mentioned, the plugin's 
+  __init__() must call the parent's __init__() (GmetadPlugin.__init__())
+  method with the cfgid.  
+
+def _parseConfig(self, cfgdata):
+  As a result of calling the the parent's __init__() method with 
+  the cfgid paramenter, the base GmetadPlugin class will locate
+  and read the configuration parameter section that is 
+  associated with the plugin's cfgid.  It will then call this 
+  method with the configuraton data.  It is the plugin's 
+  responsibility to evaluate the configuration data and 
+  act on the data appropriately.
+
+def notify(self, clusterNode):
+  Each plugin must implement a notify() method.  The plugin's notify 
+  method will be called each time that cluster data has been
+  read from a gmond daemon and updated in the Gmetad in-memory
+  master data store.  The cluster data is formated as a heirarchical
+  tree of nodes that represent each host and metric contained in
+  the cluster.  The node heirarchy is a copy of the same cluster
+  heirarchy in the master data store so changing any of the node
+  attributes will not have any affect on master data store and any
+  changes to the master data store during processing, will not affect
+  the plugin.  However, since the same cluster node copy is passed 
+  to all of the plugins in the chain, if any plugin makes a change
+  to the cluster heirarchy, it will affect downstream plugins.
+
+def start(self):
+  The implementation of the start() method is optional.  It provides the
+  plugin with the opportunity to start up or initialize any plugin 
+  specific functionality or data.
+    
+def stop(self):
+  The implementation of the stop() method is optional.  It provides the
+  plugin with the opportunity to stop or uninitialize any plugin 
+  specific functionality or data.
+
+
+Other than the implemenation of the mandatory methods and factory
+function, the Gmetad plugin is free to do whatever it needs 
+in order to appropriately store or analyze the metric data. 
+
+Deploying a Gmetad plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once a python Gmetad plugin has been developed, deploying the plugin
+is as easy as copying a file to a specific directory. The gmetad.conf
+configuration should specify a path using the plugins_dir directory 
+where all gmetad python plugins should be located. To deploy a 
+gmetad plugin, simply copy the .py file to the specified plugin 
+directory. Once the python plugin has been copied, starting gmetad 
+will cause the plugin to be loaded and initialized.
+
+Configuring a Gmetad plugin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The configuration of a Gmetad plugin requires that a plugin
+specific section be added to the gmond.conf file.  The format of 
+the section is as follows:
+
+  <cfgID> {
+     <directive> <value>
+     ...
+  }
+
+The <cfgID> must match the cfgID that is initially passed in to the
+plugin instance through the plugin factory function.  The cfgID will
+be used by the base plugin class to get the plugin configuration data
+from the master configuration store.  A plugin can implement any 
+configuration directives that it needs.  When the Gmetad configuration
+parser encounters a plugin section, it will read each configuration
+directive and store the values without any attempts to interpret
+the configuration data.  It is up to the plugin itself to interpret
+the meaning of each configuration directive and value.
+
+
