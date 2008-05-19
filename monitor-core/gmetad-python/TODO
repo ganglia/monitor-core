@@ -1,10 +1,6 @@
 Certainly there are hundreds of features not in this version, but of the more
 obvious:
 
-- No current support for summary data.
-- No current support for any type of data handling or output modules or
-  plugins of any kind.
-- No writing of RRD files or any other type of permanent data storage.
 - The "scalable" configuration attribute is not currently supported.
 - The "server_threads" configuration attribute is not currently supported.
 
