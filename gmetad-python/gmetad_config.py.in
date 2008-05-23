@@ -81,7 +81,6 @@ class GmetadConfig:
             XML_PORT : 8651,
             INTERACTIVE_PORT : 8652,
             SERVER_THREADS : 4,
-            RRD_ROOTDIR : '@varstatedir@/ganglia/rrds',
             PLUGINS_DIR : '/usr/lib/ganglia/gmetad/plugins'
     }
     
