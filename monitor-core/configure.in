@@ -615,6 +615,8 @@ AC_OUTPUT(Makefile
           gmetad/gmetad.conf
           gmetad/conf.c
           gmetad-python/gmetad_config.py
+          gmetad-python/gmetad.conf
+          gmetad-python/plugins/rrd_plugin.py
           gmetric/Makefile
           include/Makefile 
           web/conf.php
