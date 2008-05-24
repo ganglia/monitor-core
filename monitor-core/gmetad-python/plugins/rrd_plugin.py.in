@@ -174,6 +174,11 @@ class RRDPlugin(GmetadPlugin):
         if ds is None:
             logging.info('No matching data source for %s'%clusterNode.name)
             return
+        try:
+            if clusterNode.status == 'down':
+                return
+        except AttributeError:
+            pass
         # Create the cluster RRD base path and validate it
         clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.name)
         self._checkDir(clusterPath)
