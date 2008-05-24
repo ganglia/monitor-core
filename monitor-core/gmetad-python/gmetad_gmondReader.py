@@ -101,16 +101,18 @@ class GmondReader(threading.Thread):
         return (hostinfo[0], port)
         
     def run(self):
+        ds = DataStore()
         while not self._shuttingDown:
+            connected = False
             # Create a socket and connect to the cluster data source.
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 sock.connect( self._getEndpoint(self.dataSource.hosts[self.lastKnownGoodHost]) )
+                connected = True
             except socket.error:
                 # Keep track of the last good data source within the cluster. If we can't reconnect to the
                 #  same data source, try the next one in the list.
                 curidx = self.lastKnownGoodHost
-                connected=False
                 while True:
                     curidx += 1
                     if curidx >= len(self.dataSource.hosts):
@@ -123,25 +125,47 @@ class GmondReader(threading.Thread):
                         break
                     except socket.error:
                         pass
-                if not connected:
-                    logging.error('Could not connect to any host for data source %s' % self.dataSource.name)
-                    return
-            logging.info('Quering data source %s via host %s' % (self.dataSource.name, self.dataSource.hosts[self.lastKnownGoodHost]))
-            xmlbuf = ''
-            while True:
-                # Read all of the XML data from the data source.
-                buf = sock.recv(8192)
-                if not buf:
-                    break
-                xmlbuf += buf
-            sock.close()
+            if connected:
+                logging.info('Quering data source %s via host %s' % (self.dataSource.name, self.dataSource.hosts[self.lastKnownGoodHost]))
+                xmlbuf = ''
+                while True:
+                    # Read all of the XML data from the data source.
+                    buf = sock.recv(8192)
+                    if not buf:
+                        break
+                    xmlbuf += buf
+                sock.close()
+                # Create an XML parser and parse the buffer
+                gch = GmondContentHandler()
+                xml.sax.parseString(xmlbuf, gch)
+                # Notify the data store that all updates for the cluster are finished.
+                clusterNode = ds.getNode(gch.getClusterAncestry())
+                try:
+                    clusterNode.status = 'up'
+                except Exception:
+                    pass
+            else:
+                logging.error('Could not connect to any host for data source %s' % self.dataSource.name)
+                ds = DataStore()
+                cfg = getConfig()
+                gridKey = Element.generateKey(['GRID',cfg[GmetadConfig.GRIDNAME]])
+                clusterKey = Element.generateKey(['CLUSTER', self.dataSource.name])
+                gridNode = ds.getNode([str(ds.rootElement), gridKey])
+                clusterNode = None
+                if gridNode is not None and str(gridNode) == gridKey:
+                    try:
+                        clusterNode = gridNode[clusterKey]
+                    except KeyError:
+                        clusterNode = Element('CLUSTER', {'NAME':self.dataSource.name,  'LOCALTIME':'%d' % time.time()})
+                        ds.setNode(clusterNode, gridNode)
+                if clusterNode is not None:
+                    clusterNode.status = 'down'
+                    #clusterNode.localtime = time.time()
+                    
+            ds.updateFinished(clusterNode)
+                    
             if self._shuttingDown:
                 break
-            # Create an XML parser and parse the buffer
-            gch = GmondContentHandler()
-            xml.sax.parseString(xmlbuf, gch)
-            # Notify the data store that all updates for the cluster are finished.
-            DataStore().updateFinished(gch.getClusterAncestry())
             # Go to sleep for a while.
             self._cond.acquire()
             self._cond.wait(getRandomInterval(self.dataSource.interval))

@@ -92,13 +92,27 @@ class DataStore:
         clusterNode.summaryData['summary'] = {}
         clusterNode.summaryData['hosts_up'] = 0
         clusterNode.summaryData['hosts_down'] = 0
-
+        clusterUp = clusterNode.status == 'up'
+        summaryTime = int(time.time())
+        
         # Summarize over each host contained by the cluster
         for hostNode in clusterNode:
+            reportedTime = summaryTime
             # Sum up the status of all of the hosts
             if 'HOST' == hostNode.id:
+                # Calculate the difference between the last known reported time
+                #  and the current time.  This determines if the host is up or down
+                # ** There may still be some issues with the way that this calculation is done
+                # ** The metric node below may also have the same issues.
+                reportedTime = int(hostNode.reported)
+                tn = int(hostNode.tn)
+                if tn > int(hostNode.tmax):
+                    tn = int(hostNode.tmax) 
+                tn = (summaryTime - tn) - reportedTime
+                if tn < 0: tn = 0
+                hostNode.tn = str(tn)
                 try:
-                    if int(hostNode.tn) < int(hostNode.tmax)*4:
+                    if clusterUp and (int(hostNode.tn) < int(hostNode.tmax)*4):
                         clusterNode.summaryData['hosts_up'] += 1
                     else:
                         clusterNode.summaryData['hosts_down'] += 1
@@ -108,6 +122,12 @@ class DataStore:
                     pass
             # Summarize over each metric within a host
             for metricNode in hostNode:
+                tn = int(metricNode.tn)
+                if tn > int(metricNode.tmax):
+                    tn = int(metricNode.tmax) 
+                tn = (summaryTime - tn) - reportedTime
+                if tn < 0: tn = 0
+                metricNode.tn = str(tn)
                 # Don't include metrics that can not be summarized
                 if metricNode.type in ['string', 'timestamp']:
                     continue
@@ -178,14 +198,14 @@ class DataStore:
                     pass
         return node
 
-    def updateFinished(self, clusterPath=[]):
+    def updateFinished(self, clusterNode):
         ''' This method is called when the gmond reader has finished updating
             a cluster.  It indicates that a summary can be done over the
             entire cluster and than the cluster transaction needs to be
             entered and passed to the plugins. '''
-        clusterNode = self.getNode(clusterPath)
-        self._doSummary(clusterNode);
-        self.notifier.insertTransaction(clusterNode)
+        if clusterNode is not None:
+            self._doSummary(clusterNode);
+            self.notifier.insertTransaction(clusterNode)
         
     def acquireLock(self, obj):
         ''' Acquire a data store lock. '''
