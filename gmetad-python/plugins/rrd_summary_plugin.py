@@ -74,6 +74,11 @@ class RRDSummaryPlugin(RRDPlugin):
     def notify(self, clusterNode):
         '''Called by the engine when the internal data structure has changed.'''
         gmetadConfig = getConfig()
+        try:
+            if clusterNode.status == 'down':
+                return
+        except AttributeError:
+            pass
         # Find the data source configuration entry that matches the cluster name
         for ds in gmetadConfig[GmetadConfig.DATA_SOURCE]:
             if ds.name == clusterNode.name:
