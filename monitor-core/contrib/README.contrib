@@ -33,3 +33,7 @@ diskfree_report.php
     disk usage, but could be altered to work on individual hosts
     as well.
 
+ganglia-rrd-modify.pl
+    Simple script to read ganglia's rrds and modify some of their 
+    configuration values.  It can also dump & restore rrd files, 
+    useful when moving ganglia to a new architecture.
