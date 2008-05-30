@@ -1379,7 +1379,7 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
               gmetric_value_to_str(&(val->message_u.v_message)),
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.type,
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.units,
-              (int)((now - data->last_heard_from) / APR_USEC_PER_SEC),
+              (int)((now - val->last_heard_from) / APR_USEC_PER_SEC),
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.tmax,
               slope_to_cstr(data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.slope));
 
