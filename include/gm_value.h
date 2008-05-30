@@ -1,7 +1,7 @@
 #ifndef GM_VALUE_H
 #define GM_VALUE_H 1
 
-#include <stdint.h>
+#include <inttypes.h>
 
 enum g_type_t {
    g_string,  /* huh uh.. he said g string */

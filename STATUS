@@ -58,20 +58,8 @@ BACKPORT PROPOSALS:
      http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1327
     +1: bnicholes
 
-  * web: report correctly uptime in shownode when host is down
-    Reference: http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=36
-    Patch: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04137.html
-    +1: carenas, bnicholes
-
   * build: aix support
     Reference: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04086.html
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/libmetrics/aix/metrics.c?r1=1119&r2=1267
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/configure.in?r1=1319&r2=1343
-    +1: carenas, bnicholes
-
-  * build: solaris support
-    Reference:
-    Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/configure.in?r1=1314&r2=1315
-    Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/configure.in?r1=1315&r2=1319
-    Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/include/gm_value.h?r1=1178&r2=1329
     +1: carenas, bnicholes
