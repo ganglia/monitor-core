@@ -508,6 +508,7 @@ dnl
 		AC_DEFINE(IA64,1,IA64)
 		AC_DEFINE(HPUX,1,HPUX);;
 *aix*)		CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
+		EXPORT_SYMBOLS="-export-all-symbols"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		if test "$ac_cv_lib_perfstat_perfstat_cpu_total" = yes ; then
 			CFLAGS="$CFLAGS -DHAVE_PERFSTAT" 
@@ -527,7 +528,9 @@ dnl
 *osf*)	 	metric_source="osf.c"	
 		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
                 AC_DEFINE(OSF,1,OSF);;
-*darwin*) 	AC_DEFINE(DARWIN,1,DARWIN);;
+*darwin*) 	AC_DEFINE(DARWIN,1,DARWIN)
+		EXPORT_SYMBOLS="-export-all-symbols"
+		;;
 *solaris*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		if test "$ac_cv_prog_gcc" = yes; then
 		   CFLAGS="$CFLAGS -D__EXTENSIONS__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"

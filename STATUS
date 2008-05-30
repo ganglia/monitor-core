@@ -57,9 +57,3 @@ BACKPORT PROPOSALS:
      http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1325
      http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1327
     +1: bnicholes
-
-  * build: aix support
-    Reference: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04086.html
-    Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/libmetrics/aix/metrics.c?r1=1119&r2=1267
-    Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/configure.in?r1=1319&r2=1343
-    +1: carenas, bnicholes

@@ -428,7 +428,7 @@ g_val_t
 disk_total_func ( void )
 {
    g_val_t val;
-   pefstat_disk_total_t d;
+   perfstat_disk_total_t d;
 
    if (perfstat_disk_total(NULL, &d, sizeof(perfstat_disk_total_t), 1) == -1)
       val.d = 0.0;
