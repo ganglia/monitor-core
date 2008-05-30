@@ -57,3 +57,10 @@ BACKPORT PROPOSALS:
      http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1325
      http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1327
     +1: bnicholes
+
+  * Use the lastheardfrom timestamp from the value packet rather than the metadata packet 
+     to calculate the time offset for the metric.  We are more interested in the last 
+     value we got rather than the last time the metadata was received.
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmond/gmond.c?r1=1324&r2=1369
+    +1: bnicholes
+
