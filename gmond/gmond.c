@@ -1373,7 +1373,7 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
       return APR_SUCCESS;
   
   len = apr_snprintf(metricxml, 1024,
-          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\" SOURCE=\"gmond\">\n",
+          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\">\n",
               data->name,
               gmetric_value_to_str(&(val->message_u.v_message)),
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.type,

@@ -338,7 +338,6 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %{web_prefixdir}/graph.php
 %{web_prefixdir}/grid_tree.php
 %{web_prefixdir}/header.php
-%{web_prefixdir}/host_gmetrics.php
 %{web_prefixdir}/host_view.php
 %{web_prefixdir}/index.php
 %{web_prefixdir}/Makefile.am
@@ -358,6 +357,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue May 06 2008 Bernard Li <bernard@vanhpc.org>
+- Removed host_gmetrics.php from ganglia-web
 * Tue Apr 15 2008 Bernard Li <bernard@vanhpc.org>
 - Cleanup of *.{la,a} in %{_libdir}/ganglia is not needed anymore
 * Mon Mar 31 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>

@@ -49,15 +49,6 @@ BACKPORT PROPOSALS:
     Patch: http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmond/gmond.c?r1=1275&r2=1274&pathrev=1275
     +1: bnicholes
 
-  * gmetric: metrics generated with gmetric are being tagged in the XML
-     as coming from gmond instead.
-    Reference: http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04135.html
-    Patches:
-     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1324
-     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1325
-     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1327
-    +1: bnicholes
-
   * Use the lastheardfrom timestamp from the value packet rather than the metadata packet 
      to calculate the time offset for the metric.  We are more interested in the last 
      value we got rather than the last time the metadata was received.
