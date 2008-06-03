@@ -84,7 +84,7 @@ The B<globals> section controls general characteristics of gmond
 such as whether is should daemonize, what user it should run as,
 whether is should send/receive date and such.  The B<globals>
 section has the following attributes: B<daemonize>, B<setuid>, B<user>,
-B<debug_level>, B<mute>, B<deaf>, B<host_dmax>, B<cleanup_threshold>,
+B<debug_level>, B<mute>, B<deaf>, B<host_dmax>, B<host_tmax>, B<cleanup_threshold>,
 B<gexec> and B<send_metadata_interval>.
 
 For example,
@@ -94,6 +94,7 @@ For example,
     setuid = true
     user = nobody
     host_dmax = 3600
+    host_tmax = 40
   }
 
 The B<daemonize> attribute is a boolean.  When true, B<gmond> will 
@@ -119,6 +120,14 @@ to zero (0), B<gmond> will never delete a host from its list even when
 a remote host has stopped responding.  If B<host_dmax> is set to a
 positive number then B<gmond> will flush a host after it has not heard
 from it for B<host_dmax> seconds.  By the way, dmax means "delete max".
+
+The B<host_tmax> value is an integer with units in seconds. This value
+represents the amount of time after which B<gmond> should have received
+updates from a host. As messages may get lost in the network, B<gmond>
+will consider the host as being down if it has not received any messages
+from it after 4 times this value. For example, if B<host_tmax> is set 
+to 20, the host will appear as down after 80 seconds with no messages
+from it. By the way, tmax means "timeout max".
 
 The B<cleanup_threshold> is the minimum about of time before gmond
 will cleanup and hosts or metrics where B<tn> > B<dmax> a.k.a. expired
