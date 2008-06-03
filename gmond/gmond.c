@@ -63,6 +63,8 @@ int max_udp_message_len = 1472;
 extern char *default_gmond_configuration;
 /* The number of seconds to hold "dead" hosts in the hosts hash */
 int host_dmax = 0;
+/* The number of seconds to wait for a message before considering it down */
+int host_tmax = 20;
 /* The amount of time between cleanups */
 int cleanup_threshold = 300;
 /* Time interval before send another metadata packet */
@@ -207,6 +209,8 @@ process_configuration_file(void)
   gexec_on            = cfg_getbool(tmp, "gexec");
   /* Get the host dmax ... */
   host_dmax           = cfg_getint( tmp, "host_dmax");
+  /* Get the host tmax ... */
+  host_tmax           = cfg_getint( tmp, "host_tmax");
   /* Get the cleanup threshold */
   cleanup_threshold   = cfg_getint( tmp, "cleanup_threshold");
   /* Get the send meta data packet interval */
@@ -1246,7 +1250,7 @@ print_host_start( apr_socket_t *client, Ganglia_host *hostinfo)
                      hostinfo->ip, 
                      (int)(hostinfo->last_heard_from / APR_USEC_PER_SEC),
                      tn,
-                     20, /*tmax for now is always 20 */
+                     host_tmax,
                      host_dmax,
                      hostinfo->location? hostinfo->location: "unspecified", 
                      hostinfo->gmond_started);
