@@ -22,6 +22,7 @@ gexecd_LDFLAGS		= -L.
 EXTRA_DIST		= config/gexecd.in gexec.spec
 
 install-data-local: $(EXTRA_DIST)
+	chmod +x config/gexecd; \
 	$(INSTALL_DATA) config/gexecd /etc/init.d/gexecd
 
 uninstall-local: $(EXTRA_DIST)
