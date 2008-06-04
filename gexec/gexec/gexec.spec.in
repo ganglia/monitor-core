@@ -1,7 +1,7 @@
 Summary: gexec (cluster remote execution environment)
 Name: @PACKAGE@
 Version: @VERSION@
-Release: 4
+Release: 1
 License: GPL
 Group: System Environment/Daemons
 Source: @PACKAGE@-@VERSION@.tar.gz
