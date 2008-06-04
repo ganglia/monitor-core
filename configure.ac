@@ -16,7 +16,7 @@ AM_CONFIG_HEADER(config.h)
 dnl
 dnl Change default installation prefix
 dnl
-AC_PREFIX_DEFAULT(/usr/local)
+AC_PREFIX_DEFAULT(/usr)
 
 dnl
 dnl Checks for programs.
@@ -29,13 +29,14 @@ AC_PROG_LN_S
 
 dnl
 dnl Optional modules (static linking for libganglia for now)
-dnl 
+dnl
+AC_SUBST(libdir) 
 AC_ARG_ENABLE(ganglia,
 [  --enable-ganglia  Enable use of Ganglia for node selection.],
 [ if test "$enableval" = "yes" ; then
      echo "Use of Ganglia for node selection enabled"
      AC_DEFINE(GANGLIA)
-     GANGLIA_LIB="@libdir@/libganglia.a"
+     GANGLIA_LIB="$libdir/libganglia.a"
   else
      GANGLIA_LIB=""
   fi
