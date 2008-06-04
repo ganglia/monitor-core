@@ -5,6 +5,7 @@ Release: 4
 License: GPL
 Group: System Environment/Daemons
 Source: @PACKAGE@-@VERSION@.tar.gz
+BuildRequires: ganglia-devel
 Requires: gexec
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
@@ -15,7 +16,7 @@ gexec (cluster remote execution environment)
 %setup
 
 %build
-%configure
+%configure --enable-ganglia
 make ROOT="$RPM_BUILD_ROOT" RPM_OPT_FLAGS="$RPM_OPT_FLAGS"
 
 %install
@@ -47,6 +48,9 @@ fi
 %postun
 
 %changelog
+* Tue Jun 03 2008 Bernard Li <bernard@vanhpc.org>
+- Add '--enable-ganglia' to %configure
+- Add ganglia-devel to BuildRequires
 * Thu Dec 07 2006 Erich Focht
 - Stopping service in "make uninstall"
 - updated version to 0.3.6-2
