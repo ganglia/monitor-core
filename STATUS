@@ -54,4 +54,4 @@ BACKPORT PROPOSALS:
      will also be included in the ganglia-devel RPM package.  This change is needed so that future
      versions of gexec can be built against ganglia 3.1.x.
    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1380
-   +1: bernardli
+   +1: bernardli, bnicholes
