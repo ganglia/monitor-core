@@ -74,6 +74,7 @@ typedef struct
     char format[64];
     char desc[512];
     char groups[512];
+    apr_table_t *extra_data;
     PyObject* pcb;
 }
 py_metric_init_t;
@@ -321,58 +322,109 @@ get_pydict_callable_value(PyObject* pdict, char* key, PyObject** pobj)
     return 1;
 }
 
-static void fill_metric_info(PyObject* pdict, py_metric_init_t* minfo, char *modname)
+static void fill_metric_info(PyObject* pdict, py_metric_init_t* minfo, char *modname, apr_pool_t *pool)
 {
     char *metric_name = "";
+    PyObject *key, *value;
+    int pos = 0, ret;
+    char strkey[1024], strvalue[1024];
 
     memset(minfo, 0, sizeof(*minfo));
-    if (get_pydict_string_value(pdict, "name", minfo->mname, sizeof(minfo->mname)) < 1) {
-        err_msg("[PYTHON] No metric name given in module [%s].\n", modname);
-    }
-    else
-        metric_name = minfo->mname;
-    if (get_pydict_callable_value(pdict, "call_back", &minfo->pcb) < 1) {
-        err_msg("[PYTHON] No python call back given for metric [%s] in module [%s]. Will not call\n", 
-                metric_name, modname);
-    }
-    if (get_pydict_int_value(pdict, "time_max", &(minfo->tmax)) < 1) {
-        minfo->tmax = 60;
-        err_msg("[PYTHON] No time max given for metric [%s] in module [%s]. Using %d.\n", 
-                metric_name, modname, minfo->tmax);
-    }
-    if (get_pydict_string_value(pdict, "value_type", minfo->vtype, sizeof(minfo->vtype)) < 1) {
-        strcpy (minfo->vtype, "uint");
-        err_msg("[PYTHON] No value type given for metric [%s] in module [%s]. Using %s.\n", 
-                metric_name, modname, minfo->vtype);
-    }
-    if (get_pydict_string_value(pdict, "units", minfo->units, sizeof(minfo->units)) < 1) {
-        strcpy (minfo->units, "unknown");
-        err_msg("[PYTHON] No metric units given for metric [%s] in module [%s]. Using %s.\n", 
-                metric_name, modname, minfo->units);
-    }
-    if (get_pydict_string_value(pdict, "slope", minfo->slope, sizeof(minfo->slope)) < 1) {
-        strcpy (minfo->slope, "both");
-        err_msg("[PYTHON] No slope given for metric [%s] in module [%s]. Using %s.\n", 
-                metric_name, modname, minfo->slope);
-    }
-    if (get_pydict_string_value(pdict, "format", minfo->format, sizeof(minfo->format)) < 1) {
-        strcpy (minfo->format, "%u");
-        err_msg("[PYTHON] No format given for metric [%s] in module [%s]. Using %s.\n", 
-                metric_name, modname, minfo->format);
-    }
-    if (get_pydict_string_value(pdict, "description", minfo->desc, sizeof(minfo->desc)) < 1) {
-        strcpy (minfo->desc, "unknown metric");
-        err_msg("[PYTHON] No description given for metric [%s] in module [%s]. Using %s.\n", 
-                metric_name, modname, minfo->desc);
-    }
-    if (get_pydict_string_value(pdict, "groups", minfo->groups, sizeof(minfo->groups)) < 1) {
-        strcpy (minfo->groups, "");
+
+    /* create the apr table here */
+    minfo->extra_data = apr_table_make(pool, 2);
+
+    while (PyDict_Next(pdict, &pos, &key, &value)) {
+        ret = get_python_string_value(key, strkey, sizeof(strkey));
+        if (ret < 0) 
+            continue;
+
+        if (!strcasecmp(strkey, "name")) {
+            if (get_python_string_value(value, minfo->mname, sizeof(minfo->mname)) < 1) {
+                err_msg("[PYTHON] No metric name given in module [%s].\n", modname);
+            }
+            else
+                metric_name = minfo->mname;
+            continue;
+        }
+
+        if (!strcasecmp(strkey, "call_back")) {
+            if (get_pydict_callable_value(pdict, "call_back", &minfo->pcb) < 1) {
+                err_msg("[PYTHON] No python call back given for metric [%s] in module [%s]. Will not call\n", 
+                        metric_name, modname);
+            }
+            continue;
+        }
+        if (!strcasecmp(strkey, "time_max")) {
+            if (get_python_int_value(value, &(minfo->tmax)) < 1) {
+                minfo->tmax = 60;
+                err_msg("[PYTHON] No time max given for metric [%s] in module [%s]. Using %d.\n", 
+                        metric_name, modname, minfo->tmax);
+            }
+            continue;
+        }
+        if (!strcasecmp(strkey, "value_type")) {
+            if (get_python_string_value(value, minfo->vtype, sizeof(minfo->vtype)) < 1) {
+                strcpy (minfo->vtype, "uint");
+                err_msg("[PYTHON] No value type given for metric [%s] in module [%s]. Using %s.\n", 
+                        metric_name, modname, minfo->vtype);
+            }
+            continue;
+        }
+        if (!strcasecmp(strkey, "units")) {
+            if (get_python_string_value(value, minfo->units, sizeof(minfo->units)) < 1) {
+                strcpy (minfo->units, "unknown");
+                err_msg("[PYTHON] No metric units given for metric [%s] in module [%s]. Using %s.\n", 
+                        metric_name, modname, minfo->units);
+            }
+            continue;
+        }
+        if (!strcasecmp(strkey, "slope")) {
+            if (get_python_string_value(value, minfo->slope, sizeof(minfo->slope)) < 1) {
+                strcpy (minfo->slope, "both");
+                err_msg("[PYTHON] No slope given for metric [%s] in module [%s]. Using %s.\n", 
+                        metric_name, modname, minfo->slope);
+            }
+            continue;
+        }
+        if (!strcasecmp(strkey, "format")) {
+            if (get_python_string_value(value, minfo->format, sizeof(minfo->format)) < 1) {
+                strcpy (minfo->format, "%u");
+                err_msg("[PYTHON] No format given for metric [%s] in module [%s]. Using %s.\n", 
+                        metric_name, modname, minfo->format);
+            }
+            continue;
+        }
+        if (!strcasecmp(strkey, "description")) {
+            if (get_python_string_value(value, minfo->desc, sizeof(minfo->desc)) < 1) {
+                strcpy (minfo->desc, "unknown metric");
+                err_msg("[PYTHON] No description given for metric [%s] in module [%s]. Using %s.\n", 
+                        metric_name, modname, minfo->desc);
+            }
+            continue;
+        }
+        if (!strcasecmp(strkey, "groups")) {
+            if (get_python_string_value(value, minfo->groups, sizeof(minfo->groups)) < 1) {
+                strcpy (minfo->groups, "");
+            }
+            continue;
+        }
+
+        if (get_python_string_value(value, strvalue, sizeof(strvalue)) < 1) {
+            err_msg("[PYTHON] Extra data key [%s] could not be processed.\n", strkey); 
+        }
+        else {
+            apr_table_add(minfo->extra_data, strkey, strvalue);
+        }
     }
 }
 
 static void fill_gmi(Ganglia_25metric* gmi, py_metric_init_t* minfo)
 {
     char *s, *lasts;
+    int i;
+    const apr_array_header_t *arr = apr_table_elts(minfo->extra_data);
+    const apr_table_entry_t *elts = (const apr_table_entry_t *)arr->elts;
 
     /* gmi->key will be automatically assigned by gmond */
     gmi->name = apr_pstrdup (pool, minfo->mname);
@@ -416,6 +468,13 @@ static void fill_gmi(Ganglia_25metric* gmi, py_metric_init_t* minfo)
             d++;
         }
         MMETRIC_ADD_METADATA(gmi,MGROUP,d);
+    }
+
+    /* transfer any extra data as metric metadata */
+    for (i = 0; i < arr->nelts; ++i) {
+        if (elts[i].key == NULL)
+            continue;
+        MMETRIC_ADD_METADATA(gmi, elts[i].key, elts[i].val);
     }
 }
 
@@ -579,7 +638,7 @@ static int pyth_metric_init (apr_pool_t *p)
             for (j = 0; j < size; j++) {
                 PyObject* plobj = PyList_GetItem(pobj, j);
                 if (PyMapping_Check(plobj)) {
-                    fill_metric_info(plobj, &minfo, modname);
+                    fill_metric_info(plobj, &minfo, modname, pool);
                     gmi = (Ganglia_25metric*)apr_array_push(metric_info);
                     fill_gmi(gmi, &minfo);
                     mi = (mapped_info_t*)apr_array_push(metric_mapping_info);
@@ -590,7 +649,7 @@ static int pyth_metric_init (apr_pool_t *p)
             }
         }
         else if (PyMapping_Check(pobj)) {
-            fill_metric_info(pobj, &minfo, modname);
+            fill_metric_info(pobj, &minfo, modname, pool);
             gmi = (Ganglia_25metric*)apr_array_push(metric_info);
             fill_gmi(gmi, &minfo);
             mi = (mapped_info_t*)apr_array_push(metric_mapping_info);
