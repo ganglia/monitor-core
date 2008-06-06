@@ -55,3 +55,17 @@ BACKPORT PROPOSALS:
      versions of gexec can be built against ganglia 3.1.x.
    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1380
    +1: bernardli, bnicholes
+
+
+BACKPORT PROPOSALS NEXT VERSION:
+  These proposals are not targeted at the current version.  They should be
+   addressed after the current version is released.
+
+  * Allow both a C and python module to create a metric that will spoof a specific host.
+     This provides the same spoofing functionality as gmetric but through a metric module.
+     It is done by adding SPOOF_HOST and SPOOF_NAME as extra metadata to the metric
+     description. This is patch contains fairly significant code changes so rather than
+     risk destabilizing the current release, this is a proposal for a follow-on release.
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
+    +1: bnicholes
+
