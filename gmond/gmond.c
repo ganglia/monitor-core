@@ -190,7 +190,7 @@ typedef struct Ganglia_collection_group Ganglia_collection_group;
 apr_array_header_t *collection_groups = NULL;
 
 mmodule *metric_modules = NULL;
-extern int daemon_proc;		/* defined in error.c */
+extern int daemon_proc;     /* defined in error.c */
 
 /* this is just a temporary function */
 void
@@ -1781,6 +1781,7 @@ static void
 setup_metric_callbacks( void )
 {
   mmodule *modp = metric_modules;
+  Ganglia_metric_callback *metric_cb;
 
   /* Create the metric_callbacks hash */
   metric_callbacks = apr_hash_make( global_context );
@@ -1800,7 +1801,9 @@ setup_metric_callbacks( void )
       metric_info = modp->metrics_info;
       for (i = 0; metric_info[i].name != NULL; i++) 
         {
-          Ganglia_metric_cb_define(metric_info[i].name, modp->handler, i, modp);
+          metric_cb = Ganglia_metric_cb_define(metric_info[i].name, modp->handler, i, modp);
+          if (metric_cb) 
+              metric_cb->info = (Ganglia_25metric*)&(metric_info[i]);
         }
       modp = modp->next;
   }
@@ -1814,29 +1817,11 @@ setup_metric_info(Ganglia_metric_callback *metric_cb, int group_once, cfg_t *met
     float value_threshold = cfg_getfloat( metric_cfg, "value_threshold");
     Ganglia_25metric *metric_info = NULL;
 
-    if (metric_cb->modp) 
+    if (metric_cb->info) 
     {
-        const Ganglia_25metric *mi = metric_cb->modp->metrics_info;
-        int k, klen = strlen(name);
-    
-        /*XXX Store the metric info in a hash_table so that this 
-          lookup can be done faster. */
-    
-        for (k = 0; mi[k].name != NULL; k++) 
-        {
-            if ((is_dynamic && !strncasecmp(name,  mi[k].name, klen)) || !strcasecmp(name,  mi[k].name)) 
-            {
-                metric_info = apr_pcalloc( global_context, sizeof(Ganglia_25metric));
-                memcpy (metric_info, &(mi[k]), sizeof(Ganglia_25metric));
-                metric_info->key = modular_metric;
-                break;
-            }
-        }
-    }
-    else 
-    {
-        err_msg("Unable to send metric '%s' (not in gm_protocol.x). Exiting.\n", name);
-        exit(1);
+        metric_info = apr_pcalloc( global_context, sizeof(Ganglia_25metric));
+        memcpy (metric_info, metric_cb->info, sizeof(Ganglia_25metric));
+        metric_info->key = modular_metric;
     }
     
     if(metric_info)
@@ -1900,7 +1885,7 @@ setup_metric_info(Ganglia_metric_callback *metric_cb, int group_once, cfg_t *met
             val = apr_table_get((apr_table_t *)metric_info->metadata, SPOOF_NAME);
             if (val) 
             {
-                char *spoofedname = apr_pstrcat(global_context, val, ":", name);
+                char *spoofedname = apr_pstrcat(global_context, val, ":", name, NULL);
     
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name = spoofedname;
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
