@@ -67,5 +67,6 @@ BACKPORT PROPOSALS NEXT VERSION:
      description. This is patch contains fairly significant code changes so rather than
      risk destabilizing the current release, this is a proposal for a follow-on release.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
 
