@@ -617,6 +617,41 @@ setup_listen_channels_pollset( void )
     }
 }
 
+static void
+get_metric_names (Ganglia_metric_id *metric_id, char **metricName, char **realName)
+{
+    char *firstName=NULL, *secondName=NULL, *buff=NULL;
+    int name_len;
+
+    *metricName = *realName = NULL;
+    firstName = metric_id->name;
+
+    if (metric_id->spoof) 
+      {
+        name_len = strlen(firstName);
+        buff = malloc(name_len+1);
+        strcpy(buff, firstName);
+        firstName = buff;
+        secondName = strchr(buff+1,':');
+        if(secondName)
+          {
+            *secondName = 0;
+            secondName++;
+          }
+      }
+
+    if (firstName) {
+        *metricName = strdup(firstName);
+        if (secondName) {
+            *realName = strdup(secondName);
+        }
+    }
+
+    if (buff)
+        free(buff);
+    return;
+}
+
 static Ganglia_host *
 Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
 {
@@ -744,7 +779,15 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
 static void
 Ganglia_update_vidals( Ganglia_host *host, Ganglia_value_msg *vmsg)
 {
-    if(vmsg && !strcasecmp("location", vmsg->Ganglia_value_msg_u.gstr.metric_id.name))
+    char *metricName=NULL, *realName=NULL;
+
+    if (!vmsg) 
+        return;
+    
+    metricName = vmsg->Ganglia_value_msg_u.gstr.metric_id.name;
+    get_metric_names (&(vmsg->Ganglia_value_msg_u.gstr.metric_id), &metricName, &realName);
+
+    if(!strcasecmp("location", metricName))
       {
         /* We have to manage this memory here because.. returning NULL
          * will not cause Ganglia_message_save to be run.  Maybe this
@@ -759,25 +802,25 @@ Ganglia_update_vidals( Ganglia_host *host, Ganglia_value_msg *vmsg)
         host->location = strdup(vmsg->Ganglia_value_msg_u.gstr.str);
         debug_msg("Got a location message %s\n", host->location);
         /* Processing is finished */
-        return;
       }
-    if(vmsg && !vmsg->Ganglia_value_msg_u.gstr.metric_id.spoof && 
-       !strcasecmp("heartbeat", vmsg->Ganglia_value_msg_u.gstr.metric_id.name))
+    else if(!strcasecmp("heartbeat", metricName))
       {
         /* nothing more needs to be done. we handled the timestamps above. */
         host->gmond_started = vmsg->Ganglia_value_msg_u.gu_int.u_int;
         debug_msg("Got a heartbeat message %d\n", host->gmond_started);
         /* Processing is finished */
-        return;
       }
-    if(vmsg && vmsg->Ganglia_value_msg_u.gstr.metric_id.spoof)
+    else if(vmsg->Ganglia_value_msg_u.gstr.metric_id.spoof)
       {
         /* nothing more needs to be done. we handled the timestamps above. */
-        debug_msg("Got a spoof message %s %s\n", vmsg->Ganglia_value_msg_u.gstr.metric_id.name,
-                  vmsg->Ganglia_value_msg_u.gstr.str);
+        debug_msg("Got a spoof message %s from %s\n", vmsg->Ganglia_value_msg_u.gstr.metric_id.name,
+                  vmsg->Ganglia_value_msg_u.gstr.metric_id.host);
         /* Processing is finished */
-        return;
       }
+
+    if (metricName) free(metricName);
+    if (realName) free(realName);
+    return;
 }
 
 static void
@@ -1371,21 +1414,32 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
   char metricxml[1024];
   apr_size_t len;
   apr_status_t ret;
+  char *metricName=NULL, *realName=NULL;
 
   if (!data || !val)
       return APR_SUCCESS;
-  if (!strcasecmp(data->name, "heartbeat") || !strcasecmp(data->name, "location")) 
+
+  get_metric_names (&(data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric_id), &metricName, &realName);
+
+  if (!metricName || (!strcasecmp(metricName, "heartbeat") || !strcasecmp(metricName, "location"))) 
+    {
+      if (metricName) free(metricName);
+      if (realName) free(realName);
       return APR_SUCCESS;
+    }
   
   len = apr_snprintf(metricxml, 1024,
           "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\">\n",
-              data->name,
+              metricName,
               gmetric_value_to_str(&(val->message_u.v_message)),
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.type,
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.units,
               (int)((now - val->last_heard_from) / APR_USEC_PER_SEC),
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.tmax,
               slope_to_cstr(data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.slope));
+
+  if (metricName) free(metricName);
+  if (realName) free(realName);
 
   ret = apr_socket_send(client, metricxml, &len);
   if (ret == APR_SUCCESS) 
@@ -1752,6 +1806,149 @@ setup_metric_callbacks( void )
   }
 }
 
+void 
+setup_metric_info(Ganglia_metric_callback *metric_cb, int group_once, cfg_t *metric_cfg, int is_dynamic)
+{
+    char *name            = cfg_getstr  ( metric_cfg, "name");
+    char *title           = cfg_getstr  ( metric_cfg, "title");
+    float value_threshold = cfg_getfloat( metric_cfg, "value_threshold");
+    Ganglia_25metric *metric_info = NULL;
+
+    if (metric_cb->modp) 
+    {
+        const Ganglia_25metric *mi = metric_cb->modp->metrics_info;
+        int k, klen = strlen(name);
+    
+        /*XXX Store the metric info in a hash_table so that this 
+          lookup can be done faster. */
+    
+        for (k = 0; mi[k].name != NULL; k++) 
+        {
+            if ((is_dynamic && !strncasecmp(name,  mi[k].name, klen)) || !strcasecmp(name,  mi[k].name)) 
+            {
+                metric_info = apr_pcalloc( global_context, sizeof(Ganglia_25metric));
+                memcpy (metric_info, &(mi[k]), sizeof(Ganglia_25metric));
+                metric_info->key = modular_metric;
+                break;
+            }
+        }
+    }
+    else 
+    {
+        err_msg("Unable to send metric '%s' (not in gm_protocol.x). Exiting.\n", name);
+        exit(1);
+    }
+    
+    if(metric_info)
+    {
+        /* Build the message */
+        switch(metric_info->type)
+        {
+            case GANGLIA_VALUE_UNKNOWN:
+                /* The 2.5.x protocol doesn't allow for unknown values. :(  Do nothing. */
+                return;
+            case GANGLIA_VALUE_STRING:
+                metric_info->key = gmetric_string; 
+                metric_cb->msg.Ganglia_value_msg_u.gstr.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                break;
+            case GANGLIA_VALUE_UNSIGNED_SHORT:
+                metric_info->key = gmetric_ushort; 
+                metric_cb->msg.Ganglia_value_msg_u.gu_short.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                break;
+            case GANGLIA_VALUE_SHORT:
+                metric_info->key = gmetric_short; 
+                metric_cb->msg.Ganglia_value_msg_u.gs_short.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                break;
+            case GANGLIA_VALUE_UNSIGNED_INT:
+                metric_info->key = gmetric_uint; 
+                metric_cb->msg.Ganglia_value_msg_u.gu_int.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                break;
+            case GANGLIA_VALUE_INT:
+                metric_info->key = gmetric_int; 
+                metric_cb->msg.Ganglia_value_msg_u.gs_int.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                break;
+            case GANGLIA_VALUE_FLOAT:
+                metric_info->key = gmetric_float; 
+                metric_cb->msg.Ganglia_value_msg_u.gf.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                break;
+            case GANGLIA_VALUE_DOUBLE:
+                metric_info->key = gmetric_double; 
+                metric_cb->msg.Ganglia_value_msg_u.gd.fmt = apr_pstrdup(global_context, metric_info->fmt); 
+                break;
+            default:
+                metric_info->key = gmetric_uint; 
+        }
+    
+        /* This sets the key for this particular metric.
+         * The value is set by the callback function later */
+        metric_cb->msg.id = metric_info->key;
+    
+        metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup(global_context, myname);
+        metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup(global_context, metric_info->name);
+    
+        /* Replace the host metric name with the spoof data if it exists in the metadata */
+        if (metric_info->metadata) 
+        {
+            const char *val;
+    
+            val = apr_table_get((apr_table_t *)metric_info->metadata, SPOOF_HOST);
+            if (val) 
+            {
+                metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup(global_context, val);
+                metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
+            }
+            val = apr_table_get((apr_table_t *)metric_info->metadata, SPOOF_NAME);
+            if (val) 
+            {
+                char *spoofedname = apr_pstrcat(global_context, val, ":", name);
+    
+                metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name = spoofedname;
+                metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
+    
+                /* Reinsert the same metric_callback structure pointer under the spoofed name. 
+                    This will put the same metric info in the hash table twice but under
+                    the spoofed name. */
+                apr_hash_set( metric_callbacks, spoofedname, APR_HASH_KEY_STRING, metric_cb);
+            }
+        }
+    
+        /* Save the location of information about this particular metric */
+        metric_cb->info   = metric_info;
+    
+        /* Set the value threshold for this particular metric */
+        metric_cb->value_threshold = value_threshold;
+    
+        /* Fill in the title or short descriptive name of the metric if
+         * one had been given in the configuration file. Otherwise just
+         * copy the metric name as the title. */
+        if (title)
+        {
+            metric_cb->title = apr_pstrdup(global_context, title);
+        }
+        else  
+        {
+            metric_cb->title = apr_pstrdup(global_context, metric_info->name);
+        }
+    
+        /* If this metric will only be collected once, run it now at setup... */
+        if(group_once)
+        {
+            if (metric_cb->multi_metric_index == CB_NOINDEX) 
+                metric_cb->now = metric_cb->cb();
+            else
+                metric_cb->now = metric_cb->cbindexed(metric_cb->multi_metric_index);
+        }
+        else
+        {
+            /* ... otherwise set it to zero */
+            memset( &(metric_cb->now), 0, sizeof(g_val_t));
+        }
+        memset( &(metric_cb->last), 0, sizeof(g_val_t));
+    }
+
+    return;
+}
+
 double
 setup_collection_groups( void )
 {
@@ -1799,134 +1996,61 @@ setup_collection_groups( void )
         {
           cfg_t *metric         = cfg_getnsec( group_conf, "metric", j );
           char *name            = cfg_getstr  ( metric, "name");
-          char *title           = cfg_getstr  ( metric, "title");
-          float value_threshold = cfg_getfloat( metric, "value_threshold");
 
           Ganglia_metric_callback *metric_cb =  (Ganglia_metric_callback *)
                         apr_hash_get( metric_callbacks, name, APR_HASH_KEY_STRING );
-          Ganglia_25metric *metric_info = NULL;
 
           if(!metric_cb)
             {
-              err_msg("Unable to collect metric '%s' on this platform. Exiting.\n", name);
-              exit(1);
-            }
+              /* If a metric callback was not found and the metric is dynamic, then
+                  search through the callback sequentially. */
 
-          if (metric_cb->modp) 
-            {
-              const Ganglia_25metric *mi = metric_cb->modp->metrics_info;
-              int k;
+              apr_hash_index_t *hi;
+              apr_pool_t *p;
+              apr_ssize_t klen = strlen(name);
+              void *val;
+              const char *key;
+              int found = 0;
 
-              /*XXX Store the metric info in a hash_table so that this 
-                lookup can be done faster. */
-              metric_info = apr_pcalloc( global_context, sizeof(Ganglia_25metric));
+              /* Create a sub-pool for this channel */
+              apr_pool_create(&p, global_context);
 
-              for (k = 0; mi[k].name != NULL; k++) 
+              for(hi = apr_hash_first(p, metric_callbacks);
+                  hi;
+                  hi = apr_hash_next(hi))
                 {
-                  if (strcasecmp(name,  mi[k].name) == 0) 
-                    {
-                      memcpy (metric_info, &(mi[k]), sizeof(Ganglia_25metric));
-                      break;
-                    }
-                }
+                  Ganglia_metric_callback *cb;
 
-              metric_info->key = modular_metric;
-            }
-          else 
-            {
-              err_msg("Unable to send metric '%s' (not in gm_protocol.x). Exiting.\n", name);
-              exit(1);
-            }
+                  apr_hash_this(hi, (const void**)&key, NULL, &val);
 
-          if(metric_info)
-            {
-              /* Build the message */
-              switch(metric_info->type)
-                {
-                case GANGLIA_VALUE_UNKNOWN:
-                  /* The 2.5.x protocol doesn't allow for unknown values. :(  Do nothing. */
-                  continue;
-                case GANGLIA_VALUE_STRING:
-                  metric_info->key = gmetric_string; 
-                  metric_cb->msg.Ganglia_value_msg_u.gstr.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-                  break;
-                case GANGLIA_VALUE_UNSIGNED_SHORT:
-                  metric_info->key = gmetric_ushort; 
-                  metric_cb->msg.Ganglia_value_msg_u.gu_short.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-                  break;
-                case GANGLIA_VALUE_SHORT:
-                  metric_info->key = gmetric_short; 
-                  metric_cb->msg.Ganglia_value_msg_u.gs_short.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-                  break;
-                case GANGLIA_VALUE_UNSIGNED_INT:
-                  metric_info->key = gmetric_uint; 
-                  metric_cb->msg.Ganglia_value_msg_u.gu_int.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-                  break;
-                case GANGLIA_VALUE_INT:
-                  metric_info->key = gmetric_int; 
-                  metric_cb->msg.Ganglia_value_msg_u.gs_int.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-                  break;
-                case GANGLIA_VALUE_FLOAT:
-                  metric_info->key = gmetric_float; 
-                  metric_cb->msg.Ganglia_value_msg_u.gf.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-                  break;
-                case GANGLIA_VALUE_DOUBLE:
-                  metric_info->key = gmetric_double; 
-                  metric_cb->msg.Ganglia_value_msg_u.gd.fmt = apr_pstrdup(global_context, metric_info->fmt); 
-                  break;
-                default:
-                  metric_info->key = gmetric_uint; 
+                  if (strncasecmp(key, name, klen) == 0) {
+                      cb = val;
+                      setup_metric_info (cb, group->once, metric, 1);
+    
+                      if (cb->info) {
+                          bytes_per_sec += ( (double)(cb->info->msg_size) / (double)group->time_threshold );
+                      }
+    
+                      /* Push this metric onto the metric_array for this group */
+                      *(Ganglia_metric_callback **)apr_array_push(group->metric_array) = cb;
+                      found = 1;
+                  }
                 }
-    
-              /* This sets the key for this particular metric.
-               * The value is set by the callback function later */
-              metric_cb->msg.id = metric_info->key;
-    
-              metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup(global_context, myname);
-              metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup(global_context, metric_info->name);
-    
-              /* Save the location of information about this particular metric */
-              metric_cb->info   = metric_info;
-    
-              /* Set the value threshold for this particular metric */
-              metric_cb->value_threshold = value_threshold;
-    
-              /* Fill in the title or short descriptive name of the metric if
-               * one had been given in the configuration file. Otherwise just
-               * copy the metric name as the title. */
-              if (title)
-                {
-                  metric_cb->title = apr_pstrdup(global_context, title);
-                }
-              else  
-                {
-                  metric_cb->title = apr_pstrdup(global_context, metric_info->name);
-                }
-    
-              /* If this metric will only be collected once, run it now at setup... */
-              if(group->once)
-                {
-                  if (metric_cb->multi_metric_index == CB_NOINDEX) 
-                      metric_cb->now = metric_cb->cb();
-                  else
-                      metric_cb->now = metric_cb->cbindexed(metric_cb->multi_metric_index);
-                }
-              else
-                {
-                  /* ... otherwise set it to zero */
-                  memset( &(metric_cb->now), 0, sizeof(g_val_t));
-                }
-              memset( &(metric_cb->last), 0, sizeof(g_val_t));
-    
-              /* Calculate the bandwidth this metric will use */
-              bytes_per_sec += ( (double)metric_info->msg_size / (double)group->time_threshold );
-    
-              /* Push this metric onto the metric_array for this group */
-              *(Ganglia_metric_callback **)apr_array_push(group->metric_array) = metric_cb;
+              apr_pool_destroy(p);
+
+              if (!found) 
+                  err_msg("Unable to find the metric information for '%s'. Possible that the module has not been loaded.\n", name);
             }
           else
             {
-              err_msg("Unable to find the metric information for '%s'. Possible that the module has not been loaded.\n", name);
+              setup_metric_info (metric_cb, group->once, metric, 0);
+
+              if (metric_cb->info) {
+                  bytes_per_sec += ( (double)(metric_cb->info->msg_size) / (double)group->time_threshold );
+              }
+
+              /* Push this metric onto the metric_array for this group */
+              *(Ganglia_metric_callback **)apr_array_push(group->metric_array) = metric_cb;
             }
         }
 
@@ -2058,7 +2182,7 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
             (cb->metadata_last_sent < (now - apr_time_make(send_metadata_interval,0))))) 
           {
             Ganglia_metric gmetric = Ganglia_metric_create((Ganglia_pool)global_context);
-            char *val, *type;
+            char *name, *val, *type;
             apr_pool_t *gm_pool = (apr_pool_t*)gmetric->pool;
 
             if(!gmetric)
@@ -2067,10 +2191,11 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
                 return;
               }
         
+            name = cb->msg.Ganglia_value_msg_u.gstr.metric_id.name;
             val = apr_pstrdup(gm_pool, host_metric_value(cb->info, &(cb->msg)));
             type = apr_pstrdup(gm_pool, host_metric_type(cb->info->type));
         
-            errors = Ganglia_metric_set(gmetric, cb->info->name, val, type,
+            errors = Ganglia_metric_set(gmetric, name, val, type,
                         cb->info->units, cstr_to_slope( cb->info->slope),
                         cb->info->tmax, 0);
 
