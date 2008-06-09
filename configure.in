@@ -614,7 +614,8 @@ AC_OUTPUT(Makefile
           gmond/python_modules/network/Makefile
           gmetad/gmetad.conf
           gmetad/conf.c
-          gmetad-python/gmetad_config.py
+          gmetad-python/setup.py
+          gmetad-python/Gmetad/gmetad_config.py
           gmetad-python/gmetad.conf
           gmetad-python/plugins/rrd_plugin.py
           gmetric/Makefile
