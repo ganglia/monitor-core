@@ -38,8 +38,8 @@ import threading
 from random import randrange
 
 from rrd_plugin import RRDPlugin
-from gmetad_config import getConfig, GmetadConfig
-from gmetad_data import DataStore
+from Gmetad.gmetad_config import getConfig, GmetadConfig
+from Gmetad.gmetad_data import DataStore
 
 def get_plugin():
     ''' All plugins are required to implement this method.  It is used as the factory
