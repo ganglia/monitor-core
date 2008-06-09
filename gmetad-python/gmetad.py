@@ -40,11 +40,11 @@ import asyncore
 import logging
 import logging.handlers
 
-from gmetad_gmondReader import GmondReader
-from gmetad_xmlWriter import XmlWriter
-from gmetad_config import getConfig, GmetadConfig
-from gmetad_daemon import daemonize
-from gmetad_data import DataStore
+from Gmetad.gmetad_gmondReader import GmondReader
+from Gmetad.gmetad_xmlWriter import XmlWriter
+from Gmetad.gmetad_config import getConfig, GmetadConfig
+from Gmetad.gmetad_daemon import daemonize
+from Gmetad.gmetad_data import DataStore
 
 
 class GmetadListenSocket(asyncore.dispatcher):
