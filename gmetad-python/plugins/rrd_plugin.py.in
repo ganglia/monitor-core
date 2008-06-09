@@ -35,8 +35,9 @@ import os
 import rrdtool
 import logging
 from time import time
-from Gmetad.plugin import GmetadPlugin
-from Gmetad.config import getConfig, GmetadConfig
+
+from Gmetad.gmetad_plugin import GmetadPlugin
+from Gmetad.gmetad_config import getConfig, GmetadConfig
 
 def get_plugin():
     ''' All plugins are required to implement this method.  It is used as the factory
