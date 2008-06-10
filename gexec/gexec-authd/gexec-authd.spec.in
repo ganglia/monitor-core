@@ -2,10 +2,11 @@ Summary: authd (RSA authentication daemon) for gexec and pcp
 Name: @PACKAGE@
 Version: @VERSION@
 Release: 4
-License: GPL
+License: BSD
 Group: System Environment/Daemons
 Source: @PACKAGE@-@VERSION@.tar.gz
 BuildRequires: libe
+Requires: libe
 Provides: authd
 
 %description

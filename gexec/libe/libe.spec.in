@@ -2,7 +2,7 @@ Summary: libe (a library of useful functions in C)
 Name: @PACKAGE@
 Version: @VERSION@
 Release: 3
-License: GPL
+License: BSD
 Group: Development/Libraries
 Source: @PACKAGE@-@VERSION@.tar.gz
 

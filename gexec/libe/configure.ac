@@ -6,7 +6,7 @@ AC_INIT(e_error.c)
 dnl
 dnl Sets PACKAGE and VERSION defines
 dnl
-AM_INIT_AUTOMAKE(libe,0.3.0)
+AM_INIT_AUTOMAKE(libe,0.3.1)
 
 dnl
 dnl Creates config.h file with #defines instead of passing to compiler.

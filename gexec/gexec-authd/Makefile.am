@@ -1,4 +1,4 @@
-CFLAGS				= -O2 -Wall -D_REENTRANT -g
+AM_CFLAGS			= -O2 -Wall -D_REENTRANT -g
 INCLUDES			= -I.
 
 sbin_PROGRAMS		= gexec-authd

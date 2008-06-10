@@ -2,10 +2,11 @@ Summary: pcp (parallel, pipelined file distribution)
 Name: @PACKAGE@
 Version: @VERSION@
 Release: 4
-License: GPL
+License: BSD
 Group: System Environment/Daemons
 Source: @PACKAGE@-@VERSION@.tar.gz
-Requires: authd
+BuildRequires: libe, gexec-authd
+Requires: libe, gexec-authd, xinetd
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description

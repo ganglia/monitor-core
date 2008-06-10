@@ -12,7 +12,7 @@ libe_a_SOURCES		= barrier.c barrier.h bitmask.c bitmask.h bytes.h 	 \
 					  cpa.c cpa.h e_error.c e_error.h hash.c hash.h io.c \
 					  io.h net.c net.h safe.c safe.h token_array.c		 \
 					  token_array.h tree.c tree.h xmalloc.c xmalloc.h 	 \
-					  llist.c llist.h pack.c pack.h anet.h anet.c
+					  llist.c llist.h anet.h anet.c
 
 EXTRA_DIST			 = libe.spec
 SUBDIRS				 = . test

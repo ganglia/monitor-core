@@ -1,3 +1,9 @@
+2008-06-04  Brent N. Chun  <bnc@theether.org>
+	* authd now carries a BSD license as of version 0.2.4.
+	* Added libe in in the Requires section in the spec file. libe
+	  is required since programs using libauth will not link
+	  otherwise.
+	
 2004-09-14  Brent N. Chun  <bnc@intel-research.net>
 	* Using NID_sha1, as opposed to 0, for RSA_sign, RSA_verify (fixes
 	  problems with later versions of openssl, e.g., on RedHat 9).
