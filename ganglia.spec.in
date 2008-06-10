@@ -303,6 +303,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/ganglia.h
+%{_includedir}/ganglia_gexec.h
 %{_includedir}/gm_metric.h
 %{_includedir}/gm_mmn.h
 %{_includedir}/gm_msg.h
@@ -357,6 +358,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Jun 04 2008 Bernard Li <bernard@vanhpc.org>
+- Add ganglia_gexec.h to ganglia-devel package
 * Tue May 06 2008 Bernard Li <bernard@vanhpc.org>
 - Removed host_gmetrics.php from ganglia-web
 * Tue Apr 15 2008 Bernard Li <bernard@vanhpc.org>

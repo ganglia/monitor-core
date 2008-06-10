@@ -8,6 +8,7 @@
 #include <time.h>
 #include <expat.h>
 
+#include "ganglia_gexec.h"
 #include "ganglia_priv.h"
 #include "net.h"
 #include "llist.h"
