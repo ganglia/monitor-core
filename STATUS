@@ -50,13 +50,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmond/gmond.c?r1=1324&r2=1369
     +1: bnicholes
 
-  * Move all gexec structs from lib/ganglia_priv.h to include/ganglia_gexec.h, this header file
-     will also be included in the ganglia-devel RPM package.  This change is needed so that future
-     versions of gexec can be built against ganglia 3.1.x.
-   http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1380
-   +1: bernardli, bnicholes
-
-
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
    addressed after the current version is released.
