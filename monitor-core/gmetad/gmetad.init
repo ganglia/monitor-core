@@ -23,7 +23,7 @@ case "$1" in
 
   stop)
       echo -n "Shutting down GANGLIA gmetad: "
-      killproc gmetad
+      killproc $GMETAD
       RETVAL=$?
       echo
       [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/gmetad
@@ -35,7 +35,7 @@ case "$1" in
       RETVAL=$?
       ;;
   status)
-      status gmetad
+      status $GMETAD
       RETVAL=$?
       ;;
   *)
