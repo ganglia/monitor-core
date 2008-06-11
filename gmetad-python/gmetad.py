@@ -155,8 +155,11 @@ if __name__ == '__main__':
     
     # Initialize the application
     ignore_fds = [] # Remembers log file descriptors we create, so they aren't closed when we daemonize.
-    logging.basicConfig(level=getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]),
-            format='%(levelname)-8s %(message)s')    
+    if sys.version_info[:2] >= (2, 4):
+        logging.basicConfig(level=getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]),
+            format='%(levelname)-8s %(message)s')
+    else:
+        logging.basicConfig()
     syslogHandler = logging.handlers.SysLogHandler('/dev/log')
     syslogHandler.setLevel(getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]))
     syslogHandler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)-8s - GMETAD - %(message)s',
