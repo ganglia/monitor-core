@@ -107,7 +107,8 @@ class XmlWriter:
         hosts_up = 0
         hosts_down = 0
         # If there is summary data, then pull the host status counts.
-        if hasattr(clusternode, 'summaryData'):
+        summaryData = clusternode.getSummaryData()
+        if summaryData is not None:
             hosts_up = clusternode.summaryData['hosts_up']
             hosts_down = clusternode.summaryData['hosts_down']
         return (hosts_up, hosts_down)
@@ -118,8 +119,9 @@ class XmlWriter:
         # Pull the host status summaries from the grid node.
         hosts = self._getNumHostsForCluster(gridnode)
         # If we have summary data, then interate through all of the metric nodes and generate XML for each.
-        if hasattr(gridnode, 'summaryData'):
-            for m in gridnode.summaryData['summary'].itervalues():
+        summaryData = gridnode.getSummaryData()
+        if summaryData is not None:
+            for m in summaryData['summary'].itervalues():
                 cbuf += self._getXmlImpl(m, filterList, queryargs)
         # Format the XML based on all of the results.
         rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n%s' % (hosts[0], hosts[1], cbuf)
@@ -136,8 +138,9 @@ class XmlWriter:
         # Pull the host status summaries from the cluster node.
         hosts = self._getNumHostsForCluster(clusternode)
         # If we have summary data, then interate through all of the metric nodes and generate XML for each.
-        if hasattr(clusternode, 'summaryData'):
-            for m in clusternode.summaryData['summary'].itervalues():
+        summaryData = clusternode.getSummaryData()
+        if summaryData is not None:
+            for m in summaryData['summary'].itervalues():
                 cbuf += self._getXmlImpl(m, filterList, queryargs)
         # Format the XML based on all of the results.
         rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n%s' % (hosts[0], hosts[1], cbuf)
@@ -150,18 +153,9 @@ class XmlWriter:
         rbuf = '<%s' % element.tag
         # If this is a grid tag, then get the local time since a time stamp was never provided by gmond.
         if 'GRID' == element.id:
-            element.localtime = '%d' % time.time()
-        foundName = False
-        # Try to add a name attribute if one exists in the node.
-        try:
-            rbuf += ' NAME="%s"' % element.name
-            foundName = True
-        except AttributeError:
-            pass
+            element.setAttr('localtime', int(time.time()))
         # Add each attribute that is contained in the.  By pass some specific attributes.
-        for k,v in element.__dict__.items():
-            if k == 'id' or k == 'tag' or k == 'children' or k == 'summaryData' or (foundName and k == 'name'):
-                continue
+        for k,v in element.getAttrs().items():
             rbuf += ' %s="%s"' % (k.upper(), v)
         if queryargs is not None:
             if ('GRID' == element.id or 'CLUSTER' == element.id) and (filterList is None or not len(filterList)):

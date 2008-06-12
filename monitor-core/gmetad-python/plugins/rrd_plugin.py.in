@@ -111,17 +111,22 @@ class RRDPlugin(GmetadPlugin):
         ''' This method creates a new metric RRD file.'''
         
         # Determine the RRD data source type.
-        if metricNode.slope.lower() == 'positive':
+        slope = metricNode.getAttr('slope')
+        if slope.lower() == 'positive':
             dsType = 'COUNTER'
         else:
             dsType = 'GAUGE'
+            
+        localTime = clusterNode.getAttr('localtime')
+        if localTime is None:
+            localTime = int(time())
             
         # Calculate the heartbeat.
         heartbeat = 8*step
         # Format the data source string and add all of the RRDTool arguments to the
         #  args list.
         dsString = 'DS:sum:%s:%d:U:U'%(dsType,heartbeat)
-        args = [str(rrdPath), '-b', str(clusterNode.localtime), '-s', str(step), str(dsString)]
+        args = [str(rrdPath), '-b', str(localTime), '-s', str(step), str(dsString)]
         if summary is True:
             dsString = 'DS:num:%s:%d:U:U'%(dsType,heartbeat)
             args.append(str(dsString))
@@ -138,19 +143,18 @@ class RRDPlugin(GmetadPlugin):
         ''' This method updates an RRD file with current metric values. '''
         # If the node has a time stamp then use it to update the RRD.  Otherwise get
         #  the current timestamp.
-        if hasattr(clusterNode, 'localtime'):
-            processTime = clusterNode.localtime
-        else:
+        processTime = clusterNode.getAttr('localtime')
+        if processTime is None:
             processTime = int(time())
         # If this is a summary RRD, format the summary entry.  Otherwise just use a standard entry
         if summary is True:
-            args = [str(rrdPath), '%s:%s:%s'%(str(processTime),str(metricNode.sum),str(metricNode.num))]
+            args = [str(rrdPath), '%s:%s:%s'%(str(processTime),str(metricNode.getAttr('sum')),str(metricNode.getAttr('num')))]
         else:
-            args = [str(rrdPath), '%s:%s'%(str(processTime),str(metricNode.val))]
+            args = [str(rrdPath), '%s:%s'%(str(processTime),str(metricNode.getAttr('val')))]
         try:
             # Update the RRD file with the current timestamp and value
             rrdtool.update(*args)
-            #logging.debug('Updated rrd %s with value %s'%(rrdPath, str(metricNode.val)))
+            #logging.debug('Updated rrd %s with value %s'%(rrdPath, str(metricNode.getAttr('val'))))
         except Exception, e:
             logging.info('Error updating rrd %s - %s'%(rrdPath, str(e)))
 
@@ -170,31 +174,31 @@ class RRDPlugin(GmetadPlugin):
         gmetadConfig = getConfig()
         # Find the data source configuration entry that matches the cluster name
         for ds in gmetadConfig[GmetadConfig.DATA_SOURCE]:
-            if ds.name == clusterNode.name:
+            if ds.name == clusterNode.getAttr('name'):
                 break
         if ds is None:
-            logging.info('No matching data source for %s'%clusterNode.name)
+            logging.info('No matching data source for %s'%clusterNode.getAttr('name'))
             return
         try:
-            if clusterNode.status == 'down':
+            if clusterNode.getAttr('status') == 'down':
                 return
         except AttributeError:
             pass
         # Create the cluster RRD base path and validate it
-        clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.name)
+        clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.getAttr('name'))
         self._checkDir(clusterPath)
         # Update metrics for each host in the cluster
         for hostNode in clusterNode:
             # Create the host RRD base path and validate it.
-            hostPath = '%s/%s'%(clusterPath,hostNode.name)
+            hostPath = '%s/%s'%(clusterPath,hostNode.getAttr('name'))
             self._checkDir(hostPath)
             # Update metrics for each host
             for metricNode in hostNode:
                 # Don't update metrics that are numeric values.
-                if metricNode.type in ['string', 'timestamp']:
+                if metricNode.getAttr('type') in ['string', 'timestamp']:
                     continue
                 # Create the RRD final path and validate it.
-                rrdPath = '%s/%s.rrd'%(hostPath, metricNode.name)
+                rrdPath = '%s/%s.rrd'%(hostPath, metricNode.getAttr('name'))
                 # Create the RRD metric file if it doesn't exist
                 if not os.path.isfile(rrdPath):
                     self._createRRD(clusterNode, metricNode, rrdPath, ds.interval, False)
