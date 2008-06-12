@@ -48,7 +48,7 @@ BACKPORT PROPOSALS:
      to calculate the time offset for the metric.  We are more interested in the last 
      value we got rather than the last time the metadata was received.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/gmond/gmond.c?r1=1324&r2=1369
-    +1: bnicholes
+    +1: bnicholes, bernardli
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
