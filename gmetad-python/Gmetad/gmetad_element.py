@@ -52,8 +52,10 @@ class Element:
         else:
             self.tag = tag
         # If any attributes where given during intialization, add them here.
+        self.attrs = {}
+        self.lastReportedTime = 0
         for k,v in attrs.items():
-            self.__dict__[k.lower()] = v
+            self.attrs[k.lower()] = v
         self.children = {}
         
     def __setitem__(self, k, v):
@@ -69,18 +71,16 @@ class Element:
         
     def update(self, elem):
         ''' This method updates an existing chld node based on a new node. '''
-        for k in self.__dict__.keys():
-            if k == 'children' or k == 'id' or k == 'name':
-                continue
+        for k in self.attrs.keys():
             try:
-                self.__dict__[k] = elem.__dict__[k]
+                self.attrs[k] = elem.attrs[k]
             except ValueError:
                 pass
         
     def __str__(self):
         ''' This method generates a string representation of a node. '''
-        if self.__dict__.has_key('name'):
-            return Element.generateKey([self.id,self.name])
+        if self.attrs.has_key('name'):
+            return Element.generateKey([self.id,self.attrs['name']])
         return Element.generateKey(self.id)
         
     def __iter__(self):
@@ -90,12 +90,9 @@ class Element:
     def __copy__(self):
         ''' Shallow copy method, may not be used. '''
         cp = Element(self.id, {})
-        for k in self.__dict__.keys():
-            if k == 'children':
-                cp.children = {}
-                continue
+        for k in self.attrs.keys():
             try:
-                cp.__dict__[k.lower()] = copy.copy(self.__dict__[k])
+                cp.attrs[k.lower()] = copy.copy(self.attrs[k])
             except ValueError:
                 pass
         return cp
@@ -104,10 +101,12 @@ class Element:
         '''  This method creates a copy of the node that can be used as a summary node. '''
         attrs = {}
         # Copy all of the attributes that are necessary for a summary node.
-        for k in self.__dict__.keys():
+        for k in self.attrs.keys():
             try:
-                if k.lower() in ['name', 'sum', 'num', 'type', 'units', 'slop', 'source']:
-                    attrs[k.lower()] = self.__dict__[k]
+                if k.lower() in ['name', 'sum', 'num', 'type', 'units', 'slope', 'source']:
+                    attrs[k.lower()] = self.attrs[k]
+                attrs['sum'] = 0
+                attrs['num'] = 0
             except ValueError:
                 pass
         # Create a new node from the attributes that were copied from the existing node.
@@ -115,3 +114,27 @@ class Element:
         # Make sure that the summary node references the original children
         cp.children = self.children
         return cp
+        
+    def getAttr(self, attr):
+        if self.attrs.has_key(attr.lower()):
+            return self.attrs[attr.lower()]
+        return None
+        
+    def getAttrs(self):
+        return self.attrs
+
+    def setAttr(self, attr, val):
+        self.attrs[attr.lower()] = val
+        
+    def incAttr(self, attr, val):
+        try:
+            self.attrs[attr.lower()] += val
+        except Exception, e:
+            print 'Can not increment attribute ' + str(e)
+        
+    def getSummaryData(self):
+        try:
+            return self.summaryData
+        except:
+            return None
+    

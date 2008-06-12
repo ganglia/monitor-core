@@ -69,7 +69,7 @@ class GmondContentHandler(xml.sax.ContentHandler):
         self._elemStack.append(ds.setNode(e, self._elemStack[self._elemStackLen-1]))
         # If this is a cluster node, then keep track of the data store path to this node.
         if (self._ancestry[len(self._ancestry)-1].startswith('CLUSTER') == False):
-            self._ancestry.append('%s:%s'%(e.id,e.name))
+            self._ancestry.append('%s:%s'%(e.id,e.getAttr('name')))
         self._elemStackLen += 1
         
     def endElement(self, tag):
@@ -140,10 +140,8 @@ class GmondReader(threading.Thread):
                 xml.sax.parseString(xmlbuf, gch)
                 # Notify the data store that all updates for the cluster are finished.
                 clusterNode = ds.getNode(gch.getClusterAncestry())
-                try:
-                    clusterNode.status = 'up'
-                except Exception:
-                    pass
+                if clusterNode is not None:
+                    clusterNode.setAttr('status', 'up')
             else:
                 logging.error('Could not connect to any host for data source %s' % self.dataSource.name)
                 ds = DataStore()
@@ -159,7 +157,7 @@ class GmondReader(threading.Thread):
                         clusterNode = Element('CLUSTER', {'NAME':self.dataSource.name,  'LOCALTIME':'%d' % time.time()})
                         ds.setNode(clusterNode, gridNode)
                 if clusterNode is not None:
-                    clusterNode.status = 'down'
+                    clusterNode.setAttr('status', 'down')
                     #clusterNode.localtime = time.time()
                     
             ds.updateFinished(clusterNode)

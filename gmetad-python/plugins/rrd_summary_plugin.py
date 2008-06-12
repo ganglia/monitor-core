@@ -75,26 +75,26 @@ class RRDSummaryPlugin(RRDPlugin):
         '''Called by the engine when the internal data structure has changed.'''
         gmetadConfig = getConfig()
         try:
-            if clusterNode.status == 'down':
+            if clusterNode.getAttr('status') == 'down':
                 return
         except AttributeError:
             pass
         # Find the data source configuration entry that matches the cluster name
         for ds in gmetadConfig[GmetadConfig.DATA_SOURCE]:
-            if ds.name == clusterNode.name:
+            if ds.name == clusterNode.getAttr('name'):
                 break
         if ds is None:
-            logging.info('No matching data source for %s'%clusterNode.name)
+            logging.info('No matching data source for %s'%clusterNode.getAttr('name'))
             return
         # Create the summary RRD base path and validate it
-        clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.name)
+        clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.getAttr('name'))
         self._checkDir(clusterPath)
         clusterPath = '%s/__SummaryInfo__'%clusterPath
         self._checkDir(clusterPath)
         # Update metrics for each cluster
         for metricNode in clusterNode.summaryData['summary'].itervalues():
             # Create the summary RRD final path and validate it
-            rrdPath = '%s/%s.rrd'%(clusterPath,metricNode.name)
+            rrdPath = '%s/%s.rrd'%(clusterPath,metricNode.getAttr('name'))
             # Create the RRD metric summary file if it doesn't exist
             if not os.path.isfile(rrdPath):
                 self._createRRD(clusterNode, metricNode, rrdPath, ds.interval, True)
@@ -139,7 +139,7 @@ class RRDRootSummary(threading.Thread, RRDPlugin):
                 # Update metrics RRDs for each cluster summary in the grid
                 for metricNode in gridNode.summaryData['summary'].itervalues():
                     # Create the summary RRD final path and validate it.
-                    rrdPath = '%s/%s.rrd'%(rootPath,metricNode.name)
+                    rrdPath = '%s/%s.rrd'%(rootPath,metricNode.getAttr('name'))
                     # if the RRD file doesn't exist then create it
                     if not os.path.isfile(rrdPath):
                         self._createRRD(rootNode, metricNode, rrdPath, 15, True)
@@ -147,9 +147,9 @@ class RRDRootSummary(threading.Thread, RRDPlugin):
                     # Update the RRD file.
                     self._updateRRD(rootNode, metricNode, rrdPath, True)
         except Exception, e:
-            print e
+            logging.error('Error writing to summary RRD %s'%str(e))
         ds.releaseLock(self)
-        print "RRDRootSummary called"
+        #print "RRDRootSummary called"
 
     def run(self):
         if self._running:

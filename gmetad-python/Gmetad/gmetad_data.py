@@ -66,7 +66,7 @@ class DataStore:
             # no reporting data sources the web front end depends on having
             # at least a GANGLIA_XML tag and a nested GRID tag.
             cfg = getConfig()
-            self.setNode(Element('GANGLIA_XML', {'VERSION':cfg.VERSION}))
+            self.setNode(Element('GANGLIA_XML', {'VERSION':cfg.VERSION, 'SOURCE':'gmetad'}))
             self.setNode(Element('GRID', {'NAME':cfg[GmetadConfig.GRIDNAME], 'AUTHORITY':cfg[GmetadConfig.AUTHORITY], 'LOCALTIME':'%d' % time.time()}), self.rootElement)
             self.lock.release()
 
@@ -92,7 +92,7 @@ class DataStore:
         clusterNode.summaryData['summary'] = {}
         clusterNode.summaryData['hosts_up'] = 0
         clusterNode.summaryData['hosts_down'] = 0
-        clusterUp = clusterNode.status == 'up'
+        clusterUp = (clusterNode.getAttr('status') == 'up')
         summaryTime = int(time.time())
         
         # Summarize over each host contained by the cluster
@@ -104,15 +104,20 @@ class DataStore:
                 #  and the current time.  This determines if the host is up or down
                 # ** There may still be some issues with the way that this calculation is done
                 # ** The metric node below may also have the same issues.
-                reportedTime = int(hostNode.reported)
-                tn = int(hostNode.tn)
-                if tn > int(hostNode.tmax):
-                    tn = int(hostNode.tmax) 
-                tn = (summaryTime - tn) - reportedTime
-                if tn < 0: tn = 0
-                hostNode.tn = str(tn)
+                reportedTime = int(hostNode.getAttr('reported'))
+                tn = int(hostNode.getAttr('tn'))
+                # If the last reported time is the same as the current reported time, then
+                #  the host has not been updated.  Therefore calculate the time offset from
+                #  the current time.
+                if hostNode.lastReportedTime == reportedTime:
+                    tn = summaryTime - reportedTime
+                    if tn < 0: tn = 0
+                    hostNode.setAttr('tn', str(tn))
+                else:
+                    hostNode.lastReportedTime = reportedTime
+                    
                 try:
-                    if clusterUp and (int(hostNode.tn) < int(hostNode.tmax)*4):
+                    if clusterUp and (int(hostNode.getAttr('tn')) < int(hostNode.getAttr('tmax'))*4):
                         clusterNode.summaryData['hosts_up'] += 1
                     else:
                         clusterNode.summaryData['hosts_down'] += 1
@@ -122,32 +127,36 @@ class DataStore:
                     pass
             # Summarize over each metric within a host
             for metricNode in hostNode:
-                tn = int(metricNode.tn)
-                if tn > int(metricNode.tmax):
-                    tn = int(metricNode.tmax) 
-                tn = (summaryTime - tn) - reportedTime
-                if tn < 0: tn = 0
-                metricNode.tn = str(tn)
+                tn = int(metricNode.getAttr('tn'))
+                    
+                # If the last reported time is the same as the current reported time, then
+                #  the host has not been updated.  Therefore calculate the time offset from
+                #  the current time.
+                if hostNode.lastReportedTime == reportedTime:
+                    tn = summaryTime - reportedTime
+                    if tn < 0: tn = 0
+                    metricNode.setAttr('tn', str(tn))
+                    
                 # Don't include metrics that can not be summarized
-                if metricNode.type in ['string', 'timestamp']:
+                if metricNode.getAttr('type') in ['string', 'timestamp']:
                     continue
                 try:
                     # Pull the existing summary node from the summary data
                     # dictionary. If one doesn't exist, add it in the exception.
                     summaryNode = clusterNode.summaryData['summary'][str(metricNode)]
-                    summaryNode.sum += float(metricNode.val)
+                    currSum = summaryNode.getAttr('sum')
+                    summaryNode.incAttr('sum',  float(metricNode.getAttr('val')))
                 except KeyError:
                     # Since summary metrics use a different tag, create the new 
                     #  summary node with correct tag.
                     summaryNode = metricNode.summaryCopy(tag='METRICS')
                     # Initialize the first summary value and change the data type
                     # to double for all metric summaries
-                    summaryNode.sum = float(metricNode.val)
-                    summaryNode.type = 'double'
+                    summaryNode.setAttr('sum', float(metricNode.getAttr('val')))
+                    summaryNode.setAttr('type', 'double')
                     # Add the summary node to the summary dictionary
                     clusterNode.summaryData['summary'][str(summaryNode)] = summaryNode
-                    summaryNode.num = 0
-                summaryNode.num += 1
+                summaryNode.incAttr('num', 1)
         self.releaseLock(self)
     
     def shutdown(self):
@@ -162,7 +171,6 @@ class DataStore:
             # If there isn't a root node, the new node becomes the root
             if self.rootElement is None:
                 self.rootElement = node
-                self.rootElement.source = 'gmetad'
             return self.rootElement
         if str(node) in parent.children:
             try:
@@ -260,22 +268,22 @@ class DataStoreGridSummary(threading.Thread):
                     # Summarize over all of the metrics in the cluster node summary.
                     for metricNode in clusterNode.summaryData['summary'].itervalues():
                         # Don't include metrics that can not be summarized
-                        if metricNode.type in ['string', 'timestamp']:
+                        if metricNode.getAttr('type') in ['string', 'timestamp']:
                             continue
                         try:
                             # Pull the existing summary node from the summary data
                             #   dictionary. If one doesn't exist, add it in the exception.
                             summaryNode = gridNode.summaryData['summary'][str(metricNode)]
-                            summaryNode.sum += metricNode.sum
+                            summaryNode.incAttr('sum', metricNode.getAttr('sum'))
                         except KeyError:
                             # Create the new summary node with correct tag.
                             summaryNode = metricNode.summaryCopy(tag=metricNode.tag)
                             # Add the new summary node to the grid summary dictionary
                             gridNode.summaryData['summary'][str(summaryNode)] = summaryNode
-                            summaryNode.num = 0
-                        summaryNode.num += 1
+                            summaryNode.setAttr('sum', metricNode.getAttr('sum'))
+                        summaryNode.incAttr('num', 1)
         except Exception, e:
-            print e
+            print 'Grid summary ' + str(e) 
         ds.releaseLock(self)
 
     def run(self):
