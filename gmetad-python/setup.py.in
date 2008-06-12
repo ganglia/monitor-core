@@ -2,10 +2,10 @@ from distutils.core import setup
 from glob import glob
 
 setup(name='gmetad-python',
-      version='0.0.1',
+      version='@VERSION@',
       description='Gmetad implementation in Python.',
       packages=['Gmetad'],
       scripts=['gmetad.py'],
-      data_files=[('/etc/ganglia', ['gmetad.conf']),
+      data_files=[('/etc/ganglia', ['gmetad-python.conf']),
                   ('@libdir@/ganglia/python_modules/gmetad', glob('plugins/*.py'))] 
      )
