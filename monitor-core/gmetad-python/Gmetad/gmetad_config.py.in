@@ -284,8 +284,8 @@ def getConfig(args=sys.argv):
             help='Write process-id to file',
             default=None)
     parser.add_option('-c', '--conf', action='store',
-            help='Location of gmetad configuration file (default=\'/etc/ganglia/gmetad.conf\')',
-            default='/etc/ganglia/gmetad.conf')
+            help='Location of gmetad configuration file (default=\'/etc/ganglia/gmetad-python.conf\')',
+            default='/etc/ganglia/gmetad-python.conf')
     parser.add_option('-l', '--logfile', action='store',
             help='Log messages to this path in addition to syslog; overrides configuration',
             default=None)

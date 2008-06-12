@@ -81,6 +81,31 @@ well-defined XML format.
 This gmetad daemon aggregates monitoring data from several clusters
 to form a monitoring grid. It also keeps metric history using rrdtool.
 
+%package gmetad-python
+Summary: Ganglia Meta daemon in Python http://ganglia.sourceforge.net/
+Group: System Environment/Base
+Requires: python-rrdtool
+Obsoletes: ganglia-monitor-core-gmetad < %{version}
+Obsoletes: ganglia-monitor-core < %{version}
+Provides: ganglia-monitor-core-gmetad = %{version}
+Provides: ganglia-monitor-core = %{version}
+Conflicts: ganglia-gmetad
+
+%description gmetad-python
+Ganglia is a scalable, real-time monitoring and execution environment
+with all execution requests and statistics expressed in an open
+well-defined XML format.
+
+This gmetad daemon aggregates monitoring data from several clusters
+to form a monitoring grid. It also keeps metric history using rrdtool.
+
+gmetad-python is a re-write of the original gmetad code (written in C)
+with pluggable interface.  The RRD files, both the metric RRDs and summary
+RRDs are being written by RRD plugins rather than directly from gmetad.
+This provides the ability to plug in new metric storage modules to support
+other types of storage mechanisms other than RRD and also the ability to
+plug in any type of gmetad-level analysis.
+
 %package gmond
 Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
 Group: System Environment/Base
@@ -153,6 +178,9 @@ if [ -e /etc/gmetad.conf ]; then
   %__mv /etc/gmetad.conf %{conf_dir}
 fi
 
+%post gmetad-python
+/sbin/chkconfig --add gmetad-python
+
 %post gmond
 /sbin/chkconfig --add gmond
 
@@ -184,6 +212,13 @@ if [ "$1" = 0 ]
 then
    /etc/init.d/gmetad stop
    /sbin/chkconfig --del gmetad
+fi
+
+%preun gmetad-python
+if [ "$1" = 0 ]
+then
+   /etc/init.d/gmetad-python stop
+   /sbin/chkconfig --del gmetad-python
 fi
 
 %preun gmond
@@ -221,9 +256,13 @@ fi
 %if 0%{?suse_version}
    %__cp -f gmond/gmond.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmond
    %__cp -f gmetad/gmetad.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmetad
+   sed -e 's/sbin\/gmetad/sbin\/gmetad.py/' gmetad/gmetad.init.SuSE > $RPM_BUILD_ROOT/etc/init.d/gmetad-python
+   chmod +x $RPM_BUILD_ROOT/etc/init.d/gmetad-python
 %else
    %__cp -f gmond/gmond.init $RPM_BUILD_ROOT/etc/init.d/gmond
    %__cp -f gmetad/gmetad.init $RPM_BUILD_ROOT/etc/init.d/gmetad
+   sed -e 's/sbin\/gmetad/sbin\/gmetad.py/' gmetad/gmetad.init > $RPM_BUILD_ROOT/etc/init.d/gmetad-python
+   chmod +x $RPM_BUILD_ROOT/etc/init.d/gmetad-python
 %endif
 
 %__install -d -m 0755 $RPM_BUILD_ROOT%{conf_dir}
@@ -257,6 +296,10 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__install -m 0644 mans/*.1* $RPM_BUILD_ROOT%{_mandir}/man1/
 %__install -m 0644 gmond/gmond.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/gmond.conf.5
 
+# gmetad-python
+cd gmetad-python
+%{__python} setup.py install --install-scripts=/usr/sbin --root=$RPM_BUILD_ROOT --record=GMETAD_PYTHON_FILES
+
 %endif
 
 %ifnarch noarch
@@ -268,6 +311,11 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 /etc/init.d/gmetad
 %{_mandir}/man1/gmetad.1*
 %config(noreplace) %{conf_dir}/gmetad.conf
+
+%files gmetad-python -f gmetad-python/GMETAD_PYTHON_FILES
+%defattr(-,root,root)
+/etc/init.d/gmetad-python
+%config(noreplace) %{conf_dir}/gmetad-python.conf
 
 %files gmond
 %defattr(-,root,root)
@@ -358,6 +406,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Jun 10 2008 Bernard Li <bernard@vanhpc.org>
+- New subpackage gmetad-python for the Python re-write of gmetad
 * Wed Jun 04 2008 Bernard Li <bernard@vanhpc.org>
 - Add ganglia_gexec.h to ganglia-devel package
 * Tue May 06 2008 Bernard Li <bernard@vanhpc.org>
