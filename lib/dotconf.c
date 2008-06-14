@@ -608,7 +608,7 @@ const char *dotconf_handle_command(configfile_t *configfile, char *buffer)
 	skip_whitespace(&cp1, (long)eob - (long)cp1, 0);
 
 	/* ignore comments and empty lines */
-	if (!cp1 || !*cp1 || *cp1 == '#' || *cp1 == '\n' || *cp1 == EOF)
+	if (!cp1 || !*cp1 || *cp1 == '#' || *cp1 == '\n' || *cp1 == (char)EOF)
 		return NULL;
 
 	/* skip line if it only contains whitespace */
