@@ -514,7 +514,7 @@ dnl
 		AC_DEFINE(IA64,1,IA64)
 		AC_DEFINE(HPUX,1,HPUX);;
 *aix*)		CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
-		EXPORT_SYMBOLS="-export-all-symbols"
+		EXPORT_SYMBOLS="-Wl,-bexpfull"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		if test "$ac_cv_lib_perfstat_perfstat_cpu_total" = yes ; then
 			CFLAGS="$CFLAGS -DHAVE_PERFSTAT" 
