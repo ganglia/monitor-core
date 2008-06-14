@@ -36,6 +36,7 @@
 #include <cf.h>
 #include <sys/utsname.h>
 #include <sys/proc.h>
+#include <sys/types.h>
 
 #include <libperfstat.h>
 
