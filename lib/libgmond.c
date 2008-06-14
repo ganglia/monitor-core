@@ -364,23 +364,24 @@ Ganglia_metric_create( Ganglia_pool parent_pool )
 {
   apr_pool_t *pool = (apr_pool_t*)Ganglia_pool_create(parent_pool);
   Ganglia_metric gmetric;
+
   if(!pool)
     {
       return NULL;
     }
-  gmetric = apr_pcalloc( parent_pool, sizeof(struct Ganglia_metric));
+  gmetric = apr_pcalloc((apr_pool_t *)parent_pool, sizeof(struct Ganglia_metric));
   if(!gmetric)
     {
       return NULL;
     }
 
   gmetric->pool = (Ganglia_pool)pool;
-  gmetric->msg  = apr_pcalloc( parent_pool, sizeof(struct Ganglia_metadata_message));
+  gmetric->msg  = apr_pcalloc((apr_pool_t *)parent_pool, sizeof(struct Ganglia_metadata_message));
   if(!gmetric->msg)
     {
       return NULL;
     }
-  gmetric->extra = (void*)apr_table_make(parent_pool, 2);
+  gmetric->extra = (void*)apr_table_make((apr_pool_t *)parent_pool, 2);
 
   return gmetric;
 }
