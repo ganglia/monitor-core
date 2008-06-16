@@ -43,7 +43,7 @@ import logging.handlers
 from Gmetad.gmetad_gmondReader import GmondReader
 from Gmetad.gmetad_xmlWriter import XmlWriter
 from Gmetad.gmetad_config import getConfig, GmetadConfig
-from Gmetad.gmetad_daemon import daemonize
+from Gmetad.gmetad_daemon import daemonize, setuid
 from Gmetad.gmetad_data import DataStore
 
 
@@ -173,6 +173,10 @@ if __name__ == '__main__':
                 datefmt='%a, %d %b %Y %H:%M:%S'))
         ignore_fds.append(fileHandler.stream.fileno())
         logging.getLogger().addHandler(fileHandler)
+
+    # Switch to non-priviledged user if running as root
+    if not os.getuid():
+        setuid()
 
     # Determine if the service should be daemonized based on the debug level.
     if 5 > int(gmetadConfig[GmetadConfig.DEBUG_LEVEL]):
