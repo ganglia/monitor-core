@@ -36,7 +36,7 @@
 #include <stdlib.h>
 
 #include "file.h"
-#include "scoreboard.h"
+#include "gm_scoreboard.h"
 
 #include <apr_strings.h>
 

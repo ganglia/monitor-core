@@ -1,5 +1,5 @@
-#ifndef SCOREBOARD_H
-#define SCOREBOARD_H 1
+#ifndef GM_SCOREBOARD_H
+#define GM_SCOREBOARD_H 1
 
 #include <apr_pools.h>
 
@@ -26,8 +26,7 @@ typedef enum ganglia_scoreboard_types ganglia_scoreboard_types;
 #define PKTS_SENT_REQUEST "gmond_pkts_sent_request"
 #define PKTS_SENT_FAILED "gmond_pkts_sent_failed"
 
-
-/* The scoreboard is only enabled whe --enable-status is set on configure */
+/* The scoreboard is only enabled when --enable-status is set on configure */
 #ifdef GSTATUS
 void ganglia_scoreboard_init(apr_pool_t *pool);
 void* ganglia_scoreboard_iterator();
@@ -52,6 +51,4 @@ ganglia_scoreboard_types ganglia_scoreboard_type(char *name);
 #define ganglia_scoreboard_type(n) (GSB_UNKNOWN)
 #endif
 
-#endif /*SCOREBOARD_H*/
-
-
+#endif /*GM_SCOREBOARD_H*/
