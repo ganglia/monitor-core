@@ -38,14 +38,7 @@ import resource
 
 from gmetad_config import getConfig, GmetadConfig
 
-def daemonize(ignore_fds=[]):
-    UMASK=0
-    WORKDIR = '/'
-    MAXFD = 1024
-    REDIRECT_TO = '/dev/null'
-    if hasattr(os, 'devnull'):
-        REDIRECT_TO = os.devnull
-        
+def setuid():
     cfg = getConfig()
     setuid_user = None
     if cfg[GmetadConfig.SETUID]:
@@ -56,6 +49,14 @@ def daemonize(ignore_fds=[]):
         except Exception:
             print 'Unable to setuid to user "%s", exiting' % setuid_user
             sys.exit()
+        
+def daemonize(ignore_fds=[]):
+    UMASK=0
+    WORKDIR = '/'
+    MAXFD = 1024
+    REDIRECT_TO = '/dev/null'
+    if hasattr(os, 'devnull'):
+        REDIRECT_TO = os.devnull
         
     try:
         pid = os.fork()
