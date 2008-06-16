@@ -4,7 +4,7 @@
 
 #include "ganglia_priv.h"
 #include "gm_msg.h"
-#include "scoreboard.h"
+#include "gm_scoreboard.h"
 #include <apr_hash.h>
 #include <apr_strings.h>
 
