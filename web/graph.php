@@ -221,9 +221,10 @@ if($command) {
     header ("Pragma: no-cache");                     // HTTP/1.0
     if ($debug>2) {
         print htmlentities( $command ) . "\n\n\n\n\n";
+    } else {
+        header ("Content-type: image/gif");
+        passthru($command);
     }
-    header ("Content-type: image/gif");
-    passthru($command);
 }
 
 ?>
