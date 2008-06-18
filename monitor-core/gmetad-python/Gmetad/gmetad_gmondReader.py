@@ -126,7 +126,7 @@ class GmondReader(threading.Thread):
                     except socket.error:
                         pass
             if connected:
-                logging.info('Quering data source %s via host %s' % (self.dataSource.name, self.dataSource.hosts[self.lastKnownGoodHost]))
+                logging.info('Querying data source %s via host %s' % (self.dataSource.name, self.dataSource.hosts[self.lastKnownGoodHost]))
                 xmlbuf = ''
                 while True:
                     # Read all of the XML data from the data source.
