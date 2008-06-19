@@ -160,6 +160,7 @@ if __name__ == '__main__':
             format='%(levelname)-8s %(message)s')
     else:
         logging.basicConfig()
+        logging.getLogger().setLevel(getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]))
     syslogHandler = logging.handlers.SysLogHandler('/dev/log')
     syslogHandler.setLevel(getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]))
     syslogHandler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)-8s - GMETAD - %(message)s',
