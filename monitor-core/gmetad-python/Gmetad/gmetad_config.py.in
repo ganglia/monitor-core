@@ -316,7 +316,7 @@ def getConfig(args=sys.argv):
     cfg = GmetadConfig(options.conf)
     
     # Update configuration if non-default values were provided.
-    if dbgLevelDefault != options.debug:
+    if int(dbgLevelDefault) != int(options.debug):
         cfg[GmetadConfig.DEBUG_LEVEL] = options.debug
     if int(iPortDefault) != int(options.interactive_port):
         cfg[GmetadConfig.INTERACTIVE_PORT] = options.interactive_port
