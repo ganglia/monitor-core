@@ -194,7 +194,7 @@ if __name__ == '__main__':
             pffd.close()
             pffd = open(gmetadConfig[GmetadConfig.PIDFILE], 'r')
         except Exception, e:
-            logger.error('Unable to write PID %d to %s (%s)' % (os.getpid(), gmetadConfig[GmetadConfig.PIDFILE], e))
+            logging.error('Unable to write PID %d to %s (%s)' % (os.getpid(), gmetadConfig[GmetadConfig.PIDFILE], e))
             sys.exit()
          
     # Initialize the data store with the notifier and summery threads and plugins
