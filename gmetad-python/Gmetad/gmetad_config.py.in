@@ -191,7 +191,7 @@ class GmetadConfig:
             self.cfg[GmetadConfig.DEBUG_LEVEL] = v
             
     def parseLogfile(self, logfile):
-        self.cfg[GgmetadConfig.LOGFILE] = logfile.strip().strip('"')
+        self.cfg[GmetadConfig.LOGFILE] = logfile.strip().strip('"')
             
     def parseDataSource(self, args):
         a = args.split('"')
