@@ -156,20 +156,20 @@ if __name__ == '__main__':
     # Initialize the application
     ignore_fds = [] # Remembers log file descriptors we create, so they aren't closed when we daemonize.
     if sys.version_info[:2] >= (2, 4):
-        logging.basicConfig(level=getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]),
+        logging.basicConfig(level=getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])),
             format='%(levelname)-8s %(message)s')
     else:
         logging.basicConfig()
-        logging.getLogger().setLevel(getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]))
+        logging.getLogger().setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
     syslogHandler = logging.handlers.SysLogHandler('/dev/log')
-    syslogHandler.setLevel(getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]))
+    syslogHandler.setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
     syslogHandler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)-8s - GMETAD - %(message)s',
             datefmt='%a, %d %b %Y %H:%M:%S'))
     ignore_fds.append(syslogHandler.socket.fileno())
     logging.getLogger().addHandler(syslogHandler)
     if gmetadConfig[GmetadConfig.LOGFILE] is not None:
         fileHandler = logging.FileHandler(gmetadConfig[GmetadConfig.LOGFILE],'a')
-        fileHandler.setLevel(getLoggingLevel(gmetadConfig[GmetadConfig.DEBUG_LEVEL]))
+        fileHandler.setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
         fileHandler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S'))
         ignore_fds.append(fileHandler.stream.fileno())
