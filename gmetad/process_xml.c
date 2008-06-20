@@ -768,8 +768,8 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
     
     if ((name_off >= 0) && (value_off >= 0)) 
     {
-        char *new_name = attr[name_off+1];
-        char *new_value = attr[value_off+1];
+        const char *new_name = attr[name_off+1];
+        const char *new_value = attr[value_off+1];
 
         metric.ednames[metric.ednameslen++] = addstring(metric.strings, &edge, new_name);
         metric.edvalues[metric.edvalueslen++] = addstring(metric.strings, &edge, new_value);
