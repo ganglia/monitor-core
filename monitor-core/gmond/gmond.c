@@ -1401,9 +1401,11 @@ gmetric_value_to_str(Ganglia_value_msg *message)
     case gmetric_double:
       apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gd.fmt, message->Ganglia_value_msg_u.gd.d);
       return value;
+    case gmetadata_full: /* FIXME */
+    case gmetadata_request: /* FIXME */
+    default:
+      return "unknown";
     }
-
-  return "unknown";
 }
 
 static apr_status_t
