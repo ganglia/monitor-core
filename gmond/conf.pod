@@ -84,8 +84,8 @@ The B<globals> section controls general characteristics of gmond
 such as whether is should daemonize, what user it should run as,
 whether is should send/receive date and such.  The B<globals>
 section has the following attributes: B<daemonize>, B<setuid>, B<user>,
-B<debug_level>, B<mute>, B<deaf>, B<host_dmax>, B<host_tmax>, B<cleanup_threshold>,
-B<gexec> and B<send_metadata_interval>.
+B<debug_level>, B<mute>, B<deaf>, B<host_dmax>, B<host_tmax>,
+B<cleanup_threshold>, B<gexec> and B<send_metadata_interval>.
 
 For example,
 
@@ -117,25 +117,25 @@ receive data regardless of any other configuration directives.
 
 The B<host_dmax> value is an integer with units in seconds.  When set 
 to zero (0), B<gmond> will never delete a host from its list even when 
-a remote host has stopped responding.  If B<host_dmax> is set to a
+a remote host has stopped reporting.  If B<host_dmax> is set to a
 positive number then B<gmond> will flush a host after it has not heard
 from it for B<host_dmax> seconds.  By the way, dmax means "delete max".
 
 The B<host_tmax> value is an integer with units in seconds. This value
-represents the amount of time after which B<gmond> should have received
+represents the maximum amount of time that B<gmond> should wait between
 updates from a host. As messages may get lost in the network, B<gmond>
 will consider the host as being down if it has not received any messages
 from it after 4 times this value. For example, if B<host_tmax> is set 
 to 20, the host will appear as down after 80 seconds with no messages
 from it. By the way, tmax means "timeout max".
 
-The B<cleanup_threshold> is the minimum about of time before gmond
-will cleanup and hosts or metrics where B<tn> > B<dmax> a.k.a. expired
+The B<cleanup_threshold> is the minimum amount of time before gmond
+will cleanup any hosts or metrics where B<tn> > B<dmax> a.k.a. expired
 data.
 
 The B<gexec> boolean allows you to specify whether gmond will announce
 the hosts availability to run gexec jobs.  B<Note>: this requires
-the B<gexecd> is running on the host and the proper keys have been
+that B<gexecd> is running on the host and the proper keys have been
 installed.  
 
 The B<send_metadata_interval> establishes an interval in which gmond
@@ -234,9 +234,9 @@ If you specify a bind address, the family of that address takes precedence.
 f your IPv6 stack doesn't support IPV6_V6ONLY, a warning will be issued
 but gmond will continue working (this should rarely happen).
 
-Multicast Note: for multicast, specifying a B<bind> address that equals the B<mcast_join>
-address will prevent unicast UDP messages to the same B<port> from being 
-processed.
+Multicast Note: for multicast, specifying a B<bind> address with the same
+value used for B<mcast_join> will prevent unicast UDP messages to the same
+B<port> from being processed.
 
 =head2 tcp_accept_channel
 
@@ -280,9 +280,10 @@ If you specify a bind address, the family of that address takes precedence.
 If your IPv6 stack doesn't support IPV6_V6ONLY, a warning will be issued
 but gmond will continue working (this should rarely happen).
 
-The B<timeout> attribute allows you to specify how many microseconds to block before
-closing a connection to a client.  The default is set to 1 second (1000000 usecs).  
-If you have a very slow connection you may need to increase this value.
+The B<timeout> attribute allows you to specify how many microseconds to block
+before closing a connection to a client.  The default is set to 1 second
+(1000000 usecs).  If you have a very slow connection you may need to increase
+this value.
 
 The B<interface> is not implemented at this time (use B<bind>).
 
@@ -317,12 +318,11 @@ change between reboots).  The metric B<cpu_num> would be send
 every 1/2 hour (1800 seconds).  The default value for the B<time_threshold>
 is 3600 seconds if no B<time_threshold> is specified.
 
-The B<time_threshold> is the maximum
-amount of time that can pass before gmond sends all B<metric>s specified in the
-B<collection_group> to all listed B<udp_send_channel>s.  A
-B<metric> may be sent before this B<time_threshold> is met if
-during collection the value surpasses the B<value_threshold> (explained
-below).
+The B<time_threshold> is the maximum amount of time that can pass before
+gmond sends all B<metric>s specified in the B<collection_group> to all
+configured B<udp_send_channel>s.  A B<metric> may be sent before this
+B<time_threshold> is met if during collection the value surpasses the
+B<value_threshold> (explained below).
 
 Here is an example of a collection group for a volatile metric...
 
@@ -347,11 +347,10 @@ every 60 seconds (specified in B<collect_every>).  If B<cpu_user> varies by
 is sent.  If no B<value_threshold> is triggered within B<time_threshold>
 seconds (in this case 300), the entire B<collection_group> is sent.
 
-Each time the metric value
-is collected the new value is compared with the old value collected.  If
-the difference between the last value and current value is greater than
-the B<value_threshold>, the entire collection group is send to the 
-B<udp_send_channel>s defined.
+Each time the metric value is collected the new value is compared with
+the old value collected.  If the difference between the last value and
+the current value is greater than the B<value_threshold>, the entire
+collection group is send to the B<udp_send_channel>s defined.
 
 It's important to note that all metrics in a collection group are sent
 even when only a single B<value_threshold> is surpassed.
@@ -398,13 +397,12 @@ invoking B<gmond -m>.
      }
    }
 
-
 =head2 Include
 
 This directive allows the user to include additional configuration files
-rather than having add all gmond configuration directives to the gmond.conf 
-file. The following example includes any file with the extension of .conf 
-contained in the directory conf.d as if the contents of the included 
+rather than having to add all gmond configuration directives to the
+gmond.conf file.  The following example includes any file with the extension
+of .conf contained in the directory conf.d as if the contents of the included 
 configuration files were part of the original gmond.conf file. This allows 
 the user to modularize their configuration file.  One usage example might 
 be to load individual metric modules by including module specific .conf files.
@@ -450,8 +448,6 @@ Here is another example
 
 This ACL will by default allow all traffic unless it comes from the 
 two subnets specified with action = "deny".
-    
-
 
 =head1 EXAMPLE
 
@@ -474,7 +470,7 @@ To see the complete default configuration for gmond simply run:
 
   % gmond -t
 
-gmond will print out it default behavior in a configuration file
+gmond will print out its default behavior in a configuration file
 and then exit.  Capturing this output to a file can serve as
 a useful starting point for creating your own custom configuration.
 
