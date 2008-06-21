@@ -44,9 +44,9 @@ BACKPORT PROPOSALS:
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
 
-  * Do not reset header and run passthru() command if in debug mode
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1423 
-    +1: bernardli
+  * web: return correctly formatted web content for graph.php when debug>2
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1438 
+    +1: carenas
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
