@@ -220,6 +220,7 @@ if($command) {
     header ("Cache-Control: no-cache, must-revalidate");   // HTTP/1.1
     header ("Pragma: no-cache");                     // HTTP/1.0
     if ($debug>2) {
+        header ("Content-type: text/plain");
         print htmlentities( $command ) . "\n\n\n\n\n";
     } else {
         header ("Content-type: image/gif");
