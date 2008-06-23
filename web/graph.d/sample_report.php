@@ -69,15 +69,21 @@ function graph_sample_report ( &$rrdtool_graph ) {
            $cpu_user_color,
            $cpu_wio_color,
            $hostname,
+           $range,
            $rrd_dir,
            $size;
     //
     // You *MUST* set at least the 'title', 'vertical-label', and 'series' variables.
     // Otherwise, the graph *will not work*.  
     //
-    $rrdtool_graph['title']  = 'Sample CPU Report';
+    $title = 'Sample CPU Report';
+    if ($context != 'host') {
+       $rrdtool_graph['title']  = $title;
                              //  This will be turned into:   
                              //  "Clustername $TITLE last $timerange", so keep it short
+    } else {
+       $rrdtool_graph['title']  = "$hostname $title last $range";
+    }
     $rrdtool_graph['vertical-label'] = 'Sample Percent';
     $rrdtool_graph['height']        += $size == 'medium' ? 28 : 0 ;   // Fudge to account for number of lines in the chart legend
     $rrdtool_graph['upper-limit']    = '100';

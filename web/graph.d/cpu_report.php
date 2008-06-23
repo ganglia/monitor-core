@@ -11,11 +11,18 @@ function graph_cpu_report ( &$rrdtool_graph ) {
            $cpu_user_color,
            $cpu_wio_color,
            $hostname,
+           $range,
            $rrd_dir,
            $size;
     
     $rrdtool_graph['height']        += $size == 'medium' ? 14 : 0 ;
-    $rrdtool_graph['title']          = 'CPU';
+    $title = 'CPU';
+    if ($context != 'host') {
+       $rrdtool_graph['title'] = $title;
+    } else {
+       $rrdtool_graph['title'] = "$hostname $title last $range";
+
+    }
     $rrdtool_graph['upper-limit']    = '100';
     $rrdtool_graph['lower-limit']    = '0';
     $rrdtool_graph['vertical-label'] = 'Percent';
