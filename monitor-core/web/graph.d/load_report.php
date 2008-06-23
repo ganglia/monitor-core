@@ -10,12 +10,18 @@ function graph_load_report ( &$rrdtool_graph ) {
            $hostname,
            $load_one_color,
            $num_nodes_color,
-           $proc_run_color, 
+           $proc_run_color,
+           $range, 
            $rrd_dir,
            $size;
     
     $rrdtool_graph['height']        += $size == 'medium' ? 28 : 0 ;
-    $rrdtool_graph['title']          = 'Load';
+    $title = 'Load';
+    if ($context != 'host') {
+       $rrdtool_graph['title'] = $title;
+    } else {
+       $rrdtool_graph['title'] = "$hostname $title last $range";
+    }
     $rrdtool_graph['lower-limit']    = '0';
     $rrdtool_graph['vertical-label'] = 'Load/Procs';
     $rrdtool_graph['extras']         = '--rigid';

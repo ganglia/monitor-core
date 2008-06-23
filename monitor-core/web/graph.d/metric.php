@@ -50,7 +50,12 @@ function graph_metric ( &$rrdtool_graph ) {
                 $hrs = intval (-$jobrange / 3600);
                 $subtitle = "$prefix last ${hrs} (now $value)";
             } else {
-                $subtitle = "$metricname (now $value)";
+                if ($summary) {
+                   $subtitle_one = "$metricname last $range";
+                } else {
+                   $subtitle_one = "$hostname last $range";
+                }
+                $subtitle_two = "  (now $value)";
             }
 
             break;
@@ -117,7 +122,8 @@ function graph_metric ( &$rrdtool_graph ) {
 
     //# the actual graph...
     $series  = "DEF:'sum'='$rrd_dir/$metricname.rrd:sum':AVERAGE ";
-    $series .= "AREA:'sum'#$default_metric_color:'$subtitle' ";
+    $series .= "AREA:'sum'#$default_metric_color:'$subtitle_one'";
+    $series .= ":STACK: COMMENT:'$subtitle_two'";
 
     if ($jobstart) {
         $series .= "VRULE:$jobstart#$jobstart_color ";
