@@ -611,10 +611,7 @@ AC_OUTPUT(Makefile
           gmond/Makefile 
           gstat/Makefile 
           gmond/modules/Makefile
-          gmond/modules/conf.d/example.conf
           gmond/modules/conf.d/modpython.conf
-          gmond/modules/conf.d/multicpu.conf
-          gmond/modules/conf.d/modgstatus.conf
           gmond/modules/example/Makefile
           gmond/modules/cpu/Makefile
           gmond/modules/disk/Makefile
