@@ -1687,6 +1687,7 @@ load_metric_modules( void )
         char *modPath=NULL, *modName=NULL, *modparams=NULL, *modLanguage=NULL;
         apr_array_header_t *modParams_list = NULL;
         int k;
+        apr_status_t merge_ret;
 
         cfg_t *module = cfg_getnsec(tmp, "module", j);
 
@@ -1699,6 +1700,15 @@ load_metric_modules( void )
             continue;
 
         modPath = cfg_getstr(module, "path");
+#ifdef GANGLIA_MODULE_DIR
+        if(modPath)
+          {
+            merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR, modPath,
+                               APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE, global_context);
+            if (merge_ret != APR_SUCCESS) 
+                modPath = cfg_getstr(module, "path");
+          }
+#endif 
         modName = cfg_getstr(module, "name");
         modparams = cfg_getstr(module, "params");
         modParams_list = apr_array_make(global_context, 2, sizeof(mmparam));
