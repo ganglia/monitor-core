@@ -71,7 +71,13 @@ function graph_sample_report ( &$rrdtool_graph ) {
            $hostname,
            $range,
            $rrd_dir,
-           $size;
+           $size,
+           $use_fqdn_hostname;
+
+    if (!$use_fqdn_hostname) {
+        $hostname = shortenFQDN($hostname);
+    }
+
     //
     // You *MUST* set at least the 'title', 'vertical-label', and 'series' variables.
     // Otherwise, the graph *will not work*.  
@@ -82,7 +88,7 @@ function graph_sample_report ( &$rrdtool_graph ) {
                              //  This will be turned into:   
                              //  "Clustername $TITLE last $timerange", so keep it short
     } else {
-       $rrdtool_graph['title']  = "$hostname $title last $range";
+       $rrdtool_graph['title']  = "$title last $range";
     }
     $rrdtool_graph['vertical-label'] = 'Sample Percent';
     $rrdtool_graph['height']        += $size == 'medium' ? 28 : 0 ;   // Fudge to account for number of lines in the chart legend
