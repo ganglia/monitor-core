@@ -84,3 +84,9 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
 
+  * Construct the library path to the modules within gmond, based off of the
+     --libdir configure	parameter rather than hard coding it in the configuration files.
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1461
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1462
+    +1: bnicholes
+
