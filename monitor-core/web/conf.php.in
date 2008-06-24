@@ -125,6 +125,11 @@ $default_range = "hour";
 $default_metric = "load_one";
 
 #
+# use FQDN hostnames in graphs (to help with long hostnames in small charts)
+#
+$use_fqdn_hostname = false;
+
+#
 # Optional summary graphs
 #
 #$optional_graphs = array('packet');
