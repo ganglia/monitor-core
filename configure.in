@@ -172,6 +172,11 @@ AC_ARG_WITH( libconfuse,
 [  --with-libconfuse=DIR   Specify location for libconfuse],
 [if test x"$withval" != xno; then libconfuse=yes; libconfusepath=$withval; fi])
 
+AC_ARG_WITH( moduledir,
+[  --with-moduledir=DIR   Base directory for dynamically loadable modules],
+  moduledir="$withval", 
+  moduledir=${libdir}/ganglia)
+
 AC_ARG_ENABLE(debug,
 [
   --enable-debug          turn on debugging output and compile options],
@@ -518,6 +523,7 @@ dnl
 			else
 				libdir="$prefix/lib"
 			fi
+			moduledir=${libdir}/ganglia
 		fi
 		;;
 *ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
@@ -590,6 +596,10 @@ AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
 dnl Python module config files need to know where to look for libraries (/usr/lib vs /usr/lib64)
 AC_SUBST_FILE(libdir)
+
+AC_DEFINE_UNQUOTED(GANGLIA_MODULE_DIR, ["$moduledir"], GANGLIA_MODULE_DIR)
+AC_SUBST(moduledir)
+
 
 AC_OUTPUT(Makefile 
           ganglia-config

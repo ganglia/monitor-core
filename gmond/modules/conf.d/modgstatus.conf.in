@@ -1,7 +1,7 @@
 modules {
   module {
     name = "gstatus_module"
-    path = "@libdir@/ganglia/modgstatus.so" 
+    path = "modgstatus.so" 
   }
 }
 
