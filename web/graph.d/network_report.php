@@ -9,11 +9,17 @@ function graph_network_report ( &$rrdtool_graph ) {
            $mem_cached_color, 
            $mem_used_color,
            $cpu_num_color,
+           $range,
            $rrd_dir,
            $size;
-    
+   
+    $title = 'Network';
     $rrdtool_graph['height']        += $size == 'medium' ? 28 : 0 ;
-    $rrdtool_graph['title']          = 'Network';
+    if ($context != 'host') {
+       $rrdtool_graph['title'] = $title;
+    } else {
+       $rrdtool_graph['title'] = "$hostname Network last $range";
+    }
     $rrdtool_graph['lower-limit']    = '0';
     $rrdtool_graph['vertical-label'] = 'Bytes/sec';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
