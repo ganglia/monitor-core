@@ -17,9 +17,14 @@ Contributors looking for a mission:
 
   * Open bugs in the bug database.
 
-
 CURRENT RELEASE NOTES:
 
+  * Dynamically loaded metric support (DSO)
+  * Scriptable metric support with Python
+  * Modular frontend graph support
+  * Platform support for DragonFlyBSD
+  * Improved native metric support for Windows (Built with CygWin)
+  * Bug fixes
 
 RELEASE SHOWSTOPPERS:
  <TEMPLATE>
@@ -66,11 +71,6 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
     +1: carenas
-
-  * build: linux: remove obsolete debian package
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04244.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1453
-    +1: carenas, bnicholes
 
   * build: respect libdir setting and allow for working default in 64bit linux
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04275.html

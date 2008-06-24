@@ -839,17 +839,9 @@ helped with the IRIX port.
 
 =item B<Where are the debian packages?>
 
-Here is an email message from Preston Smith for Debian users
-
- Debian packages for Debian 3.0 (woody) are available at
-  http://www.physics.purdue.edu/~psmith/ganglia
- (i386, sparc, and powerpc are there presently, more architectures will
-  appear when I get them built.)
- Packages for "unstable" (sid) will be available in the main Debian
-  archive soon.
-
- Also, a CVS note: I checked in the debian/ directory used to create
- debian packages.
+Debian packages for 2.5 are available from the main Debian archive
+there was never an oficial Debian package for 3.0 but packages for 3.1 are
+going to be available in Debian experimental very soon.
 
 =item B<How should I configure multihomed machines?>
 
