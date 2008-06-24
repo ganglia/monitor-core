@@ -75,6 +75,8 @@ BACKPORT PROPOSALS:
   * build: respect libdir setting and allow for working default in 64bit linux
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04275.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1452
+    -1: bernardli
+    bernardli: ./configure --exec-prefix does not work (still hardcodes /usr)
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
