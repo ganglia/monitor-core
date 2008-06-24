@@ -11,14 +11,19 @@ function graph_packet_report ( &$rrdtool_graph ) {
            $cpu_num_color,
            $range,
            $rrd_dir,
-           $size;
+           $size,
+           $use_fqdn_hostname;
    
+    if (!$use_fqdn_hostname) {
+        $hostname = shortenFQDN($hostname);
+    }
+
     $title = 'Packets'; 
     $rrdtool_graph['height']        += $size == 'medium' ? 28 : 0 ;
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {
-       $rrdtool_graph['title'] = "$hostname $title last $range";
+       $rrdtool_graph['title'] = "$title last $range";
     }
     $rrdtool_graph['lower-limit']    = '0';
     $rrdtool_graph['vertical-label'] = 'Packets/sec';

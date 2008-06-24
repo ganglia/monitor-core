@@ -444,4 +444,16 @@ function is_valid_hex_color( $string )
   return $return_value;
     
 }
+
+#-------------------------------------------------------------------------------
+# Return a shortened version of an FQDN 
+function shortenFQDN( $hostname ) {
+    $postition = strpos($hostname, '.');
+    if ( FALSE === $postition ) {
+        return $hostname;
+    } else {
+        return substr( $hostname , 0, $postition );
+    }
+}
+
 ?>
