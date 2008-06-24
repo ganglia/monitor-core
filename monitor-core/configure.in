@@ -493,6 +493,10 @@ dnl Some system-specific stuff ...
 dnl Some operating systems require additional flags in order to get all
 dnl the definitions that we're looking for in some system headers.
 
+if test x"$prefix" = xNONE; then
+  prefix="$ac_default_prefix"
+fi
+
 dnl default VARSTATEDIR to /var/lib since that's the traditional location.
 dnl
 varstatedir="/var/lib"
@@ -500,14 +504,22 @@ varstatedir="/var/lib"
 EXPORT_SYMBOLS="-export-dynamic"
 case "$host" in
 *linux*)
-                CFLAGS="$CFLAGS -D_REENTRANT"
-                AC_DEFINE(LINUX, 1, LINUX)
+		CFLAGS="$CFLAGS -D_REENTRANT"
+		AC_DEFINE(LINUX, 1, LINUX)
 dnl
 dnl For fsusage.c - disk usage.
 dnl
-                AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
-                AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
-                ;;
+		AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
+		AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
+		if test x"$libdir" = x"\${exec_prefix}/lib"; then
+			if test x"$host_cpu" = xx86_64 || \
+			    test x"$host_cpu" = xpowerpc64; then
+				libdir="$prefix/lib64"
+			else
+				libdir="$prefix/lib"
+			fi
+		fi
+		;;
 *ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
 		LIBS="-lpthread $LIBS"
 		EXPORT_SYMBOLS="-Wl,-E"
@@ -578,15 +590,6 @@ AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
 dnl Python module config files need to know where to look for libraries (/usr/lib vs /usr/lib64)
 AC_SUBST_FILE(libdir)
-if test "x$prefix" = xNONE; then
-  prefix="$ac_default_prefix"
-fi
-
-if test "x$host_cpu" = "xx86_64"; then
-  libdir="$prefix/lib64"
-else
-  libdir="$prefix/lib"
-fi
 
 AC_OUTPUT(Makefile 
           ganglia-config
