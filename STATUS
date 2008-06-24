@@ -52,22 +52,29 @@ BACKPORT PROPOSALS:
   * Do not reset header and run passthru() command if in debug mode
     http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1423 
     +1: bernardli
-    -1: carenas: conflicts with previous proposal
+    -1: carenas
+    carenas: conflicts with previous proposal
 
   * web: Revert graphs' title and subtitle behaviour back to pre-modular graph.php patch (3.0.x) with one
      enhancement: the subtitle "$metricname last $range (now $now)" is no longer clobbered and is split into
      two lines (tested with rrdtool 1.2.23)
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1448
-    +1: bernardli
-    +1: carenas: subtitle still clovered for very long hostnames and 1.2.27
+    +1: bernardli, carenas
+    carenas: subtitle still clovered for very long hostnames using 1.2.27
 
   * web: remove redirect hack for grid pulldown navigation
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
     +1: carenas
 
+  * build: linux: remove obsolete debian package
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04244.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1453
+    +1: carenas
+
   * build: respect libdir setting and allow for working default in 64bit linux
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04275.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1452
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
