@@ -51,14 +51,15 @@ BACKPORT PROPOSALS:
 
   * web: return correctly formatted web content for graph.php when debug>2
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04335.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1438 
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1438
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1465
     +1: carenas
 
   * Do not reset header and run passthru() command if in debug mode
     http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1423 
     +1: bernardli
     -1: carenas
-    carenas: conflicts with previous proposal
+    carenas: obsoleted by previous proposal
 
   * web: remove redirect hack for grid pulldown navigation
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
@@ -70,6 +71,10 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1452
     -1: bernardli
     bernardli: ./configure --exec-prefix does not work (still hardcodes /usr)
+
+  * include: support building modules with a C++ compiler
+    http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1464
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
