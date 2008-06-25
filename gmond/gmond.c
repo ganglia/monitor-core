@@ -806,7 +806,7 @@ Ganglia_update_vidals( Ganglia_host *host, Ganglia_value_msg *vmsg)
     else if(!strcasecmp("heartbeat", metricName))
       {
         /* nothing more needs to be done. we handled the timestamps above. */
-        host->gmond_started = vmsg->Ganglia_value_msg_u.gu_int.u_int;
+        host->gmond_started = vmsg->Ganglia_value_msg_u.gu_int.ui;
         debug_msg("Got a heartbeat message %d\n", host->gmond_started);
         /* Processing is finished */
       }
@@ -1034,20 +1034,20 @@ Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
               apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.str);
           break;
         case gmetric_ushort:
-          vmessage->Ganglia_value_msg_u.gu_short.u_short = 
-              message->Ganglia_value_msg_u.gu_short.u_short;
+          vmessage->Ganglia_value_msg_u.gu_short.us = 
+              message->Ganglia_value_msg_u.gu_short.us;
           break;
         case gmetric_short:
-          vmessage->Ganglia_value_msg_u.gs_short.s_short = 
-              message->Ganglia_value_msg_u.gs_short.s_short;
+          vmessage->Ganglia_value_msg_u.gs_short.ss = 
+              message->Ganglia_value_msg_u.gs_short.ss;
           break;
         case gmetric_uint:
-          vmessage->Ganglia_value_msg_u.gu_int.u_int = 
-              message->Ganglia_value_msg_u.gu_int.u_int;
+          vmessage->Ganglia_value_msg_u.gu_int.ui = 
+              message->Ganglia_value_msg_u.gu_int.ui;
           break;
         case gmetric_int:
-          vmessage->Ganglia_value_msg_u.gs_int.s_int = 
-              message->Ganglia_value_msg_u.gs_int.s_int;
+          vmessage->Ganglia_value_msg_u.gs_int.si = 
+              message->Ganglia_value_msg_u.gs_int.si;
           break;
         case gmetric_float:
           vmessage->Ganglia_value_msg_u.gf.f = 
@@ -1344,18 +1344,18 @@ host_metric_value( Ganglia_25metric *metric, Ganglia_value_msg *message )
     case GANGLIA_VALUE_STRING:
       return message->Ganglia_value_msg_u.gstr.str;
     case GANGLIA_VALUE_UNSIGNED_SHORT:
-      apr_snprintf(value, 1024, metric->fmt, message->Ganglia_value_msg_u.gu_short.u_short);
+      apr_snprintf(value, 1024, metric->fmt, message->Ganglia_value_msg_u.gu_short.us);
       return value;
     case GANGLIA_VALUE_SHORT:
       /* For right now.. there are no metrics which are signed shorts... use u_short */
-      apr_snprintf(value, 1024, metric->fmt, message->Ganglia_value_msg_u.gs_short.s_short);
+      apr_snprintf(value, 1024, metric->fmt, message->Ganglia_value_msg_u.gs_short.ss);
       return value;
     case GANGLIA_VALUE_UNSIGNED_INT:
-      apr_snprintf(value, 1024, metric->fmt, message->Ganglia_value_msg_u.gu_int.u_int);
+      apr_snprintf(value, 1024, metric->fmt, message->Ganglia_value_msg_u.gu_int.ui);
       return value;
     case GANGLIA_VALUE_INT:
       /* For right now.. there are no metric which are signed ints... use u_int */
-      apr_snprintf(value, 1024, metric->fmt, message->Ganglia_value_msg_u.gs_int.s_int);
+      apr_snprintf(value, 1024, metric->fmt, message->Ganglia_value_msg_u.gs_int.si);
       return value;
     case GANGLIA_VALUE_FLOAT:
       apr_snprintf(value, 1024, metric->fmt, message->Ganglia_value_msg_u.gf.f);
@@ -1382,18 +1382,18 @@ gmetric_value_to_str(Ganglia_value_msg *message)
     case gmetric_string:
       return message->Ganglia_value_msg_u.gstr.str;
     case gmetric_ushort:
-      apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gu_short.fmt, message->Ganglia_value_msg_u.gu_short.u_short);
+      apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gu_short.fmt, message->Ganglia_value_msg_u.gu_short.us);
       return value;
     case gmetric_short:
       /* For right now.. there are no metrics which are signed shorts... use u_short */
-      apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gs_short.fmt, message->Ganglia_value_msg_u.gs_short.s_short);
+      apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gs_short.fmt, message->Ganglia_value_msg_u.gs_short.ss);
       return value;
     case gmetric_uint:
-      apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gu_int.fmt, message->Ganglia_value_msg_u.gu_int.u_int);
+      apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gu_int.fmt, message->Ganglia_value_msg_u.gu_int.ui);
       return value;
     case gmetric_int:
       /* For right now.. there are no metric which are signed ints... use u_int */
-      apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gs_int.fmt, message->Ganglia_value_msg_u.gs_int.s_int);
+      apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gs_int.fmt, message->Ganglia_value_msg_u.gs_int.si);
       return value;
     case gmetric_float:
       apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gf.fmt, message->Ganglia_value_msg_u.gf.f);
@@ -2147,16 +2147,16 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
             cb->msg.Ganglia_value_msg_u.gstr.str = cb->now.str; 
             break;
           case GANGLIA_VALUE_UNSIGNED_SHORT:
-            cb->msg.Ganglia_value_msg_u.gu_short.u_short = cb->now.uint16;
+            cb->msg.Ganglia_value_msg_u.gu_short.us = cb->now.uint16;
             break;
           case GANGLIA_VALUE_SHORT:
-            cb->msg.Ganglia_value_msg_u.gs_short.s_short = cb->now.int16;
+            cb->msg.Ganglia_value_msg_u.gs_short.ss = cb->now.int16;
             break;
           case GANGLIA_VALUE_UNSIGNED_INT:
-            cb->msg.Ganglia_value_msg_u.gu_int.u_int = cb->now.uint32;
+            cb->msg.Ganglia_value_msg_u.gu_int.ui = cb->now.uint32;
             break;
           case GANGLIA_VALUE_INT:
-            cb->msg.Ganglia_value_msg_u.gs_int.s_int = cb->now.int32;
+            cb->msg.Ganglia_value_msg_u.gs_int.si = cb->now.int32;
             break;
           case GANGLIA_VALUE_FLOAT:
             cb->msg.Ganglia_value_msg_u.gf.f = cb->now.f;
