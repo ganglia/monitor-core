@@ -111,7 +111,6 @@ AC_PREFIX_DEFAULT(/usr)
 dnl The following cpu_vendor_os string goes into config.h.
 dnl
 AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
-AC_DEFINE_UNQUOTED(ARCH, "$host_cpu", ARCH)
 AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
 dnl AC_CYGWIN
 
@@ -523,8 +522,11 @@ dnl
 				libroot="$exec_prefix"
 			fi
 
-			if test x"$host_cpu" = xx86_64 || \
-			    test x"$host_cpu" = xpowerpc64; then
+			AC_TRY_COMPILE([], [], [file conftest.$ac_objext > conftest.file])
+			FILE=`cat conftest.file`
+			WIDTH_CPU=`expr "x$FILE" : '.*ELF \(.*\)-bit '`
+			rm -f conftest.file
+			if test x"$WIDTH_CPU" = x64; then
 				libdir="$libroot/lib64"
 			else
 				libdir="$libroot/lib"
