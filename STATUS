@@ -24,7 +24,7 @@ CURRENT RELEASE NOTES:
   * Modular frontend graph support
   * Platform support for DragonFlyBSD
   * Improved native metric support for Windows (Built with CygWin)
-  * Bug fixes
+  * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
  <TEMPLATE>
@@ -69,8 +69,8 @@ BACKPORT PROPOSALS:
   * build: respect libdir setting and allow for working default in 64bit linux
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04275.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1452
-    -1: bernardli
-    bernardli: ./configure --exec-prefix does not work (still hardcodes /usr)
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1467
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1468
 
   * include: support building modules with a C++ compiler
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
