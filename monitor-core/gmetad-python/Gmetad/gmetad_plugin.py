@@ -46,7 +46,7 @@ def load_plugins(pdir):
     global _plugins
     # Make sure we have a valid plugin directory
     if not os.path.isdir(pdir):
-        logger.warning('No such plugin directory "%s", no plugins loaded' % pdir)
+        logging.warning('No such plugin directory "%s", no plugins loaded' % pdir)
         return
     # Add the plugin directory to the python search path
     sys.path.append(pdir)
