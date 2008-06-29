@@ -2,11 +2,7 @@
 /* $Id$ */
 #include <gmetad.h>
 %}
-struct xml_tag
-   {
-      const char *name;
-      xml_tag_t tag;
-   };
+struct xml_tag;
 %%
 GANGLIA_XML, GANGLIA_XML_TAG
 VERSION, VERSION_TAG
