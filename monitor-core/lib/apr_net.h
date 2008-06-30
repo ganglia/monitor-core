@@ -13,6 +13,9 @@ create_udp_server(apr_pool_t *context, int32_t family, apr_port_t port, char *bi
 APR_DECLARE(apr_status_t) 
 apr_sockaddr_ip_buffer_get(char *addr, int len, apr_sockaddr_t *sockaddr);
 
+apr_status_t
+join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_port_t port, char *ifname );
+
 apr_socket_t *
 create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int ttl);
 

@@ -51,6 +51,8 @@ apr_pool_t *global_context = NULL;
 int deaf;
 /* Mute mode boolean */
 int mute;
+/* last time we received any data */
+apr_time_t udp_last_heard;
 /* Cluster tag boolean */
 int cluster_tag = 0;
 /* This host's location */
@@ -453,7 +455,7 @@ get_sock_family( char *family )
 }
 
 static void
-setup_listen_channels_pollset( void )
+setup_listen_channels_pollset( int reset )
 {
   apr_status_t status;
   int i;
@@ -463,7 +465,8 @@ setup_listen_channels_pollset( void )
   Ganglia_channel *channel;
 
   /* Create my incoming pollset */
-  apr_pollset_create(&listen_channels, total_listen_channels, global_context, 0);
+  if (!reset)
+      apr_pollset_create(&listen_channels, total_listen_channels, global_context, 0);
 
   /* Process all the udp_recv_channels */
   for(i = 0; i< num_udp_recv_channels; i++)
@@ -471,7 +474,7 @@ setup_listen_channels_pollset( void )
       cfg_t *udp_recv_channel;
       char *mcast_join, *mcast_if, *bindaddr, *family;
       int port;
-      apr_socket_t *socket = NULL;
+      static apr_socket_t *socket = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
       int32_t sock_family = APR_INET;
@@ -496,7 +499,12 @@ setup_listen_channels_pollset( void )
       if( mcast_join )
         {
           /* Listen on the specified multicast channel */
-          socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
+          if (reset) {	   /* network reset? rejoin existing socket */
+              join_mcast(pool, socket, mcast_join, port, mcast_if);
+              return;
+          } else
+              socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
+
           if(!socket)
             {
               err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Exiting.\n",
@@ -1572,8 +1580,12 @@ poll_listen_channels( apr_interval_time_t timeout, apr_time_t now)
 
   /* Poll for incoming data */
   status = apr_pollset_poll(listen_channels, timeout, &num, &descs);
-  if(status != APR_SUCCESS)
-    return;
+  if (status != APR_SUCCESS && status != APR_TIMEUP) {
+      char buff[128];
+      debug_msg("apr_pollset_poll returned unexpected status %d = %s\n",
+          status, apr_strerror(status, buff, 128));
+      return;
+  }
 
   for(i = 0; i< num ; i++)
     {
@@ -1582,6 +1594,7 @@ poll_listen_channels( apr_interval_time_t timeout, apr_time_t now)
         {
         case UDP_RECV_CHANNEL:
           process_udp_recv_channel(descs+i, now); 
+          udp_last_heard = apr_time_now();
           break;
         case TCP_ACCEPT_CHANNEL:
           process_tcp_accept_channel(descs+i, now);
@@ -2518,7 +2531,7 @@ main ( int argc, char *argv[] )
 
   if(!deaf)
     {
-      setup_listen_channels_pollset();
+      setup_listen_channels_pollset(0);
     }
 
   /* even if mute, a send channel may be needed to send a request for metadata */
@@ -2544,7 +2557,7 @@ main ( int argc, char *argv[] )
   hosts = apr_hash_make( global_context );
 
   /* Initialize time variables */
-  last_cleanup = next_collection = now = apr_time_now();
+  udp_last_heard = last_cleanup = next_collection = now = apr_time_now();
 
   /* Loop */
   for(;!done;)
@@ -2569,6 +2582,10 @@ main ( int argc, char *argv[] )
 
       if(!deaf)
         {
+	  /* if we went deaf, re-subscribe to the multicast channel */
+          if ((now - udp_last_heard) > 60 * APR_USEC_PER_SEC)
+              setup_listen_channels_pollset(1);
+
           /* cleanup the data if the cleanup threshold has been met */
           if( (now - last_cleanup) > apr_time_make(cleanup_threshold,0))
             {
