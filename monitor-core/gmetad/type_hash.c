@@ -1,5 +1,5 @@
 /* C code produced by gperf version 3.0.3 */
-/* Command-line: gperf -G -l -H type_hash -t -F ', 0' -N in_type_list -k '1,$' -W types ./type_hash.gperf  */
+/* Command-line: gperf -G -l -H type_hash -t -F ', 0' -N in_type_list -k '1,$' -W types type_hash.gperf  */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
       && ('%' == 37) && ('&' == 38) && ('\'' == 39) && ('(' == 40) \
@@ -28,7 +28,7 @@
 error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
 
-#line 1 "./type_hash.gperf"
+#line 1 "type_hash.gperf"
 
 /* $Id$ */
 /* Recognizes metric types. 
@@ -36,7 +36,7 @@ error "gperf generated tables don't work with this execution character set. Plea
  * -W types ./type_hash.gperf > type_hash.c
  */
 #include <gmetad.h>
-#line 9 "./type_hash.gperf"
+#line 9 "type_hash.gperf"
 struct type_tag;
 
 #define TOTAL_KEYWORDS 10
@@ -99,28 +99,28 @@ static unsigned char lengthtable[] =
 static struct type_tag types[] =
   {
     {"", 0}, {"", 0}, {"", 0}, {"", 0},
-#line 11 "./type_hash.gperf"
+#line 11 "type_hash.gperf"
     {"int8", INT},
-#line 12 "./type_hash.gperf"
+#line 12 "type_hash.gperf"
     {"uint8", UINT},
-#line 20 "./type_hash.gperf"
+#line 20 "type_hash.gperf"
     {"string", STRING},
     {"", 0}, {"", 0},
-#line 19 "./type_hash.gperf"
+#line 19 "type_hash.gperf"
     {"timestamp", TIMESTAMP},
-#line 13 "./type_hash.gperf"
+#line 13 "type_hash.gperf"
     {"int16", INT},
-#line 14 "./type_hash.gperf"
+#line 14 "type_hash.gperf"
     {"uint16", UINT},
     {"", 0}, {"", 0}, {"", 0},
-#line 15 "./type_hash.gperf"
+#line 15 "type_hash.gperf"
     {"int32", INT},
-#line 16 "./type_hash.gperf"
+#line 16 "type_hash.gperf"
     {"uint32", UINT},
     {"", 0}, {"", 0}, {"", 0},
-#line 17 "./type_hash.gperf"
+#line 17 "type_hash.gperf"
     {"float", FLOAT},
-#line 18 "./type_hash.gperf"
+#line 18 "type_hash.gperf"
     {"double", FLOAT}
   };
 
