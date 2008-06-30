@@ -1,5 +1,5 @@
 /* C code produced by gperf version 3.0.3 */
-/* Command-line: gperf -l -H xml_hash -t -F ', 0' -N in_xml_list -k '1,$' -W xml_tags ./xml_hash.gperf  */
+/* Command-line: gperf -l -H xml_hash -t -F ', 0' -N in_xml_list -k '1,$' -W xml_tags xml_hash.gperf  */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
       && ('%' == 37) && ('&' == 38) && ('\'' == 39) && ('(' == 40) \
@@ -28,11 +28,11 @@
 error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
 
-#line 1 "./xml_hash.gperf"
+#line 1 "xml_hash.gperf"
 
 /* $Id$ */
 #include <gmetad.h>
-#line 5 "./xml_hash.gperf"
+#line 5 "xml_hash.gperf"
 struct xml_tag;
 
 #define TOTAL_KEYWORDS 32
@@ -107,75 +107,75 @@ in_xml_list (str, len)
   static struct xml_tag xml_tags[] =
     {
       {"", 0}, {"", 0}, {"", 0},
-#line 33 "./xml_hash.gperf"
+#line 33 "xml_hash.gperf"
       {"VAL", VAL_TAG},
-#line 34 "./xml_hash.gperf"
+#line 34 "xml_hash.gperf"
       {"TYPE", TYPE_TAG},
-#line 35 "./xml_hash.gperf"
+#line 35 "xml_hash.gperf"
       {"SLOPE", SLOPE_TAG},
-#line 36 "./xml_hash.gperf"
+#line 36 "xml_hash.gperf"
       {"SOURCE", SOURCE_TAG},
-#line 15 "./xml_hash.gperf"
+#line 15 "xml_hash.gperf"
       {"LATLONG", LATLONG_TAG,},
-#line 16 "./xml_hash.gperf"
+#line 16 "xml_hash.gperf"
       {"URL", URL_TAG,},
-#line 13 "./xml_hash.gperf"
+#line 13 "xml_hash.gperf"
       {"LOCALTIME", LOCALTIME_TAG},
-#line 29 "./xml_hash.gperf"
+#line 29 "xml_hash.gperf"
       {"UNITS", UNITS_TAG},
-#line 7 "./xml_hash.gperf"
+#line 7 "xml_hash.gperf"
       {"GANGLIA_XML", GANGLIA_XML_TAG},
-#line 30 "./xml_hash.gperf"
+#line 30 "xml_hash.gperf"
       {"TN", TN_TAG},
-#line 38 "./xml_hash.gperf"
+#line 38 "xml_hash.gperf"
       {"EXTRA_ELEMENT", EXTRA_ELEMENT_TAG},
-#line 10 "./xml_hash.gperf"
+#line 10 "xml_hash.gperf"
       {"NAME", NAME_TAG},
-#line 37 "./xml_hash.gperf"
+#line 37 "xml_hash.gperf"
       {"EXTRA_DATA", EXTRA_DATA_TAG},
       {"", 0},
-#line 8 "./xml_hash.gperf"
+#line 8 "xml_hash.gperf"
       {"VERSION", VERSION_TAG},
-#line 22 "./xml_hash.gperf"
+#line 22 "xml_hash.gperf"
       {"LOCATION", LOCATION_TAG},
-#line 9 "./xml_hash.gperf"
+#line 9 "xml_hash.gperf"
       {"GRID", GRID_TAG},
-#line 14 "./xml_hash.gperf"
+#line 14 "xml_hash.gperf"
       {"OWNER", OWNER_TAG,},
       {"", 0},
-#line 12 "./xml_hash.gperf"
+#line 12 "xml_hash.gperf"
       {"CLUSTER", CLUSTER_TAG},
-#line 27 "./xml_hash.gperf"
+#line 27 "xml_hash.gperf"
       {"SUM", SUM_TAG,},
-#line 31 "./xml_hash.gperf"
+#line 31 "xml_hash.gperf"
       {"TMAX", TMAX_TAG},
       {"", 0},
-#line 25 "./xml_hash.gperf"
+#line 25 "xml_hash.gperf"
       {"METRIC", METRIC_TAG},
-#line 26 "./xml_hash.gperf"
+#line 26 "xml_hash.gperf"
       {"METRICS", METRICS_TAG},
-#line 24 "./xml_hash.gperf"
+#line 24 "xml_hash.gperf"
       {"GMOND_STARTED", STARTED_TAG},
-#line 20 "./xml_hash.gperf"
+#line 20 "xml_hash.gperf"
       {"DOWN", DOWN_TAG,},
       {"", 0}, {"", 0},
-#line 19 "./xml_hash.gperf"
+#line 19 "xml_hash.gperf"
       {"UP", UP_TAG,},
-#line 28 "./xml_hash.gperf"
+#line 28 "xml_hash.gperf"
       {"NUM", NUM_TAG,},
-#line 17 "./xml_hash.gperf"
+#line 17 "xml_hash.gperf"
       {"HOST", HOST_TAG},
-#line 18 "./xml_hash.gperf"
+#line 18 "xml_hash.gperf"
       {"HOSTS", HOSTS_TAG,},
       {"", 0},
-#line 21 "./xml_hash.gperf"
+#line 21 "xml_hash.gperf"
       {"IP", IP_TAG},
-#line 23 "./xml_hash.gperf"
+#line 23 "xml_hash.gperf"
       {"REPORTED", REPORTED_TAG},
-#line 32 "./xml_hash.gperf"
+#line 32 "xml_hash.gperf"
       {"DMAX", DMAX_TAG},
       {"", 0}, {"", 0}, {"", 0}, {"", 0},
-#line 11 "./xml_hash.gperf"
+#line 11 "xml_hash.gperf"
       {"AUTHORITY", AUTHORITY_TAG}
     };
 
