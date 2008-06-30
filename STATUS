@@ -71,6 +71,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1452
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1467
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1468
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1475
 
   * include: support building modules with a C++ compiler
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
@@ -95,3 +96,11 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1462
     +1: bnicholes
 
+  * gmetad: gperf generated files for C99 support and build cleanup
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04365.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1445
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1446
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1471
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1472
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1476
+    +1: carenas
