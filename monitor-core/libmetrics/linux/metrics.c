@@ -221,6 +221,7 @@ void update_ifdata ( char *caller )
 		     net_dev_stats *ns = hash_lookup(src, n); 
 		     if ( !ns ) return;
 
+		     /* receive */
 		     rbi = strtoul( p, &p ,10);
 		     if ( rbi >= ns->rbi ) {
 			l_bytes_in += rbi - ns->rbi;
@@ -238,8 +239,11 @@ void update_ifdata ( char *caller )
 			l_pkts_in += ULONG_MAX - ns->rpi + rpi;
 		     }
 		     ns->rpi = rpi;
+		     
+		     /* skip unneeded metrics */
+		     for (i = 0; i < 6; i++) rbo = strtoul(p, &p, 10);
 
-		     for (i = 0; i < 6; i++) strtol(p, &p, 10);
+		     /* transmit */
 		     rbo = strtoul( p, &p ,10);
 		     if ( rbo >= ns->rbo ) {
 			l_bytes_out += rbo - ns->rbo;
