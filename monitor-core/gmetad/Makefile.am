@@ -13,7 +13,7 @@ AM_CFLAGS = -O0 -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/
 sbin_PROGRAMS = gmetad 
 gmetad_SOURCES =  gmetad.c cmdline.c cmdline.h gmetad.h data_thread.c \
    server.c process_xml.c rrd_helpers.c conf.c conf.h type_hash.c \
-   xml_hash.c cleanup.c rrd_helpers.h
+   xml_hash.c cleanup.c rrd_helpers.h type_hash.gperf xml_hash.gperf
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
                  $(GLDADD)
 
