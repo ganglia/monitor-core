@@ -511,28 +511,32 @@ dnl For fsusage.c - disk usage.
 dnl
 		AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
 		AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
-		if test x"$libdir" = x"\${exec_prefix}/lib"; then
-			if test x"$exec_prefix" = xNONE; then
-				if test x"$prefix" = xNONE; then
-					libroot="/usr"
+		if test x"$build_cpu" != xia64 && \
+		    test x"$build_cpu" != xalpha; then
+			if test x"$libdir" = x"\${exec_prefix}/lib"; then
+				if test x"$exec_prefix" = xNONE; then
+					if test x"$prefix" = xNONE; then
+						libroot="/usr"
+					else
+						libroot="$prefix"
+					fi
 				else
-					libroot="$prefix"
+					libroot="$exec_prefix"
 				fi
-			else
-				libroot="$exec_prefix"
-			fi
 
-			AC_TRY_COMPILE([], [], [file conftest.$ac_objext > conftest.file])
-			FILE=`cat conftest.file`
-			WIDTH_CPU=`expr "x$FILE" : '.*ELF \(.*\)-bit '`
-			rm -f conftest.file
-			if test x"$WIDTH_CPU" = x64; then
-				libdir="$libroot/lib64"
-			else
-				libdir="$libroot/lib"
+				AC_TRY_COMPILE([], [],
+				    [file conftest.$ac_objext > conftest.file])
+				FILE=`cat conftest.file`
+				WIDTH_CPU=`expr "x$FILE" : '.*ELF \(.*\)-bit '`
+				rm -f conftest.file
+				if test x"$WIDTH_CPU" = x64; then
+					libdir="$libroot/lib64"
+				else
+					libdir="$libroot/lib"
+				fi
 			fi
-			moduledir=${libdir}/ganglia
 		fi
+		moduledir=${libdir}/ganglia
 		;;
 *ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
 		LIBS="-lpthread $LIBS"
