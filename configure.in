@@ -534,9 +534,9 @@ dnl
 				else
 					libdir="$libroot/lib"
 				fi
+				moduledir="$libdir/ganglia"
 			fi
 		fi
-		moduledir=${libdir}/ganglia
 		;;
 *ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
 		LIBS="-lpthread $LIBS"
