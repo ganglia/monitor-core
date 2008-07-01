@@ -1,5 +1,10 @@
 #ifndef GM_METRIC_H
 #define GM_METRIC_H 1
+
+#ifndef _LARGEFILE64_SOURCE
+#define _LARGEFILE64_SOURCE
+#endif
+
 #include <rpc/rpc.h>
 
 #include <gm_mmn.h>
