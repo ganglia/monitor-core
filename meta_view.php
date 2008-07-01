@@ -64,9 +64,10 @@ if ($sort == "descending") {
 # Display the sources. The first is ourself, the rest are our children.
 foreach ( $sorted_sources as $source => $val )
    {
-     if ($source == "AAAAA.$self") { # SORT HACK to keep $self first; see above
-       $source = $self;
-     }
+      # XXX: SORT HACK to keep $self first; see above
+      if ($source == "AAAAA.$self") {
+            $source = $self;
+      }
       $m = $metrics[$source];
       $sourceurl = rawurlencode($source);
       if (isset($grid[$source]['GRID']) and $grid[$source]['GRID'])
