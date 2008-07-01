@@ -27,3 +27,7 @@ automake (GNU automake) 1.8.3
 autoconf (GNU Autoconf) 2.53
 ltmain.sh (GNU libtool) 1.4.2
 xsltproc (The XSLT C library for GNOME)
+
+Additionally,  you might need the following
+
+gperf (GNU gperf) 3.0.3 (used in gmetad's xml and type hash functions)
