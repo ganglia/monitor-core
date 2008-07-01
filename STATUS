@@ -49,7 +49,7 @@ BACKPORT PROPOSALS:
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
 
-  * web: return correctly formatted web content for graph.php when debug>2
+  * web: return correctly formatted web content for graph.php when debug > 2
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04335.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1438
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1465
@@ -72,10 +72,17 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1467
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1468
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1475
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1487
+    +1: carenas
 
-  * include: support building modules with a C++ compiler
+  * gmond: drop C++ as a supported language for building DSO metrics
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1464
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1490
+    +1: carenas
+
+  * include: protect gmond 32bit module users against APR header bug
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1488
+    +1: carenas
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
@@ -95,6 +102,11 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1461
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1462
     +1: bnicholes
+    -1: carenas
+    carenas: moduledir will be pulled with the biarch fixes, and this patch
+             series will conflict.  adding a configuration option to gmond
+	     so this can be changed at runtime a worthy addition, updating
+	     the documentation a must.
 
   * gmetad: gperf generated files for C99 support and build cleanup
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04365.html
@@ -103,4 +115,15 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1471
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1472
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1476
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1479
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1485
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1486
     +1: carenas
+
+  * include: support building modules with a C++ compiler
+    http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1464
+
+  * web: keep grid summary always on top for meta view for all sorting methods
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1480
