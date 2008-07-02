@@ -64,7 +64,7 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04386.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1313
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1314
-    +1: carenas
+    +1: carenas, bnicholes
 
   * build: respect libdir setting and allow for working default in 64bit linux
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04275.html
@@ -73,17 +73,29 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1468
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1475
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1487
-    +1: carenas
+    +1: carenas, bnicholes
 
   * include: protect gmond 32bit module users against APR header bug
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04388.html  
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1488
     +1: carenas
+    +0: bnicholes - see a follow-up message in the same message thread.
     
   * gmond: drop C++ as a supported language for building DSO metrics
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1490
     +1: carenas
+    +0: bnicholes
+    bnicholes: I understand that the language label of "C/C++" might be a little misleading
+               but it is still a more meaningful language label than "c". If we change to a 
+	       language label of "c" now and then more fully support C++ later, we will have 
+	       to add another language label.  Internally there is no difference in how a C 
+	       module or a C++ module would be handled however to avoid confusion later, we 
+	       would have to treat them externally as being different.  Even if the
+	       other changes are applied, I would still rather keep the "C/C++" language
+	       label so that no configuration file changes will be necessary later when
+	       C++ is more fully supported.
+
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
@@ -121,6 +133,11 @@ BACKPORT PROPOSALS NEXT VERSION:
              series will conflict.  adding a configuration option to gmond
 	     so this can be changed at runtime a worthy addition, updating
 	     the documentation a must.
+    bnicholes: Do you disagree with the patch or the implementation? It sounds
+               like it is just the implementation that has a conflict however
+	       the proposed patch is fine. If there is a conflict then the
+	       implementation can be reworked before backporting, but don't
+	       veto the patch in this case.
 
   * include: support building modules with a C++ compiler
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
