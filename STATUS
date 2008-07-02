@@ -72,18 +72,8 @@ BACKPORT PROPOSALS:
   * gmond: drop C++ as a supported language for building DSO metrics
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1490
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1500
     +1: carenas
-    +0: bnicholes
-    bnicholes: I understand that the language label of "C/C++" might be a little misleading
-               but it is still a more meaningful language label than "c". If we change to a 
-	       language label of "c" now and then more fully support C++ later, we will have 
-	       to add another language label.  Internally there is no difference in how a C 
-	       module or a C++ module would be handled however to avoid confusion later, we 
-	       would have to treat them externally as being different.  Even if the
-	       other changes are applied, I would still rather keep the "C/C++" language
-	       label so that no configuration file changes will be necessary later when
-	       C++ is more fully supported.
-
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
