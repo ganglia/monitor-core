@@ -1,4 +1,3 @@
-
 #ifndef GM_MMN_H
 #define GM_MMN_H
 

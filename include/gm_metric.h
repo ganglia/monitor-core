@@ -101,5 +101,4 @@ struct mmodule_struct {
                 NULL, \
                 MMODULE_MAGIC_COOKIE
 
-
 #endif  /* GM_METRIC_H */
