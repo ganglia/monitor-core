@@ -60,12 +60,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
     +1: carenas
 
-  * build: openbsd: workaround broken rrdtool package dependency in xbase
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04386.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1313
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1314
-    +1: carenas, bnicholes
-
   * build: respect libdir setting and allow for working default in 64bit linux
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04275.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1452

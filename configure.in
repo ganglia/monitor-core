@@ -229,17 +229,23 @@ if test x"$librrdpath" != x && test x"$librrdpath" != xyes ; then
   LDFLAGS="$LDFLAGS -L$librrdpath/lib"
 fi
 
-if test "$gmetad" = yes ; then
-   AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], [echo "rrd lib not found"], [-lm])
+if test x"$gmetad" = xyes ; then
    AC_CHECK_HEADERS(rrd.h)
-   if test "$ac_cv_lib_rrd_rrd_create" != yes; then
-      echo
-      echo "The Ganglia Meta Daemon uses the Round-Robin Database Tool (rrdtool)"
-      echo "for storing historical information.  You have chosen to compile the"
-      echo "monitoring core with gmetad but librrd could not be found.  Please"
-      echo "visit http://www.rrdtool.org/, download rrdtool and then try again"
-      echo
-      exit;
+   AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], [], [-lm])
+   if test x"$ac_cv_lib_rrd_rrd_create" != xyes; then
+      echo "Trying harder by including the X library path"
+      unset ac_cv_lib_rrd_rrd_create
+      LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/X11R6/lib"
+      AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], [], [-lm])
+      if test x"$ac_cv_lib_rrd_rrd_create" != xyes; then
+         echo
+         echo "The Ganglia Meta Daemon uses the Round-Robin Database Tool (rrdtool)"
+         echo "for storing historical information.  You have chosen to compile the"
+         echo "monitoring core with gmetad but librrd could not be found.  Please"
+         echo "visit http://www.rrdtool.org/, download rrdtool and then try again"
+         echo
+         exit;
+      fi
    fi
 fi
 
