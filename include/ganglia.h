@@ -7,15 +7,6 @@
 #include <gm_protocol.h>
 #endif
 
-/* For C++ */
-#ifdef __cplusplus
-#define BEGIN_C_DECLS extern "C" {
-#define END_C_DECLS }
-#else
-#define BEGIN_C_DECLS
-#define END_C_DECLS
-#endif
-
 #define SPOOF "SPOOF"
 #define SPOOF_HOST SPOOF"_HOST"
 #define SPOOF_HEARTBEAT SPOOF"_HEARTBEAT"
@@ -42,7 +33,10 @@ struct Ganglia_metric {
 };
 typedef struct Ganglia_metric * Ganglia_metric;
 
-BEGIN_C_DECLS
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 Ganglia_gmond_config
 Ganglia_gmond_config_create(char *path, int fallback_to_default);
 void Ganglia_gmond_config_destroy(Ganglia_gmond_config config);
@@ -70,7 +64,8 @@ const char*     slope_to_cstr(unsigned int slope);
 
 void build_default_gmond_configuration(Ganglia_pool p);
 
-#define END_C_DECLS
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif
