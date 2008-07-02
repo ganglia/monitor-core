@@ -1,6 +1,10 @@
 #ifndef GM_MSG_H
 #define GM_MSG_H 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int ganglia_quiet_errors;
 
 void debug_msg(const char *format, ...); 
@@ -14,7 +18,8 @@ void err_dump (const char *fmt, ...);
 void err_msg (const char *fmt, ...);
 void err_quit (const char *fmt, ...);
 
-#define END_C_DECLS
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif
