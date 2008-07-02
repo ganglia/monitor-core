@@ -69,12 +69,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1487
     +1: carenas, bnicholes
 
-  * include: protect gmond 32bit module users against APR header bug
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04388.html  
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1488
-    +1: carenas
-    +0: bnicholes - see a follow-up message in the same message thread.
-    
   * gmond: drop C++ as a supported language for building DSO metrics
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1490
