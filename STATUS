@@ -55,15 +55,15 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1465
     +1: carenas
 
-  * Do not reset header and run passthru() command if in debug mode
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1423 
-    +1: bernardli
-    -1: carenas
-    carenas: obsoleted by previous proposal
-
   * web: remove redirect hack for grid pulldown navigation
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
+    +1: carenas
+
+  * build: openbsd: workaround broken rrdtool package dependency in xbase
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04386.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1313
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1314
     +1: carenas
 
   * build: respect libdir setting and allow for working default in 64bit linux
@@ -75,13 +75,14 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1487
     +1: carenas
 
+  * include: protect gmond 32bit module users against APR header bug
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04388.html  
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1488
+    +1: carenas
+    
   * gmond: drop C++ as a supported language for building DSO metrics
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1490
-    +1: carenas
-
-  * include: protect gmond 32bit module users against APR header bug
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1488
     +1: carenas
 
 BACKPORT PROPOSALS NEXT VERSION:
@@ -97,17 +98,6 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
 
-  * Construct the library path to the modules within gmond, based off of the
-     --libdir configure	parameter rather than hard coding it in the configuration files.
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1461
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1462
-    +1: bnicholes
-    -1: carenas
-    carenas: moduledir will be pulled with the biarch fixes, and this patch
-             series will conflict.  adding a configuration option to gmond
-	     so this can be changed at runtime a worthy addition, updating
-	     the documentation a must.
-
   * gmetad: gperf generated files for C99 support and build cleanup
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04365.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1445
@@ -120,9 +110,24 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1486
     +1: carenas
 
+  * Construct the library path to the modules within gmond, based off of the
+    --libdir configure	parameter rather than hard coding it in the
+    configuration files.
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1461
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1462
+    +1: bnicholes
+    -1: carenas
+    carenas: moduledir will be pulled with the biarch fixes, and this patch
+             series will conflict.  adding a configuration option to gmond
+	     so this can be changed at runtime a worthy addition, updating
+	     the documentation a must.
+
   * include: support building modules with a C++ compiler
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1464
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1492
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1494
+    +1: carenas
 
   * web: keep grid summary always on top for meta view for all sorting methods
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
