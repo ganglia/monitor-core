@@ -53,7 +53,7 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04335.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1438
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1465
-    +1: carenas
+    +1: carenas, bernardli
 
   * web: remove redirect hack for grid pulldown navigation
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
@@ -128,3 +128,4 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1480
     +1: bernardli
+    bernardli: Why can't this patch be backported in the current version?
