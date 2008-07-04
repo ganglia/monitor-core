@@ -71,6 +71,8 @@ int host_tmax = 20;
 int cleanup_threshold = 300;
 /* Time interval before send another metadata packet */
 int send_metadata_interval = 0;
+/* The directory where DSO modules are located */
+char *module_dir = NULL;
 
 /* The array for outgoing UDP message channels */
 Ganglia_udp_send_channels udp_send_channels = NULL;
@@ -217,6 +219,8 @@ process_configuration_file(void)
   cleanup_threshold   = cfg_getint( tmp, "cleanup_threshold");
   /* Get the send meta data packet interval */
   send_metadata_interval = cfg_getint( tmp, "send_metadata_interval");
+  /* Get the DSO module dir */
+  module_dir = cfg_getstr(tmp, "module_dir");
 
   /* Commandline for debug_level trumps configuration file behaviour ... */
   if (args_info.debug_given) 
@@ -1704,7 +1708,7 @@ load_metric_modules( void )
 
         cfg_t *module = cfg_getnsec(tmp, "module", j);
 
-        /* Check the module language to see if were are
+        /* Check the module language to see if we are
            meant to handle it or delegate it to an
            alternate module scripting interface
         */
@@ -1715,9 +1719,17 @@ load_metric_modules( void )
         modPath = cfg_getstr(module, "path");
         if(modPath && *modPath != '/' && *modPath != '.')
           {
-            merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR,
-                        modPath, APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE,
-                        global_context);
+            if (module_dir)
+                merge_ret = apr_filepath_merge(&modPath, module_dir,
+                                modPath,
+                                APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE,
+                                global_context);
+            else
+                merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR,
+                                modPath,
+                                APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE,
+                                global_context);
+
             if (merge_ret != APR_SUCCESS) 
                 modPath = cfg_getstr(module, "path");
           }

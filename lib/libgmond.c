@@ -62,6 +62,7 @@ static cfg_opt_t globals_opts[] = {
   CFG_INT("cleanup_threshold", 300, CFGF_NONE),
   CFG_BOOL("gexec", 0, CFGF_NONE),
   CFG_INT("send_metadata_interval", 0, CFGF_NONE),
+  CFG_STR("module_dir", NULL, CFGF_NONE),
   CFG_END()
 };
 
