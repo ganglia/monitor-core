@@ -531,7 +531,7 @@ boottime_func ( void )
    p = strstr ( p, "btime" );
    if(p) { 
      p = skip_token ( p );
-     val.uint32 = strtod ( p, (char **)NULL );
+     val.uint32 = atoi ( p );
    } else {
      val.uint32 = 0;
    }
