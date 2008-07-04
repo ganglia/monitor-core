@@ -12,9 +12,7 @@ Release history:
 Contributors looking for a mission:
 
   * Just do an egrep on "TODO", "XXX" or "FIXME" in the source.
-
   * Review the bug database at: http://bugzilla.ganglia.info/
-
   * Open bugs in the bug database.
 
 CURRENT RELEASE NOTES:
@@ -34,10 +32,11 @@ RELEASE SHOWSTOPPERS:
 
   * Ganglia Web Frontend conflicting license for Templating class
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04072.html
-    bnicholes: I don't consider this to be a showstopper since it is not a regression
-      from previously released versions of Ganglia. We should get this fixed in order
-      to resolve any licensing conflicts in the web front end, but the affects are
-      no worse than any previously released code.
+    bnicholes: I don't consider this to be a showstopper since it is not a
+               regression from previously released versions of Ganglia.
+               We should get this fixed in order to resolve any licensing 
+               conflicts in the web front end, but the affects are no worse
+               than any previously released code.
 
 BACKPORT PROPOSALS:
  <TEMPLATE>
@@ -63,10 +62,17 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1487
     +1: carenas, bnicholes
 
-  * gmond: drop C++ as a supported language for building DSO metrics
+  * include: support building modules with a C++ compiler
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1490
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1500
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1464
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1492
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1494
+    +1: carenas
+
+  * web: keep grid summary always on top for meta view for all sorting methods
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1480
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1482
     +1: carenas
 
 BACKPORT PROPOSALS NEXT VERSION:
@@ -82,7 +88,7 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
 
-  * gmetad: gperf generated files for C99 support and build cleanup
+  * gmetad: support for C99 in gperf generated files and build cleanup
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04365.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1445
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1446
@@ -99,27 +105,9 @@ BACKPORT PROPOSALS NEXT VERSION:
     configuration files.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1461
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1462
-    +1: bnicholes
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1505
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1506
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1507
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1508
     -1: carenas
-    carenas: moduledir will be pulled with the biarch fixes, and this patch
-             series will conflict.  adding a configuration option to gmond
-	     so this can be changed at runtime a worthy addition, updating
-	     the documentation a must.
-    bnicholes: Do you disagree with the patch or the implementation? It sounds
-               like it is just the implementation that has a conflict however
-	       the proposed patch is fine. If there is a conflict then the
-	       implementation can be reworked before backporting, but don't
-	       veto the patch in this case.
-
-  * include: support building modules with a C++ compiler
-    http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1464
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1492
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1494
-    +1: carenas
-
-  * web: keep grid summary always on top for meta view for all sorting methods
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1480
-    +1: bernardli
-    bernardli: Why can't this patch be backported in the current version?
+    carenas: the documentation must be updated
