@@ -140,15 +140,18 @@ it will not be compiled unless you explicit request it by using a B<--with-gmeta
   % ./configure --with-gmetad
 
 The configure script will fail if it cannot find the rrdtool library and header files.
-By default, it expects to find them at /usr/include/rrd.h and /usr/lib/librrd.a.  If 
-you installed them in different locations then you need to add the following configure
-flags
+By default, it expects to find them at /usr/include/rrd.h and
+/usr/lib/librrd.so.
+If you installed them in different locations then you need to instruct
+configure where to find them using:
 
-  % ./configure CFLAGS="-I/rrd/header/path" CPPFLAGS="-I/rrd/header/path" \
-     LDFLAGS="-L/rrd/library/path" --with-gmetad
+  % ./configure --with-librrd=/rrd/path --with-gmetad
 
-of course, you need to substitute C</rrd/header/path> and C</rrd/library/path> with the
-real location of the rrd tool header file and library respectively.
+Of course, you need to substitute C</rrd/path> with the real location of the
+rrd tool directory where the header file can be located inside an include
+subdirectory and the library can be located inside a lib subdirectory.
+As an alternative you could set "-L" in LDFLAGS, and "-I" in CFLAGS and
+CPPFLAGS for the library path and the header path respectively.
 
 =item B<AIX should not be compiled with shared libraries>
 
