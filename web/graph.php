@@ -222,10 +222,14 @@ if($command) {
     header ("Cache-Control: no-cache, must-revalidate");   // HTTP/1.1
     header ("Pragma: no-cache");                     // HTTP/1.0
     if ($debug>2) {
-        print htmlentities( $command ) . "\n\n\n\n\n";
+        header ("Content-type: text/html");
+        print "<html><body>";
+        print htmlentities( $command );
+        print "</body></html>";
+    } else {
+        header ("Content-type: image/gif");
+        passthru($command);
     }
-    header ("Content-type: image/gif");
-    passthru($command);
 }
 
 ?>

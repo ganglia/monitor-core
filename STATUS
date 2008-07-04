@@ -49,12 +49,6 @@ BACKPORT PROPOSALS:
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
 
-  * web: return correctly formatted web content for graph.php when debug > 2
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04335.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia/trunk/monitor-core/web/graph.php?r1=1231&r2=1438
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1465
-    +1: carenas, bernardli
-
   * web: remove redirect hack for grid pulldown navigation
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
