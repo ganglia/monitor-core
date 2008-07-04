@@ -30,7 +30,13 @@
 * Author: Brad Nicholes (bnicholes novell.com)
 ******************************************************************************/
 
+/*
+ * The ganglia metric "C" interface, required for building DSO modules.
+ */
 #include <gm_metric.h>
+
+#include <stdlib.h>
+#include <strings.h>
 #include <time.h>
 
 /*
@@ -38,6 +44,7 @@
  * We'll fill it in at the end of the module.
  */
 extern mmodule example_module;
+
 static int random_max = 50;
 static int constant_value = 20;
 
