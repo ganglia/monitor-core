@@ -9,8 +9,8 @@ int
 get_min_mtu( void )
 {
   struct ifi_info *info, *n;
-  int min_mtu_set = 0;
-  int min_mtu = 0;
+  unsigned min_mtu_set = 0;
+  unsigned min_mtu = 0;
 
   info = Get_ifi_info(AF_INET, 0);
 
