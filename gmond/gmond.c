@@ -1715,8 +1715,9 @@ load_metric_modules( void )
         modPath = cfg_getstr(module, "path");
         if(modPath)
           {
-            merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR, modPath,
-                               APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE, global_context);
+            merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR,
+                        modPath, APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE,
+                        global_context);
             if (merge_ret != APR_SUCCESS) 
                 modPath = cfg_getstr(module, "path");
           }
