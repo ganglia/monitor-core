@@ -1713,7 +1713,7 @@ load_metric_modules( void )
             continue;
 
         modPath = cfg_getstr(module, "path");
-        if(modPath)
+        if(modPath && *modPath != '/' && *modPath != '.')
           {
             merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR,
                         modPath, APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE,
