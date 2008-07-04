@@ -1713,7 +1713,6 @@ load_metric_modules( void )
             continue;
 
         modPath = cfg_getstr(module, "path");
-#ifdef GANGLIA_MODULE_DIR
         if(modPath)
           {
             merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR, modPath,
@@ -1721,7 +1720,6 @@ load_metric_modules( void )
             if (merge_ret != APR_SUCCESS) 
                 modPath = cfg_getstr(module, "path");
           }
-#endif 
         modName = cfg_getstr(module, "name");
         modparams = cfg_getstr(module, "params");
         modParams_list = apr_array_make(global_context, 2, sizeof(mmparam));
