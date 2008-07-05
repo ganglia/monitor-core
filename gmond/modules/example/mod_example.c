@@ -116,7 +116,7 @@ static g_val_t ex_metric_handler ( int metric_index )
 
 static Ganglia_25metric ex_metric_info[] = 
 {
-    {0, "Random_Numbers", 90, GANGLIA_VALUE_UNSIGNED_INT, "s", "both", "%u", UDP_HEADER_SIZE+8, "Example module metric (random numbers)"},
+    {0, "Random_Numbers", 90, GANGLIA_VALUE_UNSIGNED_INT, "Num", "both", "%u", UDP_HEADER_SIZE+8, "Example module metric (random numbers)"},
     {0, "Constant_Number", 90, GANGLIA_VALUE_UNSIGNED_INT, "Num", "zero", "%u", UDP_HEADER_SIZE+8, "Example module metric (constant number)"},
     {0, NULL}
 };
