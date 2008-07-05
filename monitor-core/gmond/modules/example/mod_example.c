@@ -103,14 +103,14 @@ static g_val_t ex_metric_handler ( int metric_index )
     switch (metric_index) {
     case 0:
         val.int32 = rand()%random_max;
-        return val;
+        break;
     case 1:
         val.int32 = constant_value;
-        return val;
+        break;
+    default:
+        val.int32 = 0; /* default fallback */
     }
 
-    /* default case */
-    val.int32 = 0;
     return val;
 }
 
