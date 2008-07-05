@@ -52,6 +52,7 @@ static int ex_metric_init ( apr_pool_t *p )
 {
     const char* str_params = example_module.module_params;
     apr_array_header_t *list_params = example_module.module_params_list;
+    mmparam *params;
     int i;
 
     srand(time(NULL)%99);
@@ -64,7 +65,7 @@ static int ex_metric_init ( apr_pool_t *p )
     /* Multiple name/value pair parameters. */
     if (list_params) {
         debug_msg("[mod_example]Received following params list: ");
-        mmparam *params = (mmparam*) list_params->elts;
+        params = (mmparam*) list_params->elts;
         for(i=0; i< list_params->nelts; i++) {
             debug_msg("\tParam: %s = %s", params[i].name, params[i].value);
             if (!strcasecmp(params[i].name, "RandomMax")) {
