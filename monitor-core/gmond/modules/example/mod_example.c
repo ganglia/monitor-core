@@ -45,8 +45,8 @@
  */
 extern mmodule example_module;
 
-static int random_max = 50;
-static int constant_value = 20;
+static unsigned int random_max = 50;
+static unsigned int constant_value = 20;
 
 static int ex_metric_init ( apr_pool_t *p )
 {
@@ -102,13 +102,13 @@ static g_val_t ex_metric_handler ( int metric_index )
     */
     switch (metric_index) {
     case 0:
-        val.int32 = rand()%random_max;
+        val.uint32 = rand()%random_max;
         break;
     case 1:
-        val.int32 = constant_value;
+        val.uint32 = constant_value;
         break;
     default:
-        val.int32 = 0; /* default fallback */
+        val.uint32 = 0; /* default fallback */
     }
 
     return val;
@@ -117,7 +117,7 @@ static g_val_t ex_metric_handler ( int metric_index )
 static Ganglia_25metric ex_metric_info[] = 
 {
     {0, "Random_Numbers", 90, GANGLIA_VALUE_UNSIGNED_INT, "s", "both", "%u", UDP_HEADER_SIZE+8, "Example module metric (random numbers)"},
-    {0, "Constant_Number", 90, GANGLIA_VALUE_UNSIGNED_INT, "Num", "zero", "%hu", UDP_HEADER_SIZE+8, "Example module metric (constant number)"},
+    {0, "Constant_Number", 90, GANGLIA_VALUE_UNSIGNED_INT, "Num", "zero", "%u", UDP_HEADER_SIZE+8, "Example module metric (constant number)"},
     {0, NULL}
 };
 
