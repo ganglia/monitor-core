@@ -174,7 +174,7 @@ AC_ARG_WITH( libconfuse,
 AC_ARG_WITH( moduledir,
 [  --with-moduledir=DIR   Base directory for dynamically loadable modules],
   moduledir="$withval", 
-  moduledir=${libdir}/ganglia)
+  moduledir="$libdir/ganglia")
 
 AC_ARG_ENABLE(debug,
 [
@@ -516,7 +516,7 @@ dnl
 			if test x"$libdir" = x"\${exec_prefix}/lib"; then
 				if test x"$exec_prefix" = xNONE; then
 					if test x"$prefix" = xNONE; then
-						libroot="/usr"
+						libroot="$ac_default_prefix"
 					else
 						libroot="$prefix"
 					fi
@@ -609,6 +609,16 @@ AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 dnl Where to look for libraries (/usr/lib vs /usr/lib64)
 AC_SUBST(libdir)
 
+if test x"$moduledir" = x"\${exec_prefix}/lib/ganglia"; then
+   if test x"$exec_prefix" = xNONE; then
+      if test x"$prefix" = xNONE; then
+         exec_prefix="$ac_default_prefix"
+      else
+         exec_prefix="$prefix"
+      fi
+   fi
+   moduledir=`eval echo "$moduledir"`
+fi
 AC_DEFINE_UNQUOTED(GANGLIA_MODULE_DIR, "$moduledir", GANGLIA_MODULE_DIR)
 AC_SUBST(moduledir)
 
