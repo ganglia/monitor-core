@@ -511,7 +511,7 @@ dnl For fsusage.c - disk usage.
 dnl
 		AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
 		AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
-		if test x"$moduledir" = x"\$libdir/ganglia"; then
+		if test x"$moduledir" = x"\${exec_prefix}/lib/ganglia"; then
 		   if test x"$build_cpu" != xia64 && \
 		      test x"$build_cpu" != xalpha; then
 		      if test x"$libdir" = x"\${exec_prefix}/lib"; then
@@ -534,8 +534,8 @@ dnl
 		         else
 		            libdir="$libroot/lib"
 		         fi
-		         moduledir="$libdir/ganglia"
 		      fi
+		      moduledir="$libdir/ganglia"
 		   fi
 		fi
 		;;
