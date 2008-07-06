@@ -609,7 +609,7 @@ AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 dnl Where to look for libraries (/usr/lib vs /usr/lib64)
 AC_SUBST(libdir)
 
-AC_DEFINE_UNQUOTED(GANGLIA_MODULE_DIR, ["$moduledir"], GANGLIA_MODULE_DIR)
+AC_DEFINE_UNQUOTED(GANGLIA_MODULE_DIR, "$moduledir", GANGLIA_MODULE_DIR)
 AC_SUBST(moduledir)
 
 
