@@ -91,7 +91,7 @@ Configuring Gmond for python support
 
 Configuring Gmond to support python based modules is as easy as loading
 any other type of gmond dynamically loadable metric module. The name of
-the python support module is mod_python.so. A base configuration file 
+the python support module is modpython.so. A base configuration file 
 is included in the Ganglia source code and should have been installed
 automatically if done through an RPM. The basic configuration that
 should be added to or included by gmond.conf in a 32bit Linux node is as
