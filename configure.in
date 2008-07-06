@@ -606,8 +606,8 @@ dnl
 AC_SUBST(varstatedir)
 AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
-dnl Python module config files need to know where to look for libraries (/usr/lib vs /usr/lib64)
-AC_SUBST_FILE(libdir)
+dnl Where to look for libraries (/usr/lib vs /usr/lib64)
+AC_SUBST(libdir)
 
 AC_DEFINE_UNQUOTED(GANGLIA_MODULE_DIR, ["$moduledir"], GANGLIA_MODULE_DIR)
 AC_SUBST(moduledir)
