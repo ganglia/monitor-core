@@ -512,32 +512,31 @@ dnl
 		AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
 		AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
 		if test x"$moduledir" = x"\$libdir/ganglia"; then
-			if test x"$build_cpu" != xia64 && \
-			    test x"$build_cpu" != xalpha; then
-				if test x"$libdir" = x"\${exec_prefix}/lib"; then
-					if test x"$exec_prefix" = xNONE; then
-						if test x"$prefix" = xNONE; then
-							libroot="$ac_default_prefix"
-						else
-							libroot="$prefix"
-						fi
-					else
-						libroot="$exec_prefix"
-					fi
-	
-					AC_TRY_COMPILE([], [],
-					    [file conftest.$ac_objext > conftest.file])
-					FILE=`cat conftest.file`
-					WIDTH_CPU=`expr "x$FILE" : '.*ELF \(.*\)-bit '`
-					rm -f conftest.file
-					if test x"$WIDTH_CPU" = x64; then
-						libdir="$libroot/lib64"
-					else
-						libdir="$libroot/lib"
-					fi
-					moduledir="$libdir/ganglia"
-				fi
-			fi
+		   if test x"$build_cpu" != xia64 && \
+		      test x"$build_cpu" != xalpha; then
+		      if test x"$libdir" = x"\${exec_prefix}/lib"; then
+		         if test x"$exec_prefix" = xNONE; then
+		            if test x"$prefix" = xNONE; then
+		               libroot="$ac_default_prefix"
+		            else
+		               libroot="$prefix"
+		            fi
+		         else
+		            libroot="$exec_prefix"
+			 fi
+	                 AC_TRY_COMPILE([], [],
+		                        [file conftest.$ac_objext > conftest.file])
+		         FILE=`cat conftest.file`
+		         WIDTH_CPU=`expr "x$FILE" : '.*ELF \(.*\)-bit '`
+		         rm -f conftest.file
+		         if test x"$WIDTH_CPU" = x64; then
+		            libdir="$libroot/lib64"
+		         else
+		            libdir="$libroot/lib"
+		         fi
+		         moduledir="$libdir/ganglia"
+		      fi
+		   fi
 		fi
 		;;
 *ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
@@ -550,24 +549,23 @@ dnl
 		EXPORT_SYMBOLS="-Wl,-bexpfull"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		if test "$ac_cv_lib_perfstat_perfstat_cpu_total" = yes ; then
-			CFLAGS="$CFLAGS -DHAVE_PERFSTAT" 
+		   CFLAGS="$CFLAGS -DHAVE_PERFSTAT" 
 		else
-			echo "libperfstat not detected."
-			echo "For AIX 5 you need to install bos.perf.libperfstat"
+		   echo "libperfstat not detected."
+		   echo "For AIX 5 you need to install bos.perf.libperfstat"
 		fi
 		AC_DEFINE(AIX, 1, AIX);;
-
 *hpux*)		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
 		LIBS="-lpthread $LIBS"
 		EXPORT_SYMBOLS="-Wl,-E"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		AC_DEFINE(HPUX,1,HPUX);;
-*irix*)         AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
-                CFLAGS="$CFLAGS -D_IRIX_SOURCE"
-                AC_DEFINE(IRIX,1,IRIX);;
-*osf*)	 	metric_source="osf.c"	
+*irix*)		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		CFLAGS="$CFLAGS -D_IRIX_SOURCE"
+		AC_DEFINE(IRIX,1,IRIX);;
+*osf*)		metric_source="osf.c"	
 		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
-                AC_DEFINE(OSF,1,OSF);;
+		AC_DEFINE(OSF,1,OSF);;
 *darwin*) 	AC_DEFINE(DARWIN,1,DARWIN)
 		EXPORT_SYMBOLS="-export-all-symbols"
 		;;
@@ -577,15 +575,15 @@ dnl
 		   CFLAGS="$CFLAGS -xc99"
 		   LIBS="-lm $LIBS"
 		fi 
-                AC_DEFINE(SOLARIS,1,SOLARIS);;
-*freebsd*)      CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
+		AC_DEFINE(SOLARIS,1,SOLARIS);;
+*freebsd*)	CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		varstatedir="/var/db"
-                osreldate=`awk '/^\#define[[:space:]]*__FreeBSD_version/ { print $3 }' /usr/include/osreldate.h`
-                if test $osreldate -lt 502102; then
-                        CFLAGS="-pthread $CFLAGS -D_REENTRANT"
-                fi
-                AC_DEFINE(FREEBSD, 1, FREEBSD);; 
+		osreldate=`awk '/^\#define[[:space:]]*__FreeBSD_version/ { print $3 }' /usr/include/osreldate.h`
+		if test $osreldate -lt 502102; then
+		   CFLAGS="-pthread $CFLAGS -D_REENTRANT"
+		fi
+		AC_DEFINE(FREEBSD, 1, FREEBSD);; 
 *dragonfly*)	CFLAGS="-pthread $CFLAGS -D_REENTRANT"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		varstatedir="/var/db"
@@ -596,7 +594,7 @@ dnl
 *openbsd*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		varstatedir="/var/db"
 		AC_DEFINE(OPENBSD, 1, OPENBSD);;
-*cygwin*)      	LDFLAGS="-L/bin"
+*cygwin*)	LDFLAGS="-L/bin"
 		EXPORT_SYMBOLS="-export-all-symbols"
 		AC_DEFINE(CYGWIN, 1, CYGWIN)
 esac
