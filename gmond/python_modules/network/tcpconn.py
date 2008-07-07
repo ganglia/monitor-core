@@ -246,7 +246,7 @@ class NetstatThread(threading.Thread):
 
             #Call the netstat utility and split the output into separate lines
             fd_poll = select.poll()
-            self.popenChild = popen2.Popen3("netstat -t -a")
+            self.popenChild = popen2.Popen3("netstat -t -a -n")
             fd_poll.register(self.popenChild.fromchild)
 
             poll_events = fd_poll.poll()
