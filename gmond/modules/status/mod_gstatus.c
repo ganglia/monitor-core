@@ -78,9 +78,11 @@ static int gs_metric_init (apr_pool_t *p)
         MMETRIC_ADD_METADATA(gmi,MGROUP,"gstatus");
     }
 
-    /* Replace the empty static metric definition array with the
-       dynamic array that we just created 
+    /* Add a terminator to the array and replace the empty static metric definition 
+        array with the dynamic array that we just created 
     */
+    gmi = apr_array_push(metric_info);
+    memset (gmi, 0, sizeof(*gmi));
     gstatus_module.metrics_info = (Ganglia_25metric *)metric_info->elts;
     return 0;
 }
