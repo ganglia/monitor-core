@@ -72,14 +72,16 @@ BACKPORT PROPOSALS:
     +1: carenas
     carenas: needs patch from thread that includes documentation fixes out of
              tree and fixes conflicts from the trunk merge
+    -1: bnicholes: The code works as-is today and this patch doesn't actually
+                   solve any real issue.
 
   * documentation: update instructions for building gmetad
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1510
-    +1: carenas
+    +1: carenas, bnicholes
 
   * documentation: use the right DSO name for modpython
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1526
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmond: avoid latency and timeouts when using the tcpconn python module
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
@@ -87,18 +89,20 @@ BACKPORT PROPOSALS:
     -1: carenas
     carenas: incomplete fix
 
-  * gmond: add a NULL terminator to the dynamic metric arrays
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04439.html
+  * gmond: add a NULL terminator to the dynamic metric info arrays in order to
+           avoid a seg-fault due to uninitialized memory
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04442.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1529
+    +1: bnicholes
 
   * documentation: update instructions for building snapshots
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg03821.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1531
-    +1: carenas
+    +1: carenas, bnicholes
 
   * build: 64bit biarch support
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04451.html
-    +1: carenas
+    +1: carenas, bnicholes
     carenas: uses a custom made patch for 3.1 as shown in the email thread that
              restores all functionality lost by the original patch as an
 	     intermediate step towars backporting more intrusive fix from trunk
