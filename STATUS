@@ -75,10 +75,6 @@ BACKPORT PROPOSALS:
     -1: bnicholes: The code works as-is today and this patch doesn't actually
                    solve any real issue.
 
-  * documentation: update instructions for building gmetad
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1510
-    +1: carenas, bnicholes
-
   * gmond: avoid latency and timeouts when using the tcpconn python module
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1528
@@ -90,11 +86,6 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04442.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1529
     +1: bnicholes
-
-  * documentation: update instructions for building snapshots
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg03821.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1531
-    +1: carenas, bnicholes
 
   * build: 64bit biarch support
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04451.html

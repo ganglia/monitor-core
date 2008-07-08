@@ -6,6 +6,14 @@ development.
 To prepare the distribution for compilation, run the 
 script "./bootstrap".
 
+If you are interested in getting a snapshot for distribution
+you have to first (before running bootstrap) edit the configure.in
+file and update the value of the variable GANGLIA_NANO_VERSION that
+your snapshot represents and that usually corresponds to the numeric
+value returned by:
+
+./svnversion .
+
 To build a distribution tarball, run:
 
 ./configure
