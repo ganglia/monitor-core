@@ -79,10 +79,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1510
     +1: carenas, bnicholes
 
-  * documentation: use the right DSO name for modpython
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1526
-    +1: carenas, bnicholes
-
   * gmond: avoid latency and timeouts when using the tcpconn python module
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1528
