@@ -111,7 +111,6 @@ AC_PREFIX_DEFAULT(/usr)
 dnl The following cpu_vendor_os string goes into config.h.
 dnl
 AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
-AC_DEFINE_UNQUOTED(ARCH, "$host_cpu", ARCH)
 AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
 dnl AC_CYGWIN
 
@@ -576,17 +575,17 @@ dnl
 AC_SUBST(varstatedir)
 AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
-dnl Python module config files need to know where to look for libraries (/usr/lib vs /usr/lib64)
-AC_SUBST_FILE(libdir)
-if test "x$prefix" = xNONE; then
-  prefix="$ac_default_prefix"
+if test x"$libdir" = x"\${exec_prefix}/lib"; then
+   if test x"$exec_prefix" = xNONE; then
+      if test x"$prefix" = xNONE; then
+         exec_prefix="$ac_default_prefix"
+      else
+         exec_prefix="$prefix"
+      fi
+   fi
+   libdir=`eval echo "$libdir"`
 fi
-
-if test "x$host_cpu" = "xx86_64"; then
-  libdir="$prefix/lib64"
-else
-  libdir="$prefix/lib"
-fi
+AC_SUBST(libdir)
 
 AC_OUTPUT(Makefile 
           ganglia-config

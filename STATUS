@@ -87,13 +87,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1529
     +1: bnicholes
 
-  * build: 64bit biarch support
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04451.html
-    +1: carenas, bnicholes
-    carenas: uses a custom made patch for 3.1 as shown in the email thread that
-             restores all functionality lost by the original patch as an
-	     intermediate step towars backporting more intrusive fix from trunk
-
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
    addressed after the current version is released.
