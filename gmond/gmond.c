@@ -1711,12 +1711,12 @@ load_metric_modules( void )
 
         cfg_t *module = cfg_getnsec(tmp, "module", j);
 
-        /* Check the module language to see if we are
-           meant to handle it or delegate it to an
-           alternate module scripting interface
+        /* Check the module language to make sure that
+           the module is loaded correctly or should be
+           delegated to an alternate module interface
         */
         modLanguage = cfg_getstr(module, "language");
-        if (modLanguage) 
+        if (modLanguage && strcasecmp(modLanguage, "C")) 
             continue;
 
         modPath = cfg_getstr(module, "path");
