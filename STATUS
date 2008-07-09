@@ -64,17 +64,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1483
     +1: carenas
 
-  * gmond: define language label as "C" for compiled DSO modules
-    http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1490
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1500
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1530
-    +1: carenas
-    carenas: needs patch from thread that includes documentation fixes out of
-             tree and fixes conflicts from the trunk merge
-    -1: bnicholes: The code works as-is today and this patch doesn't actually
-                   solve any real issue.
-
   * gmond: avoid latency and timeouts when using the tcpconn python module
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1528
@@ -91,6 +80,16 @@ BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
    addressed after the current version is released.
 
+  * gmetad: use platform specific directory for storing RRD
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1306
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1307
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1308
+    +1: carenas
+
+  * contrib: include ganglia-rrd-modify.pl from contrib
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1365
+    +1: carenas
+
   * Allow both a C and python module to create a metric that will spoof a specific host.
      This provides the same spoofing functionality as gmetric but through a metric module.
      It is done by adding SPOOF_HOST and SPOOF_NAME as extra metadata to the metric
@@ -99,6 +98,11 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
+
+  * build: solaris support for Sun Studio
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1417
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1418
+    +1: carenas
 
   * gmetad: support for C99 in gperf generated files and build cleanup
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04365.html
@@ -140,7 +144,20 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1495
     +1: carenas
 
+  * gmond: mod_example code cleanup for portability and clarity
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1489
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1513
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1514
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1515
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1516
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1517
+    +1: carenas
+
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     -1: carenas
     carenas: incomplete fix
+
+  * build: include contrib in package
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1538
+    +1: carenas
