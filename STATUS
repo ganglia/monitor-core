@@ -53,6 +53,12 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
     +1: carenas
 
+  * documentation: gmond.conf(5) proof read and typos
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04461.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1441
+    +1: carenas
+    carenas: conflict resolution fixed in patch proposed in email thread
+
   * web: keep grid summary always on top for meta view for all sorting methods
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1480
@@ -67,14 +73,15 @@ BACKPORT PROPOSALS:
   * gmond: avoid latency and timeouts when using the tcpconn python module
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1528
-    -1: carenas
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1544
+    +1: carenas
     carenas: incomplete fix
 
   * gmond: add a NULL terminator to the dynamic metric info arrays in order to
            avoid a seg-fault due to uninitialized memory
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04442.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1529
-    +1: bnicholes
+    +1: bnicholes, carenas
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
@@ -144,13 +151,14 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1495
     +1: carenas
 
-  * gmond: mod_example code cleanup for portability and clarity
+  * gmond: mod_example code cleanup for portability and usability
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1489
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1513
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1514
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1515
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1516
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1517
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1543
     +1: carenas
 
   * gmond: solaris: define fabsf for solaris < 10
