@@ -83,6 +83,11 @@ static int ex_metric_init ( apr_pool_t *p )
     MMETRIC_INIT_METADATA(&(example_module.metrics_info[0]),p);
     MMETRIC_ADD_METADATA(&(example_module.metrics_info[0]),MGROUP,"random");
     MMETRIC_ADD_METADATA(&(example_module.metrics_info[0]),MGROUP,"example");
+    /*
+     * Usually a metric will be part of one group, but you can add more
+     * if needed as shown above where Random_Numbers is both in the random
+     * and example groups.
+     */
 
     MMETRIC_INIT_METADATA(&(example_module.metrics_info[1]),p);
     MMETRIC_ADD_METADATA(&(example_module.metrics_info[1]),MGROUP,"example");
