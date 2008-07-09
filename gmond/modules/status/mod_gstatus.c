@@ -96,7 +96,7 @@ static g_val_t gs_metric_handler ( int metric_index )
     g_val_t val;
     Ganglia_25metric *gmi = &(gstatus_module.metrics_info[metric_index]);
 
-    val.int32 = ganglia_scoreboard_get(gmi->name);
+    val.uint32 = ganglia_scoreboard_get(gmi->name);
     return val;
 }
 

@@ -42,7 +42,7 @@ static g_val_t load_metric_handler ( int metric_index )
     }
 
     /* default case */
-    val.int32 = 0;
+    val.f = 0;
     return val;
 }
 

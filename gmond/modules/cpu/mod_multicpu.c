@@ -584,7 +584,7 @@ static g_val_t ex_metric_handler ( int metric_index )
         return multi_cpu_sintr_func(index);
 
     /* default case */
-    val.int32 = 0;
+    val.f = 0;
     return val;
 }
 
