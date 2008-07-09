@@ -461,10 +461,6 @@ static g_val_t multi_cpu_sintr_func (int cpu_index)
 }
 
 static apr_array_header_t *metric_info = NULL;
-static Ganglia_25metric ex_metric_info[] = 
-{
-    {0, NULL}
-};
 
 /* Initialize the give metric by allocating the per metric data
    structure and inserting a metric definition for each cpu found
@@ -534,6 +530,7 @@ static int ex_metric_init (apr_pool_t *p)
     */
     gmi = apr_array_push(metric_info);
     memset (gmi, 0, sizeof(*gmi));
+
     multicpu_module.metrics_info = (Ganglia_25metric *)metric_info->elts;
 
     for (i = 0; multicpu_module.metrics_info[i].name != NULL; i++) {
@@ -593,6 +590,6 @@ mmodule multicpu_module =
     STD_MMODULE_STUFF,
     ex_metric_init,
     ex_metric_cleanup,
-    ex_metric_info,
+    NULL, /* defined dynamically */
     ex_metric_handler,
 };

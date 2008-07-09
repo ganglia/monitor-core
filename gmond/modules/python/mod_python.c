@@ -85,10 +85,6 @@ static PyThreadState* gtstate = NULL;
 
 static apr_array_header_t *metric_info = NULL;
 static apr_array_header_t *metric_mapping_info = NULL;
-static Ganglia_25metric pyth_metric_info[] = 
-{
-    {0, NULL}
-};
 static apr_status_t pyth_metric_cleanup ( void *data);
 
 static void set_python_path(const char* path)
@@ -679,6 +675,7 @@ static int pyth_metric_init (apr_pool_t *p)
     memset (gmi, 0, sizeof(*gmi));
     mi = apr_array_push(metric_mapping_info);
     memset (mi, 0, sizeof(*mi));
+
     python_module.metrics_info = (Ganglia_25metric *)metric_info->elts;
     return 0;
 }
@@ -802,6 +799,6 @@ mmodule python_module =
     STD_MMODULE_STUFF,
     pyth_metric_init,
     NULL,
-    pyth_metric_info,
+    NULL, /* defined dynamically */
     pyth_metric_handler,
 };

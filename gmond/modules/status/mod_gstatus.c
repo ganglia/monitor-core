@@ -47,10 +47,6 @@
 mmodule gstatus_module;
 
 static apr_array_header_t *metric_info = NULL;
-static Ganglia_25metric gs_metric_info[] = 
-{
-    {0, NULL}
-};
 
 static int gs_metric_init (apr_pool_t *p)
 {
@@ -83,6 +79,7 @@ static int gs_metric_init (apr_pool_t *p)
     */
     gmi = apr_array_push(metric_info);
     memset (gmi, 0, sizeof(*gmi));
+
     gstatus_module.metrics_info = (Ganglia_25metric *)metric_info->elts;
     return 0;
 }
@@ -105,6 +102,6 @@ mmodule gstatus_module =
     STD_MMODULE_STUFF,
     gs_metric_init,
     gs_metric_cleanup,
-    gs_metric_info,
+    NULL, /* defined dynamically */
     gs_metric_handler,
 };
