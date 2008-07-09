@@ -257,7 +257,11 @@ class NetstatThread(threading.Thread):
             for (fd, events) in poll_events:
                 lines = self.popenChild.fromchild.readlines()
 
-            self.popenChild.wait()
+            try:
+                self.popenChild.wait()
+            except OSError, e:
+                if e.errno == 10: # No child process
+                    continue
             
             #Iterate through the netstat output looking for the 'tcp' keyword in the tcp_at 
             # position and the state information in the tcp_state_at position. Count each 
