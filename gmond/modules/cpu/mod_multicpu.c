@@ -527,9 +527,13 @@ static int ex_metric_init (apr_pool_t *p)
                             "Percentage of CPU utilization that occurred while "
                             "executing at the sintr level");
 
-    /* Replace the empty static metric definition array with the
-       dynamic array that we just created 
+    /* Add a terminator to the array and replace the empty static metric definition 
+        array with the dynamic array that we just created 
     */
+    {
+        Ganglia_25metric *gmi = apr_array_push(metric_info);
+        memset (gmi, 0, sizeof(*gmi));
+    }
     multicpu_module.metrics_info = (Ganglia_25metric *)metric_info->elts;
 
     for (i = 0; multicpu_module.metrics_info[i].name != NULL; i++) {
