@@ -66,7 +66,7 @@ static g_val_t cpu_metric_handler ( int metric_index )
 static Ganglia_25metric cpu_metric_info[] = 
 {
     {0, "cpu_num",    1200, GANGLIA_VALUE_UNSIGNED_SHORT, "CPUs", "zero", "%hu",  UDP_HEADER_SIZE+8, "Total number of CPUs"},
-    {0, "cpu_speed",  1200, GANGLIA_VALUE_UNSIGNED_INT,   "MHz",  "zero", "%hu",  UDP_HEADER_SIZE+8, "CPU Speed in terms of MHz"},
+    {0, "cpu_speed",  1200, GANGLIA_VALUE_UNSIGNED_INT,   "MHz",  "zero", "%u",  UDP_HEADER_SIZE+8, "CPU Speed in terms of MHz"},
     {0, "cpu_user",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of CPU utilization that occurred while executing at the user level"},
     {0, "cpu_nice",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of CPU utilization that occurred while executing at the user level with nice priority"},
     {0, "cpu_system",   90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of CPU utilization that occurred while executing at the system level"},

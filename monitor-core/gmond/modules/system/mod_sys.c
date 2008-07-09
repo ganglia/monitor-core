@@ -47,7 +47,7 @@ static g_val_t sys_metric_handler ( int metric_index )
     }
 
     /* default case */
-    val.int32 = 0;
+    val.uint32 = 0;
     return val;
 }
 
