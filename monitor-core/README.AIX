@@ -1,7 +1,7 @@
 Using Ganglia on AIX
 ~~~~~~~~~~~~~~~~~~~~
 
-This Version is tested on AIX 5.1, 5.2 and 5.3. AIX 4.3 might work as well,
+This Version is tested on AIX 5.3. AIX 6.1 might work as well,
 but it's not tested by now.
 
 Installation
@@ -10,63 +10,18 @@ Installation
 You still need some "tricks" to use ganglia on a AIX system:
 
 1. The AIX-Version should not be compiled with shared libraries
-   You must add the "--disable-shared" and "--enable-static" configure
-   flags if you running on AIX
+   You must add the "--enable-static-build" and "--disable-python"
+   configure flags if you running on AIX. Python support was not
+   tested up to now.
 
-   ./configure --disable-shared --enable-static
+   ./configure --enable-static-build --disable-python
 
-2. You should use "gcc". xlc does not work out of the box. If you only have
-   "xlc", the following might work. Run configure first !!
+2. To compile Ganglia you will need some additional tools,
+   take a look at this page http://www.perzl.org/aix/
 
-   a) remove "-Wall" from all Makefiles, especially:
-
-     lib/Makefile
-     gstat/Makefile
-     gmond/Makefile
-     gmetric/Makefile
-     gmetad/Makefile  (see below)
-
-     This should be done automatically, but automake/autoconf experts are
-     needed.
-
-   b) to actually build the binaries do:
-
-     make CC="cc -qlanglvl=extc99"
-
-   c) To build "gmetad", the following is needed:
-   c1) install the following software, preferably from RPMs:
-
-       libart_lgpl-devel-2.3.16-1
-       freetype2-devel-2.1.7-2
-       zlib-1.2.2-4
-       libpng-1.2.1-6
-       freetype2-2.1.7-2
-       libart_lgpl-2.3.16-1
-       rrdtool-1.2.11.perl56-1 (cp /opt/freeware/include/rrd.h /usr/include/ )
-
-   c2) For Gmetad-3.0.3 or earlier: there is a conflict regarding the macro
-       "FRAMSIZE". In "gmetad/*" change all occurences of "FRAMESIZE" to
-       "GMETAD_FRAMESIZE". This will be fixed in version 3.0.4.
+3. You should use "gcc".
 
 Known problems and Limitations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- - Occasionally Ganglia might report wrong network statistics, because
-   there is no test for arithmetic overflow of the AIX counters by now.
-   (Will be fixed soon, but might not make it in ganglia-3.0.2)
-
- - The following standard metrics are _not_ reported (reported as 0):
-   mem_buffers (-), mem_shared (-), part_max_used(+), cpu_sintr
-   (--), cpu_intr (--), cpu_aidle (+),   cpu_nice (-)
-
-   (--) cpu_nice, cpu_intr and  cpu_sintr:
-        There is no way to include this metric, because AIX
-        dose not know anything about them
-	
-   (-)  mem_buffers and mem_shared: libperfstat does not report
-        his information, but maybe somebody knows another way.
-
-   (+)  part_max_used and cpu_aidle: it's quite easy to do this
-	metrics as well using libperfstat, but no body has written
-        code so far.
-
+- No Power metrics are included
