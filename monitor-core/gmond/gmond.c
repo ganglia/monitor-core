@@ -1716,7 +1716,7 @@ load_metric_modules( void )
            delegated to an alternate module interface
         */
         modLanguage = cfg_getstr(module, "language");
-        if (modLanguage && strcasecmp(modLanguage, "C")) 
+        if (modLanguage && strcasecmp(modLanguage, "C/C++")) 
             continue;
 
         modPath = cfg_getstr(module, "path");
