@@ -53,12 +53,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
     +1: carenas
 
-  * documentation: gmond.conf(5) proof read and typos
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04461.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1441
-    +1: carenas, bnicholes
-    carenas: conflict resolution fixed in patch proposed in email thread
-
   * web: keep grid summary always on top for meta view for all sorting methods
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1480
@@ -76,10 +70,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1544
     +1: carenas
     carenas: incomplete fix
-
-  * documentation: AIX documentation update
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1546
-    +1: carenas, bnicholes
 
   * documentation: updates for platform support and build instructions
     carenas: still missing commits
