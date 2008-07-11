@@ -1,6 +1,6 @@
 The files in this directory have been graciously contributed by the
-Ganglia users' community and while they are open source, may have a
-different license or copyright holder than Ganglia itself.
+Ganglia users' community and while they are open source, they may 
+have a different license or copyright holder than Ganglia itself.
 
 While the various files and scripts are believed to work, The Ganglia
 development team does not maintain or support them, but merely distributes
@@ -25,7 +25,7 @@ ganglia_gmetad.xml
     Contributed by Ben Rockwood ( benr _AT_ joyent . com )
     Solaris/X86 SMF Manifest files.  Both manifests assume that
     Ganglia was installed with the prefix /opt/ganglia.  To load
-    load them (for example for gmond) run :
+    them (for example for gmond) run :
     
         # svccfg import ganglia_gmond.xml
 
@@ -39,5 +39,5 @@ diskfree_report.php
 ganglia-rrd-modify.pl
     Contributed by Jason A. Smith ( smithj _AT_ bnl.gov )
     Simple script to read ganglia's rrds and modify some of their 
-    configuration values.  It can also dump & restore rrd files, 
-    useful when moving ganglia to a new architecture.
+    configuration values.  It can also dump & restore rrd files. 
+    Useful when moving ganglia to a new architecture.
