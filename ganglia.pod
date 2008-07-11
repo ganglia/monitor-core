@@ -163,20 +163,20 @@ For more details refer to the README.AIX file
 =item B<Solaris dependencies could be problematic>
 
 Not really a Solaris specific problem, but since Solaris has several different
-package repositories, all of them unofficial, it is pretty difficult to be sure
-that all possible permutations had been confirmed to work reliably.
+package repositories, all of them unofficial, it is difficult to be sure
+that all possible permutations have been confirmed to work reliably.
 
-Be sure to have all dependencies as explained in the INSTALL file covered and
+Be sure to have all dependencies covered, as explained in the INSTALL file and
 to use GNU make and a gcc compiler that builds 32bit binaries with all other
 libraries matching that ISA.
 
-When in doubt, build that problematic dependency from source and remember
+When in doubt, build the problematic dependency from source and remember
 to distribute it together with your ganglia build as everything is dynamically
 linked by default.
 
-Be specially careful about libConfuse (specially if using the old 2.5 version)
-which has been known to be incorrectly packaged and to compile by default
-only as a static library that will then fail to link with ganglia.
+Be particularly careful with libConfuse, especially if using the old 2.5 version.
+LibConfuse 2.5 is known to be incorrectly packaged and to compile by default
+as a static library which will fail to link with ganglia.
 
 =item B<Propietary *NIX systems might not work at all>
 
@@ -184,14 +184,14 @@ The good news is that the libmetrics code that used to work before 3.1 is
 still most likely working fine and so there is nothing fundamentally broken
 about it.
 
-But the bad news is that in order to add the dynamic metric functionality
-the buid system and the way gmond uses to locate its metrics had to be
-changed in a very drastic way and therefore getting gmond to build and work
-again required fixes to be implemented for all platforms.
+But the bad news is that in order to add the dynamic metric functionality,
+the build system and the way gmond used to locate its metrics had to be
+changed significantly. Therefore getting gmond to build and work again 
+required fixes to be implemented for all platforms.
 
 Since none of the developers had access to HPUX, IRIX, Tru64 (OSF/1), or Darwin
 (MacOS X) those platforms might not be able to build or run a 3.1 gmond
-yet, but if you have access to any of them and want to run ganglia 3.1
+yet. If you have access to any of these platforms and want to run ganglia 3.1,
 feel free to drop by the ganglia-developers list with suggestions, or even
 better patches.
 
