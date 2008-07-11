@@ -50,11 +50,12 @@ BACKPORT PROPOSALS:
 
   * documentation: updates instructions for AIX
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1553
-    +1: carenas
+    +1: carenas, bnicholes
 
   * documentation: build instructions/suggestions/comments
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1554
-    +1: carenas
+    +1: carenas, bnicholes
+    bnicholes: I made some minor updates in revision 1557 as well.
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
@@ -68,7 +69,7 @@ BACKPORT PROPOSALS NEXT VERSION:
 
   * contrib: include ganglia-rrd-modify.pl from contrib
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1365
-    +1: carenas
+    +1: carenas, bnicholes
 
   * Allow both a C and python module to create a metric that will spoof a specific host.
      This provides the same spoofing functionality as gmetric but through a metric module.
@@ -142,7 +143,7 @@ BACKPORT PROPOSALS NEXT VERSION:
   * build: include contrib in package
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1538
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1552
-    +1: carenas
+    +1: carenas, bnicholes
 
   * web: remove redirect hack for grid pulldown navigation
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
