@@ -30,14 +30,6 @@ RELEASE SHOWSTOPPERS:
     <http:// link to email list or bugzilla bug describing the issue>
     <Comments prefixed with user id of comment author>
 
-  * Ganglia Web Frontend conflicting license for Templating class
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04072.html
-    bnicholes: I don't consider this to be a showstopper since it is not a
-               regression from previously released versions of Ganglia.
-               We should get this fixed in order to resolve any licensing 
-               conflicts in the web front end, but the affects are no worse
-               than any previously released code.
-
 BACKPORT PROPOSALS:
  <TEMPLATE>
   * <Brief description of proposal or bug>
@@ -47,15 +39,6 @@ BACKPORT PROPOSALS:
      0: <userid>
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
-
-  * documentation: updates instructions for AIX
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1553
-    +1: carenas, bnicholes
-
-  * documentation: build instructions/suggestions/comments
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1554
-    +1: carenas, bnicholes
-    bnicholes: I made some minor updates in revision 1557 as well.
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
@@ -143,6 +126,7 @@ BACKPORT PROPOSALS NEXT VERSION:
   * build: include contrib in package
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1538
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1552
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1556
     +1: carenas, bnicholes
 
   * web: remove redirect hack for grid pulldown navigation
