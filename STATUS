@@ -48,13 +48,13 @@ BACKPORT PROPOSALS:
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
 
-  * gmond: avoid latency and timeouts when using the tcpconn python module
-    bernardli: see same proposal under NEXT VERSION
-               for this release, have the tcpconn module turned off by default and
-               document potential pitfalls
+  * documentation: updates instructions for AIX
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1553
+    +1: carenas
 
-  * documentation: updates for platform support and build instructions
-    carenas: still missing commits
+  * documentation: build instructions/suggestions/comments
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1554
+    +1: carenas
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are not targeted at the current version.  They should be
@@ -137,14 +137,12 @@ BACKPORT PROPOSALS NEXT VERSION:
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     -1: carenas
-    carenas: incomplete fix
+    carenas: incomplete fix, should use autoconf instead to handle Solaris>=10
 
   * build: include contrib in package
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1538
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1552
     +1: carenas
-    -0: bnicholes - I thought contrib was just a place for us to put contributions
-          that might be migrated into the package. It really wasn't intended
-	  to be part of the package.
 
   * web: remove redirect hack for grid pulldown navigation
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
@@ -166,5 +164,5 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1528
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1544
-    +1: carenas
-    carenas: incomplete fix
+    -1: carenas
+    carenas: incomplete fix, latency to shutdown, lose sample data
