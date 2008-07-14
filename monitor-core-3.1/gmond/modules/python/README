@@ -1,0 +1,153 @@
+How To Write And Use A Python Metric
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One of the new features in Gmond is the ability to develop
+and install new metrics as dynamically loadable modules. This
+has enabled Gmond to be extended in new ways. One of these 
+ways is embeded python. By loading and using the new 
+mod_python DSO, gmond now has the ability to load and call new 
+metric modules that have been developed using the python 
+scripting language. The following sections will describe
+how to develop and deploy new metric modules using python.
+
+
+Writing a python metric module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are two functions that must be included in every python
+based metric module as well as at least one callback handler. 
+These functions are:
+
+def metric_init(params):
+  This function will be called once at initialization time. It
+  can be used to do any kind of initialization that the module
+  requires in order to properly gather the intended metric. This
+  function also takes a single dictionary type parameter which 
+  contains configuration directives that were designated for 
+  this module in the gmond.conf file.  In addition to any other 
+  initialization that is done, the function must also create, 
+  populate and return the metric description dictionary or a 
+  dictionary list. Each dictionary in the list, must supply at 
+  least the following elements:
+
+   d = {'name': '<your_metric_name>',
+	'call_back': <metric_handler_function>,
+        'time_max': int(<your_time_max>),
+        'value_type': '<string | uint | float | double>',
+        'units': '<your_units>',
+        'slope': '<zero | positive | negative | both>',
+        'format': '<your_format>',
+        'description': '<your_description>'}
+
+  These elements are basically the same type of data that must be
+  supplied to the gmetric commandline utility with the exception
+  of the call_back function. See the gmetric help document for 
+  more information.  The call_back entry designates a function 
+  that will be called whenever the data for this metric needs to
+  be gathered.  The format of this function is very simple.  It 
+  is just a function name with a 'name' parameter
+
+	def My_Metric_Handler(name):
+
+  The value of the name parameter will be the name of the metric
+  that is being gathered. This allows a call_back function to
+  handle more than one metric and to be able to determine which
+  metric is being handled when called. This function implements the 
+  code that handles the gathering of the metric data. The return 
+  value from this function must match the data value type that was 
+  specified in the corresponding metric description that was defined 
+  during the metric_init() function.
+
+def metric_cleanup():
+  This function will be called once when gmond is shutting down.
+  Any module clean up code can be executed here and the function
+  must not return a value.
+
+Other than the mandatory functions and metric description list as 
+specified above, the metric module is free to do whatever it needs 
+in order to appropriately gather the intended metric data. Each 
+metric description dictionary can also contain additional user 
+defined elements outside of the mandatory elements listed above. Any
+additional elements in the dictionary will be ignored by mod_python
+but can to used by the python module itself to hold additional
+data that should correspond to the metric.
+
+Deploying a python metric module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once a python metric module has been developed, deploying the module
+is as easy as copying a file to a specific directory. In the configuration
+of the mod_python module that is part of gmond.conf, a python metric module
+directory must have been specified (see next section). To deploy a 
+python module, simply copy the .py file to the specified python module 
+directory. Once the python module has been copied, start gmond using the 
+-m parameter. This will show a list of all of the available metrics that
+gmond is capable of gathering. The list should include the name of the
+python module that was just deployed. Add this metric to a collection
+group, just like any other gmond metric.
+
+Configuring Gmond for python support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Configuring Gmond to support python based modules is as easy as loading
+any other type of gmond dynamically loadable metric module. The name of
+the python support module is modpython.so. A base configuration file 
+is included in the Ganglia source code and should have been installed
+automatically if done through an RPM. The basic configuration that
+should be added to or included by gmond.conf is as follows:
+
+  modules {
+    module {
+      name = "python_module"
+      path = "/usr/lib/ganglia/modpython.so"
+      params = "/usr/lib/ganglia/python_modules"
+    }
+  }
+
+  include ('/etc/ganglia/conf.d/*.pyconf')
+
+The most significant part of this configuration is the 'params'
+directive. The path that has been assigned to this directive will
+be passed down to the mod_python module and used to search for .py
+python modules. Any python module that is found in this location
+will be loaded and assumed to be a metric gathering module. If the
+collection groups that include metrics that are implemented in
+python, are put into separate configuration files and the file
+extension of the configuration files are .pyconf, they will
+automatically be loaded and read whenever the mod_python module
+is included. 
+
+Configuring a Gmond python module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The configuration of a Gmond python module is really no different
+than any other module.  Most python modules will not require any
+specialized configuration at all. However, support has been 
+provided to allow for parameters to be passed from the gmond.conf
+file to a python module.  The syntax for passing parameters to
+a specific python module is at follows:
+
+modules {
+  module {
+    name = "example"
+    language = "python"
+    param YouNameIt {
+        value = Whatever
+    }
+    param Another {
+        value = NewValue
+    }
+  }
+}
+
+The "module" section must contain a "name" directive and a 
+"language" directive.  The value of the "name" directive must 
+match the file name of the python module's .py file and the 
+value of the "language" directive must be "python".  The section 
+can take multiple "param" sections.  Each "param" section must 
+include a name which will be the name of the value when it is 
+passed to the python module, and a "value" directive.  The 
+"value" directive will always be passed as a string to the 
+python module.  It is up to the module itself to determine the 
+actual value type.
+

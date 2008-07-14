@@ -1,0 +1,50 @@
+Build Ganglia source from the repository using Cygwin on Windows 
+================================================================
+
+Ganglia (Gmond, Gmetric and Gstat) may be built in the Cygwin environment for
+use by Cygwin applications. As with the Unix platform, Ganglia on  Cygwin uses 
+GNU tools. Therefore Ganglia on Cygwin could be built using the same 
+instructions as in the UNIX platforms with some work arounds. 
+
+Prerequisites
+------------- 
+
+Latest version of Cygwin with the following packages: apr1, autoconf, automake, 
+bison, expat, diffutils, flex, gcc, libtool, make, python, sharutils, sunrpc
+and svn to checkout the source code.
+
+CheckOut the source files of Ganglia in the Cygwin command console: 
+
+  svn co http://ganglia.svn.sourceforge.net/svnroot/ganglia/trunk/monitor-core ganglia
+
+Go to the ganglia directory and bootstrap your sources:
+
+  ./bootstrap
+
+The steps above generate the configure file and are common to all platforms
+that want to use the development version.
+
+Download libconfuse, build it and install the libconfuse library (this will
+be linked statically and will only be needed in the build machine)
+
+  ./configure
+  make
+  make install
+
+Go to the ganglia directory, and run the following command to build Ganglia
+
+  ./configure --with-libconfuse=/usr/local --enable-static-build
+
+If everything works right, then you should see a gmond.exe, gstat.exe and 
+gmetric.exe created in the gmond, gstat and gmetric directories
+respectively. 
+
+The binaries generated depend on cygwin (cygwin1.dll), the apr cygwin
+library (cygapr-1-0.dll), the expat cygwin library (cygexpat-0.dll)  and 
+the python cygwin library (libpython2.5.dll).
+
+if you want to use them in a different system you'll need to copy and
+install all of them together with an appropiate configuration.
+
+gmetad cannot be built on Cygwin but you can use gmetad in any other supported
+architecture with the gmond agents running in Cygwin.

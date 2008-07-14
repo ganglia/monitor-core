@@ -1,0 +1,46 @@
+#!/bin/sh
+# $Id$
+#
+# chkconfig: 2345 20 80
+# description: gmetad startup script
+#
+GMETAD=/usr/sbin/gmetad
+
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+
+case "$1" in
+   start)
+      echo -n "Starting GANGLIA gmetad: "
+      [ -f $GMETAD ] || exit 1
+
+      daemon $GMETAD
+      RETVAL=$?
+      echo
+      [ $RETVAL -eq 0 ] && touch /var/lock/subsys/gmetad
+      ;;
+
+  stop)
+      echo -n "Shutting down GANGLIA gmetad: "
+      killproc gmetad
+      RETVAL=$?
+      echo
+      [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/gmetad
+      ;;
+
+  restart|reload)
+      $0 stop
+      $0 start
+      RETVAL=$?
+      ;;
+  status)
+      status gmetad
+      RETVAL=$?
+      ;;
+  *)
+      echo "Usage: $0 {start|stop|restart|status}"
+      exit 1
+esac
+
+exit $RETVAL

@@ -1,0 +1,245 @@
+Summary: Ganglia Distributed Monitoring System
+Name: ganglia
+Version: 3.0.4
+URL: http://ganglia.info/
+Release: 1 
+License: BSD
+Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
+Group: System Environment/Base
+
+Source: %{name}-%{version}.tar.gz
+Source1: gmond.aix.init
+Source2: gmetad.aix.init
+
+###Patch0: ganglia-3.0.3.patch
+
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+BuildRequires: rrdtool-devel
+
+Prefix: /opt/freeware
+
+%description
+Ganglia is a scalable, real-time monitoring and execution environment
+
+%package gmetad
+Summary: Ganglia Meta daemon http://ganglia.sourceforge.net/
+Group: System Environment/Base
+Requires: rrdtool
+Obsoletes: ganglia-monitor-core-gmetad ganglia-monitor-core
+
+%description gmetad
+Ganglia is a scalable, real-time monitoring and execution environment
+with all execution requests and statistics expressed in an open
+well-defined XML format.
+
+This gmetad daemon aggregates monitoring data from several clusters
+to form a monitoring grid. It also keeps metric history using rrdtool.
+
+%package gmond
+Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
+Group: System Environment/Base
+Obsoletes: ganglia-monitor-core-gmond ganglia-monitor-core
+
+%description gmond
+Ganglia is a scalable, real-time monitoring and execution environment
+with all execution requests and statistics expressed in an open
+well-defined XML format.
+
+This gmond daemon provides the ganglia service within a single cluster or
+Multicast domain.
+
+%package devel
+Summary: Ganglia Library http://ganglia.sourceforge.net/
+Group: System Environment/Base
+Obsoletes: ganglia-monitor-core-lib 
+
+%description devel
+The Ganglia Monitoring Core library provides a set of functions that programmers
+can use to build scalable cluster or grid applications.
+
+
+##
+## PREP
+##
+%prep 
+%setup -q
+###%patch0 -p1
+
+
+##
+## BUILD
+##
+%build
+export CC=xlc_r
+export CFLAGS="-O"
+./configure --prefix=/opt/freeware --disable-shared --enable-static CFLAGS="-I/opt/freeware/include" CPPFLAGS="-I/opt/freeware/include" LDFLAGS="-L/opt/freeware/lib" --with-gmetad
+## now we can start the make process...
+make
+
+
+##
+## PRE
+##
+%pre
+
+
+##
+## POST GMETA
+##
+%post gmetad
+
+if [ "$1" = 1 ]; then
+   # Installing new package - start gmetad
+   /etc/rc.d/init.d/gmetad start
+elif [ "$1" -gt 1 ]; then
+   # Upgrading ganglia package - restart gmetad
+   /etc/rc.d/init.d/gmetad restart
+fi
+
+
+##
+## POST GMON
+##
+%post gmond
+
+if [ "$1" = 1 ]; then
+   # Installing new package - start gmond
+   /etc/rc.d/init.d/gmond start
+elif [ "$1" -gt 1 ]; then
+   # Upgrading ganglia package - restart gmond
+   /etc/rc.d/init.d/gmond restart
+fi
+
+
+##
+## PREUN GMETA
+##
+%preun gmetad
+if [ "$1" = 0 ]
+then
+   /etc/rc.d/init.d/gmetad stop
+fi
+
+
+##
+## PREUN GMON
+##
+%preun gmond
+if [ "$1" = 0 ]
+then
+   /etc/rc.d/init.d/gmond stop
+fi
+
+
+##
+## INSTALL
+##
+%install
+
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+make DESTDIR=$RPM_BUILD_ROOT install
+
+## Create the directory structure
+%__mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
+%__mkdir -p $RPM_BUILD_ROOT/var/lib/ganglia/rrds
+%__mkdir -p $RPM_BUILD_ROOT/opt/freeware/man/man5
+
+## Move the files into the structure
+%__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
+%__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.init $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+# We just output the default gmond.conf from gmond using the '-t' flag
+%{_builddir}/%{name}-%{version}/gmond/gmond -t > $RPM_BUILD_ROOT/etc/gmond.conf
+%__cp -f %{_builddir}/%{name}-%{version}/gmetad/gmetad.conf $RPM_BUILD_ROOT/etc/gmetad.conf
+
+%__cp -f %{_builddir}/%{name}-%{version}/gmond/gmond.conf.5 $RPM_BUILD_ROOT/opt/freeware/man/man5/gmond.conf.5
+
+mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d/
+install -m 0755 %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/gmond
+install -m 0755 %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/gmetad
+
+mkdir -p $RPM_BUILD_ROOT/etc/rc.d/rc2.d/
+mkdir -p $RPM_BUILD_ROOT/etc/rc.d/rc3.d/
+ln -sf '../init.d/gmond' $RPM_BUILD_ROOT/etc/rc.d/rc2.d/S20gmond
+ln -sf '../init.d/gmond' $RPM_BUILD_ROOT/etc/rc.d/rc2.d/K20gmond
+ln -sf '../init.d/gmond' $RPM_BUILD_ROOT/etc/rc.d/rc3.d/S20gmond
+ln -sf '../init.d/gmond' $RPM_BUILD_ROOT/etc/rc.d/rc3.d/K20gmond
+ln -sf '../init.d/gmetad' $RPM_BUILD_ROOT/etc/rc.d/rc2.d/S20gmetad
+ln -sf '../init.d/gmetad' $RPM_BUILD_ROOT/etc/rc.d/rc2.d/K20gmetad
+ln -sf '../init.d/gmetad' $RPM_BUILD_ROOT/etc/rc.d/rc3.d/S20gmetad
+ln -sf '../init.d/gmetad' $RPM_BUILD_ROOT/etc/rc.d/rc3.d/K20gmetad
+
+
+##
+## FILES GMETA
+##
+%files gmetad
+%defattr(-,root,root)
+%attr(0755,nobody,nobody)/var/lib/ganglia/rrds
+/opt/freeware/sbin/gmetad
+%config(noreplace) /etc/gmetad.conf
+/etc/rc.d/init.d/gmetad
+/etc/rc.d/rc2.d/S20gmetad
+/etc/rc.d/rc2.d/K20gmetad
+/etc/rc.d/rc3.d/S20gmetad
+/etc/rc.d/rc3.d/K20gmetad
+
+##
+## FILES GMOND
+##
+%files gmond
+%defattr(-,root,root)
+%attr(0500,root,root)/opt/freeware/bin/gmetric
+%attr(0555,root,root)/opt/freeware/bin/gstat
+/opt/freeware/sbin/gmond
+%attr(0555,root,root)/opt/freeware/man/man5/gmond.conf.5*
+%config(noreplace) /etc/gmond.conf
+/etc/rc.d/init.d/gmond
+/etc/rc.d/rc2.d/S20gmond
+/etc/rc.d/rc2.d/K20gmond
+/etc/rc.d/rc3.d/S20gmond
+/etc/rc.d/rc3.d/K20gmond
+
+##
+## FILES DEVEL
+##
+%files devel
+%defattr(-,root,root)
+/opt/freeware/include/ganglia.h
+/opt/freeware/lib/libganglia*
+/opt/freeware/bin/ganglia-config
+
+
+##
+## CLEAN
+##
+%clean
+%__rm -rf $RPM_BUILD_ROOT
+
+
+##
+## CHANGELOG
+##
+%changelog
+* Fri Apr 21 2006 Michael Perzl <michael@perzl.org>
+- adapted for Ganglia v3.0.3
+* Thu Feb 23 2006 Michael Perzl <michael@perzl.org>
+- first version for AIX V5.1 and higher
+* Fri Dec 10 2004 Matt Massie <massie@cs.berkeley.edu>
+- Updated the spec file for 2.6.0 release
+* Tue Apr 13 2004 Brooks Davis <brooks@one-eyed-alien.net>
+- Use the autoconf variable varstatedir instead of /var/lib for consistancy.
+* Thu Feb 19 2004 Matt Massie <massie@cs.berkeley.edu>
+- Removed the /usr/include/ganglia directory from the lib rpm and
+  changed the deprecated Copyright to License
+* Mon Oct 14 2002 Federico Sacerdoti <fds@sdsc.edu>
+- Split package into -gmetad and -gmond subpackages for clarity,
+  and separation of purpose/functionality.
+* Thu Sep 19 2002 Federico Sacerdoti <fds@sdsc.edu>
+- Added config files, made /var/lib/ganglia for RRD storage.
+* Mon Mar 11 2002 Matt Massie <massie@cs.berkeley.edu>
+- Added support for libganglia, added Prefix: for RPM relocation
+* Wed Feb 27 2002 Matt Massie <massie@cs.berkeley.edu>
+- Merge gmetric and gmond together into one RPM.  Fix some small bugs.
+* Fri Nov  2 2001 Matt Massie <massie@cs.berkeley.edu>
+- initial release

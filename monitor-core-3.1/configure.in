@@ -1,0 +1,636 @@
+dnl
+dnl $Id$
+dnl
+dnl "Copyright (c) 2001 by Matt Massie and The Regents of the University
+dnl  of California.  All rights reserved."
+dnl
+dnl Permission to use, copy, modify, and distribute this software and its
+dnl documentation for any purpose, without fee, and without written agreement is
+dnl hereby granted, provided that the above copyright notice and the following
+dnl two paragraphs appear in all copies of this software.
+dnl 
+dnl IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+dnl DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+dnl OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+dnl CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+dnl 
+dnl THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+dnl INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+dnl AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+dnl ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+dnl PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+dnl
+
+AC_REVISION([$Revision$])
+AC_INIT(gmond/gmond.c)
+AC_CONFIG_AUX_DIR(build)
+
+### BEGIN RELEASE VARIABLES ############################
+# On making a release...
+# If this release is just a minor bug fix release, increment 
+# GANGLIA_MICRO_VERSION.
+#
+# If this release adds significant features or breaks backward compatibility,
+# increment GANGLIA_MINOR_VERSION and set GANGLIA_MICRO_VERSION to 0 (zero).
+#
+# If this release is a complete restructuring of
+# the overall architecture of ganglia,
+# increment GANGLIA_MAJOR_VERSION and set 
+# GANGLIA_MINOR_VERSION and GANGLIA_MICRO_VERSION
+# to 0 (zero) 
+GANGLIA_RELEASE_NAME="Amelia"
+GANGLIA_MAJOR_VERSION=3
+GANGLIA_MINOR_VERSION=1
+GANGLIA_MICRO_VERSION=0
+
+# If we are releasing a snapshot (beta), set GANGLIA_SNAPSHOT to "yes"
+# If we are creating an official release, set it to "no" 
+GANGLIA_SNAPSHOT="no"
+
+# If there are any changes to libganglia in this release, you need to...
+#   LIBGANGLIA_MICRO_VERSION += 1;
+#   LIBGANGLIA_INTERFACE_AGE += 1;
+#   LIBGANGLIA_BINARY_AGE += 1;
+# if any functions have been added, set LIBGANGLIA_INTERFACE_AGE to 0.
+# if backwards compatibility has been broken,
+# set LIBGANGLIA_BINARY_AGE _and_ LIBGANGLIA_INTERFACE_AGE to 0.
+LIBGANGLIA_MICRO_VERSION=0
+LIBGANGLIA_INTERFACE_AGE=0
+LIBGANGLIA_BINARY_AGE=0
+### END RELEASE VARIABLES #############################
+
+if test "$GANGLIA_SNAPSHOT" != yes;
+then
+GANGLIA_VERSION=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION.$GANGLIA_MICRO_VERSION
+else
+GANGLIA_NANO_VERSION=999
+AC_DEFINE_UNQUOTED(GANGLIA_NANO_VERSION, $GANGLIA_NANO_VERSION, GANGLIA_NANO_VERSION)
+GANGLIA_VERSION=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION.$GANGLIA_MICRO_VERSION.$GANGLIA_NANO_VERSION
+fi
+
+AM_INIT_AUTOMAKE(ganglia, $GANGLIA_VERSION)
+
+AC_SUBST(GANGLIA_MAJOR_VERSION)
+AC_SUBST(GANGLIA_MINOR_VERSION)
+AC_SUBST(GANGLIA_MICRO_VERSION)
+AC_SUBST(GANGLIA_VERSION)
+AC_SUBST(GANGLIA_RELEASE_NAME)
+
+AC_SUBST(LIBGANGLIA_INTERFACE_AGE)
+AC_SUBST(LIBGANGLIA_BINARY_AGE)
+
+# libtool versioning
+# the LT_RELEASE variable is passed with the --release option... it is just
+# a way to tie our internal package library with the release numbers of ganglia in general
+LT_RELEASE=$GANGLIA_VERSION
+# The most current libganglia interface is MICRO - INTERFACE
+LT_CURRENT=`expr $LIBGANGLIA_MICRO_VERSION - $LIBGANGLIA_INTERFACE_AGE`
+# The implementation number of the current interface is simply LIBGANGLIA_INTERFACE_AGE
+LT_REVISION=$LIBGANGLIA_INTERFACE_AGE
+# The different between the new and oldest interfaces this library implements is BINARY-INTERFACE
+LT_AGE=`expr $LIBGANGLIA_BINARY_AGE - $LIBGANGLIA_INTERFACE_AGE`
+
+AC_SUBST(LT_RELEASE)
+AC_SUBST(LT_CURRENT)
+AC_SUBST(LT_REVISION)
+AC_SUBST(LT_AGE)
+
+# Define version stuff
+AC_DEFINE_UNQUOTED(GANGLIA_MAJOR_VERSION, $GANGLIA_MAJOR_VERSION, GANGLIA_MAJOR_VERSION)
+AC_DEFINE_UNQUOTED(GANGLIA_MINOR_VERSION, $GANGLIA_MINOR_VERSION, GANGLIA_MINOR_VERSION)
+AC_DEFINE_UNQUOTED(GANGLIA_MICRO_VERSION, $GANGLIA_MICRO_VERSION, GANGLIA_MICRO_VERSION)
+
+
+########################
+AC_CANONICAL_HOST
+AM_CONFIG_HEADER(config.h)
+
+dnl Install with /usr are the root by default
+AC_PREFIX_DEFAULT(/usr)
+
+dnl The following cpu_vendor_os string goes into config.h.
+dnl
+AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
+AC_DEFINE_UNQUOTED(CPU_VENDOR_OS, "$host", CPU_VENDOR_OS)
+dnl AC_CYGWIN
+
+nl='
+'
+ganglia_popdir=`pwd`
+
+dnl ##################################################################
+dnl Checks for programs.
+dnl
+AC_PROG_CC
+AC_PROG_CC_STDC
+AM_PROG_LIBTOOL
+
+AC_ARG_ENABLE( static-build,
+[  --enable-static-build   Statically link libGanglia, APR, Expat and Confuse libraries (may disable some metric modules) ],
+[ enable_static_build=yes ],[ enable_static_build=no ])
+
+AC_SUBST(modpathstart)
+AM_CONDITIONAL(STATIC_BUILD, test x"$enable_static_build" = xyes)
+
+echo $ac_n "${nl}Configuring libmetrics ...${nl}"
+cd libmetrics && ./configure --cache-file=$ganglia_popdir/config.cache
+cd $ganglia_popdir
+
+modpathstart=""
+if test x"$enable_static_build" = xyes ; then
+  modpathstart="#"
+fi
+
+dnl ##################################################################
+dnl Special parameters
+dnl
+
+AC_ARG_WITH( gmetad,
+[  --with-gmetad           compile and install the Ganglia Meta Daemon],
+if test "$withval" = yes; then gmetad=yes; fi)
+
+AM_CONDITIONAL(BUILD_GMETAD, test x$gmetad = xyes)
+
+AC_ARG_WITH( python,
+[  --with-python=PATH      Specify prefix for python or full path to interpreter],
+[if test x"$withval" != xno; then enable_python="yes"; PYTHON_BIN=$withval; fi])
+
+AC_ARG_WITH( librrd,
+[  --with-librrd=DIR       Specify location for librrd],
+[if test x"$withval" != xno; then librrd=yes; librrdpath=$withval; fi])
+
+AC_ARG_WITH( libapr,
+[  --with-libapr=PATH      Specify location for libapr-1 or full path to apr-1-config],
+[if test x"$withval" != xno; then libapr=yes; libaprpath=$withval; fi])
+
+AC_ARG_WITH( libexpat,
+[  --with-libexpat=DIR     Specify location for libexpat],
+[if test x"$withval" != xno; then libexpat=yes; libexpatpath=$withval; fi])
+
+AC_ARG_WITH( libconfuse,
+[  --with-libconfuse=DIR   Specify location for libconfuse],
+[if test x"$withval" != xno; then libconfuse=yes; libconfusepath=$withval; fi])
+
+AC_ARG_ENABLE(debug,
+[
+  --enable-debug          turn on debugging output and compile options],
+[ CFLAGS="$CFLAGS -ggdb"
+  AC_DEFINE(DEBUG, 1, DEBUG)])
+# Turn off optimizations when debugging.
+#[ CFLAGS="$CFLAGS -O2" 
+#  AC_DEFINE(DEBUG, 0, DEBUG)])
+
+AC_ARG_ENABLE(gexec,
+[  --enable-gexec          turn on gexec support (platform-specific) ],
+AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC), AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC))
+
+AC_ARG_ENABLE(pedantic,   
+[  --enable-pedantic       turn on pedantic mode during compile],     
+[ CFLAGS="$CFLAGS --pedantic" ],)
+
+AC_ARG_ENABLE(memcheck,
+[  --enable-memcheck       turn on memory checking during compile
+                           note: requires mpatrol from
+                           http://www.cbmamiga.demon.co.uk/mpatrol/],
+[ enable_memcheck="yes" ])
+
+AC_ARG_ENABLE( python,
+[  --disable-python        exclude mod_python and support for metric modules written in python],
+[ if test x"$enableval" != xyes; then enable_python="no"; fi ], [ enable_python="yes" ] )
+
+
+AC_ARG_ENABLE( status,
+[  --enable-status         compile and install modgstatus to enable gmond status metric module support],
+[ enable_status="yes" 
+  AC_DEFINE(GSTATUS, 1, GSTATUS)], 
+[ enable_status="no" ] )
+
+AM_CONDITIONAL(BUILD_STATUS, test "$enable_status" = yes)
+
+dnl ##################################################################
+dnl Checks for libraries.
+dnl The order of these tests is the *reverse* order of the libraries in
+dnl the LIBS variable that is constructed: each new one gets prepended,
+dnl not appended.
+dnl
+AC_CHECK_LIB(pthread, pthread_create)
+dnl if test "$ac_cv_lib_pthread_pthread_create" = yes ; then
+dnl    CFLAGS="$CFLAGS -D_REENTRANT"
+dnl else
+AC_CHECK_LIB(pthreads, pthread_create)
+dnl    if test "$ac_cv_lib_pthreads_pthread_create" = yes ; then
+dnl       CFLAGS="$CFLAGS -D_REENTRANT"
+dnl    fi
+dnl fi
+
+if test x"$librrdpath" != x && test x"$librrdpath" != xyes ; then
+  CFLAGS="$CFLAGS -I$librrdpath/include"
+  LDFLAGS="$LDFLAGS -L$librrdpath/lib"
+fi
+
+if test x"$gmetad" = xyes ; then
+   AC_CHECK_HEADERS(rrd.h)
+   AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], [], [-lm])
+   if test x"$ac_cv_lib_rrd_rrd_create" != xyes; then
+      echo "Trying harder by including the X library path"
+      unset ac_cv_lib_rrd_rrd_create
+      LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/X11R6/lib"
+      AC_CHECK_LIB(rrd, rrd_create, [echo "The ganglia graphs are created using RRDTool (http://www.rrdtool.org/)"], [], [-lm])
+      if test x"$ac_cv_lib_rrd_rrd_create" != xyes; then
+         echo
+         echo "The Ganglia Meta Daemon uses the Round-Robin Database Tool (rrdtool)"
+         echo "for storing historical information.  You have chosen to compile the"
+         echo "monitoring core with gmetad but librrd could not be found.  Please"
+         echo "visit http://www.rrdtool.org/, download rrdtool and then try again"
+         echo
+         exit;
+      fi
+   fi
+fi
+
+if test "$enable_python" = yes ; then
+  echo
+  echo Checking for python
+
+  # check for Python executable
+  if test -z "$PYTHON_BIN"; then
+    AC_PATH_PROG(PYTHON_BIN, python)
+  else
+    if test -d $PYTHON_BIN; then
+      PYTHON_BIN="$PYTHON_BIN/bin/python"
+    fi
+  fi
+
+  if test -n "$PYTHON_BIN"; then
+    # find out python version
+    AC_MSG_CHECKING(Python version)
+    PyVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:3]'`]
+    PyMAJVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:1]'`]
+    AC_MSG_RESULT($PyVERSION)
+    PYTHON_VERSION=$PyVERSION
+    AC_SUBST(PYTHON_VERSION)
+
+    PyEXEC_INSTALLDIR=`$PYTHON_BIN -c "import sys; print sys.exec_prefix"`
+    if test -d "$PyEXEC_INSTALLDIR/include/python"; then
+      PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python"
+    else 
+      if test -d "$PyEXEC_INSTALLDIR/include/python$PyVERSION"; then
+        PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python$PyVERSION"
+      else
+        PYTHON_INCLUDES=""
+        enable_python="no"
+      fi
+    fi
+    AC_SUBST(PYTHON_INCLUDES)
+  else
+    enable_python="no"
+  fi
+fi
+
+AC_MSG_CHECKING(Python support)
+AC_MSG_RESULT($enable_python)
+AM_CONDITIONAL(BUILD_PYTHON, test "$enable_python" = "yes")
+
+echo
+echo Checking for apr
+if test x"$libaprpath" != x && test x"$libaprpath" != xyes ; then
+  if test -f "$libaprpath" ; then
+    APR_INCLUDES=`$libaprpath --includes`
+    AC_SUBST(APR_INCLUDES)
+    APR_LIBPATH=`$libaprpath --link-ld`
+    LDFLAGS="$LDFLAGS -L`expr "x$APR_LIBPATH" : '.*-L\(.*\) '`"
+    AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$libaprpath --libs`])
+  else
+    CFLAGS="$CFLAGS -I$libaprpath/include"
+    LDFLAGS="$LDFLAGS -L$libaprpath/lib"
+    echo "Added -I$libaprpath/include to CFLAGS"
+    echo "Added -L$libaprpath/lib to LDFLAGS"
+    AC_CHECK_LIB(apr-1, apr_socket_send)
+  fi
+else
+  AC_PATH_PROG(APR_CONFIG, apr-1-config)
+  if test -z "$APR_CONFIG"; then
+    AC_MSG_ERROR(apr-1-config binary not found in path)
+  fi
+  APR_INCLUDES=`$APR_CONFIG --includes`
+  AC_SUBST(APR_INCLUDES)
+  APR_LIBPATH=`$APR_CONFIG --link-ld`
+  APR_LIBPATH=`expr "x$APR_LIBPATH" : '.*-L\(.*\) '`
+  if test x$APR_LIBPATH != x; then
+    LDFLAGS="$LDFLAGS -L$APR_LIBPATH"
+  fi
+  AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$APR_CONFIG --libs`])
+fi
+
+if test $ac_cv_lib_apr_1_apr_socket_send = yes; then
+  echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
+  echo "Found a suitable libapr1 library"
+else
+  echo "libapr not found"
+  exit;
+fi
+
+echo
+echo Checking for confuse
+if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes ; then
+  CFLAGS="$CFLAGS -I$libconfusepath/include"
+  LDFLAGS="$LDFLAGS -L$libconfusepath/lib"
+  echo "Added -I$libconfusepath/include to CFLAGS"
+  echo "Added -L$libconfusepath/lib to LDFLAGS"
+fi
+AC_CHECK_LIB(confuse, cfg_parse)
+if test $ac_cv_lib_confuse_cfg_parse = no; then
+  echo Trying harder including gettext
+  unset ac_cv_lib_confuse_cfg_parse
+  LDFLAGS="$LDFLAGS -lintl"
+  AC_CHECK_LIB(confuse, cfg_parse)
+  if test $ac_cv_lib_confuse_cfg_parse = no; then
+    echo Trying harder including iconv
+    unset ac_cv_lib_confuse_cfg_parse
+    LDFLAGS="$LDFLAGS -liconv"
+    AC_CHECK_LIB(confuse, cfg_parse)
+    if test $ac_cv_lib_confuse_cfg_parse = no; then
+      echo "libconfuse not found"
+      exit
+    fi
+  fi
+fi
+if test $ac_cv_lib_confuse_cfg_parse = yes; then
+  echo "Found a suitable Confuse library"
+fi
+
+echo
+echo Checking for expat
+if test x"$libexpatpath" != x && test x"$libexpatpath" != xyes ; then
+  CFLAGS="$CFLAGS -I$libexpatpath/include"
+  LDFLAGS="$LDFLAGS -L$libexpatpath/lib"
+  echo "Added -I$libexpatpath/include to CFLAGS"
+  echo "Added -L$libexpatpath/lib to LDFLAGS"
+fi
+AC_CHECK_LIB(expat, XML_ParserCreate)
+if test $ac_cv_lib_expat_XML_ParserCreate = yes; then
+  echo "Found a suitable Expat library"
+else
+  echo "libexpat not found"
+  exit;
+fi
+echo
+
+AC_CHECK_LIB(rpc, xdr_string)
+AC_CHECK_LIB(socket, socket)
+AC_CHECK_LIB(nsl, inet_addr)
+AC_CHECK_LIB(nsl, gethostbyaddr_r)
+AC_CHECK_FUNC(inet_aton, , [AC_CHECK_LIB(resolv, inet_aton)])
+AC_CHECK_LIB(kstat, kstat_open)
+AC_CHECK_LIB(kvm, kvm_open)
+AC_CHECK_LIB(odm, odm_initialize)
+AC_CHECK_LIB(cfg, _system_configuration)
+AC_CHECK_LIB(perfstat, perfstat_cpu_total)
+AC_CHECK_LIB(dl, dlopen)
+dnl AC_CHECK_LIB(crypto, RSA_sign)
+dnl if test "$ac_cv_lib_crypto_RSA_sign" = no; then
+dnl    echo "$PACKAGE $VERSION requires IPv4 OpenSSL."
+dnl    echo "See http://www.openssl.org/."
+dnl    exit;
+dnl fi
+
+
+dnl ##################################################################
+dnl Checks for header files.
+dnl
+
+dnl Check for stdlib.h stdarg.h string.h float.h
+AC_HEADER_STDC
+
+AC_CHECK_HEADERS(syslog.h pthread.h fcntl.h signal.h sys/time.h sys/types.h sys/stat.h sys/socket.h sys/ioctl.h netinet/in.h arpa/inet.h net/if.h netinet/tcp.h unistd.h stropts.h sys/sockio.h ctype.h errno.h netdb.h stdio.h sys/uio.h sys/wait.h sys/un.h sys/select.h sys/filio.h getopt.h net/if_dl.h net/raw.h poll.h)
+AC_CHECK_HEADERS(inttypes.h limits.h sys/param.h sys/mount.h sys/vfs.h sys/statfs.h sys/statvfs.h)
+
+dnl ##################################################################
+dnl Checks for typedefs.
+dnl
+dnl AC_TYPE_SIZE_T
+AC_HEADER_TIME
+dnl AC_SEARCH_TYPE is a custom macro in acinclude.m4
+AC_SEARCH_TYPE(uchar_t,   unsigned char)
+AC_SEARCH_TYPE(int8_t,    signed char)
+AC_SEARCH_TYPE(uint8_t,   unsigned char)
+AC_SEARCH_TYPE(int16_t,   signed short)
+AC_SEARCH_TYPE(uint16_t,  unsigned short)
+AC_SEARCH_TYPE(int32_t,   signed int)
+AC_SEARCH_TYPE(uint32_t,  unsigned int)
+AC_SEARCH_TYPE(size_t,    unsigned int)
+AC_SEARCH_TYPE(ssize_t,   signed int)
+AC_SEARCH_TYPE(socklen_t, unsigned int)
+AC_SEARCH_TYPE(time_t,    long)
+
+dnl AC_CHECK_SIZEOF(char)
+dnl AC_CHECK_SIZEOF(short)
+dnl AC_CHECK_SIZEOF(int)
+dnl AC_CHECK_SIZEOF(long)
+dnl AC_CHECK_SIZEOF(void *)
+
+dnl ##################################################################
+dnl Check for structure definitions.
+dnl   
+
+
+dnl ##################################################################
+dnl Check the compiler characteristics
+dnl
+dnl Don't need this now that all data is send in XDR
+AC_C_BIGENDIAN
+
+dnl ##################################################################
+dnl Checks for library functions.
+dnl
+dnl AC_FUNC_MEMCMP
+AC_CHECK_FUNCS([snprintf vsnprintf strlcat])
+
+dnl ##################################################################
+dnl Check for function prototypes in headers.
+dnl
+AC_CHECK_FUNCS(getopt_long inet_ntop strdup)
+dnl AC_CHECK_FUNC(getopt_long)
+dnl AC_CHECK_FUNC(pthread_rwlock_rdlock,
+dnl   [AC_DEFINE(HAVE_PTHREAD_RWLOCK, 1)])
+
+dnl ##################################################################
+dnl Check for system services.
+
+dnl ##################################################################
+dnl If the compiler is gcc, enable all warnings.  Main purpose is to
+dnl catch any function call where the function has not been prototyped.
+dnl
+dnl Add "-Wcast-qual again later"...
+dnl if test "$ac_cv_prog_gcc" = yes; then
+if test "$ac_cv_gcc" = yes; then
+   CFLAGS="$CFLAGS -Wall -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes"
+fi
+
+dnl disable type punning optimization until verified safe
+if test "$ac_cv_c_compiler_gnu" = yes; then
+   SAVE_CFLAGS="$CFLAGS"
+   CFLAGS="$CFLAGS -fno-strict-aliasing"
+   AC_MSG_CHECKING([whether disabling type punning in gcc is possible])
+   AC_TRY_COMPILE([], [], type_punning=yes, type_punning=no)
+   if test $type_punning = no; then
+      CFLAGS="$SAVE_CFLAGS"
+   fi
+   AC_MSG_RESULT($type_punning)
+   unset type_punning
+   unset SAVE_CFLAGS
+   CFLAGS="$CFLAGS -Wall"
+fi
+
+if test "$enable_memcheck" = yes; then
+   echo "Setting up for memory checking via mpatrol"
+   CFLAGS="$CFLAGS -fcheck-memory-usage "
+   LDFLAGS="$LDFLAGS -lmpatrol -lbfd -liberty "
+fi
+
+dnl Some system-specific stuff ...
+dnl Some operating systems require additional flags in order to get all
+dnl the definitions that we're looking for in some system headers.
+
+dnl default VARSTATEDIR to /var/lib since that's the traditional location.
+dnl
+varstatedir="/var/lib"
+
+EXPORT_SYMBOLS="-export-dynamic"
+case "$host" in
+*linux*)
+                CFLAGS="$CFLAGS -D_REENTRANT"
+                AC_DEFINE(LINUX, 1, LINUX)
+dnl
+dnl For fsusage.c - disk usage.
+dnl
+                AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
+                AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
+                ;;
+*ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
+		LIBS="-lpthread $LIBS"
+		EXPORT_SYMBOLS="-Wl,-E"
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		AC_DEFINE(IA64,1,IA64)
+		AC_DEFINE(HPUX,1,HPUX);;
+*aix*)		CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
+		EXPORT_SYMBOLS="-Wl,-bexpfull"
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		if test "$ac_cv_lib_perfstat_perfstat_cpu_total" = yes ; then
+			CFLAGS="$CFLAGS -DHAVE_PERFSTAT" 
+		else
+			echo "libperfstat not detected."
+			echo "For AIX 5 you need to install bos.perf.libperfstat"
+		fi
+		AC_DEFINE(AIX, 1, AIX);;
+
+*hpux*)		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
+		LIBS="-lpthread $LIBS"
+		EXPORT_SYMBOLS="-Wl,-E"
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		AC_DEFINE(HPUX,1,HPUX);;
+*irix*)         AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+                CFLAGS="$CFLAGS -D_IRIX_SOURCE"
+                AC_DEFINE(IRIX,1,IRIX);;
+*osf*)	 	metric_source="osf.c"	
+		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
+                AC_DEFINE(OSF,1,OSF);;
+*darwin*) 	AC_DEFINE(DARWIN,1,DARWIN)
+		EXPORT_SYMBOLS="-export-all-symbols"
+		;;
+*solaris*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		if test "$ac_cv_prog_gcc" = yes; then
+		   CFLAGS="$CFLAGS -D__EXTENSIONS__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"
+		else
+		   CFLAGS="$CFLAGS -D__STDC__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"
+		fi 
+                AC_DEFINE(SOLARIS,1,SOLARIS);;
+*freebsd*)      CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		varstatedir="/var/db"
+                osreldate=`awk '/^\#define[[:space:]]*__FreeBSD_version/ { print $3 }' /usr/include/osreldate.h`
+                if test $osreldate -lt 502102; then
+                        CFLAGS="-pthread $CFLAGS -D_REENTRANT"
+                fi
+                AC_DEFINE(FREEBSD, 1, FREEBSD);; 
+*dragonfly*)	CFLAGS="-pthread $CFLAGS -D_REENTRANT"
+		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		varstatedir="/var/db"
+		AC_DEFINE(DRAGONFLYBSD, 1, DRAGONFLYBSD);;
+*netbsd*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		varstatedir="/var/db"
+		AC_DEFINE(NETBSD, 1, NETBSD);; 
+*openbsd*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
+		varstatedir="/var/db"
+		AC_DEFINE(OPENBSD, 1, OPENBSD);;
+*cygwin*)      	LDFLAGS="-L/bin"
+		EXPORT_SYMBOLS="-export-all-symbols"
+		AC_DEFINE(CYGWIN, 1, CYGWIN)
+esac
+
+AC_SUBST(EXPORT_SYMBOLS)
+
+dnl Define VARSTATEDIR in config.h
+dnl
+AC_SUBST(varstatedir)
+AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
+
+if test x"$libdir" = x"\${exec_prefix}/lib"; then
+   if test x"$exec_prefix" = xNONE; then
+      if test x"$prefix" = xNONE; then
+         exec_prefix="$ac_default_prefix"
+      else
+         exec_prefix="$prefix"
+      fi
+   fi
+   libdir=`eval echo "$libdir"`
+fi
+AC_SUBST(libdir)
+
+AC_OUTPUT(Makefile 
+          ganglia-config
+          tests/Makefile 
+          ganglia.spec 
+          gmetad/Makefile 
+          lib/default_conf.h
+          lib/Makefile 
+          gmond/Makefile 
+          gstat/Makefile 
+          gmond/modules/Makefile
+          gmond/modules/conf.d/example.conf
+          gmond/modules/conf.d/modpython.conf
+          gmond/modules/conf.d/multicpu.conf
+          gmond/modules/conf.d/modgstatus.conf
+          gmond/modules/example/Makefile
+          gmond/modules/cpu/Makefile
+          gmond/modules/disk/Makefile
+          gmond/modules/memory/Makefile
+          gmond/modules/network/Makefile
+          gmond/modules/python/Makefile
+          gmond/modules/status/Makefile
+          gmond/modules/system/Makefile
+          gmond/python_modules/Makefile
+          gmond/python_modules/disk/Makefile
+          gmond/python_modules/example/Makefile
+          gmond/python_modules/network/Makefile
+          gmetric/Makefile
+          include/Makefile 
+          web/version.php)
+
+
+echo ""
+echo "Welcome to.."
+echo "     ______                  ___"
+echo "    / ____/___ _____  ____ _/ (_)___ _"
+echo "   / / __/ __ \`/ __ \/ __ \`/ / / __ \`/"
+echo "  / /_/ / /_/ / / / / /_/ / / / /_/ /"
+echo "  \____/\__,_/_/ /_/\__, /_/_/\__,_/"
+echo "                   /____/"
+echo ""
+echo "Copyright (c) 2005 University of California, Berkeley"
+echo ""
+echo "Version: $GANGLIA_VERSION ($GANGLIA_RELEASE_NAME)"
+echo "Library: Release $LT_RELEASE $LT_CURRENT:$LT_REVISION:$LT_AGE"
+echo ""
+echo "Type \"make\" to compile."
+
