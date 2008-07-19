@@ -9,7 +9,7 @@ checkprivate();
 # RFM - These definitions are here to eliminate "undefined variable"
 # error messages in ssl_error_log.
 !isset($initgrid) and $initgrid = 0;
-!isset($metric) and $metric = "";
+!isset($metricname) and $metricname = "";
 !isset($context_metrics) and $context_metrics = "";
 
 if ( $context == "control" && $controlroom < 0 )
@@ -87,7 +87,7 @@ else
 # Used when making graphs via graph.php. Included in most URLs
 #
 $sort_url=rawurlencode($sort);
-$get_metric_string = "m=$metric&amp;r=$range&amp;s=$sort_url&amp;hc=$hostcols";
+$get_metric_string = "m=$metricname&amp;r=$range&amp;s=$sort_url&amp;hc=$hostcols";
 if ($jobrange and $jobstart)
         $get_metric_string .= "&amp;jr=$jobrange&amp;js=$jobstart";
 
