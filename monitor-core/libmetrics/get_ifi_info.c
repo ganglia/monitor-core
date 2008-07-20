@@ -135,8 +135,12 @@ get_ifi_info(int family, int doaliases)
 
                 /* Grab the MTU for this interface */
                 memcpy( mtu.ifr_name , ifi->ifi_name, IFI_NAME);
+#ifdef SIOCGIFMTU
                 Ioctl(sockfd, SIOCGIFMTU, &mtu);
                 ifi->ifi_mtu = mtu.ifr_mtu;
+#else
+                ifi->ifi_mtu = 1500;
+#endif
 
 
 /* end get_ifi_info2 */
