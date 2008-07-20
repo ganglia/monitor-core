@@ -67,7 +67,7 @@ $part_max = ($part_max_used) ? "$part_max_used% used." : "Unknown";
 
 # Compute time of last heartbeat from node's dendrite.
 $clustertime=$cluster['LOCALTIME'];
-tpl->assign("clustertime", strftime("%c", $clustertime));
+$tpl->assign("clustertime", strftime("%c", $clustertime));
 $heartbeat=$hostattrs['REPORTED'];
 $age = $clustertime - $heartbeat;
 if ($age > 3600) {
