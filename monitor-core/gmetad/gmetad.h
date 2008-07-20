@@ -107,7 +107,7 @@ typedef struct
       int dead;
       int last_good_index;
    }
-data_source_list_t;;
+data_source_list_t;
 
 /* The size of an ethernet frame, minus IP/UDP headers (1472)
  * plus a bit since gmond sends meta data in binary format, while

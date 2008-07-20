@@ -205,7 +205,7 @@ class piechart
     function draw_legends ($fontsize) {
       $n = count($this->data);
       $x1 = $this->width - $this->right + $this->legend_left;
-      $x2 = $x1 + $this->fy[$fontsize];;
+      $x2 = $x1 + $this->fy[$fontsize];
       for ($i = 0; $i < $n; $i++) {
       /* determine Y coordinates */
       $y1 = ($i * $this->fy[$fontsize] * 1.5) + $this->top;
