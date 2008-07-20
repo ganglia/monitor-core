@@ -49,6 +49,12 @@ $gmetad_port = $ganglia_port;
 $max_graphs = 0;
 
 #
+# In the Cluster View this sets the default number of columns used to
+# display the host grid below the summary graphs.
+#
+$hostcols = 4;
+
+#
 # Turn on and off the Grid Snapshot. Now that we have a
 # hierarchical snapshot (per-cluster instead of per-node) on
 # the meta page this makes more sense. Most people will want this
