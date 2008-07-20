@@ -54,11 +54,10 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1365
     +1: carenas, bnicholes
 
-  * Allow both a C and python module to create a metric that will spoof a specific host.
-     This provides the same spoofing functionality as gmetric but through a metric module.
-     It is done by adding SPOOF_HOST and SPOOF_NAME as extra metadata to the metric
-     description. This is patch contains fairly significant code changes so rather than
-     risk destabilizing the current release, this is a proposal for a follow-on release.
+  * Allow both a C and python module to create a metric that will spoof a
+    specific host.  This provides the same spoofing functionality as gmetric
+    but through a metric module.  It is done by adding SPOOF_HOST and
+    SPOOF_NAME as extra metadata to the metric description
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
@@ -149,5 +148,9 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1528
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1544
-    -1: carenas
-    carenas: incomplete fix, latency to shutdown, lose sample data
+    carenas: incomplete fix, latency to shutdown
+
+  * web: report correctly uptime in shownode when host is down
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
