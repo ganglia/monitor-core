@@ -16,10 +16,9 @@
 #define PATHSIZE 4096
 extern gmetad_config_t gmetad_config;
 
-
 pthread_mutex_t rrd_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void inline
+static inline void
 my_mkdir ( const char *dir )
 {
    pthread_mutex_lock( &rrd_mutex );
