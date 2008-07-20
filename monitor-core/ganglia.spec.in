@@ -373,7 +373,6 @@ cd gmetad-python
 %config(noreplace) %{web_prefixdir}/conf.php
 %{web_prefixdir}/AUTHORS
 %{web_prefixdir}/auth.php
-%{web_prefixdir}/ChangeLog
 %{web_prefixdir}/class.TemplatePower.inc.php
 %{web_prefixdir}/cluster_legend.html
 %{web_prefixdir}/cluster_view.php
@@ -406,6 +405,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sun Jul 20 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- Remove ChangeLog from ganglia-web
 * Tue Jun 10 2008 Bernard Li <bernard@vanhpc.org>
 - New subpackage gmetad-python for the Python re-write of gmetad
 * Wed Jun 04 2008 Bernard Li <bernard@vanhpc.org>
