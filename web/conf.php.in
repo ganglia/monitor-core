@@ -115,11 +115,6 @@ $load_scale = 1.0;
 $default_metric_color = "555555";
 
 #
-# Default graph range (hour, day, week, month, or year)
-#
-$default_range = "hour";
-
-#
 # Default metric 
 #
 $default_metric = "load_one";
