@@ -148,6 +148,19 @@ function start_cluster ($parser, $tagname, $attrs)
                   $cluster['HOSTS_DOWN']++;
                   $hosts_down[$hostname] = $attrs;
                }
+            # Pseudo metrics - add useful HOST attributes like gmond_started & last_reported to the metrics list:
+            $metrics[$hostname][gmond_started][NAME] = "GMOND_STARTED";
+            $metrics[$hostname][gmond_started][VAL] = $attrs[GMOND_STARTED];
+            $metrics[$hostname][gmond_started][TYPE] = "timestamp";
+            $metrics[$hostname][last_reported][NAME] = "REPORTED";
+            $metrics[$hostname][last_reported][VAL] = uptime($cluster[LOCALTIME] - $attrs[REPORTED]);
+            $metrics[$hostname][last_reported][TYPE] = "string";
+            $metrics[$hostname][ip_address][NAME] = "IP";
+            $metrics[$hostname][ip_address][VAL] = $attrs[IP];
+            $metrics[$hostname][ip_address][TYPE] = "string";
+            $metrics[$hostname][location][NAME] = "LOCATION";
+            $metrics[$hostname][location][VAL] = $attrs[LOCATION];
+            $metrics[$hostname][location][TYPE] = "string";
             break;
 
          case "METRIC":
