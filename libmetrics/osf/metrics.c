@@ -163,8 +163,7 @@ void get_cpu_percentages (void)
     {
       alpha = 0.5 * (timediff / 30.0e7);
       beta = 1.0 - alpha;
-      debug_msg("* * * * Setting alpha to %f and beta to %f because timediff
-= %d",alpha,beta,timediff);                                                 
+      debug_msg("* * * * Setting alpha to %f and beta to %f because timediff= %d", alpha, beta, timediff);
     }                                                                       
   else
     {
@@ -215,7 +214,7 @@ void get_cpu_percentages (void)
 	cpu_old[0],cpu_old[1],cpu_old[2],cpu_old[3],
 	cpu_diff[0],cpu_diff[1],cpu_diff[2],cpu_diff[3]);
 
-   debug_msg ("CPU: ** ** ** ** ** Are percentages electric?  Try user %d%%, nice %d%% , sys %d%% , idle %d%% ", cpu_states[0],cpu_states[1],cpu_states[2],cpu_states[3],cpu_states[4]);
+   debug_msg ("CPU: ** ** ** ** ** Are percentages electric?  Try user %d%%, nice %d%% , sys %d%% , idle %d%% ", cpu_states[0], cpu_states[1], cpu_states[2], cpu_states[3]);
    metriclist.cpu_idle.f = (float) cpu_states[3] / 10;
    metriclist.cpu_user.f = (float) cpu_states[0] / 10;
    metriclist.cpu_system.f = (float)cpu_states[2] / 10;
