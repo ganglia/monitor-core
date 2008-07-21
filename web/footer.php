@@ -7,6 +7,7 @@ $tpl->assign("webfrontend-version",$version["webfrontend"]);
 if ($version["rrdtool"]) {
    $tpl->assign("rrdtool-version",$version["rrdtool"]);
 }
+$tpl->assign("templatepower-version", $tpl->version);
 
 if ($version["gmetad"]) {
    $tpl->assign("webbackend-component", "gmetad");
