@@ -23,8 +23,11 @@ $sort = isset($_GET["s"]) ?
 	escapeshellcmd( clean_string( rawurldecode($_GET["s"]) ) ) : NULL;
 $controlroom = isset($_GET["cr"]) ?
 	clean_number( rawurldecode($_GET["cr"]) ) : NULL;
+# Default value set in conf.php, Allow URL to overrride
 if (isset($_GET["hc"]))
 	$hostcols = clean_number($_GET["hc"]);
+if (isset($_GET["mc"]))
+	$metriccols = clean_number($_GET["mc"]);
 # Flag, whether or not to show a list of hosts
 $showhosts = isset($_GET["sh"]) ?
 	clean_number( $_GET["sh"] ) : NULL;
