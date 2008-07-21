@@ -25,9 +25,9 @@ $rrds = "$gmetad_root/rrds";
 # otherwise, change it if it is installed elsewhere (like /usr/bin)
 define("RRDTOOL", "/usr/bin/rrdtool");
 
-
 # Location for modular-graph files.
 $graphdir='./graph.d';
+
 #
 # If you want to grab data from a different ganglia source specify it here.
 # Although, it would be strange to alter the IP since the Round-Robin
@@ -111,7 +111,6 @@ $load_colors = array(
    "75-100" =>"ffa15e",
    "50-75" => "ffde5e",
    "25-50" => "caff98",
-   #"0-25" => "efefef",
    "0-25" => "e2ecff",
    "down" => "515151"
 );
@@ -182,7 +181,6 @@ $graph_sizes = array(
      'fudge_2'=>0
    ),
    # this was the default value when no other size was provided.
-   # I wasn't sure what else to call it?
    'default'=>array(
      'height'=>100,
      'width'=>400,
