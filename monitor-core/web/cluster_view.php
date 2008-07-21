@@ -173,10 +173,6 @@ list($min, $max) = find_limits($sorted_hosts, $metricname);
 # Second pass to output the graphs or metrics.
 $i = 1;
 
-foreach ( $sorted_hosts as $host => $value ) {
-#echo "$host: $value, ";
-}
-
 foreach ( $sorted_hosts as $host => $value )
    {
       $tpl->newBlock ("sorted_list");
