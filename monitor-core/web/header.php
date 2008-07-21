@@ -2,7 +2,7 @@
 /* $Id$ */
 
 # Check if this context is private.
-include_once "auth.php";
+include_once "./auth.php";
 checkcontrol();
 checkprivate();
 
