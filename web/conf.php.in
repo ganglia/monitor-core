@@ -55,6 +55,12 @@ $max_graphs = 0;
 $hostcols = 4;
 
 #
+# In the Host View this sets the default number of columns used to
+# display the metric grid below the summary graphs.
+#
+$metriccols = 2;
+
+#
 # Turn on and off the Grid Snapshot. Now that we have a
 # hierarchical snapshot (per-cluster instead of per-node) on
 # the meta page this makes more sense. Most people will want this
