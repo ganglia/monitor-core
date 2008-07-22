@@ -248,6 +248,28 @@ function find_limits($nodes, $metricname)
 
 #-------------------------------------------------------------------------------
 #
+# Finds the avg of the given cluster & metric from the summary rrds.
+#
+function find_avg($clustername, $hostname, $metricname)
+{
+   global $rrds, $start, $end;
+   $avg = 0;
+
+   if ($hostname)
+     $sum_dir = "$rrds/$clustername/$hostname";
+   else
+     $sum_dir = "$rrds/$clustername/__SummaryInfo__";
+   $command = RRDTOOL . " graph '' --start $start --end $end ".
+     "DEF:avg='$sum_dir/$metricname.rrd':'sum':AVERAGE ".
+     "PRINT:avg:AVERAGE:%.2lf ";
+   exec($command, $out);
+   $avg = $out[1];
+   #echo "$sum_dir: avg($metricname)=$avg<br>\n";
+   return $avg;
+}
+
+#-------------------------------------------------------------------------------
+#
 # Generates the colored Node cell HTML. Used in Physical
 # view and others. Intended to be used to build a table, output
 # begins with "<tr><td>" and ends the same.
