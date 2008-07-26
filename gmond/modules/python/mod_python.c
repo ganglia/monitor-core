@@ -50,10 +50,13 @@
 #include <sys/stat.h>
 
 /*
- * Backward compatibility for 2.3 and 2.4
+ * Backward compatibility for 2.1 to 2.4
  */
 #if PY_MINOR_VERSION < 5
 #define Py_ssize_t int
+#if PY_MINOR_VERSION < 3
+#define PyInt_AsUnsignedLongMask PyInt_AsLong
+#endif
 #endif
 
 /*
