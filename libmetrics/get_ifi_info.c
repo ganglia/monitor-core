@@ -7,15 +7,14 @@
 #include <sys/sockio.h>
 #endif
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include <gm_msg.h>
 
 #include "unpifi.h"
-#include <gm_msg.h>
 
 /* HP-UX, Solaris */
 #if !defined(ifr_mtu) && defined(ifr_metric)
