@@ -32,8 +32,6 @@ AC_HAVE_LIBRARY(nsl)
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h nlist.h paths.h stdlib.h strings.h sys/filsys.h sys/fs/s5param.h sys/mount.h sys/param.h sys/socket.h sys/statfs.h sys/statvfs.h sys/systeminfo.h sys/time.h sys/vfs.h unistd.h utmp.h sys/sockio.h])
-AC_CHECK_HEADERS([rpc/rpc.h],, 
-   [AC_MSG_ERROR([your system is missing the Sun RPC (ONC/RPC) libraries])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
