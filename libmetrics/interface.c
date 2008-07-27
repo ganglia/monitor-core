@@ -2,8 +2,6 @@
 #include <string.h>
 
 #include "interface.h"
-#include "unpifi.h"
-
 
 int
 get_min_mtu( void )
