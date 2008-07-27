@@ -10,6 +10,7 @@
 #include <sys/sysinfo.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
+#include <sys/time.h>
 
 /* From old ganglia 2.5.x... */
 #include "file.h"
