@@ -406,6 +406,8 @@ AC_HEADER_STDC
 
 AC_CHECK_HEADERS(syslog.h pthread.h fcntl.h signal.h sys/time.h sys/types.h sys/stat.h sys/socket.h sys/ioctl.h netinet/in.h arpa/inet.h net/if.h netinet/tcp.h unistd.h stropts.h sys/sockio.h ctype.h errno.h netdb.h stdio.h sys/uio.h sys/wait.h sys/un.h sys/select.h sys/filio.h getopt.h net/if_dl.h net/raw.h poll.h)
 AC_CHECK_HEADERS(inttypes.h limits.h sys/param.h sys/mount.h sys/vfs.h sys/statfs.h sys/statvfs.h)
+AC_CHECK_HEADERS([rpc/rpc.h],,
+   [AC_MSG_ERROR([your system is missing the Sun RPC (ONC/RPC) libraries])])
 
 dnl ##################################################################
 dnl Checks for typedefs.
