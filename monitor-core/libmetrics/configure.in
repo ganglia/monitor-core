@@ -26,8 +26,6 @@ AC_HAVE_LIBRARY(socket)
 AC_HAVE_LIBRARY(resolv)
 AC_HAVE_LIBRARY(nsl)
 
-
-
 # Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
@@ -68,7 +66,6 @@ AC_SEARCH_TYPE(socklen_t, unsigned int)
 
 # Checks for library functions.
 AC_FUNC_CLOSEDIR_VOID
-#AC_FUNC_GETLOADAVG
 AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
@@ -81,64 +78,66 @@ case "$host" in
 *linux*)
 		GEXEC=1
 		OS="linux"
-                AC_DEFINE(LINUX, 1, LINUX)
+		AC_DEFINE(LINUX, 1, LINUX)
 dnl
 dnl For fsusage.c - disk usage.
 dnl
                 AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
-                ;;
-*ia64-*hpux*)   OS="hpux"
+		;;
+*ia64-*hpux*)	OS="hpux"
 		CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
-dnl LIBS="-lpthread $LIBS"
-                AC_DEFINE(IA64,1,IA64)
-                AC_DEFINE(HPUX,1,HPUX)
-                ;;
+		AC_DEFINE(IA64, 1, IA64)
+		AC_DEFINE(HPUX, 1, HPUX)
+		;;
 *aix*)		OS="aix"
-                CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
+		CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
 		if test "$ac_cv_lib_perfstat_perfstat_cpu_total" = yes ; then
 			CFLAGS="$CFLAGS -DHAVE_PERFSTAT"
 		else
 			echo "libperfstat not detected."
 			echo "For AIX 5 you need to install bos.perf.libperfstat"
 		fi
-                AC_DEFINE(AIX, 1, AIX)
+		AC_DEFINE(AIX, 1, AIX)
                 ;;
 *hpux*)		OS="hpux"
 		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
-dnl  LIBS="-lpthread $LIBS"
-                AC_DEFINE(HPUX,1,HPUX);;
-*irix*)         OS="irix"
-                CFLAGS="$CFLAGS -D_IRIX_SOURCE"
-                AC_DEFINE(IRIX,1,IRIX);;
-*osf*)	 	OS="osf"
+		AC_DEFINE(HPUX, 1, HPUX)
+		;;
+*irix*)		OS="irix"
+		CFLAGS="$CFLAGS -D_IRIX_SOURCE"
+		AC_DEFINE(IRIX, 1, IRIX)
+		;;
+*osf*)		OS="osf"
 		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
-                AC_DEFINE(OSF,1,OSF);;
-*darwin*) 	OS="darwin"
-                AC_DEFINE(DARWIN,1,DARWIN);;
+		AC_DEFINE(OSF, 1, OSF)
+		;;
+*darwin*)	OS="darwin"
+		AC_DEFINE(DARWIN, 1, DARWIN)
+		;;
 *solaris*)	OS="solaris"
 		CFLAGS="$CFLAGS -DHAVE_STRERROR"
-                AC_DEFINE(SOLARIS,1,SOLARIS);;
-*freebsd*)      OS="freebsd"
+		AC_DEFINE(SOLARIS, 1, SOLARIS)
+		;;
+*freebsd*)	OS="freebsd"
 		AC_DEFINE(FREEBSD, 1, FREEBSD)
 		;; 
 *dragonfly*)	OS="dragonfly"
 		AC_DEFINE(DRAGONFLYBSD, 1, DRAGONFLYBSD)
 		;;
-*netbsd*)       OS="netbsd"
+*netbsd*)	OS="netbsd"
 		AC_DEFINE(NETBSD, 1, NETBSD)
 		;; 
-*openbsd*)      OS="openbsd"
+*openbsd*)	OS="openbsd"
 		AC_DEFINE(OPENBSD, 1, OPENBSD)
 		;;
 *cygwin*)      	OS="cygwin"
-                dnl LIBS="$LIBS -lrpc"
-		AC_DEFINE(CYGWIN,1,CYGWIN)
+		AC_DEFINE(CYGWIN, 1, CYGWIN)
 		;;
 esac
 AC_SUBST(OS)
 
 AC_CONFIG_FILES([Makefile
-		 tests/Makefile
+                 tests/Makefile
                  aix/Makefile
                  cygwin/Makefile
                  darwin/Makefile
