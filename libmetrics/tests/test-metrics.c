@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "libmetrics.h"
+#include "config.h"
+
+#ifdef MINGW
+#include <windows.h>
+#define sleep(s) Sleep(s*1000)
+#endif
 
 #define NUM_TESTS 3 
 #define SLEEP_TIME 5

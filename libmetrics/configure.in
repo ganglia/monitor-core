@@ -133,6 +133,9 @@ dnl
 *cygwin*)      	OS="cygwin"
 		AC_DEFINE(CYGWIN, 1, CYGWIN)
 		;;
+*mingw*)	OS="mingw"
+		AC_DEFINE(MINGW, 1, MINGW)
+		;;
 esac
 AC_SUBST(OS)
 
@@ -146,6 +149,7 @@ AC_CONFIG_FILES([Makefile
                  hpux/Makefile
                  irix/Makefile
                  linux/Makefile
+                 mingw/Makefile
                  netbsd/Makefile
                  openbsd/Makefile
                  osf/Makefile

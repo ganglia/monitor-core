@@ -2,6 +2,8 @@
 #include "config.h"
 #endif
 
+#ifndef MINGW
+
 #ifdef HAVE_SYS_SOCKIO_H
 /* For older versions of Solaris... */
 #include <sys/sockio.h>
@@ -206,3 +208,5 @@ Get_ifi_info(int family, int doaliases)
 		err_quit("get_ifi_info error");
 	return(ifi);
 }
+
+#endif
