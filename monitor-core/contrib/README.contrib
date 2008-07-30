@@ -41,3 +41,8 @@ ganglia-rrd-modify.pl
     Simple script to read ganglia's rrds and modify some of their 
     configuration values.  It can also dump & restore rrd files. 
     Useful when moving ganglia to a new architecture.
+
+check_ganglia.py
+    Contributed by Kostas Georgiou ( k.georgiou _AT_ imperial.ac.uk )
+    NRPE plugin to translate ganglia metric values into nagios
+    alarms.
