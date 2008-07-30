@@ -22,7 +22,7 @@ The files:
 
 ganglia_gmond.xml     
 ganglia_gmetad.xml    
-    Contributed by Ben Rockwood ( benr _AT_ joyent . com )
+    Contributed by Ben Rockwood ( benr _AT_ joyent.com )
     Solaris/X86 SMF Manifest files.  Both manifests assume that
     Ganglia was installed with the prefix /opt/ganglia.  To load
     them (for example for gmond) run :
@@ -30,7 +30,7 @@ ganglia_gmetad.xml
         # svccfg import ganglia_gmond.xml
 
 diskfree_report.php 
-    Contributed by Jesse Becker ( hawson _AT_ gmail . com )
+    Contributed by Jesse Becker ( hawson _AT_ gmail.com )
     Fancy diskfree report that attempts to predict when you
     will run out of disk space.  Currently only works on aggregate
     disk usage, but could be altered to work on individual hosts
