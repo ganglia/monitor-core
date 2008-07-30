@@ -1,11 +1,13 @@
+pys = multidisk.py
+EXTRA_DIST = $(pys)
+
 if BUILD_PYTHON
 
-pys = multidisk.py
 pycs = multidisk.pyc
 
 .py.pyc:
 	$(PYTHON_BIN) -c "import py_compile; py_compile.compile( '$<' )"
 
-EXTRA_DIST = $(pys) $(pycs)
+EXTRA_DIST += $(pycs)
 
 endif
