@@ -1,4 +1,4 @@
-TESTS = test-metrics 
+TESTS = test-metrics
 
 AM_CFLAGS = -I../../include
 
