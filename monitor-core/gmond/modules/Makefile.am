@@ -2,6 +2,7 @@ if BUILD_PYTHON
 PYTHON_SUBDIR = python
 endif
 
+DIST_SUBDIRS = cpu disk memory network system status python
 if STATIC_BUILD
 SUBDIRS = cpu disk memory network system $(PYTHON_SUBDIR)
 else
