@@ -45,7 +45,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1306
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1307
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1308
-    +1: carenas
+    +1: carenas, bnicholes
 
   * contrib: include ganglia-rrd-modify.pl from contrib
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1365
@@ -62,7 +62,7 @@ BACKPORT PROPOSALS:
   * build: solaris support for Sun Studio
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1417
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1418
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmetad: support for C99 in gperf generated files and build cleanup
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04365.html
@@ -74,7 +74,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1479
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1485
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1486
-    +1: carenas
+    +1: carenas, bnicholes
 
   * build: respect libdir setting and allow for working default in 64bit linux
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04275.html
@@ -94,7 +94,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1522
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1524
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1525
-    +1: carenas
+    +1: carenas, bnicholes
 
   * include: support building modules with a C++ compiler
     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
@@ -102,7 +102,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1492
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1494
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1495
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmond: mod_example code cleanup for portability and usability
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1489
@@ -112,7 +112,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1516
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1517
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1543
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
@@ -139,7 +139,7 @@ BACKPORT PROPOSALS:
   * build: remove bogus svn:executable from package
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1481
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1483
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmond: avoid latency and timeouts when using the tcpconn python module
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
@@ -151,6 +151,11 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
+
+  * mod_python: fix segfault if the params directive is missing (bugzilla #195)
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1615
+    +1: bnicholes
+  
 
 
 BACKPORT PROPOSALS NEXT VERSION:
