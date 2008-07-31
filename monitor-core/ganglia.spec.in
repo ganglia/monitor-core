@@ -20,7 +20,7 @@ Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
 Source: %{name}-@VERSION@.tar.gz
 Buildroot: %{_tmppath}/%{name}-%{version}-buildroot
-BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel
+BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel, make
 %if 0%{?suse_version}
 BuildRequires:  freetype2-devel, libapr1-devel
 %if 0%{?suse_version} > 1020
@@ -405,6 +405,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Jul 30 2008 Bernard Li <bernard@vanhpc.org>
+- Add make to BuildRequires
 * Sun Jul 20 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
 - Remove ChangeLog from ganglia-web
 * Tue Jun 10 2008 Bernard Li <bernard@vanhpc.org>
