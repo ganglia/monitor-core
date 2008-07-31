@@ -555,14 +555,23 @@ static int pyth_metric_init (apr_pool_t *p)
 
     /* Verify path exists and can be read */
 
+    if (!path) {
+        err_msg("[PYTHON] Missing python module path.\n");
+        return -1;
+    }
+
     if (access(path, F_OK))
     {
         /* 'path' does not exist */
+        err_msg("[PYTHON] Can't open the python module path %s.\n", path);
+        return -1;
     }
 
     if (access(path, R_OK))
     {
         /* Don't have read access to 'path' */
+        err_msg("[PYTHON] Can't read from the python module path %s.\n", path);
+        return -1;
     }
 
     /* Init Python environment */

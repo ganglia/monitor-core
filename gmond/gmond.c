@@ -1830,18 +1830,20 @@ setup_metric_callbacks( void )
       if (modp->init && modp->init(global_context)) {
           err_msg("Module %s failed to initialize.\n", modp->module_name);
       }
-
-      apr_pool_cleanup_register(global_context, modp,
-                                modular_metric_cleanup,
-                                apr_pool_cleanup_null);
-
-      metric_info = modp->metrics_info;
-      for (i = 0; metric_info[i].name != NULL; i++) 
-        {
-          metric_cb = Ganglia_metric_cb_define(metric_info[i].name, modp->handler, i, modp);
-          if (metric_cb) 
-              metric_cb->info = (Ganglia_25metric*)&(metric_info[i]);
-        }
+      else {
+  
+        apr_pool_cleanup_register(global_context, modp,
+                                  modular_metric_cleanup,
+                                  apr_pool_cleanup_null);
+  
+        metric_info = modp->metrics_info;
+        for (i = 0; metric_info[i].name != NULL; i++) 
+          {
+            metric_cb = Ganglia_metric_cb_define(metric_info[i].name, modp->handler, i, modp);
+            if (metric_cb) 
+                metric_cb->info = (Ganglia_25metric*)&(metric_info[i]);
+          }
+      }
       modp = modp->next;
   }
 }
