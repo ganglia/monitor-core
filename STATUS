@@ -7,7 +7,8 @@ The current version of this file can be found at:
 
 Release history:
 
-    3.1.0   : Tagged on July 15, 2008
+    3.1.1   : In development
+    3.1.0   : Shipped July 30, 2008
 
 Contributors looking for a mission:
 
@@ -39,10 +40,6 @@ BACKPORT PROPOSALS:
      0: <userid>
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
-
-BACKPORT PROPOSALS NEXT VERSION:
-  These proposals are not targeted at the current version.  They should be
-   addressed after the current version is released.
 
   * gmetad: use platform specific directory for storing RRD
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1306
@@ -154,3 +151,10 @@ BACKPORT PROPOSALS NEXT VERSION:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
+
+
+BACKPORT PROPOSALS NEXT VERSION:
+  These proposals are not targeted at the current version.  They should be
+   addressed after the current version is released.
+
+
