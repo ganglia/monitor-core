@@ -69,7 +69,7 @@ Legend
 <tr>
 <td colspan=2 style="color: rgb(70,70,70)">
 <font size=-1>
-<em>cpu: </em> CPU clock (Ghz) (num CPUs)<br>
+<em>cpu: </em> CPU clock (GHz) (num CPUs)<br>
 <em>mem: </em> Total Memory (GB)</td>
 </font>
 </tr>
