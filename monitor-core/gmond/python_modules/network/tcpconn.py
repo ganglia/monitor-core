@@ -245,17 +245,8 @@ class NetstatThread(threading.Thread):
                 tempconns[conn] = 0
 
             #Call the netstat utility and split the output into separate lines
-            fd_poll = select.poll()
             self.popenChild = popen2.Popen3("netstat -t -a -n")
-            fd_poll.register(self.popenChild.fromchild)
-
-            poll_events = fd_poll.poll()
-
-            if (len(poll_events) == 0):             # Timeout
-                continue
-
-            for (fd, events) in poll_events:
-                lines = self.popenChild.fromchild.readlines()
+            lines = self.popenChild.fromchild.readlines()
 
             try:
                 self.popenChild.wait()
@@ -304,7 +295,8 @@ class NetstatThread(threading.Thread):
             _glock.release()
             
             #Wait for the refresh_rate period before collecting the netstat data again.
-            time.sleep(_refresh_rate)
+            if not self.shuttingdown:
+                time.sleep(_refresh_rate)
             
         #Set the current state of the thread after a shutdown has been indicated.
         self.running = False
