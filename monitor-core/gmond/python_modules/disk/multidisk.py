@@ -108,7 +108,6 @@ def metric_init(params):
         elif Remote_Mount(line[0], line[2]): continue
         elif (not line[0].startswith('/dev/')) and (not line[0].startswith('/dev2/')): continue;
         
-        print 'Discovered device %s' % line[1]
         descriptors.append(Init_Metric(line, 'disk_total', int(1200), 
             'double', 'GB', 'zero', '%.3f', 
             'Available disk space', DiskTotal_Handler))
