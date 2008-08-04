@@ -145,21 +145,21 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1528
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1544
-    carenas: incomplete fix, latency to shutdown
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1621
+    +1: carenas
 
   * web: report correctly uptime in shownode when host is down
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
 
-  * mod_python: fix segfault if the params directive is missing (bugzilla #195)
+  * mod_python: fix segfault if the params directive is missing
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=195
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1615
-    +1: bnicholes
-  
-
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1622
+    +1: carenas
+    carenas: incomplete fix, depends on r1389 (DSO metric spoofing)
 
 BACKPORT PROPOSALS NEXT VERSION:
-  These proposals are not targeted at the current version.  They should be
-   addressed after the current version is released.
-
-
+  These proposals are too unstabilizing for the current version.
+  They should be addressed after the current version is released.
