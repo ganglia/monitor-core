@@ -57,7 +57,15 @@ _conns = {'tcp_established': 0,
 
 def TCP_Connections(name):
     '''Return the requested connection type status.'''
-
+    global _WorkerThread
+    
+    if _WorkerThread is None:
+        print 'Error: No netstat data gathering thread created for metric %s'%name
+        return 0;
+        
+    if not _WorkerThread.running and not _WorkerThread.shuttingdown:
+        _WorkerThread.start()
+        
     #Read the last connection total for the state requested. The metric
     # name passed in matches the dictionary slot for the state value.
     _glock.acquire()
@@ -312,7 +320,6 @@ def metric_init(params):
     
     #Start the worker thread
     _WorkerThread = NetstatThread()
-    _WorkerThread.start()
     
     #Return the metric descriptions to Gmond
     return _descriptors
