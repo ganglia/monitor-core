@@ -82,7 +82,7 @@ if ((!$up) && ($cluster['HOSTS_UP'] == 0)) {
 # The these hardware units should be more flexible.
 $s = ($cpu_num>1) ? "s" : "";
 $tpl->assign("s",$s);
-$tpl->assign("cpu", sprintf("%s x %.2f Ghz", $cpu_num, $cpu_speed));
+$tpl->assign("cpu", sprintf("%s x %.2f GHz", $cpu_num, $cpu_speed));
 $tpl->assign("mem", sprintf("%.2f GB", $mem_total_gb));
 $tpl->assign("disk","$disk");
 $tpl->assign("part_max_used", "$part_max");
