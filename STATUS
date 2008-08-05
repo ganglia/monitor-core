@@ -153,12 +153,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
 
-  * mod_python: fix segfault if the params directive is missing
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=195
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1615
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1622
-    +1: carenas
-    carenas: incomplete fix, depends on r1389 (DSO metric spoofing)
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are too unstabilizing for the current version.
