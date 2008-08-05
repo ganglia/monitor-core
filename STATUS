@@ -146,12 +146,18 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1528
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1544
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1621
-    +1: carenas
+    +1: carenas, bnicholes
 
   * web: report correctly uptime in shownode when host is down
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
+
+  * tcpconn.py: Move the netstat thread start out of metric_init 
+      to avoid needlessly starting a thread with the query type 
+      parameters (such as -m) are used by gmond
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1628
+    +1: bnicholes
 
 
 BACKPORT PROPOSALS NEXT VERSION:
