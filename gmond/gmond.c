@@ -521,6 +521,10 @@ setup_listen_channels_pollset( int reset )
         }
       else
         {
+          /* Unicast listener needs no reset */
+          if (reset)
+              return;
+
           /* Create a UDP server */
           socket = create_udp_server( pool, sock_family, port, bindaddr );
           if(!socket)
