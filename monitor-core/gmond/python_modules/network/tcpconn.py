@@ -206,9 +206,9 @@ _descriptors = [{'name': 'tcp_established',
         }]
 
 class NetstatThread(threading.Thread):
-    '''This thread contunually gathers the current states of the tcp socket
+    '''This thread continually gathers the current states of the tcp socket
     connections on the machine.  The refresh rate is controlled by the 
-    RefreshRate parameter that is passed in through th gmond.conf file.'''
+    RefreshRate parameter that is passed in through the gmond.conf file.'''
 
     def __init__(self):
         threading.Thread.__init__(self)
@@ -343,5 +343,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         time.sleep(0.2)
         os._exit(1)
-
-
