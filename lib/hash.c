@@ -299,6 +299,9 @@ hash_lookup (datum_t *key, hash_t * hash)
   datum_t *val;
   bucket_t *bucket;
 
+  if (hash == NULL)
+     return NULL;
+
   i = hashval(key, hash);
 
   READ_LOCK(hash, i);
