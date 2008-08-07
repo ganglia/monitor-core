@@ -724,7 +724,11 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
     
     if (!xmldata->host_alive) 
         return 0;
-    
+
+    /* Only keep extra element details if we are the authority on this cluster. */
+    if (!authority_mode(xmldata))
+       return 0;
+
     hashkey.data = (void*) name;
     hashkey.size =  strlen(name) + 1;
     
