@@ -8,13 +8,14 @@ The current version of this file can be found at:
 Release history:
 
     3.1.1   : In development
-    3.1.0   : Shipped July 30, 2008
+    3.1.0   : Jul 30, 2008
 
 Contributors looking for a mission:
 
   * Just do an egrep on "TODO", "XXX" or "FIXME" in the source.
   * Review the bug database at: http://bugzilla.ganglia.info/
   * Open bugs in the bug database.
+  * Implement a feature from the wishlist at: http://ganglia.wiki.sourceforce.net/ganglia_wish-list
 
 CURRENT RELEASE NOTES:
 
@@ -34,7 +35,7 @@ RELEASE SHOWSTOPPERS:
   * gmetad: Fix segfault when specifying the data source for gmetad
       as another gmetad (aggregated gmetad)
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1633
-    +1: bnicholes
+    +1: bnicholes, carenas
 
 BACKPORT PROPOSALS:
  <TEMPLATE>
@@ -163,7 +164,6 @@ BACKPORT PROPOSALS:
       parameters (such as -m) are used by gmond
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1628
     +1: bnicholes
-
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are too unstabilizing for the current version.
