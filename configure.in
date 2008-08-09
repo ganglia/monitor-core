@@ -613,8 +613,11 @@ AC_OUTPUT(Makefile
           gmond/python_modules/disk/Makefile
           gmond/python_modules/example/Makefile
           gmond/python_modules/network/Makefile
+          gmetad/gmetad.conf
+          gmetad/conf.c
           gmetric/Makefile
           include/Makefile 
+          web/conf.php
           web/version.php)
 
 

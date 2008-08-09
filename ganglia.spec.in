@@ -449,7 +449,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 * Fri Dec 10 2004 Matt Massie <massie@cs.berkeley.edu>
 - Updated the spec file for 2.6.0 release
 * Tue Apr 13 2004 Brooks Davis <brooks@one-eyed-alien.net>
-- Use the autoconf variable varstatedir instead of /var/lib for consistancy.
+- Use the autoconf variable varstatedir instead of /var/lib for consistency.
 * Thu Feb 19 2004 Matt Massie <massie@cs.berkeley.edu>
 - Removed the /usr/include/ganglia directory from the lib rpm and
   changed the deprecated Copyright to License

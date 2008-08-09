@@ -52,12 +52,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
     +1: carenas
 
-  * gmetad: use platform specific directory for storing RRD
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1306
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1307
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1308
-    +1: carenas, bnicholes
-
   * Allow both a C and python module to create a metric that will spoof a
     specific host.  This provides the same spoofing functionality as gmetric
     but through a metric module.  It is done by adding SPOOF_HOST and
