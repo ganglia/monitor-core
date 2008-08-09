@@ -53,10 +53,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1308
     +1: carenas, bnicholes
 
-  * contrib: include ganglia-rrd-modify.pl from contrib
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1365
-    +1: carenas, bnicholes
-
   * Allow both a C and python module to create a metric that will spoof a
     specific host.  This provides the same spoofing functionality as gmetric
     but through a metric module.  It is done by adding SPOOF_HOST and
@@ -164,6 +160,12 @@ BACKPORT PROPOSALS:
       parameters (such as -m) are used by gmond
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1628
     +1: bnicholes
+
+  * contrib: add check_ganglia NRPE plugin and other minor contrib updates
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1607
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1608
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1609
+    +1: carenas
 
 BACKPORT PROPOSALS NEXT VERSION:
   These proposals are too unstabilizing for the current version.
