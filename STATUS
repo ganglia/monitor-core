@@ -121,12 +121,6 @@ BACKPORT PROPOSALS:
     -1: carenas
     carenas: incomplete fix, should use autoconf instead to handle Solaris>=10
 
-  * build: include contrib in package
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1538
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1552
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1556
-    +1: carenas, bnicholes
-
   * web: remove redirect hack for grid pulldown navigation
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
@@ -161,8 +155,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1628
     +1: bnicholes
 
-  * contrib: add check_ganglia NRPE plugin and other minor contrib updates
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1607
+  * contrib: add check_ganglia NRPE plugin
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1608
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1609
     +1: carenas

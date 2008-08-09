@@ -1,7 +1,11 @@
 The files in this directory have been graciously contributed by the
-Ganglia users' community.  While the various files and scripts are
-believed to work, they are *NOT* supported by core Ganglia development
-team.  Use at your own risk, YMMV, etc, etc.
+Ganglia users' community and while they are open source, they may 
+have a different license or copyright holder than Ganglia itself.
+
+While the various files and scripts are believed to work, The Ganglia
+development team does not maintain or support them, but merely distributes
+them for our users' convenience 'AS IS' and without any express or implied
+warranties.  Use at your own risk.
 
 If you have any questions about the files, please contact the original
 authors or try emailing the ganglia-general mailing list.  Information
@@ -18,22 +22,22 @@ The files:
 
 ganglia_gmond.xml     
 ganglia_gmetad.xml    
-    Contributed by Ben Rockwood (benr {@} joyent . com)
+    Contributed by Ben Rockwood ( benr _AT_ joyent.com )
     Solaris/X86 SMF Manifest files.  Both manifests assume that
     Ganglia was installed with the prefix /opt/ganglia.  To load
-    load them (for example for gmond) run :
+    them (for example for gmond) run :
     
         # svccfg import ganglia_gmond.xml
 
-
 diskfree_report.php 
-    Contributed by Jesse Becker ( hawson _AT_ gmail . com)
+    Contributed by Jesse Becker ( hawson _AT_ gmail.com )
     Fancy diskfree report that attempts to predict when you
     will run out of disk space.  Currently only works on aggregate
     disk usage, but could be altered to work on individual hosts
     as well.
 
 ganglia-rrd-modify.pl
+    Contributed by Jason A. Smith ( smithj _AT_ bnl.gov )
     Simple script to read ganglia's rrds and modify some of their 
-    configuration values.  It can also dump & restore rrd files, 
-    useful when moving ganglia to a new architecture.
+    configuration values.  It can also dump & restore rrd files. 
+    Useful when moving ganglia to a new architecture.

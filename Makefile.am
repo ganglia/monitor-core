@@ -6,7 +6,7 @@ else
 GMETAD_SUBDIR = 
 endif
 
-EXTRA_SUBDIRS = "./web"
+EXTRA_SUBDIRS = "web contrib"
 EXTRA_DIST_FILES = 
 INCLUDES = @APR_INCLUDES@
 
