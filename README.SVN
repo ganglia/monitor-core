@@ -1,0 +1,46 @@
+Welcome to the Bleeding Edge of Ganglia Development
+
+The SVN source represents the latest snapshot of Ganglia
+development.
+
+For best results, make sure you have in your development environment
+at least the following tools installed.
+
+  automake (GNU automake) 1.8.3
+  autoconf (GNU autoconf) 2.53
+  ltmain.sh (GNU libtool) 1.4.2
+  xsltproc (The XSLT C library for GNOME)
+
+Additionally,  you might need the following
+
+  gperf (GNU gperf) 3.0.3 (used in gmetad's xml and type hash functions)
+
+CheckOut the source files of Ganglia:
+
+  svn co http://ganglia.svn.sourceforge.net/svnroot/ganglia/branches/monitor-core-3.1 ganglia-3.1
+
+If you are interested in getting a snapshot for distribution
+you have to edit the configure.in file to set the variable GANGLIA_SNAPSHOT
+to "yes" and update the value of the GANGLIA_NANO_VERSION variable with the
+version number that your snapshot represents and that usually corresponds
+to the numeric value returned by:
+
+  ./svnversion .
+
+To prepare the distribution for compilation, run the bootstrapping script:
+
+  ./bootstrap
+
+To build a distribution tarball, run:
+
+  ./configure
+  make dist-gzip
+
+To prepare a distribution tree, run:
+
+  ./configure
+  make distdir
+
+To build RPMs after building the tarball:
+
+  rpmbuild -ta --target i686,noarch <tarball>

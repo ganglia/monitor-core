@@ -373,7 +373,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 * Thu Mar 13 2008 Jesse Becker <hawson@gmail.com>
 - Add web/graph.d directory and contents to %files.
 * Fri Feb 15 2008 Bernard Li <bernard@vanhpc.org>
-- Fix bug where .pyconf files are copied to %{libdir}/ganglia/python_modules
+- Fix bug where .pyconf files are copied to %{_libdir}/ganglia/python_modules
 - Enable tcpconn.py by default since code is now compatible with Python 2.3.x
 - No longer need to run %configure when building ganglia-web (noarch)
 * Tue Dec 18 2007 Brad Nicholes <bnicholes@novell.com>
