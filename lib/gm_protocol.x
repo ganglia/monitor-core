@@ -54,25 +54,25 @@ struct Ganglia_metadatareq {
 struct Ganglia_gmetric_ushort {
   struct Ganglia_metric_id metric_id;
   string fmt<>;
-  unsigned short u_short;
+  unsigned short us;
 };
 
 struct Ganglia_gmetric_short {
   struct Ganglia_metric_id metric_id;
   string fmt<>;
-  short s_short;
+  short ss;
 };
 
 struct Ganglia_gmetric_int {
   struct Ganglia_metric_id metric_id;
   string fmt<>;
-  int s_int;  
+  int si;  
 };
 
 struct Ganglia_gmetric_uint {
   struct Ganglia_metric_id metric_id;
   string fmt<>;
-  unsigned int u_int;  
+  unsigned int ui;  
 };
 
 struct Ganglia_gmetric_string {

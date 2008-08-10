@@ -80,14 +80,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1525
     +1: carenas, bnicholes
 
-  * include: support building modules with a C++ compiler
-    http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg03961.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1464
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1492
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1494
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1495
-    +1: carenas, bnicholes
-
   * web: keep grid summary always on top for meta view for all sorting methods
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1480

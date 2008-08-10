@@ -39,7 +39,7 @@
  * Declare ourselves so the configuration routines can find and know us.
  * We'll fill it in at the end of the module.
  */
-mmodule example_module;
+extern mmodule example_module;
 static int random_max = 50;
 static int constant_value = 20;
 
