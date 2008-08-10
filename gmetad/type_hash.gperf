@@ -6,11 +6,7 @@
  */
 #include <gmetad.h>
 %}
-struct type_tag
-   {
-      const char *name;
-      metric_type_t type;
-   };
+struct type_tag;
 %%
 int8, INT
 uint8, UINT

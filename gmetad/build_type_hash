@@ -1,2 +1,0 @@
-#!/bin/sh
-gperf -G -l -H type_hash -t -F ', 0' -N in_type_list -k 1,$ * -W types ./type_hash.gperf > type_hash.c

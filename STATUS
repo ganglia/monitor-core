@@ -60,18 +60,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
 
-  * gmetad: support for C99 in gperf generated files and build cleanup
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04365.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1445
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1446
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1471
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1472
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1476
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1479
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1485
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1486
-    +1: carenas, bnicholes
-
   * build: respect libdir setting and allow for working default in 64bit linux
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04275.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1452
@@ -143,6 +131,7 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
+    +1: carenas
 
   * libmetrics: osf: build fixes
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=74
@@ -232,6 +221,10 @@ BACKPORT PROPOSALS:
     are used by gmond
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1628
     +1: bnicholes
+
+  * build: clear test and assignment for undefined values or spaces
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1640
+    +1: carenas
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
