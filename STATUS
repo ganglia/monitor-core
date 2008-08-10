@@ -60,11 +60,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
 
-  * build: solaris support for Sun Studio
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1417
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1418
-    +1: carenas, bnicholes
-
   * gmetad: support for C99 in gperf generated files and build cleanup
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04365.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1445

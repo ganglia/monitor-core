@@ -539,10 +539,10 @@ dnl
 		EXPORT_SYMBOLS="-export-all-symbols"
 		;;
 *solaris*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
-		if test "$ac_cv_prog_gcc" = yes; then
-		   CFLAGS="$CFLAGS -D__EXTENSIONS__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"
-		else
-		   CFLAGS="$CFLAGS -D__STDC__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"
+		CFLAGS="$CFLAGS -D__EXTENSIONS__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"
+		if test "$ac_cv_prog_gcc" != yes; then
+		   CFLAGS="$CFLAGS -xc99"
+		   LIBS="-lm $LIBS"
 		fi 
                 AC_DEFINE(SOLARIS,1,SOLARIS);;
 *freebsd*)      CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
