@@ -30,9 +30,13 @@
 * Author: Brad Nicholes (bnicholes novell.com)
 ******************************************************************************/
 
+/*
+ * The ganglia metric "C" interface, required for building DSO modules.
+ */
 #include <gm_metric.h>
-#include <stdio.h>
+
 #include <stdlib.h>
+#include <strings.h>
 #include <time.h>
 
 /*
@@ -40,13 +44,15 @@
  * We'll fill it in at the end of the module.
  */
 extern mmodule example_module;
-static int random_max = 50;
-static int constant_value = 20;
+
+static unsigned int random_max = 50;
+static unsigned int constant_value = 20;
 
 static int ex_metric_init ( apr_pool_t *p )
 {
     const char* str_params = example_module.module_params;
     apr_array_header_t *list_params = example_module.module_params_list;
+    mmparam *params;
     int i;
 
     srand(time(NULL)%99);
@@ -59,7 +65,7 @@ static int ex_metric_init ( apr_pool_t *p )
     /* Multiple name/value pair parameters. */
     if (list_params) {
         debug_msg("[mod_example]Received following params list: ");
-        mmparam *params = (mmparam*) list_params->elts;
+        params = (mmparam*) list_params->elts;
         for(i=0; i< list_params->nelts; i++) {
             debug_msg("\tParam: %s = %s", params[i].name, params[i].value);
             if (!strcasecmp(params[i].name, "RandomMax")) {
@@ -77,6 +83,11 @@ static int ex_metric_init ( apr_pool_t *p )
     MMETRIC_INIT_METADATA(&(example_module.metrics_info[0]),p);
     MMETRIC_ADD_METADATA(&(example_module.metrics_info[0]),MGROUP,"random");
     MMETRIC_ADD_METADATA(&(example_module.metrics_info[0]),MGROUP,"example");
+    /*
+     * Usually a metric will be part of one group, but you can add more
+     * if needed as shown above where Random_Numbers is both in the random
+     * and example groups.
+     */
 
     MMETRIC_INIT_METADATA(&(example_module.metrics_info[1]),p);
     MMETRIC_ADD_METADATA(&(example_module.metrics_info[1]),MGROUP,"example");
@@ -97,22 +108,22 @@ static g_val_t ex_metric_handler ( int metric_index )
     */
     switch (metric_index) {
     case 0:
-        val.int32 = rand()%random_max;
-        return val;
+        val.uint32 = rand()%random_max;
+        break;
     case 1:
-        val.int32 = constant_value;
-        return val;
+        val.uint32 = constant_value;
+        break;
+    default:
+        val.uint32 = 0; /* default fallback */
     }
 
-    /* default case */
-    val.int32 = 0;
     return val;
 }
 
 static Ganglia_25metric ex_metric_info[] = 
 {
-    {0, "Random_Numbers", 90, GANGLIA_VALUE_UNSIGNED_INT, "s", "both", "%u", UDP_HEADER_SIZE+8, "Example module metric (random numbers)"},
-    {0, "Constant_Number", 90, GANGLIA_VALUE_UNSIGNED_INT, "Num", "zero", "%hu", UDP_HEADER_SIZE+8, "Example module metric (constant number)"},
+    {0, "Random_Numbers", 90, GANGLIA_VALUE_UNSIGNED_INT, "Num", "both", "%u", UDP_HEADER_SIZE+8, "Example module metric (random numbers)"},
+    {0, "Constant_Number", 90, GANGLIA_VALUE_UNSIGNED_INT, "Num", "zero", "%u", UDP_HEADER_SIZE+8, "Example module metric (constant number)"},
     {0, NULL}
 };
 

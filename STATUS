@@ -86,16 +86,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1482
     +1: carenas
 
-  * gmond: mod_example code cleanup for portability and usability
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1489
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1513
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1514
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1515
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1516
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1517
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1543
-    +1: carenas, bnicholes
-
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     +1: carenas
