@@ -91,13 +91,6 @@ BACKPORT PROPOSALS:
     +1: carenas
     carenas: incomplete fix, should use autoconf instead to handle Solaris>=10
 
-  * gmond: avoid latency and timeouts when using the tcpconn python module
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04432.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1528
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1544
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1621
-    +1: carenas, bnicholes
-
   * gmond: modular code cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1540
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1541

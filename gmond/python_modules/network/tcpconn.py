@@ -245,19 +245,14 @@ class NetstatThread(threading.Thread):
                 tempconns[conn] = 0
 
             #Call the netstat utility and split the output into separate lines
-            fd_poll = select.poll()
-            self.popenChild = popen2.Popen3("netstat -t -a")
-            fd_poll.register(self.popenChild.fromchild)
+            self.popenChild = popen2.Popen3("netstat -t -a -n")
+            lines = self.popenChild.fromchild.readlines()
 
-            poll_events = fd_poll.poll()
-
-            if (len(poll_events) == 0):             # Timeout
-                continue
-
-            for (fd, events) in poll_events:
-                lines = self.popenChild.fromchild.readlines()
-
-            self.popenChild.wait()
+            try:
+                self.popenChild.wait()
+            except OSError, e:
+                if e.errno == 10: # No child process
+                    continue
             
             #Iterate through the netstat output looking for the 'tcp' keyword in the tcp_at 
             # position and the state information in the tcp_state_at position. Count each 
@@ -300,7 +295,8 @@ class NetstatThread(threading.Thread):
             _glock.release()
             
             #Wait for the refresh_rate period before collecting the netstat data again.
-            time.sleep(_refresh_rate)
+            if not self.shuttingdown:
+                time.sleep(_refresh_rate)
             
         #Set the current state of the thread after a shutdown has been indicated.
         self.running = False
