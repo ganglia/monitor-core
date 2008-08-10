@@ -94,14 +94,14 @@ any other type of gmond dynamically loadable metric module. The name of
 the python support module is modpython.so. A base configuration file 
 is included in the Ganglia source code and should have been installed
 automatically if done through an RPM. The basic configuration that
-should be added to or included by gmond.conf in a 32bit Linux node is as
+should be added to or included by gmond.conf in your system is as
 follows:
 
   modules {
     module {
       name = "python_module"
       path = "modpython.so"
-      params = "/usr/lib/ganglia/python_modules"
+      params = "@moduledir@/python_modules"
     }
   }
 

@@ -647,6 +647,7 @@ AC_OUTPUT(Makefile
           gmond/modules/memory/Makefile
           gmond/modules/network/Makefile
           gmond/modules/python/Makefile
+          gmond/modules/python/README
           gmond/modules/status/Makefile
           gmond/modules/system/Makefile
           gmond/python_modules/Makefile
