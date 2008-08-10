@@ -195,7 +195,7 @@ BACKPORT PROPOSALS:
     needlessly starting a thread with the query type parameters (such as -m)
     are used by gmond
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1628
-    +1: bnicholes
+    +1: bnicholes, carenas
 
   * build: clear test and assignment for undefined values or spaces
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1640
@@ -228,6 +228,6 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1599
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1600
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1601
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1602
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
     +1: carenas
