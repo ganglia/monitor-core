@@ -52,6 +52,39 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
     +1: carenas
 
+  * libmetrics: linux cleanup leftovers from r740
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1254
+    +1: carenas
+
+  * libmetrics: freebsd: prototype for cpu_state to avoid implicit declaration
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1260
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1304
+    +1: carenas
+
+  * libmetrics: freebsd: define isdigit and isspace
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1261
+    +1: carenas
+
+  * gmetad: pthread_t is an opaque type which could oveflow an int
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1262
+    +1: carenas
+
+  * libmetrics: dragonfly: prototype for cpu_state to avoid implicit declaration
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1264
+    +1: carenas
+
+  * libmetrics: netbsd: dead code cleanup
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1305
+    +1: carenas
+
+  * libganglia: protect against negative offsets for isspace if char is signed
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1312
+    +1: carenas
+
+  * libmetrics: solaris: dead code cleanup
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1317
+    +1: carenas
+
   * Allow both a C and python module to create a metric that will spoof a
     specific host.  This provides the same spoofing functionality as gmetric
     but through a metric module.  It is done by adding SPOOF_HOST and
@@ -60,10 +93,26 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
 
+  * libmetrics: linux: update_ifdata cleanup
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1473
+    +1: carenas
+
+  * libganglia: silence daemon_init warning when using cpp's FORTIFY_SOURCE
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1474
+    +1: carenas
+
   * web: keep grid summary always on top for meta view for all sorting methods
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1480
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1482
+    +1: carenas
+
+  * libmetrics: mtu is always positive so use unsigned instead for interface
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1511
+    +1: carenas
+
+  * libmetrics: ensure boottime isn't reported through a float
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1512
     +1: carenas
 
   * gmond: solaris: define fabsf for solaris < 10
@@ -190,6 +239,12 @@ BACKPORT PROPOSALS FUTURE VERSION:
     +1: carenas
     carenas: should also remove the hardcoded rule of 4x this time
 
+  * web: add optional use of hostname withouth FQDN
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04354.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1460
+    +1: carenas
+    carenas: logic/name should reflect hostname is formatted to remove domain
+
   * gmond: recover from interface reconfiguration gracefully
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=38
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1478
@@ -208,6 +263,5 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1599
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1600
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1601
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1602
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
     +1: carenas

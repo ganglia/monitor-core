@@ -61,7 +61,7 @@ function graph_metric ( &$rrdtool_graph ) {
             break;
             
         case 'meta':
-            $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";;
+            $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";
             break;
             
         case 'grid':
