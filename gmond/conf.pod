@@ -85,7 +85,7 @@ such as whether is should daemonize, what user it should run as,
 whether is should send/receive date and such.  The B<globals>
 section has the following attributes: B<daemonize>, B<setuid>, B<user>,
 B<debug_level>, B<mute>, B<deaf>, B<host_dmax>, B<cleanup_threshold>,
-B<gexec> and B<send_metadata_interval>.
+B<gexec> and B<send_metadata_interval> and B<module_dir>.
 
 For example,
 
@@ -139,6 +139,16 @@ metrics that it currently supports. In multicast mode, this isn't a problem
 because any node can request the metadata of all other nodes in the cluster.
 However in unicast mode, a resend interval must be established. The interval
 value is the minimum number of seconds between resends.
+
+The B<module_dir> is an optional parameter indicating the directory where
+the DSO modules are to be located.  If absent, the value to use is set at
+configure time with the --with-moduledir option which will default if omitted
+to the a subdirectory named "ganglia" in the directory where libganglia will
+be installed.
+
+For example, in a 32-bit Intel compatible Linux host that is usually:
+
+  /usr/lib/ganglia
 
 =head2 udp_send_channel
 
@@ -376,8 +386,7 @@ invoking B<gmond -m>.
    modules {
      module {
        name = "example_module"
-       language = "C/C++"
-       path = "/usr/lib/ganglia/modules/modexample.so"
+       path = "modexample.so"
        params = "An extra raw parameter"
        param RandomMax {
          value = 75

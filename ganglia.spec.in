@@ -385,7 +385,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 - Set variable conf_dir to /etc/ganglia
 - Migrate /etc/{gmond,gmetad}.conf files to /etc/ganglia for upgrades etc.
 * Fri Nov 09 2007 Bernard Li <bernard@vanhpc.org>
-- Include .pyc files from /usr/lib/ganglia/python_modules
+- Include .pyc files from @moduledir@/python_modules
 * Thu Nov 08 2007 Bernard Li <bernard@vanhpc.org>
 - Clean up /etc/ganglia/conf.d/*.conf.in files
 * Wed Oct 10 2007 Bernard Li <bernard@vanhpc.org>

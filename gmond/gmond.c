@@ -67,6 +67,8 @@ int host_dmax = 0;
 int cleanup_threshold = 300;
 /* Time interval before send another metadata packet */
 int send_metadata_interval = 0;
+/* The directory where DSO modules are located */
+char *module_dir = NULL;
 
 /* The array for outgoing UDP message channels */
 Ganglia_udp_send_channels udp_send_channels = NULL;
@@ -211,6 +213,8 @@ process_configuration_file(void)
   cleanup_threshold   = cfg_getint( tmp, "cleanup_threshold");
   /* Get the send meta data packet interval */
   send_metadata_interval = cfg_getint( tmp, "send_metadata_interval");
+  /* Get the DSO module dir */
+  module_dir = cfg_getstr(tmp, "module_dir");
 
   /* Commandline for debug_level trumps configuration file behaviour ... */
   if (args_info.debug_given) 
@@ -1629,6 +1633,7 @@ load_metric_modules( void )
         char *modPath=NULL, *modName=NULL, *modparams=NULL, *modLanguage=NULL;
         apr_array_header_t *modParams_list = NULL;
         int k;
+        apr_status_t merge_ret;
 
         cfg_t *module = cfg_getnsec(tmp, "module", j);
 
@@ -1641,6 +1646,22 @@ load_metric_modules( void )
             continue;
 
         modPath = cfg_getstr(module, "path");
+        if(modPath && *modPath != '/' && *modPath != '.')
+          {
+            if (module_dir)
+                merge_ret = apr_filepath_merge(&modPath, module_dir,
+                                modPath,
+                                APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE,
+                                global_context);
+            else
+                merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR,
+                                modPath,
+                                APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE,
+                                global_context);
+
+            if (merge_ret != APR_SUCCESS) 
+                modPath = cfg_getstr(module, "path");
+          }
         modName = cfg_getstr(module, "name");
         modparams = cfg_getstr(module, "params");
         modParams_list = apr_array_make(global_context, 2, sizeof(mmparam));

@@ -60,26 +60,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
 
-  * build: respect libdir setting and allow for working default in 64bit linux
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04275.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1452
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1461
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1462
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1467
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1468
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1475
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1487
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1505
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1506
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1507
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1508
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1519
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1521
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1522
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1524
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1525
-    +1: carenas, bnicholes
-
   * web: keep grid summary always on top for meta view for all sorting methods
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1480

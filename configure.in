@@ -171,6 +171,11 @@ AC_ARG_WITH( libconfuse,
 [  --with-libconfuse=DIR   Specify location for libconfuse],
 [if test x"$withval" != xno; then libconfuse=yes; libconfusepath=$withval; fi])
 
+AC_ARG_WITH( moduledir,
+[  --with-moduledir=DIR   Base directory for dynamically loadable modules],
+  moduledir="$withval", 
+  moduledir="$libdir/ganglia")
+
 AC_ARG_ENABLE(debug,
 [
   --enable-debug          turn on debugging output and compile options],
@@ -499,14 +504,41 @@ varstatedir="/var/lib"
 EXPORT_SYMBOLS="-export-dynamic"
 case "$host" in
 *linux*)
-                CFLAGS="$CFLAGS -D_REENTRANT"
-                AC_DEFINE(LINUX, 1, LINUX)
+		CFLAGS="$CFLAGS -D_REENTRANT"
+		AC_DEFINE(LINUX, 1, LINUX)
 dnl
 dnl For fsusage.c - disk usage.
 dnl
-                AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
-                AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
-                ;;
+		AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
+		AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC)
+		if test x"$moduledir" = x"\${exec_prefix}/lib/ganglia"; then
+		   if test x"$build_cpu" != xia64 && \
+		      test x"$build_cpu" != xalpha; then
+		      if test x"$libdir" = x"\${exec_prefix}/lib"; then
+		         if test x"$exec_prefix" = xNONE; then
+		            if test x"$prefix" = xNONE; then
+		               libroot="$ac_default_prefix"
+		            else
+		               libroot="$prefix"
+		            fi
+		         else
+		            libroot="$exec_prefix"
+			 fi
+	                 AC_TRY_COMPILE([], [],
+		                        [file conftest.$ac_objext > conftest.file])
+		         FILE=`cat conftest.file`
+		         WIDTH_CPU=`expr "x$FILE" : '.*ELF \(.*\)-bit '`
+		         rm -f conftest.file
+		         if test x"$WIDTH_CPU" = x64; then
+		            libdir="$libroot/lib64"
+		         else
+		            libdir="$libroot/lib"
+		         fi
+		      fi
+		      moduledir="$libdir/ganglia"
+		   fi
+		fi
+		;;
 *ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
 		LIBS="-lpthread $LIBS"
 		EXPORT_SYMBOLS="-Wl,-E"
@@ -575,7 +607,10 @@ dnl
 AC_SUBST(varstatedir)
 AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
-if test x"$libdir" = x"\${exec_prefix}/lib"; then
+dnl Where to look for libraries (/usr/lib vs /usr/lib64)
+AC_SUBST(libdir)
+
+if test x"$moduledir" = x"\${exec_prefix}/lib/ganglia"; then
    if test x"$exec_prefix" = xNONE; then
       if test x"$prefix" = xNONE; then
          exec_prefix="$ac_default_prefix"
@@ -583,9 +618,10 @@ if test x"$libdir" = x"\${exec_prefix}/lib"; then
          exec_prefix="$prefix"
       fi
    fi
-   libdir=`eval echo "$libdir"`
+   moduledir=`eval echo "$moduledir"`
 fi
-AC_SUBST(libdir)
+AC_DEFINE_UNQUOTED(GANGLIA_MODULE_DIR, "$moduledir", GANGLIA_MODULE_DIR)
+AC_SUBST(moduledir)
 
 AC_OUTPUT(Makefile 
           ganglia-config
@@ -597,16 +633,14 @@ AC_OUTPUT(Makefile
           gmond/Makefile 
           gstat/Makefile 
           gmond/modules/Makefile
-          gmond/modules/conf.d/example.conf
           gmond/modules/conf.d/modpython.conf
-          gmond/modules/conf.d/multicpu.conf
-          gmond/modules/conf.d/modgstatus.conf
           gmond/modules/example/Makefile
           gmond/modules/cpu/Makefile
           gmond/modules/disk/Makefile
           gmond/modules/memory/Makefile
           gmond/modules/network/Makefile
           gmond/modules/python/Makefile
+          gmond/modules/python/README
           gmond/modules/status/Makefile
           gmond/modules/system/Makefile
           gmond/python_modules/Makefile
