@@ -215,12 +215,6 @@ BACKPORT PROPOSALS:
     +1: carenas
     carenas: incomplete fix, will require python framework for debug messages
 
-  * tcpconn.py: Move the netstat thread start out of metric_init to avoid
-    needlessly starting a thread with the query type parameters (such as -m)
-    are used by gmond
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1628
-    +1: bnicholes, carenas
-
   * build: clear test and assignment for undefined values or spaces
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1640
     +1: carenas
