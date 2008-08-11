@@ -32,11 +32,6 @@ RELEASE SHOWSTOPPERS:
     <http:// link to email list or bugzilla bug describing the issue>
     <Comments prefixed with user id of comment author>
 
-  * gmetad: Fix segfault when specifying the data source for gmetad
-      as another gmetad (aggregated gmetad)
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1633
-    +1: bnicholes, carenas
-
 BACKPORT PROPOSALS:
  <TEMPLATE>
   * <Brief description of proposal or bug>
