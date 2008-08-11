@@ -19,11 +19,11 @@ Contributors looking for a mission:
 
 CURRENT RELEASE NOTES:
 
-  * Dynamically loaded metric support (DSO)
-  * Scriptable metric support with Python
-  * Modular frontend graph support
-  * Platform support for DragonFlyBSD
-  * Improved native metric support for Windows (Built with CygWin)
+  * Module directory configurable at build and run time
+  * Autodetect libdir/moduledir for bi-arch Linux architectures
+  * Include contrib directory with user provided goodies
+  * Support for building C++ DSO
+  * Support for building with Sun Studio 12 in OpenSolaris
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -65,7 +65,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1261
     +1: carenas
 
-  * gmetad: pthread_t is an opaque type which could oveflow an int
+  * gmetad: pthread_t is an opaque type which could overflow an int
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1262
     +1: carenas
 
