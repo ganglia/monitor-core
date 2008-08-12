@@ -49,36 +49,36 @@ BACKPORT PROPOSALS:
 
   * libmetrics: linux cleanup leftovers from r740
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1254
-    +1: carenas
+    +1: carenas, bnicholes
 
   * libmetrics: freebsd: prototype for cpu_state to avoid implicit declaration
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1260
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1304
-    +1: carenas
+    +1: carenas, bnicholes
 
   * libmetrics: freebsd: define isdigit and isspace
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1261
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmetad: pthread_t is an opaque type which could overflow an int
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1262
-    +1: carenas
+    +1: carenas, bnicholes
 
   * libmetrics: dragonfly: prototype for cpu_state to avoid implicit declaration
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1264
-    +1: carenas
+    +1: carenas, bnicholes
 
   * libmetrics: netbsd: dead code cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1305
-    +1: carenas
+    +1: carenas, bnicholes
 
   * libganglia: protect against negative offsets for isspace if char is signed
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1312
-    +1: carenas
+    +1: carenas, bnicholes
 
   * libmetrics: solaris: dead code cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1317
-    +1: carenas
+    +1: carenas, bnicholes
 
   * Allow both a C and python module to create a metric that will spoof a
     specific host.  This provides the same spoofing functionality as gmetric
@@ -90,11 +90,11 @@ BACKPORT PROPOSALS:
 
   * libmetrics: linux: update_ifdata cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1473
-    +1: carenas
+    +1: carenas, bnicholes
 
   * libganglia: silence daemon_init warning when using cpp's FORTIFY_SOURCE
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1474
-    +1: carenas
+    +1: carenas, bnicholes
 
   * web: keep grid summary always on top for meta view for all sorting methods
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=186
@@ -104,11 +104,11 @@ BACKPORT PROPOSALS:
 
   * libmetrics: mtu is always positive so use unsigned instead for interface
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1511
-    +1: carenas
+    +1: carenas, bnicholes
 
   * libmetrics: ensure boottime isn't reported through a float
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1512
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
@@ -119,7 +119,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1540
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1541
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1542
-    +1: carenas
+    +1: carenas, bnicholes
 
   * web: fix metric variable name mismatch
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
@@ -137,7 +137,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1570
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1571
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1572
-    +1: carenas
+    +1: carenas, bnicholes
 
   * build: fix ChangeLogs
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1575
@@ -146,7 +146,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1590
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1591
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1592
-    +1: carenas
+    +1: carenas, bnicholes
 
   * web: add host atrributes into metric list
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=30
@@ -175,12 +175,12 @@ BACKPORT PROPOSALS:
 
   * web: add references to templatePower in the footer
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1586
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmond: mod_python support for 2.3 or older and 2.5 or newer
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1596
-    +1: carenas
+    +1: carenas, bnicholes
 
   * build: libmetrics dependency cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1597
@@ -192,12 +192,12 @@ BACKPORT PROPOSALS:
 
   * libmetrics: linux: include definition for gettimeofday
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1598
-    +1: carenas
+    +1: carenas, bnicholes
 
   * contrib: add check_ganglia NRPE plugin
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1608
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1609
-    +1: carenas
+    +1: carenas, bnicholes
 
   * build: remove sideffects of --disable-python for dist target
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04551.html
@@ -208,7 +208,7 @@ BACKPORT PROPOSALS:
 
   * build: enable -Wall in libmetrics if using gcc
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1613
-    +1: carenas
+    +1: carenas, bnicholes
 
   * python_modules: remove unconditional debugging information for multidisk
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1623
@@ -217,7 +217,7 @@ BACKPORT PROPOSALS:
 
   * build: clear test and assignment for undefined values or spaces
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1640
-    +1: carenas
+    +1: carenas, bnicholes
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
