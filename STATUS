@@ -84,7 +84,7 @@ BACKPORT PROPOSALS:
 
   * web: remove references to obsoleted default_range
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1581
-    +1: carenas
+    +1: carenas, bernardli
 
   * web: allow for configuring number of columns in grid view
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
@@ -101,6 +101,11 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1587
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
     +1: carenas
+    bernardli: In regards to 1588, PHP would look in the current directory for the file to
+               include, therefore, adding the "./" is redundant.  In fact I would propose that
+               we get rid of all the "./" for the other include_once() calls in web/*.  I am
+               good with the other two patches though but will vote if/when the last patch is
+               removed.
 
   * web: add references to templatePower in the footer
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1586
