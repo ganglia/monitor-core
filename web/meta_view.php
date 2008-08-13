@@ -36,25 +36,25 @@ foreach( $source_names as $c)
       isset($total_load) or $total_load = 0;
       $total_load += $value;   
    }
-# Insure self is always first 
-$sorted_sources[$self] = 999999;
 
 if ($sort == "descending") {
+      $sorted_sources[$self] = 999999999;
       arsort($sorted_sources);
-}
-else if ($sort == "by name") {
+} else if ($sort == "by name") { # SORT HACK to keep $self first; see below:
+      $sorted_sources["AAAAA.$self"] = $sorted_sources[$self];
+      unset($sorted_sources[$self]);
       ksort($sorted_sources);
 } else if ($sort == "by hosts up") {
       foreach ($sorted_sources as $source => $val) {
             $sorted_sources[$source] = intval($grid[$source]['HOSTS_UP']);
       }
-      $sorted_sources[$self] = 999999;
+      $sorted_sources[$self] = 999999999;
       arsort($sorted_sources);
 } else if ($sort == "by hosts down") {
       foreach ($sorted_sources as $source => $val) {
             $sorted_sources[$source] = intval($grid[$source]['HOSTS_DOWN']);
       }
-      $sorted_sources[$self] = 999999;
+      $sorted_sources[$self] = 999999999;
       arsort($sorted_sources);
 } else {
       $sorted_sources[$self] = -1;
@@ -64,6 +64,10 @@ else if ($sort == "by name") {
 # Display the sources. The first is ourself, the rest are our children.
 foreach ( $sorted_sources as $source => $val )
    {
+      # XXX: SORT HACK to keep $self first; see above
+      if ($source == "AAAAA.$self") {
+            $source = $self;
+      }
       $m = $metrics[$source];
       $sourceurl = rawurlencode($source);
       if (isset($grid[$source]['GRID']) and $grid[$source]['GRID'])
@@ -157,6 +161,7 @@ if ($show_meta_snapshot=="yes") {
 
    foreach ($sorted_sources as $c=>$value) {
       if ($c==$self) continue;
+      if ($c=="AAAAA.$self") continue;  # SORT HACK; see above
       if (isset($private[$c]) and $private[$c]) {
          $Private[$c] = template("images/cluster_private.jpg");
          continue;
