@@ -18,9 +18,7 @@
 #include <sys/swap.h>
 #include <sys/types.h>
 
-
 #include <sys/utsname.h>
-
 
 #include <stdio.h>
 #include <sys/sysinfo.h>
@@ -28,7 +26,6 @@
 
 // #include <mach.h>
 #include <sys/vm.h>
-
 
 #include <sys/table.h>
 #include <sys/time.h>
@@ -39,8 +36,6 @@
 
 int multiplier;
 static struct utsname unamedata;
-
-
 
 struct g_metrics_struct {
     g_val_t             boottime;
@@ -75,13 +70,9 @@ struct g_metrics_struct {
     g_val_t             phwrite_sec;
     g_val_t             rcache;
     g_val_t             wcache;
-
-
-
 };
 
 static struct g_metrics_struct metriclist;
-
 
 /* although i mention this a million times in my comments, everything about
  * the CPU percentages was ripped off from top.  this function was lifted
@@ -91,12 +82,7 @@ static struct g_metrics_struct metriclist;
  * values.  although maybe not the most correct.
  */
 
-long percentages(cnt, out, diffs,total_change)
-
-int cnt;
-int *out;
-long *diffs;
-
+long percentages(int cnt, int *out, long *diffs, int total_change)
 {
     register int i;
     register long change;
@@ -114,7 +100,9 @@ long *diffs;
 
     /* calculate percentages based on overall change, rounding up */
     half_total = total_change / 2l;
-    debug_msg("CPU:percentages - half_total is %d, total_change is %d",half_total,total_change);
+    debug_msg("CPU:percentages - half_total is %d, total_change is %d",
+              half_total, total_change);
+
     for (i = 0; i <= cnt; i++)
     {
         *out++ = (int)((*diffs++ * 1000 + half_total) / total_change);
@@ -123,7 +111,6 @@ long *diffs;
     /* return the total in case the caller wants to use it */
     return(0);
 }
-
 
 void get_cpu_percentages (void)
 {
@@ -148,23 +135,23 @@ void get_cpu_percentages (void)
 
    if (lasttime.tv_sec)
      timediff = ((double) thistime.tv_sec * 1.0e7 +
-                 ((double) thistime.tv_usec * 10.0)) -
-        ((double) lasttime.tv_sec * 1.0e7 +
-         ((double) lasttime.tv_usec * 10.0));
+                ((double) thistime.tv_usec * 10.0)) -
+                ((double) lasttime.tv_sec * 1.0e7 +
+                ((double) lasttime.tv_usec * 10.0));
    else
      timediff = 1.0e7;
 
   /*
-     * constants for exponential average.  avg = alpha * new + beta * avg
-     * The goal is 50% decay in 30 sec.  However if the sample period
-     * is greater than 30 sec, there's not a lot we can do.
-     */
+   * constants for exponential average.  avg = alpha * new + beta * avg
+   * The goal is 50% decay in 30 sec.  However if the sample period
+   * is greater than 30 sec, there's not a lot we can do.
+   */
   if (timediff < 30.0e7)
     {
       alpha = 0.5 * (timediff / 30.0e7);
       beta = 1.0 - alpha;
-      debug_msg("* * * * Setting alpha to %f and beta to %f because timediff
-= %d",alpha,beta,timediff);                                                 
+      debug_msg("Setting alpha to %f and beta to %f because timediff = %d",
+                alpha, beta, timediff);
     }                                                                       
   else
     {
@@ -178,20 +165,20 @@ void get_cpu_percentages (void)
 
    if ( table(TBL_SYSINFO, 0,&si,1,sizeof(struct tbl_sysinfo)) != 1)
        perror("osf.c:CPU:get_cpu_percentages");
-   debug_msg("CPU: Just ran table().  Got:  usr %d , nice %d , sys %d , idle %d, %dhz.",
-       si.si_user, si.si_nice, si.si_sys, si.si_idle, si.si_hz);
+
+   debug_msg("CPU: Just ran table().  Got: usr %d, nice %d, sys %d, idle %d, %dhz.", si.si_user, si.si_nice, si.si_sys, si.si_idle, si.si_hz);
    cpu_now[0] = labs(si.si_user);
    cpu_now[1] = labs(si.si_nice);
    cpu_now[2] = labs(si.si_sys);
    cpu_now[3] = labs(si.si_idle);
    debug_msg("CPU:--before-------------------------------------------------------------\n CPU cycles:");
-   debug_msg("CPU:   now: %d , %d, %d, %d   old:  %d , %d , %d , %d diffs: %d, %d, %d, %d",
-        cpu_now[0],cpu_now[1],cpu_now[2],cpu_now[3],
-        cpu_old[0],cpu_old[1],cpu_old[2],cpu_old[3],
-        cpu_diff[0],cpu_diff[1],cpu_diff[2],cpu_diff[3]);
+   debug_msg("CPU: now: %d, %d, %d, %d old: %d, %d, %d, %d diffs: %d, %d, %d, %d",           cpu_now[0],cpu_now[1],cpu_now[2],cpu_now[3],
+             cpu_old[0],cpu_old[1],cpu_old[2],cpu_old[3],
+             cpu_diff[0],cpu_diff[1],cpu_diff[2],cpu_diff[3]);
 
    if (metriclist.boottime.uint32 == 0)
       metriclist.boottime.uint32 = si.si_boottime;
+
    cycledelta = 0;
    for (i = 0; i <= CPUSTATES; i++)
        {
@@ -202,7 +189,7 @@ void get_cpu_percentages (void)
 	  cpu_now[i] = labs(si.si_idle);
 	  }
        cycledelta += cpu_diff[i];
-       debug_msg("CPU:i is %d : new - old = difference, delta  %d - %d = %d,%d",i,cpu_now[i],cpu_old[i], cpu_diff[i],cycledelta);
+       debug_msg("CPU:i is %d : new - old = difference, delta  %d - %d = %d,%d",i, cpu_now[i], cpu_old[i], cpu_diff[i], cycledelta);
        cpu_old[i] = cpu_now[i];
        cpu_states[i] = 0;
        }
@@ -210,37 +197,39 @@ void get_cpu_percentages (void)
    // a test, to force the issue (end of array seems not to be getting right idle val)
    cpu_old[3] = labs(si.si_idle);
    debug_msg("CPU:--after--------------------------------------------------------------\n CPU cycles:");
-   debug_msg("CPU:   later: %d , %d, %d, %d   old:  %d , %d , %d , %d diffs: %d, %d, %d, %d",
-	cpu_now[0],cpu_now[1],cpu_now[2],cpu_now[3],
-	cpu_old[0],cpu_old[1],cpu_old[2],cpu_old[3],
-	cpu_diff[0],cpu_diff[1],cpu_diff[2],cpu_diff[3]);
+   debug_msg("CPU: later: %d, %d, %d, %d old: %d, %d, %d, %d diffs: %d, %d, %d, %d",         cpu_now[0],cpu_now[1],cpu_now[2],cpu_now[3],
+             cpu_old[0],cpu_old[1],cpu_old[2],cpu_old[3],
+             cpu_diff[0],cpu_diff[1],cpu_diff[2],cpu_diff[3]);
 
-   debug_msg ("CPU: ** ** ** ** ** Are percentages electric?  Try user %d%%, nice %d%% , sys %d%% , idle %d%% ", cpu_states[0],cpu_states[1],cpu_states[2],cpu_states[3],cpu_states[4]);
+   debug_msg ("CPU: Are percentages electric? Try user %d%%, nice %d%%, sys %d%%, idle %d%%", cpu_states[0], cpu_states[1], cpu_states[2], cpu_states[3]);
    metriclist.cpu_idle.f = (float) cpu_states[3] / 10;
    metriclist.cpu_user.f = (float) cpu_states[0] / 10;
    metriclist.cpu_system.f = (float)cpu_states[2] / 10;
    metriclist.cpu_nice.f = (float) cpu_states[1] / 10;
-
-
 }
 
 void
 get_mem_stats(void)
-
 {
     struct tbl_vmstats vmstats;
     if(table(TBL_VMSTATS,0,&vmstats,1,sizeof(struct tbl_vmstats))>0) {
-	debug_msg("** ** ** ** * * * ** ** ** Vmstats:  Free %d Active %d Inactive %d Wire %d",
-		vmstats.free_count, vmstats.active_count, vmstats.inactive_count, vmstats.wire_count);
-        metriclist.mem_total.uint32 = (vmstats.free_count + vmstats.active_count + 
-				vmstats.inactive_count + vmstats.wire_count) * multiplier;
-	metriclist.mem_free.uint32 = metriclist.mem_total.uint32 - (vmstats.active_count * multiplier);
+	debug_msg("Vmstats:  Free %d Active %d Inactive %d Wire %d",
+                  vmstats.free_count, vmstats.active_count,
+                  vmstats.inactive_count, vmstats.wire_count);
+
+        metriclist.mem_total.uint32 = (vmstats.free_count +
+                                       vmstats.active_count +
+                                       vmstats.inactive_count +
+                                       vmstats.wire_count) * multiplier;
+
+	metriclist.mem_free.uint32 = metriclist.mem_total.uint32 - \
+                                     (vmstats.active_count * multiplier);
     }
     else {
 	perror("WARNING:  Cannot open vmstat kernel table.  Memory stats will be inaccurate.");
     }
-    debug_msg("** ** ** ** * * * ** ** ** Came out with total == %d  ... free = %d",
-		metriclist.mem_total.uint32,metriclist.mem_free.uint32);
+    debug_msg("Came out with total == %d  ... free = %d",
+              metriclist.mem_total.uint32, metriclist.mem_free.uint32);
 }
 
 /*
@@ -283,12 +272,9 @@ metric_init(void)
    metriclist.cpu_speed.uint32 = cpuinfo.mhz;
 
    val.int32 = SYNAPSE_SUCCESS;
+
    return val;
 }
-
-/*
- * 
- */
 
 g_val_t
 cpu_num_func ( void )
@@ -296,6 +282,7 @@ cpu_num_func ( void )
    g_val_t val;
 
    val.uint16 = sysconf(_SC_NPROCESSORS_ONLN);
+
    return val;
 }
 
@@ -308,6 +295,7 @@ cpu_speed_func ( void )
    getsysinfo(GSI_CPU_INFO,allcpuinfo,sizeof(allcpuinfo),0);
 */
    val.uint16 = metriclist.cpu_speed.uint32;
+
    return val;
 }
 
@@ -315,10 +303,10 @@ g_val_t
 mem_total_func ( void )
 {
    g_val_t val;
-
    struct tbl_pmemstats pmbuf;
 
    val.f = metriclist.mem_total.uint32;
+
    return val;
 }
 
@@ -326,7 +314,6 @@ g_val_t
 swap_total_func ( void )
 {
    g_val_t val;
-
    struct tbl_swapinfo swainfo;
    
    table(TBL_SWAPINFO,-1,&swainfo,1,sizeof(struct tbl_swapinfo) );
@@ -341,6 +328,7 @@ boottime_func ( void )
    g_val_t val;
 
    val.uint32 = metriclist.boottime.uint32;
+
    return val;
 }
 
@@ -350,6 +338,7 @@ sys_clock_func ( void )
    g_val_t val;
 
    val.uint32 = time(NULL);
+
    return val;
 }
 
@@ -371,6 +360,7 @@ os_name_func ( void )
    long size;
    
    strncpy( val.str, metriclist.os_name, MAX_G_STRING_SIZE );
+
    return val;
 }        
 
@@ -381,6 +371,7 @@ os_release_func ( void )
    long size;
    
    strncpy( val.str, metriclist.os_release, MAX_G_STRING_SIZE );
+
    return val;
 }        
 
@@ -410,6 +401,7 @@ cpu_system_func ( void )
    g_val_t val;
 
    val.f = metriclist.cpu_system.f;
+
    return val;
 }
 
@@ -417,8 +409,10 @@ g_val_t
 cpu_idle_func ( void )
 {
    g_val_t val;
+
    get_cpu_percentages();
    val.f = metriclist.cpu_idle.f;
+
    return val;
 }
 
@@ -428,6 +422,7 @@ cpu_wio_func ( void )
    g_val_t val;
    
    val.f = 0.0;
+
    return val;
 }
 
@@ -556,6 +551,7 @@ load_one_func ( void )
         }
    else                   /* not scaled */
 	val.f = labuf.tl_avenrun.l[0];
+
    return val;
 }
 
@@ -574,6 +570,7 @@ load_five_func ( void )
         }
    else                   /* not scaled */
         val.f = labuf.tl_avenrun.l[1];
+
    return val;
 }
 
@@ -592,6 +589,7 @@ load_fifteen_func ( void )
         }
    else                   /* not scaled */
         val.f = labuf.tl_avenrun.l[2];
+
    return val;
 }
 
@@ -601,6 +599,7 @@ proc_run_func( void )
    g_val_t val;
 
    val.uint32 = 0;
+
    return val;
 }
 
@@ -610,6 +609,7 @@ proc_total_func ( void )
    g_val_t val;
 
    val.uint32 = 0;
+
    return val;
 }
 
@@ -620,6 +620,7 @@ mem_free_func ( void )
 
    get_mem_stats();
    val.f = metriclist.mem_free.uint32;
+
    return val;
 }
 
@@ -629,6 +630,7 @@ mem_shared_func ( void )
    g_val_t val;
 
    val.f = 0;
+
    return val;
 }
 
@@ -638,6 +640,7 @@ mem_buffers_func ( void )
    g_val_t val;
 
    val.f = ( 10 * multiplier);
+
    return val;
 }
 
@@ -647,6 +650,7 @@ mem_cached_func ( void )
    g_val_t val;
 
    val.f = 0;
+
    return val;
 }
 
@@ -672,4 +676,3 @@ mtu_func ( void )
    /* A val of 0 means there are no UP interfaces. Shouldn't happen. */
    return val;
 }
-

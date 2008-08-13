@@ -88,9 +88,7 @@ BACKPORT PROPOSALS:
     +1: carenas
 
   * libmetrics: osf: build fixes
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=74
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1570
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1571
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=75
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1572
     +1: carenas, bnicholes
 
