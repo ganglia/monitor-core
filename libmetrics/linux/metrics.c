@@ -10,6 +10,7 @@
 #include <sys/sysinfo.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
+#include <sys/time.h>
 
 /* From old ganglia 2.5.x... */
 #include "file.h"
@@ -221,6 +222,7 @@ void update_ifdata ( char *caller )
 		     net_dev_stats *ns = hash_lookup(src, n); 
 		     if ( !ns ) return;
 
+		     /* receive */
 		     rbi = strtoul( p, &p ,10);
 		     if ( rbi >= ns->rbi ) {
 			l_bytes_in += rbi - ns->rbi;
@@ -238,8 +240,11 @@ void update_ifdata ( char *caller )
 			l_pkts_in += ULONG_MAX - ns->rpi + rpi;
 		     }
 		     ns->rpi = rpi;
+		     
+		     /* skip unneeded metrics */
+		     for (i = 0; i < 6; i++) rbo = strtoul(p, &p, 10);
 
-		     for (i = 0; i < 6; i++) strtol(p, &p, 10);
+		     /* transmit */
 		     rbo = strtoul( p, &p ,10);
 		     if ( rbo >= ns->rbo ) {
 			l_bytes_out += rbo - ns->rbo;
@@ -1113,10 +1118,6 @@ mtu_func ( void )
    /* A val of 0 means there are no UP interfaces. Shouldn't happen. */
    return val;
 }
-
-/* ===================================================== */
-/* Disk Usage. Using fsusage.c from the GNU fileutils-4.1.5 package. */
-#include <inttypes.h>
 
 /* Linux Specific, but we are in the Linux machine file. */
 #define MOUNTS "/proc/mounts"

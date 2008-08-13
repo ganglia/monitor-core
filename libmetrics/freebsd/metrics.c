@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <kvm.h>
 
@@ -110,6 +111,7 @@ static int	  skipvfs;
 /* Function prototypes */
 static long percentages(int cnt, int *out, register long *new,
                           register long *old, long *diffs);
+int cpu_state(int which);
  
 /*
  * This function is called only once by the gmond.  Use to 
@@ -342,7 +344,6 @@ int cpu_state(int which) {
    static struct timeval this_time, last_time;
    struct timeval time_diff;
    size_t len = sizeof(cp_time);
-   int i;
 
    if (which == -1) {
       bzero(cp_old, sizeof(cp_old));
