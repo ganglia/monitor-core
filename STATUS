@@ -57,10 +57,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1482
     +1: carenas, bernardli
 
-  * libmetrics: mtu is always positive so use unsigned instead for interface
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1511
-    +1: carenas, bnicholes
-
   * libmetrics: ensure boottime isn't reported through a float
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1512
     +1: carenas, bnicholes
