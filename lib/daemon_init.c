@@ -90,7 +90,7 @@ daemon_init (const char *pname, int facility)
    /* 42nd child continues */
    daemon_proc = 1;     /* for our err_XXX() functions */
 
-   chdir ("/");         /* change working directory */
+   i = chdir ("/");     /* change working directory */
 
    umask (0);           /* clear our file mode creation mask */
 
