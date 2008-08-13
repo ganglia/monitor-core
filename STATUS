@@ -43,10 +43,6 @@ BACKPORT PROPOSALS:
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
 
-  * libganglia: protect against negative offsets for isspace if char is signed
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1312
-    +1: carenas, bnicholes
-
   * Allow both a C and python module to create a metric that will spoof a
     specific host.  This provides the same spoofing functionality as gmetric
     but through a metric module.  It is done by adding SPOOF_HOST and
