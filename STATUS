@@ -131,10 +131,6 @@ BACKPORT PROPOSALS:
     +1: carenas
     carenas: incomplete fix, will require python framework for debug messages
 
-  * build: clear test and assignment for undefined values or spaces
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1640
-    +1: carenas, bnicholes
-
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
   They should be addressed after the current version is released.
