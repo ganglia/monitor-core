@@ -19,6 +19,7 @@ Contributors looking for a mission:
 
 CURRENT RELEASE NOTES:
 
+  * Fix segfault when aggregating 3.1 gmetad
   * Module directory configurable at build and run time
   * Autodetect libdir/moduledir for bi-arch Linux architectures
   * Include contrib directory with user provided goodies
@@ -41,11 +42,6 @@ BACKPORT PROPOSALS:
      0: <userid>
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
-
-  * web: remove redirect hack for grid pulldown navigation
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04052.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1253
-    +1: carenas, bernardli
 
   * libmetrics: linux cleanup leftovers from r740
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1254
