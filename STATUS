@@ -62,12 +62,6 @@ BACKPORT PROPOSALS:
     +1: carenas
     carenas: incomplete fix, should use autoconf instead to handle Solaris>=10
 
-  * gmond: modular code cleanup
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1540
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1541
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1542
-    +1: carenas, bnicholes
-
   * web: fix metric variable name mismatch
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1567

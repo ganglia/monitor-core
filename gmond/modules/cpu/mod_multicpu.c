@@ -461,10 +461,6 @@ static g_val_t multi_cpu_sintr_func (int cpu_index)
 }
 
 static apr_array_header_t *metric_info = NULL;
-static Ganglia_25metric ex_metric_info[] = 
-{
-    {0, NULL}
-};
 
 /* Initialize the give metric by allocating the per metric data
    structure and inserting a metric definition for each cpu found
@@ -472,12 +468,13 @@ static Ganglia_25metric ex_metric_info[] =
 static cpu_util *init_metric (apr_pool_t *p, apr_array_header_t *ar, int cpu_count, char *name, char *desc)
 {
     int i;
+    Ganglia_25metric *gmi;
     cpu_util *cpu;
 
     cpu = apr_pcalloc (p, sizeof(cpu_util)*cpu_count);
 
     for (i=0; i<cpu_count; i++) {
-        Ganglia_25metric *gmi = apr_array_push(ar);
+        gmi = apr_array_push(ar);
 
         /* gmi->key will be automatically assigned by gmond */
         gmi->name = apr_psprintf (p, "%s%d", name, i);
@@ -496,6 +493,7 @@ static cpu_util *init_metric (apr_pool_t *p, apr_array_header_t *ar, int cpu_cou
 static int ex_metric_init (apr_pool_t *p)
 {
     int i;
+    Ganglia_25metric *gmi;
 
     init_cpu_info ();
 
@@ -530,10 +528,9 @@ static int ex_metric_init (apr_pool_t *p)
     /* Add a terminator to the array and replace the empty static metric definition 
         array with the dynamic array that we just created 
     */
-    {
-        Ganglia_25metric *gmi = apr_array_push(metric_info);
-        memset (gmi, 0, sizeof(*gmi));
-    }
+    gmi = apr_array_push(metric_info);
+    memset (gmi, 0, sizeof(*gmi));
+
     multicpu_module.metrics_info = (Ganglia_25metric *)metric_info->elts;
 
     for (i = 0; multicpu_module.metrics_info[i].name != NULL; i++) {
@@ -584,7 +581,7 @@ static g_val_t ex_metric_handler ( int metric_index )
         return multi_cpu_sintr_func(index);
 
     /* default case */
-    val.int32 = 0;
+    val.f = 0;
     return val;
 }
 
@@ -593,6 +590,6 @@ mmodule multicpu_module =
     STD_MMODULE_STUFF,
     ex_metric_init,
     ex_metric_cleanup,
-    ex_metric_info,
+    NULL, /* defined dynamically */
     ex_metric_handler,
 };
