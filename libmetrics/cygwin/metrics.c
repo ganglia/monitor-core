@@ -403,9 +403,9 @@ boottime_func ( void )
    p = strstr ( p, "btime" );
    if(p) { 
      p = skip_token ( p );
-     val.f = strtod ( p, (char **)NULL );
+     val.uint32 = atoi ( p );
    } else {
-     val.f = 0;
+     val.uint32 = 0;
    }
 
    return val;

@@ -57,10 +57,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1482
     +1: carenas, bernardli
 
-  * libmetrics: ensure boottime isn't reported through a float
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1512
-    +1: carenas, bnicholes
-
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     +1: carenas
