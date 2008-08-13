@@ -138,11 +138,6 @@ BACKPORT PROPOSALS:
     +1: carenas
     carenas: prerequisite for mingw32 support
 
-  * contrib: add check_ganglia NRPE plugin
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1608
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1609
-    +1: carenas, bnicholes
-
   * build: remove sideffects of --disable-python for dist target
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04551.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1610
