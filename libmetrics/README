@@ -1,2 +1,2 @@
 This is a simple convenience library that allows us 
-to collect ganglia 2.x metrics.
+to collect ganglia metrics in all supported platforms.
