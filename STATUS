@@ -51,11 +51,12 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
+    carenas: apparently includes several other unrelated changes
 
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     +1: carenas
-    carenas: incomplete fix, should use autoconf instead to handle Solaris>=10
+    carenas: suboptimal fix, autoconf instead to handle Solaris>=10 better
 
   * web: fix metric variable name mismatch
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
@@ -86,18 +87,17 @@ BACKPORT PROPOSALS:
   * web: dead code elimination and cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1585
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1587
+    +1: carenas
+
+  * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
     +1: carenas
-    bernardli: In regards to 1588, PHP would look in the current directory for the file to
-               include, therefore, adding the "./" is redundant.  In fact I would propose that
-               we get rid of all the "./" for the other include_once() calls in web/*.  I am
-               good with the other two patches though but will vote if/when the last patch is
-               removed.
 
   * gmond: mod_python support for 2.3 or older and 2.5 or newer
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1596
     +1: carenas, bnicholes
+    carenas: depends on spoofing support
 
   * build: libmetrics dependency cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1597
@@ -111,13 +111,12 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04551.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1610
     +1: carenas
-    carenas: incomplete fix, will need also to stop generating python bytecode
-             at bootstrap time
+    carenas: partial fix, stop generating python bytecode at bootstrap time
 
   * python_modules: remove unconditional debugging information for multidisk
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1623
     +1: carenas
-    carenas: incomplete fix, will require python framework for debug messages
+    carenas: suboptimal fix, python framework for debug messages to wrap it
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
