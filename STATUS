@@ -73,10 +73,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1580
     +1: carenas
 
-  * web: remove references to obsoleted default_range
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1581
-    +1: carenas, bernardli
-
   * web: allow for configuring number of columns in grid view
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1582

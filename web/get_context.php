@@ -104,7 +104,7 @@ else if($clustername and $hostname)
    }
 
 if (!$range)
-      $range = "$default_range";
+      $range = "$default_time_range";
 
 $end = "N";
 
