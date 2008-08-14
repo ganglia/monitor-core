@@ -87,11 +87,15 @@ BACKPORT PROPOSALS:
   * web: dead code elimination and cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1585
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1587
-    +1: carenas
+    +1: carenas, bernardli
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
     +1: carenas
+    -1: bernardli: PHP would look in the current directory for the file to include,
+                   therefore, adding the "./" is redundant.  In fact I would propose
+                   that we get rid of all the "./" for the other include_once() calls
+                   in web/*.
 
   * gmond: mod_python support for 2.3 or older and 2.5 or newer
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
