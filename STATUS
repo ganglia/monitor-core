@@ -94,10 +94,6 @@ BACKPORT PROPOSALS:
                good with the other two patches though but will vote if/when the last patch is
                removed.
 
-  * web: add references to templatePower in the footer
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1586
-    +1: carenas, bnicholes
-
   * gmond: mod_python support for 2.3 or older and 2.5 or newer
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1596
