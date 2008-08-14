@@ -325,7 +325,6 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %config(noreplace) %{web_prefixdir}/conf.php
 %{web_prefixdir}/AUTHORS
 %{web_prefixdir}/auth.php
-%{web_prefixdir}/ChangeLog
 %{web_prefixdir}/class.TemplatePower.inc.php
 %{web_prefixdir}/cluster_legend.html
 %{web_prefixdir}/cluster_view.php
@@ -358,6 +357,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sun Jul 20 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- Remove ChangeLog from ganglia-web
 * Wed Jun 04 2008 Bernard Li <bernard@vanhpc.org>
 - Add ganglia_gexec.h to ganglia-devel package
 * Tue May 06 2008 Bernard Li <bernard@vanhpc.org>

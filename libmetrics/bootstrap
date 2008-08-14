@@ -6,8 +6,8 @@ echo "Running aclocal" &&
 aclocal &&
 echo "Running autoheader" &&
 autoheader &&
-echo "Creating build" &&
-mkdir -p build &&
+echo "Preparing tree" &&
+mkdir -p build && ../scripts/svn2cl.sh -i --break-before-msg=1 --reparagraph
 echo "Running automake" &&
 automake --add-missing --copy 2>/dev/null
 echo "Running libtoolize" &&
