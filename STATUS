@@ -62,18 +62,19 @@ BACKPORT PROPOSALS:
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1567
     +1: carenas
+    +1: hawson:  for the $metric -> $metricname patch only.
 
   * web: report correctly uptime in shownode when host is down
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
-    +1: carenas
+    +1: carenas, hawson
 
   * web: add host atrributes into metric list
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=30
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1580
     +1: carenas
-
+    
   * web: allow for configuring number of columns in grid view
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1582
@@ -92,7 +93,10 @@ BACKPORT PROPOSALS:
                therefore, adding the "./" is redundant.  In fact I would propose
                that we get rid of all the "./" for the other include_once()
                calls in web/*.
-
+    +0: hawson: If security is an issue, then check/set the include path with 
+                the get_include_path() and set_include_path() functions.  I don't
+                see that this would affect performance much.
+   
   * gmond: mod_python support for 2.3 or older and 2.5 or newer
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1596
@@ -126,7 +130,7 @@ BACKPORT PROPOSALS:
   * Web-Interface: Fix "Vertical label (min - max) is not working in the rrdtool graphs" 
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=37
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1595
-    +1: knobi1, carenas
+    +1: knobi1, carenas, hawson
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
