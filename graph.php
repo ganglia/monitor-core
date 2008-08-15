@@ -158,7 +158,7 @@ switch ($context) {
         break;
 
     case 'grid':
-        $title  = $gridname;
+        $title  = "$gridname Grid";
         break;
 
     case 'host':
