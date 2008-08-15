@@ -492,6 +492,7 @@ static cfg_t* find_module_config(char *modname)
     modules_cfg = cfg_getsec(python_module.config_file, "modules");
     for (j = 0; j < cfg_size(modules_cfg, "module"); j++) {
         char *modName, *modLanguage;
+        int modEnabled;
 
         cfg_t *pymodule = cfg_getnsec(modules_cfg, "module", j);
 
@@ -506,6 +507,13 @@ static cfg_t* find_module_config(char *modname)
         if (strcasecmp(modname, modName)) {
             continue;
         }
+
+        /* Check to make sure that the module is enabled.
+        */
+        modEnabled = cfg_getbool(pymodule, "enabled");
+        if (!modEnabled) 
+            continue;
+
         return pymodule;
     }
     return NULL; 
@@ -598,6 +606,13 @@ static int pyth_metric_init (apr_pool_t *p)
         if (modname == NULL)
             continue;
 
+        /* Find the specified module configuration in gmond.conf 
+           If this return NULL then either the module config
+           doesn't exist or the module is disabled. */
+        module_cfg = find_module_config(modname);
+        if (!module_cfg)
+            continue;
+
         PyEval_RestoreThread(gtstate);
 
         pmod = PyImport_ImportModule(modname);
@@ -620,8 +635,6 @@ static int pyth_metric_init (apr_pool_t *p)
             continue;
         }
 
-        /* Find the specified module configuration in gmond.conf */
-        module_cfg = find_module_config(modname);
         /* Build a parameter dictionary to pass to the module */
         pparamdict = build_params_dict(module_cfg);
         if (!pparamdict || !PyDict_Check(pparamdict)) {
