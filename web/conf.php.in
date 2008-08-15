@@ -36,10 +36,6 @@ $graphdir='./graph.d';
 $ganglia_ip = "127.0.0.1";
 $ganglia_port = 8652;
 
-# Old-style names.
-$gmetad_ip = $ganglia_ip;
-$gmetad_port = $ganglia_port;
-
 #
 # The maximum number of dynamic graphs to display.  If you set this
 # to 0 (the default) all graphs will be shown.  This option is

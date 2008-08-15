@@ -51,7 +51,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     +1: bnicholes
-    carenas: apparently includes several other unrelated changes
+    carenas: apparently includes few other unrelated changes
 
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
@@ -84,18 +84,14 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1583
     +1: carenas
 
-  * web: dead code elimination and cleanup
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1585
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1587
-    +1: carenas, bernardli
-
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
     +1: carenas
-    -1: bernardli: PHP would look in the current directory for the file to include,
-                   therefore, adding the "./" is redundant.  In fact I would propose
-                   that we get rid of all the "./" for the other include_once() calls
-                   in web/*.
+    -1: bernardli
+    bernardli: PHP would look in the current directory for the file to include,
+               therefore, adding the "./" is redundant.  In fact I would propose
+               that we get rid of all the "./" for the other include_once()
+               calls in web/*.
 
   * gmond: mod_python support for 2.3 or older and 2.5 or newer
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
@@ -124,17 +120,17 @@ BACKPORT PROPOSALS:
 
   * web: add missing "Grid" from grid graph titles
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1682
-    +1: bernardli
+    +1: bernardli, carenas
 
   * Web-Interface: Add "Avg Load percentages and overall cluster utilization"
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=193
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1594
-    +1: knobi1
+    +1: knobi1, carenas
 
   * Web-Interface: Fix "Vertical label (min - max) is not working in the rrdtool graphs" 
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=37
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1595
-    +1: knobi1
+    +1: knobi1, carenas
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
@@ -158,13 +154,6 @@ BACKPORT PROPOSALS FUTURE VERSION:
     -1: carenas
     carenas: not a fix but a workaround to the problem
 
-  * web: add avg load percentages
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=193
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1594
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1595
-    +1: carenas
-    carenas: added here just because no proposal was yet published
-
   * libmetrics: mingw32 (native windows) support
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1599
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1600
@@ -175,4 +164,6 @@ BACKPORT PROPOSALS FUTURE VERSION:
   * gmond: Add and 'enabled' directive to the module section so that a 
      module can easily be enabled or disabled through the configuration file
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1684
-    +1: bnicholes
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1685
+    +1: carenas
+    carenas: incomplete fix, documentation missing
