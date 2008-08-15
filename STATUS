@@ -126,6 +126,16 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1682
     +1: bernardli
 
+  * Web-Interface: Add "Avg Load percentages and overall cluster utilization"
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=193
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1594
+    +1: knobi1
+
+  * Web-Interface: Fix "Vertical label (min - max) is not working in the rrdtool graphs" 
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=37
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1595
+    +1: knobi1
+
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
   They should be addressed after the current version is released.
@@ -166,4 +176,3 @@ BACKPORT PROPOSALS FUTURE VERSION:
      module can easily be enabled or disabled through the configuration file
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1684
     +1: bnicholes
-
