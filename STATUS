@@ -161,9 +161,10 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
     +1: carenas
     
-  * gmond: Add and 'enabled' directive to the module section so that a 
+  * gmond: Add an 'enabled' directive to the module section so that a 
      module can easily be enabled or disabled through the configuration file
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1684
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1685
-    +1: carenas
-    carenas: incomplete fix, documentation missing
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1689
+    +1: carenas, bnicholes
+
