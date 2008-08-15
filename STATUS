@@ -127,11 +127,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1594
     +1: knobi1, carenas
 
-  * Web-Interface: Fix "Vertical label (min - max) is not working in the rrdtool graphs" 
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=37
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1595
-    +1: knobi1, carenas, hawson
-
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
   They should be addressed after the current version is released.

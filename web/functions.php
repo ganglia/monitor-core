@@ -223,7 +223,7 @@ function find_limits($nodes, $metricname)
 
          $rrd_dir = "$rrds/$clustername/$host";
          if (file_exists("$rrd_dir/$metricname.rrd")) {
-		$command = RRDTOOL . " graph - --start $start --end $end ".
+		$command = RRDTOOL . " graph '' --start $start --end $end ".
 		"DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
 		"PRINT:limits:MAX:%.2lf ".
 		"PRINT:limits:MIN:%.2lf";
