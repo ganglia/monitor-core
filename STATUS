@@ -118,10 +118,6 @@ BACKPORT PROPOSALS:
     +1: carenas
     carenas: suboptimal fix, python framework for debug messages to wrap it
 
-  * web: add missing "Grid" from grid graph titles
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1682
-    +1: bernardli, carenas
-
   * Web-Interface: Add "Avg Load percentages and overall cluster utilization"
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=193
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1594
