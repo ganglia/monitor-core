@@ -111,6 +111,11 @@ foreach ( $sorted_sources as $source => $val )
       $cluster_load1 = sprintf("%.0f", ((double) $m["load_one"]['SUM'] / $cpu_num) * 100);
       $cluster_load = "$cluster_load15%, $cluster_load5%, $cluster_load1%";
 
+      $clusname = $grid[$source][GRID] ? '' : $source;
+      $avg_cpu_num = find_avg($clusname, "", "cpu_num");
+      if ($avg_cpu_num == 0) $avg_cpu_num = 1;
+      $cluster_util = sprintf("%.0f", ((double) find_avg($clusname, "", "load_one") / $avg_cpu_num ) * 100);
+
       $tpl->newBlock ("source_info");
       $tpl->assign("name", $name );
       $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
@@ -130,8 +135,11 @@ foreach ( $sorted_sources as $source => $val )
                $tpl->assign("localtime",  "<font size=-1>Localtime:</font><br>&nbsp;&nbsp;" 
                   . date("Y-m-d H:i", $localtime) );
             if ($cluster_load)
-               $tpl->assign("cluster_load", "<font size=-1>Avg Load (15, 5, 1m):</font>"
-                  ."<br>&nbsp;&nbsp;$cluster_load");
+               $tpl->assign("cluster_load", "<font size=-1>Current Load Avg (15, 5, 1m):</font>"
+                  ."<br>&nbsp;&nbsp;<b>$cluster_load</b>");
+            if ($cluster_util)
+               $tpl->assign("cluster_util", "<font size=-1>Avg Utilization (last $range):</font>"
+                  ."<br>&nbsp;&nbsp;<b>$cluster_util%</b>");
             $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
             $tpl->assign("num_nodes", $grid[$source]["HOSTS_UP"] );
             $tpl->assign("num_dead_nodes", $grid[$source]["HOSTS_DOWN"] );
