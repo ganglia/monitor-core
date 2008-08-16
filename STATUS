@@ -28,6 +28,7 @@ CURRENT RELEASE NOTES:
   * Support for building with Sun Studio 12 in OpenSolaris
   * In node view show correctly the downtime relatively to cluster time
   * In meta view show grid summary always on top regardless of sorting
+  * Add "Avg Load percentages and overall cluster utilization"
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -149,3 +150,7 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1685
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1689
     +1: carenas, bnicholes
+
+  * Add "removespikes.pl" script to contrib repository
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1697
+    +1: knobi1
