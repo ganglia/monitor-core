@@ -67,6 +67,7 @@ $part_max = ($part_max_used) ? "$part_max_used% used." : "Unknown";
 
 # Compute time of last heartbeat from node's dendrite.
 $clustertime=$cluster['LOCALTIME'];
+$tpl->assign("clustertime", strftime("%c", $clustertime));
 $heartbeat=$hostattrs['REPORTED'];
 $age = $clustertime - $heartbeat;
 if ($age > 3600) {
@@ -74,9 +75,6 @@ if ($age > 3600) {
 } else {
    $s = ($age > 1) ? "s" : "";
    $tpl->assign("age", "$age second$s");
-}
-if ((!$up) && ($cluster['HOSTS_UP'] == 0)) {
-   $tpl->assign("message","<b>This cluster is down.</b>");
 }
 
 # The these hardware units should be more flexible.

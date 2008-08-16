@@ -26,7 +26,8 @@ CURRENT RELEASE NOTES:
   * Include contrib directory with user provided goodies
   * Support for building C++ DSO
   * Support for building with Sun Studio 12 in OpenSolaris
-  * In meta view show grid summary always on top regardless of sorting.
+  * In node view show correctly the downtime relatively to cluster time
+  * In meta view show grid summary always on top regardless of sorting
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -44,12 +45,6 @@ BACKPORT PROPOSALS:
      0: <userid>
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
-
-  * web: report correctly uptime in shownode when host is down
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
-    +1: carenas, hawson
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
@@ -116,7 +111,7 @@ BACKPORT PROPOSALS FUTURE VERSION:
             the get_include_path() and set_include_path() functions.  I don't
             see that this would affect performance much.
 
-  * gmond: mod_python support for 2.3 or older and 2.5 or newer
+  * gmond: mod_python support for versions older than 2.3 or newer than 2.4
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1596
     +1: carenas, bnicholes

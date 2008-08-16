@@ -15,9 +15,9 @@
    <i>{ip}</i><br>
    <em>Location:</em> {location}<p>
 
+   Cluster local time {clustertime}<br>
    Last heartbeat received {age} ago.<br>
    Uptime {uptime}<br>
-   {message}
 
    </td>
    <td align=right valign=top>
