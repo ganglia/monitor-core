@@ -46,3 +46,10 @@ check_ganglia.py
     Contributed by Kostas Georgiou ( k.georgiou _AT_ imperial.ac.uk )
     NRPE plugin to translate ganglia metric values into nagios
     alarms.
+
+removespikes.pl
+README-removespikes
+    Contributed by Martin Knoblauch ( knobi _AT_ knobisoft.de ) with
+    explicit permission from Tobias Oetiker ( tobi _AT_ oetiker.ch )
+    Perl script to remove "spikes" from RRD databases.
+
