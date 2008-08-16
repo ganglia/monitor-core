@@ -20,12 +20,13 @@ Contributors looking for a mission:
 CURRENT RELEASE NOTES:
 
   * Fix segfault when aggregating 3.1 gmetad
+  * Fix failures and unstability for tcpconn.py
   * Module directory configurable at build and run time
   * Autodetect libdir/moduledir for bi-arch Linux architectures
   * Include contrib directory with user provided goodies
   * Support for building C++ DSO
   * Support for building with Sun Studio 12 in OpenSolaris
-  * In meta view regardless of sorting grid summary always on top
+  * In meta view show grid summary always on top regardless of sorting.
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -44,31 +45,48 @@ BACKPORT PROPOSALS:
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
 
+  * web: report correctly uptime in shownode when host is down
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
+    +1: carenas, hawson
+
+BACKPORT PROPOSALS FUTURE VERSION:
+  These proposals are too unstabilizing for the current version or incomplete.
+  They should be addressed after the current version is released.
+
+  * gmond: add configurable host tmax (timeout max)
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1376
+    +1: carenas
+    carenas: should also remove the hardcoded rule of 4x this time
+
   * Allow both a C and python module to create a metric that will spoof a
     specific host.  This provides the same spoofing functionality as gmetric
     but through a metric module.  It is done by adding SPOOF_HOST and
     SPOOF_NAME as extra metadata to the metric description
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1622
     +1: bnicholes
     carenas: apparently includes few other unrelated changes
+
+  * web: add optional use of hostname withouth FQDN
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04354.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1460
+    +1: carenas
+    carenas: logic/name should reflect hostname is formatted to remove domain
+
+  * gmond: recover from interface reconfiguration gracefully
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=38
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1478
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1632
+    -1: carenas
+    carenas: not a fix but a workaround to the problem
 
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     +1: carenas
     carenas: suboptimal fix, autoconf instead to handle Solaris>=10 better
-
-  * web: fix metric variable name mismatch
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1567
-    +1: carenas
-    +1: hawson:  for the $metric -> $metricname patch only.
-
-  * web: report correctly uptime in shownode when host is down
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04523.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1568
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1577
-    +1: carenas, hawson
 
   * web: add host atrributes into metric list
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=30
@@ -88,15 +106,16 @@ BACKPORT PROPOSALS:
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
     +1: carenas
+    +0: hawson
     -1: bernardli
     bernardli: PHP would look in the current directory for the file to include,
                therefore, adding the "./" is redundant.  In fact I would propose
                that we get rid of all the "./" for the other include_once()
                calls in web/*.
-    +0: hawson: If security is an issue, then check/set the include path with 
-                the get_include_path() and set_include_path() functions.  I don't
-                see that this would affect performance much.
-   
+    hawson: If security is an issue, then check/set the include path with 
+            the get_include_path() and set_include_path() functions.  I don't
+            see that this would affect performance much.
+
   * gmond: mod_python support for 2.3 or older and 2.5 or newer
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1596
@@ -122,28 +141,6 @@ BACKPORT PROPOSALS:
     +1: carenas
     carenas: suboptimal fix, python framework for debug messages to wrap it
 
-BACKPORT PROPOSALS FUTURE VERSION:
-  These proposals are too unstabilizing for the current version or incomplete.
-  They should be addressed after the current version is released.
-
-  * gmond: add configurable host tmax (timeout max)
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1376
-    +1: carenas
-    carenas: should also remove the hardcoded rule of 4x this time
-
-  * web: add optional use of hostname withouth FQDN
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04354.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1460
-    +1: carenas
-    carenas: logic/name should reflect hostname is formatted to remove domain
-
-  * gmond: recover from interface reconfiguration gracefully
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=38
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1478
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1632
-    -1: carenas
-    carenas: not a fix but a workaround to the problem
-
   * libmetrics: mingw32 (native windows) support
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1599
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1600
@@ -157,4 +154,3 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1685
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1689
     +1: carenas, bnicholes
-
