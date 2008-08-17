@@ -26,6 +26,7 @@ typedef struct
       long int num_custom_metrics;
       long int mute;
       long int deaf;
+      long int allow_extra_data;
       long int debug_level;
       long int no_setuid;
       char *setuid;

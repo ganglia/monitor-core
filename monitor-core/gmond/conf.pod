@@ -84,8 +84,9 @@ The B<globals> section controls general characteristics of gmond
 such as whether is should daemonize, what user it should run as,
 whether is should send/receive date and such.  The B<globals>
 section has the following attributes: B<daemonize>, B<setuid>, B<user>,
-B<debug_level>, B<mute>, B<deaf>, B<host_dmax>, B<host_tmax>,
-B<cleanup_threshold>, B<gexec>, B<send_metadata_interval> and B<module_dir>.
+B<debug_level>, B<mute>, B<deaf>, B<allow_extra_data>, B<host_dmax>,
+B<host_tmax>, B<cleanup_threshold>, B<gexec>, B<send_metadata_interval>
+and B<module_dir>.
 
 For example,
 
@@ -114,6 +115,11 @@ send data regardless of any other configuration directives.
 
 The B<deaf> attribute is a boolean.  When true, B<gmond> will not 
 receive data regardless of any other configuration directives.
+
+The B<allow_extra_data> attribute is a boolean.  When false, B<gmond> will
+not send out the EXTRA_ELEMENT and EXTRA_DATA parts of the XML.  This might
+be useful if you are using your own frontend to the metric data and will
+like to save some bandwith.
 
 The B<host_dmax> value is an integer with units in seconds.  When set 
 to zero (0), B<gmond> will never delete a host from its list even when 
