@@ -774,9 +774,17 @@ helped with the IRIX port.
 
 =item B<Where are the debian packages?>
 
-Debian packages for 2.5 are available from the main Debian archive
-there was never an oficial Debian package for 3.0 but packages for 3.1 are
-going to be available in Debian experimental very soon.
+Debian packages for 2.5 are available from the main Debian archive for all
+releases.
+
+There was never an oficial Debian package for 3.0 but packages for 3.1 are
+available from Debian experimental and will be available in the Debian
+archive as soon as they are stabilized.
+
+If you are interested on using them (and help them stabilize) you can get
+them from:
+
+  http://packages.debian.org/experimental/ganglia-monitor
 
 =item B<How should I configure multihomed machines?>
 

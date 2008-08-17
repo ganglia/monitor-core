@@ -161,3 +161,9 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1701
     +1: carenas
     carenas: suboptimal fix, closing metric tag shouldn't be needed either
+
+  * build: remove ganglia release name
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04653.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1703
+    +1: carenas
+    carenas: dead code
