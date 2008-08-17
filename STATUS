@@ -149,9 +149,15 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1684
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1685
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1689
-    +1: carenas, bnicholes
+    +1: bnicholes, carenas
 
   * Add "removespikes.pl" script to contrib repository
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1697
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1699
     +1: knobi1, carenas
+
+  * gmond: add an 'allow_extra_data' boolean global directive
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=199
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1701
+    +1: carenas
+    carenas: suboptimal fix, closing metric tag shouldn't be needed either
