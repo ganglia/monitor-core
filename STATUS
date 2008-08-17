@@ -153,4 +153,5 @@ BACKPORT PROPOSALS FUTURE VERSION:
 
   * Add "removespikes.pl" script to contrib repository
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1697
-    +1: knobi1
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1699
+    +1: knobi1, carenas
