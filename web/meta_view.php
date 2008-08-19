@@ -141,7 +141,7 @@ foreach ( $sorted_sources as $source => $val )
             if ($cluster_load)
                $tpl->assign("cluster_load", "<font size=-1>Current Load Avg (15, 5, 1m):</font>"
                   ."<br>&nbsp;&nbsp;<b>$cluster_load</b>");
-            if ($cluster_util)
+            if (isset($cluster_util))
                $tpl->assign("cluster_util", "<font size=-1>Avg Utilization (last $range):</font>"
                   ."<br>&nbsp;&nbsp;<b>$cluster_util%</b>");
             $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
