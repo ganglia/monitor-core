@@ -50,6 +50,10 @@ BACKPORT PROPOSALS:
   * web: A previous backport caused this to show up in httpd error log: "PHP Notice:  Undefined index:  GRID"
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1706
     +1: bernardli
+ 
+  * web: "Avg Utilization" should be shown even if $cluster_util is 0, so use isset() to do condition check
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1708
+    +1: bernardli
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
