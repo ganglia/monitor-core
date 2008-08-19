@@ -47,6 +47,10 @@ BACKPORT PROPOSALS:
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
 
+  * web: A previous backport caused this to show up in httpd error log: "PHP Notice:  Undefined index:  GRID"
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1706
+    +1: bernardli
+
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version or incomplete.
   They should be addressed after the current version is released.
