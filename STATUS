@@ -37,6 +37,15 @@ RELEASE SHOWSTOPPERS:
     <http:// link to email list or bugzilla bug describing the issue>
     <Comments prefixed with user id of comment author>
 
+  * gmond/gmetad: The gmetad code can not handle a host with no associated 
+      cluster, therefore the gmond code must always include a cluster XML tag.  
+      This patch matches up the default values for the cluster section of 
+      gmond with the default gmond.conf so that a cluster name will always 
+      be present.  bug #200
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=200
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
+    +1: bnicholes
+
 BACKPORT PROPOSALS:
  <TEMPLATE>
   * <Brief description of proposal or bug>
