@@ -41,11 +41,6 @@ $cluster_load5 = sprintf("%.0f", ((double) $load_five_sum / $cpu_num) * 100);
 $cluster_load1 = sprintf("%.0f", ((double) $load_one_sum / $cpu_num) * 100);
 $tpl->assign("cluster_load", "$cluster_load15%, $cluster_load5%, $cluster_load1%");
 
-$avg_cpu_num = find_avg($clustername, "", "cpu_num");
-if ($avg_cpu_num == 0) $avg_cpu_num = 1;
-$cluster_util = sprintf("%.0f", ((double) find_avg($clustername, "", "load_one") / $avg_cpu_num ) * 100);
-$tpl->assign("cluster_util", "$cluster_util%");
-
 $cluster_url=rawurlencode($clustername);
 
 

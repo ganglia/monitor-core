@@ -12,8 +12,7 @@
  <tr><td width="60%">Hosts up:</td><td align=left><B>{num_nodes}</B></td></tr>
  <tr><td>Hosts down:</td><td align=left><B>{num_dead_nodes}</B></td></tr>
  <tr><td>&nbsp;</td></tr>
- <tr><td colspan=2>Current Load Avg (15, 5, 1m):<br>&nbsp;&nbsp;<b>{cluster_load}</b></td></tr>
- <tr><td colspan=2>Avg Utilization (last {range}):<br>&nbsp;&nbsp;<b>{cluster_util}</b></td></tr>
+ <tr><td colspan=2>Avg Load (15, 5, 1m):<br>&nbsp;&nbsp;<b>{cluster_load}</b></td></tr>
  <tr><td colspan=2>Localtime:<br>&nbsp;&nbsp;<b>{localtime}</b></td></tr>
  </table>
 <!-- INCLUDE BLOCK : extra -->

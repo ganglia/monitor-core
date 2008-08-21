@@ -16,7 +16,6 @@
  <tr><td>Hosts down:</td><td align=left><B>{num_dead_nodes}</B></td></tr>
  <tr><td>&nbsp;</td></tr>
  <tr><td class=footer colspan=2>{cluster_load}</td></tr>
- <tr><td class=footer colspan=2>{cluster_util}</td></tr>
  <tr><td class=footer colspan=2>{localtime}</td></tr>
 </table>
   </TD>

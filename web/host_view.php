@@ -121,13 +121,6 @@ if (is_array($s_metrics))
      }
    }
 
-# Add the average node utilization to the time & string metrics section:
-$avg_cpu_num = find_avg($clustername, $hostname, "cpu_num");
-if ($avg_cpu_num == 0) $avg_cpu_num = 1;
-$cluster_util = sprintf("%.0f", ((double) find_avg($clustername, $hostname, "load_one") / $avg_cpu_num ) * 100);
-$tpl->assign("name", "Avg Utilization (last $range)");
-$tpl->assign("value", "$cluster_util%");
-
 # Show constant metrics.
 if (is_array($c_metrics))
    {
