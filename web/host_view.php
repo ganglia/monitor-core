@@ -159,6 +159,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
 	    }
             $tpl->newBlock("vol_group_info");
             $tpl->assign("group", $group);
+            $tpl->assign("group_metric_count", count($metric_array));
             $i = 0;
             ksort($g_metrics);
             foreach ( $g_metrics as $name => $v )

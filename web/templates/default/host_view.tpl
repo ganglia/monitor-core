@@ -111,7 +111,7 @@ function toggleLayer( whichLayer )
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD CLASS=metric>
-  {group} metrics
+  {group} metrics ({group_metric_count})
   </TD>
 </TR>
 </TABLE>
