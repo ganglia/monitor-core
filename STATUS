@@ -37,15 +37,6 @@ RELEASE SHOWSTOPPERS:
     <http:// link to email list or bugzilla bug describing the issue>
     <Comments prefixed with user id of comment author>
 
-  * gmond/gmetad: The gmetad code can not handle a host with no associated 
-      cluster, therefore the gmond code must always include a cluster XML tag.  
-      This patch matches up the default values for the cluster section of 
-      gmond with the default gmond.conf so that a cluster name will always 
-      be present.  bug #200
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=200
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
-    +1: bnicholes
-
 BACKPORT PROPOSALS:
  <TEMPLATE>
   * <Brief description of proposal or bug>
@@ -57,7 +48,8 @@ BACKPORT PROPOSALS:
     <Optional comments prefixed with user id of comment author>
 
 BACKPORT PROPOSALS FUTURE VERSION:
-  These proposals are too unstabilizing for the current version or incomplete.
+  These proposals are too unstabilizing for the current version, incomplete or
+  haven't been tested enough to be considered for a stable release.
   They should be addressed after the current version is released.
 
   * gmond: add configurable host tmax (timeout max)
@@ -183,3 +175,18 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1706
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1708
     bernardli: patch still needs testing in meta-grid environments
+
+  * web: metric group enhancements for host view
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=203
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1711
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1714
+    +1: carenas
+
+  * gmond/gmetad: The gmetad code can not handle a host with no associated 
+      cluster, therefore the gmond code must always include a cluster XML tag.  
+      This patch matches up the default values for the cluster section of 
+      gmond with the default gmond.conf so that a cluster name will always 
+      be present.  bug #200
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=200
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
+    +1: bnicholes
