@@ -55,6 +55,7 @@ BACKPORT PROPOSALS FUTURE VERSION:
   * gmond: add configurable host tmax (timeout max)
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1376
     +1: carenas
+    +1: hawson
     carenas: should also remove the hardcoded rule of 4x this time
 
   * Allow both a C and python module to create a metric that will spoof a
@@ -67,10 +68,11 @@ BACKPORT PROPOSALS FUTURE VERSION:
     +1: bnicholes
     carenas: apparently includes few other unrelated changes
 
-  * web: add optional use of hostname withouth FQDN
+  * web: add optional use of hostname without FQDN
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04354.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1460
     +1: carenas
+    +1: hawson
     carenas: logic/name should reflect hostname is formatted to remove domain
 
   * gmond: recover from interface reconfiguration gracefully
@@ -89,16 +91,25 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=30
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1580
     +1: carenas
-    
+    +1: hawson
+
   * web: allow for configuring number of columns in grid view
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1582
     +1: carenas
+    -1: hawson: A default value needs to be set, in the event that $hostcols
+                is not defined in conf.php.  A simple line such as:
+                    if ( !isset($hostcols) || !is_numeric($hostcols) ) { $hostcols=4 }
+                should suffice.    
 
   * web: make number of metric columns in host view configurable
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1583
     +1: carenas
+    -1: hawson: A default value needs to be set, in the event that $metriccols
+                is not defined in conf.php.  A simple check in get_context.php
+                should be fine.  The default value should be 2, to match previous
+                behavior.
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
@@ -116,7 +127,8 @@ BACKPORT PROPOSALS FUTURE VERSION:
   * gmond: mod_python support for versions older than 2.3 or newer than 2.4
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1596
-    +1: carenas, bnicholes
+    +1: carenas
+    +1: bnicholes
     carenas: depends on spoofing support
 
   * build: libmetrics dependency cleanup
@@ -150,12 +162,15 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1684
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1685
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1689
-    +1: bnicholes, carenas
+    +1: bnicholes
+    +1: carenas
 
   * Add "removespikes.pl" script to contrib repository
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1697
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1699
-    +1: knobi1, carenas
+    +1: knobi1
+    +1: carenas
+    +1: hawson
 
   * gmond: add an 'allow_extra_data' boolean global directive
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=199
@@ -190,3 +205,4 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=200
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
     +1: bnicholes
+    +1: hawson
