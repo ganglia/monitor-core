@@ -66,6 +66,7 @@ if ( !isset($gridstack) or !strstr($gridstack[0], "http://"))
 
 # Default values
 if (!isset($hostcols) || !is_numeric($hostcols)) $hostcols = 4;
+if (!isset($metriccols) || !is_numeric($metriccols)) $metriccols = 2;
 if (!is_numeric($showhosts)) $showhosts = 1;
 
 # Set context.
