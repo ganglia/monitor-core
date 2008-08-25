@@ -21,10 +21,10 @@ function graph_metric ( &$rrdtool_graph ) {
            $summary,
            $value,
            $vlabel,
-           $use_fqdn_hostname;
+           $strip_domainname;
 
-    if (!$use_fqdn_hostname) {
-        $hostname = shortenFQDN($hostname);
+    if ($strip_domainname) {
+        $hostname = strip_domainname($hostname);
     }
 
     $rrdtool_graph['height']  +=  0 ; //no fudge needed

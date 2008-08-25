@@ -175,16 +175,8 @@ if ($context != 'host') {
    $rrdtool_graph['title'] = $rrdtool_graph['title'] . " last $range";
 }
 
-
-if (!$use_fqdn_hostname) {
-    $hostname = shortenFQDN($hostname);
-}
-
-
-if ( preg_match('/_report/', $graph) ) {
-    $rrdtool_graph['title'] = "$title $hostname ". $rrdtool_graph['title'];
-} else if (isset($title)) {
-    $rrdtool_graph['title'] = "$title " . $rrdtool_graph['title'];
+if (isset($title)) {
+   $rrdtool_graph['title'] = "$title " . $rrdtool_graph['title'];
 }
 
 //--------------------------------------------------------------------------------------
