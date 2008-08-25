@@ -127,9 +127,10 @@ $default_metric_color = "555555";
 $default_metric = "load_one";
 
 #
-# use FQDN hostnames in graphs (to help with long hostnames in small charts)
+# remove the domainname from the FQDN hostnames in graphs
+# (to help with long hostnames in small charts)
 #
-$use_fqdn_hostname = false;
+$strip_domainname = false;
 
 #
 # Optional summary graphs

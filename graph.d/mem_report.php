@@ -15,17 +15,17 @@ function graph_mem_report ( &$rrdtool_graph ) {
            $range,
            $rrd_dir,
            $size,
-           $use_fqdn_hostname;
+           $strip_domainname;
 
-    if (!$use_fqdn_hostname) {
-        $hostname = shortenFQDN($hostname);
+    if ($strip_domainname) {
+       $hostname = strip_domainname($hostname);
     }
 
     $title = 'Memory'; 
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {
-       $rrdtool_graph['title'] = "$title last $range";
+       $rrdtool_graph['title'] = "$hostname $title last $range";
     }
     $rrdtool_graph['lower-limit']    = '0';
     $rrdtool_graph['vertical-label'] = 'Bytes';
