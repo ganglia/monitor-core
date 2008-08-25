@@ -469,7 +469,7 @@ function is_valid_hex_color( $string )
 
 #-------------------------------------------------------------------------------
 # Return a shortened version of an FQDN 
-function shortenFQDN( $hostname ) {
+function strip_domainname( $hostname ) {
     $postition = strpos($hostname, '.');
     if ( FALSE === $postition ) {
         return $hostname;

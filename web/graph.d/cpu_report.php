@@ -14,10 +14,10 @@ function graph_cpu_report ( &$rrdtool_graph ) {
            $range,
            $rrd_dir,
            $size,
-           $use_fqdn_hostname;
+           $strip_domainname;
     
-    if (!$use_fqdn_hostname) {
-        $hostname = shortenFQDN($hostname);
+    if ($strip_domainname) {
+       $hostname = strip_domainname($hostname);
     }
 
     $rrdtool_graph['height']        += $size == 'medium' ? 14 : 0 ;
@@ -25,7 +25,7 @@ function graph_cpu_report ( &$rrdtool_graph ) {
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {
-       $rrdtool_graph['title'] = "$title last $range";
+       $rrdtool_graph['title'] = "$hostname $title last $range";
 
     }
     $rrdtool_graph['upper-limit']    = '100';
