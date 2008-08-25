@@ -80,8 +80,8 @@ BACKPORT PROPOSALS FUTURE VERSION:
   * web: add host atrributes into metric list
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=30
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1580
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1724
     +1: carenas
-    +1: hawson
 
   * web: allow for configuring number of columns in grid view
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
