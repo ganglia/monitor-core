@@ -38,14 +38,14 @@ AC_CONFIG_AUX_DIR(build)
 # increment GANGLIA_MAJOR_VERSION and set 
 # GANGLIA_MINOR_VERSION and GANGLIA_MICRO_VERSION
 # to 0 (zero) 
-GANGLIA_RELEASE_NAME="NoAmelia"
+GANGLIA_RELEASE_NAME="Wien"
 GANGLIA_MAJOR_VERSION=3
 GANGLIA_MINOR_VERSION=1
-GANGLIA_MICRO_VERSION=0
+GANGLIA_MICRO_VERSION=1
 
 # If we are releasing a snapshot (beta), set GANGLIA_SNAPSHOT to "yes"
 # If we are creating an official release, set it to "no" 
-GANGLIA_SNAPSHOT="yes"
+GANGLIA_SNAPSHOT="no"
 
 # If there are any changes to libganglia in this release, you need to...
 #   LIBGANGLIA_MICRO_VERSION += 1;
