@@ -28,7 +28,6 @@ CURRENT RELEASE NOTES:
   * Support for building with Sun Studio 12 in OpenSolaris
   * In node view show correctly the downtime relatively to cluster time
   * In meta view show grid summary always on top regardless of sorting
-  * Add "Avg Load percentages and overall cluster utilization"
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -38,14 +37,6 @@ RELEASE SHOWSTOPPERS:
     <Comments prefixed with user id of comment author>
 
 BACKPORT PROPOSALS:
- <TEMPLATE>
-  * <Brief description of proposal or bug>
-    <http:// link to email list or bugzilla bug describing the issue -optional>
-    <http:// link to committed patch in the trunk repository>
-    +1: <userid>
-     0: <userid>
-    -1: <userid>
-    <Optional comments prefixed with user id of comment author>
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
@@ -68,12 +59,11 @@ BACKPORT PROPOSALS FUTURE VERSION:
     +1: bnicholes
     carenas: apparently includes few other unrelated changes
 
-  * web: add optional use of hostname without FQDN
+  * web: add optional use of hostname without domainname for graphs
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04354.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1460
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1718
     +1: carenas
-    +1: hawson
-    carenas: logic/name should reflect hostname is formatted to remove domain
 
   * gmond: recover from interface reconfiguration gracefully
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=38
@@ -96,20 +86,14 @@ BACKPORT PROPOSALS FUTURE VERSION:
   * web: allow for configuring number of columns in grid view
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1582
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1719
     +1: carenas
-    -1: hawson: A default value needs to be set, in the event that $hostcols
-                is not defined in conf.php.  A simple line such as:
-                    if ( !isset($hostcols) || !is_numeric($hostcols) ) { $hostcols=4 }
-                should suffice.    
 
   * web: make number of metric columns in host view configurable
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1583
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1720
     +1: carenas
-    -1: hawson: A default value needs to be set, in the event that $metriccols
-                is not defined in conf.php.  A simple check in get_context.php
-                should be fine.  The default value should be 2, to match previous
-                behavior.
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
