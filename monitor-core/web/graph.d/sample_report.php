@@ -82,7 +82,7 @@ function graph_sample_report ( &$rrdtool_graph ) {
     // You *MUST* set at least the 'title', 'vertical-label', and 'series' variables.
     // Otherwise, the graph *will not work*.  
     //
-    $title = 'Sample CPU Report';
+    $title = 'Sample';
     if ($context != 'host') {
        $rrdtool_graph['title']  = $title;
                              //  This will be turned into:   
