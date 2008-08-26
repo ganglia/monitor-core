@@ -7,7 +7,7 @@ The current version of this file can be found at:
 
 Release history:
 
-    3.1.1   : In development
+    3.1.1   : Tagged: Aug 25, 2008
     3.1.0   : Jul 30, 2008
 
 Contributors looking for a mission:
@@ -162,9 +162,10 @@ BACKPORT PROPOSALS FUTURE VERSION:
     +1: carenas
     carenas: suboptimal fix, closing metric tag shouldn't be needed either
 
-  * build: remove ganglia release name
+  * build: remove ganglia release name from the code
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04653.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1703
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1730
     +1: carenas
     carenas: dead code
 
@@ -190,3 +191,15 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
     +1: bnicholes
     +1: hawson
+
+  * build: clarify/update use of  "dist" targets
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1726
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1728
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1729
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1730
+    +1: carenas
+
+  * build: ChangeLog generation compatibility fixes
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1727
+    +1: carenas
