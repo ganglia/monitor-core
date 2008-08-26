@@ -38,6 +38,7 @@ AC_CONFIG_AUX_DIR(build)
 # increment GANGLIA_MAJOR_VERSION and set 
 # GANGLIA_MINOR_VERSION and GANGLIA_MICRO_VERSION
 # to 0 (zero) 
+GANGLIA_RELEASE_NAME="Garriott"
 GANGLIA_MAJOR_VERSION=3
 GANGLIA_MINOR_VERSION=2
 GANGLIA_MICRO_VERSION=0
@@ -674,7 +675,7 @@ echo "                   /____/"
 echo ""
 echo "Copyright (c) 2005 University of California, Berkeley"
 echo ""
-echo "Version: $GANGLIA_VERSION"
+echo "Version: $GANGLIA_VERSION ($GANGLIA_RELEASE_NAME)"
 echo "Library: Release $LT_RELEASE $LT_CURRENT:$LT_REVISION:$LT_AGE"
 echo ""
 echo "Type \"make\" to compile."
