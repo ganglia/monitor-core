@@ -10,7 +10,7 @@ EXTRA_SUBDIRS = "web gmetad-python contrib"
 EXTRA_DIST_FILES = 
 INCLUDES = @APR_INCLUDES@
 
-AUTOMAKE_OPTIONS = dist-bzip2 dist-lzma dist-tarZ dist-zip
+AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-zip
 
 GANGLIA_SUBDIRS = lib libmetrics tests $(GMETAD_SUBDIR) gmond gstat gmetric include
 SUBDIRS = $(GANGLIA_SUBDIRS)
