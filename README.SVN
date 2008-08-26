@@ -46,4 +46,4 @@ To build RPMs after building the tarball:
   rpmbuild -ta --target i686,noarch <tarball>
 
 (*) other distribution formats are available if you have the needed tools
-    installed by using dist-bzip2, dist-zip, dist-lzma, dist-shar or dist-tarZ
+    installed by using dist-bzip2, dist-zip, or dist-tarZ (dist target)
