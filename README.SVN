@@ -31,7 +31,7 @@ To prepare the distribution for compilation, run the bootstrapping script:
 
   ./bootstrap
 
-To build a distribution tarball, run:
+To build a distribution tarball (*), run:
 
   ./configure
   make dist-gzip
@@ -44,3 +44,6 @@ To prepare a distribution tree, run:
 To build RPMs after building the tarball:
 
   rpmbuild -ta --target i686,noarch <tarball>
+
+(*) other distribution formats are available if you have the needed tools
+    installed by using dist-bzip2, dist-zip, dist-lzma, dist-shar or dist-tarZ
