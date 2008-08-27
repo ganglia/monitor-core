@@ -1,11 +1,12 @@
 <?php
 
-// This report is used for specific metric graphs at the bottom of the cluster_view page.
+// This report is used for specific metric graphs at the bottom of the
+// cluster_view page.
 
 /* Pass in by reference! */
 function graph_metric ( &$rrdtool_graph ) {
 
-    global $context, 
+    global $context,
            $default_metric_color,
            $hostname,
            $jobstart,
@@ -27,17 +28,16 @@ function graph_metric ( &$rrdtool_graph ) {
         $hostname = strip_domainname($hostname);
     }
 
-    $rrdtool_graph['height']  +=  0 ; //no fudge needed
+    //no fudge needed for rrdtool_graph['height']
 
     switch ($context) {
     
         case 'host':
-    
+
             if ($summary) {
                 $rrdtool_graph['title'] = $hostname;
                 $prefix = $metricname;
-            }
-            else {
+            } else {
                 $prefix = $hostname;
                 if ($metrictitle) {
                    $rrdtool_graph['title'] = $metrictitle;
@@ -47,9 +47,9 @@ function graph_metric ( &$rrdtool_graph ) {
             }
 
             $prefix = $summary ? $metricname : $hostname;
-            $value = $value > 1000 
-                        ? number_format($value) 
-                        : number_format($value,2);
+            $value = ($value > 1000)
+                        ? number_format($value)
+                        : number_format($value, 2);
 
             if ($range == 'job') {
                 $hrs = intval (-$jobrange / 3600);
@@ -64,11 +64,11 @@ function graph_metric ( &$rrdtool_graph ) {
             }
 
             break;
-            
+
         case 'meta':
             $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";
             break;
-            
+
         case 'grid':
             $rrdtool_graph['title'] = "$meta_designator ". $rrdtool_graph['title'] ."last $range";
             break;
@@ -78,7 +78,6 @@ function graph_metric ( &$rrdtool_graph ) {
             break;
 
         default:
-            
             if ($size == 'small') {
                 $rrdtool_graph['title'] = $hostname;
             } else if ($summary) {
@@ -86,44 +85,29 @@ function graph_metric ( &$rrdtool_graph ) {
             } else {
                 $rrdtool_graph['title'] = $metricname;
             }
-            
             break;
-        
+
     }
 
-    if ($load_color) 
+    if ($load_color)
         $rrdtool_graph['color'] = "BACK#'$load_color'";
 
     if (isset($max) && is_numeric($max))
         $rrdtool_graph['upper-limit'] = $max;
-    
+
     if (isset($min) && is_numeric($min))
         $rrdtool_graph['lower-limit'] = $min;
-    
-    if ($vlabel ) {
-	// We should set $vlabel, even if it isn't used for spacing
-	// and alignment reasons.  This is mostly for aesthetics
-	$temp_vlabel = trim($vlabel);
-        $rrdtool_graph['vertical-label'] = strlen($temp_vlabel) 
+
+    if ($vlabel) {
+        // We should set $vlabel, even if it isn't used for spacing
+        // and alignment reasons.  This is mostly for aesthetics
+        $temp_vlabel = trim($vlabel);
+        $rrdtool_graph['vertical-label'] = strlen($temp_vlabel)
                    ?  $temp_vlabel
                    :  ' ';
     } else {
         $rrdtool_graph['vertical-label'] = ' ';
     }
- /*   else if ( isset($rrdtool_graph['lower-limit']) or 
-              isset($rrdtool_graph['upper-limit'])    ) {
-        $max = $max > 1000
-                    ? number_format($max)
-                    : number_format($max,2);
-        $min = $min = 0
-                    ? $min
-                    : number_format($min,2);
-        $rrdtool_graph['vertical-label'] = "'$min - $max'";    
-    }
-    else {
-        $rrdtool_graph['vertical-label'] = "";    
-    }
-  */ 
 
     //# the actual graph...
     $series  = "DEF:'sum'='$rrd_dir/$metricname.rrd:sum':AVERAGE ";
@@ -132,8 +116,8 @@ function graph_metric ( &$rrdtool_graph ) {
 
     if ($jobstart) {
         $series .= "VRULE:$jobstart#$jobstart_color ";
-    }    
-   
+    }
+
     $rrdtool_graph['series'] = $series;
 
     return $rrdtool_graph;
