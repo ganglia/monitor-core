@@ -1,25 +1,24 @@
 <?php
 
-
 /* Pass in by reference! */
 function graph_packet_report ( &$rrdtool_graph ) {
 
-    global $context, 
+    global $context,
            $hostname,
-           $mem_cached_color, 
+           $mem_cached_color,
            $mem_used_color,
            $cpu_num_color,
            $range,
            $rrd_dir,
            $size,
            $strip_domainname;
-   
+
     if ($strip_domainname) {
        $hostname = strip_domainname($hostname);
     }
 
-    $title = 'Packets'; 
-    $rrdtool_graph['height']        += $size == 'medium' ? 28 : 0 ;
+    $title = 'Packets';
+    $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {
