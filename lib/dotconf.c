@@ -226,7 +226,7 @@ void dotconf_register_options(configfile_t *configfile, const configoption_t * o
 	{
 		if ( !(num % GROW_BY) )
 			configfile->config_options = realloc(configfile->config_options,
-											 sizeof(void *) * (num + GROW_BY));
+											 sizeof(void *) * (num + GROW_BY + 1));
 	}
 
 #undef GROW_BY
