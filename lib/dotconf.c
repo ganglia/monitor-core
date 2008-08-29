@@ -21,6 +21,10 @@
 
 /* -- dotconf.c - this code is responsible for the input, parsing and dispatching of options  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
