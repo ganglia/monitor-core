@@ -36,7 +36,7 @@ struct type_tag
 #define DEFAULT_METRICSIZE 50
 
 /* For xml_hash */
-typedef enum 
+typedef enum
    {
       GANGLIA_XML_TAG,
       GRID_TAG,
@@ -126,7 +126,7 @@ metric_val_t;
 
 typedef struct
    {
-      int  fd;
+      int fd;
       struct sockaddr_in addr;
       int valid;
       filter_type_t filter;
@@ -134,27 +134,23 @@ typedef struct
    }
 client_t;
 
-
 /* sacerdoti: The base class for a hash node.
  * Any hash node type can be cast to this (OO style). */
 typedef struct Generic_type
    {
       node_type_t id;
-      int (*report_start)(struct Generic_type *self, datum_t *key, 
-                      client_t *client, void *arg);
+      int (*report_start)(struct Generic_type *self, datum_t *key,
+                          client_t *client, void *arg);
       int (*report_end)(struct Generic_type *self, client_t *client, void *arg);
       hash_t *children;
       char *therest;
    }
 Generic_t;
 
-
 /* The reporting functions for all node types. */
-typedef int (*report_start_func)(Generic_t *self, datum_t *key, 
-                client_t *client, void *arg);
+typedef int (*report_start_func)(Generic_t *self, datum_t *key,
+                                 client_t *client, void *arg);
 typedef int (*report_end_func)(Generic_t *self, client_t *client, void *arg);
-
-
 
 /* sacerdoti: these are used for root, clusters, and grids. */
 typedef struct
@@ -163,7 +159,7 @@ typedef struct
       report_start_func report_start;
       report_end_func report_end;
       hash_t *authority; /* Null for a grid. */
-      short int authority_ptr;   /* An authority URL. */
+      short int authority_ptr; /* An authority URL. */
       hash_t *metric_summary;
       pthread_mutex_t *sum_finished; /* A lock held during summarization. */
       data_source_list_t *ds;
@@ -178,7 +174,6 @@ typedef struct
    }
 Source_t;
 
-
 /* See Metric_t struct below for an explanation of the strings buffer.
  * The hash key is the node's name for easier subtree addressing. */
 typedef struct
@@ -187,7 +182,7 @@ typedef struct
       report_start_func report_start;
       report_end_func report_end;
       hash_t *metrics;
-      struct timeval t0;	/* A local timestamp, for TN */
+      struct timeval t0; /* A local timestamp, for TN */
       short int ip;
       uint32_t tn;
       uint32_t tmax;
@@ -199,7 +194,6 @@ typedef struct
       char strings[GMETAD_FRAMESIZE];
    }
 Host_t;
-
 
 #define MAX_EXTRA_ELEMENTS  32
 
@@ -214,12 +208,12 @@ typedef struct
       node_type_t id;
       report_start_func report_start;
       report_end_func report_end;
-      hash_t *leaf;  /* Always NULL. */
+      hash_t *leaf; /* Always NULL. */
       struct timeval t0;
       metric_val_t val;
       short int name;
-      short int valstr;    /* An optimization to speed queries. */
-      short int precision;    /* Number of decimal places for floats. */
+      short int valstr; /* An optimization to speed queries. */
+      short int precision; /* Number of decimal places for floats. */
       uint32_t num;
       short int type;
       short int units;
@@ -236,7 +230,6 @@ typedef struct
       char strings[GMETAD_FRAMESIZE];
    }
 Metric_t;
-
 
 #ifndef SYS_CALL
 #define SYS_CALL(RC,SYSCALL) \
