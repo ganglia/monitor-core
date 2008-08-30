@@ -141,13 +141,13 @@ data_thread ( void *arg )
                          * not that I lost the connection (See FreeBSD lists on this discussion)
                          */
 #if !(defined(DARWIN))
-                        if( struct_poll.revents & POLLHUP )
-                          {
-                            err_msg("The remote machine closed connection for [%s] data source after %d bytes read", d->name, read_index);
-                            d->last_good_index = -1;
-                            d->dead = 1;
-                            goto take_a_break;
-                          }
+                     if( struct_poll.revents & POLLHUP )
+                        {
+                           err_msg("The remote machine closed connection for [%s] data source after %d bytes read", d->name, read_index);
+                           d->last_good_index = -1;
+                           d->dead = 1;
+                           goto take_a_break;
+                        }
 #endif /* DARWIN */
                      if( struct_poll.revents & POLLERR )
                         {
