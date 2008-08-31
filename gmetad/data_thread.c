@@ -90,9 +90,9 @@ data_thread ( void *arg )
                if( rval < 0 )
                   {
                      /* Error */
-                     err_msg("poll() error in data_thread from source %d for [%s] data source after %d bytes read", i, d->name, read_index);
-                     if (i < (d->num_sources - 1))
-                        d->last_good_index = i + 1; /* skip this source */
+                     err_msg("poll() error in data_thread from source %d for [%s] data source after %d bytes read", d->last_good_index, d->name, read_index);
+                     if (d->last_good_index < (d->num_sources - 1))
+                        d->last_good_index += 1; /* skip this source */
                      else
                         d->last_good_index = -1; /* forget this source */
                      d->dead = 1;
@@ -101,9 +101,9 @@ data_thread ( void *arg )
                else if (rval == 0)
                   {
                      /* No revents during timeout period */
-                     err_msg("poll() timeout from source %d for [%s] data source after %d bytes read", i, d->name, read_index);
-                     if (i < (d->num_sources - 1))
-                        d->last_good_index = i + 1; /* skip this source */
+                     err_msg("poll() timeout from source %d for [%s] data source after %d bytes read", d->last_good_index, d->name, read_index);
+                     if (d->last_good_index < (d->num_sources - 1))
+                        d->last_good_index += 1; /* skip this source */
                      else
                         d->last_good_index = -1; /* forget this source */
                      d->dead = 1;
