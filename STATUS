@@ -203,3 +203,25 @@ BACKPORT PROPOSALS FUTURE VERSION:
   * build: ChangeLog generation compatibility fixes
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1727
     +1: carenas
+
+  * libganglia: mcast_if support in gmond (BUG140)
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg03775.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1734
+    +1: carenas
+
+  * libganglia: dotconf fixes
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1735
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1736
+    +1: carenas
+
+  * gmond: reformat memory metrics to match pre 3.1 style
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1737
+    +1: carenas
+
+  * gmetad: skip unresponsive sources
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=92
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1738
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1741
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1743
+    +1: carenas
+    carenas: r1741 only needed to align white space fixes to prevent conflicts
