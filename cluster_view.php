@@ -227,6 +227,10 @@ foreach ( $sorted_hosts as $host => $value )
                   $graphargs .= "z=$size&amp;c=$cluster_url&amp;h=$host_url"
                      ."&amp;l=$load_color&amp;v=$val[VAL]&amp;x=$max&amp;n=$min"
                      ."&amp;r=$range&amp;su=1&amp;st=$cluster[LOCALTIME]";
+		  if ($cs)
+		     $graphargs .= "&amp;cs=" . rawurlencode($cs);
+		  if ($ce)
+		     $graphargs .= "&amp;ce=" . rawurlencode($ce);
                }
          }
 

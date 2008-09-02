@@ -42,6 +42,11 @@ $jobrange = isset($_GET["jr"]) ?
 # A red vertical line for various events. Value specifies the event time.
 $jobstart = isset($_GET["js"]) ?
 	clean_number( $_GET["js"] ) : NULL;
+# custom start and end
+$cs = isset($_GET["cs"]) ?
+	escapeshellcmd($_GET["cs"]) : NULL;
+$ce = isset($_GET["ce"]) ?
+	escapeshellcmd($_GET["ce"]) : NULL;
 # The direction we are travelling in the grid tree
 $gridwalk = isset($_GET["gw"]) ?
 	escapeshellcmd( clean_string( $_GET["gw"] ) ) : NULL;
@@ -120,6 +125,8 @@ if( $range == 'job' && isSet( $jobrange ) ) {
 } else {
   $start = $time_ranges[ $default_time_range ] * -1;
 }
+if ($cs or $ce)
+     $range = "custom";
 
 if (!$metricname)
       $metricname = "$default_metric";

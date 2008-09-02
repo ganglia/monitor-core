@@ -54,6 +54,10 @@ foreach ($metrics as $name => $v)
              $graphargs = "c=$cluster_url&amp;h=$hostname&amp;v=$v[VAL]"
                ."&amp;m=$name&amp;r=$range&amp;z=medium&amp;jr=$jobrange"
                ."&amp;js=$jobstart&amp;st=$cluster[LOCALTIME]";
+	     if ($cs)
+	       $graphargs .= "&amp;cs=" . rawurlencode($cs);
+	     if ($ce)
+	       $graphargs .= "&amp;ce=" . rawurlencode($ce);
              # Adding units to graph 2003 by Jason Smith <smithj4@bnl.gov>.
              if ($v['UNITS']) {
                 $encodeUnits = rawurlencode($v['UNITS']);
