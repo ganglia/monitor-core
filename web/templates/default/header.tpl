@@ -5,6 +5,7 @@
 <META http-equiv="Content-type" content="text/html; charset=utf-8">
 <META http-equiv="refresh" content="{refresh}">
 <LINK rel="stylesheet" href="./styles.css" type="text/css">
+{custom_time_head}
 </HEAD>
 <BODY BGCOLOR="#FFFFFF">
 
@@ -34,6 +35,7 @@
      {metric_menu} &nbsp;&nbsp;
      {range_menu}&nbsp;&nbsp;
      {sort_menu}
+     {custom_time}
      </TD>
      <TD>
       <B>{alt_view}</B>
