@@ -74,6 +74,11 @@ switch ($context)
       exit;
 }
 
+if ($cs)
+    $start = $cs;
+if ($ce)
+    $end = $ce;
+
 # Set some standard defaults that don't need to change much
 $rrdtool_graph = array(
     'start'  => $start,

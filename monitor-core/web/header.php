@@ -3,6 +3,7 @@
 
 # Check if this context is private.
 include_once "./auth.php";
+include_once "./calendar.php";
 checkcontrol();
 checkprivate();
 
@@ -90,6 +91,10 @@ $sort_url=rawurlencode($sort);
 $get_metric_string = "m=$metricname&amp;r=$range&amp;s=$sort_url&amp;hc=$hostcols&amp;mc=$metriccols";
 if ($jobrange and $jobstart)
         $get_metric_string .= "&amp;jr=$jobrange&amp;js=$jobstart";
+if ($cs)
+    $get_metric_string .= "&amp;cs=" . rawurlencode($cs);
+if ($ce)
+    $get_metric_string .= "&amp;ce=" . rawurlencode($ce);
 
 # Set the Alternate view link.
 $cluster_url=rawurlencode($clustername);
@@ -237,9 +242,11 @@ if (!$physical) {
    $context_ranges = array_keys( $time_ranges );
    if ($jobrange)
       $context_ranges[]="job";
+   if ($cs or $ce)
+      $context_ranges[]="custom";
 
    $range_menu = "<B>Last</B>&nbsp;&nbsp;"
-      ."<SELECT NAME=\"r\" OnChange=\"ganglia_form.submit();\">\n";
+      ."<SELECT NAME=\"r\" OnChange=\"ganglia_submit();\">\n";
    foreach ($context_ranges as $v) {
       $url=rawurlencode($v);
       $range_menu .= "<OPTION VALUE=\"$url\"";
@@ -248,6 +255,7 @@ if (!$physical) {
       $range_menu .= ">$v\n";
    }
    $range_menu .= "</SELECT>\n";
+   $range_menu .= "<input type=\"button\" value=\"Clear\" onclick=\"ganglia_submit(1)\">\n";
 
    $tpl->assign("range_menu", $range_menu);
 }
@@ -338,7 +346,6 @@ if ($context == "physical" or $context == "cluster")
   
       # Assign template variable in cluster view.
    }
-
 if ($context == "host")
    {
       # Present a width list
@@ -353,6 +360,22 @@ if ($context == "host")
 	 }
       $metric_cols_menu .= "</SELECT>\n";
    }
+
+{
+   $examples = "Feb 27 2007 00:00, 2/27/2007, 27.2.2007, now -1 week,"
+	. " -2 days, start + 1 hour, etc.";
+   $custom_time .= "<br>or from <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"cs\" ID=\"cs\" SIZE=\"17\"";
+   if ($cs)
+	$custom_time .= " value=\"$cs\"";
+   $custom_time .= "> to <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"ce\" ID=\"ce\" SIZE=\"17\"";
+   if ($ce)
+	$custom_time .= " value=\"$ce\"";
+   $custom_time .= "><input type=\"submit\" value=\"Go\">\n";
+   $custom_time .= $calendar;
+   $tpl->assign("custom_time", $custom_time);
+
+   $tpl->assign("custom_time_head", $calendar_head);
+}
 
 # Make sure that no data is cached..
 header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");    # Date in the past
