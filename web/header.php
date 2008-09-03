@@ -360,7 +360,7 @@ if ($context == "host")
          }
       $metric_cols_menu .= "</SELECT>\n";
    }
-if ($context = "meta" or $context == "cluster" or $context == "host")
+if ($context == "meta" or $context == "cluster" or $context == "host")
    {
       $examples = "Feb 27 2007 00:00, 2/27/2007, 27.2.2007, now -1 week,"
          . " -2 days, start + 1 hour, etc.";
