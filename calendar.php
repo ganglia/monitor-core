@@ -5,7 +5,7 @@ $calendar_head = '
 <script type="text/javascript" src="jscalendar-1.0/lang/calendar-en.js"></script>
 <script type="text/javascript" src="jscalendar-1.0/calendar-setup.js"></script>
 <script type="text/javascript">
-var fmt = "%b %d %Y %H:%M";	// must be a format that RRDtool likes
+var fmt = "%b %d %Y %H:%M"; // must be a format that RRDtool likes
 function ganglia_submit(nogo) {
   document.getElementById("cs").value = "";
   document.getElementById("ce").value = "";
@@ -16,18 +16,18 @@ function isDisabled(date, y, m, d) {
   var today = new Date();
   return (today.getTime() - date.getTime()) < -1 * Date.DAY;
 }
-function checkcal(cal) {	// ensure cs < ce
+function checkcal(cal) { // ensure cs < ce
   var date = cal.date;
   var time = date.getTime();
   var field = document.getElementById("cs");
-  if (field == cal.params.inputField) {	// cs was changed: change ce
+  if (field == cal.params.inputField) { // cs was changed: change ce
     field = document.getElementById("ce");
     var other = new Date(Date.parseDate(field.value, fmt));
     if (time >= other) {
       date = new Date(time + Date.HOUR);
       field.value = date.print(fmt);
     }
-  } else {			// ce was changed: change cs
+  } else { // ce was changed: change cs
     field = document.getElementById("cs");
     var other = new Date(Date.parseDate(field.value, fmt));
     if (other >= time) {
@@ -46,7 +46,7 @@ Calendar.setup({
   showsTime      : true,
   step           : 1,
   weekNumbers    : false,
-  onUpdate	 : checkcal,
+  onUpdate       : checkcal,
   dateStatusFunc : isDisabled
 });
 Calendar.setup({
@@ -55,7 +55,7 @@ Calendar.setup({
   showsTime      : true,
   step           : 1,
   weekNumbers    : false,
-  onUpdate	 : checkcal,
+  onUpdate       : checkcal,
   dateStatusFunc : isDisabled
 });
 </script>

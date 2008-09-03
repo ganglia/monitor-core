@@ -54,10 +54,10 @@ foreach ($metrics as $name => $v)
              $graphargs = "c=$cluster_url&amp;h=$hostname&amp;v=$v[VAL]"
                ."&amp;m=$name&amp;r=$range&amp;z=medium&amp;jr=$jobrange"
                ."&amp;js=$jobstart&amp;st=$cluster[LOCALTIME]";
-	     if ($cs)
-	       $graphargs .= "&amp;cs=" . rawurlencode($cs);
-	     if ($ce)
-	       $graphargs .= "&amp;ce=" . rawurlencode($ce);
+             if ($cs)
+                $graphargs .= "&amp;cs=" . rawurlencode($cs);
+             if ($ce)
+                $graphargs .= "&amp;ce=" . rawurlencode($ce);
              # Adding units to graph 2003 by Jason Smith <smithj4@bnl.gov>.
              if ($v['UNITS']) {
                 $encodeUnits = rawurlencode($v['UNITS']);
@@ -106,16 +106,18 @@ if (is_array($s_metrics))
    {
       ksort($s_metrics);
       foreach ($s_metrics as $name => $v )
-     {
-	# RFM - If units aren't defined for metric, make it be the empty string
-	! array_key_exists('UNITS', $v) and $v['UNITS'] = "";
+      {
+        # RFM - If units aren't defined for metric, make it be the empty string
+        ! array_key_exists('UNITS', $v) and $v['UNITS'] = "";
         $tpl->newBlock("string_metric_info");
-		if (isset($v['TITLE'])) {
-			$tpl->assign("name", $v['TITLE']);
-		}
-		else {
-			$tpl->assign("name", $name);
-		}
+        if (isset($v['TITLE']))
+           {
+              $tpl->assign("name", $v['TITLE']);
+           }
+        else
+           {
+              $tpl->assign("name", $name);
+           }
         if( $v['TYPE']=="timestamp" or (isset($always_timestamp[$name]) and $always_timestamp[$name]))
            {
               $tpl->assign("value", date("r", $v['VAL']));
@@ -141,12 +143,14 @@ if (is_array($c_metrics))
       foreach ($c_metrics as $name => $v )
      {
         $tpl->newBlock("const_metric_info");
-		if (isset($v['TITLE'])) {
-			$tpl->assign("name", $v['TITLE']);
-		}
-		else { 
-			$tpl->assign("name", $name);
-		}
+        if (isset($v['TITLE']))
+           {
+              $tpl->assign("name", $v['TITLE']);
+           }
+        else
+           {
+              $tpl->assign("name", $name);
+           }
         $tpl->assign("value", "$v[VAL] $v[UNITS]");
      }
    }
@@ -160,7 +164,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
          {
             if ( $group == "" ) {
                $group = "no_group";
-	    }
+            }
             $tpl->newBlock("vol_group_info");
             $tpl->assign("group", $group);
             $tpl->assign("group_metric_count", count($metric_array));
@@ -173,7 +177,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
                      $tpl->assign("graphargs", $v['graph']);
                      $tpl->assign("alt", "$hostname $name");
                      if (isset($v['description']))
-                       $tpl->assign("desc", $v['description']);
+                        $tpl->assign("desc", $v['description']);
                      if ( !(++$i % $metriccols) )
                         $tpl->assign("br", "<BR>");
                   }

@@ -56,12 +56,12 @@ $tpl->assign("cluster", $clustername);
 $graph_args = "c=$cluster_url&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]";
 $tpl->assign("graph_args", $graph_args);
 if (!isset($optional_graphs))
-	$optional_graphs = array();
+  $optional_graphs = array();
 foreach ($optional_graphs as $g) {
-	$tpl->newBlock('optional_graphs');
-	$tpl->assign('name',$g);
-	$tpl->assign('graph_args',$graph_args);
-	$tpl->gotoBlock('_ROOT');
+  $tpl->newBlock('optional_graphs');
+  $tpl->assign('name',$g);
+  $tpl->assign('graph_args',$graph_args);
+  $tpl->gotoBlock('_ROOT');
 }
 
 #
@@ -93,17 +93,17 @@ if ($showhosts)
             $load_one  = $metrics[$host]["load_one"]['VAL'];
             $load = ((float) $load_one)/$cpus;
             $host_load[$host] = $load;
-	    if(isset($percent_hosts[load_color($load)])) { 
+            if(isset($percent_hosts[load_color($load)])) { 
                 $percent_hosts[load_color($load)] += 1;
-	    } else {
-		$percent_hosts[load_color($load)] = 1;
-	    }
+            } else {
+                $percent_hosts[load_color($load)] = 1;
+            }
             if ($metricname=="load_one")
                $sorted_hosts[$host] = $load;
             else if (isset($metrics[$host][$metricname]))
                $sorted_hosts[$host] = $metrics[$host][$metricname]['VAL'];
-	    else
-	       $sorted_hosts[$host] = "";
+            else
+               $sorted_hosts[$host] = "";
          }
          
       foreach ($hosts_down as $host => $val)
@@ -227,10 +227,10 @@ foreach ( $sorted_hosts as $host => $value )
                   $graphargs .= "z=$size&amp;c=$cluster_url&amp;h=$host_url"
                      ."&amp;l=$load_color&amp;v=$val[VAL]&amp;x=$max&amp;n=$min"
                      ."&amp;r=$range&amp;su=1&amp;st=$cluster[LOCALTIME]";
-		  if ($cs)
-		     $graphargs .= "&amp;cs=" . rawurlencode($cs);
-		  if ($ce)
-		     $graphargs .= "&amp;ce=" . rawurlencode($ce);
+                  if ($cs)
+                     $graphargs .= "&amp;cs=" . rawurlencode($cs);
+                  if ($ce)
+                     $graphargs .= "&amp;ce=" . rawurlencode($ce);
                }
          }
 
