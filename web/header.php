@@ -90,7 +90,7 @@ else
 $sort_url=rawurlencode($sort);
 $get_metric_string = "m=$metricname&amp;r=$range&amp;s=$sort_url&amp;hc=$hostcols&amp;mc=$metriccols";
 if ($jobrange and $jobstart)
-        $get_metric_string .= "&amp;jr=$jobrange&amp;js=$jobstart";
+    $get_metric_string .= "&amp;jr=$jobrange&amp;js=$jobstart";
 if ($cs)
     $get_metric_string .= "&amp;cs=" . rawurlencode($cs);
 if ($ce)
@@ -174,7 +174,7 @@ if ( $clustername && !$hostname )
    {
       # Drop in a host list if we have hosts
       if (!$showhosts) {
-      	 $node_menu .= "[Summary Only]";
+            $node_menu .= "[Summary Only]";
       }
       elseif (is_array($hosts_up) || is_array($hosts_down))
          {
@@ -353,29 +353,29 @@ if ($context == "host")
 
       foreach(range(1,25) as $metric_cols)
          {
-	    $metric_cols_menu .= "<OPTION VALUE=$metric_cols ";
-	    if ($metric_cols == $metriccols)
-	       $metric_cols_menu .= "SELECTED";
-	    $metric_cols_menu .= ">$metric_cols\n";
-	 }
+            $metric_cols_menu .= "<OPTION VALUE=$metric_cols ";
+            if ($metric_cols == $metriccols)
+               $metric_cols_menu .= "SELECTED";
+            $metric_cols_menu .= ">$metric_cols\n";
+         }
       $metric_cols_menu .= "</SELECT>\n";
    }
 
-{
-   $examples = "Feb 27 2007 00:00, 2/27/2007, 27.2.2007, now -1 week,"
-	. " -2 days, start + 1 hour, etc.";
-   $custom_time .= "<br>or from <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"cs\" ID=\"cs\" SIZE=\"17\"";
-   if ($cs)
-	$custom_time .= " value=\"$cs\"";
-   $custom_time .= "> to <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"ce\" ID=\"ce\" SIZE=\"17\"";
-   if ($ce)
-	$custom_time .= " value=\"$ce\"";
-   $custom_time .= "><input type=\"submit\" value=\"Go\">\n";
-   $custom_time .= $calendar;
-   $tpl->assign("custom_time", $custom_time);
+   {
+      $examples = "Feb 27 2007 00:00, 2/27/2007, 27.2.2007, now -1 week,"
+         . " -2 days, start + 1 hour, etc.";
+      $custom_time .= "<br>or from <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"cs\" ID=\"cs\" SIZE=\"17\"";
+      if ($cs)
+         $custom_time .= " value=\"$cs\"";
+      $custom_time .= "> to <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"ce\" ID=\"ce\" SIZE=\"17\"";
+      if ($ce)
+         $custom_time .= " value=\"$ce\"";
+      $custom_time .= "><input type=\"submit\" value=\"Go\">\n";
+      $custom_time .= $calendar;
+      $tpl->assign("custom_time", $custom_time);
 
-   $tpl->assign("custom_time_head", $calendar_head);
-}
+      $tpl->assign("custom_time_head", $calendar_head);
+   }
 
 # Make sure that no data is cached..
 header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");    # Date in the past
