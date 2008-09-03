@@ -32,10 +32,10 @@
   </TR>
   <TR>
      <TD COLSPAN="1">
-     {metric_menu} &nbsp;&nbsp;
-     {range_menu}&nbsp;&nbsp;
+     {range_menu}
+     {custom_time}<br>
+     {metric_menu}
      {sort_menu}
-     {custom_time}
      </TD>
      <TD>
       <B>{alt_view}</B>
