@@ -7,8 +7,9 @@ The current version of this file can be found at:
 
 Release history:
 
-    3.1.1   : Tagged: Aug 25, 2008
-    3.1.0   : Jul 30, 2008
+    3.1.2(langley)    : In Development
+    3.1.1(wien)       : Released: Sep 10, 2008
+    3.1.0(amelia)     : Released: Jul 30, 2008
 
 Contributors looking for a mission:
 
@@ -17,17 +18,11 @@ Contributors looking for a mission:
   * Open bugs in the bug database.
   * Implement a feature from the wishlist at: http://ganglia.wiki.sourceforce.net/ganglia_wish-list
 
-CURRENT RELEASE NOTES:
+CURRENT RELEASE NOTES: 
+  (Please update this area with a brief description of bug fixes and enhancements
+    that have been backported for the current release)
 
-  * Fix segfault when aggregating 3.1 gmetad
-  * Fix failures and unstability for tcpconn.py
-  * Module directory configurable at build and run time
-  * Autodetect libdir/moduledir for bi-arch Linux architectures
-  * Include contrib directory with user provided goodies
-  * Support for building C++ DSO
-  * Support for building with Sun Studio 12 in OpenSolaris
-  * In node view show correctly the downtime relatively to cluster time
-  * In meta view show grid summary always on top regardless of sorting
+  * 
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -36,12 +31,8 @@ RELEASE SHOWSTOPPERS:
     <http:// link to email list or bugzilla bug describing the issue>
     <Comments prefixed with user id of comment author>
 
-BACKPORT PROPOSALS:
 
-BACKPORT PROPOSALS FUTURE VERSION:
-  These proposals are too unstabilizing for the current version, incomplete or
-  haven't been tested enough to be considered for a stable release.
-  They should be addressed after the current version is released.
+BACKPORT PROPOSALS:
 
   * gmond: add configurable host tmax (timeout max)
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1376
@@ -225,3 +216,9 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1743
     +1: carenas
     carenas: r1741 only needed to align white space fixes to prevent conflicts
+
+BACKPORT PROPOSALS FUTURE VERSION:
+  These proposals are too unstabilizing for the current version, incomplete or
+  haven't been tested enough to be considered for a stable release.
+  They should be addressed after the current version is released.
+
