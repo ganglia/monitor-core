@@ -19,8 +19,8 @@ Contributors looking for a mission:
   * Implement a feature from the wishlist at: http://ganglia.wiki.sourceforce.net/ganglia_wish-list
 
 CURRENT RELEASE NOTES: 
-  (Please update this area with a brief description of bug fixes and enhancements
-    that have been backported for the current release)
+  (Please update this area with a brief description of bug fixes and
+   enhancements that have been backported for the current release)
 
   * 
   * Bug fixes and Enhancements
@@ -31,14 +31,7 @@ RELEASE SHOWSTOPPERS:
     <http:// link to email list or bugzilla bug describing the issue>
     <Comments prefixed with user id of comment author>
 
-
 BACKPORT PROPOSALS:
-
-  * gmond: add configurable host tmax (timeout max)
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1376
-    +1: carenas
-    +1: hawson
-    carenas: should also remove the hardcoded rule of 4x this time
 
   * Allow both a C and python module to create a metric that will spoof a
     specific host.  This provides the same spoofing functionality as gmetric
@@ -173,7 +166,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1714
     +1: carenas
 
-  * gmond/gmetad: The gmetad code can not handle a host with no associated 
+  * libganglia: The gmetad code can not handle a host with no associated 
       cluster, therefore the gmond code must always include a cluster XML tag.  
       This patch matches up the default values for the cluster section of 
       gmond with the default gmond.conf so that a cluster name will always 
@@ -182,6 +175,10 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
     +1: bnicholes
     +1: hawson
+    -1: carenas
+    carenas: not having a cluster section is documented as valid and might
+             be a common setup with 2.5.x (still the official ganglia in
+             Debian and [Open]SuSE)
 
   * build: clarify/update use of  "dist" targets
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
@@ -222,3 +219,8 @@ BACKPORT PROPOSALS FUTURE VERSION:
   haven't been tested enough to be considered for a stable release.
   They should be addressed after the current version is released.
 
+  * gmond: add configurable host tmax (timeout max)
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1376
+    +1: carenas
+    +1: hawson
+    carenas: should also remove the hardcoded rule of 4x this time
