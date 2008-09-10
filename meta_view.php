@@ -154,6 +154,20 @@ foreach ( $sorted_sources as $source => $val )
 	    if(isset($base64img)) {
                 $tpl->assign("base64img", $base64img);
 	    }
+            if ( $source == $self ) {
+               $tpl->newBlock("self_summary_graphs");
+               $tpl->assign("range", $range);
+               $tpl->assign("name", $name );
+               $tpl->assign("url", $url);
+               $tpl->assign("graph_url", $graph_url);
+            } else {
+               $tpl->newBlock("summary_graphs");
+               $tpl->assign("range", $range);
+               $tpl->assign("name", $name );
+               $tpl->assign("url", $url);
+               $tpl->assign("graph_url", $graph_url);
+            }
+
          }
       else 
          {

@@ -21,6 +21,39 @@
 </table>
   </TD>
 
+ <!-- START BLOCK : self_summary_graphs -->
+ <TD VALIGN=top align=right>
+<table><tr><td>
+ <A HREF="./graph.php?{graph_url}&g=load_report&z=large">
+  <IMG SRC="./graph.php?{graph_url}&g=load_report&z=medium"
+      ALT="{name} Load" BORDER="0">
+ </A>
+ </td>
+</tr><tr><td>
+ <A HREF="./graph.php?{graph_url}&g=cpu_report&z=large">
+  <IMG SRC="./graph.php?{graph_url}&g=cpu_report&z=medium"
+      ALT="{name} Load" BORDER="0">
+ </A>
+ </td>
+</tr></table></TD>
+
+<TD VALIGN=top>
+<table><tr><td>
+ <A HREF="./graph.php?{graph_url}&g=mem_report&z=large" VALIGN=top>
+  <IMG SRC="./graph.php?{graph_url}&g=mem_report&z=medium"
+      ALT="{name} MEM" BORDER="0">
+ </A>
+ </td>
+</tr><tr><td>
+ <A HREF="./graph.php?{graph_url}&g=network_report&z=large" VALIGN=top>
+  <IMG SRC="./graph.php?{graph_url}&g=network_report&z=medium"
+      ALT="{name} MEM" BORDER="0">
+ </A>
+ </td>
+</tr></table></TD>
+ <!-- END BLOCK : self_summary_graphs -->
+
+ <!-- START BLOCK : summary_graphs -->
   <TD VALIGN=top align=right>
   <A HREF="{url}">
    <IMG SRC="./graph.php?{graph_url}&g=load_report&z=medium&r={range}"
@@ -34,6 +67,7 @@
        ALT="{name} MEM" BORDER="0">
   </A>
    </TD>
+ <!-- END BLOCK : summary_graphs -->
 <!-- END BLOCK : public -->
 
 <!-- START BLOCK : private -->
