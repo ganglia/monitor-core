@@ -25,13 +25,13 @@
 <IMG BORDER=0 ALT="{cluster} LOAD"
    SRC="./graph.php?g=load_report&amp;z=medium&amp;{graph_args}">
 </A>
-<A HREF="./graph.php?g=cpu_report&amp;z=large&amp;{graph_args}">
-<IMG BORDER=0 ALT="{cluster} CPU"
-   SRC="./graph.php?g=cpu_report&amp;z=medium&amp;{graph_args}">
-</A>
 <A HREF="./graph.php?g=mem_report&amp;z=large&amp;{graph_args}">
 <IMG BORDER=0 ALT="{cluster} MEM"
    SRC="./graph.php?g=mem_report&amp;z=medium&amp;{graph_args}">
+</A>
+<A HREF="./graph.php?g=cpu_report&amp;z=large&amp;{graph_args}">
+<IMG BORDER=0 ALT="{cluster} CPU"
+   SRC="./graph.php?g=cpu_report&amp;z=medium&amp;{graph_args}">
 </A>
 <A HREF="./graph.php?g=network_report&amp;z=large&amp;{graph_args}">
 <IMG BORDER=0 ALT="{cluster} NETWORK"
