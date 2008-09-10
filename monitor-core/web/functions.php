@@ -259,7 +259,7 @@ function find_avg($clustername, $hostname, $metricname)
      $sum_dir = "$rrds/$clustername/$hostname";
    else
      $sum_dir = "$rrds/$clustername/__SummaryInfo__";
-   $command = RRDTOOL . " graph '' --start $start --end $end ".
+   $command = RRDTOOL . " graph /dev/null --start $start --end $end ".
      "DEF:avg='$sum_dir/$metricname.rrd':'sum':AVERAGE ".
      "PRINT:avg:AVERAGE:%.2lf ";
    exec($command, $out);
