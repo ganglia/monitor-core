@@ -49,15 +49,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1718
     +1: carenas
 
-  * gmond: recover from interface reconfiguration gracefully
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=38
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1478
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1632
-    -1: carenas
-    carenas: not a fix but a workaround to the problem
-    bnicholes: vetoing your own proposal doesn't make sense.  Do you want to
-      backport this patch or not?  If not then remove the proposal.
-
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     +1: carenas
@@ -168,28 +159,15 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1714
     +1: carenas
 
-  * libganglia: The gmetad code can not handle a host with no associated 
+  * gmond/gmetad: The gmetad code can not handle a host with no associated 
       cluster, therefore the gmond code must always include a cluster XML tag.  
       This patch matches up the default values for the cluster section of 
       gmond with the default gmond.conf so that a cluster name will always 
       be present.  bug #200
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=200
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
-    +1: bnicholes
-    +1: hawson
-    -1: carenas
-    carenas: not having a cluster section is documented as valid and might
-             be a common setup with 2.5.x (still the official ganglia in
-             Debian and [Open]SuSE)
-    bnicholes: The reason for vetoing this backport proposal doesn't make an
-      sense.  This patch is proposed for backport to the 3.1.x branch.  
-      Backward compatibility for 2.5.x has never been supported.  If the
-      documentation states that not having a cluster section is valid, then
-      it is a bug in the documentation.  The code has never supported it and
-      there is no practical purpose for ever supporting no cluster section. 
-      In addition this patch does not alter the current functionality in that
-      regard. It simply emliminates a mis-configuration and brings the default
-      internal configuration in line with the default configuration file.  
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1756
+    carenas: removes a documented gmond feature
 
   * build: clarify/update use of  "dist" targets
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
@@ -235,3 +213,10 @@ BACKPORT PROPOSALS FUTURE VERSION:
     +1: carenas
     +1: hawson
     carenas: should also remove the hardcoded rule of 4x this time
+
+  * gmond: recover from interface reconfiguration gracefully
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=38
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1478
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1632
+    -1: carenas
+    carenas: not a fix but a workaround to the problem
