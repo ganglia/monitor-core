@@ -22,9 +22,10 @@ globals {                    \n\
   send_metadata_interval = 0     \n\
 } \n\
 \n\
-/* If a cluster attribute is specified, then all gmond hosts are wrapped inside \n\
- * of a <CLUSTER> tag.  If you do not specify a cluster tag, then all <HOSTS> will \n\
- * NOT be wrapped inside of a <CLUSTER> tag. */ \n\
+/*\n\
+ * The cluster attributes specified will be used as part of the <CLUSTER>\n\
+ * tag that will wrap all hosts collected by this instance.\n\
+ */\n\
 cluster { \n\
   name = \"unspecified\" \n\
   owner = \"unspecified\" \n\
