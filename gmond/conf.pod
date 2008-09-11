@@ -63,9 +63,6 @@ into the following XML.
   ...
   </CLUSTER>
 
-B<NOTE>: Currently gmetad cannot process data sources that do not
-have a cluster tag.  This will be remedied in the future.  
-
 =head2 host
 
 The B<host> section provides information about the host running this
