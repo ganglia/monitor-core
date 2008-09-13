@@ -95,7 +95,7 @@ writen (int fd, const void *vptr, size_t n)
  * @param buffer A pointer to the data buffer
  * @param buflen The data buffer length
  * @return int
- * @retval 0 on success
+ * @retval number of bytes read on success
  * @retval -1 on failure
  */
 int
