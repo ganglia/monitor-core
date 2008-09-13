@@ -122,6 +122,11 @@ slurpfile ( char * filename, char *buffer, int buflen )
       }
    close(fd);
 
+   if (read_len == buflen)
+      {
+         --read_len;
+         err_msg("slurpfile() read() buffer overflow on file %s", filename);
+      }
    buffer[read_len] = '\0';
    return read_len;
 }   
