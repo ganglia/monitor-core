@@ -223,25 +223,25 @@ function find_limits($nodes, $metricname)
 
          $rrd_dir = "$rrds/$clustername/$host";
          if (file_exists("$rrd_dir/$metricname.rrd")) {
-		$command = RRDTOOL . " graph /dev/null ".
-		"--start $start --end $end ".
-		"DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
-		"PRINT:limits:MAX:%.2lf ".
-		"PRINT:limits:MIN:%.2lf";
-		exec($command, $out);
-		if(isset($out[1])) {
-         		$thismax = $out[1];
-	 	} else {
-			$thismax = NULL;
-	 	}
-	 if (!is_numeric($thismax)) continue;
-	 if ($max < $thismax) $max = $thismax;
+            $command = RRDTOOL . " graph /dev/null ".
+               "--start $start --end $end ".
+               "DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
+               "PRINT:limits:MAX:%.2lf ".
+               "PRINT:limits:MIN:%.2lf";
+            exec($command, $out);
+            if(isset($out[1])) {
+               $thismax = $out[1];
+            } else {
+               $thismax = NULL;
+            }
+            if (!is_numeric($thismax)) continue;
+            if ($max < $thismax) $max = $thismax;
 
-	 $thismin=$out[2];
-	 if (!is_numeric($thismin)) continue;
-	 if ($min > $thismin) $min = $thismin;
-	 #echo "$host: $thismin - $thismax (now $value)<br>\n";
-	 }
+            $thismin=$out[2];
+            if (!is_numeric($thismin)) continue;
+            if ($min > $thismin) $min = $thismin;
+            #echo "$host: $thismin - $thismax (now $value)<br>\n";
+         }
       }
       
       return array($min, $max);
@@ -260,6 +260,7 @@ function find_avg($clustername, $hostname, $metricname)
      $sum_dir = "$rrds/$clustername/$hostname";
    else
      $sum_dir = "$rrds/$clustername/__SummaryInfo__";
+
    $command = RRDTOOL . " graph /dev/null --start $start --end $end ".
      "DEF:avg='$sum_dir/$metricname.rrd':'sum':AVERAGE ".
      "PRINT:avg:AVERAGE:%.2lf ";
