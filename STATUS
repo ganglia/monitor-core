@@ -151,7 +151,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1594
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1706
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1708
-    bernardli: patch still needs testing in meta-grid environments
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1754
 
   * web: metric group enhancements for host view
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=203
