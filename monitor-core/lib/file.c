@@ -24,13 +24,13 @@
  * @retval 0 on success
  * @retval -1 on failure
  */
-ssize_t                         
+ssize_t
 readn (int fd, void *vptr, size_t n)
 {
    size_t nleft;
    ssize_t nread;
    char *ptr;
- 
+
    ptr = vptr;
    nleft = n;
    while (nleft > 0)
@@ -45,12 +45,12 @@ readn (int fd, void *vptr, size_t n)
           }
         else if (nread == 0)
            break;               /* EOF */
- 
+
         nleft -= nread;
         ptr   += nread;
      }
    return (n - nleft);          /* return >= 0 */
-}                                                 
+}
 
 /**
  * @fn ssize_t writen (int fd, const void *vptr, size_t n)
@@ -62,13 +62,13 @@ readn (int fd, void *vptr, size_t n)
  * @retval 0 on success
  * @retval -1 on failure
  */
-ssize_t 
+ssize_t
 writen (int fd, const void *vptr, size_t n)
 {
    size_t nleft;
    ssize_t nwritten;
    const char *ptr;
- 
+
    ptr = vptr;
    nleft = n;
    while (nleft > 0)
@@ -85,7 +85,7 @@ writen (int fd, const void *vptr, size_t n)
         ptr += nwritten;
      }
    return SYNAPSE_SUCCESS;
-}                     
+}
 
 /**
  * @fn int slurpfile ( char * filename, char **buffer, int buflen )
@@ -101,14 +101,14 @@ int
 slurpfile (char * filename, char **buffer, int buflen)
 {
    int fd, read_len;
- 
+
    fd = open(filename, O_RDONLY);
    if (fd < 0)
       {
-         err_ret("slurpfile() open() error on file %s", filename);      
+         err_ret("slurpfile() open() error on file %s", filename);
          return SYNAPSE_FAILURE;
       }
- 
+
 read:
    read_len = read(fd, *buffer, buflen);
    if (read_len <= 0)
@@ -128,19 +128,19 @@ read:
 
    close(fd);
    return read_len;
-}   
+}
 
-char * 
+char *
 skip_whitespace (const char *p)
 {
     while (isspace((unsigned char)*p)) p++;
     return (char *)p;
 }
- 
-char * 
+
+char *
 skip_token (const char *p)
 {
     while (isspace((unsigned char)*p)) p++;
     while (*p && !isspace((unsigned char)*p)) p++;
     return (char *)p;
-}         
+}
