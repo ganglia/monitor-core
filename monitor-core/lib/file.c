@@ -108,6 +108,10 @@ slurpfile (char * filename, char **buffer, int buflen)
          err_ret("slurpfile() open() error on file %s", filename);
          return SYNAPSE_FAILURE;
       }
+   if (*buffer == NULL)
+      {
+         *buffer = malloc(buflen);
+      }
 
 read:
    read_len = read(fd, *buffer, buflen);
