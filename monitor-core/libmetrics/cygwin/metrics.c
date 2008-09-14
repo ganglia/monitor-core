@@ -18,6 +18,7 @@
 #include <iphlpapi.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
+#include <sys/time.h>
 #include <sys/timeb.h>
 #include <mntent.h>
 #include <sys/vfs.h>
@@ -37,14 +38,14 @@ char sys_osname[MAX_G_STRING_SIZE];
 char sys_osrelease[MAX_G_STRING_SIZE];
 
 typedef struct {
-  uint32_t last_read;
-  uint32_t thresh;
+  struct timeval last_read;
+  float thresh;
   char *name;
   char *buffer;
   size_t buffersize;
 } timely_file;
 
-timely_file proc_stat    = { 0, 1, "/proc/stat", NULL, BUFFSIZE };
+timely_file proc_stat    = { {0, 0}, 1., "/proc/stat", NULL, BUFFSIZE };
 
 static time_t
 get_netbw(double *in_bytes, double *out_bytes,
@@ -95,13 +96,28 @@ get_netbw(double *in_bytes, double *out_bytes,
   return timebuffer.time;
 }
 
+
+static float timediff (const struct timeval *thistime,
+                       const struct timeval *lasttime)
+{
+  float diff;
+
+  diff = ((double) thistime->tv_sec * 1.0e6 +
+          (double) thistime->tv_usec -
+          (double) lasttime->tv_sec * 1.0e6 -
+          (double) lasttime->tv_usec) / 1.0e6;
+
+  return diff;
+}
+
 char *update_file(timely_file *tf)
 {
-  int now,rval;
+  int rval;
+  struct timeval now;
   char *bp;
 
-  now = time(0);
-  if(now - tf->last_read > tf->thresh) {
+  gettimeofday (&now, NULL);
+  if (timediff (&now, &tf->last_read) > tf->thresh) {
     bp = tf->buffer;
     rval = slurpfile(tf->name, &bp, tf->buffersize);
     if(rval == SYNAPSE_FAILURE) {
@@ -132,9 +148,11 @@ num_cpustates_func ( void )
    char *p;
    unsigned int i=0;
 
-   proc_stat.last_read=0;
+   proc_stat.last_read.tv_sec = 0;
+   proc_stat.last_read.tv_usec = 0;
    p = update_file(&proc_stat);
-   proc_stat.last_read=0;
+   proc_stat.last_read.tv_sec = 0;
+   proc_stat.last_read.tv_usec = 0;
 
 /*
 ** Skip initial "cpu" token
@@ -519,12 +537,13 @@ cpu_user_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp = {0, 0};
    static double last_user_jiffies,  user_jiffies, 
                  last_total_jiffies, total_jiffies, diff;
    
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if ((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
      
      p = skip_token(p);
@@ -550,12 +569,13 @@ cpu_nice_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp = {0, 0};
    static double last_nice_jiffies,  nice_jiffies,
                  last_total_jiffies, total_jiffies, diff;
  
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if ((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
  
      p = skip_token(p);
@@ -582,12 +602,13 @@ cpu_system_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp = {0, 0};
    static double last_system_jiffies,  system_jiffies,
                  last_total_jiffies, total_jiffies, diff;
  
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if ((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
      
      p = skip_token(p);
@@ -623,12 +644,13 @@ cpu_idle_func ( void )
 {
    char *p;
    static g_val_t val;
-   static int stamp;
+   static struct timeval stamp = {0, 0};
    static double last_idle_jiffies,  idle_jiffies,
                  last_total_jiffies, total_jiffies, diff;
  
    p = update_file(&proc_stat);
-   if(proc_stat.last_read != stamp) {
+   if ((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
      
      p = skip_token(p);
