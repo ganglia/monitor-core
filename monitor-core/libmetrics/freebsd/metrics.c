@@ -979,7 +979,7 @@ static char *
 makenetvfslist(void)
 {
 	char *str = NULL, *strptr, **listptr = NULL;
-	size_t slen;
+	size_t slen = 0;
 	int cnt, i;
 
 #if __FreeBSD_version > 500000
