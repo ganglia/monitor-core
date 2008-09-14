@@ -329,7 +329,7 @@ metric_init(void)
    if ( stat(SCALING_MAX_FREQ, &struct_stat) == 0 ) {
       cpufreq = 1;
       dummy = sys_devices_system_cpu;
-      slurpfile(SCALING_MAX_FREQ, &dummy, BUFFSIZE);
+      slurpfile(SCALING_MAX_FREQ, &dummy, 32);
    }
 
    dummy = proc_cpuinfo;
