@@ -49,14 +49,6 @@
  */
 mmodule multicpu_module;
 
-typedef struct {
-  struct timeval last_read;
-  float thresh;
-  char *name;
-  char *buffer;
-  size_t buffersize;
-} timely_file;
-
 timely_file proc_stat    = { {0,0} , 1., "/proc/stat", NULL, BUFFSIZE };
 
 struct cpu_util {
