@@ -3,7 +3,7 @@
 
 /* Never changes */
 #ifndef BUFFSIZE
-#define BUFFSIZE 8192
+#define BUFFSIZE 4096
 #endif
 
 /* FreeBSD seems to gag on these.. Yet still works when not compiled in */
