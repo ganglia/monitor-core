@@ -99,9 +99,12 @@ get_netbw(double *in_bytes, double *out_bytes,
 char *update_file(timely_file *tf)
 {
   int now,rval;
+  char *bp;
+
   now = time(0);
   if(now - tf->last_read > tf->thresh) {
-    rval = slurpfile(tf->name, tf->buffer, BUFFSIZE);
+    bp = tf->buffer;
+    rval = slurpfile(tf->name, &bp, BUFFSIZE);
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
               tf->name);
@@ -154,10 +157,12 @@ metric_init(void)
 {
    struct utsname u;
    g_val_t rval;
+   char *bp;
 
    num_cpustates = num_cpustates_func();
 
-   rval.int32 = slurpfile("/proc/cpuinfo", proc_cpuinfo, BUFFSIZE);
+   bp = proc_cpuinfo;
+   rval.int32 = slurpfile("/proc/cpuinfo", &bp, BUFFSIZE);
    if ( rval.int32 == SYNAPSE_FAILURE ) {
          err_msg("metric_init() got an error from slurpfile() /proc/cpuinfo");
          return rval;

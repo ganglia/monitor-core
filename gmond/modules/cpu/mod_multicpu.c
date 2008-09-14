@@ -104,9 +104,12 @@ static char *update_file(timely_file *tf)
 {
     int rval;
     struct timeval now;
+    char *bp;
+
     gettimeofday(&now, NULL);
     if(timediff(&now,&tf->last_read) > tf->thresh) {
-        rval = slurpfile(tf->name, tf->buffer, BUFFSIZE);
+        bp = tf->buffer;
+        rval = slurpfile(tf->name, &bp, BUFFSIZE);
         if(rval == SYNAPSE_FAILURE) {
             err_msg("update_file() got an error from slurpfile() reading %s",
                     tf->name);
