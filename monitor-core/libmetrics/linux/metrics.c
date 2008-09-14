@@ -40,7 +40,7 @@ static net_dev_stats *netstats[NHASH];
 #define BUFFSIZE 8192
 #endif
 char proc_cpuinfo[BUFFSIZE];
-char proc_sys_kernel_osrelease[BUFFSIZE];
+char proc_sys_kernel_osrelease[MAX_G_STRING_SIZE];
 
 #define SCALING_MAX_FREQ "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
 char sys_devices_system_cpu[32];
@@ -341,7 +341,8 @@ metric_init(void)
       }  
 
    dummy = proc_sys_kernel_osrelease;
-   rval.int32 = slurpfile( "/proc/sys/kernel/osrelease", &dummy, BUFFSIZE);
+   rval.int32 = slurpfile("/proc/sys/kernel/osrelease", &dummy,
+                          MAX_G_STRING_SIZE);
    if ( rval.int32 == SYNAPSE_FAILURE )
       {
          err_msg("metric_init() got an error from slurpfile()");
