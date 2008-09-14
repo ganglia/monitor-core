@@ -119,8 +119,6 @@ read:
          close(fd);
          return SYNAPSE_FAILURE;
       }
-   close(fd);
-
    if (read_len == buflen)
       {
          --read_len;
@@ -128,6 +126,7 @@ read:
       }
    (*buffer)[read_len] = '\0';
 
+   close(fd);
    return read_len;
 }   
 
