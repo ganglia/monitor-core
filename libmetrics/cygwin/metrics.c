@@ -108,14 +108,14 @@ char *update_file(timely_file *tf)
   if(now - tf->last_read > tf->thresh) {
     bp = tf->buffer;
     rval = slurpfile(tf->name, &bp, BUFFSIZE);
-    if (tf->buffer == NULL)
-      tf->buffer = bp;
-    
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
               tf->name);
+    } else {
+      tf->last_read = now;
+      if (tf->buffer == NULL)
+        tf->buffer = bp;
     }
-    else tf->last_read = now;
   }
   return tf->buffer;
 }
