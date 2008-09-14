@@ -1,10 +1,20 @@
 #ifndef FILE_H
 #define FILE_H 1
 
+#include <sys/time.h>
+
 /* Never changes */
 #ifndef BUFFSIZE
 #define BUFFSIZE 4096
 #endif
+
+typedef struct {
+  struct timeval last_read;
+  float thresh;
+  char *name;
+  char *buffer;
+  size_t buffersize;
+} timely_file;
 
 /* FreeBSD seems to gag on these.. Yet still works when not compiled in */
 #if defined(BSD)

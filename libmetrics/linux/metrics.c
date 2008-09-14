@@ -42,14 +42,6 @@ char proc_sys_kernel_osrelease[MAX_G_STRING_SIZE];
 char sys_devices_system_cpu[32];
 int cpufreq;
 
-typedef struct {
-  struct timeval last_read;
-  float thresh;
-  char *name;
-  char *buffer;
-  size_t buffersize;
-} timely_file;
-
 timely_file proc_stat    = { {0,0} , 1., "/proc/stat", NULL, BUFFSIZE };
 timely_file proc_loadavg = { {0,0} , 5., "/proc/loadavg", NULL, BUFFSIZE };
 timely_file proc_meminfo = { {0,0} , 5., "/proc/meminfo", NULL, BUFFSIZE };
