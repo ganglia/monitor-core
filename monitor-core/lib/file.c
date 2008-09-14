@@ -89,17 +89,17 @@ writen (int fd, const void *vptr, size_t n)
 }                     
 
 /**
- * @fn int slurpfile ( char * filename, char *buffer, int buflen )
+ * @fn int slurpfile ( char * filename, char **buffer, int buflen )
  * Reads an entire file into a buffer
  * @param filename The name of the file to read into memory
- * @param buffer A pointer to the data buffer
+ * @param buffer A pointer reference to the data buffer
  * @param buflen The data buffer length
  * @return int
  * @retval number of bytes read on success
  * @retval -1 on failure
  */
 int
-slurpfile ( char * filename, char *buffer, int buflen )
+slurpfile ( char * filename, char **buffer, int buflen )
 {
    int  fd, read_len;
  
@@ -111,7 +111,7 @@ slurpfile ( char * filename, char *buffer, int buflen )
       }
  
   read:
-   read_len = read( fd, buffer, buflen );
+   read_len = read( fd, *buffer, buflen );
    if ( read_len <= 0 )
       {
          if ( errno == EINTR )
@@ -127,7 +127,7 @@ slurpfile ( char * filename, char *buffer, int buflen )
          --read_len;
          err_msg("slurpfile() read() buffer overflow on file %s", filename);
       }
-   buffer[read_len] = '\0';
+   (*buffer)[read_len] = '\0';
    return read_len;
 }   
 

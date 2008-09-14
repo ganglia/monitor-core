@@ -74,9 +74,12 @@ char *update_file(timely_file *tf)
 {
   int rval;
   struct timeval now;
+  char *bp;
+
   gettimeofday(&now, NULL);
   if(timediff(&now,&tf->last_read) > tf->thresh) {
-    rval = slurpfile(tf->name, tf->buffer, BUFFSIZE);
+    bp = tf->buffer;
+    rval = slurpfile(tf->name, &bp, BUFFSIZE);
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
               tf->name);
@@ -325,18 +328,20 @@ metric_init(void)
    cpufreq = 0;
    if ( stat(SCALING_MAX_FREQ, &struct_stat) == 0 ) {
       cpufreq = 1;
-      slurpfile(SCALING_MAX_FREQ, sys_devices_system_cpu, BUFFSIZE);
+      dummy = sys_devices_system_cpu;
+      slurpfile(SCALING_MAX_FREQ, &dummy, BUFFSIZE);
    }
 
-   rval.int32 = slurpfile("/proc/cpuinfo", proc_cpuinfo, BUFFSIZE);
+   dummy = proc_cpuinfo;
+   rval.int32 = slurpfile("/proc/cpuinfo", &dummy, BUFFSIZE);
    if ( rval.int32 == SYNAPSE_FAILURE )
       {
          err_msg("metric_init() got an error from slurpfile() /proc/cpuinfo");
          return rval;
       }  
 
-   rval.int32 = slurpfile( "/proc/sys/kernel/osrelease", 
-                       proc_sys_kernel_osrelease, BUFFSIZE);
+   dummy = proc_sys_kernel_osrelease;
+   rval.int32 = slurpfile( "/proc/sys/kernel/osrelease", &dummy, BUFFSIZE);
    if ( rval.int32 == SYNAPSE_FAILURE )
       {
          err_msg("metric_init() got an error from slurpfile()");
