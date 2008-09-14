@@ -14,7 +14,6 @@
 
 #include "ganglia_priv.h"
 
-
 /**
  * @fn ssize_t readn (int fd, void *vptr, size_t n)
  * Reads "n" bytes from a descriptor
@@ -99,22 +98,22 @@ writen (int fd, const void *vptr, size_t n)
  * @retval -1 on failure
  */
 int
-slurpfile ( char * filename, char **buffer, int buflen )
+slurpfile (char * filename, char **buffer, int buflen)
 {
-   int  fd, read_len;
+   int fd, read_len;
  
    fd = open(filename, O_RDONLY);
-   if ( fd < 0 )
+   if (fd < 0)
       {
          err_ret("slurpfile() open() error on file %s", filename);      
          return SYNAPSE_FAILURE;
       }
  
-  read:
-   read_len = read( fd, *buffer, buflen );
-   if ( read_len <= 0 )
+read:
+   read_len = read(fd, *buffer, buflen);
+   if (read_len <= 0)
       {
-         if ( errno == EINTR )
+         if (errno == EINTR)
             goto read;
          err_ret("slurpfile() read() error on file %s", filename);
          close(fd);
@@ -128,9 +127,9 @@ slurpfile ( char * filename, char **buffer, int buflen )
          err_msg("slurpfile() read() buffer overflow on file %s", filename);
       }
    (*buffer)[read_len] = '\0';
+
    return read_len;
 }   
-
 
 char * 
 skip_whitespace (const char *p)
