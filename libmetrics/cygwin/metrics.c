@@ -31,10 +31,6 @@
 #undef max
 #include "interface.h"
 
-/* Never changes */
-#ifndef BUFFSIZE
-#define BUFFSIZE 8192
-#endif
 char *proc_cpuinfo = NULL;
 
 char sys_osname[MAX_G_STRING_SIZE];

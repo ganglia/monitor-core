@@ -35,10 +35,6 @@ struct net_dev_stats {
 #define MULTIPLIER 31
 static net_dev_stats *netstats[NHASH];
 
-/* Never changes */
-#ifndef BUFFSIZE
-#define BUFFSIZE 8192
-#endif
 char *proc_cpuinfo = NULL;
 char proc_sys_kernel_osrelease[MAX_G_STRING_SIZE];
 

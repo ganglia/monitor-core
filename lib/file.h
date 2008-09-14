@@ -1,6 +1,11 @@
 #ifndef FILE_H
 #define FILE_H 1
 
+/* Never changes */
+#ifndef BUFFSIZE
+#define BUFFSIZE 8192
+#endif
+
 /* FreeBSD seems to gag on these.. Yet still works when not compiled in */
 #if defined(BSD)
 ssize_t readn (int fd, void *vptr, size_t n);

@@ -49,11 +49,6 @@
  */
 mmodule multicpu_module;
 
-/* Never changes */
-#ifndef BUFFSIZE
-#define BUFFSIZE 8192
-#endif
-
 typedef struct {
   struct timeval last_read;
   float thresh;
