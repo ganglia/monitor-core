@@ -80,15 +80,18 @@ char *update_file(timely_file *tf)
   gettimeofday(&now, NULL);
   if(timediff(&now,&tf->last_read) > tf->thresh) {
     bp = tf->buffer;
-    rval = slurpfile(tf->name, &bp, BUFFSIZE);
+    rval = slurpfile(tf->name, &bp, tf->buffersize);
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
               tf->name);
       return (char *)SYNAPSE_FAILURE;
     } else {
       tf->last_read = now;
-      if (tf->buffer == NULL)
+      if (tf->buffer == NULL) {
         tf->buffer = bp;
+        if (rval > tf->buffersize)
+          tf->buffersize = ((rval/tf->buffersize) + 1) * tf->buffersize;
+      }
     }
   }
   return tf->buffer;

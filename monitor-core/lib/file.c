@@ -101,6 +101,8 @@ int
 slurpfile (char * filename, char **buffer, int buflen)
 {
    int fd, read_len;
+   int dynamic = 0, sl = 0;
+   char *db;
 
    fd = open(filename, O_RDONLY);
    if (fd < 0)
@@ -110,11 +112,15 @@ slurpfile (char * filename, char **buffer, int buflen)
       }
    if (*buffer == NULL)
       {
-         *buffer = malloc(buflen);
+         db = malloc(buflen);
+         dynamic = buflen;
+         *buffer = db;
       }
+   else
+      db = *buffer;
 
 read:
-   read_len = read(fd, *buffer, buflen);
+   read_len = read(fd, db, buflen);
    if (read_len <= 0)
       {
          if (errno == EINTR)
@@ -123,15 +129,26 @@ read:
          close(fd);
          return SYNAPSE_FAILURE;
       }
+   else
+      sl += read_len;
+
    if (read_len == buflen)
       {
-         --read_len;
-         err_msg("slurpfile() read() buffer overflow on file %s", filename);
+         if (dynamic) {
+            dynamic += buflen;
+            db = realloc(*buffer, dynamic);
+            *buffer = db;
+            db = *buffer + dynamic - buflen;
+            goto read;
+         } else {
+            --read_len;
+            err_msg("slurpfile() read() buffer overflow on file %s", filename);
+         }
       }
-   (*buffer)[read_len] = '\0';
+   db[read_len] = '\0';
 
    close(fd);
-   return read_len;
+   return sl;
 }
 
 char *
