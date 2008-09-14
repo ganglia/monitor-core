@@ -39,7 +39,7 @@ static net_dev_stats *netstats[NHASH];
 #ifndef BUFFSIZE
 #define BUFFSIZE 8192
 #endif
-char proc_cpuinfo[BUFFSIZE];
+char *proc_cpuinfo = NULL;
 char proc_sys_kernel_osrelease[MAX_G_STRING_SIZE];
 
 #define SCALING_MAX_FREQ "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
@@ -50,13 +50,14 @@ typedef struct {
   struct timeval last_read;
   float thresh;
   char *name;
-  char buffer[BUFFSIZE];
+  char *buffer;
+  size_t buffersize;
 } timely_file;
 
-timely_file proc_stat    = { {0,0} , 1., "/proc/stat" };
-timely_file proc_loadavg = { {0,0} , 5., "/proc/loadavg" };
-timely_file proc_meminfo = { {0,0} , 5., "/proc/meminfo" };
-timely_file proc_net_dev = { {0,0} , 1., "/proc/net/dev" };
+timely_file proc_stat    = { {0,0} , 1., "/proc/stat", NULL, BUFFSIZE };
+timely_file proc_loadavg = { {0,0} , 5., "/proc/loadavg", NULL, BUFFSIZE };
+timely_file proc_meminfo = { {0,0} , 5., "/proc/meminfo", NULL, BUFFSIZE };
+timely_file proc_net_dev = { {0,0} , 1., "/proc/net/dev", NULL, BUFFSIZE };
 
 float timediff(const struct timeval *thistime, const struct timeval *lasttime)
 {
@@ -80,6 +81,9 @@ char *update_file(timely_file *tf)
   if(timediff(&now,&tf->last_read) > tf->thresh) {
     bp = tf->buffer;
     rval = slurpfile(tf->name, &bp, BUFFSIZE);
+    if (tf->buffer == NULL)
+      tf->buffer = bp;
+
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
               tf->name);
@@ -334,6 +338,9 @@ metric_init(void)
 
    dummy = proc_cpuinfo;
    rval.int32 = slurpfile("/proc/cpuinfo", &dummy, BUFFSIZE);
+   if (proc_cpuinfo == NULL)
+      proc_cpuinfo = dummy;
+
    if ( rval.int32 == SYNAPSE_FAILURE )
       {
          err_msg("metric_init() got an error from slurpfile() /proc/cpuinfo");

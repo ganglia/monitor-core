@@ -2,7 +2,9 @@
  * This file contains all the metrics gathering code from Windows using cygwin
  * or native Windows calls when possible.
  * 
- * Tested with cygwin 1.5.23-2 in Windows XP Home SP2 (i386)
+ * Tested in Windows XP Home SP3 (i386)
+ * Tested in Windows Vista Home SP1 (i386)
+ * Tested in Windows Advanced Server 2000 (i386)
  */
 
 #include <stdio.h>
@@ -33,7 +35,7 @@
 #ifndef BUFFSIZE
 #define BUFFSIZE 8192
 #endif
-char proc_cpuinfo[BUFFSIZE];
+char *proc_cpuinfo = NULL;
 
 char sys_osname[MAX_G_STRING_SIZE];
 char sys_osrelease[MAX_G_STRING_SIZE];
@@ -42,10 +44,11 @@ typedef struct {
   uint32_t last_read;
   uint32_t thresh;
   char *name;
-  char buffer[BUFFSIZE];
+  char *buffer;
+  size_t buffersize;
 } timely_file;
 
-timely_file proc_stat    = { 0, 1, "/proc/stat" };
+timely_file proc_stat    = { 0, 1, "/proc/stat", NULL, BUFFSIZE };
 
 static time_t
 get_netbw(double *in_bytes, double *out_bytes,
@@ -105,6 +108,9 @@ char *update_file(timely_file *tf)
   if(now - tf->last_read > tf->thresh) {
     bp = tf->buffer;
     rval = slurpfile(tf->name, &bp, BUFFSIZE);
+    if (tf->buffer == NULL)
+      tf->buffer = bp;
+    
     if(rval == SYNAPSE_FAILURE) {
       err_msg("update_file() got an error from slurpfile() reading %s",
               tf->name);
@@ -163,6 +169,9 @@ metric_init(void)
 
    bp = proc_cpuinfo;
    rval.int32 = slurpfile("/proc/cpuinfo", &bp, BUFFSIZE);
+   if (proc_cpuinfo == NULL)
+      proc_cpuinfo = bp;
+
    if ( rval.int32 == SYNAPSE_FAILURE ) {
          err_msg("metric_init() got an error from slurpfile() /proc/cpuinfo");
          return rval;
