@@ -47,6 +47,7 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04354.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1460
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1718
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1799
     +1: carenas
 
   * gmond: solaris: define fabsf for solaris < 10
