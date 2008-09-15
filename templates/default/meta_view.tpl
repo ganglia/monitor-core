@@ -56,14 +56,14 @@
  <!-- START BLOCK : summary_graphs -->
   <TD ALIGN="RIGHT" VALIGN="TOP">
   <A HREF="{url}">
-    <IMG SRC="./graph.php?{graph_url}&amp;g=load_report&amp;z=medium&r={range}"
+    <IMG SRC="./graph.php?{graph_url}&amp;g=load_report&amp;z=medium&amp;r={range}"
          ALT="{name} LOAD" BORDER="0">
   </A>
   </TD>
 
   <TD VALIGN="TOP">
   <A HREF="{url}">
-    <IMG SRC="./graph.php?{graph_url}&amp;g=mem_report&amp;z=medium&r={range}"
+    <IMG SRC="./graph.php?{graph_url}&amp;g=mem_report&amp;z=medium&amp;r={range}"
          ALT="{name} MEM" BORDER="0">
   </A>
   </TD>
