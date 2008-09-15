@@ -61,7 +61,7 @@
  </TD>
 </TR>
 <TR>
-<TD align=center valign=center>
+<TD align=center valign=middle>
  <a href="{physical_view}">Physical View</a> | 
  <a href="{self}">Reload</a>
  <p>
