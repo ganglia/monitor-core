@@ -48,7 +48,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1460
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1718
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1799
-    +1: carenas
+    +1: carenas, hawson
 
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
@@ -59,19 +59,19 @@ BACKPORT PROPOSALS:
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=30
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1580
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1724
-    +1: carenas
+    +1: carenas, hawson
 
   * web: allow for configuring number of columns in grid view
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1582
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1719
-    +1: carenas
+    +1: carenas, hawson
 
   * web: make number of metric columns in host view configurable
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1583
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1720
-    +1: carenas
+    +1: carenas, hawson
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
@@ -145,6 +145,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1703
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1730
     +1: carenas
+    -1: hawson: see http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04697.html
     carenas: dead code
 
   * Web-Interface: Add "Avg Load percentages and overall cluster utilization"
@@ -158,7 +159,7 @@ BACKPORT PROPOSALS:
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=203
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1711
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1714
-    +1: carenas
+    +1: carenas, hawson
 
   * gmond/gmetad: The gmetad code can not handle a host with no associated 
       cluster, therefore the gmond code must always include a cluster XML tag.  
@@ -169,7 +170,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1756
     carenas: removes a documented gmond feature
-    +1: bnicholes
+    +1: bnicholes, hawson
 
   * build: clarify/update use of  "dist" targets
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
@@ -178,10 +179,14 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1729
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1730
     +1: carenas
+    +0: hawson -- Why not simply remove the offending targets?  Decide what
+                  targets are desired (I suggest .tgz, .tb2 and .zip), and
+                  remove the rest.  This will reduce the number of dependencies
+                  required.
 
   * build: ChangeLog generation compatibility fixes
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1727
-    +1: carenas
+    +1: carenas, hawson
 
   * libganglia: mcast_if support in gmond (BUG140)
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg03775.html
@@ -195,7 +200,7 @@ BACKPORT PROPOSALS:
 
   * gmond: reformat memory metrics to match pre 3.1 style
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1737
-    +1: carenas
+    +1: carenas, hawson
 
   * gmetad: skip unresponsive sources
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=92
