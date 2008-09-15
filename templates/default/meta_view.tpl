@@ -26,13 +26,13 @@
 <table><tr><td>
  <A HREF="./graph.php?{graph_url}&g=load_report&z=large">
   <IMG SRC="./graph.php?{graph_url}&g=load_report&z=medium"
-      ALT="{name} Load" BORDER="0">
+      ALT="{name} LOAD" BORDER="0">
  </A>
  </td>
 </tr><tr><td>
  <A HREF="./graph.php?{graph_url}&g=cpu_report&z=large">
   <IMG SRC="./graph.php?{graph_url}&g=cpu_report&z=medium"
-      ALT="{name} Load" BORDER="0">
+      ALT="{name} CPU" BORDER="0">
  </A>
  </td>
 </tr></table></TD>
@@ -47,7 +47,7 @@
 </tr><tr><td>
  <A HREF="./graph.php?{graph_url}&g=network_report&z=large">
   <IMG SRC="./graph.php?{graph_url}&g=network_report&z=medium"
-      ALT="{name} MEM" BORDER="0">
+      ALT="{name} NETWORK" BORDER="0">
  </A>
  </td>
 </tr></table></TD>
@@ -57,7 +57,7 @@
   <TD VALIGN=top align=right>
   <A HREF="{url}">
    <IMG SRC="./graph.php?{graph_url}&g=load_report&z=medium&r={range}"
-       ALT="{name} Load" BORDER="0">
+       ALT="{name} LOAD" BORDER="0">
   </A>
   </TD>
 
