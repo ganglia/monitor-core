@@ -60,25 +60,25 @@ function toggleLayer( whichLayer )
 </TD>
 
 <TD ALIGN="CENTER" VALIGN="TOP" WIDTH="395">
-<A HREF="./graph.php?g=load_report&z=large&c={cluster_url}&{graphargs}">
+<A HREF="./graph.php?g=load_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
 <IMG BORDER=0 ALT="{cluster_url} LOAD"
-   SRC="./graph.php?g=load_report&z=medium&c={cluster_url}&{graphargs}">
+   SRC="./graph.php?g=load_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
 </A>
-<A HREF="./graph.php?g=mem_report&z=large&c={cluster_url}&{graphargs}">
+<A HREF="./graph.phpg=mem_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
 <IMG BORDER=0 ALT="{cluster_url} MEM"
-   SRC="./graph.php?g=mem_report&z=medium&c={cluster_url}&{graphargs}">
+   SRC="./graph.php?g=mem_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
 </A>
-<A HREF="./graph.php?g=cpu_report&z=large&c={cluster_url}&{graphargs}">
+<A HREF="./graph.php?g=cpu_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
 <IMG BORDER=0 ALT="{cluster_url} CPU"
-   SRC="./graph.php?g=cpu_report&z=medium&c={cluster_url}&{graphargs}">
+   SRC="./graph.php?g=cpu_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
 </A>
-<A HREF="./graph.php?g=network_report&z=large&c={cluster_url}&{graphargs}">
+<A HREF="./graph.php?g=network_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
 <IMG BORDER=0 ALT="{cluster_url} NETWORK"
-   SRC="./graph.php?g=network_report&z=medium&c={cluster_url}&{graphargs}">
+   SRC="./graph.php?g=network_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
 </A>
-<A HREF="./graph.php?g=packet_report&z=large&c={cluster_url}&{graphargs}">
+<A HREF="./graph.php?g=packet_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
 <IMG BORDER=0 ALT="{cluster_url} PACKETS"
-   SRC="./graph.php?g=packet_report&z=medium&c={cluster_url}&{graphargs}">
+   SRC="./graph.php?g=packet_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
 </A>
 
 </TD>
@@ -118,7 +118,7 @@ function toggleLayer( whichLayer )
 </A>
 <DIV ID="{group}">
 <!-- START BLOCK : vol_metric_info -->
-<A HREF="./graph.php?&{graphargs}&z=large">
+<A HREF="./graph.php?{graphargs}&amp;z=large">
 <IMG BORDER=0 ALT="{alt}" SRC="./graph.php?{graphargs}" TITLE="{desc}">{br}
 </A>
 <!-- END BLOCK : vol_metric_info -->
