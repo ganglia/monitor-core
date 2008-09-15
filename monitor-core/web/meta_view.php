@@ -136,13 +136,13 @@ foreach ( $sorted_sources as $source => $val )
             # Each block has a different namespace, so we need to redefine variables.
             $tpl->newBlock("public");
             if ($localtime)
-               $tpl->assign("localtime",  "<font size=-1>Localtime:</font><br>&nbsp;&nbsp;" 
+               $tpl->assign("localtime",  "<font size=\"-1\">Localtime:</font><br>&nbsp;&nbsp;" 
                   . date("Y-m-d H:i", $localtime) );
             if ($cluster_load)
-               $tpl->assign("cluster_load", "<font size=-1>Current Load Avg (15, 5, 1m):</font>"
+               $tpl->assign("cluster_load", "<font size=\"-1\">Current Load Avg (15, 5, 1m):</font>"
                   ."<br>&nbsp;&nbsp;<b>$cluster_load</b>");
             if (isset($cluster_util))
-               $tpl->assign("cluster_util", "<font size=-1>Avg Utilization (last $range):</font>"
+               $tpl->assign("cluster_util", "<font size=\"-1\">Avg Utilization (last $range):</font>"
                   ."<br>&nbsp;&nbsp;<b>$cluster_util%</b>");
             $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
             $tpl->assign("num_nodes", $grid[$source]["HOSTS_UP"] );
@@ -175,7 +175,7 @@ foreach ( $sorted_sources as $source => $val )
             $tpl->assign("num_nodes", $grid[$source]["HOSTS_UP"] + $grid[$source]["HOSTS_DOWN"] );
             $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
             if ($localtime)
-               $tpl->assign("localtime", "<font size=-1>Localtime:</font><br>&nbsp;&nbsp;"
+               $tpl->assign("localtime", "<font size=\"-1\">Localtime:</font><br>&nbsp;&nbsp;"
                   . date("Y-m-d H:i",$localtime));
          }
    }

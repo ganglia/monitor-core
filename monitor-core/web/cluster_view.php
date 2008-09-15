@@ -194,7 +194,7 @@ foreach ( $sorted_hosts as $host => $value )
             $age = $last_heartbeat > 3600 ? uptime($last_heartbeat) : "${last_heartbeat}s";
 
             $class = "down";
-            $textval = "down <br>&nbsp;<font size=-2>Last heartbeat $age ago</font>";
+            $textval = "down <br>&nbsp;<font size=\"-2\">Last heartbeat $age ago</font>";
          }
       else
          {
