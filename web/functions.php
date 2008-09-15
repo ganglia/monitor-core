@@ -470,13 +470,16 @@ function is_valid_hex_color( $string )
 }
 
 #-------------------------------------------------------------------------------
-# Return a shortened version of an FQDN 
+# Return a shortened version of a FQDN
+# if "hostname" is numeric only, assume it is an IP instead
+# 
 function strip_domainname( $hostname ) {
     $postition = strpos($hostname, '.');
-    if ( FALSE === $postition ) {
+    $name = substr( $hostname , 0, $postition );
+    if ( FALSE === $postition || is_numeric($name) ) {
         return $hostname;
     } else {
-        return substr( $hostname , 0, $postition );
+        return $name;
     }
 }
 
