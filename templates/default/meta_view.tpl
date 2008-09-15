@@ -39,13 +39,13 @@
 
 <TD VALIGN=top>
 <table><tr><td>
- <A HREF="./graph.php?{graph_url}&g=mem_report&z=large" VALIGN=top>
+ <A HREF="./graph.php?{graph_url}&g=mem_report&z=large">
   <IMG SRC="./graph.php?{graph_url}&g=mem_report&z=medium"
       ALT="{name} MEM" BORDER="0">
  </A>
  </td>
 </tr><tr><td>
- <A HREF="./graph.php?{graph_url}&g=network_report&z=large" VALIGN=top>
+ <A HREF="./graph.php?{graph_url}&g=network_report&z=large">
   <IMG SRC="./graph.php?{graph_url}&g=network_report&z=medium"
       ALT="{name} MEM" BORDER="0">
  </A>
@@ -62,7 +62,7 @@
   </TD>
 
   <TD VALIGN=top>
-  <A HREF="{url}" VALIGN=top>
+  <A HREF="{url}">
    <IMG SRC="./graph.php?{graph_url}&g=mem_report&z=medium&r={range}"
        ALT="{name} MEM" BORDER="0">
   </A>
