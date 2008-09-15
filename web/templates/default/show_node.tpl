@@ -11,7 +11,7 @@
 <tr>
 <td class={class}>
    <table cellpadding=1 cellspacing=10 border=0>
-   <tr><td valign=top><font size=+2><b>{name}</b></font><br>
+   <tr><td valign=top><font size="+2"><b>{name}</b></font><br>
    <i>{ip}</i><br>
    <em>Location:</em> {location}<p>
 

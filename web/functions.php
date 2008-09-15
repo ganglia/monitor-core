@@ -325,7 +325,7 @@ function nodebox($hostname, $verbose, $title="", $extrarow="")
       $last_heartbeat = $hostattrs[$hostname]['TN'];
       $age = $last_heartbeat > 3600 ? uptime($last_heartbeat) : 
          "${last_heartbeat}s";
-      $row2 .= "<font size=-2>Last heartbeat $age</font>";
+      $row2 .= "<font size=\"-2\">Last heartbeat $age</font>";
       $row3 = $hardware;
    }
 
