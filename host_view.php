@@ -61,11 +61,11 @@ foreach ($metrics as $name => $v)
              # Adding units to graph 2003 by Jason Smith <smithj4@bnl.gov>.
              if ($v['UNITS']) {
                 $encodeUnits = rawurlencode($v['UNITS']);
-                $graphargs .= "&vl=$encodeUnits";
+                $graphargs .= "&amp;vl=$encodeUnits";
              }
              if (isset($v['TITLE'])) {
                 $title = $v['TITLE'];
-                $graphargs .= "&ti=$title";
+                $graphargs .= "&amp;ti=$title";
              }
              $g_metrics[$name]['graph'] = $graphargs;
              $g_metrics[$name]['description'] = isset($v['DESC']) ? $v['DESC'] : '';
