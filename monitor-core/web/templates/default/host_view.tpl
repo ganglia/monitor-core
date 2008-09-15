@@ -37,7 +37,7 @@ function toggleLayer( whichLayer )
 
 <!-- START BLOCK : string_metric_info -->
 <TR>
- <TD CLASS=footer WIDTH=30%>{name}</TD><TD>{value}</TD>
+ <TD CLASS=footer WIDTH="30%">{name}</TD><TD>{value}</TD>
 </TR>
 <!-- END BLOCK : string_metric_info -->
 
@@ -49,7 +49,7 @@ function toggleLayer( whichLayer )
 
 <!-- START BLOCK : const_metric_info -->
 <TR>
- <TD CLASS=footer WIDTH=30%>{name}</TD><TD>{value}</TD>
+ <TD CLASS=footer WIDTH="30%">{name}</TD><TD>{value}</TD>
 </TR>
 <!-- END BLOCK : const_metric_info -->
 </TABLE>
