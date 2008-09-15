@@ -232,7 +232,7 @@ if ($show_meta_snapshot=="yes") {
                      $nameurl = rawurlencode($n);
                      $snapimgs .= "<a href=\"./?c=$nameurl&amp;$get_metric_string\">";
                   }
-               $snapimgs .= "<img src=$Images[$k] border=0 align=top></a></td>\n";
+               $snapimgs .= "<img src=\"$Images[$k]\" alt=\"$names[$k]\" border=0 align=top></a></td>\n";
             }
          $tpl->assign("names", $snapnames);
          $tpl->assign("images", $snapimgs);
