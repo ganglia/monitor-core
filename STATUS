@@ -168,6 +168,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1756
     carenas: removes a documented gmond feature
+    +1: bnicholes
 
   * build: clarify/update use of  "dist" targets
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
