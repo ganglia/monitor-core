@@ -76,7 +76,7 @@ num_cpustates_func ( void )
 ** i=4 : Linux 2.4.x
 ** i=7 : Linux 2.6.x
 */
-   while (strncmp(p,"cpu",3)) {
+   while (strncmp(p, "cpu", 3)) {
      p = skip_token(p);
      p = skip_whitespace(p);
      i++;
@@ -99,11 +99,11 @@ static unsigned int hashval(const char *s)
   return hval % NHASH;
 }
 
-static net_dev_stats *hash_lookup(char *devname, size_t nlen) 
+static net_dev_stats *hash_lookup(char *devname, size_t nlen)
 {
   int hval;
   net_dev_stats *stats;
-  char *name=strndup(devname,nlen);
+  char *name=strndup(devname, nlen);
 
   hval = hashval(name);
   for (stats = netstats[hval]; stats != NULL; stats = stats->next)
@@ -116,8 +116,8 @@ static net_dev_stats *hash_lookup(char *devname, size_t nlen)
 
   stats = (net_dev_stats *)malloc(sizeof(net_dev_stats));
   if ( stats == NULL )
-  {   
-    err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup(%s,%d)",name,nlen);
+  {
+    err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup(%s,%d)", name, nlen);
     free(name);
     return NULL;
   }
@@ -134,131 +134,134 @@ static net_dev_stats *hash_lookup(char *devname, size_t nlen)
 }
 
 /*
-** FIXME: this routine should be rewritten to do per-interface statistics
-*/
-static double bytes_in=0,bytes_out=0,pkts_in=0,pkts_out=0;
+ * FIXME: this routine should be rewritten to do per-interface statistics
+ */
+static double bytes_in=0, bytes_out=0, pkts_in=0, pkts_out=0;
+
 void update_ifdata ( char *caller )
 {
    char *p;
    int i;
    static struct timeval stamp={0,0};
-   unsigned long rbi=0,rbo=0,rpi=0,rpo=0;
-   unsigned long l_bytes_in=0,l_bytes_out=0,l_pkts_in=0,l_pkts_out=0;
-   double l_bin,l_bout,l_pin,l_pout;
+   unsigned long rbi=0, rbo=0, rpi=0, rpo=0;
+   unsigned long l_bytes_in=0, l_bytes_out=0, l_pkts_in=0, l_pkts_out=0;
+   double l_bin, l_bout, l_pin, l_pout;
 
    p = update_file(&proc_net_dev);
    if ((proc_net_dev.last_read.tv_sec != stamp.tv_sec) &&
        (proc_net_dev.last_read.tv_usec != stamp.tv_usec))
       {
-	 /*  skip past the two-line header ... */
-	 p = index (p, '\n')+1;
-	 p = index (p, '\n')+1;
+        /*  skip past the two-line header ... */
+        p = index (p, '\n') + 1;
+        p = index (p, '\n') + 1;
 
-	 while (*p != 0x00 )
-	    {
-	       /*  skip past the interface tag portion of this line */
-	       /*  but save the name of the interface (hash key) */
-	       char *src;
-	       size_t n = 0;
+        while (*p != 0x00)
+           {
+              /*  skip past the interface tag portion of this line */
+              /*  but save the name of the interface (hash key) */
+              char *src;
+              size_t n = 0;
 
-	       while (p != 0x00 && isblank(*p))
-		  p++;
-	       src = p;
-	       while (p != 0x00 && *p != ':')
-		  {
-		     n++;
-		     p++;
-		  }
+              while (p != 0x00 && isblank(*p))
+                 p++;
 
-	       p = index(p, ':');
+              src = p;
+              while (p != 0x00 && *p != ':')
+                 {
+                    n++;
+                    p++;
+                 }
 
-	       /* Ignore 'lo' and 'bond*' interfaces (but sanely) */
-	       if (p && strncmp (src, "lo", 2) &&
-		   strncmp (src, "bond", 4))
-		  { 
-		     p++;
-		     /* Check for data from the last read for this */
-		     /* interface.  If nothing exists, add to the table. */
-		     net_dev_stats *ns = hash_lookup(src, n); 
-		     if ( !ns ) return;
+              p = index(p, ':');
 
-		     /* receive */
-		     rbi = strtoul( p, &p ,10);
-		     if ( rbi >= ns->rbi ) {
-			l_bytes_in += rbi - ns->rbi;
-		     } else {
-			debug_msg("update_ifdata(%s) - Overflow in rbi: %lu -> %lu",caller,ns->rbi,rbi);
-			l_bytes_in += ULONG_MAX - ns->rbi + rbi;
-		     }
-		     ns->rbi = rbi;
+              /* Ignore 'lo' and 'bond*' interfaces (but sanely) */
+              if (p && strncmp (src, "lo", 2) &&
+                  strncmp (src, "bond", 4))
+                 {
+                    p++;
+                    /* Check for data from the last read for this */
+                    /* interface.  If nothing exists, add to the table. */
+                    net_dev_stats *ns = hash_lookup(src, n);
+                    if ( !ns ) return;
 
-		     rpi = strtoul( p, &p ,10);
-		     if ( rpi >= ns->rpi ) {
-			l_pkts_in += rpi - ns->rpi;
-		     } else {
-			debug_msg("updata_ifdata(%s) - Overflow in rpi: %lu -> %lu",caller,ns->rpi,rpi);
-			l_pkts_in += ULONG_MAX - ns->rpi + rpi;
-		     }
-		     ns->rpi = rpi;
-		     
-		     /* skip unneeded metrics */
-		     for (i = 0; i < 6; i++) rbo = strtoul(p, &p, 10);
+                    /* receive */
+                    rbi = strtoul(p, &p ,10);
+                    if ( rbi >= ns->rbi ) {
+                       l_bytes_in += rbi - ns->rbi;
+                    } else {
+                       debug_msg("update_ifdata(%s) - Overflow in rbi: %lu -> %lu",caller,ns->rbi,rbi);
+                       l_bytes_in += ULONG_MAX - ns->rbi + rbi;
+                    }
+                    ns->rbi = rbi;
 
-		     /* transmit */
-		     rbo = strtoul( p, &p ,10);
-		     if ( rbo >= ns->rbo ) {
-			l_bytes_out += rbo - ns->rbo;
-		     } else {
-			debug_msg("update_ifdata(%s) - Overflow in rbo: %lu -> %lu",caller,ns->rbo,rbo);
-			l_bytes_out += ULONG_MAX - ns->rbo + rbo;
-		     }
-		     ns->rbo = rbo;
+                    rpi = strtoul(p, &p ,10);
+                    if ( rpi >= ns->rpi ) {
+                       l_pkts_in += rpi - ns->rpi;
+                    } else {
+                       debug_msg("updata_ifdata(%s) - Overflow in rpi: %lu -> %lu",caller,ns->rpi,rpi);
+                       l_pkts_in += ULONG_MAX - ns->rpi + rpi;
+                    }
+                    ns->rpi = rpi;
 
-		     rpo = strtoul( p, &p ,10);
-		     if ( rpo >= ns->rpo ) {
-			l_pkts_out += rpo - ns->rpo;
-		     } else {
-			debug_msg("update_ifdata(%s) - Overflow in rpo: %lu -> %lu",caller,ns->rpo,rpo);
-			l_pkts_out += ULONG_MAX - ns->rpo + rpo;
-		     }
-		     ns->rpo = rpo;
-		  }
-	       p = index (p, '\n') + 1;    // skips a line
-	    }
+                    /* skip unneeded metrics */
+                    for (i = 0; i < 6; i++) rbo = strtoul(p, &p, 10);
 
-	 /*
-	 ** Compute timediff. Check for bogus delta-t
-	 */
-	 float t = timediff(&proc_net_dev.last_read,&stamp);
-	 if ( t <  proc_net_dev.thresh) {
-	   err_msg("update_ifdata(%s) - Dubious delta-t: %f",caller,t);
+                    /* transmit */
+                    rbo = strtoul(p, &p ,10);
+                    if ( rbo >= ns->rbo ) {
+                       l_bytes_out += rbo - ns->rbo;
+                    } else {
+                       debug_msg("update_ifdata(%s) - Overflow in rbo: %lu -> %lu",caller,ns->rbo,rbo);
+                       l_bytes_out += ULONG_MAX - ns->rbo + rbo;
+                    }
+                    ns->rbo = rbo;
+
+                    rpo = strtoul(p, &p ,10);
+                    if ( rpo >= ns->rpo ) {
+                       l_pkts_out += rpo - ns->rpo;
+                    } else {
+                       debug_msg("update_ifdata(%s) - Overflow in rpo: %lu -> %lu",caller,ns->rpo,rpo);
+                       l_pkts_out += ULONG_MAX - ns->rpo + rpo;
+                    }
+                    ns->rpo = rpo;
+                  }
+              p = index (p, '\n') + 1;    // skips a line
+            }
+
+        /*
+         * Compute timediff. Check for bogus delta-t
+         */
+        float t = timediff(&proc_net_dev.last_read, &stamp);
+        if ( t <  proc_net_dev.thresh) {
+           err_msg("update_ifdata(%s) - Dubious delta-t: %f", caller, t);
            return;
-	 }
-	 stamp = proc_net_dev.last_read;
+        }
+        stamp = proc_net_dev.last_read;
 
-	 /*
-	 ** Compute rates in local variables
-	 */
-	 l_bin = l_bytes_in / t;
-	 l_bout = l_bytes_out / t;
-	 l_pin = l_pkts_in / t;
-	 l_pout = l_pkts_out / t;
+        /*
+         * Compute rates in local variables
+         */
+        l_bin = l_bytes_in / t;
+        l_bout = l_bytes_out / t;
+        l_pin = l_pkts_in / t;
+        l_pout = l_pkts_out / t;
 
 #ifdef REMOVE_BOGUS_SPIKES
-	 /*
-	 ** Check for "invalid" data, caused by HW error. Throw away dubious data points
-	 ** FIXME: This should be done per-interface, with threshholds depending on actual link speed
-	 */	
-	 if ((l_bin > 1.0e13) || (l_bout > 1.0e13) ||
-             (l_pin > 1.0e8)  || (l_pout > 1.0e8)) {
-		err_msg("update_ifdata(%s): %g %g %g %g / %g",caller,l_bin,l_bout,l_pin,l_pout,t);
-		return;
-	}
+        /*
+         * Check for "invalid" data, caused by HW error. Throw away dubious data points
+         * FIXME: This should be done per-interface, with threshholds depending on actual link speed
+         */
+        if ((l_bin > 1.0e13) || (l_bout > 1.0e13) ||
+            (l_pin > 1.0e8)  || (l_pout > 1.0e8)) {
+           err_msg("update_ifdata(%s): %g %g %g %g / %g", caller,
+                   l_bin, l_bout, l_pin, l_pout, t);
+           return;
+        }
 #endif
 
         /*
-        ** Finally return Values
-        */
+         * Finally return Values
+         */
         bytes_in  = l_bin;
         bytes_out = l_bout;
         pkts_in   = l_pin;
@@ -269,7 +272,7 @@ void update_ifdata ( char *caller )
 }
 
 /*
- * This function is called only once by the gmond.  Use to 
+ * This function is called only once by the gmond.  Use to
  * initialize data structures, etc or just return SYNAPSE_SUCCESS;
  */
 g_val_t
@@ -298,7 +301,7 @@ metric_init(void)
       {
          err_msg("metric_init() got an error from slurpfile() /proc/cpuinfo");
          return rval;
-      }  
+      }
 
    dummy = proc_sys_kernel_osrelease;
    rval.int32 = slurpfile("/proc/sys/kernel/osrelease", &dummy,
@@ -307,8 +310,8 @@ metric_init(void)
       {
          err_msg("metric_init() got an error from slurpfile()");
          return rval;
-      }  
-   
+      }
+
    /* Get rid of pesky \n in osrelease */
    proc_sys_kernel_osrelease[rval.int32-1] = '\0';
 
@@ -318,7 +321,7 @@ metric_init(void)
          err_msg("metric_init() got an error from update_file()");
          rval.int32 = SYNAPSE_FAILURE;
          return rval;
-      } 
+      }
 
    update_ifdata("metric_inint");
 
@@ -403,9 +406,9 @@ cpu_speed_func ( void )
 #if defined (__i386__) || defined(__ia64__) || defined(__hppa__) || defined(__x86_64__)
    if (! val.uint32 )
       {
-         p = proc_cpuinfo;  
+         p = proc_cpuinfo;
          p = strstr( p, "cpu MHz" );
-         if(p) {
+         if (p) {
            p = strchr( p, ':' );
            p++;
            p = skip_whitespace(p);
@@ -420,7 +423,7 @@ cpu_speed_func ( void )
          int num;
          p = proc_cpuinfo;
          p = strstr( p, "cycle frequency [Hz]" );
-         if(p) {
+         if (p) {
            p = strchr( p, ':' );
            p++;
            p = skip_whitespace(p);
@@ -437,7 +440,7 @@ cpu_speed_func ( void )
       {
          p = proc_cpuinfo;
          p = strstr( p, "clock" );
-         if(p) { 
+         if (p) {
            p = strchr( p, ':' );
            p++;
            p = skip_whitespace(p);
@@ -459,8 +462,8 @@ mem_total_func ( void )
    char *p;
    g_val_t val;
 
-   p = strstr( update_file(&proc_meminfo), "MemTotal:");
-   if(p) {
+   p = strstr(update_file(&proc_meminfo), "MemTotal:");
+   if (p) {
      p = skip_token(p);
      val.f = atof( p );
    } else {
@@ -475,11 +478,11 @@ swap_total_func ( void )
 {
    char *p;
    g_val_t val;
- 
-   p = strstr( update_file(&proc_meminfo), "SwapTotal:" );
-   if(p) {
+
+   p = strstr(update_file(&proc_meminfo), "SwapTotal:");
+   if (p) {
      p = skip_token(p);
-     val.f = atof( p );  
+     val.f = atof( p );
    } else {
      val.f = 0;
    }
@@ -493,10 +496,10 @@ boottime_func ( void )
    char *p;
    g_val_t val;
 
-   p = update_file(&proc_stat); 
+   p = update_file(&proc_stat);
 
    p = strstr ( p, "btime" );
-   if(p) { 
+   if (p) {
      p = skip_token ( p );
      val.uint32 = atoi ( p );
    } else {
@@ -512,6 +515,7 @@ sys_clock_func ( void )
    g_val_t val;
 
    val.uint32 = time(NULL);
+
    return val;
 }
 
@@ -519,7 +523,7 @@ g_val_t
 machine_type_func ( void )
 {
    g_val_t val;
- 
+
 #ifdef __i386__
    snprintf(val.str, MAX_G_STRING_SIZE, "x86");
 #endif
@@ -563,6 +567,7 @@ os_name_func ( void )
    g_val_t val;
 
    snprintf(val.str, MAX_G_STRING_SIZE, "Linux");
+
    return val;
 }
 
@@ -572,12 +577,14 @@ os_release_func ( void )
    g_val_t val;
 
    snprintf(val.str, MAX_G_STRING_SIZE, "%s", proc_sys_kernel_osrelease);
+
    return val;
 }
 
 /*
-** FIXME: all functions using /proc/stat should be rewritten to use a central function like networking
-*/
+ * FIXME: all functions using /proc/stat should be rewritten to use a
+ * central function like networking
+ */
 
 /*
  * A helper function to return the total number of cpu jiffies
@@ -594,25 +601,25 @@ total_jiffies_func ( void )
    p = skip_whitespace(p);
    user_jiffies = strtod( p, &p );
    p = skip_whitespace(p);
-   nice_jiffies = strtod( p, &p ); 
+   nice_jiffies = strtod( p, &p );
    p = skip_whitespace(p);
-   system_jiffies = strtod( p , &p ); 
+   system_jiffies = strtod( p, &p );
    p = skip_whitespace(p);
-   idle_jiffies = strtod( p , &p );
+   idle_jiffies = strtod( p, &p );
 
    if(num_cpustates == NUM_CPUSTATES_24X)
      return user_jiffies + nice_jiffies + system_jiffies + idle_jiffies;
 
    p = skip_whitespace(p);
-   wio_jiffies = strtod( p , &p );
+   wio_jiffies = strtod( p, &p );
    p = skip_whitespace(p);
-   irq_jiffies = strtod( p , &p );
+   irq_jiffies = strtod( p, &p );
    p = skip_whitespace(p);
-   sirq_jiffies = strtod( p , &p );
-  
+   sirq_jiffies = strtod( p, &p );
+
    return user_jiffies + nice_jiffies + system_jiffies + idle_jiffies +
-          wio_jiffies + irq_jiffies + sirq_jiffies; 
-}   
+          wio_jiffies + irq_jiffies + sirq_jiffies;
+}
 
 
 g_val_t
@@ -620,29 +627,29 @@ cpu_user_func ( void )
 {
    char *p;
    static g_val_t val;
-   static struct timeval stamp={0,0};
-   static double last_user_jiffies,  user_jiffies, 
+   static struct timeval stamp={0, 0};
+   static double last_user_jiffies,  user_jiffies,
                  last_total_jiffies, total_jiffies, diff;
-   
+
    p = update_file(&proc_stat);
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
-     
+
      p = skip_token(p);
      user_jiffies  = strtod( p , (char **)NULL );
      total_jiffies = total_jiffies_func();
-     
-     diff = user_jiffies - last_user_jiffies; 
-     
+
+     diff = user_jiffies - last_user_jiffies;
+
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
+       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
      else
        val.f = 0.0;
-     
+
      last_user_jiffies  = user_jiffies;
      last_total_jiffies = total_jiffies;
-     
+
    }
    return val;
 }
@@ -652,27 +659,27 @@ cpu_nice_func ( void )
 {
    char *p;
    static g_val_t val;
-   static struct timeval stamp={0,0};
+   static struct timeval stamp={0, 0};
    static double last_nice_jiffies,  nice_jiffies,
                  last_total_jiffies, total_jiffies, diff;
- 
+
    p = update_file(&proc_stat);
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
- 
+
      p = skip_token(p);
      p = skip_token(p);
      nice_jiffies  = strtod( p , (char **)NULL );
      total_jiffies = total_jiffies_func();
 
      diff = (nice_jiffies  - last_nice_jiffies);
- 
+
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
+       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
      else
        val.f = 0.0;
- 
+
      last_nice_jiffies  = nice_jiffies;
      last_total_jiffies = total_jiffies;
 
@@ -680,91 +687,91 @@ cpu_nice_func ( void )
    return val;
 }
 
-g_val_t 
+g_val_t
 cpu_system_func ( void )
 {
    char *p;
    static g_val_t val;
-   static struct timeval stamp={0,0};
+   static struct timeval stamp={0, 0};
    static double last_system_jiffies,  system_jiffies,
                  last_total_jiffies, total_jiffies, diff;
- 
+
    p = update_file(&proc_stat);
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
-     
+
      p = skip_token(p);
      p = skip_token(p);
      p = skip_token(p);
-     system_jiffies = strtod( p , (char **)NULL );
+     system_jiffies = strtod( p, (char **)NULL );
      if (num_cpustates > NUM_CPUSTATES_24X) {
        p = skip_token(p);
        p = skip_token(p);
        p = skip_token(p);
-       system_jiffies += strtod( p , (char **)NULL ); /* "intr" counted in system */
+       system_jiffies += strtod( p, (char **)NULL ); /* "intr" counted in system */
        p = skip_token(p);
-       system_jiffies += strtod( p , (char **)NULL ); /* "sintr" counted in system */
+       system_jiffies += strtod( p, (char **)NULL ); /* "sintr" counted in system */
        }
-     total_jiffies  = total_jiffies_func();
+     total_jiffies = total_jiffies_func();
 
-     diff = system_jiffies  - last_system_jiffies;
- 
+     diff = system_jiffies - last_system_jiffies;
+
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
+       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
      else
        val.f = 0.0;
- 
+
      last_system_jiffies  = system_jiffies;
-     last_total_jiffies = total_jiffies;   
+     last_total_jiffies = total_jiffies;
 
    }
    return val;
 }
 
-g_val_t 
+g_val_t
 cpu_idle_func ( void )
 {
    char *p;
    static g_val_t val;
-   static struct timeval stamp={0,0};
+   static struct timeval stamp={0, 0};
    static double last_idle_jiffies,  idle_jiffies,
                  last_total_jiffies, total_jiffies, diff;
- 
+
    p = update_file(&proc_stat);
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
-     
+
      p = skip_token(p);
      p = skip_token(p);
      p = skip_token(p);
      p = skip_token(p);
      idle_jiffies  = strtod( p , (char **)NULL );
      total_jiffies = total_jiffies_func();
-     
+
      diff = idle_jiffies - last_idle_jiffies;
-     
-     if ( diff ) 
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
+
+     if ( diff )
+       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
      else
        val.f = 0.0;
-     
+
      last_idle_jiffies  = idle_jiffies;
      last_total_jiffies = total_jiffies;
-     
+
    }
-   
+
    return val;
 }
 
-g_val_t 
+g_val_t
 cpu_aidle_func ( void )
 {
    char *p;
    g_val_t val;
    double idle_jiffies, total_jiffies;
-   
+
    p = update_file(&proc_stat);
 
    p = skip_token(p);
@@ -773,22 +780,22 @@ cpu_aidle_func ( void )
    p = skip_token(p);
    idle_jiffies  = strtod( p , (char **)NULL );
    total_jiffies = total_jiffies_func();
-   
-   val.f = (idle_jiffies/total_jiffies)*100;
+
+   val.f = (idle_jiffies/total_jiffies) * 100;
    return val;
 }
 
-g_val_t 
+g_val_t
 cpu_wio_func ( void )
 {
    char *p;
    static g_val_t val;
-   static struct timeval stamp={0,0};
+   static struct timeval stamp={0, 0};
    static double last_wio_jiffies,  wio_jiffies,
                  last_total_jiffies, total_jiffies, diff;
- 
+
    if (num_cpustates == NUM_CPUSTATES_24X) {
-     val.f = 0.;
+     val.f = 0.0;
      return val;
      }
 
@@ -796,7 +803,7 @@ cpu_wio_func ( void )
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
-     
+
      p = skip_token(p);
      p = skip_token(p);
      p = skip_token(p);
@@ -804,31 +811,31 @@ cpu_wio_func ( void )
      p = skip_token(p);
      wio_jiffies  = strtod( p , (char **)NULL );
      total_jiffies = total_jiffies_func();
-     
+
      diff = wio_jiffies - last_wio_jiffies;
-     
-     if ( diff ) 
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
+
+     if ( diff )
+       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
      else
        val.f = 0.0;
-     
+
      last_wio_jiffies  = wio_jiffies;
      last_total_jiffies = total_jiffies;
-     
+
    }
-   
+
    return val;
 }
 
-g_val_t 
+g_val_t
 cpu_intr_func ( void )
 {
    char *p;
    static g_val_t val;
-   static struct timeval stamp={0,0};
+   static struct timeval stamp={0, 0};
    static double last_intr_jiffies,  intr_jiffies,
                  last_total_jiffies, total_jiffies, diff;
- 
+
    if (num_cpustates == NUM_CPUSTATES_24X) {
      val.f = 0.;
      return val;
@@ -838,7 +845,7 @@ cpu_intr_func ( void )
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
-     
+
      p = skip_token(p);
      p = skip_token(p);
      p = skip_token(p);
@@ -847,31 +854,31 @@ cpu_intr_func ( void )
      p = skip_token(p);
      intr_jiffies  = strtod( p , (char **)NULL );
      total_jiffies = total_jiffies_func();
-     
+
      diff = intr_jiffies - last_intr_jiffies;
-     
-     if ( diff ) 
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
+
+     if ( diff )
+       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
      else
        val.f = 0.0;
-     
+
      last_intr_jiffies  = intr_jiffies;
      last_total_jiffies = total_jiffies;
-     
+
    }
-   
+
    return val;
 }
 
-g_val_t 
+g_val_t
 cpu_sintr_func ( void )
 {
    char *p;
    static g_val_t val;
-   static struct timeval stamp={0,0};
+   static struct timeval stamp={0, 0};
    static double last_sintr_jiffies,  sintr_jiffies,
                  last_total_jiffies, total_jiffies, diff;
- 
+
    if (num_cpustates == NUM_CPUSTATES_24X) {
      val.f = 0.;
      return val;
@@ -881,7 +888,7 @@ cpu_sintr_func ( void )
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
       (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
      stamp = proc_stat.last_read;
-     
+
      p = skip_token(p);
      p = skip_token(p);
      p = skip_token(p);
@@ -891,19 +898,19 @@ cpu_sintr_func ( void )
      p = skip_token(p);
      sintr_jiffies  = strtod( p , (char **)NULL );
      total_jiffies = total_jiffies_func();
-     
+
      diff = sintr_jiffies - last_sintr_jiffies;
-     
-     if ( diff ) 
-       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
+
+     if ( diff )
+       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
      else
        val.f = 0.0;
-     
+
      last_sintr_jiffies  = sintr_jiffies;
      last_total_jiffies = total_jiffies;
-     
+
    }
-   
+
    return val;
 }
 
@@ -925,8 +932,8 @@ load_five_func ( void )
 
    p = update_file(&proc_loadavg);
    p = skip_token(p);
-   val.f = strtod( p, (char **)NULL);
- 
+   val.f = strtod(p, (char **)NULL);
+
    return val;
 }
 
@@ -937,10 +944,10 @@ load_fifteen_func ( void )
    g_val_t val;
 
    p = update_file(&proc_loadavg);
- 
+
    p = skip_token(p);
    p = skip_token(p);
-   val.f = strtod( p, (char **)NULL);
+   val.f = strtod(p, (char **)NULL);
 
    return val;
 }
@@ -974,12 +981,12 @@ proc_total_func ( void )
    p = update_file(&proc_loadavg);
    p = skip_token(p);
    p = skip_token(p);
-   p = skip_token(p); 
+   p = skip_token(p);
    p = skip_whitespace(p);
    while ( isdigit(*p) )
       p++;
-   p++;  /* skip the slash-/ */ 
-   val.uint32 = strtol( p, (char **)NULL, 10 ); 
+   p++;  /* skip the slash-/ */
+   val.uint32 = strtol( p, (char **)NULL, 10 );
 
    return val;
 }
@@ -991,11 +998,11 @@ mem_free_func ( void )
    g_val_t val;
 
    p = strstr( update_file(&proc_meminfo), "MemFree:" );
-   if(p) {
+   if (p) {
      p = skip_token(p);
      val.f = atof( p );
    } else {
-     val.f = 0;
+     val.f = 0.0;
    }
 
    return val;
@@ -1015,7 +1022,7 @@ mem_shared_func ( void )
       p = skip_token(p);
       val.f = atof( p );
    } else {
-      val.f = 0;
+      val.f = 0.0;
    }
 
    return val;
@@ -1028,11 +1035,11 @@ mem_buffers_func ( void )
    g_val_t val;
 
    p = strstr( update_file(&proc_meminfo), "Buffers:" );
-   if(p) {
+   if (p) {
      p = skip_token(p);
-     val.f = atof( p ); 
+     val.f = atof( p );
    } else {
-     val.f = 0;
+     val.f = 0.0;
    }
 
    return val;
@@ -1044,12 +1051,12 @@ mem_cached_func ( void )
    char *p;
    g_val_t val;
 
-   p = strstr( update_file(&proc_meminfo), "Cached:");
-   if(p) {
+   p = strstr( update_file(&proc_meminfo), "Cached:" );
+   if (p) {
      p = skip_token(p);
      val.f = atof( p );
    } else {
-     val.f = 0;
+     val.f = 0.0;
    }
 
    return val;
@@ -1062,11 +1069,11 @@ swap_free_func ( void )
    g_val_t val;
 
    p = strstr( update_file(&proc_meminfo), "SwapFree:" );
-   if(p) {
+   if (p) {
      p = skip_token(p);
-     val.f = atof( p ); 
+     val.f = atof( p );
    } else {
-     val.f = 0;
+     val.f = 0.0;
    }
 
    return val;
