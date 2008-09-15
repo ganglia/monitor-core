@@ -72,9 +72,9 @@
 
 <!-- START BLOCK : private -->
   <TD ALIGN="LEFT" VALIGN="TOP">
-<table cellspacing=1 cellpadding=1 width=100% border=0>
+<table cellspacing=1 cellpadding=1 width="100%" border=0>
  <tr><td>CPUs Total:</td><td align=left><B>{cpu_num}</B></td></tr>
- <tr><td width=80%>Nodes:</td><td align=left><B>{num_nodes}</B></td></tr>
+ <tr><td width="80%">Nodes:</td><td align=left><B>{num_nodes}</B></td></tr>
  <tr><td>&nbsp;</td></tr>
  <tr><td class=footer colspan=2>{localtime}</td></tr>
 </table>
