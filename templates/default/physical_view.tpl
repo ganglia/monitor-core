@@ -48,7 +48,7 @@ Most Full Disk: <b>{most_full}</b><br>
 <table border=0>
 <tr>
  <td align=left>
-<font size=-1>
+<font size="-1">
 Legend
 </font>
  </td>
@@ -62,13 +62,13 @@ Legend
   <table cellspacing=1 cellpadding=3 border=0>
   <tr>
   <td class=L1 align=right>
-  <font size=-1>1-min load</font>
+  <font size="-1">1-min load</font>
   </td>
   </tr>
  </table>
 <tr>
 <td colspan=2 style="color: rgb(70,70,70)">
-<font size=-1>
+<font size="-1">
 <em>cpu: </em> CPU clock (GHz) (num CPUs)<br>
 <em>mem: </em> Total Memory (GB)
 </font>
