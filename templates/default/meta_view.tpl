@@ -90,7 +90,7 @@
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD COLSPAN="2" CLASS=title>Snapshot of the {self} |
-   <FONT SIZE="-1"><A HREF="./cluster_legend.html" ALT="Node Image Legend">Legend</A></FONT>
+    <FONT SIZE="-1"><A HREF="./cluster_legend.html">Legend</A></FONT>
   </TD>
 </TR>
 </TABLE>
