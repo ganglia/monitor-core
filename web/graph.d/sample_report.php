@@ -41,7 +41,7 @@ A full list of variables that will be used:
     
     $color           (ARRAY:  Sets one or more chart colors.  Usually used for setting
                       the background color of the chart.  Valid array keys are
-                      BACK, CANVAS, SADEA, SHADEB, FONT, FRAME and ARROW.  Usually,
+                      BACK, CANVAS, SHADEA, SHADEB, FONT, FRAME and ARROW.  Usually,
                       only BACK is set).
     
     $extras          (Any other custom rrdtool commands can be added to this
