@@ -46,7 +46,7 @@ A full list of variables that will be used:
 
     $color           (array: Sets one or more chart colors.  Usually used
                              for setting the background color of the chart.
-                             Valid array keys are BACK, CANVAS, SADEA,
+                             Valid array keys are BACK, CANVAS, SHADEA,
                              SHADEB, FONT, FRAME and ARROW.  Usually,
                              only BACK is set).
 
