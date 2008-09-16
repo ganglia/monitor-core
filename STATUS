@@ -136,7 +136,7 @@ BACKPORT PROPOSALS:
   * gmond: add an 'allow_extra_data' boolean global directive
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=199
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1701
-    +1: carenas
+    +1: carenas, bnicholes
     carenas: suboptimal fix, closing metric tag shouldn't be needed either
 
   * build: remove ganglia release name from the code
@@ -180,11 +180,14 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg03775.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1734
     +1: carenas
+    -1: bnicholes
+    bnicholes: The patch appears to be dependant on rev. 1478 in trunk which
+      is not included in the backport proposal.
 
   * libganglia: dotconf fixes
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1735
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1736
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmond: reformat memory metrics to match pre 3.1 style
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1737
