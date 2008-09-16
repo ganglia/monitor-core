@@ -5,11 +5,11 @@
 /* Instructions for adding custom reports
 
 1) Reports should have a primary function named:  "<yourtesthere>_report".
-   This fuction will be called from the graph.php script automatically.
+   This function will be called from the graph.php script automatically.
 
 2) The *_report script should return an array that contains at least the
-   variables listed below.  Several have been pre-populated, and may not need
-   to be changed.
+   variables listed below.  Several have been pre-populated, and may not
+   need to be changed.
    However, you will have to alter at least these:  $series, $title, and
    $vertical_label
 
@@ -24,7 +24,7 @@ A full list of variables that will be used:
 
     $series          (string: holds the meat of the rrdgraph definition)
     $title           (string: title of the report)
-    $vertical_label  (label for Y-Axis.)
+    $vertical_label  (string: label for Y-Axis.)
 
     $start           (string: Start time of the graph, can usually be
                               left alone)
@@ -60,7 +60,7 @@ For more information and specifics, see the man page for 'rrdgraph'.
 
 function graph_sample_report ( &$rrdtool_graph ) {
 
-/* 
+/*
  * this is just the cpu_report (from revision r920) as an example, but
  * with extra comments
  */
