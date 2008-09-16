@@ -35,10 +35,10 @@ static int Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
                           const char **argv);
 
 static cfg_opt_t cluster_opts[] = {
-  CFG_STR("name", NULL, CFGF_NONE ),
-  CFG_STR("owner", NULL, CFGF_NONE ),
-  CFG_STR("latlong", NULL, CFGF_NONE ),
-  CFG_STR("url", NULL, CFGF_NONE ),
+  CFG_STR("name", "unspecified", CFGF_NONE ),
+  CFG_STR("owner", "unspecified", CFGF_NONE ),
+  CFG_STR("latlong", "unspecified", CFGF_NONE ),
+  CFG_STR("url", "unspecified", CFGF_NONE ),
   CFG_END()
 };
 

@@ -22,7 +22,11 @@ CURRENT RELEASE NOTES:
   (Please update this area with a brief description of bug fixes and
    enhancements that have been backported for the current release)
 
-  * 
+  *gmond/gmetad: Sync-up the default values for the cluster section of 
+      gmond with the default gmond.conf so that a cluster name will always 
+      be present. The gmetad code can not handle a host with no associated 
+      cluster, therefore the gmond code must always include a cluster XML tag.  
+      Bug #200
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -160,17 +164,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1711
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1714
     +1: carenas, hawson
-
-  * gmond/gmetad: The gmetad code can not handle a host with no associated 
-      cluster, therefore the gmond code must always include a cluster XML tag.  
-      This patch matches up the default values for the cluster section of 
-      gmond with the default gmond.conf so that a cluster name will always 
-      be present.  bug #200
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=200
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1712
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1756
-    carenas: removes a documented gmond feature
-    +1: bnicholes, hawson
 
   * build: clarify/update use of  "dist" targets
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
