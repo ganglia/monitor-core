@@ -28,10 +28,10 @@ function graph_metric ( &$rrdtool_graph ) {
         $hostname = strip_domainname($hostname);
     }
 
-    //no fudge needed for rrdtool_graph['height']
+    $rrdtool_graph['height'] += 0; //no fudge needed
 
     switch ($context) {
-    
+
         case 'host':
 
             if ($summary) {
