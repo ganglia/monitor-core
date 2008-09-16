@@ -170,7 +170,7 @@ AC_ARG_WITH( libconfuse,
 [if test x"$withval" != xno; then libconfuse="yes"; libconfusepath="$withval"; fi])
 
 AC_ARG_WITH( moduledir,
-[  --with-moduledir=DIR   Base directory for dynamically loadable modules],
+[  --with-moduledir=DIR    Base directory for dynamically loadable modules],
   moduledir="$withval", 
   moduledir="$libdir/ganglia")
 
