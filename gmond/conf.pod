@@ -362,27 +362,36 @@ A B<modules> section contains the parameters that are necessary to load a
 metric module. A metric module is a dynamically loadable module that 
 extends the available metrics that gmond is able to collect. Each B<modules>
 section contains at least one B<module> section.  Within a B<module> section
-are the directives B<name>, B<language>, B<path> and B<params>.  The module 
-B<name> is the name of the module as determined by the module structure if
-the module was developed in C/C++.  Alternatively, the B<name> can be 
-the name of the source file if the module has been implemented in a 
-interpreted language such as python.  A B<language> designation must be 
-specified as a string value for each module.  The B<language> directive 
-must correspond to the source code language in which the module was 
-implemented (ex. language = "python").  If a B<language> directive does 
-not exist for the module, the assumed language will be "C/C++". The B<path> 
-is the path from which gmond is expected to load the module (C/C++ compiled 
-dynamically loadable module only).  The B<params> directive can be used 
-to pass a single string parameter directly to the module initialization 
-function (C/C++ module only). Multiple parameters can be passed to the 
-module's initialization function by including one or more B<param> sections. 
-Each B<param> section must be named and contain a B<value> directive. Once 
-a module has been loaded, the additional metrics can be discovered by 
-invoking B<gmond -m>.
+are the directives B<name>, B<language>, B<enabled>, B<path> and B<params>.  
+The module B<name> is the name of the module as determined by the module 
+structure if the module was developed in C/C++.  Alternatively, the 
+B<name> can be the name of the source file if the module has been 
+implemented in a interpreted language such as python.  A B<language> 
+designation must be specified as a string value for each module.  The 
+B<language> directive must correspond to the source code language in 
+which the module was implemented (ex. language = "python").  If a 
+B<language> directive does not exist for the module, the assumed 
+language will be "C/C++". The B<enabled> directive allows a metric module
+to be easily enabled or disabled through the configuration file. If the
+B<enabled> directive is not included in the module configuration, the 
+enabled state will default to "yes". One thing to note is that if a 
+module has been disabled yet the metric which that module implements 
+is still listed as part of a collection group, gmond will produce a 
+warning message.  However gmond will continue to function normally 
+by simply ignoring the metric. The B<path> is the path from which 
+gmond is expected to load the  module (C/C++ compiled dynamically 
+loadable module only).  The B<params> directive can be used to pass 
+a single string parameter directly to the module initialization 
+function (C/C++ module only). Multiple parameters can be passed to 
+the module's initialization function by including one or more 
+B<param> sections. Each B<param> section must be named and contain 
+a B<value> directive. Once a module has been loaded, the additional 
+metrics can be discovered by invoking B<gmond -m>.
 
    modules {
      module {
        name = "example_module"
+       enabled = yes
        path = "modexample.so"
        params = "An extra raw parameter"
        param RandomMax {

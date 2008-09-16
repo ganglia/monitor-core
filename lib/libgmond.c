@@ -129,6 +129,7 @@ static cfg_opt_t metric_module_param[] = {
 static cfg_opt_t metric_module_opts[] = {
   CFG_STR("name", NULL, CFGF_NONE),
   CFG_STR("language", NULL, CFGF_NONE),
+  CFG_BOOL("Enabled", 1, CFGF_NONE),
   CFG_STR("path", NULL, CFGF_NONE),
   CFG_STR("params", NULL, CFGF_NONE),
   CFG_SEC("param", metric_module_param, CFGF_TITLE | CFGF_MULTI),

@@ -22,11 +22,14 @@ CURRENT RELEASE NOTES:
   (Please update this area with a brief description of bug fixes and
    enhancements that have been backported for the current release)
 
-  *gmond/gmetad: Sync-up the default values for the cluster section of 
-      gmond with the default gmond.conf so that a cluster name will always 
-      be present. The gmetad code can not handle a host with no associated 
-      cluster, therefore the gmond code must always include a cluster XML tag.  
-      Bug #200
+  * gmond/gmetad: Sync-up the default values for the cluster section of 
+     gmond with the default gmond.conf so that a cluster name will always 
+     be present. The gmetad code can not handle a host with no associated 
+     cluster, therefore the gmond code must always include a cluster XML tag.  
+     Bug #200
+  * gmond: Add an 'enabled' directive to the module section so that a 
+     module can easily be enabled or disabled through the configuration 
+     file  
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -123,14 +126,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
     +1: carenas
     
-  * gmond: Add an 'enabled' directive to the module section so that a 
-     module can easily be enabled or disabled through the configuration file
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1684
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1685
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1689
-    +1: bnicholes
-    +1: carenas
-
   * Add "removespikes.pl" script to contrib repository
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1697
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1699

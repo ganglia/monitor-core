@@ -1632,7 +1632,7 @@ load_metric_modules( void )
         mmodule *modp;
         char *modPath=NULL, *modName=NULL, *modparams=NULL, *modLanguage=NULL;
         apr_array_header_t *modParams_list = NULL;
-        int k;
+        int k, modEnabled;
         apr_status_t merge_ret;
 
         cfg_t *module = cfg_getnsec(tmp, "module", j);
@@ -1643,6 +1643,12 @@ load_metric_modules( void )
         */
         modLanguage = cfg_getstr(module, "language");
         if (modLanguage && strcasecmp(modLanguage, "C/C++")) 
+            continue;
+
+        /* Check to make sure that the module is enabled.
+        */
+        modEnabled = cfg_getbool(module, "enabled");
+        if (!modEnabled) 
             continue;
 
         modPath = cfg_getstr(module, "path");
