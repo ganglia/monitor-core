@@ -1,22 +1,21 @@
 <?php
 
-
 /* Pass in by reference! */
 function graph_mem_report ( &$rrdtool_graph ) {
 
-    global $context, 
-           $hostname, 
+    global $context,
+           $hostname,
            $mem_shared_color,
-           $mem_cached_color, 
-           $mem_buffered_color, 
-           $mem_swapped_color, 
+           $mem_cached_color,
+           $mem_buffered_color,
+           $mem_swapped_color,
            $mem_used_color,
            $cpu_num_color,
            $range,
            $rrd_dir,
            $size;
 
-    $title = 'Memory'; 
+    $title = 'Memory';
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {
@@ -41,15 +40,16 @@ function graph_mem_report ( &$rrdtool_graph ) {
         ."STACK:'bmem_shared'#$mem_shared_color:'Memory Shared' "
         ."STACK:'bmem_cached'#$mem_cached_color:'Memory Cached' "
         ."STACK:'bmem_buffers'#$mem_buffered_color:'Memory Buffered' ";
+
     if (file_exists("$rrd_dir/swap_total.rrd")) {
         $series .= "DEF:'swap_total'='${rrd_dir}/swap_total.rrd':'sum':AVERAGE "
             ."DEF:'swap_free'='${rrd_dir}/swap_free.rrd':'sum':AVERAGE "
             ."CDEF:'bmem_swapped'='swap_total','swap_free',-,1024,* "
             ."STACK:'bmem_swapped'#$mem_swapped_color:'Memory Swapped' ";
     }
+
     $series .= "LINE2:'bmem_total'#$cpu_num_color:'Total In-Core Memory' ";
 
-  
     $rrdtool_graph['series'] = $series;
 
     return $rrdtool_graph;

@@ -1,12 +1,11 @@
 <?php
 
-
 /* Pass in by reference! */
 function graph_network_report ( &$rrdtool_graph ) {
 
-    global $context, 
+    global $context,
            $hostname,
-           $mem_cached_color, 
+           $mem_cached_color,
            $mem_used_color,
            $cpu_num_color,
            $range,
@@ -14,7 +13,7 @@ function graph_network_report ( &$rrdtool_graph ) {
            $size;
    
     $title = 'Network';
-    $rrdtool_graph['height']        += $size == 'medium' ? 28 : 0 ;
+    $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {

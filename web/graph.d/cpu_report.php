@@ -1,27 +1,25 @@
 <?php
 
-
 /* Pass in by reference! */
 function graph_cpu_report ( &$rrdtool_graph ) {
 
-    global $context, 
+    global $context,
            $cpu_idle_color,
-           $cpu_nice_color, 
-           $cpu_system_color, 
+           $cpu_nice_color,
+           $cpu_system_color,
            $cpu_user_color,
            $cpu_wio_color,
            $hostname,
            $range,
            $rrd_dir,
            $size;
-    
-    $rrdtool_graph['height']        += $size == 'medium' ? 14 : 0 ;
+
+    $rrdtool_graph['height'] += ($size == 'medium') ? 14 : 0;
     $title = 'CPU';
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {
        $rrdtool_graph['title'] = "$hostname $title last $range";
-
     }
     $rrdtool_graph['upper-limit']    = '100';
     $rrdtool_graph['lower-limit']    = '0';
@@ -30,8 +28,10 @@ function graph_cpu_report ( &$rrdtool_graph ) {
 
     if($context != "host" ) {
 
-
-        /* If we are not in a host context, then we need to calculate the average */
+        /*
+         * If we are not in a host context, then we need to calculate
+         * the average
+         */
         $series =
               "DEF:'num_nodes'='${rrd_dir}/cpu_user.rrd':'num':AVERAGE "
             . "DEF:'cpu_user'='${rrd_dir}/cpu_user.rrd':'sum':AVERAGE "
@@ -53,9 +53,10 @@ function graph_cpu_report ( &$rrdtool_graph ) {
         }
 
         $series .= "STACK:'ccpu_idle'#$cpu_idle_color:'Idle CPU' ";
-    }
-    // Context is not "host"
-    else {
+
+    } else {
+
+        /* Context is not "host" */
 
         $series ="DEF:'cpu_user'='${rrd_dir}/cpu_user.rrd':'sum':AVERAGE "
         ."DEF:'cpu_nice'='${rrd_dir}/cpu_nice.rrd':'sum':AVERAGE "
@@ -72,7 +73,6 @@ function graph_cpu_report ( &$rrdtool_graph ) {
 
         $series .= "STACK:'cpu_idle'#$cpu_idle_color:'Idle CPU' ";
     }
-
 
     $rrdtool_graph['series'] = $series;
 
