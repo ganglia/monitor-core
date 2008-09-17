@@ -30,6 +30,7 @@ CURRENT RELEASE NOTES:
   * gmond: Add an 'enabled' directive to the module section so that a 
      module can easily be enabled or disabled through the configuration 
      file  
+  * web: add boolean option for using hostname without domainname for graphs
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
