@@ -31,6 +31,7 @@ CURRENT RELEASE NOTES:
      module can easily be enabled or disabled through the configuration 
      file  
   * web: add boolean option for using hostname without domainname for graphs
+  * web: add host atrributes into metric list (BUG30)
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -55,12 +56,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     +1: carenas
     carenas: suboptimal fix, autoconf instead to handle Solaris>=10 better
-
-  * web: add host atrributes into metric list
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=30
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1580
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1724
-    +1: carenas, hawson
 
   * web: allow for configuring number of columns in grid view
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
