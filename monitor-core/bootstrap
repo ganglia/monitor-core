@@ -20,4 +20,4 @@ echo "Running autoconf" &&
 autoconf
 
 echo &&
-echo "To begin installation, run \"./configure\" now" 
+echo "To begin installation, run \"./configure\" now"
