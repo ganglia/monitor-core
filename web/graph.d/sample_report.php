@@ -77,7 +77,13 @@ function graph_sample_report ( &$rrdtool_graph ) {
            $hostname,
            $range,
            $rrd_dir,
-           $size;
+           $size,
+           $strip_domainname;
+
+    if ($strip_domainname) {
+       $hostname = strip_domainname($hostname);
+    }
+
     //
     // You *MUST* set at least the 'title', 'vertical-label', and 'series'
     // variables otherwise, the graph *will not work*.

@@ -21,7 +21,12 @@ function graph_metric ( &$rrdtool_graph ) {
            $size,
            $summary,
            $value,
-           $vlabel;
+           $vlabel,
+           $strip_domainname;
+
+    if ($strip_domainname) {
+        $hostname = strip_domainname($hostname);
+    }
 
     $rrdtool_graph['height'] += 0; //no fudge needed
 

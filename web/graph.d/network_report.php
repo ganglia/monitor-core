@@ -10,8 +10,13 @@ function graph_network_report ( &$rrdtool_graph ) {
            $cpu_num_color,
            $range,
            $rrd_dir,
-           $size;
-   
+           $size,
+           $strip_domainname;
+
+    if ($strip_domainname) {
+       $hostname = strip_domainname($hostname);
+    }
+
     $title = 'Network';
     $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
     if ($context != 'host') {

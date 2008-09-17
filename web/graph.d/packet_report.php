@@ -10,7 +10,12 @@ function graph_packet_report ( &$rrdtool_graph ) {
            $cpu_num_color,
            $range,
            $rrd_dir,
-           $size;
+           $size,
+           $strip_domainname;
+
+    if ($strip_domainname) {
+       $hostname = strip_domainname($hostname);
+    }
 
     $title = 'Packets';
     $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;

@@ -12,7 +12,12 @@ function graph_cpu_report ( &$rrdtool_graph ) {
            $hostname,
            $range,
            $rrd_dir,
-           $size;
+           $size,
+           $strip_domainname;
+
+    if ($strip_domainname) {
+       $hostname = strip_domainname($hostname);
+    }
 
     $rrdtool_graph['height'] += ($size == 'medium') ? 14 : 0;
     $title = 'CPU';

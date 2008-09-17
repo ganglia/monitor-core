@@ -50,13 +50,6 @@ BACKPORT PROPOSALS:
     +1: bnicholes
     carenas: apparently includes few other unrelated changes
 
-  * web: add optional use of hostname without domainname for graphs
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04354.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1460
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1718
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1799
-    +1: carenas, hawson
-
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     +1: carenas

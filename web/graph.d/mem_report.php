@@ -13,7 +13,12 @@ function graph_mem_report ( &$rrdtool_graph ) {
            $cpu_num_color,
            $range,
            $rrd_dir,
-           $size;
+           $size,
+           $strip_domainname;
+
+    if ($strip_domainname) {
+       $hostname = strip_domainname($hostname);
+    }
 
     $title = 'Memory';
     if ($context != 'host') {

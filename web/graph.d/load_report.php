@@ -12,7 +12,12 @@ function graph_load_report ( &$rrdtool_graph ) {
            $proc_run_color,
            $range,
            $rrd_dir,
-           $size;
+           $size,
+           $strip_domainname;
+
+    if ($strip_domainname) {
+       $hostname = strip_domainname($hostname);
+    }
 
     $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
     $title = 'Load';
