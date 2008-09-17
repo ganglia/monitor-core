@@ -172,10 +172,6 @@ BACKPORT PROPOSALS:
                   remove the rest.  This will reduce the number of dependencies
                   required.
 
-  * build: ChangeLog generation compatibility fixes
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1727
-    +1: carenas, hawson
-
   * libganglia: mcast_if support in gmond (BUG140)
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg03775.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1734
