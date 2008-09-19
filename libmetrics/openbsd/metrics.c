@@ -840,7 +840,8 @@ makenetvfslist(void)
 {
 	char *str = NULL, *strptr, **listptr = NULL;
 	size_t slen = 0;
-	int cnt, i;
+	int cnt = 0;
+	int i;
 
 	int mib[3], maxvfsconf;
 	size_t miblen;
@@ -858,7 +859,6 @@ makenetvfslist(void)
 		goto done;
 	}
 
-	cnt = 0;
 	if (cnt == 0)
 		goto done;
 	/*
