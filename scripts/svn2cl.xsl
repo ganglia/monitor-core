@@ -115,7 +115,7 @@
     <xsl:apply-templates select="logentry[not(starts-with(msg,$ignore-message-starting))]" />
    </xsl:when>
    <xsl:otherwise>
-    <xsl:apply-templates select="logentry" />
+    <xsl:apply-templates select="logentry[paths/path[@action='A'] or paths/path[@action='D'] or not(count(paths/path[@action='M']) = 1 and contains(paths/path, 'STATUS'))]" />
    </xsl:otherwise>
   </xsl:choose>
   <!-- add newlines at the end of the changelog -->
