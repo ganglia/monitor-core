@@ -115,13 +115,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
     +1: carenas
     
-  * Add "removespikes.pl" script to contrib repository
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1697
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1699
-    +1: knobi1
-    +1: carenas
-    +1: hawson
-
   * gmond: add an 'allow_extra_data' boolean global directive
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=199
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1701
