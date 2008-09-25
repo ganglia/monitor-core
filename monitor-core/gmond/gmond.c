@@ -2386,7 +2386,11 @@ print_metric_list( void )
             {
               if (strcasecmp(cb->name,  metric_info[i].name) == 0) 
                 {
-                  sprintf (modular_desc, "%s (module %s)", metric_info[i].desc, cb->modp->module_name);
+                  snprintf (modular_desc, sizeof(modular_desc),
+                            "%s (module %s)",
+                            metric_info[i].desc,
+                            cb->modp->module_name);
+
                   desc = (char*)modular_desc;
                   break;
                 }
