@@ -756,16 +756,11 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
                 ret = fnmatch(pattern, entry->d_name, 
                               FNM_PATHNAME|FNM_PERIOD);
                 if (ret == 0) {
-                    char *newpath = malloc (strlen(path) + strlen(entry->d_name)+2);
+                    char *newpath, *line;
 
-                    sprintf (newpath, "%s/%s", path, entry->d_name);
-
-                    if (newpath) {
-                        char *line = apr_pstrcat(p, "include ('", newpath, "')\n", NULL);
-
-                        apr_file_puts(line, ftemp);
-                        free(newpath);
-                    }
+                    newpath = apr_psprintf (p, "%s/%s", path, entry->d_name);
+                    line = apr_pstrcat(p, "include ('", newpath, "')\n", NULL);
+                    apr_file_puts(line, ftemp);
                 }
             }
             closedir(dir);
