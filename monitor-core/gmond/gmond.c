@@ -658,7 +658,7 @@ get_metric_names (Ganglia_metric_id *metric_id, char **metricName, char **realNa
       {
         name_len = strlen(firstName);
         buff = malloc(name_len+1);
-        strcpy(buff, firstName);
+        strncpy(buff, firstName, name_len + 1);
         firstName = buff;
         secondName = strchr(buff+1,':');
         if(secondName)
@@ -705,7 +705,7 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
 
       spoof_info_len = strlen(metric_id->host);
       buff = malloc(spoof_info_len+1);
-      strcpy(buff,metric_id->host);
+      strncpy(buff, metric_id->host, spoof_info_len + 1);
       spoofIP = buff;
       if( !(spoofName = strchr(buff+1,':')) ){
           err_msg("Incorrect format for spoof argument. exiting.\n");
