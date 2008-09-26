@@ -87,7 +87,7 @@ else
 # Used when making graphs via graph.php. Included in most URLs
 #
 $sort_url=rawurlencode($sort);
-$get_metric_string = "m=$metricname&amp;r=$range&amp;s=$sort_url&amp;hc=$hostcols";
+$get_metric_string = "m=$metricname&amp;r=$range&amp;s=$sort_url&amp;hc=$hostcols&amp;mc=$metriccols";
 if ($jobrange and $jobstart)
         $get_metric_string .= "&amp;jr=$jobrange&amp;js=$jobstart";
 
@@ -337,6 +337,21 @@ if ($context == "physical" or $context == "cluster")
       $size_menu .= "</SELECT>\n";
   
       # Assign template variable in cluster view.
+   }
+
+if ($context == "host")
+   {
+      # Present a width list
+      $metric_cols_menu = "<SELECT NAME=\"mc\" OnChange=\"ganglia_form.submit();\">\n";
+
+      foreach(range(1,25) as $metric_cols)
+         {
+	    $metric_cols_menu .= "<OPTION VALUE=$metric_cols ";
+	    if ($metric_cols == $metriccols)
+	       $metric_cols_menu .= "SELECTED";
+	    $metric_cols_menu .= ">$metric_cols\n";
+	 }
+      $metric_cols_menu .= "</SELECT>\n";
    }
 
 # Make sure that no data is cached..

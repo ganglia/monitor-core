@@ -92,6 +92,11 @@ function toggleLayer( whichLayer )
   {host} <strong>graphs</strong>
   last <strong>{range}</strong>
   sorted <strong>{sort}</strong>
+<!-- START BLOCK : columns_dropdown -->
+  <FONT SIZE="-1">
+    Columns&nbsp;&nbsp;{metric_cols_menu}
+  </FONT>
+<!-- END BLOCK : columns_dropdown -->
   </TD>
 </TR>
 </TABLE>

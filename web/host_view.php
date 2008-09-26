@@ -31,6 +31,8 @@ if ($hosts_down)
    }
 
 $tpl->assign("ip", $hosts_up['IP']);
+$tpl->newBlock('columns_dropdown');
+$tpl->assign("metric_cols_menu", $metric_cols_menu);
 $g_metrics_group = array();
 
 foreach ($metrics as $name => $v)
@@ -161,7 +163,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
                      $tpl->assign("alt", "$hostname $name");
                      if (isset($v['description']))
                        $tpl->assign("desc", $v['description']);
-                     if($i++ %2)
+                     if ( !(++$i % $metriccols) )
                         $tpl->assign("br", "<BR>");
                   }
                }

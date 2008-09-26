@@ -35,6 +35,7 @@ CURRENT RELEASE NOTES:
   * web: add host atrributes into metric list (BUG30)
   * web: metric group enhancements for host view (BUG203)
   * web: add option for configurable number of columns in cluster view (BUG194)
+  * web: make number of metric columns in host view configurable (BUG194)
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -59,12 +60,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     +1: carenas
     carenas: suboptimal fix, autoconf instead to handle Solaris>=10 better
-
-  * web: make number of metric columns in host view configurable
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1583
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1720
-    +1: carenas, hawson
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
