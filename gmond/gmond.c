@@ -51,6 +51,8 @@ apr_pool_t *global_context = NULL;
 int deaf;
 /* Mute mode boolean */
 int mute;
+/* Allow extra data boolean */
+int allow_extra_data;
 /* Cluster tag boolean */
 int cluster_tag = 0;
 /* This host's location */
@@ -285,6 +287,13 @@ process_deaf_mute_mode( void )
       err_msg("Configured to run both deaf and mute. Nothing to do. Exiting.\n");
       exit(1);
     }
+}
+
+static void
+process_allow_extra_data_mode( void )
+{
+  cfg_t *tmp = cfg_getsec( config_file, "globals");
+  allow_extra_data = cfg_getbool( tmp, "allow_extra_data");
 }
 
 static Ganglia_acl *
@@ -787,7 +796,7 @@ Ganglia_metadata_check(Ganglia_host *host, Ganglia_value_msg *vmsg )
     Ganglia_metadata *metric = 
         (Ganglia_metadata *)apr_hash_get(host->metrics, metric_name, APR_HASH_KEY_STRING);
     
-    if(!metric)
+    if((!metric) && allow_extra_data)
       {
         int len;
         XDR x;
@@ -1388,7 +1397,7 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
               slope_to_cstr(data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.slope));
 
   ret = apr_socket_send(client, metricxml, &len);
-  if (ret == APR_SUCCESS) 
+  if ((ret == APR_SUCCESS) && allow_extra_data) 
     {
       int extra_len = data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len;
       len = apr_snprintf(metricxml, 1024, "<EXTRA_DATA>\n");
@@ -2079,8 +2088,9 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
          *  metadata_last_set field will be 0.  No need to send the full data 
          *  with every value update.
          */
-        if (!cb->metadata_last_sent || (send_metadata_interval && 
-            (cb->metadata_last_sent < (now - apr_time_make(send_metadata_interval,0))))) 
+        if (allow_extra_data && (!cb->metadata_last_sent ||
+           (send_metadata_interval && 
+           (cb->metadata_last_sent < (now - apr_time_make(send_metadata_interval,0)))))) 
           {
             Ganglia_metric gmetric = Ganglia_metric_create((Ganglia_pool)global_context);
             char *val, *type;
@@ -2420,6 +2430,7 @@ main ( int argc, char *argv[] )
   setuid_if_necessary(); 
 
   process_deaf_mute_mode();
+  process_allow_extra_data_mode();
 
   if(!deaf)
     {

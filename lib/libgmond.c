@@ -56,6 +56,7 @@ static cfg_opt_t globals_opts[] = {
   CFG_INT("max_udp_msg_len", 1472, CFGF_NONE),
   CFG_BOOL("mute", 0, CFGF_NONE),
   CFG_BOOL("deaf", 0, CFGF_NONE),
+  CFG_BOOL("allow_extra_data", 1, CFGF_NONE),
   CFG_INT("host_dmax", 0, CFGF_NONE),
   CFG_INT("cleanup_threshold", 300, CFGF_NONE),
   CFG_BOOL("gexec", 0, CFGF_NONE),

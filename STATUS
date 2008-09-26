@@ -31,6 +31,7 @@ CURRENT RELEASE NOTES:
      module can easily be enabled or disabled through the configuration 
      file  
   * gmond: reformat memory metrics to match pre 3.1 style
+  * gmond: add boolean option to 'allow_extra_data' generation (BUG199)
   * web: add boolean option for using hostname without domainname for graphs
   * web: add host atrributes into metric list (BUG30)
   * web: metric group enhancements for host view (BUG203)
@@ -107,12 +108,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
     +1: carenas
     
-  * gmond: add an 'allow_extra_data' boolean global directive
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=199
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1701
-    +1: carenas, bnicholes
-    carenas: suboptimal fix, closing metric tag shouldn't be needed either
-
   * build: remove ganglia release name from the code
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04653.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1703

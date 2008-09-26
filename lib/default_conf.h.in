@@ -14,6 +14,7 @@ globals {                    \n\
   max_udp_msg_len = 1472        \n\
   mute = no             \n\
   deaf = no             \n\
+  allow_extra_data = yes \n\
   host_dmax = 0 /*secs */ \n\
   cleanup_threshold = 300 /*secs */ \n\
   gexec = no             \n\

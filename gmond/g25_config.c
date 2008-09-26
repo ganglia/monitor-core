@@ -162,6 +162,13 @@ static DOTCONF_CB(cb_deaf)
    return NULL;
 }
 
+static DOTCONF_CB(cb_allow_extra_data)
+{
+   gmond_config_t *c = (gmond_config_t *)cmd->option->info;
+   c->allow_extra_data = cmd->data.value;
+   return NULL;
+}
+
 static DOTCONF_CB(cb_debug_level)
 {
    gmond_config_t *c = (gmond_config_t *)cmd->option->info;
@@ -226,6 +233,7 @@ set_defaults(gmond_config_t *config )
    config->num_custom_metrics = 16;
    config->mute = 0;
    config->deaf = 0;
+   config->allow_extra_data = 1;
    config->debug_level = 0;
    config->no_setuid = 0;
    config->setuid = conf_strdup("nobody");
@@ -243,9 +251,10 @@ print_config(char *path, gmond_config_t *config)
   char *p;
 
   fprintf(stdout,"/* global variables */\n");
-  fprintf(stdout,"globals {\n  mute = \"%s\"\n  deaf = \"%s\"\n  debug_level = \"%ld\"\n  setuid = \"%s\"\n  user=\"%s\"\n  gexec = \"%s\"\n  host_dmax = \"%ld\"\n}\n\n",
+  fprintf(stdout,"globals {\n  mute = \"%s\"\n  deaf = \"%s\"\n  allow_extra_data = \"%s\"\n  debug_level = \"%ld\"\n  setuid = \"%s\"\n  user=\"%s\"\n  gexec = \"%s\"\n  host_dmax = \"%ld\"\n}\n\n",
           config->mute? "yes":"no", 
           config->deaf? "yes":"no", 
+          config->allow_extra_data? "yes":"no", 
           config->debug_level, 
           config->no_setuid? "no":"yes",
           config->setuid,
@@ -320,6 +329,7 @@ print_ganglia_25_config( char *path )
          {"num_custom_metrics", ARG_INT, cb_num_custom_metrics, &gmond_config, 0},
          {"mute", ARG_TOGGLE, cb_mute, &gmond_config, 0},
          {"deaf", ARG_TOGGLE, cb_deaf, &gmond_config, 0},
+         {"allow_extra_data", ARG_TOGGLE, cb_allow_extra_data, &gmond_config, 0},
          {"debug_level", ARG_INT, cb_debug_level, &gmond_config, 0},
          {"no_setuid", ARG_TOGGLE, cb_no_setuid, &gmond_config, 0},
          {"setuid", ARG_STR, cb_setuid, &gmond_config, 0},
