@@ -162,11 +162,6 @@ BACKPORT PROPOSALS:
     bnicholes: The patch appears to be dependant on rev. 1478 in trunk which
       is not included in the backport proposal.
 
-  * libganglia: dotconf fixes
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1735
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1736
-    +1: carenas, bnicholes
-
   * gmond: reformat memory metrics to match pre 3.1 style
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1737
     +1: carenas, hawson

@@ -21,6 +21,10 @@
 
 /* -- dotconf.c - this code is responsible for the input, parsing and dispatching of options  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -226,7 +230,7 @@ void dotconf_register_options(configfile_t *configfile, const configoption_t * o
 	{
 		if ( !(num % GROW_BY) )
 			configfile->config_options = realloc(configfile->config_options,
-											 sizeof(void *) * (num + GROW_BY));
+											 sizeof(void *) * (num + GROW_BY + 1));
 	}
 
 #undef GROW_BY
