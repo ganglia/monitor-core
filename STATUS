@@ -30,6 +30,7 @@ CURRENT RELEASE NOTES:
   * gmond: Add an 'enabled' directive to the module section so that a 
      module can easily be enabled or disabled through the configuration 
      file  
+  * gmond: reformat memory metrics to match pre 3.1 style
   * web: add boolean option for using hostname without domainname for graphs
   * web: add host atrributes into metric list (BUG30)
   * Bug fixes and Enhancements
@@ -161,10 +162,6 @@ BACKPORT PROPOSALS:
     -1: bnicholes
     bnicholes: The patch appears to be dependant on rev. 1478 in trunk which
       is not included in the backport proposal.
-
-  * gmond: reformat memory metrics to match pre 3.1 style
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1737
-    +1: carenas, hawson
 
   * gmetad: skip unresponsive sources
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=92
