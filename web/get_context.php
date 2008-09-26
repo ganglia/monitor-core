@@ -23,8 +23,8 @@ $sort = isset($_GET["s"]) ?
 	escapeshellcmd( clean_string( rawurldecode($_GET["s"]) ) ) : NULL;
 $controlroom = isset($_GET["cr"]) ?
 	clean_number( rawurldecode($_GET["cr"]) ) : NULL;
-$hostcols = isset($_GET["hc"]) ?
-	clean_number( $_GET["hc"] ) : NULL;
+if (isset($_GET["hc"]))
+	$hostcols = clean_number($_GET["hc"]);
 # Flag, whether or not to show a list of hosts
 $showhosts = isset($_GET["sh"]) ?
 	clean_number( $_GET["sh"] ) : NULL;
@@ -62,7 +62,7 @@ if ( !isset($gridstack) or !strstr($gridstack[0], "http://"))
     $initgrid = TRUE;
 
 # Default values
-if (!is_numeric($hostcols)) $hostcols = 4;
+if (!isset($hostcols) || !is_numeric($hostcols)) $hostcols = 4;
 if (!is_numeric($showhosts)) $showhosts = 1;
 
 # Set context.

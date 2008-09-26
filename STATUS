@@ -34,6 +34,7 @@ CURRENT RELEASE NOTES:
   * web: add boolean option for using hostname without domainname for graphs
   * web: add host atrributes into metric list (BUG30)
   * web: metric group enhancements for host view (BUG203)
+  * web: add option for configurable number of columns in cluster view (BUG194)
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -58,12 +59,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
     +1: carenas
     carenas: suboptimal fix, autoconf instead to handle Solaris>=10 better
-
-  * web: allow for configuring number of columns in grid view
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1582
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1719
-    +1: carenas, hawson
 
   * web: make number of metric columns in host view configurable
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=194
