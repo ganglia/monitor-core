@@ -1038,7 +1038,11 @@ int dotconf_handle_question_mark(command_t* cmd, char* path, char* pre, char* ex
 					strncpy(new_pre,dirptr->d_name,(name_len > pre_len)?(pre_len+1):pre_len);
 					new_pre[(name_len > pre_len)?(pre_len+1):pre_len] = '\0';
 
+#ifdef HAVE_SNPRINTF
+					snprintf(new_path, new_path_len, "%s%s%s", path, new_pre, ext);
+#else
 					sprintf(new_path,"%s%s%s",path,new_pre,ext);
+#endif
 
 					if (strcmp(new_path,already_matched) == 0)
 					{
@@ -1219,7 +1223,11 @@ int dotconf_handle_star(command_t* cmd, char* path, char* pre, char* ext)
 					strcat(new_pre,new_ext);
 #endif
 
+#ifdef HAVE_SNPRINTF
+					snprintf(new_path, new_path_len, "%s%s%s",path, new_pre, t_ext);
+#else
 					sprintf(new_path,"%s%s%s",path,new_pre,t_ext);
+#endif
 
 					if (strcmp(new_path,already_matched) == 0)
 					{
@@ -1250,7 +1258,11 @@ int dotconf_handle_star(command_t* cmd, char* path, char* pre, char* ext)
 
 				}
 
+#ifdef HAVE_SNPRINTF
+				snprintf(new_path, new_path_len, "%s%s", path, dirptr->d_name);
+#else
 				sprintf(new_path,"%s%s",path,dirptr->d_name);
+#endif
 
 				if (access(new_path, R_OK))
 				{
