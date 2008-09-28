@@ -24,12 +24,12 @@ get_min_mtu( void )
 
       if ((ifRow -> dwType != MIB_IF_TYPE_LOOPBACK) && (ifRow -> dwOperStatus ==MIB_IF_OPER_STATUS_OPERATIONAL)) {
         if (min_mtu) {
-	  if (ifRow -> dwMtu < min_mtu) {
-	    min_mtu = ifRow -> dwMtu;
-	  }
-	} else {
-	  min_mtu = ifRow -> dwMtu;
-	}
+          if (ifRow -> dwMtu < min_mtu) {
+            min_mtu = ifRow -> dwMtu;
+          }
+        } else {
+          min_mtu = ifRow -> dwMtu;
+        }
       }
     }
     free(ifTable);
@@ -48,7 +48,7 @@ get_min_mtu( void )
 
   for(n = info; n; n = n->ifi_next)
     {
-      if(!min_mtu_set) 
+      if(!min_mtu_set)
         {
           min_mtu = n->ifi_mtu;
           min_mtu_set = 1;
