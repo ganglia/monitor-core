@@ -302,7 +302,7 @@
      </xsl:choose>
     </xsl:variable>
     <!-- filter on all entries within directory -->
-    <xsl:for-each select="path[starts-with(concat(normalize-space(.),'/'),concat($tmpstrip2,'/'))]">
+    <xsl:for-each select="path[starts-with(concat(normalize-space(.),'/'),concat($tmpstrip2,'/')) and (not(contains(., 'STATUS') and not(count(../path) = 1)))]">
      <xsl:sort select="normalize-space(.)" data-type="text" />
      <!-- unless we are the first entry, add a comma -->
      <xsl:if test="not(position()=1)">
@@ -320,7 +320,7 @@
    </xsl:when>
    <!-- print a simple list of all paths -->
    <xsl:otherwise>
-    <xsl:for-each select="path">
+    <xsl:for-each select="path[not(contains(., 'STATUS') and not(count(../path) = 1))]">
      <xsl:sort select="normalize-space(.)" data-type="text" />
      <!-- unless we are the first entry, add a comma -->
      <xsl:if test="not(position()=1)">
