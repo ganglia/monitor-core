@@ -11,6 +11,7 @@
    inside xml comments):
      svn ++verbose ++xml log | \
        xsltproc ++stringparam strip-prefix `basename $(pwd)` \
+                ++stringparam alternate-strip-prefix \
                 ++stringparam linelen 75 \
                 ++stringparam groupbyday yes \
                 ++stringparam separate-daylogs yes \
@@ -77,6 +78,9 @@
 
  <!-- the prefix of pathnames to strip -->
  <xsl:param name="strip-prefix" select="'/'" />
+
+ <!-- an altenate prefix of pathnames to strip -->
+ <xsl:param name="alternate-strip-prefix" select="no" />
 
  <!-- the length of a line to wrap messages at -->
  <xsl:param name="linelen" select="75" />
@@ -302,16 +306,25 @@
      </xsl:choose>
     </xsl:variable>
     <!-- filter on all entries within directory -->
-    <xsl:for-each select="path[starts-with(concat(normalize-space(.),'/'),concat($tmpstrip2,'/')) and (not(contains(., 'STATUS') and not(count(../path) = 1)))]">
+    <xsl:for-each select="path[(starts-with(concat(normalize-space(.),'/'),concat($tmpstrip2,'/')) or starts-with(normalize-space(.),$alternate-strip-prefix)) and (not(contains(., 'STATUS') and not(count(../path) = 1)))]">
      <xsl:sort select="normalize-space(.)" data-type="text" />
      <!-- unless we are the first entry, add a comma -->
      <xsl:if test="not(position()=1)">
       <xsl:text>,&space;</xsl:text>
      </xsl:if>
      <!-- print the path name -->
-     <xsl:call-template name="printpath">
-      <xsl:with-param name="path" select="substring(normalize-space(.),string-length($strip-prefix)+3)" />
-     </xsl:call-template>
+     <xsl:choose>
+      <xsl:when test="$alternate-strip-prefix != 'no' and starts-with(normalize-space(.),$alternate-strip-prefix)">
+       <xsl:call-template name="printpath">
+        <xsl:with-param name="path" select="substring(normalize-space(.),string-length($alternate-strip-prefix))" />
+       </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+       <xsl:call-template name="printpath">
+        <xsl:with-param name="path" select="substring(normalize-space(.),string-length($strip-prefix)+3)" />
+       </xsl:call-template>
+      </xsl:otherwise>
+     </xsl:choose>
      <!-- add the action flag -->
      <xsl:if test="$include-actions='yes'">
       <xsl:apply-templates select="." mode="action"/>
