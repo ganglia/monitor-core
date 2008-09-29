@@ -41,6 +41,7 @@ VERSION="0.10"
 # set default parameters
 PWD=`pwd`
 STRIPPREFIX="AUTOMATICALLY-DETERMINED"
+ALTERNATESTRIPPREFIX="no"
 LINELEN=75
 GROUPBYDAY="no"
 INCLUDEREV="no"
@@ -69,6 +70,10 @@ do
       ;;
     --strip-prefix=*)
       STRIPPREFIX=`echo "$1" | sed 's/^--[a-z-]*=//'`
+      shift
+      ;;
+    --alternate-strip-prefix=*)
+      ALTERNATESTRIPPREFIX=`echo "$1" | sed 's/^--[a-z-]*=//'`
       shift
       ;;
     --linelen)
@@ -211,6 +216,11 @@ do
       echo ""
       echo "  --strip-prefix=NAME  prefix to strip from all entries, defaults"
       echo "                       path inside the repository"
+      echo "  --alternate-strip-prefix=NAME alternate prefix to strip from all"
+      echo "                                entries; useful to avoid filtering"
+      echo "                                entries that don't match the strip"
+      echo "                                prefix because they were in a"
+      echo "                                different branch originally"
       echo "  --linelen=NUM        maximum length of an output line"
       echo "  --group-by-day       group changelog entries by day"
       echo "  --separate-daylogs   put a blank line between grouped by day entries"
@@ -310,6 +320,7 @@ fi
 # actually run the command we need
 eval "$SVNLOGCMD" | \
   xsltproc --stringparam strip-prefix "$STRIPPREFIX" \
+           --stringparam alternate-strip-prefix "$ALTERNATESTRIPPREFIX" \
            --stringparam linelen "$LINELEN" \
            --stringparam groupbyday "$GROUPBYDAY" \
            --stringparam separate-daylogs "$SEPARATEDAYLOGS" \
