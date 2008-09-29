@@ -199,7 +199,7 @@ typedef struct Ganglia_collection_group Ganglia_collection_group;
 apr_array_header_t *collection_groups = NULL;
 
 mmodule *metric_modules = NULL;
-extern int daemon_proc;     /* defined in error.c */
+extern int daemon_proc; /* defined in error.c */
 
 /* this is just a temporary function */
 void
@@ -515,7 +515,7 @@ setup_listen_channels_pollset( int reset )
       if( mcast_join )
         {
           /* Listen on the specified multicast channel */
-          if (reset) {	   /* network reset? rejoin existing socket */
+          if (reset) { /* network reset? rejoin existing socket */
               join_mcast(pool, socket, mcast_join, port, mcast_if);
               return;
           } else
@@ -2623,7 +2623,7 @@ main ( int argc, char *argv[] )
 
       if(!deaf)
         {
-	  /* if we went deaf, re-subscribe to the multicast channel */
+          /* if we went deaf, re-subscribe to the multicast channel */
           if ((now - udp_last_heard) > 60 * APR_USEC_PER_SEC)
               setup_listen_channels_pollset(1);
 
