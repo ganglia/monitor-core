@@ -3,9 +3,10 @@ SUBDIRS = modules python_modules
 EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
 if STATIC_BUILD
 GCFLAGS = -D_LARGEFILE64_SOURCE
-GLDADD = modules/disk/mod_disk.lo modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
-	modules/memory/mod_mem.lo modules/network/mod_net.lo \
-	modules/system/mod_proc.lo modules/system/mod_sys.lo
+GLDADD = modules/disk/mod_disk.lo \
+         modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
+         modules/memory/mod_mem.lo modules/network/mod_net.lo \
+         modules/system/mod_proc.lo modules/system/mod_sys.lo
 GLDFLAGS = -static @EXPORT_SYMBOLS@
 if BUILD_PYTHON
 GLDADD += modules/python/mod_python.lo
@@ -34,12 +35,11 @@ gmond.conf.html: conf.pod
 
 #monitor.c server.c listen.c cleanup.c \
 #metric.h dtd.h 
-gmond_LDADD   = $(top_builddir)/libmetrics/libmetrics.la \
-		$(top_builddir)/lib/libganglia.la \
-	        $(top_builddir)/lib/libgetopthelper.a \
-		$(GLDADD)
+gmond_LDADD = $(top_builddir)/libmetrics/libmetrics.la \
+              $(top_builddir)/lib/libganglia.la \
+              $(top_builddir)/lib/libgetopthelper.a \
+              $(GLDADD)
 
 gmond_DEPENDENCIES = $(gmond_LDADD)
 
 gmond_LDFLAGS = $(GLDFLAGS)
-
