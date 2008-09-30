@@ -96,20 +96,6 @@ static apr_array_header_t *metric_info = NULL;
 static apr_array_header_t *metric_mapping_info = NULL;
 static apr_status_t pyth_metric_cleanup ( void *data);
 
-static void set_python_path(const char* path)
-{
-    const char* p;
-    char pathbuf[PATH_MAX];
-
-    strcpy(pathbuf, "PYTHONPATH=");
-    if ((p = getenv("PYTHONPATH"))) {
-        strcat(pathbuf, p);
-        strcat(pathbuf, ":");
-    }
-    strcat(pathbuf, path);
-    putenv(pathbuf);
-}
-
 char modname_bfr[PATH_MAX];
 static char* is_python_module(const char* fname)
 {
@@ -585,8 +571,12 @@ static int pyth_metric_init (apr_pool_t *p)
     /* Init Python environment */
 
     /* Set up the python path to be able to load module from our module path */
-    set_python_path(path);
     Py_Initialize();
+
+    PyObject *sys_path = PySys_GetObject("path");
+    PyObject *addpath = PyString_FromString(path);
+    PyList_Append(sys_path, addpath);
+
     PyEval_InitThreads();
     gtstate = PyEval_SaveThread();
 
