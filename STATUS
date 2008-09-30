@@ -151,6 +151,13 @@ BACKPORT PROPOSALS:
     +1: carenas
     carenas: r1741 only needed to align white space fixes to prevent conflicts
 
+  * mod_python: Change the way that the python module path is added to better
+     support the Solaris platform.  It is also a cleaner way to add the
+     python path programatically rather than altering the PYTHON_PATH
+     environment variable.
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1840
+    +1: bnicholes
+
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
   haven't been tested enough to be considered for a stable release.
