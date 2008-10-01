@@ -111,11 +111,7 @@ foreach ( $sorted_sources as $source => $val )
       $cluster_load1 = sprintf("%.0f", ((double) $m["load_one"]['SUM'] / $cpu_num) * 100);
       $cluster_load = "$cluster_load15%, $cluster_load5%, $cluster_load1%";
 
-      if (isset($grid[$source]['GRID']) and $grid[$source]['GRID']) {
-         $clusname = '';
-      } else {
-         $clusname = $source;
-      }
+      $clusname = $source == $self ? '' : $source;
       $avg_cpu_num = find_avg($clusname, "", "cpu_num");
       if ($avg_cpu_num == 0) $avg_cpu_num = 1;
       $cluster_util = sprintf("%.0f", ((double) find_avg($clusname, "", "load_one") / $avg_cpu_num ) * 100);
