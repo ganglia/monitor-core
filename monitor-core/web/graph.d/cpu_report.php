@@ -47,17 +47,23 @@ function graph_cpu_report ( &$rrdtool_graph ) {
             . "CDEF:'ccpu_system'=cpu_system,num_nodes,/ "
             . "DEF:'cpu_idle'='${rrd_dir}/cpu_idle.rrd':'sum':AVERAGE "
             . "CDEF:'ccpu_idle'=cpu_idle,num_nodes,/ "
-            . "AREA:'ccpu_user'#$cpu_user_color:'User CPU' "
-            . "STACK:'ccpu_nice'#$cpu_nice_color:'Nice CPU' "
-            . "STACK:'ccpu_system'#$cpu_system_color:'System CPU' ";
+            . "AREA:'ccpu_user'#$cpu_user_color:'User' "
+            . "'GPRINT:ccpu_user:AVERAGE:%.1lf%%' "
+            . "STACK:'ccpu_nice'#$cpu_nice_color:'Nice' "
+            . "'GPRINT:ccpu_nice:AVERAGE:%.1lf%%' "
+            . "STACK:'ccpu_system'#$cpu_system_color:'System' "
+            . "'GPRINT:ccpu_system:AVERAGE:%.1lf%%' ";
 
         if (file_exists("$rrd_dir/cpu_wio.rrd")) {
             $series .= "DEF:'cpu_wio'='${rrd_dir}/cpu_wio.rrd':'sum':AVERAGE "
                 ."CDEF:'ccpu_wio'=cpu_wio,num_nodes,/ "
-                ."STACK:'ccpu_wio'#$cpu_wio_color:'WAIT CPU' ";
+                ."STACK:'ccpu_wio'#$cpu_wio_color:'WAIT' "
+                ."'GPRINT:ccpu_wio:AVERAGE:%.1lf%%' ";
         }
 
-        $series .= "STACK:'ccpu_idle'#$cpu_idle_color:'Idle CPU' ";
+        $series .= "STACK:'ccpu_idle'#$cpu_idle_color:'Idle' ";
+        $series .= "'GPRINT:ccpu_idle:AVERAGE:%.1lf%%' ";
+        $series .= "CDEF:util=100,ccpu_idle,- ";
 
     } else {
 
@@ -67,17 +73,24 @@ function graph_cpu_report ( &$rrdtool_graph ) {
         ."DEF:'cpu_nice'='${rrd_dir}/cpu_nice.rrd':'sum':AVERAGE "
         ."DEF:'cpu_system'='${rrd_dir}/cpu_system.rrd':'sum':AVERAGE "
         ."DEF:'cpu_idle'='${rrd_dir}/cpu_idle.rrd':'sum':AVERAGE "
-        ."AREA:'cpu_user'#$cpu_user_color:'User CPU' "
-        ."STACK:'cpu_nice'#$cpu_nice_color:'Nice CPU' "
-        ."STACK:'cpu_system'#$cpu_system_color:'System CPU' ";
+        ."AREA:'cpu_user'#$cpu_user_color:'User' "
+        ."'GPRINT:cpu_user:AVERAGE:%.1lf%%' "
+        ."STACK:'cpu_nice'#$cpu_nice_color:'Nice' "
+        ."'GPRINT:cpu_nice:AVERAGE:%.1lf%%' "
+        ."STACK:'cpu_system'#$cpu_system_color:'System' "
+        ."'GPRINT:cpu_system:AVERAGE:%.1lf%%' ";
 
         if (file_exists("$rrd_dir/cpu_wio.rrd")) {
             $series .= "DEF:'cpu_wio'='${rrd_dir}/cpu_wio.rrd':'sum':AVERAGE ";
-            $series .= "STACK:'cpu_wio'#$cpu_wio_color:'WAIT CPU' ";
+            $series .= "STACK:'cpu_wio'#$cpu_wio_color:'WAIT' ";
+            $series .= "'GPRINT:cpu_wio:AVERAGE:%.1lf%%' ";
         }
 
-        $series .= "STACK:'cpu_idle'#$cpu_idle_color:'Idle CPU' ";
+        $series .= "STACK:'cpu_idle'#$cpu_idle_color:'Idle' ";
+        $series .= "'GPRINT:cpu_idle:AVERAGE:%.1lf%%' ";
+        $series .= "CDEF:util=100,cpu_idle,- ";
     }
+    $series .= "'GPRINT:util:AVERAGE:(%.1lf%% Avg Usage)' ";
 
     $rrdtool_graph['series'] = $series;
 
