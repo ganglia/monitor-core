@@ -18,7 +18,7 @@ function graph_network_report ( &$rrdtool_graph ) {
     }
 
     $title = 'Network';
-    $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
+    $rrdtool_graph['height'] += ($size == 'medium') ? 14 : 0;
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {
@@ -31,7 +31,13 @@ function graph_network_report ( &$rrdtool_graph ) {
     $series = "DEF:'bytes_in'='${rrd_dir}/bytes_in.rrd':'sum':AVERAGE "
        ."DEF:'bytes_out'='${rrd_dir}/bytes_out.rrd':'sum':AVERAGE "
        ."LINE2:'bytes_in'#$mem_cached_color:'In' "
-       ."LINE2:'bytes_out'#$mem_used_color:'Out' ";
+       ."'GPRINT:bytes_in:MIN:(%.1lf %s Min' "
+       ."'GPRINT:bytes_in:AVERAGE:%.1lf %s Avg' "
+       ."'GPRINT:bytes_in:MAX:%.1lf %s Max)\\j' "
+       ."LINE2:'bytes_out'#$mem_used_color:'Out' "
+       ."'GPRINT:bytes_out:MIN:(%.1lf %s Min' "
+       ."'GPRINT:bytes_out:AVERAGE:%.1lf %s Avg' "
+       ."'GPRINT:bytes_out:MAX:%.1lf %s Max)\\j' ";
 
     $rrdtool_graph['series'] = $series;
 
