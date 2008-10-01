@@ -342,6 +342,7 @@ cd gmetad-python
 %{_libdir}/ganglia/modsys.so*
 
 %files gmond-modules-python
+%defattr(-,root,root,-)
 %dir %{_libdir}/ganglia/python_modules/
 %{_libdir}/ganglia/python_modules/*.py*
 %{_libdir}/ganglia/modpython.so*
@@ -405,6 +406,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Oct 01 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- Add missing defattr for gmond-modules-python
 * Wed Jul 30 2008 Bernard Li <bernard@vanhpc.org>
 - Add make to BuildRequires
 * Sun Jul 20 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
