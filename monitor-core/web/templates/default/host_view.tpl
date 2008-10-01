@@ -64,7 +64,7 @@ function toggleLayer( whichLayer )
 <IMG BORDER=0 ALT="{cluster_url} LOAD"
    SRC="./graph.php?g=load_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
 </A>
-<A HREF="./graph.phpg=mem_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
+<A HREF="./graph.php?g=mem_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
 <IMG BORDER=0 ALT="{cluster_url} MEM"
    SRC="./graph.php?g=mem_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
 </A>
