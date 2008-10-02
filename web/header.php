@@ -320,7 +320,7 @@ if ($context == "physical" or $context == "cluster")
       # Present a width list
       $cols_menu = "<SELECT NAME=\"hc\" OnChange=\"ganglia_form.submit();\">\n";
 
-      foreach(range(1,25) as $cols)
+      foreach(range(0,25) as $cols)
          {
             $cols_menu .= "<OPTION VALUE=$cols ";
             if ($cols == $hostcols)

@@ -19,7 +19,10 @@ if (!$showhosts) {
   }
 else {
   if(array_key_exists($metricname, $metrics[key($metrics)]))
-     $units = $metrics[key($metrics)][$metricname]['UNITS'];
+     if (isset($metrics[key($metrics)][$metricname]['UNITS']))
+        $units = $metrics[key($metrics)][$metricname]['UNITS'];
+     else
+        $units = '';
   }
 
 if(isset($cluster['HOSTS_UP'])) {
@@ -215,24 +218,31 @@ foreach ( $sorted_hosts as $host => $value )
                     $always_constant[$metricname] or
                     ($max_graphs > 0 and $i > $max_graphs )))
                {
-                  $textval = "$val[VAL] $val[UNITS]";
-               }
-            else
-               {
-                  $load_color = load_color($host_load[$host]);
-                  $size = isset($clustergraphsize) ? $clustergraphsize : 'small';
-                  $graphargs = (isset($reports[$metricname]) and
-                                $reports[$metricname]) ?
-                        "g=$metricname&amp;" : "m=$metricname&amp;";
-                  $graphargs .= "z=$size&amp;c=$cluster_url&amp;h=$host_url"
-                     ."&amp;l=$load_color&amp;v=$val[VAL]&amp;x=$max&amp;n=$min"
-                     ."&amp;r=$range&amp;su=1&amp;st=$cluster[LOCALTIME]";
-                  if ($cs)
-                     $graphargs .= "&amp;cs=" . rawurlencode($cs);
-                  if ($ce)
-                     $graphargs .= "&amp;ce=" . rawurlencode($ce);
+                  $textval = "$val[VAL]";
+                  if (isset($val['UNITS']))
+                     $textval .= " $val[UNITS]";
                }
          }
+
+      $size = isset($clustergraphsize) ? $clustergraphsize : 'small';
+
+      if ($hostcols == 0) # enforce small size in multi-host report
+         $size = 'small';
+
+      $graphargs = "z=$size&amp;c=$cluster_url&amp;h=$host_url";
+
+      if (isset($host_load[$host])) {
+         $load_color = load_color($host_load[$host]);
+         $graphargs .= "&amp;l=$load_color&amp;v=$val[VAL]";
+      }
+      $graphargs .= "&amp;r=$range&amp;su=1&amp;st=$cluster[LOCALTIME]";
+      if ($cs)
+         $graphargs .= "&amp;cs=" . rawurlencode($cs);
+      if ($ce)
+         $graphargs .= "&amp;ce=" . rawurlencode($ce);
+
+      if ($showhosts == 1)
+         $graphargs .= "&amp;x=$max&amp;n=$min";
 
       if ($textval)
          {
@@ -242,10 +252,20 @@ foreach ( $sorted_hosts as $host => $value )
          }
       else
          {
-            $cell="<td><a href=$host_link>".
-               "<img src=\"./graph.php?$graphargs\" ".
-               "alt=\"$host\" border=0></a></td>";
+            $cell="<td><a href=$host_link><img src=\"./graph.php?";
+            $cell .= (isset($reports[$metricname]) and $reports[$metricname])
+               ? "g=$metricname" : "m=$metricname";
+            $cell .= "&amp;$graphargs\" alt=\"$host\" border=0></a></td>";
          }
+
+      if ($hostcols == 0) {
+         $pre = "<td><a href=$host_link><img src=\"./graph.php?g=";
+         $post = "&amp;$graphargs\" alt=\"$host\" border=0></a></td>";
+         $cell .= $pre . "load_report" . $post;
+         $cell .= $pre . "mem_report" . $post;
+         $cell .= $pre . "cpu_report" . $post;
+         $cell .= $pre . "network_report" . $post;
+      }
 
       $tpl->assign("metric_image", $cell);
       if (! ($i++ % $hostcols) )
