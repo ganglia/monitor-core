@@ -57,9 +57,10 @@
 <TR>
   <TD CLASS=title COLSPAN="2"> 
   <FONT SIZE="-1">
-  Show Hosts:
-  yes<INPUT type=radio name="sh" value="1" OnClick="ganglia_form.submit();" {checked1}>
-  no<INPUT type=radio name="sh" value="0" OnClick="ganglia_form.submit();" {checked0}>
+  Show Hosts Scaled:
+  Auto<INPUT type=radio name="sh" value="2" OnClick="ganglia_form.submit();" {checked2}>
+  Same<INPUT type=radio name="sh" value="1" OnClick="ganglia_form.submit();" {checked1}>
+  None<INPUT type=radio name="sh" value="0" OnClick="ganglia_form.submit();" {checked0}>
   </FONT>
   |
   {cluster} <strong>{metric}</strong>
@@ -68,8 +69,8 @@
 <!-- START BLOCK : columns_size_dropdown -->
   |
    <FONT SIZE="-1">
-   Columns&nbsp;&nbsp;{cols_menu}
    Size&nbsp;&nbsp;{size_menu}
+   Columns&nbsp;&nbsp;{cols_menu} (0 = metric + reports)
    </FONT>
 <!-- END BLOCK : columns_size_dropdown -->
   </TD>
