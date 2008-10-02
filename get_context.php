@@ -79,7 +79,7 @@ if(!$clustername && !$hostname && $controlroom)
    {
       $context = "control";
    }
-else if ($tree)
+else if (isset($tree))
    {
       $context = "tree";
    }
