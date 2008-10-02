@@ -48,24 +48,27 @@ function graph_mem_report ( &$rrdtool_graph ) {
         ."STACK:'bmem_shared'#$mem_shared_color:'Shared' "
         ."'GPRINT:bmem_shared:AVERAGE:$fmt%S' "
         ."STACK:'bmem_cached'#$mem_cached_color:'Cached' "
-        ."'GPRINT:bmem_cached:AVERAGE:$fmt%S' "
+        ."'GPRINT:bmem_cached:AVERAGE:$fmt%S\\l' "
         ."STACK:'bmem_buffers'#$mem_buffered_color:'Buffered' "
-        ."'GPRINT:bmem_buffers:AVERAGE:$fmt%S' "
-        ."CDEF:util=bmem_total,bmem_free,-,bmem_total,/,100,* "
-        ."'GPRINT:util:AVERAGE:($fmt%% Utilized)' ";
+        ."'GPRINT:bmem_buffers:AVERAGE:$fmt%S' ";
 
     if (file_exists("$rrd_dir/swap_total.rrd")) {
         $series .= "DEF:'swap_total'='${rrd_dir}/swap_total.rrd':'sum':AVERAGE "
             ."DEF:'swap_free'='${rrd_dir}/swap_free.rrd':'sum':AVERAGE "
             ."CDEF:'bmem_swapped'='swap_total','swap_free',-,1024,* "
             ."STACK:'bmem_swapped'#$mem_swapped_color:'Swapped' "
-            ."'GPRINT:bmem_swapped:AVERAGE:$fmt%S' "
-            ."'CDEF:swap_util=bmem_total,bmem_free,-,bmem_swapped,+,bmem_total,/,100,*' "
-            ."'GPRINT:swap_util:AVERAGE:($fmt%% w/Virt)' ";
+            ."'GPRINT:bmem_swapped:AVERAGE:$fmt%S\\l' ";
     }
 
     $series .= "LINE2:'bmem_total'#$cpu_num_color:'Total In-Core' ";
-    $series .= "'GPRINT:bmem_total:AVERAGE:$fmt%S' ";
+    $series .= "'GPRINT:bmem_total:AVERAGE:$fmt%S' "
+            .  "CDEF:util=bmem_total,bmem_free,-,bmem_total,/,100,* "
+            .  "'GPRINT:util:AVERAGE:($fmt%% Util)' ";
+            
+    if (file_exists("$rrd_dir/swap_total.rrd")) {
+        $series .= "'CDEF:swap_util=bmem_total,bmem_free,-,bmem_swapped,-,bmem_total,swap_total,+,/,100,*' "
+                .  "'GPRINT:swap_util:AVERAGE:($fmt%% w/Swap)\\l' ";
+    }
 
     $rrdtool_graph['series'] = $series;
 

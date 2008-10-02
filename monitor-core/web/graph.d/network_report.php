@@ -18,7 +18,7 @@ function graph_network_report ( &$rrdtool_graph ) {
     }
 
     $title = 'Network';
-    $rrdtool_graph['height'] += ($size == 'medium') ? 14 : 0;
+    $rrdtool_graph['height'] += ($size != 'small' ) ? 14 : 0;
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {
