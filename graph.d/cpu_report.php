@@ -19,7 +19,7 @@ function graph_cpu_report ( &$rrdtool_graph ) {
        $hostname = strip_domainname($hostname);
     }
 
-    $rrdtool_graph['height'] += ($size == 'medium') ? 14 : 0;
+    $rrdtool_graph['height'] += ($size != 'small') ? 14 : 0;
     $title = 'CPU';
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
@@ -31,7 +31,7 @@ function graph_cpu_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'Percent';
     $rrdtool_graph['extras']         = '--rigid';
 
-    $fmt = '%.1lf';
+    $fmt = '%5.1lf';
 
     if($context != "host" ) {
 
@@ -54,12 +54,12 @@ function graph_cpu_report ( &$rrdtool_graph ) {
             . "STACK:'ccpu_nice'#$cpu_nice_color:'Nice' "
             . "'GPRINT:ccpu_nice:AVERAGE:$fmt%%' "
             . "STACK:'ccpu_system'#$cpu_system_color:'System' "
-            . "'GPRINT:ccpu_system:AVERAGE:$fmt%%' ";
+            . "'GPRINT:ccpu_system:AVERAGE:$fmt%%\\l' ";
 
         if (file_exists("$rrd_dir/cpu_wio.rrd")) {
             $series .= "DEF:'cpu_wio'='${rrd_dir}/cpu_wio.rrd':'sum':AVERAGE "
                 ."CDEF:'ccpu_wio'=cpu_wio,num_nodes,/ "
-                ."STACK:'ccpu_wio'#$cpu_wio_color:'WAIT' "
+                ."STACK:'ccpu_wio'#$cpu_wio_color:'Wait' "
                 ."'GPRINT:ccpu_wio:AVERAGE:$fmt%%' ";
         }
 
@@ -80,7 +80,7 @@ function graph_cpu_report ( &$rrdtool_graph ) {
         ."STACK:'cpu_nice'#$cpu_nice_color:'Nice' "
         ."'GPRINT:cpu_nice:AVERAGE:$fmt%%' "
         ."STACK:'cpu_system'#$cpu_system_color:'System' "
-        ."'GPRINT:cpu_system:AVERAGE:$fmt%%' ";
+        ."'GPRINT:cpu_system:AVERAGE:$fmt%%\\l' ";
 
         if (file_exists("$rrd_dir/cpu_wio.rrd")) {
             $series .= "DEF:'cpu_wio'='${rrd_dir}/cpu_wio.rrd':'sum':AVERAGE ";
@@ -92,7 +92,7 @@ function graph_cpu_report ( &$rrdtool_graph ) {
         $series .= "'GPRINT:cpu_idle:AVERAGE:$fmt%%' ";
         $series .= "CDEF:util=100,cpu_idle,- ";
     }
-    $series .= "'GPRINT:util:AVERAGE:($fmt%% Avg Usage)' ";
+    $series .= "'GPRINT:util:AVERAGE:($fmt%% Avg Usage)\\l' ";
 
     $rrdtool_graph['series'] = $series;
 
