@@ -57,18 +57,15 @@ function graph_mem_report ( &$rrdtool_graph ) {
             ."DEF:'swap_free'='${rrd_dir}/swap_free.rrd':'sum':AVERAGE "
             ."CDEF:'bmem_swapped'='swap_total','swap_free',-,1024,* "
             ."STACK:'bmem_swapped'#$mem_swapped_color:'Swapped' "
-            ."'GPRINT:bmem_swapped:AVERAGE:$fmt%S\\l' ";
+            ."'GPRINT:bmem_swapped:AVERAGE:$fmt%S' "
+            ."'CDEF:swap_util=swap_total,swap_free,-,swap_total,/,100,*' "
+            ."'GPRINT:swap_util:AVERAGE:($fmt%% of Swap)\\l' ";
     }
 
     $series .= "LINE2:'bmem_total'#$cpu_num_color:'Total In-Core' ";
     $series .= "'GPRINT:bmem_total:AVERAGE:$fmt%S' "
-            .  "CDEF:util=bmem_total,bmem_free,-,bmem_total,/,100,* "
-            .  "'GPRINT:util:AVERAGE:($fmt%% Util)' ";
-            
-    if (file_exists("$rrd_dir/swap_total.rrd")) {
-        $series .= "'CDEF:swap_util=bmem_total,bmem_free,-,bmem_swapped,-,bmem_total,swap_total,+,/,100,*' "
-                .  "'GPRINT:swap_util:AVERAGE:($fmt%% w/Swap)\\l' ";
-    }
+            .  "'CDEF:util=bmem_total,bmem_free,-,bmem_total,/,100,*' "
+            .  "'GPRINT:util:AVERAGE:($fmt%% Real Memory Used)\\l' ";
 
     $rrdtool_graph['series'] = $series;
 
