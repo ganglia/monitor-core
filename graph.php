@@ -189,6 +189,11 @@ if (!array_key_exists('series', $rrdtool_graph) || !strlen($rrdtool_graph['serie
     exit();
 }
 
+# Make small graphs (host list) cleaner by removing the too-big
+# legend: it is displayed above on larger cluster summary graphs.
+if ($size == "small" and ! isset($subtitle))
+    $rrdtool_graph['extras'] = "-g";
+
 $command = RRDTOOL . " graph - ";
 
 // The order of the other arguments isn't important, except for the
