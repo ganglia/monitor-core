@@ -30,30 +30,32 @@ function graph_load_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'Load/Procs';
     $rrdtool_graph['extras']         = '--rigid';
 
+    $fmt = '%.1lf';
+
     $series = "DEF:'load_one'='${rrd_dir}/load_one.rrd':'sum':AVERAGE "
         ."DEF:'proc_run'='${rrd_dir}/proc_run.rrd':'sum':AVERAGE "
         ."DEF:'cpu_num'='${rrd_dir}/cpu_num.rrd':'sum':AVERAGE ";
 
     $series .="AREA:'load_one'#$load_one_color:'1-min Load' ";
-    $series .="'GPRINT:load_one:AVERAGE:%.1lf' ";
+    $series .="'GPRINT:load_one:AVERAGE:$fmt' ";
     $series .="CDEF:util=load_one,cpu_num,/,100,* ";
-    $series .="'GPRINT:util:AVERAGE:(%.1lf%%)' ";
+    $series .="'GPRINT:util:AVERAGE:($fmt%%)' ";
 
     if( $context != 'host' ) {
         $series .="DEF:'num_nodes'='${rrd_dir}/cpu_num.rrd':'num':AVERAGE ";
         $series .= "LINE2:'num_nodes'#$num_nodes_color:'Nodes' ";
-        $series .= "'GPRINT:num_nodes:AVERAGE:%.1lf' ";
+        $series .= "'GPRINT:num_nodes:AVERAGE:$fmt' ";
         $proc_label = 'Running';
     } else {
         $proc_label = 'Running Processes';
     }
 
     $series .="LINE2:'cpu_num'#$cpu_num_color:'CPUs' ";
-    $series .="'GPRINT:cpu_num:AVERAGE:%.1lf' ";
+    $series .="'GPRINT:cpu_num:AVERAGE:$fmt' ";
     $series .="LINE2:'proc_run'#$proc_run_color:'$proc_label' ";
-    $series .="'GPRINT:proc_run:AVERAGE:%.1lf' ";
+    $series .="'GPRINT:proc_run:AVERAGE:$fmt' ";
     $series .="CDEF:util2=proc_run,cpu_num,/,100,* ";
-    $series .="'GPRINT:util2:AVERAGE:(%.1lf%%)' ";
+    $series .="'GPRINT:util2:AVERAGE:($fmt%%)' ";
 
     $rrdtool_graph['series'] = $series;
 
