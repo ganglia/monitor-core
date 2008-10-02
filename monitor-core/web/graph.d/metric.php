@@ -112,16 +112,17 @@ function graph_metric ( &$rrdtool_graph ) {
     //# the actual graph...
     $series  = "DEF:'sum'='$rrd_dir/$metricname.rrd:sum':AVERAGE ";
     $series .= "AREA:'sum'#$default_metric_color:'$subtitle_one'";
-    $series .= ":STACK: COMMENT:'$subtitle_two' ";
+    $series .= ":STACK: COMMENT:'$subtitle_two\\l' ";
 
     if ($jobstart) {
         $series .= "VRULE:$jobstart#$jobstart_color ";
     }
     if ($size != "small") {
-        $series .= "'GPRINT:sum:LAST:%.1lf %S Last\\r' ";
-        $series .= "'GPRINT:sum:MIN:(%.1lf %S Min' ";
-        $series .= "'GPRINT:sum:AVERAGE:%.1lf %S Avg' ";
-        $series .= "'GPRINT:sum:MAX:%.1lf %S Max)\\r' ";
+        $fmt = '%.1lf';
+        $series .= "'GPRINT:sum:MIN:(Min\:$fmt%s' ";
+        $series .= "'GPRINT:sum:AVERAGE:Avg\:$fmt%s' ";
+        $series .= "'GPRINT:sum:MAX:Max\:$fmt%s)' ";
+        $series .= "'GPRINT:sum:LAST:Last\:$fmt%s\\l' ";
     }
     $rrdtool_graph['series'] = $series;
 

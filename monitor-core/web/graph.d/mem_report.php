@@ -30,6 +30,8 @@ function graph_mem_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'Bytes';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
 
+    $fmt = '%.1lf';
+
     $series = "DEF:'mem_total'='${rrd_dir}/mem_total.rrd':'sum':AVERAGE "
         ."CDEF:'bmem_total'=mem_total,1024,* "
         ."DEF:'mem_shared'='${rrd_dir}/mem_shared.rrd':'sum':AVERAGE "
@@ -42,28 +44,28 @@ function graph_mem_report ( &$rrdtool_graph ) {
         ."CDEF:'bmem_buffers'=mem_buffers,1024,* "
         ."CDEF:'bmem_used'='bmem_total','bmem_shared',-,'bmem_free',-,'bmem_cached',-,'bmem_buffers',- "
         ."AREA:'bmem_used'#$mem_used_color:'Used' "
-        ."'GPRINT:bmem_used:AVERAGE:%.1lf%S' "
+        ."'GPRINT:bmem_used:AVERAGE:$fmt%S' "
         ."STACK:'bmem_shared'#$mem_shared_color:'Shared' "
-        ."'GPRINT:bmem_shared:AVERAGE:%.1lf%S' "
+        ."'GPRINT:bmem_shared:AVERAGE:$fmt%S' "
         ."STACK:'bmem_cached'#$mem_cached_color:'Cached' "
-        ."'GPRINT:bmem_cached:AVERAGE:%.1lf%S' "
+        ."'GPRINT:bmem_cached:AVERAGE:$fmt%S' "
         ."STACK:'bmem_buffers'#$mem_buffered_color:'Buffered' "
-        ."'GPRINT:bmem_buffers:AVERAGE:%.1lf%S' "
+        ."'GPRINT:bmem_buffers:AVERAGE:$fmt%S' "
         ."CDEF:util=bmem_total,bmem_free,-,bmem_total,/,100,* "
-        ."'GPRINT:util:AVERAGE:(%.1lf%% Utilized)' ";
+        ."'GPRINT:util:AVERAGE:($fmt%% Utilized)' ";
 
     if (file_exists("$rrd_dir/swap_total.rrd")) {
         $series .= "DEF:'swap_total'='${rrd_dir}/swap_total.rrd':'sum':AVERAGE "
             ."DEF:'swap_free'='${rrd_dir}/swap_free.rrd':'sum':AVERAGE "
             ."CDEF:'bmem_swapped'='swap_total','swap_free',-,1024,* "
             ."STACK:'bmem_swapped'#$mem_swapped_color:'Swapped' "
-            ."'GPRINT:bmem_swapped:AVERAGE:%.1lf%S' "
+            ."'GPRINT:bmem_swapped:AVERAGE:$fmt%S' "
             ."'CDEF:swap_util=bmem_total,bmem_free,-,bmem_swapped,+,bmem_total,/,100,*' "
-            ."'GPRINT:swap_util:AVERAGE:(%.1lf%% w/Virt)' ";
+            ."'GPRINT:swap_util:AVERAGE:($fmt%% w/Virt)' ";
     }
 
     $series .= "LINE2:'bmem_total'#$cpu_num_color:'Total In-Core' ";
-    $series .= "'GPRINT:bmem_total:AVERAGE:%.1lf%S' ";
+    $series .= "'GPRINT:bmem_total:AVERAGE:$fmt%S' ";
 
     $rrdtool_graph['series'] = $series;
 
