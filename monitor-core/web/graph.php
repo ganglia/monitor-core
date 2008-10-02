@@ -86,6 +86,10 @@ $rrdtool_graph = array(
     'height' => $height,
 );
 
+# Let load coloring work for little reports in the host list.
+if ($size == "small" and ! isset($subtitle) and $load_color)
+    $rrdtool_graph['color'] = "BACK#'$load_color'";
+
 if ($debug) {
     error_log("Graph [$graph] in context [$context]");
 }
