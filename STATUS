@@ -158,6 +158,11 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1840
     +1: bnicholes
 
+  * web: Fix incorrect image displayed in host_view for a host that is down
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=214
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1852
+    +1: bernardli
+
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
   haven't been tested enough to be considered for a stable release.
