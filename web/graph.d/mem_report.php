@@ -57,9 +57,11 @@ function graph_mem_report ( &$rrdtool_graph ) {
             ."DEF:'swap_free'='${rrd_dir}/swap_free.rrd':'sum':AVERAGE "
             ."CDEF:'bmem_swapped'='swap_total','swap_free',-,1024,* "
             ."STACK:'bmem_swapped'#$mem_swapped_color:'Swapped' "
-            ."'GPRINT:bmem_swapped:AVERAGE:$fmt%S' "
+            ."'GPRINT:bmem_swapped:AVERAGE:$fmt%S\\g' "
+            ."'CDEF:bswap_total=swap_total,1024,*' "
+            ."'GPRINT:bswap_total:AVERAGE:/$fmt%S\\g' "
             ."'CDEF:swap_util=swap_total,swap_free,-,swap_total,/,100,*' "
-            ."'GPRINT:swap_util:AVERAGE:($fmt%% of Swap)\\l' ";
+            ."'GPRINT:swap_util:AVERAGE: ($fmt%%)\\l' ";
     }
 
     $series .= "LINE2:'bmem_total'#$cpu_num_color:'Total In-Core' ";
