@@ -109,13 +109,13 @@ function graph_metric ( &$rrdtool_graph ) {
         $rrdtool_graph['vertical-label'] = ' ';
     }
 
-    //# the actual graph...
-    $series  = "DEF:'sum'='$rrd_dir/$metricname.rrd:sum':AVERAGE ";
-    $series .= "AREA:'sum'#$default_metric_color:'$subtitle_one'";
-    $series .= ":STACK: COMMENT:'$subtitle_two\\l' ";
+    // the actual graph...
+    $series  = "'DEF:sum=$rrd_dir/$metricname.rrd:sum:AVERAGE' ";
+    $series .= "'AREA:sum#$default_metric_color:$subtitle_one' ";
+    $series .= "'COMMENT:$subtitle_two\\l' ";
 
     if ($jobstart) {
-        $series .= "VRULE:$jobstart#$jobstart_color ";
+        $series .= "'VRULE:$jobstart#$jobstart_color' ";
     }
     if ($size != "small") {
         $fmt = '%.1lf';
