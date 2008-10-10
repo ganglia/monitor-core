@@ -86,9 +86,13 @@ $rrdtool_graph = array(
     'height' => $height,
 );
 
-# Let load coloring work for little reports in the host list.
-if ($size == "small" and ! isset($subtitle) and $load_color)
-    $rrdtool_graph['color'] = "BACK#'$load_color'";
+# automatically strip domainname from small graphs where it won't fit
+if ($size == "small") {
+    $strip_domainname = true;
+    # Let load coloring work for little reports in the host list.
+    if (! isset($subtitle) and $load_color)
+        $rrdtool_graph['color'] = "BACK#'$load_color'";
+}
 
 if ($debug) {
     error_log("Graph [$graph] in context [$context]");
