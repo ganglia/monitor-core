@@ -42,13 +42,13 @@ function graph_cpu_report ( &$rrdtool_graph ) {
         $series =
               "'DEF:num_nodes=${rrd_dir}/cpu_user.rrd:num:AVERAGE' "
             . "'DEF:cpu_user=${rrd_dir}/cpu_user.rrd:sum:AVERAGE' "
-            . "'CDEF:ccpu_user=cpu_user,num_nodes,/' "
+            . "'CDEF:ccpu_user=cpu_user,num_nodes,/,0,110,LIMIT' "
             . "'DEF:cpu_nice=${rrd_dir}/cpu_nice.rrd:sum:AVERAGE' "
-            . "'CDEF:ccpu_nice=cpu_nice,num_nodes,/' "
+            . "'CDEF:ccpu_nice=cpu_nice,num_nodes,/,0,110,LIMIT' "
             . "'DEF:cpu_system=${rrd_dir}/cpu_system.rrd:sum:AVERAGE' "
-            . "'CDEF:ccpu_system=cpu_system,num_nodes,/' "
+            . "'CDEF:ccpu_system=cpu_system,num_nodes,/,0,110,LIMIT' "
             . "'DEF:cpu_idle=${rrd_dir}/cpu_idle.rrd:sum:AVERAGE' "
-            . "'CDEF:ccpu_idle=cpu_idle,num_nodes,/' "
+            . "'CDEF:ccpu_idle=cpu_idle,num_nodes,/,0,110,LIMIT' "
             . "'AREA:ccpu_user#$cpu_user_color:User' "
             . "'GPRINT:ccpu_user:AVERAGE:$fmt%%' "
             . "'STACK:ccpu_nice#$cpu_nice_color:Nice' "
@@ -58,14 +58,14 @@ function graph_cpu_report ( &$rrdtool_graph ) {
 
         if (file_exists("$rrd_dir/cpu_wio.rrd")) {
             $series .= "'DEF:cpu_wio=${rrd_dir}/cpu_wio.rrd:sum:AVERAGE' "
-                . "'CDEF:ccpu_wio=cpu_wio,num_nodes,/' "
+                . "'CDEF:ccpu_wio=cpu_wio,num_nodes,/,0,110,LIMIT' "
                 . "'STACK:ccpu_wio#$cpu_wio_color:Wait' "
                 . "'GPRINT:ccpu_wio:AVERAGE:$fmt%%' ";
         }
 
         $series .= "'STACK:ccpu_idle#$cpu_idle_color:Idle' ";
         $series .= "'GPRINT:ccpu_idle:AVERAGE:$fmt%%' ";
-        $series .= "'CDEF:util=100,ccpu_idle,-' ";
+        $series .= "'CDEF:util=100,ccpu_idle,-,0,110,LIMIT' ";
 
     } else {
 
