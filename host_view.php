@@ -101,6 +101,13 @@ $s_metrics['last_reported']['TYPE'] = "string";
 $s_metrics['last_reported']['VAL'] = uptime($cluster['LOCALTIME'] - $hosts_up['REPORTED']);
 $s_metrics['last_reported']['TITLE'] = "Last Reported";
 
+$s_metrics['ip_address']['TITLE'] = "IP Address";
+$s_metrics['ip_address']['VAL'] = $hosts_up['IP'];
+$s_metrics['ip_address']['TYPE'] = "string";
+$s_metrics['location']['TITLE'] = "Location";
+$s_metrics['location']['VAL'] = $hosts_up['LOCATION'];
+$s_metrics['location']['TYPE'] = "string";
+
 # Show string metrics
 if (is_array($s_metrics))
    {
