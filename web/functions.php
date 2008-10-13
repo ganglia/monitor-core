@@ -174,6 +174,8 @@ function load_color ($value)
 # the load/death of a cluster node
 function node_image ($metrics)
 {
+   global $hosts_down;
+
    $cpu_num  = $metrics["cpu_num"]['VAL'];
    if(!$cpu_num || $cpu_num == 0)
       {
