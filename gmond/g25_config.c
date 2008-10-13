@@ -292,12 +292,14 @@ print_config(char *path, gmond_config_t *config)
   if( config->trusted_hosts  && !config->all_trusted )
     {
       fprintf(stdout,"/* your trusted_hosts assuming ipv4 mask*/\n");
-      fprintf(stdout,"acl{\n  default=\"deny\"\n");
+      fprintf(stdout,"  acl {\n    default=\"deny\"\n");
       for(i = 0, p = config->trusted_hosts[i]; p; i++, p = config->trusted_hosts[i])
         {
-          fprintf(stdout, "  access {\n  ip=\"%s\"\n  mask = 32\n  action = \"allow\"\n  }\n", p);
+          fprintf(stdout, "    access {\n");
+          fprintf(stdout, "      ip=\"%s\"\n      mask = 32\n      action = \"allow\"\n", p);
+          fprintf(stdout, "    }\n");
         }
-      fprintf(stdout,"}\n");/* close acl */
+      fprintf(stdout,"  }\n");/* close acl */
     }
   fprintf(stdout,"}\n\n"); /* close tcp_accept_channel */
   fprintf(stdout,"%s\n", Ganglia_default_collection_groups());
