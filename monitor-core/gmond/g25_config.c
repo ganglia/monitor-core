@@ -298,6 +298,9 @@ print_config(char *path, gmond_config_t *config)
           fprintf(stdout, "    access {\n");
           fprintf(stdout, "      ip=\"%s\"\n      mask = 32\n      action = \"allow\"\n", p);
           fprintf(stdout, "    }\n");
+          fprintf(stdout, "    access {\n");
+          fprintf(stdout, "      ip=\"127.0.0.1\"\n      mask = 32\n      action = \"allow\"\n");
+          fprintf(stdout, "    }\n");
         }
       fprintf(stdout,"  }\n");/* close acl */
     }
