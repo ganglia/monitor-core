@@ -59,7 +59,7 @@ BACKPORT PROPOSALS:
 
   * gmond: solaris: define fabsf for solaris < 10
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
-    +1: carenas
+    +1: carenas, bnicholes
     carenas: suboptimal fix, autoconf instead to handle Solaris>=10 better
 
   * web: performance/security improvement for handling authorization
@@ -94,7 +94,14 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04551.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1610
     +1: carenas
+    -1: bnicholes
     carenas: partial fix, stop generating python bytecode at bootstrap time
+    bnicholes: There seems to be several problems with this patch. First the
+      configure fails because the example directory was not included in the
+      DIST_SUBDIRS and therefore none of the example source or make files are
+      included in the final tarball. Second, since the .pyc are not being
+      generated, the spec file fails when it tries to copy the missing .pyc 
+      files.
 
   * python_modules: remove unconditional debugging information for multidisk
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1623
@@ -106,7 +113,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1600
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1601
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
-    +1: carenas
+    +1: carenas, bnicholes
     
   * build: remove ganglia release name from the code
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04653.html
@@ -148,7 +155,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1738
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1741
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1743
-    +1: carenas
+    +1: carenas, bnicholes
     carenas: r1741 only needed to align white space fixes to prevent conflicts
 
   * mod_python: Change the way that the python module path is added to better
