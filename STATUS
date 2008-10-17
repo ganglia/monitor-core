@@ -32,6 +32,7 @@ CURRENT RELEASE NOTES:
      file  
   * gmond: reformat memory metrics to match pre 3.1 style
   * gmond: add boolean option to 'allow_extra_data' generation (BUG199)
+  * gmetad: skip unresponsive sources (BUG92)
   * web: add boolean option for using hostname without domainname for graphs
   * web: add host atrributes into metric list (BUG30)
   * web: metric group enhancements for host view (BUG203)
@@ -88,7 +89,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1612
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1614
     +1: carenas
-    carenas: prerequisite for mingw32 support
+    carenas: prerequisite for mingw32 support, RPC/ON is used in core only
 
   * build: remove sideffects of --disable-python for dist target
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04551.html
@@ -149,14 +150,6 @@ BACKPORT PROPOSALS:
     -1: bnicholes
     bnicholes: The patch appears to be dependant on rev. 1478 in trunk which
       is not included in the backport proposal.
-
-  * gmetad: skip unresponsive sources
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=92
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1738
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1741
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1743
-    +1: carenas, bnicholes
-    carenas: r1741 only needed to align white space fixes to prevent conflicts
 
   * mod_python: Change the way that the python module path is added to better
      support the Solaris platform.  It is also a cleaner way to add the
