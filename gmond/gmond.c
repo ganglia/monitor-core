@@ -9,6 +9,9 @@
 #include <unistd.h>
 #include <syslog.h>
 #include <math.h>
+#ifdef SOLARIS
+#define fabsf(f) ((float)fabs(f))
+#endif
 
 #include <apr.h>
 #include <apr_strings.h>

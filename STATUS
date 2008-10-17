@@ -58,11 +58,6 @@ BACKPORT PROPOSALS:
     +1: bnicholes
     carenas: apparently includes few other unrelated changes
 
-  * gmond: solaris: define fabsf for solaris < 10
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1518
-    +1: carenas, bnicholes
-    carenas: suboptimal fix, autoconf instead to handle Solaris>=10 better
-
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
     +1: carenas
@@ -115,6 +110,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1601
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
     +1: carenas, bnicholes
+    carenas: depends on libmetrics dependency cleanup
     
   * build: remove ganglia release name from the code
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04653.html
