@@ -126,6 +126,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1706
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1708
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1754
+    +1: hawson
 
   * build: clarify/update use of  "dist" targets
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
@@ -161,8 +162,7 @@ BACKPORT PROPOSALS FUTURE VERSION:
 
   * gmond: add configurable host tmax (timeout max)
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1376
-    +1: carenas
-    +1: hawson
+    +1: carenas, hawson
     carenas: should also remove the hardcoded rule of 4x this time
 
   * gmond: recover from interface reconfiguration gracefully
