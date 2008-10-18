@@ -30,7 +30,7 @@ function graph_load_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'Load/Procs';
     $rrdtool_graph['extras']         = '--rigid';
 
-    $pctfmt = '%4.1lf';
+    $pctfmt = '%3.0lf';
     $numfmt = '%7.1lf';
     $intfmt = '%5.0lf';
 
