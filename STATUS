@@ -128,6 +128,12 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1754
     +1: hawson
 
+  * Web-Interface: Add statistics and numbers to various charts and reports.
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=206
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1753
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=173&action=view
+    +1: hawson -- really should go with r1753 as well.
+
   * build: clarify/update use of  "dist" targets
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1726
