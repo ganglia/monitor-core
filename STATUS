@@ -133,6 +133,11 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1753
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=173&action=view
     +1: hawson -- really should go with r1753 as well.
+    +1: twitham
+    twitham: the proposal missed corresponding tweaks to metric.php
+        and sample_report.php.  The full backport should be revisions
+        1844, 1847, 1848, 1850, 1855, 1856, 1857, like this:
+        http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=175&action=view
 
   * build: clarify/update use of  "dist" targets
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
