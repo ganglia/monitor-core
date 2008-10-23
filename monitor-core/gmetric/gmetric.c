@@ -88,6 +88,12 @@ main( int argc, char *argv[] )
       Ganglia_metadata_add(gmetric, SPOOF_HOST, args_info.spoof_arg);
   if(args_info.heartbeat_given)
       Ganglia_metadata_add(gmetric, SPOOF_HEARTBEAT, "yes");
+  if(args_info.group_given)
+      Ganglia_metadata_add(gmetric, "GROUP", args_info.group_arg);
+  if(args_info.desc_given)
+      Ganglia_metadata_add(gmetric, "DESC", args_info.desc_arg);
+  if(args_info.title_given)
+      Ganglia_metadata_add(gmetric, "TITLE", args_info.title_arg);
 
   /* send the message */
   rval = Ganglia_metric_send(gmetric, send_channels);

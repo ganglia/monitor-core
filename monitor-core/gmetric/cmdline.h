@@ -58,6 +58,15 @@ struct gengetopt_args_info
   int dmax_arg;	/**< @brief The lifetime in seconds of this metric (default='0').  */
   char * dmax_orig;	/**< @brief The lifetime in seconds of this metric original value given at command line.  */
   const char *dmax_help; /**< @brief The lifetime in seconds of this metric help description.  */
+  char * group_arg;	/**< @brief Group of the metric.  */
+  char * group_orig;	/**< @brief Group of the metric original value given at command line.  */
+  const char *group_help; /**< @brief Group of the metric help description.  */
+  char * desc_arg;	/**< @brief Description of the metric.  */
+  char * desc_orig;	/**< @brief Description of the metric original value given at command line.  */
+  const char *desc_help; /**< @brief Description of the metric help description.  */
+  char * title_arg;	/**< @brief Title of the metric.  */
+  char * title_orig;	/**< @brief Title of the metric original value given at command line.  */
+  const char *title_help; /**< @brief Title of the metric help description.  */
   char * spoof_arg;	/**< @brief IP address and name of host/device (colon separated) we are spoofing (default='').  */
   char * spoof_orig;	/**< @brief IP address and name of host/device (colon separated) we are spoofing original value given at command line.  */
   const char *spoof_help; /**< @brief IP address and name of host/device (colon separated) we are spoofing help description.  */
@@ -73,6 +82,9 @@ struct gengetopt_args_info
   unsigned int slope_given ;	/**< @brief Whether slope was given.  */
   unsigned int tmax_given ;	/**< @brief Whether tmax was given.  */
   unsigned int dmax_given ;	/**< @brief Whether dmax was given.  */
+  unsigned int group_given ;	/**< @brief Whether group was given.  */
+  unsigned int desc_given ;	/**< @brief Whether description was given.  */
+  unsigned int title_given ;	/**< @brief Whether title was given.  */
   unsigned int spoof_given ;	/**< @brief Whether spoof was given.  */
   unsigned int heartbeat_given ;	/**< @brief Whether heartbeat was given.  */
 
