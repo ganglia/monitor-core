@@ -38,6 +38,9 @@ const char *gengetopt_args_info_help[] = {
   "  -s, --slope=STRING  Either zero|positive|negative|both  (default='both')",
   "  -x, --tmax=INT      The maximum time in seconds between gmetric calls  \n                        (default='60')",
   "  -d, --dmax=INT      The lifetime in seconds of this metric  (default='0')",
+  "  -g, --group=STRING  Group of the metric",
+  "  -D, --desc=STRING   Description of the metric",
+  "  -T, --title=STRING  Title of the metric",
   "  -S, --spoof=STRING  IP address and name of host/device (colon separated) we \n                        are spoofing  (default='')",
   "  -H, --heartbeat     spoof a heartbeat message (use with spoof option)",
     0
@@ -74,6 +77,9 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->slope_given = 0 ;
   args_info->tmax_given = 0 ;
   args_info->dmax_given = 0 ;
+  args_info->group_given = 0 ;
+  args_info->desc_given = 0 ;
+  args_info->title_given = 0 ;
   args_info->spoof_given = 0 ;
   args_info->heartbeat_given = 0 ;
 }
@@ -97,6 +103,12 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->tmax_orig = NULL;
   args_info->dmax_arg = 0;
   args_info->dmax_orig = NULL;
+  args_info->group_arg = NULL;
+  args_info->group_orig = NULL;
+  args_info->desc_arg = NULL;
+  args_info->desc_orig = NULL;
+  args_info->title_arg = NULL;
+  args_info->title_orig = NULL;
   args_info->spoof_arg = gengetopt_strdup ("");
   args_info->spoof_orig = NULL;
   
@@ -117,8 +129,11 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->slope_help = gengetopt_args_info_help[7] ;
   args_info->tmax_help = gengetopt_args_info_help[8] ;
   args_info->dmax_help = gengetopt_args_info_help[9] ;
-  args_info->spoof_help = gengetopt_args_info_help[10] ;
-  args_info->heartbeat_help = gengetopt_args_info_help[11] ;
+  args_info->group_help = gengetopt_args_info_help[10] ;
+  args_info->desc_help = gengetopt_args_info_help[11] ;
+  args_info->title_help = gengetopt_args_info_help[12] ;
+  args_info->spoof_help = gengetopt_args_info_help[13] ;
+  args_info->heartbeat_help = gengetopt_args_info_help[14] ;
   
 }
 
@@ -211,6 +226,12 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->slope_orig));
   free_string_field (&(args_info->tmax_orig));
   free_string_field (&(args_info->dmax_orig));
+  free_string_field (&(args_info->group_arg));
+  free_string_field (&(args_info->group_orig));
+  free_string_field (&(args_info->desc_arg));
+  free_string_field (&(args_info->desc_orig));
+  free_string_field (&(args_info->title_arg));
+  free_string_field (&(args_info->title_orig));
   free_string_field (&(args_info->spoof_arg));
   free_string_field (&(args_info->spoof_orig));
   
@@ -262,6 +283,12 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "tmax", args_info->tmax_orig, 0);
   if (args_info->dmax_given)
     write_into_file(outfile, "dmax", args_info->dmax_orig, 0);
+  if (args_info->group_given)
+    write_into_file(outfile, "group", args_info->group_orig, 0);
+  if (args_info->desc_given)
+    write_into_file(outfile, "desc", args_info->desc_orig, 0);
+  if (args_info->title_given)
+    write_into_file(outfile, "title", args_info->title_orig, 0);
   if (args_info->spoof_given)
     write_into_file(outfile, "spoof", args_info->spoof_orig, 0);
   if (args_info->heartbeat_given)
@@ -520,12 +547,15 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "slope",	1, NULL, 's' },
         { "tmax",	1, NULL, 'x' },
         { "dmax",	1, NULL, 'd' },
+        { "group",	1, NULL, 'g' },
+        { "desc",	1, NULL, 'D' },
+        { "title",	1, NULL, 'T' },
         { "spoof",	1, NULL, 'S' },
         { "heartbeat",	0, NULL, 'H' },
         { NULL,	0, NULL, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVc:n:v:t:u:s:x:d:S:H", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVc:n:v:t:u:s:x:d:g:D:T:S:H", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from 'while (1)' loop.  */
 
@@ -633,6 +663,42 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
               &(local_args_info.dmax_given), optarg, 0, "0", ARG_INT,
               check_ambiguity, override, 0, 0,
               "dmax", 'd',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'g':	/* Group of the metric.  */
+        
+        
+          if (update_arg( (void *)&(args_info->group_arg), 
+               &(args_info->group_orig), &(args_info->group_given),
+              &(local_args_info.group_given), optarg, 0, "", ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "group", 'g',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'D':	/* Description of the metric.  */
+        
+        
+          if (update_arg( (void *)&(args_info->desc_arg), 
+               &(args_info->desc_orig), &(args_info->desc_given),
+              &(local_args_info.desc_given), optarg, 0, "", ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "desc", 'D',
+              additional_error))
+            goto failure;
+        
+          break;
+        case 'T':	/* Title of the metric.  */
+        
+        
+          if (update_arg( (void *)&(args_info->title_arg), 
+               &(args_info->title_orig), &(args_info->title_given),
+              &(local_args_info.title_given), optarg, 0, "", ARG_STRING,
+              check_ambiguity, override, 0, 0,
+              "title", 'T',
               additional_error))
             goto failure;
         
