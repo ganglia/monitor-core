@@ -22,35 +22,26 @@
 </TD>
 
 <!-- START BLOCK : self_summary_graphs -->
-<TD ALIGN="RIGHT" VALIGN="TOP"><TABLE>
-  <TR><TD>
+  <TD ALIGN="RIGHT" VALIGN="TOP">
     <A HREF="./graph.php?{graph_url}&amp;g=load_report&amp;z=large">
       <IMG SRC="./graph.php?{graph_url}&amp;g=load_report&amp;z=medium"
            ALT="{name} LOAD" BORDER="0">
-    </A>
-  </TD></TR>
-  <TR><TD>
+    </A><BR>
     <A HREF="./graph.php?{graph_url}&amp;g=cpu_report&amp;z=large">
       <IMG SRC="./graph.php?{graph_url}&amp;g=cpu_report&amp;z=medium"
            ALT="{name} CPU" BORDER="0">
     </A>
-  </TD></TR>
-</TABLE></TD>
-
-<TD VALIGN="TOP"><TABLE>
-  <TR><td>
+  </TD>
+  <TD VALIGN="TOP">
     <A HREF="./graph.php?{graph_url}&amp;g=mem_report&amp;z=large">
       <IMG SRC="./graph.php?{graph_url}&amp;g=mem_report&amp;z=medium"
            ALT="{name} MEM" BORDER="0">
-    </A>
-  </TD></TR>
-  <TR><TD>
+    </A><BR>
     <A HREF="./graph.php?{graph_url}&amp;g=network_report&amp;z=large">
       <IMG SRC="./graph.php?{graph_url}&amp;g=network_report&amp;z=medium"
            ALT="{name} NETWORK" BORDER="0">
     </A>
-  </TD></TR>
-</TABLE></TD>
+  </TD>
  <!-- END BLOCK : self_summary_graphs -->
 
  <!-- START BLOCK : summary_graphs -->
