@@ -99,6 +99,8 @@ BACKPORT PROPOSALS:
       included in the final tarball. Second, since the .pyc are not being
       generated, the spec file fails when it tries to copy the missing .pyc 
       files.
+    bnicholes: Patch r1877 fixed the first issue with the inclusion of the 
+      example source, but the second issue still remains.
 
   * python_modules: remove unconditional debugging information for multidisk
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1623
