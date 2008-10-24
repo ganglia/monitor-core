@@ -89,6 +89,7 @@ BACKPORT PROPOSALS:
   * build: remove sideffects of --disable-python for dist target
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04551.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1610
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1877
     +1: carenas
     -1: bnicholes
     carenas: partial fix, stop generating python bytecode at bootstrap time
