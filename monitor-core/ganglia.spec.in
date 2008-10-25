@@ -276,6 +276,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 
 # Copy the python metric modules and .conf files
 %__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/
+%{__python} -c 'import compileall; compileall.compile_dir("gmond/python_modules", 1, "/", 1)' > /dev/null
 %__cp -f gmond/python_modules/*/*.{py,pyc} $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
 
 # Don't install the example modules
@@ -406,6 +407,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sat Oct 25 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- Instruct RPM to byte compile python modules at install time
 * Wed Oct 01 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
 - Add missing defattr for gmond-modules-python
 * Wed Jul 30 2008 Bernard Li <bernard@vanhpc.org>
