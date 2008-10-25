@@ -90,9 +90,9 @@ BACKPORT PROPOSALS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04551.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1610
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1877
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1880
     +1: carenas
     -1: bnicholes
-    carenas: partial fix, stop generating python bytecode at bootstrap time
     bnicholes: There seems to be several problems with this patch. First the
       configure fails because the example directory was not included in the
       DIST_SUBDIRS and therefore none of the example source or make files are
@@ -135,12 +135,14 @@ BACKPORT PROPOSALS:
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=206
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1753
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=173&action=view
+    +0.5: carenas
     +1: hawson -- really should go with r1753 as well.
     +1: twitham
     twitham: the proposal missed corresponding tweaks to metric.php
         and sample_report.php.  The full backport should be revisions
         1844, 1847, 1848, 1850, 1855, 1856, 1857, like this:
         http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=175&action=view
+    carenas: original proposal incomplete, should be replaced with twitham's
 
   * build: clarify/update use of  "dist" targets
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
@@ -168,6 +170,11 @@ BACKPORT PROPOSALS:
      environment variable.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1840
     +1: bnicholes
+
+  * build: add missing defattr for gmond-modules-python package
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04821.html
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1842
+    +1: carenas
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
