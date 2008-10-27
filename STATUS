@@ -163,6 +163,18 @@ BACKPORT PROPOSALS:
     -1: bnicholes
     bnicholes: The patch appears to be dependant on rev. 1478 in trunk which
       is not included in the backport proposal.
+    carenas: no, otherwise would had been included; see BUG140 for patch
+
+  * build: generate a meaningful ChangeLog
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1819
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1820
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1821
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1822
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1835
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1836
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1837
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1838
+    +1: carenas
 
   * mod_python: Change the way that the python module path is added to better
      support the Solaris platform.  It is also a cleaner way to add the
@@ -174,6 +186,12 @@ BACKPORT PROPOSALS:
   * build: add missing defattr for gmond-modules-python package
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04821.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1842
+    +1: carenas
+
+  * gmond: allow gmond -r to get a working transformed 2.5 configuration
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1860
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1861
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1862
     +1: carenas
 
 BACKPORT PROPOSALS FUTURE VERSION:
