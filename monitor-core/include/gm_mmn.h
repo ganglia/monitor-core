@@ -19,12 +19,13 @@
  * 20070918.0 (3.1.0-dev) mmodule_struct change. Pass parameter list 
  *                          C interface modules and python modules. Allow
  *                          configuration file access from a C module.
+ * 20080913.0 (3.2-dev)   slurpfile ABI incompatible change in libganglia
  */
 
-#define MMODULE_MAGIC_COOKIE 0x474D3331UL /* "GM31" */
+#define MMODULE_MAGIC_COOKIE 0x474D3332UL /* "GM32" */
 
 #ifndef MMODULE_MAGIC_NUMBER_MAJOR
-#define MMODULE_MAGIC_NUMBER_MAJOR 20070918
+#define MMODULE_MAGIC_NUMBER_MAJOR 20080913
 #endif
 #define MMODULE_MAGIC_NUMBER_MINOR 0                     /* 0...n */
 
