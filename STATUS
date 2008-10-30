@@ -159,11 +159,12 @@ BACKPORT PROPOSALS:
   * libganglia: mcast_if support in gmond (BUG140)
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg03775.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1734
-    +1: carenas
-    -1: bnicholes
+    +1: carenas, bnicholes
     bnicholes: The patch appears to be dependant on rev. 1478 in trunk which
       is not included in the backport proposal.
     carenas: no, otherwise would had been included; see BUG140 for patch
+    bnicholes: The patch that is include with BUG140 applies cleanly and appears
+      to work as expected.  Changing my vote.
 
   * build: generate a meaningful ChangeLog
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1819
@@ -186,13 +187,13 @@ BACKPORT PROPOSALS:
   * build: add missing defattr for gmond-modules-python package
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04821.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1842
-    +1: carenas
+    +1: carenas, bnicholes
 
   * gmond: allow gmond -r to get a working transformed 2.5 configuration
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1860
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1861
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1862
-    +1: carenas
+    +1: carenas, bnicholes
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
