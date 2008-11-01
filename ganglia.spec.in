@@ -294,6 +294,7 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %{_libdir}/ganglia/modsys.so*
 
 %files gmond-modules-python
+%defattr(-,root,root,-)
 %dir %{_libdir}/ganglia/python_modules/
 %{_libdir}/ganglia/python_modules/*.py*
 %{_libdir}/ganglia/modpython.so*
@@ -357,6 +358,8 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Oct 01 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- Add missing defattr for gmond-modules-python
 * Sun Jul 20 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
 - Remove ChangeLog from ganglia-web
 * Wed Jun 04 2008 Bernard Li <bernard@vanhpc.org>

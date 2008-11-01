@@ -57,7 +57,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1622
     +1: bnicholes
-    carenas: apparently includes few other unrelated changes
+    carenas: spoofing still needs more work (even using gmetric) for 3.1
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
@@ -174,11 +174,6 @@ BACKPORT PROPOSALS:
      environment variable.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1840
     +1: bnicholes
-
-  * build: add missing defattr for gmond-modules-python package
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04821.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1842
-    +1: carenas, bnicholes
 
   * gmond: allow gmond -r to get a working transformed 2.5 configuration
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1860
