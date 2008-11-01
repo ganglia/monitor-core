@@ -14,7 +14,7 @@ APR_DECLARE(apr_status_t)
 apr_sockaddr_ip_buffer_get(char *addr, int len, apr_sockaddr_t *sockaddr);
 
 apr_socket_t *
-create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int ttl);
+create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int ttl, const char *interface);
 
 int mcast_set_ttl(apr_socket_t *socket, int val);
 

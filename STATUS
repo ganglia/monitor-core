@@ -33,6 +33,7 @@ CURRENT RELEASE NOTES:
   * gmond: reformat memory metrics to match pre 3.1 style
   * gmond: add boolean option to 'allow_extra_data' generation (BUG199)
   * gmetad: skip unresponsive sources (BUG92)
+  * libganglia: mcast_if support in gmond (BUG140)
   * web: add boolean option for using hostname without domainname for graphs
   * web: add host atrributes into metric list (BUG30)
   * web: metric group enhancements for host view (BUG203)
@@ -155,16 +156,6 @@ BACKPORT PROPOSALS:
                   targets are desired (I suggest .tgz, .tb2 and .zip), and
                   remove the rest.  This will reduce the number of dependencies
                   required.
-
-  * libganglia: mcast_if support in gmond (BUG140)
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg03775.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1734
-    +1: carenas, bnicholes
-    bnicholes: The patch appears to be dependant on rev. 1478 in trunk which
-      is not included in the backport proposal.
-    carenas: no, otherwise would had been included; see BUG140 for patch
-    bnicholes: The patch that is include with BUG140 applies cleanly and appears
-      to work as expected.  Changing my vote.
 
   * build: generate a meaningful ChangeLog
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1819

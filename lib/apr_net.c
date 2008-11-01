@@ -10,9 +10,19 @@
 
 /* 
  * FIXME: apr_arch_networkio.h is not public
- *        define apr_sockaddr_vars_set locally so it can be used
+ *        define interfaces locally so they can be used
  */
 void apr_sockaddr_vars_set(apr_sockaddr_t *, int, apr_port_t);
+
+/*
+ * FIXME: incomplete definition but enough to manipulate socketdes directly
+ */
+struct apr_socket_t {
+    apr_pool_t *pool;
+    int socketdes;
+    int type;
+    int protocol;
+};
 
 #include <apr_net.h>
 #include <apr_version.h>
@@ -206,6 +216,77 @@ create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port,
 }
 
 /*XXX This should really be replaced by the APR mcast functions */
+
+/*
+ *  Configure from which interface multicast traffic should be sent.
+ */
+static apr_status_t
+mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_channel, apr_port_t port, const char *ifname)
+{
+  apr_status_t status;
+  int rval;
+  apr_sockaddr_t *sa;
+ 
+  status = apr_sockaddr_info_get(&sa, mcast_channel , APR_UNSPEC, port, 0, context);
+  if(status != APR_SUCCESS)
+    {
+      return status;
+    }
+ 
+  switch( sa->family ) /* (*sa)->sa.sin.sin_family */
+    {
+      case APR_INET:
+        {
+          struct ifreq ifreq[1];
+ 
+          memset(&ifreq, 0, sizeof(ifreq));
+          if(ifname)
+            {
+              strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
+              if(ioctl(sock->socketdes, SIOCGIFADDR, ifreq) == -1)
+                   return APR_EGENERAL;
+            }
+          else
+            {
+              /* wildcard address (let the kernel decide) */
+              ((struct sockaddr_in *)&ifreq->ifr_addr)->sin_addr.s_addr = htonl(INADDR_ANY);
+            }
+
+          rval = setsockopt(sock->socketdes, IPPROTO_IP, IP_MULTICAST_IF,
+                            &((struct sockaddr_in *)&ifreq->ifr_addr)->sin_addr,
+                            sizeof( struct in_addr));
+
+         if(rval<0)
+           {
+             return APR_EGENERAL;
+           }
+
+          break;
+        }
+ #if APR_HAVE_IPV6
+      case APR_INET6:
+        {
+          u_int if_index = 0; /* Default interface */
+ 
+          if(ifname)
+            {
+              if_index = if_nametoindex( ifname);
+            }
+ 
+          rval = setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+                           &if_index, sizeof(if_index));
+ 
+          break;
+        }
+#endif
+      default:
+        /* Set errno to EPROTONOSUPPORT */
+        return -1;
+    }
+
+  return APR_SUCCESS;
+}
+
 static apr_status_t
 mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_port_t port, char *ifname )
 {
@@ -293,7 +374,7 @@ mcast_join( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
 }
 
 apr_socket_t *
-create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int ttl)
+create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int ttl, const char *interface)
 {
     apr_socket_t *socket = create_udp_client(context, mcast_ip, port);
     if(!socket)
@@ -301,6 +382,8 @@ create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int tt
         return NULL;
       }
     apr_mcast_hops(socket, ttl);
+
+    mcast_emit_on_if( context, socket, mcast_ip, port, interface);
 
     return socket;
 }
