@@ -58,6 +58,13 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1622
     +1: bnicholes
     carenas: spoofing still needs more work (even using gmetric) for 3.1
+    bnicholes: Can you explain what you mean by the above comment. Other than
+      support for a shortened gmetric spoof heartbeat which will be addressed
+      in a separate patch, what needs more work? Does the above proposed patch
+      work or not? Can the above patch be backported without causing instability
+      or regression to the 3.1 branch?  If so then the patch needs to be backported. 
+      If there are additional enhancements, then those can be addressed in follow-up
+      patches.  Bring the discussion to the mailing list if needed.
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
@@ -179,6 +186,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1860
     +1: carenas, bnicholes
     carenas: splitted backport proposal, need confirm vote
+    bnicholes: vote remains +1
 
   * gmond: trusted_hosts support for gmond -r
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1861
@@ -186,6 +194,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1887
     +1: carenas, bnicholes
     carenas: splitted/extended proposal, needs re-vote
+    bnicholes: vote remains +1
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
