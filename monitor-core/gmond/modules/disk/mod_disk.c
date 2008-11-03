@@ -69,9 +69,9 @@ static Ganglia_25metric disk_metric_info[] =
     {0, "disk_free",      180, GANGLIA_VALUE_DOUBLE, "GB", "both", "%.3f", UDP_HEADER_SIZE+16, "Total free disk space"},
     {0, "part_max_used",  180, GANGLIA_VALUE_FLOAT,  "%",  "both", "%.1f", UDP_HEADER_SIZE+8,  "Maximum percent used for all partitions"},
 #ifdef SOLARIS
-    {0, "bread_sec",       90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "bread_sec)"},
-    {0, "bwrite_sec",      90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "bwrite_sec)"}, 
-    {0, "lread_sec",       90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "lread_sec)"},
+    {0, "bread_sec",       90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "bread_sec"},
+    {0, "bwrite_sec",      90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "bwrite_sec"}, 
+    {0, "lread_sec",       90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "lread_sec"},
     {0, "lwrite_sec",      90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "lwrite_sec"},
     {0, "phread_sec",      90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "phread_sec"},
     {0, "phwrite_sec",     90, GANGLIA_VALUE_FLOAT,  "1/sec", "both", "%.2f",UDP_HEADER_SIZE+8, "phwrite_sec"},
