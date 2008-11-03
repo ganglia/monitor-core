@@ -619,34 +619,19 @@ determine_cpu_percentages ( void )
 
 /*
  * The following two functions retrieve statistics from all physical
- * network interfaces in "UP" state. (MKN)
+ * network interfaces.
  */
 static uint64_t oifctr[4];
 static uint64_t nifctr[4];
 
 static int
-extract_if_data(const struct ifi_info *entry)
+extract_if_data(kstat_t *ks)
 {
-   kstat_t *ks;
    kstat_named_t *kn;
 
-   /* Only consider interfaces that are up. */
-   if (! entry->ifi_flags & IFF_UP)
+   if (strcmp(ks->ks_name, "lo0") == 0)
       return 0;
 
-   if ((entry->ifi_name[0] == 'l') && (entry->ifi_name[1] == 'o'))
-      return 0;
-
-   /* fprintf(stderr,"ifname = <%s>\n",entry->ifi_name); */
-
-   ks = kstat_lookup(kc, NULL, -1, (char *)entry->ifi_name);
-   if (ks == NULL)
-      {
-         debug_msg("couldn't open kc...");
-         err_ret("extract_if_data() kstat_lookup() error");
-         return SYNAPSE_FAILURE;
-      }
-   /* fprintf(stderr,"ks = %x %d %d %s\n",ks,ks->ks_instance,ks->ks_type,ks->ks_module); */
    if (kstat_read(kc, ks, 0) == -1) {
       debug_msg("couldn't open kc...");
       err_ret("extract_if_data() kstat_read() error");
@@ -673,7 +658,8 @@ update_if_data(void)
    static struct timeval lasttime={0,0};
    struct timeval thistime;
    double timediff;
-   struct ifi_info *info, *nifi;
+   kstat_t *info;
+   char buff[20];
 
    /*
     * Compute time between calls
@@ -715,15 +701,16 @@ update_if_data(void)
     */
    nifctr[0] = nifctr[1] = nifctr[2] = nifctr[3] = 0;
 
-   info = Get_ifi_info(AF_INET, 0);
-   for(nifi = info; nifi; nifi = nifi->ifi_next) {
-     /*
-      * process the info you are interested in here
-      * nifi->ifi_flags will have all the IFF_xxx flags
-      */
-     extract_if_data(nifi);
-     }
-   free_ifi_info(info);
+   info = kc->kc_chain;
+   while (info) {
+      if (strcmp(info->ks_class, "net") == 0) {
+         sprintf(buff, "%s%d", info->ks_module, info->ks_instance);
+         if (strcmp(info->ks_name, buff) == 0) {
+            extract_if_data(info);
+         }
+      }
+      info = info->ks_next;
+   }
 
    if (init_done) {
      if (nifctr[0] >= oifctr[0]) metriclist.bytes_in.f = (double)(nifctr[0] - oifctr[0])/timediff;
