@@ -612,79 +612,6 @@ determine_cpu_percentages ( void )
 }
 
 /*
- * This function is called only once by the gmond.  Use to 
- * initialize data structures, etc or just return SYNAPSE_SUCCESS;
- */
-extern void update_if_data();
-g_val_t
-metric_init( void )
-{
-
-/* swagner's stuff below, initialization for reading running kernel data ...
- */
-
-   g_val_t val;
-
-   get_kstat_val(&metriclist.cpu_num, "unix","system_misc","ncpus");
-   debug_msg("metric_init: Assigning cpu_num value (%d) to ncpus.",(int)metriclist.cpu_num.uint32);
-   ncpus = metriclist.cpu_num.uint32;
-
-   get_kstat_val(&metriclist.boottime, "unix","system_misc","boot_time");
-   get_kstat_val(&metriclist.cpu_speed,    "cpu_info","cpu_info0","clock_MHz");
-
-/* first we get the uname data (hence my including <sys/utsname.h> ) */
-   (void) uname( &unamedata );
-/* these values don't change from tick to tick.  at least, they shouldn't ... 
- * also, these strings don't use the ganglia metric struct!
- */
-   metriclist.os_name = unamedata.sysname;
-   metriclist.os_release = unamedata.release;
-   metriclist.machine_type = unamedata.machine;
-   update_metric_data();
-   update_if_data();
-   debug_msg("solaris.c: metric_init() ok.");
-   val.int32 = SYNAPSE_SUCCESS;
-   first_run = 0;
-/*
-** We need to make sure that every server thread gets their own copy of "kc".
-** The next metric that needs a kc-handle will reopen it for the server thread.
-*/
-   if (kc) {
-     kstat_close(kc);
-     kc = NULL;
-   }
-   return val;
-}
-
-void
-metric_tick ( void )
-{
-   double thetime = time(NULL);
-   /*  update every 30 seconds */
-   if ( thetime >= ( metriclist.sys_clock.uint32 + TICK_SECONDS) ) {
-      update_metric_data();
-   }
-}
-
-g_val_t
-cpu_num_func ( void )
-{
-   g_val_t val;
-
-   val.uint16 = metriclist.cpu_num.uint32;
-   return val;
-}
-
-g_val_t
-mtu_func ( void )
-{
-   g_val_t val;
-   val.uint32 = get_min_mtu();
-   /* A val of 0 means there are no UP interfaces. Shouldn't happen. */
-   return val;
-}
-
-/*
 ** The following two functions retrieve statistics from all physical
 ** network interfaces in "UP" state. (MKN)
 */
@@ -733,7 +660,7 @@ extract_if_data(const struct ifi_info *entry)
    return 0;
 }
 
-void
+static void
 update_if_data(void)
 {
    static int init_done = 0;
@@ -819,6 +746,79 @@ update_if_data(void)
 
    return;
 }
+
+/*
+ * This function is called only once by the gmond.  Use to 
+ * initialize data structures, etc or just return SYNAPSE_SUCCESS;
+ */
+g_val_t
+metric_init( void )
+{
+
+/* swagner's stuff below, initialization for reading running kernel data ...
+ */
+
+   g_val_t val;
+
+   get_kstat_val(&metriclist.cpu_num, "unix","system_misc","ncpus");
+   debug_msg("metric_init: Assigning cpu_num value (%d) to ncpus.",(int)metriclist.cpu_num.uint32);
+   ncpus = metriclist.cpu_num.uint32;
+
+   get_kstat_val(&metriclist.boottime, "unix","system_misc","boot_time");
+   get_kstat_val(&metriclist.cpu_speed,    "cpu_info","cpu_info0","clock_MHz");
+
+/* first we get the uname data (hence my including <sys/utsname.h> ) */
+   (void) uname( &unamedata );
+/* these values don't change from tick to tick.  at least, they shouldn't ... 
+ * also, these strings don't use the ganglia metric struct!
+ */
+   metriclist.os_name = unamedata.sysname;
+   metriclist.os_release = unamedata.release;
+   metriclist.machine_type = unamedata.machine;
+   update_metric_data();
+   update_if_data();
+   debug_msg("solaris.c: metric_init() ok.");
+   val.int32 = SYNAPSE_SUCCESS;
+   first_run = 0;
+/*
+** We need to make sure that every server thread gets their own copy of "kc".
+** The next metric that needs a kc-handle will reopen it for the server thread.
+*/
+   if (kc) {
+     kstat_close(kc);
+     kc = NULL;
+   }
+   return val;
+}
+
+void
+metric_tick ( void )
+{
+   double thetime = time(NULL);
+   /*  update every 30 seconds */
+   if ( thetime >= ( metriclist.sys_clock.uint32 + TICK_SECONDS) ) {
+      update_metric_data();
+   }
+}
+
+g_val_t
+cpu_num_func ( void )
+{
+   g_val_t val;
+
+   val.uint16 = metriclist.cpu_num.uint32;
+   return val;
+}
+
+g_val_t
+mtu_func ( void )
+{
+   g_val_t val;
+   val.uint32 = get_min_mtu();
+   /* A val of 0 means there are no UP interfaces. Shouldn't happen. */
+   return val;
+}
+
 
 /* --------------------------------------------------------------------------- */
 
