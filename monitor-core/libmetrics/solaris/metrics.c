@@ -1,10 +1,11 @@
-/* This is file is an amended version of solaris.c included in ganglia 2.5.4 
- * and ganglia 2.5.5. It has been modified by Adeyemi Adesanya 
- * (yemi@slac.stanford.edu) to allow gmond to run in a non-root account. The 
- * kvm dependency has been removed and all statistics are now obtained via 
- * kstat. 
+/*
+ * This file is an amended version of solaris.c included in ganglia 2.5.4
+ * and ganglia 2.5.5. It has been modified by Adeyemi Adesanya
+ * (yemi@slac.stanford.edu) to allow gmond to run as a non-root account. The
+ * kvm dependency has been removed and all statistics are now obtained via
+ * kstat.
  *
- * It appears to run just fine in Solaris 5.9 and should be OK in 5.8 also. 
+ * It appears to run just fine in Solaris 9 and should be OK in 8 also.
  * Earlier versions of solaris may not provide all the data via kstat.
  * Try running 'kstat cpu_stat' from the command line.
  *
@@ -43,7 +44,8 @@
  * Modifications made by Carlo Marcelo Arenas Belon:
  * - Add disk_total, disk_free, part_max_used
  *
- * Tested on Solaris 5.8 (64-bit) with gcc-3.3.1
+ * Tested on Solaris 7 x86 (32-bit) with gcc-2.8.1
+ * Tested on Solaris 8 (64-bit) with gcc-3.3.1
  * Tested on Solaris 9 (64-bit) with gcc-3.4.4
  * Tested on Solaris 10 SPARC (64-bit) and x86 (32-bit and 64-bit)
  */
@@ -62,17 +64,18 @@
 #include <procfs.h>
 #include <errno.h>
 
-/* used for swap space determination - swapctl() 
+/*
+ * used for swap space determination - swapctl()
  * and anon.h has the data structure  needed for swapctl to be useful
  */
- 
+
 #include <sys/stat.h>
 #include <sys/swap.h>
 #include <vm/anon.h>
 #include <fcntl.h>
 
-/* we get the cpu struct from cpuvar, maybe other mojo too
- *
+/*
+ * we get the cpu struct from cpuvar, maybe other mojo too
  */
 
 #include <sys/var.h>
@@ -85,7 +88,8 @@
  * code for top.
  */
 
-/* used for disk space determination - getmntent(), statvfs()
+/*
+ * used for disk space determination - getmntent(), statvfs()
  */
 
 #include <sys/mnttab.h>
@@ -93,7 +97,7 @@
 
 /*  number of seconds to wait before refreshing/recomputing values off kstat */
 
-#define TICK_SECONDS 		30
+#define TICK_SECONDS    30
 
 #ifndef FSCALE
 #define FSHIFT  8               /* bits to right of fixed binary point */
@@ -102,7 +106,7 @@
 
 /*  also imported from top, i'm basically using the same CPU cycle summing algo */
 
-#define CPUSTATES	5
+#define CPUSTATES       5
 #define CPUSTATE_IDLE   0
 #define CPUSTATE_USER   1
 #define CPUSTATE_KERNEL 2
@@ -111,8 +115,6 @@
 
 int first_run = 1;
 
-
-
 /* support macros for the percentage computations */
 
 #define loaddouble(la) ((double)(la) / FSCALE)
@@ -120,55 +122,52 @@ int first_run = 1;
 static struct utsname unamedata;
 
 struct cpu_info {
-    unsigned long 		bread;
-    unsigned long 		bwrite;
-    unsigned long 		lread;
-    unsigned long 		lwrite;
-    unsigned long 		phread;
-    unsigned long 		phwrite;
+    unsigned long bread;
+    unsigned long bwrite;
+    unsigned long lread;
+    unsigned long lwrite;
+    unsigned long phread;
+    unsigned long phwrite;
 };
 
-
 struct g_metrics_struct {
-    g_val_t		boottime;
-    g_val_t		cpu_wio;
-    g_val_t		cpu_idle;
-    g_val_t		cpu_aidle;
-    g_val_t		cpu_nice;
-    g_val_t		cpu_system;
-    g_val_t		cpu_user;
-    g_val_t		cpu_num;
-    g_val_t		cpu_speed;
-    g_val_t		load_one;
-    g_val_t		load_five;
-    g_val_t		load_fifteen;
-    char *		machine_type;
-    g_val_t		mem_buffers;
-    g_val_t		mem_cached;
-    g_val_t		mem_free;
-    g_val_t		mem_shared;
-    g_val_t		mem_total;
-    char *		os_name;
-    char *		os_release;
-    g_val_t 		proc_run;
-    g_val_t 		proc_total;
-    g_val_t		swap_free;
-    g_val_t		swap_total;
-    g_val_t		sys_clock;
-    g_val_t		bread_sec;
-    g_val_t		bwrite_sec;
-    g_val_t		lread_sec;
-    g_val_t		lwrite_sec;
-    g_val_t		phread_sec;
-    g_val_t		phwrite_sec;
-    g_val_t		rcache;
-    g_val_t		wcache; 
-    g_val_t		pkts_in;
-    g_val_t		pkts_out;
-    g_val_t		bytes_in;
-    g_val_t		bytes_out;
-
-
+    g_val_t boottime;
+    g_val_t cpu_wio;
+    g_val_t cpu_idle;
+    g_val_t cpu_aidle;
+    g_val_t cpu_nice;
+    g_val_t cpu_system;
+    g_val_t cpu_user;
+    g_val_t cpu_num;
+    g_val_t cpu_speed;
+    g_val_t load_one;
+    g_val_t load_five;
+    g_val_t load_fifteen;
+     char * machine_type;
+    g_val_t mem_buffers;
+    g_val_t mem_cached;
+    g_val_t mem_free;
+    g_val_t mem_shared;
+    g_val_t mem_total;
+     char * os_name;
+     char * os_release;
+    g_val_t proc_run;
+    g_val_t proc_total;
+    g_val_t swap_free;
+    g_val_t swap_total;
+    g_val_t sys_clock;
+    g_val_t bread_sec;
+    g_val_t bwrite_sec;
+    g_val_t lread_sec;
+    g_val_t lwrite_sec;
+    g_val_t phread_sec;
+    g_val_t phwrite_sec;
+    g_val_t rcache;
+    g_val_t wcache;
+    g_val_t pkts_in;
+    g_val_t pkts_out;
+    g_val_t bytes_in;
+    g_val_t bytes_out;
 };
 
 static struct g_metrics_struct metriclist;
@@ -183,8 +182,8 @@ get_kstat_val(g_val_t *val, char *km_name, char *ks_name, char *name)
    kstat_named_t *kn;
 
    /*
-   ** Get a kstat_ctl handle, or update the kstat chain.
-   */
+    * Get a kstat_ctl handle, or update the kstat chain.
+    */
    if (kc == NULL)
       kc = kstat_open();
    else
@@ -202,7 +201,8 @@ get_kstat_val(g_val_t *val, char *km_name, char *ks_name, char *name)
    ks = kstat_lookup(kc, km_name, 0, ks_name);
    debug_msg("%s: Just did kstat_lookup().",name);
 
-   /* CPU_INFO module & instance check: Michael Hom <michael_hom_work@yahoo.com>
+   /*
+    * CPU_INFO module & instance check: Michael Hom <michael_hom_work@yahoo.com>
     * If the first online CPU is not in slot #0, gmond will segfault and core dump.
     * If "km_name = NULL" and "km_instance = -1", then first instance of the module is returned.
     *     ks = kstat_lookup(kc, km_name, -1, NULL);
@@ -252,7 +252,6 @@ pagetok( int pageval )
     return foo;
 }
 
-
 /*
  *  there's too much legwork for each function to handle its metric.
  *  hence the updater.
@@ -281,7 +280,7 @@ update_metric_data ( void )
    get_kstat_val(&metriclist.load_five,    "unix", "system_misc","avenrun_5min");
    get_kstat_val(&metriclist.load_one,     "unix", "system_misc","avenrun_1min");
    get_kstat_val(&metriclist.proc_total,   "unix", "system_misc", "nproc");
-/*  
+/*
  * memory usage stats are arguably VERY broken.
  */
    get_kstat_val(&metriclist.mem_free,     "unix", "system_pages", "pagesfree");
@@ -298,7 +297,8 @@ update_metric_data ( void )
    return 0;
 }
 
-/* another function ripped from top.  after all we want the CPU percentage
+/*
+ * another function ripped from top.  after all we want the CPU percentage
  * stuff to match.
  */
 
@@ -353,16 +353,17 @@ long percentages(int cnt, int *out, register unsigned long *new, register unsign
 int
 determine_cpu_percentages ( void )
 {
-/*  hopefully this doesn't get too confusing.
- *  cpu_snap is a structure from <sys/cpuvar.h> and is the container into which
- *  we read the current CPU metrics.
- *  the static array "cpu_old" contains the last iteration's summed cycle
- *  counts.
- *  the array "cpu_now" contains the current iteration's summed cycle
- *  counts.
- *  "cpu_diff" holds the delta.
- *  across CPUs of course. :)
- *  buffers[0..2] holds past, present and diff info for the "other" CPU stats.
+/*
+ * hopefully this doesn't get too confusing.
+ * cpu_snap is a structure from <sys/cpuvar.h> and is the container into which
+ * we read the current CPU metrics.
+ * the static array "cpu_old" contains the last iteration's summed cycle
+ * counts.
+ * the array "cpu_now" contains the current iteration's summed cycle
+ * counts.
+ * "cpu_diff" holds the delta.
+ * across CPUs of course. :)
+ * buffers[0..2] holds past, present and diff info for the "other" CPU stats.
  */
 
    static struct cpu_info buffers[3];
@@ -387,8 +388,9 @@ determine_cpu_percentages ( void )
    processorid_t i;
    int cpu_id = sysconf(_SC_NPROCESSORS_ONLN);
 
-/*  ripped from top by swagner in the hopes of getting
- *  top-like CPU percentages ...
+/*
+ * ripped from top by swagner in the hopes of getting
+ * top-like CPU percentages ...
  */
    gettimeofday (&thistime, NULL);
 
@@ -401,21 +403,21 @@ determine_cpu_percentages ( void )
      timediff = 1.0e7;
 
   /*
-     * constants for exponential average.  avg = alpha * new + beta * avg
-     * The goal is 50% decay in 30 sec.  However if the sample period
-     * is greater than 30 sec, there's not a lot we can do.
-     */ 
+   * constants for exponential average.  avg = alpha * new + beta * avg
+   * The goal is 50% decay in 30 sec.  However if the sample period
+   * is greater than 30 sec, there's not a lot we can do.
+   */
   if (timediff < 30.0e7)
     {
       alpha = 0.5 * (timediff / 30.0e7);
       beta = 1.0 - alpha;
       debug_msg("* * * * Setting alpha to %f and beta to %f because timediff = %d",alpha,beta,timediff);
-    }           
-  else          
+    }
+  else
     {
       alpha = 0.5;
       beta = 0.5;
-    }   
+    }
 
     lasttime = thistime;
 
@@ -448,8 +450,8 @@ determine_cpu_percentages ( void )
       }
 
    /*
-   ** Get a kstat_ctl handle, or update the kstat chain.
-   */
+    * Get a kstat_ctl handle, or update the kstat chain.
+    */
    if (kc == NULL)
       kc = kstat_open();
    else
@@ -464,14 +466,16 @@ determine_cpu_percentages ( void )
 
    ks_name = (char*) malloc(30 * sizeof (char) );
 
-/* Modified by Robert Petkus <rpetkus@bnl.gov>
+/*
+ * Modified by Robert Petkus <rpetkus@bnl.gov>
  * Get stats only for online CPUs. Previously, gmond segfaulted if
  * the CPUs were not numbered sequentially; i.e., cpu0, cpu2, etc.
  * Tested on 64 bit Solaris 8 and 9 with GCC 3.3 and 3.3.2
-*/
+ */
    for (i = 0; cpu_id > 0; i++)
    {
-       /* Submitted by JB Kim <jbremnant@hotmail.com>
+      /*
+       * Submitted by JB Kim <jbremnant@hotmail.com>
        * also skip the loop if CPU is "off-line"
        */
       int n = p_online(i, P_STATUS);
@@ -485,22 +489,22 @@ determine_cpu_percentages ( void )
 
       debug_msg( "getting kstat:  km ='%s', ki ='%d',ks='%s'", km_name, ki, ks_name);
       ks = kstat_lookup(kc, km_name, ki, ks_name);
- 
+
       if (kstat_read(kc, ks,&cpuKstats) == -1) {
         perror("kstat_read");
         return SYNAPSE_FAILURE;
       }
-     
+
       /* sum up to the wait state counter, the last two we determine ourselves */
       for (j = 0; j < CPU_WAIT; j++){
          cpu_now[j] += (unsigned long) cpuKstats.cpu_sysinfo.cpu[j];
       }
-      
+
 
       cpu_now[CPUSTATE_IOWAIT] += (unsigned long) cpuKstats.cpu_sysinfo.wait[W_IO] +
                                   (unsigned long) cpuKstats.cpu_sysinfo.wait[W_PIO];
       cpu_now[CPUSTATE_SWAP] += (unsigned long) cpuKstats.cpu_sysinfo.wait[W_SWAP];
-      
+
       buffers[0].bread += (long)cpuKstats.cpu_sysinfo.bread;
       buffers[0].bwrite += (long)cpuKstats.cpu_sysinfo.bwrite;
       buffers[0].lread += (long)cpuKstats.cpu_sysinfo.lread;
@@ -510,9 +514,10 @@ determine_cpu_percentages ( void )
 
       }
    free(ks_name);
-   
-/* now we have our precious "data" and have to manipulate it - compare new to old
- * and calculate percentages and sums.
+
+/*
+ * now we have our precious "data" and have to manipulate it - compare new
+ * to old and calculate percentages and sums.
  */
    buffers[2].bread = buffers[0].bread - buffers[1].bread;
    buffers[2].bwrite = buffers[0].bwrite - buffers[1].bwrite;
@@ -530,10 +535,11 @@ determine_cpu_percentages ( void )
    buffers[0].phwrite,buffers[1].phwrite,buffers[2].phwrite);
 
    time_delta = (unsigned long)time(NULL) - (unsigned long)last_refresh;
-   if (time_delta == 0)           
-      time_delta = 1; 
+   if (time_delta == 0)
+      time_delta = 1;
 
-/* decay stuff
+/*
+ * decay stuff
  * semi-stolen from top.  :)  added by swagner on 8/20/02
  */
    if (time_delta < 30) {
@@ -553,21 +559,21 @@ determine_cpu_percentages ( void )
 
    metriclist.lread_sec.f   = (float)buffers[2].lread / (float)time_delta;
    if (buffers[1].bwrite == buffers[0].lread)
-      metriclist.lread_sec.f = 0.;       
+      metriclist.lread_sec.f = 0.;
 
    metriclist.lwrite_sec.f  = (float)buffers[2].lwrite / (float)time_delta;
-   if (buffers[1].bwrite == buffers[0].lwrite)                    
-      metriclist.lwrite_sec.f = 0.;                           
+   if (buffers[1].bwrite == buffers[0].lwrite)
+      metriclist.lwrite_sec.f = 0.;
 
    metriclist.phread_sec.f  = (float)buffers[2].phread / (float)time_delta;
-   if (buffers[1].bwrite == buffers[0].phread)                    
-      metriclist.phread_sec.f = 0.;                           
+   if (buffers[1].bwrite == buffers[0].phread)
+      metriclist.phread_sec.f = 0.;
 
    metriclist.phwrite_sec.f = (float)buffers[2].phwrite / (float)time_delta;
-   if (buffers[1].bwrite == buffers[0].phwrite)                    
-      metriclist.phwrite_sec.f = 0.; 
+   if (buffers[1].bwrite == buffers[0].phwrite)
+      metriclist.phwrite_sec.f = 0.;
 
-   debug_msg("Aftermath: %f %f %f %f %f %f delta = %u", 
+   debug_msg("Aftermath: %f %f %f %f %f %f delta = %u",
            metriclist.bread_sec.f, metriclist.bwrite_sec.f,
            metriclist.lread_sec.f, metriclist.lwrite_sec.f,
            metriclist.phread_sec.f, metriclist.phwrite_sec.f,
@@ -585,7 +591,8 @@ determine_cpu_percentages ( void )
 
    debug_msg ("** ** ** ** ** Are percentages electric?  Try %d%%, %d%% , %d%% , %d%% , %d%% %d%%", cpu_states[0],cpu_states[1],cpu_states[2],cpu_states[3],cpu_states[4]);
 
-/* i don't know how you folks do things in new york city, but around here folks
+/*
+ * i don't know how you folks do things in new york city, but around here folks
  * don't go around dividing by zero.
  */
    if (diff_cycles < 1)
@@ -594,8 +601,9 @@ determine_cpu_percentages ( void )
        diff_cycles = 1;
        }
 
-/* could this be ANY HARDER TO READ?  sorry.  through hacking around i found that
- * explicitly casting everything as floats seems to work...
+/*
+ * could this be ANY HARDER TO READ?  sorry.  through hacking around i found
+ * that explicitly casting everything as floats seems to work...
  */
    metriclist.cpu_idle.f = (float) cpu_states[CPUSTATE_IDLE] / 10;
    metriclist.cpu_user.f = (float) cpu_states[CPUSTATE_USER] / 10;
@@ -606,22 +614,21 @@ determine_cpu_percentages ( void )
    metriclist.wcache.f = 100.0 * ( 1.0 - ( (float)buffers[0].bwrite / (float)buffers[0].lwrite ) );
 
    last_refresh = time(NULL);
-//   sleep(5);
    return(0);
 }
 
 /*
-** The following two functions retrieve statistics from all physical
-** network interfaces in "UP" state. (MKN)
-*/
+ * The following two functions retrieve statistics from all physical
+ * network interfaces in "UP" state. (MKN)
+ */
 static uint64_t oifctr[4];
 static uint64_t nifctr[4];
+
 static int
 extract_if_data(const struct ifi_info *entry)
 {
    kstat_t *ks;
    kstat_named_t *kn;
-
 
    /* Only consider interfaces that are up. */
    if (! entry->ifi_flags & IFF_UP)
@@ -669,8 +676,8 @@ update_if_data(void)
    struct ifi_info *info, *nifi;
 
    /*
-   ** Compute time between calls
-   */
+    * Compute time between calls
+    */
    gettimeofday (&thistime, NULL);
    if (lasttime.tv_sec)
      timediff = ((double) thistime.tv_sec * 1.0e6 +
@@ -681,15 +688,15 @@ update_if_data(void)
      timediff = 1.0;
 
    /*
-   ** Do nothing if we are called to soon after the last call
-   */
+    * Do nothing if we are called to soon after the last call
+    */
    if (init_done && (timediff < 10.)) return;
 
    lasttime = thistime;
 
    /*
-   ** Get a kstat_ctl handle, or update the kstat chain.
-   */
+    * Get a kstat_ctl handle, or update the kstat chain.
+    */
    if (kc == NULL)
       kc = kstat_open();
    else
@@ -704,15 +711,16 @@ update_if_data(void)
    /* fprintf(stderr,"kc = %x\n",kc); */
 
    /*
-   ** Loop over all interfaces to get statistics
-   */
+    * Loop over all interfaces to get statistics
+    */
    nifctr[0] = nifctr[1] = nifctr[2] = nifctr[3] = 0;
 
    info = Get_ifi_info(AF_INET, 0);
    for(nifi = info; nifi; nifi = nifi->ifi_next) {
-     /* process the info you are interested in here
-         nifi->ifi_flags will have all the IFF_xxx flags
-       */
+     /*
+      * process the info you are interested in here
+      * nifi->ifi_flags will have all the IFF_xxx flags
+      */
      extract_if_data(nifi);
      }
    free_ifi_info(info);
@@ -747,14 +755,15 @@ update_if_data(void)
 }
 
 /*
- * This function is called only once by the gmond.  Use to 
+ * This function is called only once by the gmond.  Use to
  * initialize data structures, etc or just return SYNAPSE_SUCCESS;
  */
 g_val_t
 metric_init( void )
 {
 
-/* swagner's stuff below, initialization for reading running kernel data ...
+/*
+ * swagner's stuff below, initialization for reading running kernel data ...
  */
 
    g_val_t val;
@@ -768,7 +777,8 @@ metric_init( void )
 
 /* first we get the uname data (hence my including <sys/utsname.h> ) */
    (void) uname( &unamedata );
-/* these values don't change from tick to tick.  at least, they shouldn't ... 
+/*
+ * these values don't change from tick to tick.  at least, they shouldn't ...
  * also, these strings don't use the ganglia metric struct!
  */
    metriclist.os_name = unamedata.sysname;
@@ -780,9 +790,9 @@ metric_init( void )
    val.int32 = SYNAPSE_SUCCESS;
    first_run = 0;
 /*
-** We need to make sure that every server thread gets their own copy of "kc".
-** The next metric that needs a kc-handle will reopen it for the server thread.
-*/
+ * We need to make sure that every server thread gets their own copy of "kc".
+ * The next metric that needs a kc-handle will reopen it for the server thread.
+ */
    if (kc) {
      kstat_close(kc);
      kc = NULL;
@@ -818,8 +828,7 @@ mtu_func ( void )
    return val;
 }
 
-
-/* --------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 
 g_val_t
 bytes_in_func(void)
@@ -864,7 +873,7 @@ pkts_out_func(void)
 /* --- snip!  preceding code lifted from linux.c --- */
 
 g_val_t
-cpu_speed_func ( void )     
+cpu_speed_func ( void )
 {
    g_val_t val;
 
@@ -886,6 +895,7 @@ g_val_t
 swap_total_func ( void )
 {
    g_val_t val;
+
    metric_tick();
    val.f = metriclist.swap_total.uint32;
    return val;
@@ -926,16 +936,16 @@ os_name_func ( void )
 
    strncpy( val.str, unamedata.sysname, MAX_G_STRING_SIZE );
    return val;
-}        
+}
 
 g_val_t
 os_release_func ( void )
 {
    g_val_t val;
- 
+
    strncpy( val.str, unamedata.release, MAX_G_STRING_SIZE );
    return val;
-}        
+}
 
 g_val_t
 cpu_user_func ( void )
@@ -954,10 +964,11 @@ cpu_nice_func ( void )
    g_val_t val;
 
    val.f = 0.0;   /*  no more mr. nice procs ... */
+
    return val;
 }
 
-g_val_t 
+g_val_t
 cpu_system_func ( void )
 {
    g_val_t val;
@@ -966,7 +977,7 @@ cpu_system_func ( void )
    return val;
 }
 
-g_val_t 
+g_val_t
 cpu_idle_func ( void )
 {
    g_val_t val;
@@ -976,11 +987,11 @@ cpu_idle_func ( void )
 }
 
 /* FIXME: always 0? */
-g_val_t 
+g_val_t
 cpu_wio_func ( void )
 {
    g_val_t val;
-   
+
    val.f = metriclist.cpu_wio.f;
    return val;
 }
@@ -992,7 +1003,6 @@ load_one_func ( void )
 
    metric_tick();
    val.f = metriclist.load_one.uint32;
-
    val.f = loaddouble(val.f);
    return val;
 }
@@ -1001,7 +1011,7 @@ g_val_t
 load_five_func ( void )
 {
    g_val_t val;
- 
+
    metric_tick();
    val.f = metriclist.load_five.uint32;
    val.f = loaddouble(val.f);
@@ -1020,9 +1030,9 @@ load_fifteen_func ( void )
 }
 
 /*
-** The definition of a "running" Process seems to be different from Linux :-)
-** Anyway, the numbers look sane. Suggestions are welcome. (MKN)
-*/
+ * The definition of a "running" Process seems to be different from Linux :-)
+ * Anyway, the numbers look sane. Suggestions are welcome. (MKN)
+ */
 #define PROCFS          "/proc"
 g_val_t
 proc_run_func( void )
@@ -1086,42 +1096,42 @@ mem_free_func ( void )
    return val;
 }
 
+/*
+ * FIXME ? MKN
+ */
 g_val_t
 mem_shared_func ( void )
 {
-/*
-** FIXME ? MKN
-*/
-
    g_val_t val;
 
    val.f = 0;
+
    return val;
 }
 
+/*
+ * FIXME ? MKN
+ */
 g_val_t
 mem_buffers_func ( void )
 {
-/*
-** FIXME ? MKN
-*/
-
    g_val_t val;
 
    val.f = 0;
+
    return val;
 }
 
+/*
+ * FIXME ? MKN
+ */
 g_val_t
 mem_cached_func ( void )
 {
-/*
-** FIXME ? MKN
-*/
-
    g_val_t val;
 
    val.f = 0;
+
    return val;
 }
 
@@ -1141,10 +1151,11 @@ g_val_t
 bread_sec_func(void)
 {
    g_val_t val;
-   
+
    val.f = metriclist.bread_sec.f;
    return val;
 }
+
 g_val_t
 bwrite_sec_func(void)
 {
@@ -1153,6 +1164,7 @@ bwrite_sec_func(void)
    val.f = metriclist.bwrite_sec.f;
    return val;
 }
+
 g_val_t
 lread_sec_func(void)
 {
@@ -1161,6 +1173,7 @@ lread_sec_func(void)
    val.f = metriclist.lread_sec.f;
    return val;
 }
+
 g_val_t
 lwrite_sec_func(void)
 {
@@ -1169,6 +1182,7 @@ lwrite_sec_func(void)
    val.f = metriclist.lwrite_sec.f;
    return val;
 }
+
 g_val_t
 phread_sec_func(void)
 {
@@ -1177,6 +1191,7 @@ phread_sec_func(void)
    val.f = metriclist.phread_sec.f;
    return val;
 }
+
 g_val_t
 phwrite_sec_func(void)
 {
@@ -1185,6 +1200,7 @@ phwrite_sec_func(void)
    val.f = metriclist.phwrite_sec.f;
    return val;
 }
+
 g_val_t
 rcache_func(void)
 {
@@ -1193,6 +1209,7 @@ rcache_func(void)
    val.f = metriclist.rcache.f;
    return val;
 }
+
 g_val_t
 wcache_func(void)
 {
@@ -1203,9 +1220,9 @@ wcache_func(void)
 }
 
 /*
-** FIXME
-*/
-g_val_t 
+ * FIXME
+ */
+g_val_t
 cpu_aidle_func ( void )
 {
    g_val_t val;
@@ -1214,9 +1231,9 @@ cpu_aidle_func ( void )
 }
 
 /*
-** FIXME
-*/
-g_val_t 
+ * FIXME
+ */
+g_val_t
 cpu_intr_func ( void )
 {
    g_val_t val;
@@ -1225,9 +1242,9 @@ cpu_intr_func ( void )
 }
 
 /*
-** FIXME
-*/
-g_val_t 
+ * FIXME
+ */
+g_val_t
 cpu_sintr_func ( void )
 {
    g_val_t val;
@@ -1235,20 +1252,24 @@ cpu_sintr_func ( void )
    return val;
 }
 
-/* Solaris Specific path.  but this is a Solaris machine file even if mostly */
-/* stolen from a Linux machine one */
+/*
+ * Solaris Specific path.  but this is a Solaris file even if mostly
+ * stolen from the Linux one
+ */
 #define MOUNTS "/etc/mnttab"
 
-/* Prior to Solaris 8 was a regular plain text file which should be locked */
-/* on read to ensure consistency; a read-only filesystem in newer releases */
+/*
+ * Prior to Solaris 8 was a regular plain text file which should be locked
+ * on read to ensure consistency; a read-only filesystem in newer releases
+ */
 
-/* --------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 int valid_mount_type(const char *type)
 {
    return ((strncmp(type, "ufs", 3) == 0) || (strncmp(type, "vxfs", 4) == 0));
 }
 
-/* --------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 float device_space(char *mount, char *device, double *total_size, double *total_free)
 {
    struct statvfs buf;
@@ -1267,7 +1288,7 @@ float device_space(char *mount, char *device, double *total_size, double *total_
    return pct;
 }
 
-/* --------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------- */
 float find_disk_space(double *total_size, double *total_free)
 {
    FILE *mounts;
@@ -1306,7 +1327,7 @@ float find_disk_space(double *total_size, double *total_free)
    return max;
 }
 
-g_val_t 
+g_val_t
 disk_free_func ( void )
 {
    double total_free = 0.0;
@@ -1319,7 +1340,7 @@ disk_free_func ( void )
    return val;
 }
 
-g_val_t 
+g_val_t
 disk_total_func ( void )
 {
    double total_free = 0.0;
@@ -1332,7 +1353,7 @@ disk_total_func ( void )
    return val;
 }
 
-g_val_t 
+g_val_t
 part_max_used_func ( void )
 {
    double total_free = 0.0;
