@@ -50,14 +50,18 @@ main( int argc, char *argv[] )
       fprintf(stderr,"Unable to allocate gmetric structure. Exiting.\n");
       exit(1);
     }
-  if( ! (args_info.name_given && args_info.value_given && args_info.type_given))
-    {
-      fprintf(stderr,"Incorrect options supplied, exiting.\n");
-      exit(1);
-    }
-  rval = Ganglia_metric_set( gmetric, args_info.name_arg, args_info.value_arg,
+  if(args_info.spoof_given && args_info.heartbeat_given){
+    rval = Ganglia_metric_set(gmetric, "heartbeat", "0", "uint32", "", 0, 0, 0);
+  }else{
+    if( ! (args_info.name_given && args_info.value_given && args_info.type_given))
+      {
+        fprintf(stderr,"Incorrect options supplied, exiting.\n");
+        exit(1);
+      }
+    rval = Ganglia_metric_set( gmetric, args_info.name_arg, args_info.value_arg,
              args_info.type_arg, args_info.units_arg, cstr_to_slope(args_info.slope_arg),
              args_info.tmax_arg, args_info.dmax_arg);
+  }
 
   /* TODO: make this less ugly later */
   switch(rval)
