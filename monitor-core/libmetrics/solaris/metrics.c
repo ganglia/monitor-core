@@ -1,6 +1,3 @@
-#include "interface.h"
-#include "libmetrics.h"
-
 /* This is file is an amended version of solaris.c included in ganglia 2.5.4 
  * and ganglia 2.5.5. It has been modified by Adeyemi Adesanya 
  * (yemi@slac.stanford.edu) to allow gmond to run in a non-root account. The 
@@ -51,7 +48,10 @@
  * Tested on Solaris 10 SPARC (64-bit) and x86 (32-bit and 64-bit)
  */
 
-#include "kstat.h"
+#include "interface.h"
+#include "libmetrics.h"
+
+#include <kstat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -69,7 +69,6 @@
 #include <sys/stat.h>
 #include <sys/swap.h>
 #include <vm/anon.h>
-#include <sys/types.h>
 #include <fcntl.h>
 
 /* we get the cpu struct from cpuvar, maybe other mojo too
