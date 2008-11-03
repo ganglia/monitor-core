@@ -1,0 +1,57 @@
+#/* This configuration file configures the spoof example
+#    module. This example module can be used to test the
+#    modular spoofing functionality or it can be used
+#    as an example to write your own spoof module. */
+modules {
+  module {
+    name = "spfexample"
+    language = "python"
+  }
+}
+
+#/* Collection groups for the
+#    spoof example python module */
+
+#/* This metric gathers a simulated
+#    cpu utilization value */
+collection_group {
+  collect_every = 10
+  time_threshold = 50
+  metric {
+    name = "spf_random_cpu_util"
+    value_threshold = 1.0
+    title = "Spoofed Random CPU Utilization"
+  }
+}
+
+#/* This metric spoofs a heartbeat for an
+#    imaginary box */
+collection_group {
+  collect_once = yes
+  time_threshold = 20
+  metric {
+    name = "spf_heartbeat"
+    title = "Spoofed Heartbeat"
+  }
+}
+
+#/* These metrics spoof the location, boottime and OS name
+#    for an imaginary box */
+collection_group {
+  collect_once = yes
+  time_threshold = 1200
+  metric {
+    name = "spf_location"
+    title = "Spoofed Location"
+  }
+  metric {
+    name = "spf_boottime"
+    title = "Spoofed Boot Time"
+  }
+  metric {
+    name = "spf_osname"
+    title = "Spoofed OS Name"
+  }
+}
+
+
