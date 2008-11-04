@@ -58,6 +58,9 @@ tcp_accept_channel {\n\
   port = 8649\n\
 }\n\
 \n\
+"
+
+#define COLLECTION_GROUP_LIST "\
 /* Each metrics module that is referenced by gmond must be specified and\n\
    loaded. If the module has been statically linked with gmond, it does\n\
    not require a load path. However all dynamically loadable modules must\n\
@@ -98,9 +101,6 @@ modules {\n\
 \n\
 include ('/etc/ganglia/conf.d/*.conf')\n\
 \n\
-"
-
-#define COLLECTION_GROUP_LIST "\
 /* The old internal 2.5.x metric array has been replaced by the following\n\
    collection_group directives.  What follows is the default behavior for\n\
    collecting and sending metrics that is as close to 2.5.x behavior as\n\

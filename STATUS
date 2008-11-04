@@ -30,7 +30,8 @@ CURRENT RELEASE NOTES:
   * gmond: Add an 'enabled' directive to the module section so that a 
      module can easily be enabled or disabled through the configuration 
      file  
-  * gmond: reformat memory metrics to match pre 3.1 style
+  * gmond: reformat memory metrics to match pre 3.1 style (REGRESSION)
+  * gmond: -r support for transforming 2.5 configurations (REGRESSION)
   * gmond: add boolean option to 'allow_extra_data' generation (BUG199)
   * gmetad: skip unresponsive sources (BUG92)
   * libganglia: mcast_if support in gmond (BUG140)
@@ -181,12 +182,6 @@ BACKPORT PROPOSALS:
      environment variable.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1840
     +1: bnicholes
-
-  * gmond: allow gmond -r to get a working transformed 2.5 configuration
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1860
-    +1: carenas, bnicholes
-    carenas: splitted backport proposal, need confirm vote
-    bnicholes: vote remains +1
 
   * gmond: trusted_hosts support for gmond -r
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1861
