@@ -33,6 +33,7 @@ CURRENT RELEASE NOTES:
   * gmond: reformat memory metrics to match pre 3.1 style (REGRESSION)
   * gmond: -r support for transforming 2.5 configurations (REGRESSION)
   * gmond: add boolean option to 'allow_extra_data' generation (BUG199)
+  * gmond: include localhost in translated (-r) trusted_hosts from 2.5
   * gmetad: skip unresponsive sources (BUG92)
   * libganglia: mcast_if support in gmond (BUG140)
   * web: add boolean option for using hostname without domainname for graphs
@@ -182,14 +183,6 @@ BACKPORT PROPOSALS:
      environment variable.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1840
     +1: bnicholes
-
-  * gmond: trusted_hosts support for gmond -r
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1861
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1862
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1887
-    +1: carenas, bnicholes
-    carenas: splitted/extended proposal, needs re-vote
-    bnicholes: vote remains +1
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
