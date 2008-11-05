@@ -58,6 +58,8 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1622
+    Consolidated patch that can be applied to the 3.1.x branch
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=181&action=view
     +1: bnicholes
     carenas: spoofing still needs more work (even using gmetric) for 3.1
     bnicholes: Can you explain what you mean by the above comment. Other than
