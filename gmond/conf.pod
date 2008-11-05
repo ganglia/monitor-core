@@ -294,9 +294,9 @@ If your IPv6 stack doesn't support IPV6_V6ONLY, a warning will be issued
 but gmond will continue working (this should rarely happen).
 
 The B<timeout> attribute allows you to specify how many microseconds to block
-before closing a connection to a client.  The default is set to 1 second
-(1000000 usecs).  If you have a very slow connection you may need to increase
-this value.
+before closing a connection to a client.  The default is set to -1 (blocking
+IO) and will never abort a connection regardless of how slow the client is
+in fetching the report data.
 
 The B<interface> is not implemented at this time (use B<bind>).
 
