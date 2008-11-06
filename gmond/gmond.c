@@ -657,10 +657,10 @@ get_metric_names (Ganglia_metric_id *metric_id, char **metricName, char **realNa
     if (metric_id->spoof) 
       {
         name_len = strlen(firstName);
-        buff = malloc(name_len+1);
+        buff = malloc(name_len + 1);
         strncpy(buff, firstName, name_len + 1);
         firstName = buff;
-        secondName = strchr(buff+1,':');
+        secondName = strchr(buff + 1, ':');
         if(secondName)
           {
             *secondName = 0;
@@ -2045,8 +2045,10 @@ setup_collection_groups( void )
 
           if(!metric_cb)
             {
-              /* If a metric callback was not found and the metric is dynamic, then
-                  search through the callback sequentially. */
+              /*
+               * If a metric callback was not found and the metric is dynamic,
+               * then search through the callback sequentially.
+               */
 
               apr_hash_index_t *hi;
               apr_pool_t *p;
