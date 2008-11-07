@@ -44,10 +44,13 @@ CURRENT RELEASE NOTES:
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
- <TEMPLATE>
-  * <Brief description of showstopper bug>
-    <http:// link to email list or bugzilla bug describing the issue>
-    <Comments prefixed with user id of comment author>
+  * http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04765.html
+    with the gmetad backport fixes from BUG92 this will result in erratic
+    cpu_num numbers as different sources are selected in failure.
+
+  * http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04855.html
+    modpython is broken in amd64 linux using python 2.5, fixed already
+    in trunk and ready for backport as soon as spoofing gets committed.
 
 BACKPORT PROPOSALS:
 
@@ -57,11 +60,10 @@ BACKPORT PROPOSALS:
     SPOOF_NAME as extra metadata to the metric description
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1622
     Consolidated patch that can be applied to the 3.1.x branch
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=181&action=view
-    +1: bnicholes
-    carenas: spoofing still needs more work (even using gmetric) for 3.1
+    +1: bnicholes, carenas
+    carenas: big and scary but regression free, implementation fixes to follow
     bnicholes: Can you explain what you mean by the above comment. Other than
       support for a shortened gmetric spoof heartbeat which will be addressed
       in a separate patch, what needs more work? Does the above proposed patch
@@ -184,13 +186,14 @@ BACKPORT PROPOSALS:
      python path programatically rather than altering the PYTHON_PATH
      environment variable.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1840
-    +1: bnicholes
+    +1: bnicholes, carenas
 
   * gmetric: Add support for group, description and title metadata tags for
      metrics collected via gmetric
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1875
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1876
-    +1: bernardli
+    +1: bernardli, carenas
+    carenas: patched generated files; cleanup to follow
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
