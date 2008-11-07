@@ -184,6 +184,10 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1909
     +1: bnicholes
 
+  * gmond: Fix an issue when syncing spoof metadata between gmond nodes in 
+     multicast mode
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1911
+    +1: bnicholes
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
