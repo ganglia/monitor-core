@@ -49,6 +49,15 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+/*
+ * Backward compatibility for 2.1 to 2.4
+ */
+#if PY_MINOR_VERSION < 5
+#define Py_ssize_t int
+#if PY_MINOR_VERSION < 3
+#define PyInt_AsUnsignedLongMask PyInt_AsLong
+#endif
+#endif
 
 /*
  * Declare ourselves so the configuration routines can find and know us.
@@ -322,7 +331,8 @@ static void fill_metric_info(PyObject* pdict, py_metric_init_t* minfo, char *mod
 {
     char *metric_name = "";
     PyObject *key, *value;
-    int pos = 0, ret;
+    Py_ssize_t pos = 0;
+    int ret;
     char strkey[1024], strvalue[1024];
 
     memset(minfo, 0, sizeof(*minfo));

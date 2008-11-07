@@ -45,6 +45,7 @@ CURRENT RELEASE NOTES:
     specific host.  This provides the same spoofing functionality as gmetric
     but through a metric module.  It is done by adding SPOOF_HOST and
     SPOOF_NAME as extra metadata to the metric description
+  * gmond: mod_python support for versions older than 2.3 or newer than 2.4
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -70,13 +71,6 @@ BACKPORT PROPOSALS:
     hawson: If security is an issue, then check/set the include path with 
             the get_include_path() and set_include_path() functions.  I don't
             see that this would affect performance much.
-
-  * gmond: mod_python support for versions older than 2.3 or newer than 2.4
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1593
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1596
-    +1: carenas
-    +1: bnicholes
-    carenas: depends on spoofing support
 
   * build: libmetrics dependency cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1597
