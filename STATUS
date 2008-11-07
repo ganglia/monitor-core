@@ -180,6 +180,11 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1896
     +1: bnicholes
 
+  * libgmond: Replace the calls to toupper with the cross-platform apr_toupper()
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1909
+    +1: bnicholes
+
+
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
   haven't been tested enough to be considered for a stable release.
