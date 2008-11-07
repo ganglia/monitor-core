@@ -10,6 +10,7 @@
 #define SPOOF "SPOOF"
 #define SPOOF_HOST SPOOF"_HOST"
 #define SPOOF_HEARTBEAT SPOOF"_HEARTBEAT"
+#define SPOOF_NAME SPOOF"_NAME"
 
 enum ganglia_slope {
    GANGLIA_SLOPE_ZERO = 0,

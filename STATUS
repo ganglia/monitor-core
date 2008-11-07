@@ -41,6 +41,10 @@ CURRENT RELEASE NOTES:
   * web: metric group enhancements for host view (BUG203)
   * web: add option for configurable number of columns in cluster view (BUG194)
   * web: make number of metric columns in host view configurable (BUG194)
+  * Allow both a C and python module to create a metric that will spoof a
+    specific host.  This provides the same spoofing functionality as gmetric
+    but through a metric module.  It is done by adding SPOOF_HOST and
+    SPOOF_NAME as extra metadata to the metric description
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -53,24 +57,6 @@ RELEASE SHOWSTOPPERS:
     in trunk and ready for backport as soon as spoofing gets committed.
 
 BACKPORT PROPOSALS:
-
-  * Allow both a C and python module to create a metric that will spoof a
-    specific host.  This provides the same spoofing functionality as gmetric
-    but through a metric module.  It is done by adding SPOOF_HOST and
-    SPOOF_NAME as extra metadata to the metric description
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1386
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1389
-    Consolidated patch that can be applied to the 3.1.x branch
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=181&action=view
-    +1: bnicholes, carenas
-    carenas: big and scary but regression free, implementation fixes to follow
-    bnicholes: Can you explain what you mean by the above comment. Other than
-      support for a shortened gmetric spoof heartbeat which will be addressed
-      in a separate patch, what needs more work? Does the above proposed patch
-      work or not? Can the above patch be backported without causing instability
-      or regression to the 3.1 branch?  If so then the patch needs to be backported. 
-      If there are additional enhancements, then those can be addressed in follow-up
-      patches.  Bring the discussion to the mailing list if needed.
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
