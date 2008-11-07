@@ -46,6 +46,10 @@ CURRENT RELEASE NOTES:
     but through a metric module.  It is done by adding SPOOF_HOST and
     SPOOF_NAME as extra metadata to the metric description
   * gmond: mod_python support for versions older than 2.3 or newer than 2.4
+  * mod_python: Change the way that the python module path is added to better
+     support the Solaris platform.  It is also a cleaner way to add the
+     python path programatically rather than altering the PYTHON_PATH
+     environment variable.
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -160,13 +164,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1837
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1838
     +1: carenas
-
-  * mod_python: Change the way that the python module path is added to better
-     support the Solaris platform.  It is also a cleaner way to add the
-     python path programatically rather than altering the PYTHON_PATH
-     environment variable.
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1840
-    +1: bnicholes, carenas
 
   * gmetric: Add support for group, description and title metadata tags for
      metrics collected via gmetric
