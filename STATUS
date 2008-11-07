@@ -186,6 +186,12 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1840
     +1: bnicholes
 
+  * gmetric: Add support for group, description and title metadata tags for
+     metrics collected via gmetric
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1875
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1876
+    +1: bernardli
+
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
   haven't been tested enough to be considered for a stable release.
