@@ -57,10 +57,6 @@ RELEASE SHOWSTOPPERS:
     with the gmetad backport fixes from BUG92 this will result in erratic
     cpu_num numbers as different sources are selected in failure.
 
-  * http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04855.html
-    modpython is broken in amd64 linux using python 2.5, fixed already
-    in trunk and ready for backport as soon as spoofing gets committed.
-
 BACKPORT PROPOSALS:
 
   * web: performance/security improvement for handling authorization
@@ -205,5 +201,3 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1632
     -1: carenas
     carenas: not a fix but a workaround to the problem
-
-
