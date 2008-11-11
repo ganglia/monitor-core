@@ -50,6 +50,8 @@ CURRENT RELEASE NOTES:
      support the Solaris platform.  It is also a cleaner way to add the
      python path programatically rather than altering the PYTHON_PATH
      environment variable.
+  * gmetric: Support the short commandline parameter format when spoofing
+     a heartbeat metric.  (Regression fix from 3.0.x)
   * Bug fixes and Enhancements
 
 RELEASE SHOWSTOPPERS:
@@ -168,14 +170,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1876
     +1: bernardli, carenas
     carenas: patched generated files; cleanup to follow
-
-  * gmetric: Support the short commandline parameter format when spoofing
-     a heartbeat metric. NOTE: This backport is depends on the modular 
-     spoofing backport listed in the current backport proposals above. Once 
-     the modular spoofing backport proposal has been approved, then is proposal 
-     will move up in to the current backport proposal list.
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1896
-    +1: bnicholes, carenas
 
   * libgmond: Replace the calls to toupper with the cross-platform apr_toupper()
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1909
