@@ -19,6 +19,7 @@
 #include <apr_net.h>
 #include <apr_file_io.h>
 #include <apr_network_io.h>
+#include <apr_lib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -422,12 +423,12 @@ Ganglia_metadata_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_ch
           continue;
 
       /* Replace the host name with the spoof host if it exists in the metadata */
-      if ((toupper(elts[i].key[0]) == spoof[0]) && strcasecmp(SPOOF_HOST, elts[i].key) == 0) 
+      if ((apr_toupper(elts[i].key[0]) == spoof[0]) && strcasecmp(SPOOF_HOST, elts[i].key) == 0) 
         {
           msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gm_pool, elts[i].val);
           msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = TRUE;
         }
-      if ((toupper(elts[i].key[0]) == spoof[0]) && strcasecmp(SPOOF_HEARTBEAT, elts[i].key) == 0) 
+      if ((apr_toupper(elts[i].key[0]) == spoof[0]) && strcasecmp(SPOOF_HEARTBEAT, elts[i].key) == 0) 
         {
           msg.Ganglia_metadata_msg_u.gfull.metric_id.name = apr_pstrdup (gm_pool, "heartbeat");
           msg.Ganglia_metadata_msg_u.gfull.metric.name = msg.Ganglia_metadata_msg_u.gfull.metric_id.name;
@@ -482,12 +483,12 @@ Ganglia_value_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_chann
           continue;
 
       /* Replace the host name with the spoof host if it exists in the metadata */
-      if ((toupper(elts[i].key[0]) == spoof[0]) && strcasecmp(SPOOF_HOST, elts[i].key) == 0) 
+      if ((apr_toupper(elts[i].key[0]) == spoof[0]) && strcasecmp(SPOOF_HOST, elts[i].key) == 0) 
         {
           msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gm_pool, elts[i].val);
           msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
         }
-      if ((toupper(elts[i].key[0]) == spoof[0]) && strcasecmp(SPOOF_HEARTBEAT, elts[i].key) == 0) 
+      if ((apr_toupper(elts[i].key[0]) == spoof[0]) && strcasecmp(SPOOF_HEARTBEAT, elts[i].key) == 0) 
         {
           msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup (gm_pool, "heartbeat");
           msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
