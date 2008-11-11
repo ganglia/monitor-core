@@ -95,11 +95,12 @@ BACKPORT PROPOSALS:
       files.
     bnicholes: Patch r1877 fixed the first issue with the inclusion of the 
       example source, but the second issue still remains.
+    carenas: updated proposal, re-vote required
 
   * python_modules: remove unconditional debugging information for multidisk
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1623
     +1: carenas
-    carenas: suboptimal fix, python framework for debug messages to wrap it
+    carenas: suboptimal fix, python framework for debug messages ideal
 
   * libmetrics: mingw32 (native windows) support
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1599
@@ -174,16 +175,18 @@ BACKPORT PROPOSALS:
      the modular spoofing backport proposal has been approved, then is proposal 
      will move up in to the current backport proposal list.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1896
-    +1: bnicholes
+    +1: bnicholes, carenas
 
   * libgmond: Replace the calls to toupper with the cross-platform apr_toupper()
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1909
-    +1: bnicholes
+    +1: bnicholes, carenas
 
   * gmond: Fix an issue when syncing spoof metadata between gmond nodes in 
      multicast mode
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1911
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1916
     +1: bnicholes
+    carenas: updated proposal, no clear explanation of "issue" fixed
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
