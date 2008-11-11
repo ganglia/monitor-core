@@ -995,11 +995,10 @@ Ganglia_metadata_request( Ganglia_host *host, Ganglia_metadata_msg *message )
   char *name = message->Ganglia_metadata_msg_u.grequest.metric_id.name;
   Ganglia_metric_callback *metric_cb;
   int is_spoof_msg = message->Ganglia_metadata_msg_u.grequest.metric_id.spoof;
+  char srch_name[512];
 
   if(is_spoof_msg)
     {
-      char *srch_name[512];
-
       apr_snprintf(srch_name, 512, "%s:%s", name, host->hostname);
       metric_cb =  (Ganglia_metric_callback *)apr_hash_get( metric_callbacks, srch_name, APR_HASH_KEY_STRING );
     }
