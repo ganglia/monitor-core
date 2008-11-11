@@ -187,6 +187,13 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1916
     +1: bnicholes
     carenas: updated proposal, no clear explanation of "issue" fixed
+    bnicholes: The issue is with the resync processing where the metadata for
+      a spoof metric has been requested by a recently started or restarted gmond.
+      The metadata for a spoof metric was not passing enough information to 
+      uniquely identify the spoof host and therefore when the requesting gmond
+      sent a metadata request packet, the responding gmond would sometimes send
+      the wrong metadata if the instance of gmond was spoofing the same metric
+      for multiple hosts.
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
