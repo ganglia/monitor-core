@@ -375,6 +375,7 @@ cd gmetad-python
 %config(noreplace) %{web_prefixdir}/conf.php
 %{web_prefixdir}/AUTHORS
 %{web_prefixdir}/auth.php
+%{web_prefixdir}/calendar.php
 %{web_prefixdir}/class.TemplatePower.inc.php
 %{web_prefixdir}/cluster_legend.html
 %{web_prefixdir}/cluster_view.php
@@ -390,7 +391,6 @@ cd gmetad-python
 %{web_prefixdir}/header.php
 %{web_prefixdir}/host_view.php
 %{web_prefixdir}/index.php
-%{web_prefixdir}/Makefile.am
 %{web_prefixdir}/meta_view.php
 %{web_prefixdir}/node_legend.html
 %{web_prefixdir}/physical_view.php
@@ -407,6 +407,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sat Nov 15 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- Update manually selected list of files in %{web_prefixdir}
 * Sat Oct 25 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
 - Instruct RPM to byte compile python modules at install time
 * Wed Oct 01 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
