@@ -736,18 +736,20 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
 
         apr_pool_create(&p, NULL);
         if (apr_temp_dir_get((const char**)&dirname, p) != APR_SUCCESS) {
-            cfg_error(cfg, "failed to determine the temp dir");
+            err_msg("failed to determine the temp dir; ignoring include");
             apr_pool_destroy(p);
-            return 1;
+            free(path);
+            return 0; /* ignore failure */
         }
         dirname = apr_psprintf(p, "%s/%s", dirname, tn);
 
         if (apr_file_mktemp(&ftemp, dirname, 
                             APR_CREATE | APR_READ | APR_WRITE | APR_DELONCLOSE, 
                             p) != APR_SUCCESS) {
-            cfg_error(cfg, "unable to create a temporary file %s", dirname);
+            err_msg("unable to create a temporary file %s; ignoring include", dirname);
             apr_pool_destroy(p);
-            return 1;
+            free(path);
+            return 0; /* ignore failure */
         }
 
         dir = opendir(path);
