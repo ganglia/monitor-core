@@ -736,20 +736,26 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
 
         apr_pool_create(&p, NULL);
         if (apr_temp_dir_get((const char**)&dirname, p) != APR_SUCCESS) {
-            err_msg("failed to determine the temp dir; ignoring include");
+#ifndef LINUX
+            cfg_error(cfg, "failed to determine the temp dir");
             apr_pool_destroy(p);
-            free(path);
-            return 0; /* ignore failure */
+            return 1;
+#else
+            /*
+             * workaround APR BUG46297 by using the POSIX shared memory
+             * ramdrive that is available since glibc 2.2
+             */
+            dirname = apr_psprintf(p, "%s", "/dev/shm");
+#endif
         }
         dirname = apr_psprintf(p, "%s/%s", dirname, tn);
 
         if (apr_file_mktemp(&ftemp, dirname, 
                             APR_CREATE | APR_READ | APR_WRITE | APR_DELONCLOSE, 
                             p) != APR_SUCCESS) {
-            err_msg("unable to create a temporary file %s; ignoring include", dirname);
+            cfg_error(cfg, "unable to create a temporary file %s", dirname);
             apr_pool_destroy(p);
-            free(path);
-            return 0; /* ignore failure */
+            return 1;
         }
 
         dir = opendir(path);
