@@ -91,7 +91,8 @@ def Init_Metric (line, name, tmax, type, units, slope, fmt, desc, handler):
         'units': units,
         'slope': slope,
         'format': fmt,
-        'description': desc, 
+        'description': desc,
+        'groups': 'disk',
         'mount': line[1]}
     return d
     
