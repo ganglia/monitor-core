@@ -473,34 +473,37 @@ static void fill_gmi(Ganglia_25metric* gmi, py_metric_init_t* minfo)
 static cfg_t* find_module_config(char *modname)
 {
     cfg_t *modules_cfg;
-    int j;
+    unsigned int m, j;
 
-    modules_cfg = cfg_getsec(python_module.config_file, "modules");
-    for (j = 0; j < cfg_size(modules_cfg, "module"); j++) {
-        char *modName, *modLanguage;
-        int modEnabled;
+    for (m = 0; m < cfg_size(python_module.config_file, "modules"); m++) {
+        modules_cfg = cfg_getnsec(python_module.config_file, "modules", m);
+        for (j = 0; j < cfg_size(modules_cfg, "module"); j++) {
+            char *modName, *modLanguage;
+            int modEnabled;
 
-        cfg_t *pymodule = cfg_getnsec(modules_cfg, "module", j);
+            cfg_t *pymodule = cfg_getnsec(modules_cfg, "module", j);
 
-        /* Check the module language to make sure that
-           the language designation is python.
-        */
-        modLanguage = cfg_getstr(pymodule, "language");
-        if (!modLanguage || strcasecmp(modLanguage, "python")) 
-            continue;
+            /*
+             * Check the module language to make sure that
+             * the language designation is python.
+             */
+            modLanguage = cfg_getstr(pymodule, "language");
+            if (!modLanguage || strcasecmp(modLanguage, "python")) 
+                continue;
 
-        modName = cfg_getstr(pymodule, "name");
-        if (strcasecmp(modname, modName)) {
-            continue;
+            modName = cfg_getstr(pymodule, "name");
+            if (strcasecmp(modname, modName))
+                continue;
+
+            /*
+             * Check to make sure that the module is enabled.
+             */
+            modEnabled = cfg_getbool(pymodule, "enabled");
+            if (!modEnabled) 
+                continue;
+
+            return pymodule;
         }
-
-        /* Check to make sure that the module is enabled.
-        */
-        modEnabled = cfg_getbool(pymodule, "enabled");
-        if (!modEnabled) 
-            continue;
-
-        return pymodule;
     }
     return NULL; 
 }
@@ -515,7 +518,7 @@ static PyObject* build_params_dict(cfg_t *pymodule)
             cfg_t *param;
             char *name, *value;
             PyObject *pyvalue;
-    
+
             param = cfg_getnsec(pymodule, "param", k);
             name = apr_pstrdup(pool, param->title);
             value = apr_pstrdup(pool, cfg_getstr(param, "value"));
