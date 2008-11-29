@@ -1726,125 +1726,131 @@ static void
 load_metric_modules( void )
 {
     cfg_t *tmp;
-    int j;
+    unsigned int m, j;
 
-    tmp = cfg_getsec( config_file, "modules");
-    for (j = 0; j < cfg_size(tmp, "module"); j++) 
-      {
-        apr_dso_handle_t *modHandle = NULL;
-        apr_dso_handle_sym_t modSym;
-        mmodule *modp;
-        char *modPath=NULL, *modName=NULL, *modparams=NULL, *modLanguage=NULL;
-        apr_array_header_t *modParams_list = NULL;
-        int k, modEnabled;
-        apr_status_t merge_ret;
+    for (m = 0; m < cfg_size(config_file, "modules"); m++) {
+        tmp = cfg_getnsec( config_file, "modules", m);
+        for (j = 0; j < cfg_size(tmp, "module"); j++) {
+            apr_dso_handle_t *modHandle = NULL;
+            apr_dso_handle_sym_t modSym;
+            mmodule *modp;
+            char *modPath=NULL, *modName=NULL, *modparams=NULL, *modLanguage=NULL;
+            apr_array_header_t *modParams_list = NULL;
+            int k, modEnabled;
+            apr_status_t merge_ret;
 
-        cfg_t *module = cfg_getnsec(tmp, "module", j);
+            cfg_t *module = cfg_getnsec(tmp, "module", j);
 
-        /* Check the module language to make sure that
-           the module is loaded correctly or should be
-           delegated to an alternate module interface
-        */
-        modLanguage = cfg_getstr(module, "language");
-        if (modLanguage && strcasecmp(modLanguage, "C/C++")) 
-            continue;
+            /*
+             * Check the module language to make sure that
+             * the module is loaded correctly or should be
+             * delegated to an alternate module interface
+             */
+            modLanguage = cfg_getstr(module, "language");
+            if (modLanguage && strcasecmp(modLanguage, "C/C++")) 
+                continue;
 
-        /* Check to make sure that the module is enabled.
-        */
-        modEnabled = cfg_getbool(module, "enabled");
-        if (!modEnabled) 
-            continue;
+            /*
+             * Check to make sure that the module is enabled.
+             */
+            modEnabled = cfg_getbool(module, "enabled");
+            if (!modEnabled) 
+                continue;
 
-        modPath = cfg_getstr(module, "path");
-        if(modPath && *modPath != '/' && *modPath != '.')
-          {
-            if (module_dir)
-                merge_ret = apr_filepath_merge(&modPath, module_dir,
+            modPath = cfg_getstr(module, "path");
+            if (modPath && *modPath != '/' && *modPath != '.') {
+                if (module_dir)
+                    merge_ret = apr_filepath_merge(&modPath, module_dir,
                                 modPath,
                                 APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE,
                                 global_context);
-            else
-                merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR,
+                else
+                    merge_ret = apr_filepath_merge(&modPath, GANGLIA_MODULE_DIR,
                                 modPath,
                                 APR_FILEPATH_NOTRELATIVE | APR_FILEPATH_NATIVE,
                                 global_context);
 
-            if (merge_ret != APR_SUCCESS) 
-                modPath = cfg_getstr(module, "path");
-          }
-        modName = cfg_getstr(module, "name");
-        modparams = cfg_getstr(module, "params");
-        modParams_list = apr_array_make(global_context, 2, sizeof(mmparam));
+                if (merge_ret != APR_SUCCESS) 
+                    modPath = cfg_getstr(module, "path");
+            }
+            modName = cfg_getstr(module, "name");
+            modparams = cfg_getstr(module, "params");
+            modParams_list = apr_array_make(global_context, 2, sizeof(mmparam));
 
-        for (k = 0; k < cfg_size(module, "param"); k++) 
-          {
-            cfg_t *param;
-            mmparam *node = apr_array_push(modParams_list);
+            for (k = 0; k < cfg_size(module, "param"); k++) {
+                cfg_t *param;
+                mmparam *node = apr_array_push(modParams_list);
 
-            param = cfg_getnsec(module, "param", k);
-            node->name = apr_pstrdup(global_context, param->title);
-            node->value = apr_pstrdup(global_context, cfg_getstr(param, "value"));
-          }
+                param = cfg_getnsec(module, "param", k);
+                node->name = apr_pstrdup(global_context, param->title);
+                node->value = apr_pstrdup(global_context,
+                                          cfg_getstr(param, "value"));
+            }
 
-        /*
-         * Load the file into the gmond address space
-         */
-        if (apr_dso_load(&modHandle, modPath, global_context) != APR_SUCCESS) 
-          {
-            char my_error[256];
+            /*
+             * Load the file into the gmond address space
+             */
+            if (apr_dso_load(&modHandle, modPath, global_context) != APR_SUCCESS) {
+                char my_error[256];
 
-            err_msg("Cannot load %s metric module: %s", modPath,
-                     apr_dso_error(modHandle, my_error, sizeof(my_error)));
-            if (!modPath) 
-                err_msg("No load path specified for module: %s or incorrect module language designation [%s].\n", 
-                        modName, modLanguage);
-            continue;
-          }
-        debug_msg("loaded module: %s", modName);
+                err_msg("Cannot load %s metric module: %s", modPath,
+                        apr_dso_error(modHandle, my_error, sizeof(my_error)));
+                if (!modPath) 
+                    err_msg("No load path specified for module: %s or incorrect module language designation [%s].\n", 
+                            modName, modLanguage);
+                continue;
+            }
+            debug_msg("loaded module: %s", modName);
 
-        /*
-         * Retrieve the pointer to the module structure through the module name.
-         */
-        if (apr_dso_sym(&modSym, modHandle, modName) != APR_SUCCESS) 
-          {
-            char my_error[256];
+            /*
+             * Retrieve the pointer to the module structure through
+             * the module name.
+             */
+            if (apr_dso_sym(&modSym, modHandle, modName) != APR_SUCCESS) {
+                char my_error[256];
 
-            err_msg("Cannot locate internal module structure '%s' in file %s: %s\nPossibly an incorrect module language designation [%s].\n", 
-                     modName, modPath, apr_dso_error(modHandle, my_error, sizeof(my_error)), modLanguage);
-            continue;
-          }
+                err_msg("Cannot locate internal module structure '%s' in file %s: %s\nPossibly an incorrect module language designation [%s].\n", 
+                        modName, modPath,
+                        apr_dso_error(modHandle, my_error, sizeof(my_error)),
+                        modLanguage);
+                continue;
+            }
 
-        modp = (mmodule*) modSym;
-        modp->dynamic_load_handle = (apr_dso_handle_t *)modHandle;
-        modp->module_name = apr_pstrdup (global_context, modName);
-        modp->module_params = apr_pstrdup (global_context, modparams);
-        modp->module_params_list = modParams_list;
-        modp->config_file = config_file;
+            modp = (mmodule*) modSym;
+            modp->dynamic_load_handle = (apr_dso_handle_t *)modHandle;
+            modp->module_name = apr_pstrdup (global_context, modName);
+            modp->module_params = apr_pstrdup (global_context, modparams);
+            modp->module_params_list = modParams_list;
+            modp->config_file = config_file;
 
-        /*
-         * Make sure the found module structure is really a module structure
-         *
-         */
-        if (modp->magic != MMODULE_MAGIC_COOKIE) {
-            err_msg("Internal module structure '%s' in file %s is not compatible -"
-                     "perhaps this is not a metric module.\n", 
-                     modName, modPath);
-            continue;
+            /*
+             * Make sure the found module structure is really
+             * a module structure
+             */
+            if (modp->magic != MMODULE_MAGIC_COOKIE) {
+                err_msg("Internal module structure '%s' in file %s is not compatible -"
+                        "perhaps this is not a metric module.\n", 
+                        modName, modPath);
+                continue;
+            }
+
+            /*
+             * Validate that the module was built against a compatible
+             * module interface API.
+             */
+            if (modp->version != MMODULE_MAGIC_NUMBER_MAJOR) {
+                err_msg("Module \"%s\" is not compatible with this "
+                        "version of Gmond (found %d, need %d).",
+                        modName, modp->version, MMODULE_MAGIC_NUMBER_MAJOR);
+                continue;
+            }
+
+            if (metric_modules != NULL)
+                modp->next = metric_modules;
+
+            metric_modules = modp;
         }
-
-        /* Validate that the module was built against a compatible module interface API. */
-        if (modp->version != MMODULE_MAGIC_NUMBER_MAJOR) {
-            err_msg("Module \"%s\" is not compatible with this "
-                    "version of Gmond (found %d, need %d).",
-                    modName, modp->version, MMODULE_MAGIC_NUMBER_MAJOR);
-            continue;
-        }
-
-        if (metric_modules != NULL) {
-            modp->next = metric_modules;
-        }
-        metric_modules = modp;
-      }
+    }
     return;
 }
 
@@ -1871,7 +1877,7 @@ setup_metric_callbacks( void )
           apr_pool_cleanup_register(global_context, modp,
                                     modular_metric_cleanup,
                                     apr_pool_cleanup_null);
-  
+
           metric_info = modp->metrics_info;
           for (i = 0; metric_info[i].name != NULL; i++) 
             {
