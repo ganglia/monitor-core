@@ -100,8 +100,6 @@ modules {\n\
   }\n\
 }\n\
 \n\
-include ('/etc/ganglia/conf.d/*.conf')\n\
-\n\
 /* The old internal 2.5.x metric array has been replaced by the following\n\
    collection_group directives.  What follows is the default behavior for\n\
    collecting and sending metrics that is as close to 2.5.x behavior as\n\
@@ -349,6 +347,8 @@ collection_group {\n\
     title = \"Maximum Disk Space Used\"\n\
   }\n\
 }\n\
+\n\
+include (\"/etc/ganglia/conf.d/*.conf\")\n\
 \n\
 "
 
