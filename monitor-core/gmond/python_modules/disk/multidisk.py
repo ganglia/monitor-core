@@ -109,11 +109,11 @@ def metric_init(params):
         elif (not line[0].startswith('/dev/')) and (not line[0].startswith('/dev2/')): continue;
         
         descriptors.append(Init_Metric(line, 'disk_total', int(1200), 
-            'double', 'GB', 'zero', '%.3f', 
+            'double', 'GB', 'both', '%.3f', 
             'Available disk space', DiskTotal_Handler))
         descriptors.append(Init_Metric(line, 'disk_used', int(180), 
-            'float', 'Percent', 'both', '%.1f', 
-            'Used disk space', DiskUsed_Handler))
+            'float', '%', 'both', '%.1f', 
+            'Percent used disk space', DiskUsed_Handler))
         
     f.close()
     return descriptors
