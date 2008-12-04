@@ -155,7 +155,7 @@ static cfg_opt_t gmond_opts[] = {
   CFG_SEC("tcp_accept_channel", tcp_accept_channel_opts, CFGF_MULTI),
   CFG_SEC("collection_group",  collection_group_opts, CFGF_MULTI),
   CFG_FUNC("include", Ganglia_cfg_include),
-  CFG_SEC("modules",  metric_modules_opts, CFGF_MULTI),
+  CFG_SEC("modules",  metric_modules_opts, CFGF_NONE),
   CFG_END()
 }; 
 
