@@ -839,6 +839,7 @@ static void
 Ganglia_metadata_check(Ganglia_host *host, Ganglia_value_msg *vmsg )
 {
     char *metric_name = vmsg->Ganglia_value_msg_u.gstr.metric_id.name;
+    int is_spoof_msg = vmsg->Ganglia_value_msg_u.gstr.metric_id.spoof;
     Ganglia_metadata *metric = 
         (Ganglia_metadata *)apr_hash_get(host->metrics, metric_name, APR_HASH_KEY_STRING);
     
@@ -847,12 +848,17 @@ Ganglia_metadata_check(Ganglia_host *host, Ganglia_value_msg *vmsg )
         int len;
         XDR x;
         char msgbuf[GANGLIA_MAX_MESSAGE_LEN];
+        char hostbuf[512];
         Ganglia_metadata_msg msg;
 
         msg.id = gmetadata_request;
-        msg.Ganglia_metadata_msg_u.grequest.metric_id.host = host->hostname;
+        if (is_spoof_msg) 
+            apr_snprintf(hostbuf, 512, "%s:%s", host->ip, host->hostname);
+        else
+            apr_snprintf(hostbuf, 512, "%s", host->hostname);
+        msg.Ganglia_metadata_msg_u.grequest.metric_id.host = hostbuf;
         msg.Ganglia_metadata_msg_u.grequest.metric_id.name = metric_name;
-        msg.Ganglia_metadata_msg_u.grequest.metric_id.spoof = FALSE;
+        msg.Ganglia_metadata_msg_u.grequest.metric_id.spoof = is_spoof_msg;
 
         debug_msg("sending metadata request flag for metric: %s host: %s", metric_name, host->hostname);
         ganglia_scoreboard_inc(PKTS_SENT_REQUEST);
@@ -971,9 +977,21 @@ static void
 Ganglia_metadata_request( Ganglia_host *host, Ganglia_metadata_msg *message )
 {
   char *name = message->Ganglia_metadata_msg_u.grequest.metric_id.name;
-  Ganglia_metric_callback *metric_cb =  (Ganglia_metric_callback *)
-                apr_hash_get( metric_callbacks, name, APR_HASH_KEY_STRING );
-  
+  Ganglia_metric_callback *metric_cb;
+  int is_spoof_msg = message->Ganglia_metadata_msg_u.grequest.metric_id.spoof;
+
+  if(is_spoof_msg)
+    {
+      char srch_name[512];
+
+      apr_snprintf(srch_name, 512, "%s:%s", name, host->hostname);
+      metric_cb =  (Ganglia_metric_callback *)apr_hash_get( metric_callbacks, srch_name, APR_HASH_KEY_STRING );
+    }
+  else
+    {
+      metric_cb =  (Ganglia_metric_callback *)apr_hash_get( metric_callbacks, name, APR_HASH_KEY_STRING );
+    }
+
   if(!host || !message)
     return;
 
@@ -1911,26 +1929,34 @@ setup_metric_info(Ganglia_metric_callback *metric_cb, int group_once, cfg_t *met
         /* Replace the host metric name with the spoof data if it exists in the metadata */
         if (metric_info->metadata) 
         {
-            const char *val;
+            const char *spfhost_val, *spfname_val;
     
-            val = apr_table_get((apr_table_t *)metric_info->metadata, SPOOF_HOST);
-            if (val) 
+            spfhost_val = apr_table_get((apr_table_t *)metric_info->metadata, SPOOF_HOST);
+            if (spfhost_val) 
             {
-                metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup(global_context, val);
+                metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup(global_context, spfhost_val);
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
+                spfhost_val = strchr(spfhost_val,':');
+                if(spfhost_val)
+                    spfhost_val++;
+                else
+                    spfhost_val = metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host;
             }
-            val = apr_table_get((apr_table_t *)metric_info->metadata, SPOOF_NAME);
-            if (val) 
+            else
+              spfhost_val = myname;
+            spfname_val = apr_table_get((apr_table_t *)metric_info->metadata, SPOOF_NAME);
+            if (spfname_val) 
             {
-                char *spoofedname = apr_pstrcat(global_context, val, ":", name, NULL);
-    
+                char *spoofedname = apr_pstrcat(global_context, spfname_val, ":", name, NULL);
+                char *spoofedkey = apr_pstrcat(global_context, spfname_val, ":", name, ":", spfhost_val, NULL);
+
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name = spoofedname;
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
     
                 /* Reinsert the same metric_callback structure pointer under the spoofed name. 
                     This will put the same metric info in the hash table twice but under
                     the spoofed name. */
-                apr_hash_set( metric_callbacks, spoofedname, APR_HASH_KEY_STRING, metric_cb);
+                apr_hash_set( metric_callbacks, spoofedkey, APR_HASH_KEY_STRING, metric_cb);
             }
         }
     
