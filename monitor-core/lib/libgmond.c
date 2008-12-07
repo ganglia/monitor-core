@@ -141,6 +141,13 @@ static cfg_opt_t metric_module_opts[] = {
   CFG_END()
 };
 
+/* 
+ * this section can't contain regular options because "modules"
+ * is not defined CFGF_MULTI, even if it is presented multiple times
+ * in the configuration.
+ * CFGF_MULTI sections will collapse and be accessible with one
+ * simple cfg_getsec() call though and are OK.
+ */
 static cfg_opt_t metric_modules_opts[] = {
   CFG_SEC("module", metric_module_opts, CFGF_MULTI),
   CFG_END()
