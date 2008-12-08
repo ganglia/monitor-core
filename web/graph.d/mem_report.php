@@ -67,7 +67,7 @@ function graph_mem_report ( &$rrdtool_graph ) {
     $series .= "'LINE2:bmem_total#$cpu_num_color:Total In-Core' ";
     $series .= "'GPRINT:bmem_total:AVERAGE:$fmt%S' "
             .  "'CDEF:util=bmem_total,bmem_free,-,bmem_total,/,100,*' "
-            .  "'GPRINT:util:AVERAGE:($fmt%% Real Memory Used)\\l' ";
+            .  "'GPRINT:util:AVERAGE:($fmt%% Real Memory In Use)\\l' ";
 
     $rrdtool_graph['series'] = $series;
 
