@@ -127,6 +127,12 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1708
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1754
     +1: hawson
+    -1: twitham
+    twitham: Prefer the following option instead.  Recalculating this
+             number takes more time and it is not obvious where it
+             originates from (CPU?  Load?).  Just let RRD do it and
+             display it in the graph legends so user has more
+             information.  And do away with this redundant number.
 
   * Web-Interface: Add statistics and numbers to various charts and reports.
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=206
