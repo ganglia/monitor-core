@@ -38,7 +38,7 @@ A full list of variables that will be used:
                                chosen from the web UI)
 
     $upper-limit     (strings: Maximum and minimum Y-value for the graph.
-    $lower-limit               RRDTool normally will auto-scale the Y min
+    $lower-limit               RRDtool normally will auto-scale the Y min
                                and max to fit the data.  You may override
                                this by setting these variables to specific
                                limits.  The default value is a null string,
