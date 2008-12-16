@@ -10,7 +10,7 @@ Ganglia Web Backend <i>({webbackend-component})</i> version {webbackend-version}
 version={webbackend-version}">Check for Updates.</A><BR>
 
 Downloading and parsing ganglia's XML tree took {parsetime}.<BR>
-Images created with <A HREF="http://www.rrdtool.org/">RRDTool</A> version {rrdtool-version}.<BR>
+Images created with <A HREF="http://www.rrdtool.org/">RRDtool</A> version {rrdtool-version}.<BR>
 Pages generated using <A HREF="http://templatepower.codocad.com/">TemplatePower</A> version {templatepower-version}.<BR>
 </FONT>
 </CENTER>
