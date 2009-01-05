@@ -325,7 +325,7 @@ metric_init(void)
    cpufreq = 0;
    if ( stat(SCALING_MAX_FREQ, &struct_stat) == 0 ) {
       cpufreq = 1;
-      slurpfile(SCALING_MAX_FREQ, sys_devices_system_cpu, BUFFSIZE);
+      slurpfile(SCALING_MAX_FREQ, sys_devices_system_cpu, 32);
    }
 
    rval.int32 = slurpfile("/proc/cpuinfo", proc_cpuinfo, BUFFSIZE);
