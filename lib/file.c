@@ -95,7 +95,7 @@ writen (int fd, const void *vptr, size_t n)
  * @param buffer A pointer to the data buffer
  * @param buflen The data buffer length
  * @return int
- * @retval 0 on success
+ * @retval number of bytes read on success
  * @retval -1 on failure
  */
 int
@@ -120,9 +120,13 @@ slurpfile ( char * filename, char *buffer, int buflen )
          close(fd);
          return SYNAPSE_FAILURE;
       }
-   close(fd);
-
+   if (read_len == buflen)
+      {
+         --read_len;
+         err_msg("slurpfile() read() buffer overflow on file %s", filename);
+      }
    buffer[read_len] = '\0';
+   close(fd);
    return read_len;
 }   
 
