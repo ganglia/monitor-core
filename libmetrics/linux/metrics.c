@@ -37,7 +37,7 @@ static net_dev_stats *netstats[NHASH];
 
 /* Never changes */
 #ifndef BUFFSIZE
-#define BUFFSIZE 8192
+#define BUFFSIZE 16384
 #endif
 char proc_cpuinfo[BUFFSIZE];
 char proc_sys_kernel_osrelease[BUFFSIZE];

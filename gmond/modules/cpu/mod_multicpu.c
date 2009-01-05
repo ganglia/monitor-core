@@ -51,7 +51,7 @@ mmodule multicpu_module;
 
 /* Never changes */
 #ifndef BUFFSIZE
-#define BUFFSIZE 8192
+#define BUFFSIZE 16384
 #endif
 
 typedef struct {
