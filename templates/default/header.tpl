@@ -13,9 +13,7 @@
 <TABLE WIDTH="100%">
 <TR>
   <TD ROWSPAN="2" WIDTH="150">
-  <A HREF="http://ganglia.sourceforge.net/">
-  <IMG SRC="{images}/logo.jpg" HEIGHT="91" WIDTH="150" 
-      ALT="Ganglia" BORDER="0"></A>
+  <A HREF="http://ganglia.sourceforge.net/"><IMG SRC="{images}/logo.jpg" HEIGHT="91" WIDTH="150" ALT="Ganglia" BORDER="0"></A>
   </TD>
   <TD VALIGN="TOP">
 
@@ -45,7 +43,7 @@
 
   </TD>
 </TR>
-</TABLE> 
+</TABLE>
 
 <FONT SIZE="+1">
 {node_menu}
