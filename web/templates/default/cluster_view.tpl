@@ -55,7 +55,7 @@
 
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
-  <TD CLASS=title COLSPAN="2"> 
+  <TD CLASS=title COLSPAN="2">
   <FONT SIZE="-1">
   Show Hosts Scaled:
   Auto<INPUT type=radio name="sh" value="2" OnClick="ganglia_form.submit();" {checked2}>
