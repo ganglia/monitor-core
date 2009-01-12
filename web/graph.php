@@ -164,11 +164,17 @@ switch ($context) {
         break;
 
     case 'cluster':
-        $title  = "$clustername Cluster";
+        if (preg_match('/cluster/i', $clustername))
+            $title  = $clustername;
+        else
+            $title  = "$clustername Cluster";
         break;
 
     case 'grid':
-        $title  = "$gridname Grid";
+        if (preg_match('/grid/i', $gridname))
+            $title  = $gridname;
+        else
+            $title  = "$gridname Grid";
         break;
 
     case 'host':

@@ -24,7 +24,11 @@ else if ($context == "tree")
    }
 else if ($context == "cluster" or $context == "cluster-summary")
    {
-      $title = "$clustername Cluster Report";
+      if (preg_match('/cluster/i', $clustername))
+         $title = "$clustername Report";
+      else
+         $title = "$clustername Cluster Report";
+
       include_once "./header.php";
       include_once "./cluster_view.php";
    }
