@@ -61,10 +61,8 @@
  </TD>
 </TR>
 <TR>
-<TD align=center valign=middle>
- <a href="{physical_view}">Physical View</a> | 
- <a href="{self}">Reload</a>
- <p>
+<TD ALIGN="center" VALIGN="middle">
+ <A HREF="{physical_view}">Physical View</A> | <A HREF="{self}">Reload</A>
 </TD>
 </TR>
 <TR>
