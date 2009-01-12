@@ -60,25 +60,25 @@ function toggleLayer( whichLayer )
 </TD>
 
 <TD ALIGN="CENTER" VALIGN="TOP" WIDTH="395">
-<A HREF="./graph.php?g=load_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
+<A HREF="./graph.php?{graphargs}&amp;g=load_report&amp;z=large&amp;c={cluster_url}">
 <IMG BORDER=0 ALT="{cluster_url} LOAD"
-   SRC="./graph.php?g=load_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
+   SRC="./graph.php?{graphargs}&amp;g=load_report&amp;z=medium&amp;c={cluster_url}">
 </A>
-<A HREF="./graph.php?g=mem_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
+<A HREF="./graph.php?{graphargs}&amp;g=mem_report&amp;z=large&amp;c={cluster_url}">
 <IMG BORDER=0 ALT="{cluster_url} MEM"
-   SRC="./graph.php?g=mem_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
+   SRC="./graph.php?{graphargs}&amp;g=mem_report&amp;z=medium&amp;c={cluster_url}">
 </A>
-<A HREF="./graph.php?g=cpu_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
+<A HREF="./graph.php?{graphargs}&amp;g=cpu_report&amp;z=large&amp;c={cluster_url}">
 <IMG BORDER=0 ALT="{cluster_url} CPU"
-   SRC="./graph.php?g=cpu_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
+   SRC="./graph.php?{graphargs}&amp;g=cpu_report&amp;z=medium&amp;c={cluster_url}">
 </A>
-<A HREF="./graph.php?g=network_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
+<A HREF="./graph.php?{graphargs}&amp;g=network_report&amp;z=large&amp;c={cluster_url}">
 <IMG BORDER=0 ALT="{cluster_url} NETWORK"
-   SRC="./graph.php?g=network_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
+   SRC="./graph.php?{graphargs}&amp;g=network_report&amp;z=medium&amp;c={cluster_url}">
 </A>
-<A HREF="./graph.php?g=packet_report&amp;z=large&amp;c={cluster_url}&amp;{graphargs}">
+<A HREF="./graph.php?{graphargs}&amp;g=packet_report&amp;z=large&amp;c={cluster_url}">
 <IMG BORDER=0 ALT="{cluster_url} PACKETS"
-   SRC="./graph.php?g=packet_report&amp;z=medium&amp;c={cluster_url}&amp;{graphargs}">
+   SRC="./graph.php?{graphargs}&amp;g=packet_report&amp;z=medium&amp;c={cluster_url}">
 </A>
 
 </TD>
