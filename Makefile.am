@@ -34,7 +34,7 @@ README: ganglia.sub
 	pod2text ganglia.sub README
 
 CHANGE_LOG_GEN_BIN = scripts/svn2cl.sh
-CHANGE_LOG_GEN_FLAGS = --reparagraph --ignore-message-starting='***' --revision HEAD:1
+CHANGE_LOG_GEN_FLAGS = -i --alternate-strip-prefix="/trunk/monitor-core/" --break-before-msg=1 --reparagraph --revision HEAD:1
 
 ChangeLog:
 	touch ChangeLog

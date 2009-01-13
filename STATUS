@@ -159,17 +159,6 @@ BACKPORT PROPOSALS:
                   remove the rest.  This will reduce the number of dependencies
                   required.
 
-  * build: generate a meaningful ChangeLog
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1819
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1820
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1821
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1822
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1835
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1836
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1837
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1838
-    +1: carenas
-
   * gmetric: Add support for group, description and title metadata tags for
      metrics collected via gmetric
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1875

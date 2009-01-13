@@ -36,11 +36,12 @@ set -e
 set -u
 
 # svn2cl version
-VERSION="0.10"
+VERSION="0.11"
 
 # set default parameters
 PWD=`pwd`
 STRIPPREFIX="AUTOMATICALLY-DETERMINED"
+ALTERNATESTRIPPREFIX="no"
 LINELEN=75
 GROUPBYDAY="no"
 INCLUDEREV="no"
@@ -57,6 +58,7 @@ IGNORE_MESSAGE_STARTING=""
 TITLE="ChangeLog"
 REVISION_LINK="#r"
 TMPFILES=""
+AWK="awk"
 
 # do command line checking
 prog=`basename $0`
@@ -69,6 +71,10 @@ do
       ;;
     --strip-prefix=*)
       STRIPPREFIX=`echo "$1" | sed 's/^--[a-z-]*=//'`
+      shift
+      ;;
+    --alternate-strip-prefix=*)
+      ALTERNATESTRIPPREFIX=`echo "$1" | sed 's/^--[a-z-]*=//'`
       shift
       ;;
     --linelen)
@@ -211,6 +217,11 @@ do
       echo ""
       echo "  --strip-prefix=NAME  prefix to strip from all entries, defaults"
       echo "                       path inside the repository"
+      echo "  --alternate-strip-prefix=NAME alternate prefix to strip from all"
+      echo "                                entries; useful to avoid filtering"
+      echo "                                entries that don't match the strip"
+      echo "                                prefix because they were in a"
+      echo "                                different branch originally"
       echo "  --linelen=NUM        maximum length of an output line"
       echo "  --group-by-day       group changelog entries by day"
       echo "  --separate-daylogs   put a blank line between grouped by day entries"
@@ -288,13 +299,16 @@ AUTHORSFILE=`echo "$AUTHORSFILE" | sed "/^[^/]/s|^|$pwd/|"`
 if [ -z "$CHANGELOG" ]
 then
   CHANGELOG="ChangeLog"
-  [ "$OUTSTYLE" != "cl" ] && CHANGELOG="$CHANGELOG.$OUTSTYLE"
+  if [ "$OUTSTYLE" != "cl" ]
+  then
+    CHANGELOG="$CHANGELOG.$OUTSTYLE"
+  fi
 fi
 
 # try to determin a prefix to strip from all paths
 if [ "$STRIPPREFIX" = "AUTOMATICALLY-DETERMINED" ]
 then
-  STRIPPREFIX=`LANG=C eval "$SVNINFOCMD" 2> /dev/null | awk '/^URL:/{url=$2} /^Repository Root:/{root=$3} END{if(root){print substr(url,length(root)+2)}else{gsub("^.*/","",url);print url}}'`
+  STRIPPREFIX=`LANG=C eval "$SVNINFOCMD" 2> /dev/null | $AWK '/^URL:/{url=$2} /^Repository Root:/{root=$3} END{if(root){print substr(url,length(root)+2)}else{n=split(url,u,"/");print u[n]}}'`
   STRIPPREFIX=`echo "$STRIPPREFIX" | sed 's/%20/ /g'`
 fi
 
@@ -307,6 +321,7 @@ fi
 # actually run the command we need
 eval "$SVNLOGCMD" | \
   xsltproc --stringparam strip-prefix "$STRIPPREFIX" \
+           --stringparam alternate-strip-prefix "$ALTERNATESTRIPPREFIX" \
            --stringparam linelen "$LINELEN" \
            --stringparam groupbyday "$GROUPBYDAY" \
            --stringparam separate-daylogs "$SEPARATEDAYLOGS" \
