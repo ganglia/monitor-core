@@ -61,6 +61,11 @@ RELEASE SHOWSTOPPERS:
 
 BACKPORT PROPOSALS:
 
+  * SECURITY:  gmetad buffer overflow and DoS attack
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04929.html
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=223
+
+
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
     +1: carenas
