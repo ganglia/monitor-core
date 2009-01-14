@@ -11,6 +11,7 @@
 #include "dtd.h"
 #include "gmetad.h"
 #include "my_inet_ntop.h"
+#include <stdlib.h>
 
 extern g_tcp_socket *server_socket;
 extern pthread_mutex_t  server_socket_mutex;
@@ -377,7 +378,7 @@ static int
 process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
 {
    char *p, *q, *pathend;
-   char element[256];
+   char *element;
    int rc, len;
    datum_t *found;
    datum_t findkey;
@@ -419,6 +420,8 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
          if (!q) q=pathend;
       
          len = q-p;
+         /* +1 not needed as q-p is already accounting for that */
+         element = malloc(len);
          strncpy(element, p, len);
          element[len] = '\0';
       
@@ -435,10 +438,13 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
                rc = process_path(client, q, found, &findkey);
                
                datum_free(found);
+               free(element);
             }
          else
             {
-               rc = process_path(client, 0, myroot, NULL);
+               /* element not found */
+               free(element);
+               return 1;
             }
       }
    if (rc) return 1;
@@ -600,8 +606,8 @@ server_thread (void *arg)
                if (process_request(&client, request))
                   {
                      err_msg("Got a malformed path request from %s", remote_ip);
-                     /* Send them the entire tree to discourage attacks. */
-                     strcpy(request, "/");
+                     close(client.fd);
+                     continue;
                   }
             }
          else
