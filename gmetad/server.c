@@ -371,8 +371,7 @@ tree_report(datum_t *key, datum_t *val, void *arg)
    
 /* sacerdoti: This function does a tree walk while respecting the filter path.
  * Will return valid XML even if we have chosen a subtree. Since tree depth is
- * bounded, this function guarantees O(1) search time. The recursive structure 
- * does not require any memory allocations. 
+ * bounded, this function guarantees O(1) search time.
  */
 static int
 process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
@@ -421,7 +420,9 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
       
          len = q-p;
          /* +1 not needed as q-p is already accounting for that */
-         element = malloc(len);
+         element = malloc(len + 1);
+         if ( element == NULL )
+             return 1;
          strncpy(element, p, len);
          element[len] = '\0';
       
