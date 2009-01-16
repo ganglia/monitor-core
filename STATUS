@@ -64,6 +64,7 @@ BACKPORT PROPOSALS:
   * SECURITY:  gmetad buffer overflow and DoS attack
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04929.html
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=223
+    +1: bnicholes (consolidated patch)
 
 
   * web: performance/security improvement for handling authorization
