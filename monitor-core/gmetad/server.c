@@ -419,10 +419,10 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
          if (!q) q=pathend;
       
          len = q-p;
-         /* +1 not needed as q-p is already accounting for that */
          element = malloc(len + 1);
          if ( element == NULL )
              return 1;
+
          strncpy(element, p, len);
          element[len] = '\0';
       
