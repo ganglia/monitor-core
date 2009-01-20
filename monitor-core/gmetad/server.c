@@ -544,7 +544,7 @@ server_thread (void *arg)
    socklen_t len;
    client_t client;
    char remote_ip[16];
-   char request[REQUESTLEN];
+   char request[REQUESTLEN + 1];
    llist_entry *le;
    datum_t rootdatum;
 
