@@ -538,11 +538,13 @@ check_value( char *type, char* value)
 {
 char *tail;
 int ret=1;
+double d;
+long l;
 
   if (strcmp(type,"float")||strcmp(type,"double"))
-    strtod(value,&tail);
+    d = strtod(value,&tail);
   else
-    strtol(value,&tail,10);
+    l = strtol(value,&tail,10);
 
   if(strlen(tail)==0)
     ret=0;
