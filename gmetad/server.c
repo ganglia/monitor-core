@@ -439,14 +439,13 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
                rc = process_path(client, q, found, &findkey);
                
                datum_free(found);
-               free(element);
             }
          else
             {
                /* element not found */
-               free(element);
-               return 1;
+               rc = process_path(client, 0, myroot, NULL);
             }
+         free(element);
       }
    if (rc) return 1;
 
