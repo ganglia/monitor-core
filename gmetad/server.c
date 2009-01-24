@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#include <stdlib.h>
 #include <stdarg.h>
 #include <pthread.h>
 #ifdef HAVE_SYS_TIME_H
@@ -370,14 +371,13 @@ tree_report(datum_t *key, datum_t *val, void *arg)
    
 /* sacerdoti: This function does a tree walk while respecting the filter path.
  * Will return valid XML even if we have chosen a subtree. Since tree depth is
- * bounded, this function guarantees O(1) search time. The recursive structure 
- * does not require any memory allocations. 
+ * bounded, this function guarantees O(1) search time.
  */
 static int
 process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
 {
    char *p, *q, *pathend;
-   char element[256];
+   char *element;
    int rc, len;
    datum_t *found;
    datum_t findkey;
@@ -419,6 +419,10 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
          if (!q) q=pathend;
       
          len = q-p;
+         element = malloc(len + 1);
+         if ( element == NULL )
+             return 1;
+
          strncpy(element, p, len);
          element[len] = '\0';
       
@@ -438,8 +442,10 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
             }
          else
             {
+               /* element not found */
                rc = process_path(client, 0, myroot, NULL);
             }
+         free(element);
       }
    if (rc) return 1;
 
@@ -537,7 +543,7 @@ server_thread (void *arg)
    socklen_t len;
    client_t client;
    char remote_ip[16];
-   char request[REQUESTLEN];
+   char request[REQUESTLEN + 1];
    llist_entry *le;
    datum_t rootdatum;
 
@@ -600,8 +606,8 @@ server_thread (void *arg)
                if (process_request(&client, request))
                   {
                      err_msg("Got a malformed path request from %s", remote_ip);
-                     /* Send them the entire tree to discourage attacks. */
-                     strcpy(request, "/");
+                     close(client.fd);
+                     continue;
                   }
             }
          else

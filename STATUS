@@ -35,6 +35,7 @@ CURRENT RELEASE NOTES:
   * gmond: add boolean option to 'allow_extra_data' generation (BUG199)
   * gmond: include localhost in translated (-r) trusted_hosts from 2.5
   * gmetad: skip unresponsive sources (BUG92)
+  * gmetad: CVE-2009-0241: buffer overflow in interactive port (BUG223)
   * libganglia: mcast_if support in gmond (BUG140)
   * web: add boolean option for using hostname without domainname for graphs
   * web: add host atrributes into metric list (BUG30)
@@ -60,12 +61,6 @@ RELEASE SHOWSTOPPERS:
     cpu_num numbers as different sources are selected in failure.
 
 BACKPORT PROPOSALS:
-
-  * SECURITY:  gmetad buffer overflow and DoS attack
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04929.html
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=223
-    +1: bnicholes (consolidated patch)
-
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
@@ -121,7 +116,7 @@ BACKPORT PROPOSALS:
   * build: remove ganglia release name from the code
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04653.html
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1703
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1730
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1731
     +1: carenas
     -1: hawson: see http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04697.html
     carenas: dead code
