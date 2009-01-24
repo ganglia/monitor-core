@@ -541,6 +541,7 @@ server_thread (void *arg)
 {
    int interactive = (arg != NULL);
    socklen_t len;
+   int request_len;
    client_t client;
    char remote_ip[16];
    char request[REQUESTLEN + 1];
@@ -594,8 +595,8 @@ server_thread (void *arg)
 
          if (interactive)
             {
-               len = readline(client.fd, request, REQUESTLEN);
-               if (len<0)
+               request_len = readline(client.fd, request, REQUESTLEN);
+               if (request_len < 0)
                   {
                      err_msg("server_thread() could not read request from %s", remote_ip);
                      close(client.fd);
