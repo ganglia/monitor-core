@@ -531,6 +531,9 @@ readline(int fd, char *buf, int maxlen)
       }
 
    *ptr = 0;
+   if ((stop == 0) && (nleft == 0)) /* Overflow */
+      return -1;
+
    return (maxlen - nleft);
 }
 
