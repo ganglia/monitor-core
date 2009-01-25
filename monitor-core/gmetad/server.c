@@ -418,6 +418,7 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
          q = strchr(p, '/');
          if (!q) q=pathend;
       
+         /* len is limited in size by REQUESTLEN through readline() */
          len = q-p;
          element = malloc(len + 1);
          if ( element == NULL )
