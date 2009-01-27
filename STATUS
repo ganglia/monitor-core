@@ -55,11 +55,6 @@ CURRENT RELEASE NOTES:
      a heartbeat metric.  (Regression fix from 3.0.x)
   * Bug fixes and Enhancements
 
-RELEASE SHOWSTOPPERS:
-  * http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04765.html
-    with the gmetad backport fixes from BUG92 this will result in erratic
-    cpu_num numbers as different sources are selected in failure.
-
 BACKPORT PROPOSALS:
 
   * web: performance/security improvement for handling authorization
