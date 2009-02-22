@@ -1,6 +1,9 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+#ifndef __USE_ISOC99
+#define __USE_ISOC99
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
