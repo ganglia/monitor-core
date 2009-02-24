@@ -7,7 +7,8 @@ The current version of this file can be found at:
 
 Release history:
 
-    3.1.2(langley)    : In Development
+    3.1.3(avenger)    : In Development
+    3.1.2(langley)    : Released: Feb 17, 2009
     3.1.1(wien)       : Released: Sep 10, 2008
     3.1.0(amelia)     : Released: Jul 30, 2008
 
@@ -22,37 +23,6 @@ CURRENT RELEASE NOTES:
   (Please update this area with a brief description of bug fixes and
    enhancements that have been backported for the current release)
 
-  * gmond/gmetad: Sync-up the default values for the cluster section of 
-     gmond with the default gmond.conf so that a cluster name will always 
-     be present. The gmetad code can not handle a host with no associated 
-     cluster, therefore the gmond code must always include a cluster XML tag.  
-     Bug #200
-  * gmond: Add an 'enabled' directive to the module section so that a 
-     module can easily be enabled or disabled through the configuration 
-     file  
-  * gmond: reformat memory metrics to match pre 3.1 style (REGRESSION)
-  * gmond: -r support for transforming 2.5 configurations (REGRESSION)
-  * gmond: add boolean option to 'allow_extra_data' generation (BUG199)
-  * gmond: include localhost in translated (-r) trusted_hosts from 2.5
-  * gmetad: skip unresponsive sources (BUG92)
-  * gmetad: CVE-2009-0241: buffer overflow in interactive port (BUG223)
-  * libganglia: mcast_if support in gmond (BUG140)
-  * web: add boolean option for using hostname without domainname for graphs
-  * web: add host atrributes into metric list (BUG30)
-  * web: metric group enhancements for host view (BUG203)
-  * web: add option for configurable number of columns in cluster view (BUG194)
-  * web: make number of metric columns in host view configurable (BUG194)
-  * Allow both a C and python module to create a metric that will spoof a
-    specific host.  This provides the same spoofing functionality as gmetric
-    but through a metric module.  It is done by adding SPOOF_HOST and
-    SPOOF_NAME as extra metadata to the metric description
-  * gmond: mod_python support for versions older than 2.3 or newer than 2.4
-  * mod_python: Change the way that the python module path is added to better
-     support the Solaris platform.  It is also a cleaner way to add the
-     python path programatically rather than altering the PYTHON_PATH
-     environment variable.
-  * gmetric: Support the short commandline parameter format when spoofing
-     a heartbeat metric.  (Regression fix from 3.0.x)
   * Bug fixes and Enhancements
 
 BACKPORT PROPOSALS:
