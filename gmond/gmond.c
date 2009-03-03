@@ -201,6 +201,31 @@ apr_array_header_t *collection_groups = NULL;
 mmodule *metric_modules = NULL;
 extern int daemon_proc; /* defined in error.c */
 
+/* apr_socket_send can't assure all characters in buf been sent. */
+static apr_status_t
+socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
+{
+  apr_size_t total = *len;
+  apr_size_t thisTime = total;
+  const char* p = buf;
+  apr_status_t ret;
+  for(ret=apr_socket_send(sock, p, &thisTime); ret == APR_SUCCESS;
+          ret=apr_socket_send(sock, p, &thisTime)) 
+    {
+
+      if(thisTime < total) 
+        {
+          total -= thisTime;
+          p += thisTime;
+          thisTime = total;
+        }
+      else
+          break;
+    }
+  return ret;
+}
+
+
 /* this is just a temporary function */
 void
 process_configuration_file(void)
@@ -1262,13 +1287,13 @@ print_xml_header( apr_socket_t *client )
   static char *url = NULL;
   apr_time_t now = apr_time_now();
 
-  status = apr_socket_send( client, DTD, &len );
+  status = socket_send( client, DTD, &len );
   if(status != APR_SUCCESS)
     return status;
 
   len = apr_snprintf( gangliaxml, 128, "<GANGLIA_XML VERSION=\"%s\" SOURCE=\"gmond\">\n",
                       VERSION);
-  status = apr_socket_send( client, gangliaxml, &len);
+  status = socket_send( client, gangliaxml, &len);
   if(status != APR_SUCCESS)
     return status;
 
@@ -1300,7 +1325,7 @@ print_xml_header( apr_socket_t *client )
                   latlong?latlong:"unspecified",
                   url?url:"unspecified");
 
-      return apr_socket_send( client, clusterxml, &len);
+      return socket_send( client, clusterxml, &len);
     }
 
   return APR_SUCCESS;
@@ -1314,14 +1339,14 @@ print_xml_footer( apr_socket_t *client )
   if(cluster_tag)
     {
       len = 11;
-      status = apr_socket_send(client, "</CLUSTER>\n", &len);
+      status = socket_send(client, "</CLUSTER>\n", &len);
       if(status != APR_SUCCESS)
         {
           return status;
         }
     }
   len = 15;
-  return apr_socket_send( client, "</GANGLIA_XML>\n", &len);
+  return socket_send( client, "</GANGLIA_XML>\n", &len);
 }
 
 static apr_status_t
@@ -1343,7 +1368,7 @@ print_host_start( apr_socket_t *client, Ganglia_host *hostinfo)
                      hostinfo->location? hostinfo->location: "unspecified", 
                      hostinfo->gmond_started);
 
-  return apr_socket_send(client, hostxml, &len);
+  return socket_send(client, hostxml, &len);
 }
 
 /* NOT THREAD SAFE */
@@ -1486,33 +1511,33 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
   if (metricName) free(metricName);
   if (realName) free(realName);
 
-  ret = apr_socket_send(client, metricxml, &len);
+  ret = socket_send(client, metricxml, &len);
   if ((ret == APR_SUCCESS) && allow_extra_data) 
     {
       int extra_len = data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len;
       len = apr_snprintf(metricxml, 1024, "<EXTRA_DATA>\n");
-      apr_socket_send(client, metricxml, &len);
+      socket_send(client, metricxml, &len);
       for (; extra_len > 0; extra_len--) 
         {
           len = apr_snprintf(metricxml, 1024, "<EXTRA_ELEMENT NAME=\"%s\" VAL=\"%s\"/>\n", 
                  data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[extra_len-1].name,
                  data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_val[extra_len-1].data);
-          apr_socket_send(client, metricxml, &len);
+          socket_send(client, metricxml, &len);
         }
         len = apr_snprintf(metricxml, 1024, "</EXTRA_DATA>\n");
-        apr_socket_send(client, metricxml, &len);
+        socket_send(client, metricxml, &len);
     }
   /* Send the closing tag */
   len = apr_snprintf(metricxml, 1024, "</METRIC>\n");
 
-  return apr_socket_send(client, metricxml, &len);
+  return socket_send(client, metricxml, &len);
 }
 
 static apr_status_t
 print_host_end( apr_socket_t *client)
 {
   apr_size_t len = 8;
-  return apr_socket_send(client, "</HOST>\n", &len); 
+  return socket_send(client, "</HOST>\n", &len); 
 }
 
 static void
