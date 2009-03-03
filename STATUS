@@ -27,6 +27,11 @@ CURRENT RELEASE NOTES:
 
 BACKPORT PROPOSALS:
 
+  * gmond: Ensure that a complete XML dump is delivered before closing
+           the send socket. Submitted by: Jerry <adawzq 126 com>
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1980
+    +1: bnicholes
+
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
     +1: carenas
