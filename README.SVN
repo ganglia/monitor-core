@@ -43,7 +43,7 @@ To prepare a distribution tree, run:
 
 To build RPMs after building the tarball:
 
-  rpmbuild -ta --target i686,noarch <tarball>
+  rpmbuild -ta --clean --target i686,noarch <tarball>
 
 (*) other distribution formats are available if you have the needed tools
     installed by using dist-bzip2, dist-zip, or dist-tarZ (dist target)
