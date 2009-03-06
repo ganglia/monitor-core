@@ -45,5 +45,12 @@ To build RPMs after building the tarball:
 
   rpmbuild -ta --clean --target i686,noarch <tarball>
 
+Beware that building the RPM requires that all build dependendencies are
+fist installed; which might include in some cases packages that are not
+available in the standard package repository from your distribution, and
+therefore requiring additional external repositories to be added.  For
+example, for RHEL or derived distributions, rrdtool-devel can be obtained
+from Fedora EPEL.
+
 (*) other distribution formats are available if you have the needed tools
     installed by using dist-bzip2, dist-zip, or dist-tarZ (dist target)
