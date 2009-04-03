@@ -27,6 +27,11 @@ CURRENT RELEASE NOTES:
 
 BACKPORT PROPOSALS:
 
+  * Security:  Set more restrictive umask for RRD file creation.
+    Description at http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=229
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1986
+    +1: hawson
+
   * gmond: Ensure that a complete XML dump is delivered before closing
            the send socket. Submitted by: Jerry <adawzq 126 com>
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1980
