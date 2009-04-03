@@ -74,6 +74,7 @@ daemon_init (const char *pname, int facility)
 {
    int i;
    pid_t pid;
+   mode_t prev_umask;
 
    pid = fork();
 
@@ -92,7 +93,9 @@ daemon_init (const char *pname, int facility)
 
    i = chdir ("/");     /* change working directory */
 
-   umask (0);           /* clear our file mode creation mask */
+   /* set our file mode creation mask */
+   prev_umask = umask(022);
+   umask( prev_umask | 022);
 
    for (i = 0; i < MAXFD; i++)
       close (i);
