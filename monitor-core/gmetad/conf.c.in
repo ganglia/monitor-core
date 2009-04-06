@@ -196,6 +196,14 @@ static DOTCONF_CB(cb_server_threads)
    return NULL;
 }
 
+static DOTCONF_CB(cb_umask)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Setting umask to %.5o & 07077", cmd->data.value);
+   c->umask = cmd->data.value & 07077; /* protect owner permissions */
+   return NULL;
+}
+
 static DOTCONF_CB(cb_rrd_rootdir)
 {
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
@@ -245,6 +253,7 @@ static configoption_t gmetad_options[] =
       {"xml_port",  ARG_INT, cb_xml_port, &gmetad_config, 0},
       {"interactive_port", ARG_INT, cb_interactive_port, &gmetad_config, 0},
       {"server_threads", ARG_INT, cb_server_threads, &gmetad_config, 0},
+      {"umask", ARG_INT, cb_umask, &gmetad_config, 0},
       {"rrd_rootdir", ARG_STR, cb_rrd_rootdir, &gmetad_config, 0},
       {"setuid", ARG_TOGGLE, cb_setuid, &gmetad_config, 0},
       {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
@@ -261,6 +270,7 @@ set_defaults (gmetad_config_t *config)
    config->xml_port = 8651;
    config->interactive_port = 8652;
    config->server_threads = 4;
+   config->umask = 0;
    config->trusted_hosts = NULL;
    config->debug_level = 0;
    config->should_setuid = 1;

@@ -20,11 +20,10 @@ extern int daemon_proc;		/* defined in error_msg.c */
  * @param facility See the openlog() manpage for details
  */
 void
-daemon_init (const char *pname, int facility)
+daemon_init (const char *pname, int facility, mode_t rrd_umask)
 {
    int i;
    pid_t pid;
-   mode_t prev_umask;
 
    pid = fork();
 
@@ -43,9 +42,8 @@ daemon_init (const char *pname, int facility)
 
    i = chdir ("/");     /* change working directory */
 
-   /* set our file mode creation mask */
-   prev_umask = umask(022);
-   umask( prev_umask | 022);
+   /* filter out rrd file priviledges using umask */
+   umask (rrd_umask);
 
    for (i = 0; i < MAXFD; i++)
       close (i);

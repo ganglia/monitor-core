@@ -93,6 +93,11 @@ data_source "my cluster" localhost
 # setuid_username "nobody"
 #
 #-------------------------------------------------------------------------------
+# Umask to apply to created rrd files and grid directory structure
+# default: 0 (files are public)
+# umask 022
+#
+#-------------------------------------------------------------------------------
 # The port gmetad will answer requests for XML
 # default: 8651
 # xml_port 8651
