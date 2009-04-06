@@ -23,7 +23,8 @@ gm_protocol_xdr.c gm_protocol.h: gm_protocol.x
 lib_LTLIBRARIES       = libganglia.la
 libganglia_la_SOURCES = gm_protocol_xdr.c gm_protocol.h \
 become_a_nobody.c become_a_nobody.h \
-debug_msg.c daemon_init.c daemon_init.h file.c file.h \
+debug_msg.c daemon_init.c daemon_init.h update_pidfile.c update_pidfile.h \
+file.c file.h \
 dotconf.c dotconf.h error_msg.c ganglia_priv.h \
 ganglia.c hash.c hash.h inetaddr.c llist.c llist.h \
 my_inet_ntop.c my_inet_ntop.h net.h rdwr.c rdwr.h readdir.c readdir.h tcp.c \
