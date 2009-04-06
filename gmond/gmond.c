@@ -31,7 +31,7 @@
 #include "apr_net.h"   /* our private network functions based on apr */
 #include "dtd.h"       /* the DTD definition for our XML */
 #include "g25_config.h" /* for converting old file formats to new */
-#include "daemon_init.h"
+#include "update_pidfile.h"
 #include "gm_scoreboard.h"
 #include "ganglia_priv.h"
 
