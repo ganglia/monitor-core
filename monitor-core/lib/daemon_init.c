@@ -2,65 +2,15 @@
  * @file daemon_init.c Functions for standalone daemons
  */ 
 /* $Id$ */
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <syslog.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include <assert.h>
-#include <string.h>
-#include <errno.h>
-
+#include <syslog.h>
 #include "daemon_init.h"
-#include <gm_msg.h>
 
 #define MAXFD 64
-
-/**
- * @fn void update_pidfile (const char *pname)
- * @param argv0 name of this program
- */
-extern pid_t getpgid(pid_t pid);
-void
-update_pidfile (char *pidfile)
-{
-  long p;
-  pid_t pid;
-  mode_t prev_umask;
-  FILE *file;
-
-  /* make sure this program isn't already running. */
-  file = fopen (pidfile, "r");
-  if (file)
-    {
-      if (fscanf(file, "%ld", &p) == 1 && (pid = p) && 
-          (getpgid (pid) > -1))
-        {
-          err_msg("daemon already running: %s pid %ld\n", pidfile, p);
-          exit (1);
-        }
-      fclose (file);
-    }
-
-  /* write the pid of this process to the pidfile */
-  prev_umask = umask (0112);
-  unlink(pidfile);
-
-  file = fopen (pidfile, "w");
-  if (!file)
-    {
-      err_msg("Error writing pidfile '%s' -- %s\n",
-               pidfile, strerror (errno));
-      exit (1);
-    }
-  fprintf (file, "%ld\n", (long) getpid());
-  fclose (file);
-  umask (prev_umask);
-}
-
 
 extern int daemon_proc;		/* defined in error_msg.c */
 
