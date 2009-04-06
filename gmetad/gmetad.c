@@ -251,6 +251,7 @@ main ( int argc, char *argv[] )
    pthread_attr_t attr;
    int i, num_sources, sleep_time;
    uid_t gmetad_uid;
+   mode_t rrd_umask;
    char * gmetad_username;
    struct passwd *pw;
    char hostname[HOSTNAMESZ];
@@ -314,7 +315,8 @@ main ( int argc, char *argv[] )
    /* Debug level 1 is error output only, and no daemonizing. */
    if (!debug_level)
       {
-         daemon_init (argv[0], 0);
+         rrd_umask = c->umask;
+         daemon_init (argv[0], 0, rrd_umask);
       }
 
    if (args_info.pid_file_given)

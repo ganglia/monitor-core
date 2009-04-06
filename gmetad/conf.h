@@ -11,6 +11,7 @@ typedef struct
       int xml_port;
       int interactive_port;
       int server_threads;
+      int umask;
       llist_entry *trusted_hosts;
       int debug_level;
       int should_setuid;
