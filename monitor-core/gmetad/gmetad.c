@@ -11,6 +11,7 @@
 #include <gmetad.h>
 #include <cmdline.h>
 #include "daemon_init.h"
+#include "update_pidfile.h"
 
 #include "rrd_helpers.h"
 
