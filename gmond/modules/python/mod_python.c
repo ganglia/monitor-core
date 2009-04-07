@@ -31,6 +31,7 @@
 *         Jon Carey (jcarey novell.com)
 ******************************************************************************/
 
+#include <Python.h>
 #include <gm_metric.h>
 #include <stdio.h>
 #include <time.h>
@@ -45,7 +46,6 @@
 #include <apr_strings.h>
 #include <apr_lib.h>
 
-#include <Python.h>
 #include <dirent.h>
 #include <sys/stat.h>
 
