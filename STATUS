@@ -23,6 +23,7 @@ CURRENT RELEASE NOTES:
   (Please update this area with a brief description of bug fixes and
    enhancements that have been backported for the current release)
 
+  * gmond: detect/load python_modules in Solaris (BUG228)
   * Bug fixes and Enhancements
 
 BACKPORT PROPOSALS:
@@ -31,6 +32,9 @@ BACKPORT PROPOSALS:
     Description at http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=229
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1986
     +1: hawson
+    -1: carenas
+    carenas: proposal changes gmetad's default behaviour and assumptions
+             alternative backport suggested in ATT191
 
   * gmond: Ensure that a complete XML dump is delivered before closing
            the send socket. Submitted by: Jerry <adawzq 126 com>
