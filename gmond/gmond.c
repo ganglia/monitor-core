@@ -1734,7 +1734,7 @@ location_func(void)
        cfg_t *host = cfg_getsec(config_file, "host");
        host_location = cfg_getstr( host, "location");
      }
-   strncpy(val.str, host_location, MAX_G_STRING_SIZE);
+   snprintf(val.str, MAX_G_STRING_SIZE, "%s", host_location);
    return val;
 }
 
