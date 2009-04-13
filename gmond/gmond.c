@@ -1711,9 +1711,9 @@ gexec_func ( void )
 {
    g_val_t val;
    if( gexec_on )
-      snprintf(val.str, 32, "%s", "ON");
+      snprintf(val.str, MAX_G_STRING_SIZE, "%s", "ON");
    else
-      snprintf(val.str, 32, "%s", "OFF");
+      snprintf(val.str, MAX_G_STRING_SIZE, "%s", "OFF");
    return val;
 }
 
@@ -1734,7 +1734,7 @@ location_func(void)
        cfg_t *host = cfg_getsec(config_file, "host");
        host_location = cfg_getstr( host, "location");
      }
-   strncpy(val.str, host_location, 32);
+   strncpy(val.str, host_location, MAX_G_STRING_SIZE);
    return val;
 }
 
