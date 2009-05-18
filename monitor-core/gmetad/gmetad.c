@@ -147,7 +147,10 @@ sum_metrics(datum_t *key, datum_t *val, void *arg)
    if (do_sum)
       {
          tt = in_type_list(type, strlen(type));
-         if (!tt) return 0;
+         if (!tt) {
+            datum_free(hash_datum);
+            return 0;
+	 }
 
          /* We sum everything in double to properly combine integer sources
             (3.0) with float sources (3.1).  This also avoids wraparound
