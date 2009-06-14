@@ -29,7 +29,7 @@ BuildRequires: rrdtool-devel, libexpat-devel
 BuildRequires: rrdtool, expat
 %endif
 %else
-BuildRequires: rrdtool-devel, freetype-devel, apr-devel > 1
+BuildRequires: expat-devel, rrdtool-devel, freetype-devel, apr-devel > 1
 %endif
 %define conf_dir /etc/ganglia
 
@@ -407,6 +407,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sun Jun 14 2009 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- expat-devel is needed for building gstat
 * Sat Nov 15 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
 - Update manually selected list of files in %{web_prefixdir}
 * Sat Oct 25 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
