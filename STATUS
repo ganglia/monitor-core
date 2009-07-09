@@ -162,6 +162,12 @@ BACKPORT PROPOSALS:
     +1: bernardli, carenas
     carenas: patched generated files; cleanup to follow
 
+
+  * Force null termination in string metrics for python modules.
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2000
+    +1: hawson
+
+
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
   haven't been tested enough to be considered for a stable release.
