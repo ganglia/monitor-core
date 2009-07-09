@@ -97,7 +97,7 @@ BACKPORT PROPOSALS:
 
   * python_modules: remove unconditional debugging information for multidisk
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1623
-    +1: carenas
+    +1: carenas, hawson
     carenas: suboptimal fix, python framework for debug messages ideal
 
   * libmetrics: mingw32 (native windows) support
@@ -159,7 +159,7 @@ BACKPORT PROPOSALS:
      metrics collected via gmetric
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1875
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1876
-    +1: bernardli, carenas
+    +1: bernardli, carenas, hawson
     carenas: patched generated files; cleanup to follow
 
 
