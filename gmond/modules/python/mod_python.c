@@ -128,6 +128,10 @@ get_python_string_value(PyObject* dv, char* bfr, int len)
     else if (PyString_Check(dv)) {
         char* p = PyString_AsString(dv);
         strncpy(bfr, p, len);
+        /*
+         * ensure bfr is null terminated
+         */
+        bfr[len-1] = '\0';
     }
     else if (PyFloat_Check(dv)) {
         double v = PyFloat_AsDouble(dv);
@@ -423,7 +427,7 @@ static void fill_gmi(Ganglia_25metric* gmi, py_metric_init_t* minfo)
     gmi->tmax = minfo->tmax;
     if (!strcasecmp(minfo->vtype, "string")) {
         gmi->type = GANGLIA_VALUE_STRING;
-        gmi->msg_size = UDP_HEADER_SIZE+32;
+        gmi->msg_size = UDP_HEADER_SIZE+MAX_G_STRING_SIZE;
     }
     else if (!strcasecmp(minfo->vtype, "uint")) {
         gmi->type = GANGLIA_VALUE_UNSIGNED_INT;
