@@ -126,12 +126,8 @@ get_python_string_value(PyObject* dv, char* bfr, int len)
         snprintf(bfr, len, "%ld", v);
     }
     else if (PyString_Check(dv)) {
-        char* p = PyString_AsString(dv);
-        strncpy(bfr, p, len);
-        /*
-         * ensure bfr is null terminated
-         */
-        bfr[len-1] = '\0';
+        char* v = PyString_AsString(dv);
+        snprintf(bfr, len, "%s", v);
     }
     else if (PyFloat_Check(dv)) {
         double v = PyFloat_AsDouble(dv);
