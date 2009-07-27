@@ -117,3 +117,14 @@ data_source "my cluster" localhost
 # Where gmetad stores its round-robin databases
 # default: "@varstatedir@/ganglia/rrds"
 # rrd_rootdir "/some/other/place"
+#
+#-------------------------------------------------------------------------------
+# In earlier versions of gmetad, hostnames were handled in a case
+# sensitive manner
+# If your hostname directories have been renamed to lower case,
+# set this option to 0 to disable backward compatibility.
+# From version 3.2, backwards compatibility will be disabled by default.
+# default: 1   (for gmetad < 3.2)
+# default: 0   (for gmetad >= 3.2)
+case_sensitive_hostnames 1
+
