@@ -13,6 +13,8 @@ pthread_rdwr_wlock_np( &(__hash->node[__nodeval]->rwlock))
 #define WRITE_UNLOCK(__hash, __nodeval) \
 pthread_rdwr_wunlock_np( &(__hash->node[__nodeval]->rwlock))
 
+#define HASH_FLAG_IGNORE_CASE 1
+
 typedef struct 
 {
    void        *data;
@@ -39,11 +41,15 @@ typedef struct
 {
   size_t size;
   node_t **node;
+  int flags;
 }
 hash_t;
 
 hash_t  *hash_create (size_t size);
 void     hash_destroy(hash_t *hash);
+
+int      hash_get_flags(hash_t *hash);
+void     hash_set_flags(hash_t *hash, int flags);
 
 datum_t *hash_insert (datum_t *key, datum_t *val, hash_t *hash);
 datum_t *hash_delete (datum_t *key, hash_t *hash);
