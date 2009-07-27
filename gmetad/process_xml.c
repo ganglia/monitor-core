@@ -313,6 +313,8 @@ startElement_CLUSTER(void *data, const char *el, const char **attr)
                err_msg("Could not create hash table for cluster %s", name);
                return 1;
             }
+         if(gmetad_config.case_sensitive_hostnames == 0)
+            hash_set_flags(source->authority, HASH_FLAG_IGNORE_CASE);
 
          source->metric_summary = hash_create(DEFAULT_METRICSIZE);
          if (!source->metric_summary)
@@ -438,6 +440,14 @@ startElement_HOST(void *data, const char *el, const char **attr)
     */
    xmldata->hostname = realloc(xmldata->hostname, strlen(name)+1);
    strcpy(xmldata->hostname, name);
+
+   /* Convert name to lower case - host names can't be
+    * case sensitive
+    */
+   /*for(i = 0; name[i] != 0; i++)
+       xmldata->hostname[i] = tolower(name[i]);
+   xmldata->hostname[i] = 0; */
+
    hashkey.data = (void*) name;
    hashkey.size =  strlen(name) + 1;
 

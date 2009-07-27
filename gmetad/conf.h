@@ -21,6 +21,7 @@ typedef struct
       int all_trusted;
       int num_RRAs;
       char *RRAs[MAX_RRAS];
+      int case_sensitive_hostnames;
 } gmetad_config_t;
 
 int get_gmetad_config(char *conffile);
