@@ -208,7 +208,7 @@ get_kstat_val(g_val_t *val, char *km_name, char *ks_name, char *name)
     *     ks = kstat_lookup(kc, km_name, -1, NULL);
     */
 
-   if ((km_name == "cpu_info") && (ks == NULL))  {
+   if ((strcmp(km_name, "cpu_info") == 0) && (ks == NULL))  {
       debug_msg( "Lookup up kstat:  km (unix?)='%s', ks (system_misc?)='NULL',kn (resulting metric?)='%s'", km_name, name);
       ks = kstat_lookup(kc, km_name, -1, NULL);
       debug_msg("Just did kstat_lookup() on first instance of module %s.\n",km_name);
