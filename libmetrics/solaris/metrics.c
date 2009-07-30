@@ -202,10 +202,12 @@ get_kstat_val(g_val_t *val, char *km_name, char *ks_name, char *name)
    debug_msg("%s: Just did kstat_lookup().",name);
 
    /*
-    * CPU_INFO module & instance check: Michael Hom <michael_hom_work@yahoo.com>
-    * If the first online CPU is not in slot #0, gmond will segfault and core dump.
-    * If "km_name = NULL" and "km_instance = -1", then first instance of the module is returned.
-    *     ks = kstat_lookup(kc, km_name, -1, NULL);
+    * A hack contributed by Michael Hom <michael_hom_work@yahoo.com>
+    * cpu_info0 doesn't always exist on Solaris, as the first CPU
+    * need not be in slot 0.
+    * Therefore, if ks == NULL after kstat_lookup(), we try
+    * to find the first valid instance using the query:
+    *   ks = kstat_lookup(kc, km_name, -1, NULL);
     */
 
    if ((strcmp(km_name, "cpu_info") == 0) && (ks == NULL))  {
