@@ -1202,8 +1202,8 @@ float device_space(char *mount, char *device, double *total_size, double *total_
 float find_disk_space(double *total_size, double *total_free)
 {
    FILE *mounts;
-   char procline[256];
-   char mount[128], device[128], type[32], mode[128];
+   char procline[1024];
+   char mount[1024], device[1024], type[1024], mode[1024];
    /* We report in GB = 1e9 bytes. */
    double reported_units = 1e9;
    /* Track the most full disk partition, report with a percentage. */
