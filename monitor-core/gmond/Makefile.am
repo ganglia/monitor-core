@@ -3,10 +3,14 @@ SUBDIRS = modules python_modules
 EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
 if STATIC_BUILD
 GCFLAGS = -D_LARGEFILE64_SOURCE
+if BUILD_STATUS
+MOD_GSTATUS = modules/status/mod_gstatus.lo
+endif
 GLDADD = modules/disk/mod_disk.lo \
          modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
          modules/memory/mod_mem.lo modules/network/mod_net.lo \
-         modules/system/mod_proc.lo modules/system/mod_sys.lo
+         modules/system/mod_proc.lo modules/system/mod_sys.lo \
+         $(MOD_GSTATUS)
 GLDFLAGS = -static @EXPORT_SYMBOLS@
 if BUILD_PYTHON
 GLDADD += modules/python/mod_python.lo
