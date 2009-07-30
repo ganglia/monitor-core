@@ -163,7 +163,7 @@ gmetad packages
 
 %build
 %ifnarch noarch
-%configure --with-gmetad
+%configure --with-gmetad --enable-status
 make
 %endif
 
@@ -283,9 +283,6 @@ gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/example.conf
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/example.pyconf
 
-# Don't install the status modules
-%__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/modgstatus.conf
-
 # Clean up the .conf.in files
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/*.conf.in
 
@@ -331,11 +328,13 @@ cd gmetad-python
 %config(noreplace) %{conf_dir}/gmond.conf
 %dir %{conf_dir}
 %dir %{conf_dir}/conf.d/
+%config(noreplace) %{conf_dir}/conf.d/modgstatus.conf
 %dir %{_libdir}/ganglia/
 %{_libdir}/ganglia/modmulticpu.so*
 %{conf_dir}/conf.d/multicpu.conf
 %{_libdir}/ganglia/modcpu.so*
 %{_libdir}/ganglia/moddisk.so*
+%{_libdir}/ganglia/modgstatus.so
 %{_libdir}/ganglia/modload.so*
 %{_libdir}/ganglia/modmem.so*
 %{_libdir}/ganglia/modnet.so*
@@ -407,6 +406,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Jul 30 2009 Daniel Pocock <daniel@pocock.com.au>
+- gstatus is now compiled and included in the RPM, but not loaded by default
 * Sun Jun 14 2009 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
 - expat-devel is needed for building gstat
 * Sat Nov 15 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
