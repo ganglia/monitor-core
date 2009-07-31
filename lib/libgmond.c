@@ -709,8 +709,6 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
     struct stat statbuf;
     DIR *dir;
     struct dirent *entry;
-    char *buff;
-    int fd;
 
     if(argc != 1)
     {
@@ -720,15 +718,7 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
 
     if (stat (fname, &statbuf) == 0) 
     {
-        buff = calloc(statbuf.st_size + 1, 1);
-        fd = open(fname, O_RDONLY);
-        read(fd, buff, statbuf.st_size);
-        close(fd);
-        fd = cfg_parse_buf(cfg, buff);
-        free(buff);
-        if (fd)
-            cfg_error(cfg, "error including %s", fname);
-        return fd;
+        return cfg_include(cfg, opt, argc, argv);
     }
     else if (has_wildcard(fname))
     {
@@ -737,7 +727,9 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
         char *pattern = NULL;
         char *idx = strrchr(fname, '/');
         apr_pool_t *p;
+        apr_file_t *ftemp;
         char *dirname = NULL;
+        char tn[] = "gmond.tmp.XXXXXX";
 
         if (idx == NULL) {
             idx = strrchr(fname, '\\');
@@ -753,35 +745,57 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
         }
 
         apr_pool_create(&p, NULL);
+        if (apr_temp_dir_get((const char**)&dirname, p) != APR_SUCCESS) {
+#ifndef LINUX
+            cfg_error(cfg, "failed to determine the temp dir");
+            apr_pool_destroy(p);
+            return 1;
+#else
+            /*
+             * workaround APR BUG46297 by using the POSIX shared memory
+             * ramdrive that is available since glibc 2.2
+             */
+            dirname = apr_psprintf(p, "%s", "/dev/shm");
+#endif
+        }
+        dirname = apr_psprintf(p, "%s/%s", dirname, tn);
+
+        if (apr_file_mktemp(&ftemp, dirname, 
+                            APR_CREATE | APR_READ | APR_WRITE | APR_DELONCLOSE, 
+                            p) != APR_SUCCESS) {
+            cfg_error(cfg, "unable to create a temporary file %s", dirname);
+            apr_pool_destroy(p);
+            return 1;
+        }
+
         dir = opendir(path);
 
-        if (dir != NULL) {
-            while ((entry = readdir(dir)) != NULL) {
+        if(dir != NULL){
+            while((entry = readdir(dir)) != NULL) {
                 ret = fnmatch(pattern, entry->d_name, 
                               FNM_PATHNAME|FNM_PERIOD);
                 if (ret == 0) {
-                    char *newpath;
+                    char *newpath, *line;
 
                     newpath = apr_psprintf (p, "%s/%s", path, entry->d_name);
-
-                    stat(newpath, &statbuf);
-                    buff = calloc(statbuf.st_size + 1, 1);
-                    fd = open(newpath, O_RDONLY);
-                    read(fd, buff, statbuf.st_size);
-                    close(fd);
-                    fd = cfg_parse_buf(cfg, buff);
-                    free(buff);
-                    if (fd) {
-                        cfg_error(cfg, "error including %s", newpath);
-                        return fd;
-                    }
+                    line = apr_pstrcat(p, "include ('", newpath, "')\n", NULL);
+                    apr_file_puts(line, ftemp);
                 }
             }
             closedir(dir);
             free (path);
+
+            argv[0] = dirname;
+            if (cfg_include(cfg, opt, argc, argv))
+                cfg_error(cfg, "failed to process include file %s", fname);
+            else
+                debug_msg("processed include file %s\n", fname);
         }
 
+        apr_file_close(ftemp);
         apr_pool_destroy(p);
+
+        argv[0] = fname;
     }
     else 
     {
@@ -791,3 +805,4 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
 
     return 0;
 }
+
