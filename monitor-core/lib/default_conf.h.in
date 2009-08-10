@@ -348,7 +348,7 @@ collection_group {\n\
   }\n\
 }\n\
 \n\
-include (\"/etc/ganglia/conf.d/*.conf\")\n\
+include (\"" SYSCONFDIR "/conf.d/*.conf\")\n\
 \n\
 "
 
