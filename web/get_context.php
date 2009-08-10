@@ -11,8 +11,13 @@ $clustername = isset($_GET["c"]) ?
 	escapeshellcmd( clean_string( rawurldecode($_GET["c"]) ) ) : NULL;
 $gridname = isset($_GET["G"]) ?
 	escapeshellcmd( clean_string( rawurldecode($_GET["G"]) ) ) : NULL;
-$hostname = isset($_GET["h"]) ?
-	escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) : NULL;
+if($case_sensitive_hostnames == 1) {
+    $hostname = isset($_GET["h"]) ?
+        escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) : NULL;
+} else {
+    $hostname = isset($_GET["h"]) ?
+        strtolower( escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) ) : NULL;
+}
 $range = isset( $_GET["r"] ) && in_array($_GET["r"], array_keys( $time_ranges ) ) ?
 	escapeshellcmd( rawurldecode($_GET["r"])) : NULL;
 $metricname = isset($_GET["m"]) ?

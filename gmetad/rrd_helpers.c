@@ -1,4 +1,5 @@
 /* $Id$ */
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -178,6 +179,7 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
 {
    char rrd[ PATHSIZE ];
    char *summary_dir = "__SummaryInfo__";
+   int i;
 
    /* Build the path to our desired RRD file. Assume the rootdir exists. */
    strcpy(rrd, gmetad_config.rrd_rootdir);
@@ -190,7 +192,13 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
 
    if (host) {
       strncat(rrd, "/", PATHSIZE);
+      i = strlen(rrd);
       strncat(rrd, host, PATHSIZE);
+      if(gmetad_config.case_sensitive_hostnames == 0) {
+         /* Convert the hostname to lowercase */
+         for( ; rrd[i] != 0; i++)
+            rrd[i] = tolower(rrd[i]);
+      }
       my_mkdir( rrd );
    }
    else {
