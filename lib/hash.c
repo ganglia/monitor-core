@@ -1,4 +1,5 @@
 /* $Id$ */
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -171,6 +172,18 @@ hash_destroy (hash_t * hash)
    free( hash );
 }
 
+int
+hash_get_flags (hash_t *hash)
+{
+   return hash->flags;
+}
+
+void
+hash_set_flags (hash_t *hash, int flags)
+{
+   hash->flags = flags;
+}
+
 size_t
 hashval ( datum_t *key, hash_t *hash )
 {
@@ -181,11 +194,33 @@ hashval ( datum_t *key, hash_t *hash )
    if ( hash == NULL || key == NULL || key->data == NULL || key->size <= 0 )
       return 0;
 
-   hash_val = ((unsigned char *)key->data)[0];
-   for ( i = 0; i < key->size ; i++ )
-      hash_val = ( hash_val * 32 + ((unsigned char *)key->data)[i]) % hash->size;
+   if(hash->flags & HASH_FLAG_IGNORE_CASE)
+   {
+      hash_val = tolower(((unsigned char *)key->data)[0]);
+      for ( i = 0; i < key->size ; i++ )
+         hash_val = ( hash_val * 32 + tolower(((unsigned char *)key->data)[i])) % hash->size; 
+   }
+   else
+   {
+      hash_val = ((unsigned char *)key->data)[0];
+      for ( i = 0; i < key->size ; i++ )
+         hash_val = ( hash_val * 32 + ((unsigned char *)key->data)[i]) % hash->size;
+   }
 
    return hash_val;
+}
+
+int
+hash_keycmp(hash_t *hash, datum_t *key1, datum_t *key2)
+{
+   if(hash->flags & HASH_FLAG_IGNORE_CASE)
+   {
+      return strncasecmp(key1->data, key2->data, key1->size);
+   }
+   else
+   {
+      return strncmp(key1->data, key2->data, key1->size);
+   }
 }
 
 datum_t *
@@ -241,7 +276,7 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
          if( bucket->key->size != key->size )
             continue;
 
-         if(! strncmp(bucket->key->data, key->data, key->size) )
+         if(! hash_keycmp(hash, bucket->key, key) )
             {
                /* New data for an existing key */
 
@@ -316,7 +351,7 @@ hash_lookup (datum_t *key, hash_t * hash)
       if ( key->size != bucket->key->size )
          continue;
  
-      if (! memcmp( key->data, bucket->key->data, key->size ))
+      if (! hash_keycmp( hash, key, bucket->key))
          {
             val =  datum_dup( bucket->val );
             READ_UNLOCK(hash, i);
@@ -349,7 +384,7 @@ hash_delete (datum_t *key, hash_t * hash)
        bucket != NULL; last = bucket, bucket = bucket->next)
     {
       if (bucket->key->size == key->size 
-          && !strncmp (key->data, bucket->key->data, key->size))
+          && !hash_keycmp(hash, key, bucket->key))
         {
           if (last != NULL)
             {
