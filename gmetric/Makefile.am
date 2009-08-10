@@ -8,7 +8,7 @@ GLDADD =
 GLDFLAGS = 
 endif
 
-AM_CFLAGS = -I../lib -I../include $(GCFLAGS)
+AM_CFLAGS = -I../lib -I../include $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"'
 
 bin_PROGRAMS = gmetric
 gmetric_SOURCES =  gmetric.c cmdline.c cmdline.h

@@ -34,7 +34,7 @@ struct gengetopt_args_info
 {
   const char *help_help; /**< @brief Print help and exit help description.  */
   const char *version_help; /**< @brief Print version and exit help description.  */
-  char * conf_arg;	/**< @brief Location of gmetad configuration file (default='/etc/ganglia/gmetad.conf').  */
+  char * conf_arg;	/**< @brief Location of gmetad configuration file (default='SYSCONFDIR/gmetad.conf').  */
   char * conf_orig;	/**< @brief Location of gmetad configuration file original value given at command line.  */
   const char *conf_help; /**< @brief Location of gmetad configuration file help description.  */
   int debug_arg;	/**< @brief Debug level. If greater than zero, daemon will stay in foreground. (default='0').  */

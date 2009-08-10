@@ -30,7 +30,7 @@ const char *gengetopt_args_info_description = "";
 const char *gengetopt_args_info_help[] = {
   "  -h, --help             Print help and exit",
   "  -V, --version          Print version and exit",
-  "  -c, --conf=STRING      Location of gmetad configuration file  \n                           (default='/etc/ganglia/gmetad.conf')",
+  "  -c, --conf=STRING      Location of gmetad configuration file  \n                           (default='" SYSCONFDIR "/gmetad.conf')",
   "  -d, --debug=INT        Debug level. If greater than zero, daemon will stay in \n                           foreground.  (default='0')",
   "  -p, --pid-file=STRING  Write process-id to file",
     0
@@ -67,7 +67,7 @@ void clear_given (struct gengetopt_args_info *args_info)
 static
 void clear_args (struct gengetopt_args_info *args_info)
 {
-  args_info->conf_arg = gengetopt_strdup ("/etc/ganglia/gmetad.conf");
+  args_info->conf_arg = gengetopt_strdup (SYSCONFDIR "/gmetad.conf");
   args_info->conf_orig = NULL;
   args_info->debug_arg = 0;
   args_info->debug_orig = NULL;
@@ -481,7 +481,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         
           if (update_arg( (void *)&(args_info->conf_arg), 
                &(args_info->conf_orig), &(args_info->conf_given),
-              &(local_args_info.conf_given), optarg, 0, "/etc/ganglia/gmetad.conf", ARG_STRING,
+              &(local_args_info.conf_given), optarg, 0, SYSCONFDIR "/gmetad.conf", ARG_STRING,
               check_ambiguity, override, 0, 0,
               "conf", 'c',
               additional_error))

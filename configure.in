@@ -626,6 +626,9 @@ dnl
 AC_SUBST(varstatedir)
 AC_DEFINE_UNQUOTED(VARSTATEDIR, "$varstatedir", VARSTATEDIR)
 
+AC_SUBST(sysconfdir)
+AC_DEFINE_UNQUOTED(SYSCONFDIR, "$sysconfdir", SYSCONFDIR)
+
 dnl Where to look for libraries (/usr/lib vs /usr/lib64)
 AC_SUBST(libdir)
 
