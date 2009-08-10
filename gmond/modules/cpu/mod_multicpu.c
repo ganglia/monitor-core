@@ -49,7 +49,7 @@
  */
 mmodule multicpu_module;
 
-timely_file proc_stat    = { {0,0} , 1., "/proc/stat", NULL, BUFFSIZE };
+static timely_file proc_stat    = { {0,0} , 1., "/proc/stat", NULL, BUFFSIZE };
 
 struct cpu_util {
    g_val_t val;
