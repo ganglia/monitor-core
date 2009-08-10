@@ -299,6 +299,13 @@ AC_MSG_CHECKING(Python support)
 AC_MSG_RESULT($enable_python)
 AM_CONDITIONAL(BUILD_PYTHON, test x"$enable_python" = xyes)
 
+LIB_SUFFIX=lib
+case $host in
+x86_64*linux*)
+  LIB_SUFFIX=lib64
+  ;;
+esac
+
 echo
 echo Checking for apr
 if test x"$libaprpath" != x && test x"$libaprpath" != xyes; then
@@ -310,9 +317,9 @@ if test x"$libaprpath" != x && test x"$libaprpath" != xyes; then
     AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$libaprpath --libs`])
   else
     CFLAGS="$CFLAGS -I$libaprpath/include"
-    LDFLAGS="$LDFLAGS -L$libaprpath/lib"
+    LDFLAGS="$LDFLAGS -L$libaprpath/${LIB_SUFFIX}"
     echo "Added -I$libaprpath/include to CFLAGS"
-    echo "Added -L$libaprpath/lib to LDFLAGS"
+    echo "Added -L$libaprpath/${LIB_SUFFIX} to LDFLAGS"
     AC_CHECK_LIB(apr-1, apr_socket_send)
   fi
 else
@@ -342,9 +349,9 @@ echo
 echo Checking for confuse
 if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes; then
   CFLAGS="$CFLAGS -I$libconfusepath/include"
-  LDFLAGS="$LDFLAGS -L$libconfusepath/lib"
+  LDFLAGS="$LDFLAGS -L$libconfusepath/${LIB_SUFFIX}"
   echo "Added -I$libconfusepath/include to CFLAGS"
-  echo "Added -L$libconfusepath/lib to LDFLAGS"
+  echo "Added -L$libconfusepath/${LIB_SUFFIX} to LDFLAGS"
 fi
 AC_CHECK_LIB(confuse, cfg_parse)
 if test x"$ac_cv_lib_confuse_cfg_parse" = xno; then
@@ -371,9 +378,9 @@ echo
 echo Checking for expat
 if test x"$libexpatpath" != x && test x"$libexpatpath" != xyes; then
   CFLAGS="$CFLAGS -I$libexpatpath/include"
-  LDFLAGS="$LDFLAGS -L$libexpatpath/lib"
+  LDFLAGS="$LDFLAGS -L$libexpatpath/${LIB_SUFFIX}"
   echo "Added -I$libexpatpath/include to CFLAGS"
-  echo "Added -L$libexpatpath/lib to LDFLAGS"
+  echo "Added -L$libexpatpath/${LIB_SUFFIX} to LDFLAGS"
 fi
 AC_CHECK_LIB(expat, XML_ParserCreate)
 if test x"$ac_cv_lib_expat_XML_ParserCreate" = xyes; then
