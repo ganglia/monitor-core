@@ -43,6 +43,16 @@ GANGLIA_MAJOR_VERSION=3
 GANGLIA_MINOR_VERSION=2
 GANGLIA_MICRO_VERSION=0
 
+# REL is used for various packaging systems:
+# RHEL:
+# - it is the `Release:' parameter in the spec file
+# - appended after the version number, using a hyphen, e.g. X.X.X-REL
+# Solaris:
+# - it can be used as part of the VERSION= parameter in the 
+#   pkginfo file (man 4 pkginfo), e.g. VERSION=X.X.X,REV=@REL@
+#   appears to be consistent with the way Blastwave does things
+REL=1
+
 # If we are releasing a snapshot (beta), set GANGLIA_SNAPSHOT to "yes"
 # If we are creating an official release, set it to "no" 
 GANGLIA_SNAPSHOT="yes"
@@ -74,6 +84,7 @@ AC_SUBST(GANGLIA_MAJOR_VERSION)
 AC_SUBST(GANGLIA_MINOR_VERSION)
 AC_SUBST(GANGLIA_MICRO_VERSION)
 AC_SUBST(GANGLIA_VERSION)
+AC_SUBST(REL)
 
 AC_SUBST(LIBGANGLIA_INTERFACE_AGE)
 AC_SUBST(LIBGANGLIA_BINARY_AGE)
@@ -98,6 +109,9 @@ AC_SUBST(LT_AGE)
 AC_DEFINE_UNQUOTED(GANGLIA_MAJOR_VERSION, $GANGLIA_MAJOR_VERSION, GANGLIA_MAJOR_VERSION)
 AC_DEFINE_UNQUOTED(GANGLIA_MINOR_VERSION, $GANGLIA_MINOR_VERSION, GANGLIA_MINOR_VERSION)
 AC_DEFINE_UNQUOTED(GANGLIA_MICRO_VERSION, $GANGLIA_MICRO_VERSION, GANGLIA_MICRO_VERSION)
+
+AC_DEFINE_UNQUOTED(REL, $REL, REL)
+AC_DEFINE_UNQUOTED(GANGLIA_VERSION_FULL, "${VERSION}-${REL}", GANGLIA_VERSION_FULL)
 
 ########################
 AC_CANONICAL_HOST
