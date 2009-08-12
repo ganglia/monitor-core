@@ -21,6 +21,10 @@ $template_name = "default";
 $gmetad_root = "@varstatedir@/ganglia";
 $rrds = "$gmetad_root/rrds";
 
+# Where to find filter configuration files, if not set filtering
+# will be disabled
+#$filter_dir = "$gmetad_root/filters";
+
 # Leave this alone if rrdtool is installed in $gmetad_root,
 # otherwise, change it if it is installed elsewhere (like /usr/bin)
 define("RRDTOOL", "/usr/bin/rrdtool");

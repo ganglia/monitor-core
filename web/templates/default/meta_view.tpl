@@ -1,4 +1,20 @@
 <TABLE BORDER="0" WIDTH="100%">
+  <tr>
+    <!-- START BLOCK : filter_block -->
+      <td>
+        <b>{filter_name}</b>
+        <SELECT NAME="choose_filter[{filter_shortname}]" OnChange="ganglia_form.submit();">
+          <OPTION NAME=""></OPTION>
+          <!-- START BLOCK : filter_choice_block -->
+          <OPTION NAME="{filter_choice}" {selected}>{filter_choice}</OPTION>
+          <!-- END BLOCK : filter_choice_block -->
+        </SELECT>
+      </TD>
+    <!-- END BLOCK : filter_block -->
+  </TR>
+</TABLE>
+
+<TABLE BORDER="0" WIDTH="100%">
 
 <!-- START BLOCK : source_info -->
 <TR>
