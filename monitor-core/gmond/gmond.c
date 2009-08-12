@@ -121,6 +121,11 @@ typedef struct Ganglia_channel Ganglia_channel;
 /* This pollset holds the tcp_accept and udp_recv channels */
 apr_pollset_t *listen_channels = NULL;
 
+/* These are the TCP listen channels */
+apr_socket_t **tcp_sockets = NULL;
+/* These are the UDP sockets */
+apr_socket_t **udp_recv_sockets = NULL;
+
 /* The hash to hold the hosts (key = host IP) */
 apr_hash_t *hosts = NULL;
 
@@ -201,6 +206,9 @@ apr_array_header_t *collection_groups = NULL;
 mmodule *metric_modules = NULL;
 extern int daemon_proc; /* defined in error.c */
 
+char **gmond_argv;
+extern char **environ;
+
 /* apr_socket_send can't assure all characters in buf been sent. */
 static apr_status_t
 socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
@@ -225,6 +233,33 @@ socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
   return ret;
 }
 
+/* Reload the Ganglia configuration */
+void
+reload_ganglia_configuration(void)
+{
+  int i = 0;
+  char *gmond_bin = gmond_argv[0];
+
+  apr_pollset_destroy(listen_channels);
+  for(i = 0; tcp_sockets[i] != 0; i++)
+    apr_socket_close(tcp_sockets[i]);
+  for(i = 0; udp_recv_sockets[i] != 0; i++)
+    apr_socket_close(udp_recv_sockets[i]);
+  debug_msg("reloading %s", gmond_bin);
+#ifndef CYGWIN
+  /* To do: over-ride some config opts:
+     - tell new process not to re-daemonize
+     - tell new process not to setuid
+     Any paths in gmond_argv must be absolute or relative to / */
+  execve(gmond_bin, gmond_argv, environ);
+#else
+  /* Exit and let Windows service manager restart the process, as
+     neither Cygwin nor apr provide a perfect equivalent to execve */
+  exit(0);
+#endif
+  err_msg("execve failed to reload %s: %s", gmond_bin, strerror(errno));
+  exit(1);
+}
 
 /* this is just a temporary function */
 void
@@ -521,6 +556,17 @@ setup_listen_channels_pollset( int reset )
         }
     }
 
+  if(!reset)
+    {
+      if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
+        {
+          char apr_err[512];
+          apr_strerror(status, apr_err, 511);
+          err_msg("apr_pcalloc failed: %s", apr_err);
+          exit(1);
+        }
+    }
+
   /* Process all the udp_recv_channels */
   for(i = 0; i< num_udp_recv_channels; i++)
     {
@@ -586,6 +632,8 @@ setup_listen_channels_pollset( int reset )
       socket_pollfd.reqevents   = APR_POLLIN;
       socket_pollfd.desc.s      = socket;
 
+      udp_recv_sockets[i] = socket;
+
       channel = apr_pcalloc( pool, sizeof(Ganglia_channel));
       if(!channel)
         {
@@ -614,6 +662,14 @@ setup_listen_channels_pollset( int reset )
           exit(1);
         }
     }
+
+  if((tcp_sockets = (apr_socket_t *)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_tcp_accept_channels + 1))) == NULL)
+      {
+        char apr_err[512];
+        apr_strerror(status, apr_err, 511);
+        err_msg("apr_pcalloc failed: %s", apr_err);
+        exit(1);
+      }
 
   /* Process all the tcp_accept_channels */ 
   for(i=0; i< num_tcp_accept_channels; i++)
@@ -648,6 +704,8 @@ setup_listen_channels_pollset( int reset )
           err_msg("Unable to create tcp_accept_channel. Exiting.\n");
           exit(1);
         }
+
+      tcp_sockets[i] = socket;
 
       /* Build the socket poll file descriptor structure */
       socket_pollfd.desc_type   = APR_POLL_SOCKET;
@@ -2545,9 +2603,24 @@ void initialize_scoreboard()
 }
 
 int done = 0;
+int reload_required = 0;
+
+void set_reload_required()
+ {
+     done = 1;
+     reload_required = 1;
+ }
+
 void sig_handler(int i)
 {
-    done = 1;
+    switch(i)
+    {
+    case SIGHUP:
+        set_reload_required();
+        break;
+    default:
+        done = 1;
+    }
 }
 
 int
@@ -2555,6 +2628,8 @@ main ( int argc, char *argv[] )
 {
   apr_time_t now, next_collection, last_cleanup;
   apr_pool_t *cleanup_context;
+
+  gmond_argv = argv;
 
   if (cmdline_parser (argc, argv, &args_info) != 0)
       exit(1) ;
@@ -2616,6 +2691,7 @@ main ( int argc, char *argv[] )
 
   apr_signal( SIGPIPE, SIG_IGN );
   apr_signal( SIGINT, sig_handler );
+  apr_signal( SIGHUP, sig_handler );
 
   initialize_scoreboard();
 
@@ -2715,6 +2791,9 @@ main ( int argc, char *argv[] )
           next_collection = now + 60 * APR_USEC_PER_SEC;
         }
     }
+
+  if(reload_required == 1)
+    reload_ganglia_configuration();
 
   return 0;
 }
