@@ -165,7 +165,7 @@ gmetad packages
 
 %build
 %ifnarch noarch
-%configure --with-gmetad --enable-status
+%configure --with-gmetad --enable-status --sysconfdir=%{conf_dir}
 make
 %endif
 
