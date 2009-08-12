@@ -64,6 +64,8 @@ const char*     slope_to_cstr(unsigned int slope);
 
 void build_default_gmond_configuration(Ganglia_pool p);
 
+void set_reload_required();
+
 #ifdef __cplusplus
 }
 #endif
