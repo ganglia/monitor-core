@@ -245,6 +245,7 @@ fi
 %__install -d -m 0755 $RPM_BUILD_ROOT/%{web_prefixdir}
 %__cp -rf web/* $RPM_BUILD_ROOT/%{web_prefixdir}
 %__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*.in
+%__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/filters
 
 %else
 
@@ -376,6 +377,7 @@ cd gmetad-python
 
 %files web
 %defattr(-,root,root)
+%attr(0755,nobody,nobody)@varstatedir@/ganglia/filters
 %dir %{web_prefixdir}/
 %config(noreplace) %{web_prefixdir}/conf.php
 %{web_prefixdir}/AUTHORS

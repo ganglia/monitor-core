@@ -3,6 +3,24 @@
 $tpl = new TemplatePower( template("meta_view.tpl") );
 $tpl->prepare();
 
+discover_filters();
+foreach ($filter_defs as $filter_def)
+{
+   $filter_shortname = $filter_def["shortname"];
+   $tpl->newBlock("filter_block");
+   $tpl->assign("filter_shortname", $filter_shortname);
+   $tpl->assign("filter_name", $filter_def["name"]); 
+
+   foreach ($filter_def["choices"] as $choice)
+   {
+      $tpl->newBlock("filter_choice_block");
+      $tpl->assign("filter_choice", $choice);
+      if($choose_filter[$filter_shortname] == $choice)
+         $tpl->assign("selected", "selected");
+   }
+}
+
+
 # Find the private clusters.  But no one is emabarrassed in the
 # control room (public only!). 
 if ( $context != "control" ) {
@@ -68,6 +86,11 @@ foreach ( $sorted_sources as $source => $val )
       if ($source == "AAAAA.$self") {
             $source = $self;
       }
+
+      # Make sure the source is permitted by the filters, if any
+      if(!filter_permit($source))
+         continue;
+
       $m = $metrics[$source];
       $sourceurl = rawurlencode($source);
       if (isset($grid[$source]['GRID']) and $grid[$source]['GRID'])
