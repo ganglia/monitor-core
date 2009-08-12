@@ -79,6 +79,19 @@ if (!isset($hostcols) || !is_numeric($hostcols)) $hostcols = 4;
 if (!isset($metriccols) || !is_numeric($metriccols)) $metriccols = 2;
 if (!is_numeric($showhosts)) $showhosts = 1;
 
+# Filters
+if(isset($_GET["choose_filter"]))
+{
+  $req_choose_filter = $_GET["choose_filter"];
+  $choose_filter = array();
+  foreach($req_choose_filter as $k_req => $v_req)
+  {
+    $k = escapeshellcmd( clean_string( rawurldecode ($k_req)));
+    $v = escapeshellcmd( clean_string( rawurldecode ($v_req)));
+    $choose_filter[$k] = $v;
+  }
+}
+
 # Set context.
 if(!$clustername && !$hostname && $controlroom)
    {

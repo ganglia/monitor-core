@@ -485,4 +485,172 @@ function strip_domainname( $hostname ) {
     }
 }
 
+#-------------------------------------------------------------------------------
+# Read a file containing key value pairs
+function file_to_hash($filename, $sep)
+{
+  
+  $lines = file($filename, FILE_IGNORE_NEW_LINES);
+  
+  foreach ($lines as $line) 
+  {
+    list($k, $v) = explode($sep, rtrim($line));
+    $params[$k] = $v;
+  }
+
+  return $params;
+}
+
+#-------------------------------------------------------------------------------
+# Read a file containing key value pairs
+# Multiple values permitted for each key
+function file_to_hash_multi($filename, $sep)
+{
+ 
+  $lines = file($filename);
+ 
+  foreach ($lines as $line)
+  {
+    list($k, $v) = explode($sep, rtrim($line));
+    $params[$k][] = $v;
+  }
+
+  return $params;
+}
+
+#-------------------------------------------------------------------------------
+# Obtain a list of distinct values from an array of arrays
+function hash_get_distinct_values($h)
+{
+  $values = array();
+  $values_done = array();
+  foreach($h as $k => $v)
+  {
+    if($values_done[$v] != "x")
+    {
+      $values_done[$v] = "x";
+      $values[] = $v;
+    } 
+  }
+  return $values;
+}
+
+$filter_defs = array();
+
+#-------------------------------------------------------------------------------
+# Scan $filter_dir and populate $filter_defs
+function discover_filters()
+{
+  global $filter_dir;
+  global $filter_defs;
+
+  # Check whether filtering is configured or not
+  if(!isset($filter_dir))
+    return;
+
+  if(!is_dir($filter_dir))
+  {
+    error_log("discover_filters(): not a directory: $filter_dir");
+    return;
+  }
+
+  if($dh = opendir($filter_dir))
+  {
+    while(($filter_conf_filename = readdir($dh)) !== false) {
+      if(!is_dir($filter_conf_filename))
+      {
+        # Parse the file contents
+        $full_filename = "$filter_dir/$filter_conf_filename";
+        $filter_params = file_to_hash($full_filename, '=');
+        $filter_shortname = $filter_params["shortname"];
+        $filter_type = $filter_params["type"];
+        if($filter_type = "url")
+        {
+          $filter_data_url = $filter_params['url'];
+          $filter_defs[$filter_shortname] = $filter_params;
+          $filter_defs[$filter_shortname]["data"] = file_to_hash($filter_data_url, ',');
+          $filter_defs[$filter_shortname]["choices"] = hash_get_distinct_values($filter_defs[$filter_shortname]["data"]);
+        }
+      }
+    }
+    closedir($dh);
+  }
+}
+
+$filter_permit_list = NULL;
+
+#-------------------------------------------------------------------------------
+# Initialise the filter permit list, if necessary
+function filter_init()
+{
+   global $filter_dir, $filter_permit_list, $filter_defs, $choose_filter;
+
+   if(!is_null($filter_permit_list))
+   {
+      return;
+   }
+
+   if(!isset($filter_dir))
+   {
+      $filter_permit_list = FALSE;
+      return;
+   }
+
+   $filter_permit_list = array();
+   $filter_count = 0;
+
+   foreach($choose_filter as $filter_shortname => $filter_choice)
+   {
+      if($filter_choice == "")
+         continue; 
+
+      $filter_params = $filter_defs[$filter_shortname];
+      if($filter_count == 0)
+      {
+         foreach($filter_params["data"] as $key => $value)
+         {
+            if($value == $filter_choice)
+               $filter_permit_list[$key] = $key;
+         }
+      }
+      else
+      {
+         foreach($filter_permit_list as $key => $value)
+         {
+            $remove_key = TRUE;
+            if(isset($filter_params["data"][$key]))
+            {
+               if($filter_params["data"][$key] == $filter_choice)
+               {
+                  $remove_key = FALSE;
+               } 
+            }
+            if($remove_key)
+            {
+               unset($filter_permit_list[$key]);
+            }
+         }
+      }
+      $filter_count++;
+   }
+
+   if($filter_count == 0)
+      $filter_permit_list = FALSE;
+
+}
+
+#-------------------------------------------------------------------------------
+# Decide whether the given source is permitted by the filters, if any
+function filter_permit($source_name)
+{
+   global $filter_permit_list;
+
+   filter_init();
+   
+   # Handle the case where filtering is not active
+   if(!is_array($filter_permit_list))
+      return true;
+
+   return isset($filter_permit_list[$source_name]);
+}
 ?>
