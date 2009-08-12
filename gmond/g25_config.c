@@ -235,8 +235,8 @@ set_defaults(gmond_config_t *config )
    config->deaf = 0;
    config->allow_extra_data = 1;
    config->debug_level = 0;
-   config->no_setuid = 0;
-   config->setuid = conf_strdup("nobody");
+   config->no_setuid = NO_SETUID;
+   config->setuid = conf_strdup(SETUID_USER);
    config->no_gexec = 0;
    config->all_trusted = 0;
    config->host_dmax = 0;
