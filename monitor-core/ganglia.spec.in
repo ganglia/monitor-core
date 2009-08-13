@@ -186,12 +186,19 @@ fi
 %post gmond
 /sbin/chkconfig --add gmond
 
-`rpm -q ganglia-monitor-core-gmond| grep "is not installed" > /dev/null 2>&1`
+LEGACY_GMOND_CONF=%{conf_dir}/gmond.conf
+if [ -e /etc/gmond.conf ];
+then
+  LEGACY_GMOND_CONF=/etc/gmond.conf
+fi
+
+METRIC_LIST="`%{_sbindir}/gmond -c ${LEGACY_GMOND_CONF} -m`"
 if [[ $? != 0 ]]; then
-  # They have an old configuration file format
+  # They may have an old configuration file format
   echo "-----------------------------------------------------------"
   echo "IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT"
   echo "-----------------------------------------------------------"
+  echo "Parsing your gmond.conf file failed"
   echo "It appears that you are upgrading from ganglia gmond version"
   echo "2.5.x.  The configuration file has changed and you need to "
   echo "convert your old 2.5.x configuration file to the new format."
@@ -204,8 +211,19 @@ if [[ $? != 0 ]]; then
   echo "This conversion was not made automatic to prevent unknowningly"
   echo "altering your configuration without your notice."
 else
-  if [ -e /etc/gmond.conf ]; then
-    %__mv /etc/gmond.conf %{conf_dir}
+  if [ `echo "$METRIC_LIST" | wc -l` -eq 0 ];
+  then
+    echo "-----------------------------------------------------------"
+    echo "IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT"
+    echo "-----------------------------------------------------------"
+    echo "No metrics detected - perhaps you are using a gmond.conf"
+    echo "file from Ganglia 3.0 or earlier."
+    echo "Please see the README file for details about how to"
+    echo "create a valid configuration."
+  else
+    if [ -e /etc/gmond.conf ]; then
+      %__mv /etc/gmond.conf %{conf_dir}
+    fi
   fi
 fi
    
