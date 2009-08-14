@@ -619,7 +619,13 @@ dnl
 *solaris*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		CFLAGS="$CFLAGS -D__EXTENSIONS__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"
 		if test x"$ac_cv_prog_gcc" != xyes; then
-		   CFLAGS="$CFLAGS -xc99"
+                   case "$host" in
+                   *solaris2.[89])
+                     # -xc99=all or -xc99=lib not supported < Solaris 10
+                     ;;
+                   *)
+		     CFLAGS="$CFLAGS -xc99"
+                   esac
 		   LIBS="-lm $LIBS"
 		fi 
 		AC_DEFINE(SOLARIS,1,SOLARIS)

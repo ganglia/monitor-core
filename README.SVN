@@ -52,5 +52,15 @@ therefore requiring additional external repositories to be added.  For
 example, for RHEL or derived distributions, rrdtool-devel can be obtained
 from Fedora EPEL.
 
+For Solaris users with Blastwave and Sun Studio, you can
+use this script to run configure and make:
+
+  ./scripts/build-solaris.sh
+
+Using Sun Studio's C compiler for Solaris eliminates
+the need to deploy GCC runtime libraries with Ganglia.
+The latest versions of Sun Studio are a free download
+for Solaris 8 and higher.
+
 (*) other distribution formats are available if you have the needed tools
     installed by using dist-bzip2, dist-zip, or dist-tarZ (dist target)
