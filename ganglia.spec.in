@@ -32,6 +32,8 @@ BuildRequires: rrdtool, expat
 BuildRequires: rrdtool-devel, freetype-devel, apr-devel > 1
 %endif
 %define conf_dir /etc/ganglia
+%define gmond_conf gmond/gmond.conf
+%define generate_gmond_conf %(test -e %gmond_conf && echo 0 || echo 1)
 
 %description
 Ganglia is a scalable, real-time monitoring and execution environment
@@ -230,8 +232,12 @@ fi
 %__install -d -m 0755 $RPM_BUILD_ROOT%{conf_dir}/conf.d
 %__install -d -m 0755 $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules
 
+%if %generate_gmond_conf
 # We just output the default gmond.conf from gmond using the '-t' flag
-gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
+  gmond/gmond -t > $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
+%else
+  %__cp -f %gmond_conf $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
+%endif
 %__cp -f gmetad/gmetad.conf $RPM_BUILD_ROOT%{conf_dir}/gmetad.conf
 %__cp -f gmond/modules/conf.d/* $RPM_BUILD_ROOT%{conf_dir}/conf.d
 
