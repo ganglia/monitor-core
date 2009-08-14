@@ -44,3 +44,14 @@ To prepare a distribution tree, run:
 To build RPMs after building the tarball:
 
   rpmbuild -ta --target i686,noarch <tarball>
+
+For Solaris users with Blastwave and Sun Studio, you can
+use this script to run configure and make:
+
+  ./scripts/build-solaris.sh
+
+Using Sun Studio's C compiler for Solaris eliminates
+the need to deploy GCC runtime libraries with Ganglia.
+The latest versions of Sun Studio are a free download
+for Solaris 8 and higher.
+
