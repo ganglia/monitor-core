@@ -475,7 +475,17 @@ setup_listen_channels_pollset( void )
   Ganglia_channel *channel;
 
   /* Create my incoming pollset */
-  apr_pollset_create(&listen_channels, total_listen_channels, global_context, 0);
+#ifdef LINUX
+  if((status = apr_pollset_create(&listen_channels, total_listen_channels, global_context, APR_POLLSET_THREADSAFE)) != APR_SUCCESS)
+#else
+  if((status = apr_pollset_create(&listen_channels, total_listen_channels, global_context, 0)) != APR_SUCCESS)
+#endif
+  {
+    char apr_err[512];
+    apr_strerror(status, apr_err, 511);
+    err_msg("apr_pollset_create failed: %s", apr_err);
+    exit(1);
+  }
 
   /* Process all the udp_recv_channels */
   for(i = 0; i< num_udp_recv_channels; i++)
