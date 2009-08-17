@@ -3,13 +3,19 @@
 
 char *default_gmond_configuration = NULL;
 
+#if NO_SETUID == 0
+#define DO_SETUID_STRING "yes"
+#else
+#define DO_SETUID_STRING "no"
+#endif
+
 #define BASE_GMOND_CONFIGURATION "\
 /* This configuration is as close to 2.5.x default behavior as possible\n\
    The values closely match ./gmond/metric.h definitions in 2.5.x */\n\
 globals {\n\
   daemonize = yes\n\
-  setuid = yes\n\
-  user = nobody\n\
+  setuid = " DO_SETUID_STRING "\n\
+  user = " SETUID_USER " \n\
   debug_level = 0\n\
   max_udp_msg_len = 1472\n\
   mute = no\n\
