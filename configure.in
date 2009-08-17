@@ -144,6 +144,10 @@ dnl ##################################################################
 dnl Special parameters
 dnl
 
+AC_ARG_WITH( static-modules,
+[  --with-static-modules   link user-supplied static modules with gmond],
+if test x"$withval" != xno; then STATIC_USER_MODULES=$withval; fi)
+
 AC_ARG_WITH( gmetad,
 [  --with-gmetad           compile and install the Ganglia Meta Daemon],
 if test x"$withval" = xyes; then gmetad="yes"; fi)
@@ -250,6 +254,8 @@ if test x"$gmetad" = xyes; then
       fi
    fi
 fi
+
+AC_SUBST(STATIC_USER_MODULES)
 
 if test x"$enable_python" = xyes; then
   echo
