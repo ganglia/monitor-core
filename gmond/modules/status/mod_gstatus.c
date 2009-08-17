@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "config.h"
 #include "file.h"
 #include "gm_scoreboard.h"
 
@@ -48,13 +49,32 @@ mmodule gstatus_module;
 
 static apr_array_header_t *metric_info = NULL;
 
+static int gs_scorecard_offset = 0;
+
+static Ganglia_25metric static_metric_info[] =
+{
+    {0, "gmond_version", 1200, GANGLIA_VALUE_STRING,       "",  "zero", "%s", UDP_HEADER_SIZE+32, "gmond version"},
+    {0, "gmond_version_full", 1200, GANGLIA_VALUE_STRING,       "",  "zero", "%s", UDP_HEADER_SIZE+32, "gmond version and release"},
+    {0, NULL}
+};
+
+
 static int gs_metric_init (apr_pool_t *p)
 {
     void *sbi = ganglia_scoreboard_iterator();
     Ganglia_25metric *gmi;
     char *name;
+    int *i = &gs_scorecard_offset;
 
     metric_info = apr_array_make(p, 2, sizeof(Ganglia_25metric));
+
+    for(; static_metric_info[*i].name != NULL; (*i)++)
+    {
+        gmi = apr_array_push(metric_info);
+        memcpy(gmi, &static_metric_info[*i], sizeof(Ganglia_25metric));
+        MMETRIC_INIT_METADATA(gmi,p);
+        MMETRIC_ADD_METADATA(gmi,MGROUP,"gstatus");
+    }
 
     while (sbi) {
         name = ganglia_scoreboard_next(&sbi);
@@ -93,7 +113,20 @@ static g_val_t gs_metric_handler ( int metric_index )
     g_val_t val;
     Ganglia_25metric *gmi = &(gstatus_module.metrics_info[metric_index]);
 
-    val.uint32 = ganglia_scoreboard_get(gmi->name);
+    if(metric_index >= gs_scorecard_offset)
+        val.uint32 = ganglia_scoreboard_get(gmi->name);
+    else
+    {
+        if(strcmp(gmi->name, "gmond_version") == 0)
+        {
+            snprintf(val.str, MAX_G_STRING_SIZE, VERSION);
+        }
+        else if(strcmp(gmi->name, "gmond_version_full") == 0)
+        {
+            snprintf(val.str, MAX_G_STRING_SIZE, GANGLIA_VERSION_FULL);
+        }
+    }
+
     return val;
 }
 
