@@ -61,7 +61,7 @@ typedef struct {
   char buffer[BUFFSIZE];
 } timely_file;
 
-timely_file proc_stat    = { {0,0} , 1., "/proc/stat" };
+static timely_file proc_stat    = { {0,0} , 1., "/proc/stat" };
 
 struct cpu_util {
    g_val_t val;
