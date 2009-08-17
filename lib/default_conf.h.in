@@ -99,7 +99,7 @@ modules {\n\
   }\n\
 }\n\
 \n\
-include ('/etc/ganglia/conf.d/*.conf')\n\
+include ('" SYSCONFDIR "/conf.d/*.conf')\n\
 \n\
 /* The old internal 2.5.x metric array has been replaced by the following\n\
    collection_group directives.  What follows is the default behavior for\n\

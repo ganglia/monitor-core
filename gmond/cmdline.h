@@ -34,7 +34,7 @@ struct gengetopt_args_info
 {
   const char *help_help; /**< @brief Print help and exit help description.  */
   const char *version_help; /**< @brief Print version and exit help description.  */
-  char * conf_arg;	/**< @brief Location of gmond configuration file (default='/etc/ganglia/gmond.conf').  */
+  char * conf_arg;	/**< @brief Location of gmond configuration file (default='SYSCONFDIR/gmond.conf').  */
   char * conf_orig;	/**< @brief Location of gmond configuration file original value given at command line.  */
   const char *conf_help; /**< @brief Location of gmond configuration file help description.  */
   char * location_arg;	/**< @brief Location of this host in the cluster 'rack,rank,plane'. (default='0,0,0').  */

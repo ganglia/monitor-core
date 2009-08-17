@@ -30,7 +30,7 @@ const char *gengetopt_args_info_description = "";
 const char *gengetopt_args_info_help[] = {
   "  -h, --help          Print help and exit",
   "  -V, --version       Print version and exit",
-  "  -c, --conf=STRING   The configuration file to use for finding send channels  \n                        (default='/etc/ganglia/gmond.conf')",
+  "  -c, --conf=STRING   The configuration file to use for finding send channels  \n                        (default='" SYSCONFDIR "/gmond.conf')",
   "  -n, --name=STRING   Name of the metric",
   "  -v, --value=STRING  Value of the metric",
   "  -t, --type=STRING   Either \n                        string|int8|uint8|int16|uint16|int32|uint32|float|double",
@@ -81,7 +81,7 @@ void clear_given (struct gengetopt_args_info *args_info)
 static
 void clear_args (struct gengetopt_args_info *args_info)
 {
-  args_info->conf_arg = gengetopt_strdup ("/etc/ganglia/gmond.conf");
+  args_info->conf_arg = gengetopt_strdup (SYSCONFDIR "/gmond.conf");
   args_info->conf_orig = NULL;
   args_info->name_arg = NULL;
   args_info->name_orig = NULL;
@@ -546,7 +546,7 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         
           if (update_arg( (void *)&(args_info->conf_arg), 
                &(args_info->conf_orig), &(args_info->conf_given),
-              &(local_args_info.conf_given), optarg, 0, "/etc/ganglia/gmond.conf", ARG_STRING,
+              &(local_args_info.conf_given), optarg, 0, SYSCONFDIR "/gmond.conf", ARG_STRING,
               check_ambiguity, override, 0, 0,
               "conf", 'c',
               additional_error))
