@@ -523,15 +523,12 @@ setup_listen_channels_pollset( void )
     exit(1);
   }
 
-  if(!reset)
+  if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
     {
-      if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
-        {
-          char apr_err[512];
-          apr_strerror(status, apr_err, 511);
-          err_msg("apr_pcalloc failed: %s", apr_err);
-          exit(1);
-        }
+      char apr_err[512];
+      apr_strerror(status, apr_err, 511);
+      err_msg("apr_pcalloc failed: %s", apr_err);
+      exit(1);
     }
 
   /* Process all the udp_recv_channels */
