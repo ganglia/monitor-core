@@ -25,6 +25,16 @@ CURRENT RELEASE NOTES:
 
   * gmond: detect/load python_modules in Solaris (BUG228)
   * Bug fixes and Enhancements
+  * gmond: add bind and bind_hostname parameters for udp_send_channel()
+  * gmetad: BUG232: eliminate case-sensitive hostname bug, user can choose to maintain legacy behavior though
+  * gmond: BUG237: revise fix for segfault on Solaris where first CPU not in slot 0
+  * gmond: support for HUP signal on platforms with execve
+  * gmond: delay daemonization until after other initialization steps are done
+  * gmond: status module: return gmond version info as string metrics
+  * gmond: Check return status of apr_pollset_create.  Use APR_POLLSET_THREADSAFE on Linux.
+  * build: various configure options: Solaris 8 with Sun Studio 11 support, extra modules for static linking, default setuid, release number, build multicpu and status during static builds, support for SYSCONFDIR (BUG16)
+  * RPM: include status module, allow packager to supply own gmond.conf
+  * build: Look in lib64 rather than lib for apr, confuse and expat on x86_64 Linux builds
 
 BACKPORT PROPOSALS:
 
