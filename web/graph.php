@@ -208,7 +208,7 @@ if (!array_key_exists('series', $rrdtool_graph) || !strlen($rrdtool_graph['serie
 if ($size == "small" and ! isset($subtitle))
     $rrdtool_graph['extras'] = "-g";
 
-$command = RRDTOOL . " graph - ";
+$command = RRDTOOL . " graph - $rrd_options ";
 
 // The order of the other arguments isn't important, except for the
 // 'extras' and 'series' values.  These two require special handling.

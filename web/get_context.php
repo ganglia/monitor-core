@@ -2,7 +2,16 @@
 /* $Id$ */
 
 include_once "./functions.php";
-  
+
+$rrd_options = "";
+if( isset( $rrdcached_socket ) )
+{
+    if(!empty( $rrdcached_socket ) )
+    {
+        $rrd_options .= " --daemon $rrdcached_socket";
+    }
+}
+
 $meta_designator = "Grid";
 $cluster_designator = "Cluster Overview";
 

@@ -8,6 +8,10 @@ GMETAD=/usr/sbin/gmetad
 
 . /etc/rc.d/init.d/functions
 
+test -f /etc/sysconfig/gmetad && . /etc/sysconfig/gmetad
+
+export RRDCACHED_ADDRESS
+
 RETVAL=0
 
 case "$1" in

@@ -269,6 +269,7 @@ fi
 
 # Create the directory structure
 %__install -d -m 0755 $RPM_BUILD_ROOT/etc/init.d
+%__install -d -m 0755 $RPM_BUILD_ROOT/etc/sysconfig
 %__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
 %__install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man1
 %__install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man5
@@ -285,6 +286,7 @@ fi
    sed -e 's/sbin\/gmetad/sbin\/gmetad.py/' gmetad/gmetad.init > $RPM_BUILD_ROOT/etc/init.d/gmetad-python
    chmod +x $RPM_BUILD_ROOT/etc/init.d/gmetad-python
 %endif
+%__cp -f gmetad/gmetad-default $RPM_BUILD_ROOT/etc/sysconfig/gmetad
 
 %__install -d -m 0755 $RPM_BUILD_ROOT%{conf_dir}
 %__install -d -m 0755 $RPM_BUILD_ROOT%{conf_dir}/conf.d
@@ -332,6 +334,7 @@ cd gmetad-python
 %attr(0755,nobody,nobody)@varstatedir@/ganglia/
 %{_sbindir}/gmetad
 /etc/init.d/gmetad
+%config(noreplace) /etc/sysconfig/gmetad
 %{_mandir}/man1/gmetad.1*
 %config(noreplace) %{conf_dir}/gmetad.conf
 

@@ -65,6 +65,10 @@ rc_reset
 # with force-reload (in case signalling is not supported) are
 # considered a success.
 
+test -f /etc/sysconfig/gmetad && . /etc/sysconfig/gmetad
+
+export RRDCACHED_ADDRESS
+
 case "$1" in
     start)
 	echo -n "Starting gmetad"
