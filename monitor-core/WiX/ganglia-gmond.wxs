@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix
+  xmlns="http://schemas.microsoft.com/wix/2006/wi"
+  xmlns:iis="http://schemas.microsoft.com/wix/IIsExtension"
+  xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
+  xmlns:cp="http://schemas.microsoft.com/wix/ComPlusExtension">
+
+  <!-- This file is a sample, proper GUIDs must be inserted or it won't work
+       Just search for GUID or Guid, find every instance in the file, and insert
+       an appropriate value --> 
+
+  <?define upgradeCode= "GUID XXX" ?>
+
+  <Product UpgradeCode="$(var.upgradeCode)" Manufacturer="Ganglia community" Id="GUID" Language="1033" Name="Ganglia gmond agent" Version="3.1.0">
+    <Package Keywords="Installer,MSI,Database" Description="Performance monitoring agent" Comments="Open source" Manufacturer="Ganglia community" InstallerVersion="200" Platform="intel" Languages="1033" Compressed="yes" SummaryCodepage="1252" ReadOnly="no" />
+
+    <Upgrade Id="$(var.upgradeCode)">
+      <UpgradeVersion Property="OLDAPPFOUND" IncludeMinimum="yes" Minimum="0.0.0.0" IncludeMaximum="no" Maximum="3.1.0" MigrateFeatures="yes"/>
+    </Upgrade>
+    <!-- Repeat the code below for each old upgradecode you have used, if any -->
+    <!-- <Upgrade Id="OTHER - UPGRADECODE - HERE">
+      <UpgradeVersion Property="VERYOLDAPPFOUND" IncludeMinimum="yes" Minimum="0.0.0.0" IncludeMaximum="no" Maximum="3.1.0" MigrateFeatures="yes"/>
+    </Upgrade> -->
+
+    <DirectoryRef Id="TARGETDIR">
+      <Component Id="REG_MACHINE" Guid="GUID HERE">
+        <RegistryKey Id="srvc1" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\gmond\Parameters" Action="create">
+          <RegistryValue Type="expandable" Name="AppPath" Value="[#gmond.exe]"/>
+          <RegistryValue Type="string" Name="AppArgs" Value="-p '[$var]gmond.pid' -c '[#gmond.conf]'"/>
+          <RegistryValue Type="integer" Name="NeverExits" Value="1"/>
+          <RegistryValue Type="expandable" Name="PidFile" Value="[$var]gmond.pid"/>
+        </RegistryKey>
+        <!-- <RegistryKey Id="srvc2" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\gmond\Parameters\Environment" Action="create">
+            <RegistryValue Type="string" Name="EXAMPLE_ENV" Value="[$var]example.txt"/>
+        </RegistryKey> -->
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="FOLDER_INSTALLDIR" Guid="GUID HERE" KeyPath="yes">
+        <RemoveFolder Id="RemoveApplicationsFolder" Directory="Applications" On="uninstall" />
+        <RemoveFolder Id="RemoveAppDataFolder" Directory="AppDataFolder" On="uninstall" />
+      </Component>
+
+      <Directory Id="GANGLIAHOME" Name="ganglia-3.1">
+
+        <Directory Id="sbin" Name="sbin">
+        </Directory>
+
+        <Directory Id="etc" Name="etc">
+          <Directory Id="conf.d" Name="conf.d">
+          </Directory>
+        </Directory>
+
+        <Directory Id="var" Name="var">
+        </Directory>
+
+        <Directory Id="lib" Name="lib">
+          <Directory Id="python_modules" Name="python_modules">
+          </Directory>
+        </Directory>
+
+      </Directory>
+    </DirectoryRef>
+
+    <DirectoryRef Id="sbin">
+      <Component Id="cygwin1.dll" Guid="GUID HERE">
+        <File Id="cygwin1.dll" Source="c:\cygwin17\bin\cygwin1.dll" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <!-- for Python  -->
+    <!-- <DirectoryRef Id="sbin">
+      <Component Id="cygcrypto_0.9.8.dll" Guid="GUID HERE">
+        <File Id="cygcrypto_0.9.8.dll" Source="c:\cygwin17\bin\cygcrypto-0.9.8.dll" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="sbin">
+      <Component Id="cygcurl_4.dll" Guid="">
+        <File Id="cygcurl_4.dll" Source="c:\cygwin17\bin\cygcurl-4.dll" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="sbin">
+      <Component Id="cygssh2_1.dll" Guid="">
+        <File Id="cygssh2_1.dll" Source="c:\cygwin17\bin\cygssh2-1.dll" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="sbin">
+      <Component Id="cygssl_0.9.8.dll" Guid="">
+        <File Id="cygssl_0.9.8.dll" Source="c:\cygwin17\bin\cygssl-0.9.8.dll" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="sbin">
+      <Component Id="cygz.dll" Guid="">
+        <File Id="cygz.dll" Source="c:\cygwin17\bin\cygz.dll" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="sbin">
+      <Component Id="libpython2.5.dll" Guid="">
+        <File Id="libpython2.5.dll" Source="c:\cygwin17\bin\libpython2.5.dll" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef> -->
+
+    <DirectoryRef Id="sbin">
+      <Component Id="cygrunsrv.exe" Guid="">
+        <File Id="cygrunsrv.exe" Source="c:\cygwin\bin\cygrunsrv.exe" Name="cygrunsrv.exe" KeyPath="yes" Checksum="yes"/>
+        <ServiceInstall Id="cygrunsrv.exe" Name="gmond" DisplayName="gmond" ErrorControl="normal" Type="ownProcess" Start="auto" Interactive="no">
+          <ServiceDependency Id="LanmanWorkstation"/>
+        </ServiceInstall>
+        <ServiceControl Id="gmond1" Remove="uninstall" Stop="both" Name="gmond" Start="install" Wait="no"/>
+        <util:ServiceConfig FirstFailureActionType="restart" SecondFailureActionType="restart" ThirdFailureActionType="restart" ResetPeriodInDays="1" RestartServiceDelayInSeconds="1" ServiceName="gmond"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="sbin">
+      <Component Id="gmond.exe" Guid="">
+        <File Id="gmond.exe" Source="gmond\gmond.exe" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+     
+    <DirectoryRef Id="etc">
+      <Component Id="gmond.conf" Guid="">
+        <File Id="gmond.conf" Source="WiX\gmond.conf" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="conf.d">
+      <Component Id="modpython.conf" Guid="">
+        <File Id="modpython.conf" Source="WiX\modpython.conf" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="var">
+      <Component Id="var" Guid="">
+        <CreateFolder/>
+      </Component>
+      <Component Id="gmond.pid" Guid="">
+        <RemoveFile Id="gmond.pid" Name="gmond.pid" On="both"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="lib">
+      <Component Id="lib" Guid="">
+        <CreateFolder/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="python_modules">
+      <Component Id="python_modules" Guid="">
+        <CreateFolder/>
+      </Component>
+    </DirectoryRef>
+
+    <!--FEATURES -->
+    <Feature Id="Complete" Title="Complete" Display="expand" Level="1" ConfigurableDirectory="INSTALLDIR" Absent="disallow" AllowAdvertise="system">
+      <Feature Id="Core" Title="Core Files" Description="Core files for Ganglia" Display="hidden" Level="1" ConfigurableDirectory="INSTALLDIR" InstallDefault="followParent" Absent="disallow" AllowAdvertise="system">
+        <ComponentRef Id="REG_MACHINE" />
+        <ComponentRef Id="FOLDER_INSTALLDIR" />
+        <ComponentRef Id="cygwin1.dll"/>
+        <!-- For Python
+        <ComponentRef Id="cygcrypto_0.9.8.dll"/>
+        <ComponentRef Id="cygcurl_4.dll"/>
+        <ComponentRef Id="cygssh2_1.dll"/>
+        <ComponentRef Id="cygssl_0.9.8.dll"/>
+        <ComponentRef Id="cygz.dll"/>
+        <ComponentRef Id="libpython2.5.dll"/> -->
+        <ComponentRef Id="cygrunsrv.exe"/>
+        <ComponentRef Id="gmond.exe"/>
+        <ComponentRef Id="gmond.conf"/>
+        <ComponentRef Id="modpython.conf"/>
+        <ComponentRef Id="var"/>
+        <ComponentRef Id="gmond.pid"/>
+        <ComponentRef Id="lib"/>
+        <ComponentRef Id="python_modules"/>
+      </Feature>
+    </Feature>
+
+    <!-- Uncomment if using a custom action (e.g. to generate some config files) 
+    <InstallExecuteSequence>
+      <Custom Action="gmond_SetPropertyForGenConfig" After="InstallFiles"/>
+      <Custom Action="gmond_gen_config" After="gmond_SetPropertyForGenConfig"/>
+    </InstallExecuteSequence>
+
+    <Binary Id='gen_config.vbs' SourceFile='WiX\gen_config.vbs'/>
+    <CustomAction Id='gmond_SetPropertyForGenConfig' Property="gmond_gen_config" Value="[conf.d]"/>
+    <CustomAction Id='gmond_gen_config' BinaryKey='gen_config.vbs' VBScriptCall='gen' Return='check' Execute='deferred'/> -->
+
+  </Product>
+</Wix>

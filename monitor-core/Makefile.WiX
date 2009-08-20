@@ -1,0 +1,66 @@
+
+#
+# Use this file for building a Windows (MSI) package
+# after compiling the binaries in Cygwin
+#
+# The build machine must have WiX 3.0 installed
+#
+# Use the command:
+#
+#     make -f Makefile.WiX
+#
+# and gmond.msi will be produced in the project root dir
+#
+
+MSI=gmond
+SRCS=WiX/ganglia-gmond.wxs
+
+WIX_IND=
+#WIX_INC=-Ic:\\WiX\\Templates
+
+OBJS=$(SRCS:.wxs=.wixobj)
+CANDLE=candle.exe
+LIGHT=light.exe
+srcdir?=
+VPATH = $(srcdir).:.
+RM ?=	del
+
+# Uncomment this if you have a custom action script:
+#CUST_VBS=WiX/gen_config.vbs
+
+# Uncomment these two lines if you want to try Python, although
+# more stuff probably needs to be bundled in to make it work:
+#PYTHON_DEP=	/bin/cygcrypto-0.9.8.dll /bin/cygcurl-4.dll /bin/cygssh2-1.dll \
+#	/bin/cygssl-0.9.8.dll /bin/cygz.dll /bin/libpython2.5.dll
+
+DEPFILES= gmond/gmond.exe \
+	WiX/gmond.conf \
+	/bin/cygwin1.dll \
+	/bin/cygrunsrv.exe \
+	$(PYTHON_DEP) $(CUST_VBS)
+
+VERSION ?= unknown
+MSIVERSION ?= 0.0.0.0
+
+WFLAGS= -dVERSION="$(VERSION)" -dMSIVERSION="$(MSIVERSION)" -dsrcdir="$(srcdir)" $(WIX_INC) -ext WixUtilExtension
+
+.SUFFIXES: .wxs .wixobj
+
+all: $(MSI).msi
+
+$(MSI).msi: $(OBJS) $(DEPFILES)
+	$(LIGHT) -nologo $(WFLAGS) -out $@ $(OBJS)
+
+.wxs.wixobj:
+	$(CANDLE) -nologo $(WFLAGS) -out $@ $^
+
+clean:
+	$(RM) $(MSI).msi $(OBJS)
+
+install: $(MSI).msi
+	$(RM) install.log
+	msiexec -i $(MSI).msi -l*v install.log
+
+uninstall:
+	msiexec -x $(MSI).msi
+
