@@ -1,0 +1,7 @@
+
+
+# For rrdcached, uncomment this line.  gmetad requires use of a
+# privileged rrdcached socket, created with the -l option to rrdcached.
+#RRDCACHED_ADDRESS="unix:/var/run/rrdcached/rrdcached.sock" 
+
+

@@ -20,7 +20,7 @@ gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
 gmetad_LDFLAGS = $(GLDFLAGS)
 
 EXTRA_DIST = gmetad.aix.init gmetad.conf gmetad.init gmetad.init.SuSE \
-    type_hash.gperf xml_hash.gperf
+    type_hash.gperf xml_hash.gperf gmetad-default
 
 xml_hash.c: xml_hash.gperf
 	gperf -l -H xml_hash -t -F ', 0' -N in_xml_list -k '1,$$' -W xml_tags xml_hash.gperf > xml_hash.c
