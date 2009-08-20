@@ -225,7 +225,7 @@ function find_limits($nodes, $metricname)
 
          $rrd_dir = "$rrds/$clustername/$host";
          if (file_exists("$rrd_dir/$metricname.rrd")) {
-            $command = RRDTOOL . " graph /dev/null ".
+            $command = RRDTOOL . " graph /dev/null $rrd_options ".
                "--start $start --end $end ".
                "DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
                "PRINT:limits:MAX:%.2lf ".
@@ -263,7 +263,8 @@ function find_avg($clustername, $hostname, $metricname)
    else
      $sum_dir = "$rrds/$clustername/__SummaryInfo__";
 
-   $command = RRDTOOL . " graph /dev/null --start $start --end $end ".
+   $command = RRDTOOL . " graph /dev/null $rrd_options ".
+     "--start $start --end $end ".
      "DEF:avg='$sum_dir/$metricname.rrd':'sum':AVERAGE ".
      "PRINT:avg:AVERAGE:%.2lf ";
    exec($command, $out);
