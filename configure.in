@@ -682,6 +682,7 @@ AC_SUBST(moduledir)
 
 AC_OUTPUT(Makefile 
           ganglia-config
+          contrib/ganglia_gmond.xml
           tests/Makefile 
           ganglia.spec 
           gmetad/Makefile 
@@ -689,6 +690,7 @@ AC_OUTPUT(Makefile
           lib/Makefile 
           gmond/Makefile 
           gstat/Makefile 
+          gmond/gmond.solaris.init
           gmond/modules/Makefile
           gmond/modules/conf.d/modpython.conf
           gmond/modules/example/Makefile
@@ -712,6 +714,7 @@ AC_OUTPUT(Makefile
           gmetad-python/plugins/rrd_plugin.py
           gmetric/Makefile
           include/Makefile 
+          solaris/pkginfo
           web/conf.php
           web/version.php)
 

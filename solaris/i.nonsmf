@@ -1,0 +1,12 @@
+#!/bin/sh
+
+
+echo "Installing class <nonsmf>."
+while read src dest
+do
+        # Do copy
+        /usr/bin/cp $src $dest || exit 2
+        echo $dest
+done
+exit 0
+
