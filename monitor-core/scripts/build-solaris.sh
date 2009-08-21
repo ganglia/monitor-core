@@ -6,7 +6,7 @@
 if [ ! -f configure ];
 then
   echo "Please run ./bootstrap first, it will generate configure, e.g."
-  echo "  PATH=/opt/csw/bin:$PATH ./bootstrap"
+  echo '  PATH=/opt/csw/bin:$PATH ./bootstrap'
   exit 1
 fi
 
