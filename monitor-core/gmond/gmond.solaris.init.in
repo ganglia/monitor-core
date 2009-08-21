@@ -1,0 +1,27 @@
+#!/bin/sh
+
+GANGLIA_BASEDIR=@prefix@
+GMOND=${GANGLIA_BASEDIR}/sbin/gmond
+
+test -f /etc/default/gmond && . /etc/default/gmond
+
+[ ! -d ${GANGLIA_BASEDIR} ] && exit 1
+
+case "$1" in
+
+    'start')
+        ${GMOND}
+        ;;
+
+    'stop')
+        /usr/bin/pkill -x gmond
+        ;;
+
+    *)
+        echo "Usage: $0 { start | stop }"
+        exit 1
+        ;;
+
+esac
+exit 0
+

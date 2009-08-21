@@ -1,0 +1,34 @@
+#!/bin/sh
+
+GANGLIA_HOME=${CLIENT_BASEDIR}
+GANGLIA_ETC=${GANGLIA_HOME}/etc
+
+GMOND_CONF=${GANGLIA_ETC}/gmond.conf
+
+# Set variable smf depending on the availability of SMF binaries
+smf=no
+if [ -f /usr/sbin/svccfg -a -f /usr/sbin/svcadm ]
+  then
+  smf=yes
+fi
+
+# If needed, configure SMF
+if [ $smf = yes ]
+then
+  # Register with SMF
+  echo "Configuring service in SMF"
+  /usr/sbin/svccfg import ${GANGLIA_HOME}/var/svc/manifest/ganglia/gmond.xml >/dev/null 2>&1
+  /usr/sbin/svcadm disable svc:/ganglia/gmond >/dev/null 2>&1
+  echo "gmond is using Service Management Facility.  The FMRI is:"
+  echo "  svc:/ganglia/gmond:default"
+fi
+
+if [ $smf = yes ]
+then
+    /usr/sbin/svcadm enable svc:/ganglia/gmond
+else
+    /etc/init.d/gmond start
+fi
+
+exit 0
+

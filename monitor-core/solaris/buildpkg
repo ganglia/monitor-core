@@ -1,0 +1,100 @@
+#!/bin/bash -x
+
+# run configure and make
+scripts/build-solaris.sh || exit 1
+
+MAKE=/opt/csw/bin/gmake
+
+# verify that configure has been run
+if ! [ -f solaris/pkginfo ];
+then
+  echo "Can't find solaris/pkginfo.  Please run configure."
+  exit 1
+fi
+
+# Extract information about the package from pkginfo
+# This information is needed to create the filename
+# and for other purposes
+PKGSNAME=`grep '^PKG=' solaris/pkginfo | cut -f2 -d=`
+PKGNAME=`grep '^NAME=' solaris/pkginfo | cut -f2 -d= | cut -f1 -d' '`
+PKGVERSION=`grep '^VERSION=' solaris/pkginfo | cut -f2- -d= | tr ' ' '_' `
+BASEDIR=`grep '^BASEDIR=' solaris/pkginfo | cut -f2 -d=`
+PKGARCH=`grep '^ARCH=' solaris/pkginfo | cut -f2 -d=`
+
+PKGFILENAME=${PKGNAME}-${PKGVERSION}-${PKGARCH}.pkg
+
+# Prepare a directory for DESTDIR
+INST_TMP=`pwd`/inst_tmp
+rm -rf "${ISNT_TMP}" || exit 1
+mkdir -p "${ISNT_TMP}" || exit 1
+
+# Prepare a directory for holding the output of pkgmk
+PKG_TMP=`pwd`/pkg_tmp
+rm -rf "${PKG_TMP}" || exit 1
+mkdir -p "${PKG_TMP}" || exit 1
+
+# Install the files to our working directory
+${MAKE} DESTDIR="${INST_TMP}" install || exit 1
+
+# Install some stuff that is not installed by make
+cp -f contrib/ganglia_gmond.xml "${INST_TMP}"/gmond.xml || exit 1
+cp -f gmond/gmond.solaris.init "${INST_TMP}/gmond.init" || exit 1
+cp -f gmond/modules/conf.d/modgstatus.conf "${INST_TMP}" || exit 1
+cp -f gmond/modules/conf.d/modpython.conf "${INST_TMP}" || exit 1
+cp -f gmond/python_modules/conf.d/example.pyconf "${INST_TMP}/example.pyconf.disabled" || exit 1
+
+# Generate a config file if necessary
+if [ -f gmond/gmond.conf.solaris ];
+then
+  cp -f gmond/gmond.conf.solaris "${INST_TMP}/gmond.conf" || exit 1
+else
+  gmond/gmond -t > "${INST_TMP}/gmond.conf" || exit 1
+fi
+
+# Build a prototype file
+SOLARIS_PKG=`pwd`/solaris
+cat > "${INST_TMP}/prototype" << EOF 
+i pkginfo=${SOLARIS_PKG}/pkginfo
+i checkinstall=${SOLARIS_PKG}/checkinstall
+i preinstall=${SOLARIS_PKG}/preinstall
+i postinstall=${SOLARIS_PKG}/postinstall
+i preremove=${SOLARIS_PKG}/preremove
+i i.nonsmf=${SOLARIS_PKG}/i.nonsmf
+i i.smf=${SOLARIS_PKG}/i.smf
+i depend=${SOLARIS_PKG}/depend
+f nonsmf /etc/init.d/gmond=${INST_TMP}/gmond.init 0755 root bin
+l nonsmf /etc/rc0.d/K15gmond=../init.d/gmond
+l nonsmf /etc/rc1.d/K15gmond=../init.d/gmond
+l nonsmf /etc/rc2.d/K15gmond=../init.d/gmond
+l nonsmf /etc/rc3.d/S30gmond=../init.d/gmond
+l nonsmf /etc/rcS.d/K15gmond=../init.d/gmond
+d none etc 0755 root root
+f none etc/gmond.conf=${INST_TMP}/gmond.conf 0644 root root
+d none etc/conf.d 0755 root root
+f none etc/conf.d/modpython.conf=${INST_TMP}/modpython.conf 0644 root root
+f none etc/conf.d/example.pyconf.disabled=${INST_TMP}/example.pyconf.disabled 0644 root root
+f none etc/conf.d/modgstatus.conf=${INST_TMP}/modgstatus.conf 0644 root root
+d smf var 0755 root root
+d smf var/svc 0755 root root
+d smf var/svc/manifest 0755 root root
+d smf var/svc/manifest/ganglia 0755 root root
+f smf var/svc/manifest/ganglia/gmond.xml=${INST_TMP}/gmond.xml 0755 root root
+d smf lib/svc 0755 root root
+d smf lib/svc/method 0755 root root
+f smf lib/svc/method/svc-gmond=${INST_TMP}/gmond.init 0755 root root
+EOF
+
+(cd inst_tmp/usr/local ; find . | pkgproto | sed -e 's/em_pocod other$/root bin/' ) >> "${INST_TMP}/prototype" || exit 1
+
+# Prepare a package
+(cd "${INST_TMP}" ; pkgmk \
+  -b "${INST_TMP}/${BASEDIR}" \
+ -f "${INST_TMP}/prototype" \
+ -d "${PKG_TMP}" ) || exit 1
+
+# Bundle the package data into a single file
+pkgtrans -s ${PKG_TMP} `pwd`/${PKGFILENAME} ${PKGSNAME} || exit 1
+
+# Compress the package for distribution
+gzip -f ${PKGFILENAME}
+
