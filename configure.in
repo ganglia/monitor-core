@@ -619,7 +619,7 @@ dnl
 		CFLAGS="$CFLAGS -D__EXTENSIONS__ -D_POSIX_C_SOURCE=200112L -DHAVE_STRERROR"
 		if test x"$ac_cv_prog_gcc" != xyes; then
                    case "$host" in
-                   *solaris2.[89])
+                   *solaris2.[[89]])
                      # -xc99=all or -xc99=lib not supported < Solaris 10
                      ;;
                    *)
