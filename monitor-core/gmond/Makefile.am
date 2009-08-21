@@ -10,7 +10,7 @@ GLDADD = modules/disk/mod_disk.lo \
          modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
          modules/memory/mod_mem.lo modules/network/mod_net.lo \
          modules/system/mod_proc.lo modules/system/mod_sys.lo \
-         modules/system/mod_multicpu.lo \
+         modules/cpu/mod_multicpu.lo \
          $(MOD_GSTATUS) @STATIC_USER_MODULES@
 GLDFLAGS = -static @EXPORT_SYMBOLS@
 if BUILD_PYTHON
