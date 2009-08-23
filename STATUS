@@ -24,7 +24,6 @@ CURRENT RELEASE NOTES:
    enhancements that have been backported for the current release)
 
   * gmond: detect/load python_modules in Solaris (BUG228)
-  * Bug fixes and Enhancements
   * gmond: add bind and bind_hostname parameters for udp_send_channel()
   * gmetad: BUG232: eliminate case-sensitive hostname bug, user can choose to maintain legacy behavior though
   * gmond: BUG237: revise fix for segfault on Solaris where first CPU not in slot 0
@@ -35,6 +34,7 @@ CURRENT RELEASE NOTES:
   * build: various configure options: Solaris 8 with Sun Studio 11 support, extra modules for static linking, default setuid, release number, build multicpu and status during static builds, support for SYSCONFDIR (BUG16)
   * RPM: include status module, allow packager to supply own gmond.conf
   * build: Look in lib64 rather than lib for apr, confuse and expat on x86_64 Linux builds
+  * Bug fixes and Enhancements
 
 BACKPORT PROPOSALS:
 
@@ -67,6 +67,7 @@ BACKPORT PROPOSALS:
   * build: libmetrics dependency cleanup
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1597
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1602
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1612
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1614
     +1: carenas

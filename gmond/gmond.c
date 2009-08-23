@@ -618,7 +618,7 @@ setup_listen_channels_pollset( void )
         }
     }
 
-  if((tcp_sockets = (apr_socket_t *)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_tcp_accept_channels + 1))) == NULL)
+  if((tcp_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_tcp_accept_channels + 1))) == NULL)
       {
         char apr_err[512];
         apr_strerror(status, apr_err, 511);
