@@ -148,6 +148,8 @@ void update_ifdata ( char *caller )
    unsigned long rbi=0, rbo=0, rpi=0, rpo=0;
    unsigned long l_bytes_in=0, l_bytes_out=0, l_pkts_in=0, l_pkts_out=0;
    double l_bin, l_bout, l_pin, l_pout;
+   net_dev_stats *ns;
+   float t;
 
    p = update_file(&proc_net_dev);
    if ((proc_net_dev.last_read.tv_sec != stamp.tv_sec) &&
@@ -183,7 +185,7 @@ void update_ifdata ( char *caller )
                     p++;
                     /* Check for data from the last read for this */
                     /* interface.  If nothing exists, add to the table. */
-                    net_dev_stats *ns = hash_lookup(src, n);
+                    ns = hash_lookup(src, n);
                     if ( !ns ) return;
 
                     /* receive */
@@ -227,13 +229,13 @@ void update_ifdata ( char *caller )
                     }
                     ns->rpo = rpo;
                   }
-              p = index (p, '\n') + 1;    // skips a line
+              p = index (p, '\n') + 1;
             }
 
         /*
          * Compute timediff. Check for bogus delta-t
          */
-        float t = timediff(&proc_net_dev.last_read, &stamp);
+        t = timediff(&proc_net_dev.last_read, &stamp);
         if ( t <  proc_net_dev.thresh) {
            err_msg("update_ifdata(%s) - Dubious delta-t: %f", caller, t);
            return;
