@@ -154,8 +154,15 @@ BACKPORT PROPOSALS:
      metrics collected via gmetric
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1875
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1876
-    +1: bernardli, carenas
+    +1: bernardli, carenas, bnicholes
     carenas: patched generated files; cleanup to follow
+
+  * gmond: Revert the patch that implmented allow_extra_data configuration 
+    directive back to the original patch that was submitted in bug#199.  The
+    patch was applied and backported excluded too much metric data and caused
+    gmond to stop reporting metrics if this directive was set to true.
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2062
+    +1: bnicholes
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
