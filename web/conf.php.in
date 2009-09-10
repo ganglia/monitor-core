@@ -209,22 +209,4 @@ $graph_sizes_keys = array_keys( $graph_sizes );
 # default: 1   (for gmetad < 3.2)
 # default: 0   (for gmetad >= 3.2)
 $case_sensitive_hostnames = true;
-
-
-##########################################################################
-# DO NOT CHANGE ANYTHING BELOW THIS COMMENT
-# 
-##########################################################################
-
-$rrd_options = "";
-if( isset( $rrdcached_socket ) )
-{
-    if(!empty( $rrdcached_socket ) )
-    {
-        $rrd_options .= " --daemon $rrdcached_socket";
-    }
-}
-
-
-
 ?>
