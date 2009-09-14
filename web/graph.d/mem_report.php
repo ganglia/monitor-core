@@ -55,7 +55,7 @@ function graph_mem_report ( &$rrdtool_graph ) {
     if (file_exists("$rrd_dir/swap_total.rrd")) {
         $series .= "'DEF:swap_total=${rrd_dir}/swap_total.rrd:sum:AVERAGE' "
             . "'DEF:swap_free=${rrd_dir}/swap_free.rrd:sum:AVERAGE' "
-            . "'CDEF:bmem_swapped=swap_total,swap_free,-,1024,*' "
+            . "'CDEF:bmem_swapped=swap_total,swap_free,-,1024,*,0,MAX' "
             . "'STACK:bmem_swapped#$mem_swapped_color:Swapped' "
             . "'GPRINT:bmem_swapped:AVERAGE:$fmt%S\\g' "
             . "'CDEF:bswap_total=swap_total,1024,*' "
