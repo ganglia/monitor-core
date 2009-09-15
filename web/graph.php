@@ -248,7 +248,7 @@ if($command) {
         print htmlentities( $command );
         print "</body></html>";
     } else {
-        header ("Content-type: image/gif");
+        header ("Content-type: image/png");
         passthru($command);
     }
 }
