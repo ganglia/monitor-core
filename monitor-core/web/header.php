@@ -315,7 +315,7 @@ if ($context == "meta" or $context == "cluster")
       $tpl->assign("sort_menu", $sort_menu );
    }
    
-if ($context == "physical" or $context == "cluster")
+if ($context == "physical" or $context == "cluster" or $context == 'host' )
    {
       # Present a width list
       $cols_menu = "<SELECT NAME=\"hc\" OnChange=\"ganglia_form.submit();\">\n";
