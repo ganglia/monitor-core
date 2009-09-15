@@ -89,6 +89,10 @@ foreach ($metrics as $name => $v)
              }
           }
    }
+
+# in case this is not defined, set to LOCALTIME so uptime will be 0 in the display
+if ( !isset($metrics['boottime']['VAL']) ){ $metrics['boottime']['VAL'] = $cluster['LOCALTIME'];}
+
 # Add the uptime metric for this host. Cannot be done in ganglia.php,
 # since it requires a fully-parsed XML tree. The classic contructor problem.
 $s_metrics['uptime']['TYPE'] = "string";
