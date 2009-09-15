@@ -80,6 +80,10 @@ function toggleLayer( whichLayer )
 <IMG BORDER=0 ALT="{cluster_url} PACKETS"
    SRC="./graph.php?{graphargs}&amp;g=packet_report&amp;z=medium&amp;c={cluster_url}">
 </A>
+<A HREF="./graph.php?{graphargs}&amp;g=nfs_report&amp;z=large&amp;c={cluster_url}">
+<IMG BORDER=0 ALT="{cluster_url} NFS"
+   SRC="./graph.php?{graphargs}&amp;g=nfs_report&amp;z=medium&amp;c={cluster_url}">
+</A>
 
 </TD>
 </TR>
@@ -95,6 +99,7 @@ function toggleLayer( whichLayer )
 <!-- START BLOCK : columns_dropdown -->
   <FONT SIZE="-1">
     Columns&nbsp;&nbsp;{metric_cols_menu}
+    Size&nbsp;&nbsp;{size_menu}
   </FONT>
 <!-- END BLOCK : columns_dropdown -->
   </TD>
