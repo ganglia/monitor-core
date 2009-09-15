@@ -138,7 +138,7 @@ function graph_sample_report ( &$rrdtool_graph ) {
 
     } else {
 
-        // Context is not "'hos't"
+        // Context is not "host"
         $series ="'DEF:cpu_user=${rrd_dir}/cpu_user.rrd:sum:AVERAGE' "
         . "'DEF:cpu_nice=${rrd_dir}/cpu_nice.rrd:sum:AVERAGE' "
         . "'DEF:cpu_system=${rrd_dir}/cpu_system.rrd:sum:AVERAGE' "
