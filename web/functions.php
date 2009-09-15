@@ -176,12 +176,20 @@ function node_image ($metrics)
 {
    global $hosts_down;
 
-   $cpu_num  = $metrics["cpu_num"]['VAL'];
-   if(!$cpu_num || $cpu_num == 0)
-      {
-         $cpu_num = 1;
-      }
-   $load_one  = $metrics["load_one"]['VAL'];
+
+   # More rigorous checking if variables are set before trying to use them.
+   if ( isset($metrics['cpu_num']['VAL']) and $metrics['cpu_num']['VAL'] != 0 ) {
+		$cpu_num = $metrics['cpu_num']['VAL'];
+   } else {
+		$cpu_num = 1;
+   }
+
+   if ( isset($metrics['load_one']['VAL']) ) {
+		$load_one = $metrics['load_one']['VAL'];
+   } else {
+		$load_one = 0;
+   }
+
    $value = $load_one / $cpu_num;
 
    # Check if the host is down
