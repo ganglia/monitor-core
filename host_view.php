@@ -151,7 +151,7 @@ $tpl->assign("name", "Avg Utilization (last $range)");
 $tpl->assign("value", "$cluster_util%");
 
 # Show constant metrics.
-if (is_array($c_metrics))
+if (isset($c_metrics) and is_array($c_metrics))
    {
       ksort($c_metrics);
       foreach ($c_metrics as $name => $v )
