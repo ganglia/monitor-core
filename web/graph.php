@@ -233,7 +233,7 @@ foreach (array_keys ($rrdtool_graph) as $key) {
 $command .= array_key_exists('extras', $rrdtool_graph) ? ' '.$rrdtool_graph['extras'].' ' : '';
 $command .= " $rrdtool_graph[series]";
 
-//error_log("Final command:  $command");
+#if ($debug) {   error_log("Final rrdtool command:  $command");   }
 
 # Did we generate a command?   Run it.
 if($command) {
