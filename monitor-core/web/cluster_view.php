@@ -91,9 +91,16 @@ if ($showhosts)
    {
       foreach ($hosts_up as $host => $val)
          {
-            $cpus = $metrics[$host]["cpu_num"]['VAL'];
-            if (!$cpus) $cpus=1;
-            $load_one  = $metrics[$host]["load_one"]['VAL'];
+               if ( isset($metrics[$host]["cpu_num"]['VAL']) and $metrics[$host]["cpu_num"]['VAL'] != 0 ){
+               $cpus = $metrics[$host]["cpu_num"]['VAL'];
+            } else {
+               $cpus = 1;
+            }
+            if ( isset($metrics[$host]["load_one"]['VAL']) ){
+               $load_one = $metrics[$host]["load_one"]['VAL'];
+            } else {
+               $load_one = 0;
+            }
             $load = ((float) $load_one)/$cpus;
             $host_load[$host] = $load;
             if(isset($percent_hosts[load_color($load)])) { 
