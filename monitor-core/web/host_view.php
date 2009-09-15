@@ -33,6 +33,7 @@ if ($hosts_down)
 $tpl->assign("ip", $hosts_up['IP']);
 $tpl->newBlock('columns_dropdown');
 $tpl->assign("metric_cols_menu", $metric_cols_menu);
+$tpl->assign("size_menu", $size_menu);
 $g_metrics_group = array();
 
 foreach ($metrics as $name => $v)
@@ -51,8 +52,10 @@ foreach ($metrics as $name => $v)
           continue;
        else
           {
+             $size = isset($clustergraphsize) ? $clustergraphsize : 'default';
+             $size = $size == 'medium' ? 'default' : $size; //set to 'default' to preserve old behavior
              $graphargs = "c=$cluster_url&amp;h=$hostname&amp;v=$v[VAL]"
-               ."&amp;m=$name&amp;r=$range&amp;z=medium&amp;jr=$jobrange"
+               ."&amp;m=$name&amp;r=$range&amp;z=$size&amp;jr=$jobrange"
                ."&amp;js=$jobstart&amp;st=$cluster[LOCALTIME]";
              if ($cs)
                 $graphargs .= "&amp;cs=" . rawurlencode($cs);
