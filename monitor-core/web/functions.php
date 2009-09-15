@@ -223,6 +223,10 @@ function find_limits($nodes, $metricname)
       {
          $out = array();
 
+         # If $rrd_options isn't set from conf.php or eval_config.php
+         if (!isset($rrd_options))
+            $rrd_options = '';
+
          $rrd_dir = "$rrds/$clustername/$host";
          if (file_exists("$rrd_dir/$metricname.rrd")) {
             $command = RRDTOOL . " graph /dev/null $rrd_options ".
@@ -255,22 +259,26 @@ function find_limits($nodes, $metricname)
 #
 function find_avg($clustername, $hostname, $metricname)
 {
-   global $rrds, $start, $end;
-   $avg = 0;
+    global $rrds, $start, $end;
+    $avg = 0;
 
-   if ($hostname)
-     $sum_dir = "$rrds/$clustername/$hostname";
-   else
-     $sum_dir = "$rrds/$clustername/__SummaryInfo__";
+    if ($hostname)
+        $sum_dir = "$rrds/$clustername/$hostname";
+    else
+        $sum_dir = "$rrds/$clustername/__SummaryInfo__";
 
-   $command = RRDTOOL . " graph /dev/null $rrd_options ".
-     "--start $start --end $end ".
-     "DEF:avg='$sum_dir/$metricname.rrd':'sum':AVERAGE ".
-     "PRINT:avg:AVERAGE:%.2lf ";
-   exec($command, $out);
-   $avg = $out[1];
-   #echo "$sum_dir: avg($metricname)=$avg<br>\n";
-   return $avg;
+    # If $rrd_options isn't set from conf.php or eval_config.php
+    if (!isset($rrd_options))
+        $rrd_options = '';
+
+    $command = RRDTOOL . " graph /dev/null $rrd_options ".
+        "--start $start --end $end ".
+        "DEF:avg='$sum_dir/$metricname.rrd':'sum':AVERAGE ".
+        "PRINT:avg:AVERAGE:%.2lf ";
+    exec($command, $out);
+    $avg = $out[1];
+    #echo "$sum_dir: avg($metricname)=$avg<br>\n";
+    return $avg;
 }
 
 #-------------------------------------------------------------------------------
