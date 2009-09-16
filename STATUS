@@ -24,6 +24,8 @@ CURRENT RELEASE NOTES:
    enhancements that have been backported for the current release)
 
   * gmond: Fix the allow_extra_data configuration directive(BUG199)
+  * gmond: Ensure that a complete XML dump is delivered before closing
+           the send socket. Submitted by: Jerry <adawzq 126 com>
   * gmond: add bind and bind_hostname parameters for udp_send_channel()
   * gmetad: BUG232: eliminate case-sensitive hostname bug, user can choose to maintain legacy behavior though
   * gmond: BUG237: revise fix for segfault on Solaris where first CPU not in slot 0
@@ -45,11 +47,6 @@ BACKPORT PROPOSALS:
     -1: carenas
     carenas: proposal changes gmetad's default behaviour and assumptions
              alternative backport suggested in ATT191
-
-  * gmond: Ensure that a complete XML dump is delivered before closing
-           the send socket. Submitted by: Jerry <adawzq 126 com>
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1980
-    +1: bnicholes
 
   * web: performance/security improvement for handling authorization
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1588
