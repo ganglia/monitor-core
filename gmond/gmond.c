@@ -909,7 +909,7 @@ Ganglia_metadata_check(Ganglia_host *host, Ganglia_value_msg *vmsg )
     Ganglia_metadata *metric = 
         (Ganglia_metadata *)apr_hash_get(host->metrics, metric_name, APR_HASH_KEY_STRING);
     
-    if((!metric) && allow_extra_data)
+    if(!metric)
       {
         int len;
         XDR x;
@@ -2292,9 +2292,8 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
          *  metadata_last_set field will be 0.  No need to send the full data 
          *  with every value update.
          */
-        if (allow_extra_data && (!cb->metadata_last_sent ||
-           (send_metadata_interval && 
-           (cb->metadata_last_sent < (now - apr_time_make(send_metadata_interval,0)))))) 
+        if (!cb->metadata_last_sent || (send_metadata_interval && 
+           (cb->metadata_last_sent < (now - apr_time_make(send_metadata_interval,0))))) 
           {
             Ganglia_metric gmetric = Ganglia_metric_create((Ganglia_pool)global_context);
             char *name, *val, *type;

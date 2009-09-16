@@ -23,7 +23,7 @@ CURRENT RELEASE NOTES:
   (Please update this area with a brief description of bug fixes and
    enhancements that have been backported for the current release)
 
-  * gmond: detect/load python_modules in Solaris (BUG228)
+  * gmond: Fix the allow_extra_data configuration directive(BUG199)
   * gmond: add bind and bind_hostname parameters for udp_send_channel()
   * gmetad: BUG232: eliminate case-sensitive hostname bug, user can choose to maintain legacy behavior though
   * gmond: BUG237: revise fix for segfault on Solaris where first CPU not in slot 0
@@ -157,12 +157,6 @@ BACKPORT PROPOSALS:
     +1: bernardli, carenas, bnicholes
     carenas: patched generated files; cleanup to follow
 
-  * gmond: Revert the patch that implmented allow_extra_data configuration 
-    directive back to the original patch that was submitted in bug#199.  The
-    patch was applied and backported excluded too much metric data and caused
-    gmond to stop reporting metrics if this directive was set to true.
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2062
-    +1: bnicholes
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
