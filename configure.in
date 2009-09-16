@@ -195,7 +195,7 @@ AC_ARG_WITH( moduledir,
 AC_ARG_ENABLE(debug,
 [
   --enable-debug          turn on debugging output and compile options],
-[ CFLAGS="$CFLAGS -ggdb"
+[ CFLAGS="$CFLAGS -ggdb -O0"
   AC_DEFINE(DEBUG, 1, DEBUG)])
 # Turn off optimizations when debugging.
 #[ CFLAGS="$CFLAGS -O2" 
