@@ -28,14 +28,16 @@ function graph_network_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'Bytes/sec';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
 
+    $width= $size == 'small' ? 1.25 : 2;
+
     $fmt = '%5.1lf';
     $series = "'DEF:bytes_in=${rrd_dir}/bytes_in.rrd:sum:AVERAGE' "
        . "'DEF:bytes_out=${rrd_dir}/bytes_out.rrd:sum:AVERAGE' "
-       . "'LINE2:bytes_in#$mem_cached_color:In ' "
+       . "'LINE$width:bytes_in#$mem_cached_color:In ' "
        . "'GPRINT:bytes_in:MIN:(Min\:$fmt%s' "
        . "'GPRINT:bytes_in:AVERAGE:Avg\:$fmt%s' "
        . "'GPRINT:bytes_in:MAX:Max\:$fmt%s)\\l' "
-       . "'LINE2:bytes_out#$mem_used_color:Out' "
+       . "'LINE$width:bytes_out#$mem_used_color:Out' "
        . "'GPRINT:bytes_out:MIN:(Min\:$fmt%s' "
        . "'GPRINT:bytes_out:AVERAGE:Avg\:$fmt%s' "
        . "'GPRINT:bytes_out:MAX:Max\:$fmt%s)\\l' ";
