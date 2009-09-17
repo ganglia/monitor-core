@@ -154,6 +154,11 @@ BACKPORT PROPOSALS:
     +1: bernardli, carenas, bnicholes
     carenas: patched generated files; cleanup to follow
 
+  * Web-Interface:  Change line widths on 'small' graph sizes for the stock
+    {load,network,packet}_report.php files.
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2083
+    +1: hawson
+
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
