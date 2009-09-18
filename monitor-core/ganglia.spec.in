@@ -18,7 +18,7 @@ Release: @REL@
 License: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
-Source: %{name}-@VERSION@.tar.gz
+Source: %{name}-%{version}.tar.gz
 Buildroot: %{_tmppath}/%{name}-%{version}-buildroot
 BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel, make
 %if 0%{?suse_version}
@@ -161,7 +161,7 @@ gmetad packages
 %endif
 
 %prep
-%setup -n %{name}-@VERSION@
+%setup -n %{name}-%{version}
 
 %build
 %ifnarch noarch
