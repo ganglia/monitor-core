@@ -28,7 +28,7 @@ function graph_packet_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'Packets/sec';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
 
-    $width= $size == 'small' ? 1 : 2;
+    $width= $size == 'small' ? 1.25 : 2;
 
     $fmt = '%5.1lf';
     $series = "'DEF:bytes_in=${rrd_dir}/pkts_in.rrd:sum:AVERAGE' "

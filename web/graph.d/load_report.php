@@ -34,7 +34,7 @@ function graph_load_report ( &$rrdtool_graph ) {
     $numfmt = '%7.1lf';
     $intfmt = '%5.0lf';
 
-    $width= $size == 'small' ? 1 : 2;
+    $width= $size == 'small' ? 1.25 : 2;
 
     $series = "'DEF:load_one=${rrd_dir}/load_one.rrd:sum:AVERAGE' "
             . "'DEF:proc_run=${rrd_dir}/proc_run.rrd:sum:AVERAGE' "
