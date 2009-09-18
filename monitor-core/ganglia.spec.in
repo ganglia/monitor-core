@@ -14,6 +14,7 @@ Summary: Ganglia Distributed Monitoring System
 Name: @PACKAGE@
 Version: @VERSION@
 URL: http://ganglia.info/
+# The Release macro value is set in configure.in, please update it there.
 Release: @REL@
 License: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
@@ -435,7 +436,7 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
-* Thu Sep 17 2009 Jesse Beckerj <hawson@gmail.com>
+* Thu Sep 17 2009 Jesse Becker <hawson@gmail.com>
 - Use %{version} tags where possible instead of hard-coding
 * Thu Jul 30 2009 Daniel Pocock <daniel@pocock.com.au>
 - gstatus is now compiled and included in the RPM, but not loaded by default
