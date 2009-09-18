@@ -157,6 +157,7 @@ BACKPORT PROPOSALS:
   * Web-Interface:  Change line widths on 'small' graph sizes for the stock
     {load,network,packet}_report.php files.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2083
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2085
     +1: hawson
 
 
