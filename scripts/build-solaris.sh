@@ -12,9 +12,12 @@ fi
 
 # Change these if you have installed them elsewhere
 
+# APR is provided by CSWapache2rt (apache2rt)
+# libConfuse is provided by CSWlibconfuse (libconfuse)
+
 CSW_HOME=/opt/csw
-APR=/opt/apr-1.2.7/bin/apr-1-config
-LIBCONFUSE=/opt/confuse-2.6
+APR=${CSW_HOME}/bin/apr-1-config
+LIBCONFUSE=${CSW_HOME}/apache2
 
 if [ ! -d ${CSW} ];
 then
