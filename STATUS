@@ -158,8 +158,12 @@ BACKPORT PROPOSALS:
     {load,network,packet}_report.php files.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2083
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2085
-    +1: hawson
+    +1: hawson, bernardli
 
+  * build: Enable setuid by default; cosmetic changes to enable-set{uid,gid}
+     configure help messages
+    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2094
+    +1: bernardli
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
