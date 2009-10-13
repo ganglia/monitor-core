@@ -163,7 +163,7 @@ BACKPORT PROPOSALS:
   * build: Enable setuid by default; cosmetic changes to enable-set{uid,gid}
      configure help messages
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2094
-    +1: bernardli
+    +1: bernardli, hawson
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
