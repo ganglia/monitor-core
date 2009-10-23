@@ -12,6 +12,9 @@
 #ifdef SOLARIS
 #define fabsf(f) ((float)fabs(f))
 #endif
+#ifdef LINUX
+#include <sys/utsname.h>
+#endif
 
 #include <apr.h>
 #include <apr_strings.h>
@@ -539,15 +542,19 @@ setup_listen_channels_pollset( int reset )
   int num_tcp_accept_channels = cfg_size( config_file, "tcp_accept_channel");
   int total_listen_channels   = num_udp_recv_channels + num_tcp_accept_channels;
   Ganglia_channel *channel;
+  int pollset_opts = 0;
 
   /* Create my incoming pollset */
   if (!reset)
     {
 #ifdef LINUX
-      if((status = apr_pollset_create(&listen_channels, total_listen_channels, global_context, APR_POLLSET_THREADSAFE)) != APR_SUCCESS)
-#else
-      if((status = apr_pollset_create(&listen_channels, total_listen_channels, global_context, 0)) != APR_SUCCESS)
+      struct utsname _name;
+      if(uname(&_name) >= 0) { 
+        if(strcmp(_name.release, "2.6") >= 0)
+          pollset_opts = APR_POLLSET_THREADSAFE;
+      }
 #endif
+      if((status = apr_pollset_create(&listen_channels, total_listen_channels, global_context, pollset_opts)) != APR_SUCCESS)
         {
           char apr_err[512];
           apr_strerror(status, apr_err, 511);
