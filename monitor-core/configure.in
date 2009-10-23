@@ -216,7 +216,7 @@ AC_SUBST(setuid_user)
 
 setgid_group=daemon
 AC_ARG_ENABLE(setgid,
-[  --enable-setgid=GROUP   turn on setgid support (default setgid=daemon) ],
+[  --enable-setgid=GROUP   turn on setgid support (default setgid=no) ],
 [if test x"$enableval" != xno; then no_setgid=0; setgid_group=$enableval ; fi],
 [ no_setgid=1 ])
 AC_DEFINE_UNQUOTED(NO_SETGID, $no_setgid, NO_SETGID)
