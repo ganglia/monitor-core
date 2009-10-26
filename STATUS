@@ -7,7 +7,8 @@ The current version of this file can be found at:
 
 Release history:
 
-    3.1.3(avenger)    : In Development
+    3.1.4(hargrave)   : Released: Oct 26, 2009
+    3.1.3(avenger)    : Released: Sep 19, 2009 (not GA)
     3.1.2(langley)    : Released: Feb 17, 2009
     3.1.1(wien)       : Released: Sep 10, 2008
     3.1.0(amelia)     : Released: Jul 30, 2008
@@ -22,6 +23,16 @@ Contributors looking for a mission:
 CURRENT RELEASE NOTES: 
   (Please update this area with a brief description of bug fixes and
    enhancements that have been backported for the current release)
+
+  3.1.3 never became GA, therefore, the release notes for 3.1.3 and
+  3.1.4 are combined here.
+
+  3.1.4:
+
+  * gmond: Limit the use of APR_POLLSET_THREADSAFE to Linux >= 2.6
+  * gmond: improve/revert setuid behavior in configure script
+
+  3.1.3:
 
   * gmond: Fix the allow_extra_data configuration directive(BUG199)
   * gmond: Ensure that a complete XML dump is delivered before closing
