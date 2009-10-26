@@ -55,7 +55,7 @@ REL=1
 
 # If we are releasing a snapshot (beta), set GANGLIA_SNAPSHOT to "yes"
 # If we are creating an official release, set it to "no" 
-GANGLIA_SNAPSHOT="no"
+GANGLIA_SNAPSHOT="yes"
 
 # If there are any changes to libganglia in this release, you need to...
 #   LIBGANGLIA_MICRO_VERSION += 1;
