@@ -7,7 +7,7 @@ AM_CONFIG_HEADER(config.h)
 AC_CONFIG_AUX_DIR(build)
 DATE_VERSION=`date +%Y%m%d%H%M`
 AM_INIT_AUTOMAKE("libmetrics", $DATE_VERSION)
-
+AC_DISABLE_SHARED
 AC_CANONICAL_HOST
 
 # Checks for programs.
