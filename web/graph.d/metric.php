@@ -10,6 +10,7 @@ function graph_metric ( &$rrdtool_graph ) {
            $default_metric_color,
            $hostname,
            $jobstart,
+           $jobstart_color,
            $load_color,
            $max,
            $meta_designator,
@@ -117,7 +118,7 @@ function graph_metric ( &$rrdtool_graph ) {
     $series .= "'COMMENT:$subtitle_two\\l' ";
 
     if ($jobstart) {
-        $series .= "'VRULE:$jobstart#$jobstart_color' ";
+        $series .= " 'VRULE:$jobstart#$jobstart_color' ";
     }
     if ($size != "small") {
         $fmt = '%.1lf';
