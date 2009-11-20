@@ -8,6 +8,7 @@ GLDADD =
 GLDFLAGS = 
 endif
 
+INCLUDES = @APR_INCLUDES@
 AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/include $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"'
 
 sbin_PROGRAMS = gmetad 
