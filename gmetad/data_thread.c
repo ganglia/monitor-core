@@ -6,6 +6,11 @@
 #include <gmetad.h>
 #include <string.h>
 
+#include <apr_time.h>
+
+/* Deliberately vary the sleep interval by this percentage: */
+#define SLEEP_RANDOMIZE 5.0
+
 extern hash_t *xml;
 
 extern hash_t *root;
@@ -15,7 +20,7 @@ extern int process_xml(data_source_list_t *, char *);
 void *
 data_thread ( void *arg )
 {
-   int i, sleep_time, bytes_read, rval;
+   int i, bytes_read, rval;
    data_source_list_t *d = (data_source_list_t *)arg;
    g_inet_addr *addr;
    g_tcp_socket *sock=0;
@@ -24,7 +29,13 @@ data_thread ( void *arg )
    /* This will grow as needed */
    unsigned int buf_size = 1024, read_index;
    struct pollfd struct_poll;
-   struct timeval start, end;
+   apr_time_t start, end;
+   apr_interval_time_t sleep_time, elapsed;
+   double random_factor;
+   unsigned int rand_seed;
+
+   rand_seed = apr_time_now() * (int)pthread_self();
+   for(i = 0; d->name[i] != 0; rand_seed = rand_seed * d->name[i++]);
  
    if(get_debug_msg_level())
       {
@@ -50,7 +61,7 @@ data_thread ( void *arg )
 
    for (;;)
       {
-         gettimeofday(&start, NULL);
+         start = apr_time_now();
          sock = NULL;
          
          /* If we successfully read from a good data source last time then try the same host again first. */
@@ -188,11 +199,13 @@ data_thread ( void *arg )
        take_a_break:
          g_tcp_socket_delete(sock);
 
-         gettimeofday(&end, NULL);
-         /* Sleep somewhere between (step +/- 5sec.) */
-         sleep_time = (d->step - 5) + (10 * (rand()/(float)RAND_MAX)) - (end.tv_sec - start.tv_sec);
-         if( sleep_time > 0 )
-            sleep(sleep_time);
+         end = apr_time_now();
+         /* Sleep somewhere between (step +/- SLEEP_RANDOMIZE percent.) */
+         random_factor = 1 + (SLEEP_RANDOMIZE / 50.0) * ((rand_r(&rand_seed) - RAND_MAX/2)/(float)RAND_MAX);
+         elapsed = end - start;
+         sleep_time = apr_time_from_sec(d->step) * random_factor - elapsed;
+         if(sleep_time > 0)
+           apr_sleep(sleep_time); 
       }
    return NULL;
 }
