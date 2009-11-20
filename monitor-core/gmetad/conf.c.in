@@ -83,6 +83,7 @@ static DOTCONF_CB(cb_data_source)
    char *p, *str;
    char *endptr;
    struct sockaddr_in sa;
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
 
    source_index++;
 
@@ -111,6 +112,7 @@ static DOTCONF_CB(cb_data_source)
       dslist->step = 15;
 
    debug_msg("Polling interval for %s is %u sec.", dslist->name, dslist->step);
+   c->shortest_step = dslist->step;
 
    dslist->sources = (g_inet_addr **) malloc( (cmd->arg_count-i) * sizeof(g_inet_addr *) );
    if (! dslist->sources )
