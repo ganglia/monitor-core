@@ -19,6 +19,7 @@
 #include "rrd_helpers.h"
 
 #define METADATA_SLEEP_RANDOMIZE 5.0
+#define METADATA_MINIMUM_SLEEP 1
 
 /* Holds our data sources. */
 hash_t *sources;
@@ -265,6 +266,7 @@ main ( int argc, char *argv[] )
    char hostname[HOSTNAMESZ];
    gmetad_config_t *c = &gmetad_config;
    apr_interval_time_t sleep_time;
+   apr_time_t last_metadata;
    double random_sleep_factor;
    unsigned int rand_seed;
 
@@ -420,12 +422,16 @@ main ( int argc, char *argv[] )
    debug_msg("cleanup thread has been started");
 
     /* Meta data */
+   last_metadata = 0;
    for(;;)
       {
          /* Do at a random interval, between 
                  (shortest_step/2) +/- METADATA_SLEEP_RANDOMIZE percent */
          random_sleep_factor = (1 + (METADATA_SLEEP_RANDOMIZE / 50.0) * ((rand_r(&rand_seed) - RAND_MAX/2)/(float)RAND_MAX));
-         sleep_time = random_sleep_factor * apr_time_from_sec(c->shortest_step/2);
+         sleep_time = random_sleep_factor * apr_time_from_sec(c->shortest_step) / 2;
+         /* Make sure the sleep time is at least 1 second */
+         if(apr_time_sec(apr_time_now() + sleep_time) < (METADATA_MINIMUM_SLEEP + apr_time_sec(apr_time_now())))
+            sleep_time += apr_time_from_sec(METADATA_MINIMUM_SLEEP);
          apr_sleep(sleep_time);
 
          /* Need to be sure root is locked while doing summary */
@@ -444,6 +450,9 @@ main ( int argc, char *argv[] )
 
          /* Save them to RRD */
          hash_foreach(root.metric_summary, write_root_summary, NULL);
+         
+         /* Remember our last run */
+         last_metadata = apr_time_now();
       }
 
    return 0;
