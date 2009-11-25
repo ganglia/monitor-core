@@ -7,7 +7,6 @@ The current version of this file can be found at:
 
 Release history:
 
-    3.1.5(???)        : Under development
     3.1.4(hargrave)   : Released: Oct 26, 2009
     3.1.3(avenger)    : Released: Sep 19, 2009 (not GA)
     3.1.2(langley)    : Released: Feb 17, 2009
@@ -25,6 +24,29 @@ CURRENT RELEASE NOTES:
   (Please update this area with a brief description of bug fixes and
    enhancements that have been backported for the current release)
 
+  3.1.3 never became GA, therefore, the release notes for 3.1.3 and
+  3.1.4 are combined here.
+
+  3.1.4:
+
+  * gmond: Limit the use of APR_POLLSET_THREADSAFE to Linux >= 2.6
+  * gmond: improve/revert setuid behavior in configure script
+
+  3.1.3:
+
+  * gmond: Fix the allow_extra_data configuration directive(BUG199)
+  * gmond: Ensure that a complete XML dump is delivered before closing
+           the send socket. Submitted by: Jerry <adawzq 126 com>
+  * gmond: add bind and bind_hostname parameters for udp_send_channel()
+  * gmetad: BUG232: eliminate case-sensitive hostname bug, user can choose to maintain legacy behavior though
+  * gmond: BUG237: revise fix for segfault on Solaris where first CPU not in slot 0
+  * gmond: support for HUP signal on platforms with execve
+  * gmond: delay daemonization until after other initialization steps are done
+  * gmond: status module: return gmond version info as string metrics
+  * gmond: Check return status of apr_pollset_create.  Use APR_POLLSET_THREADSAFE on Linux.
+  * build: various configure options: Solaris 8 with Sun Studio 11 support, extra modules for static linking, default setuid, release number, build multicpu and status during static builds, support for SYSCONFDIR (BUG16)
+  * RPM: include status module, allow packager to supply own gmond.conf
+  * build: Look in lib64 rather than lib for apr, confuse and expat on x86_64 Linux builds
   * Bug fixes and Enhancements
 
 BACKPORT PROPOSALS:
