@@ -187,6 +187,10 @@ AC_ARG_WITH( libconfuse,
 [  --with-libconfuse=DIR   Specify location for libconfuse],
 [if test x"$withval" != xno; then libconfuse="yes"; libconfusepath="$withval"; fi])
 
+AC_ARG_WITH( libpcre,
+[  --with-libpcre=DIR     Specify location for libpcre],
+[if test x"$withval" != xno; then libpcre="yes"; libpcrepath="$withval"; fi])
+
 AC_ARG_WITH( moduledir,
 [  --with-moduledir=DIR    Base directory for dynamically loadable modules],
   moduledir="$withval", 
@@ -422,6 +426,24 @@ else
   exit;
 fi
 echo
+
+echo
+echo Checking for pcre
+if test x"$libpcrepath" != x && test x"$libpcrepath" != xyes; then
+  CFLAGS="$CFLAGS -I$libpcrepath/include"
+  LDFLAGS="$LDFLAGS -L$libpcrepath/${LIB_SUFFIX}"
+  echo "Added -I$libpcrepath/include to CFLAGS"
+  echo "Added -L$libpcrepath/${LIB_SUFFIX} to LDFLAGS"
+fi
+AC_CHECK_LIB(pcre, pcre_compile)
+if test x"$ac_cv_lib_pcre_pcre_compile" = xyes; then
+  echo "Found a suitable pcre library"
+else
+  echo "libpcre not found"
+  exit;
+fi
+echo
+
 
 AC_CHECK_LIB(rpc, xdr_string)
 AC_CHECK_LIB(socket, socket)
