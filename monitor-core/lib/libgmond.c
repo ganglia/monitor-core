@@ -115,6 +115,7 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
 
 static cfg_opt_t metric_opts[] = {
   CFG_STR("name", NULL, CFGF_NONE ),
+  CFG_STR("name_match", NULL, CFGF_NONE ),
   CFG_FLOAT("value_threshold", -1, CFGF_NONE),
   CFG_STR("title", NULL, CFGF_NONE ),
   CFG_END()
