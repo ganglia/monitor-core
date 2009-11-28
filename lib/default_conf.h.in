@@ -15,7 +15,7 @@ char *default_gmond_configuration = NULL;
 globals {\n\
   daemonize = yes\n\
   setuid = " DO_SETUID_STRING "\n\
-  user = " SETUID_USER " \n\
+  user = " SETUID_USER "\n\
   debug_level = 0\n\
   max_udp_msg_len = 1472\n\
   mute = no\n\
