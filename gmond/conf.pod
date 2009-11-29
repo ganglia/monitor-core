@@ -168,8 +168,8 @@ You can define as many B<udp_send_channel> sections as you like within
 the limitations of memory and file descriptors.  If B<gmond> is configured
 as B<mute> this section will be ignored.
 
-The B<udp_send_channel> has a total of five attributes: B<mcast_join>,
-B<mcast_if>, B<host>, B<port> and B<ttl>.
+The B<udp_send_channel> has a total of seven attributes: B<mcast_join>,
+B<mcast_if>, B<host>, B<port>, B<ttl>, B<bind> and B<bind_hostname>.
 
 For example, the 2.5.x version gmond would send on the following single channel
 by default...
@@ -182,6 +182,10 @@ by default...
 The B<mcast_join> and B<mcast_if> attributes are optional.  When specified
 B<gmond> will create the UDP socket and join the B<mcast_join> multicast group
 and send data out the interface specified by B<mcast_if>.
+
+You can use the B<bind> attribute to bind to a particular local address to
+be used as the source for the multicast packets sent or let gmond resolve the
+default hostname if B<bind_hostname> is set to 1.
 
 If only a B<host> and B<port> are specified then B<gmond> will send unicast UDP
 messages to the hosts specified.
