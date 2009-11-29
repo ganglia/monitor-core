@@ -334,7 +334,7 @@ Ganglia_udp_send_channels_create( Ganglia_pool p, Ganglia_gmond_config config )
       else
         {
           /* Create a UDP socket */
-          socket = create_udp_client( pool, host, port, bind_address, bind_hostname );
+          socket = create_udp_client( pool, host, port, mcast_if, bind_address, bind_hostname );
           if(!socket)
             {
               err_msg("Unable to create UDP client for %s:%d. Exiting.\n",

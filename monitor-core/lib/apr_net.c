@@ -77,8 +77,11 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_buffer_get(char *addr, int len,
     return APR_SUCCESS;
 }
 
+static apr_status_t
+mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_channel, apr_port_t port, const char *ifname);
+
 static apr_socket_t *
-create_net_client(apr_pool_t *context, int type, char *host, apr_port_t port, char *bind_address, int bind_hostname)
+create_net_client(apr_pool_t *context, int type, char *host, apr_port_t port, const char *interface, char *bind_address, int bind_hostname)
 {
   apr_sockaddr_t *localsa = NULL;
   apr_sockaddr_t *remotesa = NULL;
@@ -125,6 +128,11 @@ create_net_client(apr_pool_t *context, int type, char *host, apr_port_t port, ch
       return NULL;
     }
 
+  if (interface != NULL)
+    {
+      mcast_emit_on_if(context, sock, host, port, interface);
+    }
+
   /* Bind if necessary */
   if(localsa != NULL)
     {
@@ -147,9 +155,9 @@ create_net_client(apr_pool_t *context, int type, char *host, apr_port_t port, ch
 }
 
 apr_socket_t *
-create_udp_client(apr_pool_t *context, char *host, apr_port_t port, char *bind_address, int bind_hostname)
+create_udp_client(apr_pool_t *context, char *host, apr_port_t port, const char *interface, char *bind_address, int bind_hostname)
 {
-  return create_net_client(context, SOCK_DGRAM, host, port, bind_address, bind_hostname);
+  return create_net_client(context, SOCK_DGRAM, host, port, interface, bind_address, bind_hostname);
 }
 
 static apr_socket_t *
@@ -412,7 +420,7 @@ join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
 apr_socket_t *
 create_mcast_client(apr_pool_t *context, char *mcast_ip, apr_port_t port, int ttl, const char *interface, char *bind_address, int bind_hostname)
 {
-    apr_socket_t *socket = create_udp_client(context, mcast_ip, port, bind_address, bind_hostname);
+    apr_socket_t *socket = create_udp_client(context, mcast_ip, port, interface, bind_address, bind_hostname);
     if(!socket)
       {
         return NULL;
