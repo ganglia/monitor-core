@@ -425,7 +425,6 @@ else
   echo "libexpat not found"
   exit;
 fi
-echo
 
 echo
 echo Checking for pcre
@@ -443,7 +442,6 @@ else
   exit;
 fi
 echo
-
 
 AC_CHECK_LIB(rpc, xdr_string)
 AC_CHECK_LIB(socket, socket)
