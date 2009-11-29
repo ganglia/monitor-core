@@ -2800,7 +2800,7 @@ main ( int argc, char *argv[] )
 
   if(args_info.default_config_flag)
     {
-      fprintf(stdout, default_gmond_configuration);
+      fprintf(stdout, "%s", default_gmond_configuration);
       fflush( stdout );
       exit(0);
     }
