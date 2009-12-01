@@ -981,7 +981,7 @@ makenetvfslist(void)
 {
 	char *str = NULL, *strptr, **listptr = NULL;
 	size_t slen = 0;
-	int cnt, i;
+	int cnt = 0, i;
 
 #if __FreeBSD_version > 500000
 	struct xvfsconf *xvfsp, *keep_xvfsp = NULL;
@@ -1008,7 +1008,6 @@ makenetvfslist(void)
 		goto done;
 	}
 
-	cnt = 0;
 	for (i = 0; i < maxvfsconf; i++, xvfsp++) {
 		if (xvfsp->vfc_typenum == 0)
 			continue;
@@ -1040,7 +1039,6 @@ makenetvfslist(void)
 		goto done;
 	}
 
-	cnt = 0;
 	while ((ptr = getvfsent()) != NULL && cnt < maxvfsconf) {
 		if (ptr->vfc_flags & VFCF_NONLOCAL)
 			continue;
