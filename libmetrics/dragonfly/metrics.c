@@ -19,12 +19,6 @@
 #include <sys/mount.h>
 #include <sys/sysctl.h>
 #include <sys/time.h>
-/*
- * XXX: HACK HACK HACK - avoid including machine/pmap.h and things that
- * depend on it to avoid collision with struct pmap in rpc/pmap_prot.h
- */
-#define _MACHINE_PMAP_H_
-#define _VM_VM_MAP_H_
 #include <sys/user.h>
 #include <kinfo.h>
 #include <sys/stat.h>

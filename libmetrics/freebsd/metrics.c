@@ -10,7 +10,7 @@
  * Tested on FreeBSD 7 (amd64)
  * Tested on FreeBSD 6.2 (amd64 and i386)
  * Tested on FreeBSD 5.5 (i386)
- *
+ * Tested on FreeBSD 8 (amd64)
  */
 
 #include <stdio.h>
@@ -24,12 +24,6 @@
 #include <sys/mount.h>
 #include <sys/sysctl.h>
 #include <sys/time.h>
-/*
- * XXX: HACK HACK HACK - avoid including machine/pmap.h and things that
- * depend on it to avoid collision with struct pmap in rpc/pmap_prot.h. :-P
- */
-#define _MACHINE_PMAP_H_
-#define _VM_MAP_
 #include <sys/user.h>
 #if __FreeBSD_version < 500101
 #include <sys/dkstat.h>
