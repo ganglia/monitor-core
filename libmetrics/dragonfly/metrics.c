@@ -5,6 +5,9 @@
  *  All bugs added by Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
  *
  *  Tested on DragonFlyBSD 1.10.1 (i386)
+ *  Tested on DragonFlyBSD 1.12.0 (i386)
+ *  Tested on DragonFlyBSD 2.0.1 (i386)
+ *  Tested on DragonFlyBSD 2.4.1 (i386, amd64)
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +19,12 @@
 #include <sys/mount.h>
 #include <sys/sysctl.h>
 #include <sys/time.h>
+/*
+ * XXX: HACK HACK HACK - avoid including machine/pmap.h and things that
+ * depend on it to avoid collision with struct pmap in rpc/pmap_prot.h
+ */
+#define _MACHINE_PMAP_H_
+#define _VM_VM_MAP_H_
 #include <sys/user.h>
 #include <kinfo.h>
 #include <sys/stat.h>
