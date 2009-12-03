@@ -135,7 +135,6 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1703
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1731
     +1: carenas
-    -1: hawson: see http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04697.html
     carenas: dead code
 
   * Web-Interface: Add "Avg Load percentages and overall cluster utilization"
