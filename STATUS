@@ -157,18 +157,6 @@ BACKPORT PROPOSALS:
         http://bugzilla.ganglia.info/cgi-bin/bugzilla/attachment.cgi?id=175&action=view
     carenas: original proposal incomplete, should be replaced with twitham's
 
-  * build: clarify/update use of "dist" targets
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=202
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1726
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1728
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1729
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1730
-    +1: carenas
-    +0: hawson -- Why not simply remove the offending targets?  Decide what
-                  targets are desired (I suggest .tgz, .tb2 and .zip), and
-                  remove the rest.  This will reduce the number of dependencies
-                  required.
-
   * gmetric: Add support for group, description and title metadata tags for
     metrics collected via gmetric
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1875

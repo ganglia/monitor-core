@@ -31,7 +31,7 @@ To prepare the distribution for compilation, run the bootstrapping script:
 
   ./bootstrap
 
-To build a distribution tarball, run:
+To build a distribution tarball (*), run:
 
   ./configure
   make dist-gzip
@@ -55,3 +55,5 @@ the need to deploy GCC runtime libraries with Ganglia.
 The latest versions of Sun Studio are a free download
 for Solaris 8 and higher.
 
+(*) other distribution formats are available if you have the needed tools
+    installed by using dist-bzip2, dist-zip, or dist-tarZ (dist target)
