@@ -130,13 +130,6 @@ BACKPORT PROPOSALS:
     +1: carenas, bnicholes
     carenas: depends on libmetrics dependency cleanup
     
-  * build: remove ganglia release name from the code
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg04653.html
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1703
-    http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1731
-    +1: carenas
-    carenas: dead code
-
   * Web-Interface: Add "Avg Load percentages and overall cluster utilization"
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=193
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1594
