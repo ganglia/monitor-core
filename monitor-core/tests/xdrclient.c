@@ -56,7 +56,7 @@ int main( void )
   if(rval != encoded)
     {
       fprintf(stderr,"ERROR! Client unable to send complete XDR message\n");
-      exit(1);
+      return 1;
     }
 
   fprintf(stderr,"CLIENT successfully sent XDR message\n");
