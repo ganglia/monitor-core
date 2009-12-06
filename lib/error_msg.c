@@ -131,20 +131,20 @@ static void
 err_doit (int errnoflag, int level, const char *fmt, va_list ap)
 {
    int errno_save, n;
-   char buf[MAXLINE];
+   char buf[MAXLINE + 1];
 
    if(ganglia_quiet_errors)
       return;
 
    errno_save = errno;		/* value caller might want printed */
 #ifdef	HAVE_VSNPRINTF
-   vsnprintf (buf, sizeof (buf), fmt, ap);	/* this is safe */
+   vsnprintf (buf, MAXLINE, fmt, ap);	/* safe */
 #else
-   vsprintf (buf, fmt, ap);	/* this is not safe */
+   vsprintf (buf, fmt, ap);	/* not safe */
 #endif
    n = strlen (buf);
    if (errnoflag)
-      snprintf (buf + n, sizeof (buf) - n, ": %s", strerror (errno_save));
+      snprintf (buf + n, MAXLINE - n, ": %s", strerror (errno_save));
 #ifdef HAVE_STRLCAT
    strlcat (buf, "\n", MAXLINE);
 #else
