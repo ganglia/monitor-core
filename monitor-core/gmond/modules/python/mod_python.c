@@ -33,6 +33,7 @@
 
 #include <Python.h>
 #include <gm_metric.h>
+#include <gm_msg.h>
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -528,6 +529,19 @@ static PyObject* build_params_dict(cfg_t *pymodule)
     }
     return params_dict;
 }
+
+static PyObject*
+ganglia_get_debug_msg_level(PyObject *self, PyObject *args)
+{
+    return Py_BuildValue("i", get_debug_msg_level());
+}
+
+static PyMethodDef GangliaMethods[] = {
+    {"get_debug_msg_level", ganglia_get_debug_msg_level, METH_NOARGS,
+     "Return the debug level used by ganglia."},
+    {NULL, NULL, 0, NULL}
+};
+
 static int pyth_metric_init (apr_pool_t *p)
 {
     DIR *dp;
@@ -572,6 +586,7 @@ static int pyth_metric_init (apr_pool_t *p)
 
     /* Set up the python path to be able to load module from our module path */
     Py_Initialize();
+    Py_InitModule("ganglia", GangliaMethods);
 
     PyObject *sys_path = PySys_GetObject("path");
     PyObject *addpath = PyString_FromString(path);
