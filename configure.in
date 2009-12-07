@@ -638,10 +638,10 @@ dnl
 		;;
 *solaris*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		CFLAGS="$CFLAGS -D__EXTENSIONS__ -DHAVE_STRERROR"
-		if test x"$ac_cv_prog_cc_c99" = xyes; then
-		   CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=200112L"
-		else
+		if test x"$ac_cv_prog_cc_c99" = x -o x"$ac_cv_prog_cc_c99" = xno; then
 		   CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=199506L"
+		else
+		   CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=200112L"
 		fi
 		if test x"$ac_cv_prog_gcc" != xyes; then
                    case "$host" in
