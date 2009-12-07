@@ -4,6 +4,16 @@ echo "Bootstrapping libmetrics"
 cd libmetrics && ./bootstrap
 cd ..
 
+MINOR=`grep 'GANGLIA_MINOR_VERSION=' configure.in | cut -d "=" -f 2`
+if [ $MINOR -eq 1 ]; then
+  #XXX: only for 3.1
+  SVNVERSION=`svnversion . | cut -d ":" -f 1 | sed -e "s/[A-Z]//g"`
+  if [ "$SVNVERSION" = "exported" ]; then
+    SVNVERSION=0
+  fi
+  perl -pi -e "s/GANGLIA_NANO_VERSION=\d+/GANGLIA_NANO_VERSION=$SVNVERSION/g" configure.in
+fi
+
 echo "Create distribution timestamp"
 touch Makefile.am
 echo "Running aclocal" &&
