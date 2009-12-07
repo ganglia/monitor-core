@@ -32,6 +32,7 @@
 
 import statvfs
 import os
+import ganglia
 
 descriptors = list()
     
@@ -109,6 +110,9 @@ def metric_init(params):
         elif Remote_Mount(line[0], line[2]): continue
         elif (not line[0].startswith('/dev/')) and (not line[0].startswith('/dev2/')): continue;
         
+	if ganglia.get_debug_msg_level() > 1:
+            print 'Discovered device %s' % line[1]
+        
         descriptors.append(Init_Metric(line, 'disk_total', int(1200), 
             'double', 'GB', 'both', '%.3f', 
             'Available disk space', DiskTotal_Handler))
@@ -129,4 +133,3 @@ if __name__ == '__main__':
     for d in descriptors:
         v = d['call_back'](d['name'])
         print 'value for %s is %f' % (d['name'],  v)
-
