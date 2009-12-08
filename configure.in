@@ -644,13 +644,6 @@ dnl
 		   CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=200112L"
 		fi
 		if test x"$ac_cv_prog_gcc" != xyes; then
-                   case "$host" in
-                   *solaris2.[[89]])
-                     # -xc99=all or -xc99=lib not supported < Solaris 10
-                     ;;
-                   *)
-		     CFLAGS="$CFLAGS -xc99"
-                   esac
 		   LIBS="-lm $LIBS"
 		fi 
 		AC_DEFINE(SOLARIS,1,SOLARIS)
