@@ -49,6 +49,14 @@ then
   exit 1
 fi
 
+MINOR=`uname -r | cut -d "." -f 2`
+if [ $MINOR -lt 10 ];
+then
+  echo "C99 not supported for Solaris < 10"
+  ac_cv_prog_cc_c99=no
+  export ac_cv_prog_cc_c99
+fi
+
 ./configure \
   --prefix=/usr/local \
   --without-gcc --disable-nls \
