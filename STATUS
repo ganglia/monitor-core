@@ -68,6 +68,21 @@ CURRENT RELEASE NOTES:
            Linux builds
   * Bug fixes and Enhancements
 
+RELEASE SHOWSTOPPERS:
+
+  * Fail to daemonize correctly in BSD systems
+    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=246
+    carenas: revert r2025 and probably implement alternative solution
+             for delayed daemonizations as suggested on :
+	     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg05390.html
+
+  * Decide on a bootstrapping environment for releases
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg05352.html
+    carenas: use Debian Lenny x86 in the long run or delay decision and use
+             either in order of preference SLES (3.1.2), Fedora 9 (3.1.5) or
+	     Centos4 (3.1.1) to avoid regressions to be introduced as shown by :
+	     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg04688.html
+
 BACKPORT PROPOSALS:
 
   * Security:  Set more restrictive umask for RRD file creation.
