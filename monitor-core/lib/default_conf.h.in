@@ -25,7 +25,7 @@ globals {\n\
   host_tmax = 20 /*secs */\n\
   cleanup_threshold = 300 /*secs */\n\
   gexec = no\n\
-  send_metadata_interval = 0\n\
+  send_metadata_interval = 0 /*secs */\n\
 }\n\
 \n\
 /*\n\
