@@ -12,11 +12,12 @@ Prerequisites
 
 Latest version of Cygwin with the following packages:
 
-* libapr1-devel (Libs)
-* expat (Libs)
 * diffutils (Utils)
+* expat (Libs)
 * gcc (Devel)
+* libapr1-devel (Libs)
 * make (Devel)
+* pcre-devel (Devel)
 * python (Python)
 * sharutils (Archive)
 * sunrpc (Libs)
