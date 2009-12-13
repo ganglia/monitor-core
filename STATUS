@@ -20,9 +20,9 @@ Contributors looking for a mission:
   * Just do an egrep on "TODO", "XXX" or "FIXME" in the source.
   * Review the bug database at: http://bugzilla.ganglia.info/
   * Open bugs in the bug database.
-  * Implement a feature from the wishlist at: http://ganglia.wiki.sourceforce.net/ganglia_wish-list
+  * Implement a feature from the wishlist at: http://sourceforge.net/apps/trac/ganglia/wiki/ganglia_wish-list
 
-CURRENT RELEASE NOTES: 
+CURRENT RELEASE NOTES:
   (Please update this area with a brief description of bug fixes and
    enhancements that have been backported for the current release)
 
@@ -57,12 +57,12 @@ CURRENT RELEASE NOTES:
   * gmond: support for HUP signal on platforms with execve
   * gmond: delay daemonization until after other initialization steps are done
   * gmond: status module: return gmond version info as string metrics
-  * gmond: Check return status of apr_pollset_create.  Use 
+  * gmond: Check return status of apr_pollset_create.  Use
            APR_POLLSET_THREADSAFE on Linux.
   * build: various configure options: Solaris 8 with Sun Studio 11 support,
            extra modules for static linking, default setuid, release number,
-	   build multicpu and status during static builds, support for
-	   SYSCONFDIR (BUG16)
+           build multicpu and status during static builds, support for
+           SYSCONFDIR (BUG16)
   * RPM: include status module, allow packager to supply own gmond.conf
   * build: Look in lib64 rather than lib for apr, confuse and expat on x86_64
            Linux builds
@@ -80,8 +80,8 @@ RELEASE SHOWSTOPPERS:
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg05352.html
     carenas: use Debian Lenny x86 in the long run or delay decision and use
              either in order of preference SLES (3.1.2), Fedora 9 (3.1.5) or
-	     Centos4 (3.1.1) to avoid regressions to be introduced as shown by :
-	     http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg04688.html
+             CentOS4 (3.1.1) to avoid regressions to be introduced as shown by :
+             http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg04688.html
 
 BACKPORT PROPOSALS:
 
@@ -102,7 +102,7 @@ BACKPORT PROPOSALS:
                therefore, adding the "./" is redundant.  In fact I would propose
                that we get rid of all the "./" for the other include_once()
                calls in web/*.
-    hawson: If security is an issue, then check/set the include path with 
+    hawson: If security is an issue, then check/set the include path with
             the get_include_path() and set_include_path() functions.  I don't
             see that this would affect performance much.
 
@@ -126,9 +126,9 @@ BACKPORT PROPOSALS:
       configure fails because the example directory was not included in the
       DIST_SUBDIRS and therefore none of the example source or make files are
       included in the final tarball. Second, since the .pyc are not being
-      generated, the spec file fails when it tries to copy the missing .pyc 
+      generated, the spec file fails when it tries to copy the missing .pyc
       files.
-    bnicholes: Patch r1877 fixed the first issue with the inclusion of the 
+    bnicholes: Patch r1877 fixed the first issue with the inclusion of the
       example source, but the second issue still remains.
     carenas: updated proposal, re-vote required
 
@@ -144,7 +144,7 @@ BACKPORT PROPOSALS:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1603
     +1: carenas, bnicholes
     carenas: depends on libmetrics dependency cleanup
-    
+
   * Web-Interface: Add "Avg Load percentages and overall cluster utilization"
     http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=193
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1594
