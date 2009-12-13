@@ -7,26 +7,24 @@ The current version of this file can be found at:
 
 Release history:
 
-    3.2.0   : in development
+    3.2.0   : In Development
 
 Contributors looking for a mission:
 
   * Just do an egrep on "TODO", "XXX" or "FIXME" in the source.
-
   * Review the bug database at: http://bugzilla.ganglia.info/
-
   * Open bugs in the bug database.
-
+  * Implement a feature from the wishlist at: http://sourceforge.net/apps/trac/ganglia/wiki/ganglia_wish-list
 
 CURRENT RELEASE NOTES:
 
+  There are no planned releases for this branch
 
 RELEASE SHOWSTOPPERS:
  <TEMPLATE>
   * <Brief description of showstopper bug>
     <http:// link to email list or bugzilla bug describing the issue>
     <Comments prefixed with user id of comment author>
-
 
 BACKPORT PROPOSALS:
  <TEMPLATE>
@@ -37,5 +35,3 @@ BACKPORT PROPOSALS:
      0: <userid>
     -1: <userid>
     <Optional comments prefixed with user id of comment author>
-
-
