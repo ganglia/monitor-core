@@ -315,10 +315,10 @@ if test x"$enable_python" = xyes; then
     AC_SUBST(PYTHON_VERSION)
 
     PyEXEC_INSTALLDIR=`$PYTHON_BIN -c "import sys; print sys.exec_prefix"`
-    if test -d "$PyEXEC_INSTALLDIR/include/python"; then
+    if test -f "$PyEXEC_INSTALLDIR/include/python/Python.h"; then
       PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python"
     else 
-      if test -d "$PyEXEC_INSTALLDIR/include/python$PyVERSION"; then
+      if test -f "$PyEXEC_INSTALLDIR/include/python$PyVERSION/Python.h"; then
         PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python$PyVERSION"
       else
         PYTHON_INCLUDES=""
