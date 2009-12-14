@@ -8,6 +8,7 @@ Dependencies
 * libConfuse (http://www.nongnu.org/confuse/)
 * expat (http://expat.sourceforge.net/)
 * python (http://www.python.org/)
+* PCRE (http://www.pcre.org/)
 * RRDtool (http://oss.oetiker.ch/rrdtool/)
 
 Basic Installation
