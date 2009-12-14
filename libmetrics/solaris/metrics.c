@@ -172,7 +172,7 @@ struct g_metrics_struct {
 
 static struct g_metrics_struct metriclist;
 static kstat_ctl_t *kc=NULL;
-static int ncpus;
+static int g_ncpus;
 
 int
 get_kstat_val(g_val_t *val, char *km_name, char *ks_name, char *name)
@@ -759,7 +759,7 @@ metric_init( void )
 
    get_kstat_val(&metriclist.cpu_num, "unix","system_misc","ncpus");
    debug_msg("metric_init: Assigning cpu_num value (%d) to ncpus.",(int)metriclist.cpu_num.uint32);
-   ncpus = metriclist.cpu_num.uint32;
+   g_ncpus = metriclist.cpu_num.uint32;
 
    get_kstat_val(&metriclist.boottime, "unix","system_misc","boot_time");
    get_kstat_val(&metriclist.cpu_speed,    "cpu_info","cpu_info0","clock_MHz");
