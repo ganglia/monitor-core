@@ -245,11 +245,14 @@ reload_ganglia_configuration(void)
   int i = 0;
   char *gmond_bin = gmond_argv[0];
 
-  apr_pollset_destroy(listen_channels);
-  for(i = 0; tcp_sockets[i] != 0; i++)
-    apr_socket_close(tcp_sockets[i]);
-  for(i = 0; udp_recv_sockets[i] != 0; i++)
-    apr_socket_close(udp_recv_sockets[i]);
+  if(listen_channels != NULL)
+    apr_pollset_destroy(listen_channels);
+  if(tcp_sockets != NULL)
+    for(i = 0; tcp_sockets[i] != 0; i++)
+      apr_socket_close(tcp_sockets[i]);
+  if(udp_recv_sockets != NULL)
+    for(i = 0; udp_recv_sockets[i] != 0; i++)
+      apr_socket_close(udp_recv_sockets[i]);
   debug_msg("reloading %s", gmond_bin);
 #ifndef CYGWIN
   /* To do: over-ride some config opts:
