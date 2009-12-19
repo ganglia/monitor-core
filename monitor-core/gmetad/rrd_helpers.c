@@ -182,18 +182,18 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
    int i;
 
    /* Build the path to our desired RRD file. Assume the rootdir exists. */
-   strcpy(rrd, gmetad_config.rrd_rootdir);
+   strncpy(rrd, gmetad_config.rrd_rootdir, PATHSIZE);
 
    if (source) {
-      strncat(rrd, "/", PATHSIZE);
-      strncat(rrd, source, PATHSIZE);
+      strncat(rrd, "/", PATHSIZE-strlen(rrd));
+      strncat(rrd, source, PATHSIZE-strlen(rrd));
       my_mkdir( rrd );
    }
 
    if (host) {
-      strncat(rrd, "/", PATHSIZE);
+      strncat(rrd, "/", PATHSIZE-strlen(rrd));
       i = strlen(rrd);
-      strncat(rrd, host, PATHSIZE);
+      strncat(rrd, host, PATHSIZE-strlen(rrd));
       if(gmetad_config.case_sensitive_hostnames == 0) {
          /* Convert the hostname to lowercase */
          for( ; rrd[i] != 0; i++)
@@ -202,14 +202,14 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
       my_mkdir( rrd );
    }
    else {
-      strncat(rrd, "/", PATHSIZE);
-      strncat(rrd, summary_dir, PATHSIZE);
+      strncat(rrd, "/", PATHSIZE-strlen(rrd));
+      strncat(rrd, summary_dir, PATHSIZE-strlen(rrd));
       my_mkdir( rrd );
    }
 
-   strncat(rrd, "/", PATHSIZE);
-   strncat(rrd, metric, PATHSIZE);
-   strncat(rrd, ".rrd", PATHSIZE);
+   strncat(rrd, "/", PATHSIZE-strlen(rrd));
+   strncat(rrd, metric, PATHSIZE-strlen(rrd));
+   strncat(rrd, ".rrd", PATHSIZE-strlen(rrd));
 
    return push_data_to_rrd( rrd, sum, num, step, process_time, slope);
 }
