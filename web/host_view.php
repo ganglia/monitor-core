@@ -193,7 +193,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
                      if (isset($v['description']))
                         $tpl->assign("desc", $v['description']);
                      if ( !(++$i % $metriccols) )
-                        $tpl->assign("br", "<BR>");
+                        $tpl->assign("new_row", "</TR><TR>");
                   }
                }
          }
