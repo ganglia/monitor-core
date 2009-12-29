@@ -122,11 +122,15 @@ function toggleLayer( whichLayer )
 </TABLE>
 </A>
 <DIV ID="{group}">
+<TABLE><TR>
 <!-- START BLOCK : vol_metric_info -->
-<A HREF="./graph.php?{graphargs}&amp;z=large">
-<IMG BORDER=0 ALT="{alt}" SRC="./graph.php?{graphargs}" TITLE="{desc}">{br}
-</A>
+<TD><A HREF="./graph.php?{graphargs}&amp;z=large">
+<IMG BORDER=0 ALT="{alt}" SRC="./graph.php?{graphargs}" TITLE="{desc}">
+</A></TD>
+{new_row}
 <!-- END BLOCK : vol_metric_info -->
+</TR>
+</TABLE>
 </DIV>
 <!-- END BLOCK : vol_group_info -->
 
