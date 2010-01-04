@@ -181,7 +181,8 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
             }
             $tpl->newBlock("vol_group_info");
             $tpl->assign("group", $group);
-            $tpl->assign("group_metric_count", count($metric_array));
+            $c = count($metric_array);
+            $tpl->assign("group_metric_count", $c);
             $i = 0;
             ksort($g_metrics);
             foreach ( $g_metrics as $name => $v )
@@ -192,7 +193,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
                      $tpl->assign("alt", "$hostname $name");
                      if (isset($v['description']))
                         $tpl->assign("desc", $v['description']);
-                     if ( !(++$i % $metriccols) )
+                     if ( !(++$i % $metriccols) && ($i != $c) )
                         $tpl->assign("new_row", "</TR><TR>");
                   }
                }
