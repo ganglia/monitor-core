@@ -20,7 +20,7 @@ Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
 Source: %{name}-@VERSION@.tar.gz
 Buildroot: %{_tmppath}/%{name}-%{version}-buildroot
-BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel
+BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel, pcre-devel
 %if 0%{?suse_version}
 BuildRequires:  freetype2-devel, libapr1-devel
 %if 0%{?suse_version} > 1020
@@ -363,6 +363,8 @@ fi
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Jan  5 2010 Daniel Pocock <daniel@pocock.com.au>
+- Add dependency on pcre-devel
 * Thu Jul 30 2009 Daniel Pocock <daniel@pocock.com.au>
 - gstatus is now compiled and included in the RPM, but not loaded by default
 * Wed Oct 01 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
