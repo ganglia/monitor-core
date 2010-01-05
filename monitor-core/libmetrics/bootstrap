@@ -13,5 +13,5 @@ automake --add-missing --copy 2>/dev/null
 echo "Running libtoolize" &&
 libtoolize --automake --copy && automake --add-missing --copy &&
 echo "Running autoconf" &&
-autoconf &&
+autoconf || exit 1
 echo
