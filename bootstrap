@@ -1,7 +1,7 @@
 #!/bin/sh
 # $Id$
 echo "Bootstrapping libmetrics"
-cd libmetrics && ./bootstrap
+cd libmetrics && ./bootstrap || exit 1
 cd ..
 
 MINOR=`grep 'GANGLIA_MINOR_VERSION=' configure.in | cut -d "=" -f 2`
@@ -27,7 +27,7 @@ automake --add-missing --copy 2>/dev/null
 echo "Running libtoolize" &&
 libtoolize --automake --copy && automake --add-missing --copy &&
 echo "Running autoconf" &&
-autoconf
+autoconf || exit 1
 
 echo &&
 echo "To begin installation, run \"./configure\" now"
