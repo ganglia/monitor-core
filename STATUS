@@ -31,7 +31,7 @@ CURRENT RELEASE NOTES:
 
   3.1.6:
 
-  * libmetrics: workaround system header conflicts for DFBSD2.4 or older
+  * libmetrics: workaround system header conflict in DFBSD2.4 or older (BUG245)
 
   3.1.5:
 
@@ -55,7 +55,6 @@ CURRENT RELEASE NOTES:
   * gmond: BUG237: revise fix for segfault on Solaris where first CPU not in
            slot 0
   * gmond: support for HUP signal on platforms with execve
-  * gmond: delay daemonization until after other initialization steps are done
   * gmond: status module: return gmond version info as string metrics
   * gmond: Check return status of apr_pollset_create.  Use
            APR_POLLSET_THREADSAFE on Linux.
@@ -70,18 +69,13 @@ CURRENT RELEASE NOTES:
 
 RELEASE SHOWSTOPPERS:
 
-  * Fail to daemonize correctly in BSD systems
-    http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=246
-    carenas: revert r2025 and probably implement alternative solution
-             for delayed daemonizations as suggested on :
-	     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg05390.html
-
   * Decide on a bootstrapping environment for releases
     http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg05352.html
-    carenas: use Debian Lenny x86 in the long run or delay decision and use
-             either in order of preference SLES (3.1.2), Fedora 9 (3.1.5) or
-             CentOS4 (3.1.1) to avoid regressions to be introduced as shown by :
+    carenas: delay decision and use in order of preference SLES (3.1.2),
+             Fedora 9 (3.1.5) or CentOS4 (3.1.1) to avoid regressions to
+             be introduced as shown by :
              http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg04688.html
+             in the long run use Debian 5.0 (x86, 32bit).
 
 BACKPORT PROPOSALS:
 
