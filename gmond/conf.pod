@@ -317,9 +317,10 @@ the following attributes: B<collect_once>, B<collect_every>
 and B<time_threshold>.  A B<collection_group> must also contain one
 or more B<metric> sections.
 
-The B<metric> section has the following attributes: B<name>,
-B<value_threshold> and B<title>.  For a list of available metric 
-names, run the following command:
+The B<metric> section has the following attributes: (one of B<name> 
+or B<name_match>; B<name_match> is only permitted if pcre support is
+compiled in), B<value_threshold> and B<title>.  For a list of 
+available metric names, run the following command:
 
   % gmond -m
 
@@ -379,6 +380,29 @@ even when only a single B<value_threshold> is surpassed.
 
 In addition a user friendly title can be substituted for the metric name
 by including a B<title> within the B<metric> section.
+
+By using the B<name_match> parameter instead of B<name>, it is possible
+to use a single definition to configure multiple metrics that match a
+regular expression.  The perl compatible regular expression (pcre) syntax
+is used.  This approach is particularly useful for a series of metrics
+that may vary in number between reboots (e.g. metric names that
+are generated for each individual NIC or CPU core).
+
+Here is an example of using the B<name_match> directive to enable
+the multicpu metrics:
+
+  metric {
+    name_match = "multicpu_([a-z]+)([0-9]+)"
+    value_threshold = 1.0
+    title = "CPU-\\2 \\1"
+  }
+
+Note that in the example above, there are two matches: the alphabetical
+match matches the variations of the metric name (e.g. B<idle>, B<system>)
+while the numeric match matches the CPU core number.  The second thing
+to note is the use of substitutions within the argument to B<title>.
+
+If both B<name> and B<name_match> are specified, then B<name> is ignored.
 
 =head2 Modules
 
