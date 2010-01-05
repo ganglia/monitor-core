@@ -21,7 +21,7 @@ Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
 Buildroot: %{_tmppath}/%{name}-%{version}-buildroot
-BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel, make
+BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel, make, pcre-devel
 %if 0%{?suse_version}
 BuildRequires:  freetype2-devel, libapr1-devel
 %if 0%{?suse_version} > 1020
@@ -436,6 +436,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Jan  5 2010 Daniel Pocock <daniel@pocock.com.au>
+- Add dependency on pcre-devel
 * Thu Sep 17 2009 Jesse Becker <hawson@gmail.com>
 - Use %{version} tags where possible instead of hard-coding
 * Thu Jul 30 2009 Daniel Pocock <daniel@pocock.com.au>
