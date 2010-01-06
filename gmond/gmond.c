@@ -2839,8 +2839,13 @@ main ( int argc, char *argv[] )
     {
       host_location = args_info.location_arg;
     }
-
   
+  daemonize_if_necessary( argv );
+  if (args_info.pid_file_given)
+    {
+      update_pidfile (args_info.pid_file_arg);
+    }
+
   /* Collect my hostname */
   apr_gethostname( myname, APRMAXHOSTLEN+1, global_context);
 
@@ -2888,17 +2893,6 @@ main ( int argc, char *argv[] )
 
   /* Initialize time variables */
   udp_last_heard = last_cleanup = next_collection = now = apr_time_now();
-
-  /* Daemonizing is one of the last things we do - if any of the preceding
-     steps have failed, the foreground phase has exited with a non-zero
-     status and the caller is hopefully aware that remediation is required.
-     Any non-zero return status after daemonizing is not passed to the caller,
-     as the caller will receive a return status of 0 at the moment we daemonize. */
-  daemonize_if_necessary( argv );
-  if (args_info.pid_file_given)
-    {
-      update_pidfile (args_info.pid_file_arg);
-    }
 
   /* Loop */
   for(;!done;)
