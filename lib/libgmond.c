@@ -89,7 +89,7 @@ static cfg_opt_t udp_send_channel_opts[] = {
   CFG_INT("port", -1, CFGF_NONE ),
   CFG_INT("ttl", 1, CFGF_NONE ),
   CFG_STR("bind", NULL, CFGF_NONE),
-  CFG_INT("bind_hostname", 0, CFGF_NONE),
+  CFG_BOOL("bind_hostname", 0, CFGF_NONE),
   CFG_END()
 };
 
@@ -310,13 +310,19 @@ Ganglia_udp_send_channels_create( Ganglia_pool p, Ganglia_gmond_config config )
       port           = cfg_getint( udp_send_channel, "port");
       ttl            = cfg_getint( udp_send_channel, "ttl");
       bind_address   = cfg_getstr( udp_send_channel, "bind" );
-      bind_hostname  = cfg_getint( udp_send_channel, "bind_hostname");
+      bind_hostname  = cfg_getbool( udp_send_channel, "bind_hostname");
 
       debug_msg("udp_send_channel mcast_join=%s mcast_if=%s host=%s port=%d\n",
                 mcast_join? mcast_join:"NULL", 
                 mcast_if? mcast_if:"NULL",
                 host? host:"NULL",
                 port);
+
+      if(bind_address != NULL && bind_hostname == cfg_true)
+        {
+          err_msg("udp_send_channel: bind and bind_hostname are mutually exclusive, both parameters can't be specified for the same udp_send_channel\n");
+          exit(1);
+        }
 
       /* Create a subpool */
       apr_pool_create(&pool, context);
