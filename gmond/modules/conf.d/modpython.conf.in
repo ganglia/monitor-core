@@ -1,13 +1,14 @@
-# The modules section describes the module
-#  that should be loaded.
-#   name - module name
-#   path - load path of the .so
-#   params - path to the directory where mod_python
-#             should look for python metric modules
+/*
+  params - path to the directory where mod_python
+           should look for python metric modules
+
+  the "pyconf" files in the include directory below
+  will be scanned for configurations for those modules
+*/
 modules {
   module {
     name = "python_module"
-    path = "modpython.so" 
+    path = "modpython.so"
     params = "@moduledir@/python_modules"
   }
 }
