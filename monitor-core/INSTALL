@@ -41,6 +41,12 @@ disabled by using :
 
   --disable-python
 
+the PCRE dependency is only needed to allow for the use of templates to
+define metric names using "name_match" in gmond.conf and could be disabled
+by using :
+
+  --without-libpcre
+
 gmetad is only needed to be able to generate reports and summary of the metric
 data collected and so will only be built if explicitally requested with :
 
