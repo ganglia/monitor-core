@@ -215,6 +215,7 @@ fi
 
 # Create the directory structure
 %__install -d -m 0755 $RPM_BUILD_ROOT/etc/init.d
+%__install -d -m 0755 $RPM_BUILD_ROOT/etc/sysconfig
 %__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
 %__install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man1
 %__install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man5
@@ -227,6 +228,7 @@ fi
    %__cp -f gmond/gmond.init $RPM_BUILD_ROOT/etc/init.d/gmond
    %__cp -f gmetad/gmetad.init $RPM_BUILD_ROOT/etc/init.d/gmetad
 %endif
+%__cp -f gmetad/gmetad-default $RPM_BUILD_ROOT/etc/sysconfig/gmetad
 
 %__install -d -m 0755 $RPM_BUILD_ROOT%{conf_dir}
 %__install -d -m 0755 $RPM_BUILD_ROOT%{conf_dir}/conf.d
@@ -269,6 +271,7 @@ fi
 %attr(0755,nobody,nobody)@varstatedir@/ganglia/
 %{_sbindir}/gmetad
 /etc/init.d/gmetad
+%config(noreplace) /etc/sysconfig/gmetad
 %{_mandir}/man1/gmetad.1*
 %config(noreplace) %{conf_dir}/gmetad.conf
 
