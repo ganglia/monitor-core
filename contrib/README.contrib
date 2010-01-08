@@ -53,3 +53,7 @@ README-removespikes
     explicit permission from Tobias Oetiker ( tobi _AT_ oetiker.ch )
     Perl script to remove "spikes" from RRD databases.
 
+ganglia-hosts-lowercase.sh
+    Contributed by Daniel Pocock ( daniel _AT_ pocock.com.au )
+    Script template to help convert hostname rrds to lowercase to correct
+    BUG232 in a live gmetad repository.
