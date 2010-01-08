@@ -28,7 +28,7 @@ Process
 Download libconfuse, build it and install the libconfuse library (this will
 be linked statically and will only be needed in the build machine)
 
-  ./configure
+  ./configure --disable-nls
   make
   make install
 
@@ -43,7 +43,7 @@ gmetric.exe created in the gmond, gstat and gmetric directories
 respectively. 
 
 The binaries generated depend on cygwin (cygwin1.dll), the apr cygwin
-library (cygapr-1-0.dll), the expat cygwin library (cygexpat-0.dll)  and 
+library (cygapr-1-0.dll), the expat cygwin library (cygexpat-1.dll)  and 
 the python cygwin library (libpython2.5.dll).
 
 if you want to use them in a different system you'll need to copy and
@@ -65,11 +65,11 @@ Prerequisites
 The following extra packages are needed to develop Ganglia in adition to the
 ones needed to build it and that are listed above:
 
-* autoconf
-* automake
-* bison
-* diffutils
-* flex
-* libtool
-* sharutils
-* svn
+* autoconf (Devel)
+* automake (Devel)
+* bison (Devel)
+* diffutils (Utils)
+* flex (Devel)
+* libtool (Devel)
+* sharutils (Archive)
+* subversion (Devel)
