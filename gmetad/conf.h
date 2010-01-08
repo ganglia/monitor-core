@@ -21,6 +21,7 @@ typedef struct
       int num_RRAs;
       char *RRAs[MAX_RRAS];
       int case_sensitive_hostnames;
+      int shortest_step;
 } gmetad_config_t;
 
 int get_gmetad_config(char *conffile);

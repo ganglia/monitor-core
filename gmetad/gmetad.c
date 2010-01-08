@@ -10,9 +10,15 @@
 #include <time.h>
 #include <gmetad.h>
 #include <cmdline.h>
+
+#include <apr_time.h>
+
 #include "daemon_init.h"
 
 #include "rrd_helpers.h"
+
+#define METADATA_SLEEP_RANDOMIZE 5.0
+#define METADATA_MINIMUM_SLEEP 1
 
 /* Holds our data sources. */
 hash_t *sources;
@@ -248,14 +254,16 @@ main ( int argc, char *argv[] )
    struct stat struct_stat;
    pthread_t pid;
    pthread_attr_t attr;
-   int i, num_sources, sleep_time;
+   int i, num_sources;
    uid_t gmetad_uid;
    char * gmetad_username;
    struct passwd *pw;
    char hostname[HOSTNAMESZ];
    gmetad_config_t *c = &gmetad_config;
-
-   srand(52336789);
+   apr_interval_time_t sleep_time;
+   apr_time_t last_metadata;
+   double random_sleep_factor;
+   unsigned int rand_seed;
 
    /* Ignore SIGPIPE */
    signal( SIGPIPE, SIG_IGN );
@@ -309,6 +317,9 @@ main ( int argc, char *argv[] )
          sprintf(root.strings, "http://%s/ganglia/", hostname);
          root.stringslen += strlen(root.strings) + 1;
       }
+
+   rand_seed = apr_time_now() * (int)pthread_self();
+   for(i = 0; i < root.stringslen; rand_seed = rand_seed * root.strings[i++]);
 
    /* Debug level 1 is error output only, and no daemonizing. */
    if (!debug_level)
@@ -405,11 +416,17 @@ main ( int argc, char *argv[] )
    debug_msg("cleanup thread has been started");
 
     /* Meta data */
+   last_metadata = 0;
    for(;;)
       {
-         /* Do at a random interval between 10 and 30 sec. */
-         sleep_time = 10 + ((30-10)*1.0) * rand()/(RAND_MAX + 1.0);
-         sleep(sleep_time);
+         /* Do at a random interval, between 
+                 (shortest_step/2) +/- METADATA_SLEEP_RANDOMIZE percent */
+         random_sleep_factor = (1 + (METADATA_SLEEP_RANDOMIZE / 50.0) * ((rand_r(&rand_seed) - RAND_MAX/2)/(float)RAND_MAX));
+         sleep_time = random_sleep_factor * apr_time_from_sec(c->shortest_step) / 2;
+         /* Make sure the sleep time is at least 1 second */
+         if(apr_time_sec(apr_time_now() + sleep_time) < (METADATA_MINIMUM_SLEEP + apr_time_sec(apr_time_now())))
+            sleep_time += apr_time_from_sec(METADATA_MINIMUM_SLEEP);
+         apr_sleep(sleep_time);
 
          /* Need to be sure root is locked while doing summary */
          pthread_mutex_lock(root.sum_finished);
@@ -427,6 +444,9 @@ main ( int argc, char *argv[] )
 
          /* Save them to RRD */
          hash_foreach(root.metric_summary, write_root_summary, NULL);
+         
+         /* Remember our last run */
+         last_metadata = apr_time_now();
       }
 
    return 0;
