@@ -1,7 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.61)
+AC_PREREQ(2.57)
+#AC_PREREQ(2.61)
 AC_INIT(libmetrics.c)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_AUX_DIR(build)
