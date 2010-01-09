@@ -5,7 +5,7 @@
 #include <apr_network_io.h>
 
 apr_socket_t *
-create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port, char *bind_address, int bind_hostname);
+create_udp_client(apr_pool_t *context, char *ipaddr, apr_port_t port, const char *interface, char *bind_address, int bind_hostname);
 
 apr_socket_t *
 create_udp_server(apr_pool_t *context, int32_t family, apr_port_t port, char *bind);
