@@ -785,71 +785,26 @@ distributions like Ubuntu) standard repositories.
 
 =item B<How should I configure multihomed machines?>
 
-Here is an email that Matt Massie sent to a user having problems with
-multihomed machines
+Various issues arise when a multihomed machine is running the gmond agent.
 
-   i need to add a section in the documentation talking about this since it 
-   seems to be a common question.
-   
-   when you use...
-   
-   mcast_if eth1
-   
-   .. in /etc/ganglia/gmond.conf that tells gmond to send its data out the "eth1"
-   network interface but that doesn't necessarily mean that the source
-   address of the packets will match the "eth1" interface.  to make sure that
-   data sent out eth1 has the correct source address run the following...
-   
-   % route add -host 239.2.11.71 dev eth1
-   
-   ... before starting gmond.  that should do the trick for you.
-   
-   -matt
-   
-   > I have seen some post related to some issues
-   > with gmond + multicast running on a dual nic
-   > frontend.
-   > 
-   > Currently I am experiencing a weird behavior
-   > 
-   > I have the following setup:
-   > 
-   >   -----------------------
-   >   | web server + gmetad |
-   >   -----------------------
-   >              |
-   >              |
-   >              |
-   >     ----------------------
-   >     |   eth0 A.B.C.112   |
-   >     |                    |
-   >     |  Frontend + gmond  |
-   >     |                    |
-   >     | eth1 192.168.100.1 |
-   >     ----------------------
-   >              |
-   >              |
-   > 
-   >        26 nodes each
-   >           gmond
-   > 
-   > In the frontend /etc/gmond.conf I have the
-   > following statement: mcast_if  eth1
-   > 
-   > The 26 nodes are correctly reported. 
-   > 
-   > However the Frontend is never reported.
-   > 
-   > I am running iptables on the Frontend, and I am seing
-   > things like:
-   > 
-   > INPUT packet died: IN=eth1 OUT= MAC= SRC=A.B.C.112 DST=239.2.11.71 
-   > LEN=36 TOS=0x00 PREC=0x00 TTL=1 ID=53740 DF PROTO=UDP SPT=41608 DPT=8649
-   > LEN=16 
-   > 
-   > I would have expected the source to be 192.168.100.1 with mcast_if eth1
-   > 
-   > Any idea ?
+Sending multicast packets out on the right interface: the B<mcast_if>
+option can be declared in the B<udp_send_channel> to force outgoing
+multicast packets to use a particular interface.  The system administrator
+may also be able to make other platform-specific configuration settings
+through the OS to achieve the desired behaviour.
+
+Ensuring that outgoing metric packets are always sent with the same
+source address: the B<bind> and B<bind_hostname> parameters are the solution.
+Either (but not both) of these can be specified in the B<udp_send_channel>
+if required.  See the B<gmond.conf> man page for details.
+
+Previous advice given in this document suggested adding a route
+like so:
+
+route add -host 239.2.11.71 dev eth1
+
+and this method is still valid, but it will be over-ridden by the
+B<bind> or B<bind_hostname> setting.
 
 =item B<How should I configure my Cisco Catalyst Switches?>
 
