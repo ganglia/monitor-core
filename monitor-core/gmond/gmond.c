@@ -2814,9 +2814,16 @@ main ( int argc, char *argv[] )
 
   process_configuration_file();
 
+  /* Should over-ride any value from the configuration file */
+  if(args_info.location_given)
+    {
+      host_location = args_info.location_arg;
+    }
+
+  load_metric_modules();
+
   if(args_info.metrics_flag)
     {
-      load_metric_modules();
       initialize_scoreboard();
       setup_metric_callbacks();
       print_metric_list();
@@ -2833,13 +2840,6 @@ main ( int argc, char *argv[] )
       exit(0);
     }
 
-  if(args_info.location_given)
-    {
-      host_location = args_info.location_arg;
-    }
-
-  load_metric_modules();
-  
   daemonize_if_necessary( argv );
   if (args_info.pid_file_given)
     {
