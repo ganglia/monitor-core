@@ -7,7 +7,7 @@ The current version of this file can be found at:
 
 Release history:
 
-    3.1.6(hargrave)   : In Development
+    3.1.6             : In Development
     3.1.5(hargrave)   : Tagged: Nov 24, 2009 (not released for GA)
     3.1.4(hargrave)   : Tagged: Oct 26, 2009 (not released for GA)
     3.1.3(avenger)    : Tagged: Sep 19, 2009 (not released for GA)
@@ -31,6 +31,8 @@ CURRENT RELEASE NOTES:
 
   3.1.6:
 
+  * Abolish the use of release names - only release numbers will be used
+    to distinguish versions in future
   * libmetrics: workaround system header conflict in DFBSD >= 2.4 (BUG245)
   * Use PCRE regex matching to configure metrics using the name_match directive
   * rrdcached support
