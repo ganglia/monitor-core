@@ -2824,8 +2824,6 @@ main ( int argc, char *argv[] )
       exit(0);
     }
 
-  load_metric_modules();
-
   if(args_info.bandwidth_flag)
     {
       double bytes_per_sec;
@@ -2839,6 +2837,8 @@ main ( int argc, char *argv[] )
     {
       host_location = args_info.location_arg;
     }
+
+  load_metric_modules();
   
   daemonize_if_necessary( argv );
   if (args_info.pid_file_given)
