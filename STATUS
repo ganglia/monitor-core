@@ -34,6 +34,19 @@ CURRENT RELEASE NOTES:
   * libmetrics: workaround system header conflict in DFBSD >= 2.4 (BUG245)
   * Use PCRE regex matching to configure metrics using the name_match directive
   * rrdcached support
+  * gmetad now uses apr and the sleep intervals between polls are randomized
+    in a way that supports shorter polling intervals
+  * FreeBSD support: fixes for crashes and disk statistics (BUG153)
+  * Further tweaks to Solaris build support (remove C99 hack)
+  * Eliminate conflict with ncpus symbol name on older Solaris
+  * Check for Python.h explicitly
+  * Remove references to GNU toolchain in documentation
+  * Fortify write_data_to_rrd against overflows
+  * Web interface: minor formatting changes
+  * mcast_if implementation tweaked so that the send channel will be bound
+    to the IP of the outgoing interface
+  * Documentation updates relating to the options for multihomed hosts,
+    particularly bind, bind_hostname and mcast_if
 
   3.1.5:
 
