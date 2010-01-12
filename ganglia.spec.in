@@ -245,6 +245,7 @@ fi
 
 # Copy the python metric modules and .conf files
 %__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/
+%{__python} -c 'import compileall; compileall.compile_dir("gmond/python_modules", 1, "/", 1)' > /dev/null
 %__cp -f gmond/python_modules/*/*.{py,pyc} $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
 
 # Don't install the example modules
@@ -367,6 +368,8 @@ fi
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sat Jan 12 2010 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- Instruct RPM to byte compile python modules at install time
 * Tue Jan 12 2010 Daniel Pocock <daniel@pocock.com.au>
 - Add eval_config.php to files list
 * Tue Jan  5 2010 Daniel Pocock <daniel@pocock.com.au>
