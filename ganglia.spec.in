@@ -409,6 +409,7 @@ cd gmetad-python
 %{web_prefixdir}/cluster_legend.html
 %{web_prefixdir}/cluster_view.php
 %{web_prefixdir}/COPYING
+%{web_prefixdir}/eval_config.php
 %{web_prefixdir}/footer.php
 %{web_prefixdir}/functions.php
 %{web_prefixdir}/ganglia.php
@@ -436,6 +437,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Jan 12 2010 Daniel Pocock <daniel@pocock.com.au>
+- Add eval_config.php to files list
 * Tue Jan  5 2010 Daniel Pocock <daniel@pocock.com.au>
 - Add dependency on pcre-devel
 * Thu Sep 17 2009 Jesse Becker <hawson@gmail.com>
