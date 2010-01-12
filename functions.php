@@ -209,7 +209,7 @@ function node_image ($metrics)
 #
 function find_limits($nodes, $metricname)
 {
-   global $metrics, $clustername, $rrds, $rrd_dir, $start, $end;
+   global $metrics, $clustername, $rrds, $rrd_dir, $start, $end, $rrd_options;
 
    if (!count($metrics))
       return array(0, 0);
@@ -230,10 +230,6 @@ function find_limits($nodes, $metricname)
    foreach ( $nodes as $host => $value )
       {
          $out = array();
-
-         # If $rrd_options isn't set from conf.php or eval_config.php
-         if (!isset($rrd_options))
-            $rrd_options = '';
 
          $rrd_dir = "$rrds/$clustername/$host";
          if (file_exists("$rrd_dir/$metricname.rrd")) {
@@ -267,17 +263,13 @@ function find_limits($nodes, $metricname)
 #
 function find_avg($clustername, $hostname, $metricname)
 {
-    global $rrds, $start, $end;
+    global $rrds, $start, $end, $rrd_options;
     $avg = 0;
 
     if ($hostname)
         $sum_dir = "$rrds/$clustername/$hostname";
     else
         $sum_dir = "$rrds/$clustername/__SummaryInfo__";
-
-    # If $rrd_options isn't set from conf.php or eval_config.php
-    if (!isset($rrd_options))
-        $rrd_options = '';
 
     $command = RRDTOOL . " graph /dev/null $rrd_options ".
         "--start $start --end $end ".
