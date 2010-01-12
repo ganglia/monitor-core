@@ -201,7 +201,7 @@ function node_image ($metrics)
 #
 function find_limits($nodes, $metricname)
 {
-   global $metrics, $clustername, $rrds, $rrd_dir, $start, $end;
+   global $metrics, $clustername, $rrds, $rrd_dir, $start, $end, $rrd_options;
 
    if (!count($metrics))
       return array(0, 0);
