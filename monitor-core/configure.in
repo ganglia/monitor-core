@@ -437,6 +437,7 @@ if test x"$libpcrepath" != x && test x"$libpcrepath" != xyes; then
   echo "Added -L$libpcrepath/${LIB_SUFFIX} to LDFLAGS"
 fi
 if test x"$libpcre" == xyes ; then
+  AC_CHECK_HEADERS([pcre/pcre.h pcre.h])
   AC_CHECK_LIB(pcre, pcre_compile)
   if test x"$ac_cv_lib_pcre_pcre_compile" = xyes; then
     echo "Found a suitable pcre library"
