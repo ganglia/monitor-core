@@ -704,6 +704,43 @@ fi
 AC_DEFINE_UNQUOTED(GANGLIA_MODULE_DIR, "$moduledir", GANGLIA_MODULE_DIR)
 AC_SUBST(moduledir)
 
+case $GANGLIA_VERSION in
+3\.1\.*)
+  echo "Extra checks for 3.1 series..."
+  if test "$sysconfdir" = '${prefix}/etc' && test ! "x$GANGLIA_ACK_SYSCONFDIR" = x1 ;
+  then
+    echo "sysconfdir appears to be the default value"
+    echo "Prior to release 3.1.3, Ganglia ignored the value of sysconfdir"
+    echo "passed to configure and would always use /etc/ganglia"
+    echo "This is considered a bug because the help text from configure"
+    echo "informs the user that the default location is PREFIX/etc"
+    echo "If you wish to continue using /etc/ganglia for gmond.conf and"
+    echo "other configuration files, you must now explicitly specify"
+    echo ""
+    echo "  --sysconfdir=/etc/ganglia"
+    echo ""
+    echo "If you want to use configure's default value, PREFIX/etc, you"
+    echo "must use the environment variable GANGLIA_ACK_SYSCONFDIR=1:"
+    echo ""
+    echo "  GANGLIA_ACK_SYSCONFDIR=1 ./configure ..."
+    echo ""
+    echo "otherwise you will see this error message."
+    echo ""
+    echo "When Ganglia 3.2 is released:"
+    echo " - sysconfdir will use configure's default value, unless specified"
+    echo " - GANGLIA_ACK_SYSCONFDIR will not be required"
+    echo " - this error will no longer be displayed"
+    echo ""
+    echo "*** configure has failed ***"
+    echo " - please invoke configure again using one of"
+    echo "   the methods described for determining sysconfdir"
+    exit 1
+  fi
+  ;;
+*)
+  ;;
+esac
+
 AC_OUTPUT(Makefile 
           ganglia-config
           contrib/ganglia_gmond.xml
