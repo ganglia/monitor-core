@@ -13,4 +13,4 @@ modules {
   }
 }
 
-include ("/etc/ganglia/conf.d/*.pyconf")
+include ("@sysconfdir@/conf.d/*.pyconf")
