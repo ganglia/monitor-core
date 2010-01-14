@@ -1,3 +1,6 @@
+
+include $(top_srcdir)/ganglia.inc
+
 SUBDIRS = modules python_modules
 
 EXTRA_DIST = gmond.aix.init gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
@@ -48,3 +51,15 @@ gmond_LDADD = $(top_builddir)/libmetrics/libmetrics.la \
 gmond_DEPENDENCIES = $(gmond_LDADD)
 
 gmond_LDFLAGS = $(GLDFLAGS)
+
+gmond.solaris.init:	gmond.solaris.init.in $(FIXCONFIG)
+	$(FIXCONFIG) gmond.solaris.init.in
+
+# we declare the hook so that gmond.solaris.init will be created within the
+# build tree during the install phase
+# however, the action to install it is commented out, as it is likely
+# the SA will use some other script to put this file into a package or
+# something
+install-exec-hook:	gmond.solaris.init
+#	$(INSTALL_SCRIPT) gmond.solaris.init
+

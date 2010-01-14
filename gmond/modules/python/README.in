@@ -105,7 +105,7 @@ follows:
     }
   }
 
-  include ('/etc/ganglia/conf.d/*.pyconf')
+  include ('@sysconfdir@/conf.d/*.pyconf')
 
 The most significant part of this configuration is the 'params'
 directive. The path that has been assigned to this directive will

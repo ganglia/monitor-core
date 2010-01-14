@@ -10,10 +10,10 @@
         <service_fmri value='svc:/network/physical:default'/>
      </dependency>
      <dependency name='config' grouping='require_all' restart_on='none' type='path'>
-        <service_fmri value='file://localhost@prefix@/etc/gmond.conf'/>
+        <service_fmri value='file://localhost@sysconfdir@/gmond.conf'/>
      </dependency>
 
-     <exec_method name='start' type='method' exec='@prefix@/sbin/gmond' timeout_seconds='60'/>
+     <exec_method name='start' type='method' exec='@sbindir@/gmond' timeout_seconds='60'/>
      <exec_method name='stop' type='method' exec=':kill' timeout_seconds='60' />
 
      <instance name="default" enabled="true">

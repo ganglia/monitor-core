@@ -1,3 +1,6 @@
+
+include $(top_srcdir)/ganglia.inc
+
 if STATIC_BUILD
 GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD = 
@@ -20,7 +23,7 @@ gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
 
 gmetad_LDFLAGS = $(GLDFLAGS)
 
-EXTRA_DIST = gmetad.aix.init gmetad.conf gmetad.init gmetad.init.SuSE \
+EXTRA_DIST = gmetad.aix.init gmetad.conf.in gmetad.init gmetad.init.SuSE \
     type_hash.gperf xml_hash.gperf gmetad-default
 
 xml_hash.c: xml_hash.gperf
@@ -28,3 +31,11 @@ xml_hash.c: xml_hash.gperf
 
 type_hash.c: type_hash.gperf
 	gperf -G -l -H type_hash -t -F ', 0' -N in_type_list -k '1,$$' -W types type_hash.gperf > type_hash.c
+
+gmetad.conf:	gmetad.conf.in $(FIXCONFIG)
+	$(FIXCONFIG) gmetad.conf.in
+
+install-data-hook:	gmetad.conf
+	mkdir -p $(DESTDIR)$(sysconfdir) && \
+	  $(INSTALL_DATA) gmetad.conf $(DESTDIR)$(sysconfdir)/gmetad.conf
+
