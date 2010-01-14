@@ -1,5 +1,8 @@
 # $Id$
 #
+
+include $(top_srcdir)/ganglia.inc
+
 if BUILD_GMETAD
 GMETAD_SUBDIR = gmetad web
 else
