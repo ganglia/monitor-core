@@ -742,9 +742,9 @@ case $GANGLIA_VERSION in
   ;;
 esac
 
+AC_CONFIG_FILES([scripts/fixconfig], [chmod +x scripts/fixconfig])
+
 AC_OUTPUT(Makefile 
-          ganglia-config
-          contrib/ganglia_gmond.xml
           tests/Makefile 
           ganglia.spec 
           gmetad/Makefile 
@@ -752,33 +752,27 @@ AC_OUTPUT(Makefile
           lib/Makefile 
           gmond/Makefile 
           gstat/Makefile 
-          gmond/gmond.solaris.init
           gmond/modules/Makefile
-          gmond/modules/conf.d/modpython.conf
           gmond/modules/example/Makefile
           gmond/modules/cpu/Makefile
           gmond/modules/disk/Makefile
           gmond/modules/memory/Makefile
           gmond/modules/network/Makefile
           gmond/modules/python/Makefile
-          gmond/modules/python/README
           gmond/modules/status/Makefile
           gmond/modules/system/Makefile
           gmond/python_modules/Makefile
           gmond/python_modules/disk/Makefile
           gmond/python_modules/example/Makefile
           gmond/python_modules/network/Makefile
-          gmetad/gmetad.conf
           gmetad/conf.c
           gmetad-python/setup.py
           gmetad-python/Gmetad/gmetad_config.py
           gmetad-python/gmetad-python.conf
           gmetad-python/plugins/rrd_plugin.py
           gmetric/Makefile
-          include/Makefile 
-          solaris/pkginfo
-          web/conf.php
-          web/version.php)
+          include/Makefile
+          web/Makefile)
 
 echo ""
 echo "Welcome to.."

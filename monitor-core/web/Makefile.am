@@ -1,4 +1,13 @@
-install:
+
+include $(top_srcdir)/ganglia.inc
+
+conf.php:       conf.php.in $(FIXCONFIG)
+	$(FIXCONFIG) conf.php.in
+
+version.php:    version.php.in $(FIXCONFIG)
+	$(FIXCONFIG) version.php.in
+
+install:	conf.php version.php
 	@echo
 	@echo "================================================================================="
 	@echo "     The PHP scripts are not installed by running 'make install'"
