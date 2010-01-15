@@ -126,6 +126,7 @@ struct cpu_info cpu_info[2],
 int aixver, aixrel, aixlev, aixfix;
 static time_t boottime;
 
+static int isVIOserver;
 
 /* Prototypes
  */
@@ -145,6 +146,20 @@ g_val_t
 metric_init(void)
 {
    g_val_t val;
+   FILE *f;
+
+
+/* find out if we are running on a VIO server */
+
+   f = fopen( "/usr/ios/cli/ioscli", "r" );
+
+   if (f)
+   {
+      isVIOserver = 1;
+      fclose( f );
+   }
+   else
+      isVIOserver = 0;
 
 
    last_cpu_info = &cpu_info[ci_flag];
@@ -237,8 +252,13 @@ os_name_func ( void )
    g_val_t val;
    struct utsname uts;
 
-   uname (&uts);
-   strncpy (val.str, uts.sysname, MAX_G_STRING_SIZE);
+   if (isVIOserver)
+      strcpy( val.str, "Virtual I/O Server" );
+   else
+   {
+      uname( &uts );
+      strncpy( val.str, uts.sysname, MAX_G_STRING_SIZE );
+   }
 
    return val;
 }        
