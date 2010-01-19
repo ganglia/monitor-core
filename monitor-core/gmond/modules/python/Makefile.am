@@ -24,7 +24,7 @@ README:	README.in $(FIXCONFIG)
 # Note that README is listed as a dependency to be generated, but it
 # is not currently installed anywhere
 install-exec-hook:	../conf.d/modpython.conf README
-	mkdir -p $(DESTDIR)/$(sysconfdir)/conf.d && \
-	  $(INSTALL_DATA) ../conf.d/modpython.conf $(DESTDIR)/$(sysconfdir)/conf.d/modpython.conf
+	mkdir -p $(DESTDIR)$(sysconfdir)/conf.d && \
+	  $(INSTALL_DATA) ../conf.d/modpython.conf $(DESTDIR)$(sysconfdir)/conf.d/modpython.conf
 
 INCLUDES = @APR_INCLUDES@ @PYTHON_INCLUDES@
