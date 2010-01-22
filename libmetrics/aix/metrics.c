@@ -524,6 +524,8 @@ cpu_num_func ( void )
 }
 
 #define MAXPROCS 20
+
+#if !defined(_AIX61)
 /*
 ** Theese Missing prototypes have caused me an afternoon of real grief !!!
 */
@@ -532,6 +534,7 @@ int getprocs64 (struct procentry64 *ProcessBuffer, int ProcessSize,
                 pid_t *IndexPointer, int Count);
 int getthrds64 (pid_t ProcessIdentifier, struct thrdentry64 *ThreadBuffer,
             int  ThreadSize, tid64_t *IndexPointer, int Count);
+#endif
 
 /*
 ** count_threads(pid) finds all runnable threads belonging to
