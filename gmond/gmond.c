@@ -12,6 +12,13 @@
 #ifdef SOLARIS
 #define fabsf(f) ((float)fabs(f))
 #endif
+#ifdef _AIX
+#ifndef _AIX52
+/* _AIX52 is defined on all versions of AIX >= 5.2
+   fabsf doesn't exist on versions prior to 5.2 */
+#define fabsf(f) ((float)fabs(f))
+#endif
+#endif
 #ifdef LINUX
 #include <sys/utsname.h>
 #endif
