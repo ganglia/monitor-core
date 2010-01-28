@@ -566,7 +566,10 @@ dnl default VARSTATEDIR to /var/lib since that's the traditional location.
 dnl
 varstatedir="/var/lib"
 
+# Used when static linking requested
 EXPORT_SYMBOLS="-export-dynamic"
+# Used when dynamic linking requested
+EXPORT_SYMBOLS_DYNAMIC="-export-dynamic"
 case "$host" in
 *linux*)
 		CFLAGS="$CFLAGS -D_REENTRANT"
@@ -621,6 +624,8 @@ dnl
 		   echo "For AIX 5 you need to install bos.perf.libperfstat"
 		fi
 		AC_DEFINE(AIX, 1, AIX)
+		LIBS="-lm $LIBS"
+		EXPORT_SYMBOLS_DYNAMIC="-Wl,-bexpfull"
 		;;
 *hpux*)		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
 		LIBS="-lpthread $LIBS"
@@ -674,6 +679,7 @@ dnl
 esac
 
 AC_SUBST(EXPORT_SYMBOLS)
+AC_SUBST(EXPORT_SYMBOLS_DYNAMIC)
 
 dnl Define VARSTATEDIR in config.h
 dnl

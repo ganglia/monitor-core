@@ -126,6 +126,7 @@ struct cpu_info cpu_info[2],
 int aixver, aixrel, aixlev, aixfix;
 static time_t boottime;
 
+static int isVIOserver;
 
 /* Prototypes
  */
@@ -145,6 +146,20 @@ g_val_t
 metric_init(void)
 {
    g_val_t val;
+   FILE *f;
+
+
+/* find out if we are running on a VIO server */
+
+   f = fopen( "/usr/ios/cli/ioscli", "r" );
+
+   if (f)
+   {
+      isVIOserver = 1;
+      fclose( f );
+   }
+   else
+      isVIOserver = 0;
 
 
    last_cpu_info = &cpu_info[ci_flag];
@@ -237,8 +252,13 @@ os_name_func ( void )
    g_val_t val;
    struct utsname uts;
 
-   uname (&uts);
-   strncpy (val.str, uts.sysname, MAX_G_STRING_SIZE);
+   if (isVIOserver)
+      strcpy( val.str, "Virtual I/O Server" );
+   else
+   {
+      uname( &uts );
+      strncpy( val.str, uts.sysname, MAX_G_STRING_SIZE );
+   }
 
    return val;
 }        
@@ -504,6 +524,8 @@ cpu_num_func ( void )
 }
 
 #define MAXPROCS 20
+
+#if !defined(_AIX61)
 /*
 ** Theese Missing prototypes have caused me an afternoon of real grief !!!
 */
@@ -512,6 +534,7 @@ int getprocs64 (struct procentry64 *ProcessBuffer, int ProcessSize,
                 pid_t *IndexPointer, int Count);
 int getthrds64 (pid_t ProcessIdentifier, struct thrdentry64 *ThreadBuffer,
             int  ThreadSize, tid64_t *IndexPointer, int Count);
+#endif
 
 /*
 ** count_threads(pid) finds all runnable threads belonging to
@@ -814,9 +837,10 @@ int bos_level(int *aix_version, int *aix_release, int *aix_level, int *aix_fix)
      */
     /*
      * AIX > 4.2 uses bos.mp or bos.up
+     * AIX >= 6.1 uses bos.mp64
      */
     getit = ODM_FIRST;
-    while ((rc = (int)odm_get_obj(my_cl, "name like bos.?p",
+    while ((rc = (int)odm_get_obj(my_cl, "name like bos.?p*",
                                   &productobj, getit)) != 0) {
         getit = ODM_NEXT;
         if (rc == -1) {
@@ -832,7 +856,7 @@ int bos_level(int *aix_version, int *aix_release, int *aix_level, int *aix_fix)
         }
     }
     /*
-     * AIX < 4.2 uses bos.mp or bos.up
+     * AIX < 4.2 uses bos.rte.mp or bos.rte.up
      */
     if (!found) {
         getit = ODM_FIRST;
