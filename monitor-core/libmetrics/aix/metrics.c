@@ -834,9 +834,10 @@ int bos_level(int *aix_version, int *aix_release, int *aix_level, int *aix_fix)
      */
     /*
      * AIX > 4.2 uses bos.mp or bos.up
+     * AIX >= 6.1 uses bos.mp64
      */
     getit = ODM_FIRST;
-    while ((rc = (int)odm_get_obj(my_cl, "name like bos.?p",
+    while ((rc = (int)odm_get_obj(my_cl, "name like bos.?p*",
                                   &productobj, getit)) != 0) {
         getit = ODM_NEXT;
         if (rc == -1) {
@@ -852,7 +853,7 @@ int bos_level(int *aix_version, int *aix_release, int *aix_level, int *aix_fix)
         }
     }
     /*
-     * AIX < 4.2 uses bos.mp or bos.up
+     * AIX < 4.2 uses bos.rte.mp or bos.rte.up
      */
     if (!found) {
         getit = ODM_FIRST;
