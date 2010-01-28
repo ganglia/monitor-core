@@ -96,6 +96,7 @@ dnl
 		;;
 *aix*)		OS="aix"
 		CFLAGS="$CFLAGS -D_ALL_SOURCE -DAIX"
+		LDFLAGS="$LDFLAGS -Wl,-bexpfull"
 		if test "$ac_cv_lib_perfstat_perfstat_cpu_total" = yes ; then
 			CFLAGS="$CFLAGS -DHAVE_PERFSTAT"
 		else
