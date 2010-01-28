@@ -628,6 +628,7 @@ dnl
 		   echo "For AIX 5 you need to install bos.perf.libperfstat"
 		fi
 		AC_DEFINE(AIX, 1, AIX)
+		LIBS="-lm $LIBS"
 		EXPORT_SYMBOLS_DYNAMIC="-Wl,-bexpfull"
 		;;
 *hpux*)		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
