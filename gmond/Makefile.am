@@ -23,11 +23,7 @@ endif
 else
 GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD = 
-if AIX
-GLDFLAGS = -Wl,-bexpfull
-else
-GLDFLAGS = -export-dynamic
-endif
+GLDFLAGS = @EXPORT_SYMBOLS_DYNAMIC@
 endif
 
 INCLUDES = @APR_INCLUDES@
