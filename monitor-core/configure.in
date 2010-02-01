@@ -136,7 +136,7 @@ dnl Checks for programs.
 dnl
 AC_PROG_CC
 AC_PROG_CC_STDC
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 
 AC_ARG_ENABLE( static-build,
 [  --enable-static-build   Statically link libGanglia, APR, Expat and Confuse libraries (may disable some metric modules) ],
