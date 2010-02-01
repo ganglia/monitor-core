@@ -299,7 +299,7 @@ fi
 %else
   %__cp -f %gmond_conf $RPM_BUILD_ROOT%{conf_dir}/gmond.conf
 %endif
-%__cp -f gmetad/gmetad.conf $RPM_BUILD_ROOT%{conf_dir}/gmetad.conf
+#%__cp -f gmetad/gmetad.conf $RPM_BUILD_ROOT%{conf_dir}/gmetad.conf
 %__cp -f gmond/modules/conf.d/* $RPM_BUILD_ROOT%{conf_dir}/conf.d
 
 # Copy the python metric modules and .conf files
