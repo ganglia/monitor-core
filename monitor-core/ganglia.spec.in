@@ -165,8 +165,8 @@ gmetad packages
 %setup -n %{name}-%{version}
 
 %build
-%ifnarch noarch
 %configure --with-gmetad --enable-status --sysconfdir=%{conf_dir}
+%ifnarch noarch
 make
 %endif
 
@@ -261,8 +261,11 @@ fi
 
 %ifarch noarch
 
+%__make -C web conf.php
+%__make -C web version.php
 %__install -d -m 0755 $RPM_BUILD_ROOT/%{web_prefixdir}
 %__cp -rf web/* $RPM_BUILD_ROOT/%{web_prefixdir}
+%__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/Makefile*
 %__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*.in
 %__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/filters
 
