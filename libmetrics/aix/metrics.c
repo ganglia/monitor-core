@@ -527,7 +527,7 @@ cpu_num_func ( void )
 
 #if !defined(_AIX61)
 /*
-** Theese Missing prototypes have caused me an afternoon of real grief !!!
+** These missing prototypes have caused me an afternoon of real grief !!!
 */
 int getprocs64 (struct procentry64 *ProcessBuffer, int ProcessSize, 
                 struct fdsinfo64 *FileBuffer, int FileSize,
