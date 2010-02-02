@@ -1,30 +1,100 @@
 Using Ganglia on AIX
 ~~~~~~~~~~~~~~~~~~~~
 
-This Version is tested on AIX 5.3. AIX 6.1 might work as well,
-but it's not tested by now.
+This version has been tested on the following AIX levels:
+- AIX5L V5.1 ML 04
+- AIX5L V5.2 ML 01
+- AIX5L V5.3 ML 01
+- AIX5L V5.3 TL 07
+- AIX V6.1 TL 00
+- AIX V6.1 TL 03
+
 
 Installation
 ~~~~~~~~~~~~
 
-You still need some "tricks" to use ganglia on a AIX system:
+1. You can compile Ganglia on AIX either with the IBM XLC/C++ or GNU GCC.
 
-1. The AIX-Version should not be compiled with shared libraries
-   You must add the "--enable-static-build" and "--disable-python"
-   configure flags if you running on AIX. Python support was not
-   tested up to now.
+2. Ganglia should be compiled with shared libraries to enable DSOs.
+   For DSOs to work you need to set the "-Wl,-brtl" flag to $LDFLAGS.
 
-   ./configure --enable-static-build --disable-python
+3. To compile Ganglia you will need some additional tools, all of which
+   you can obtain from http://www.perzl.org/aix/
+   As a minimum the following additional tools are required to compile:
+   - gmond only
+     * apr
+     * expat
+     * libconfuse
+     * pcre (can be disabled with "--with-libpcre=no")
+   - gmetad
+     * requirements of gmond
+     * rrdtool
 
-2. To compile Ganglia you will need some additional tools,
-   take a look at this page http://www.perzl.org/aix/
+   Please note that no package of the IBM AIX Toolbox for Linux Applications
+   currently provides the required functionality to compile Ganglia.
 
-3. You should use "gcc".
+4. In order to speed up the configure process under AIX you should install
+   bash and use the following environment settings:
+
+   export CONFIG_SHELL=/opt/freeware/bin/bash
+   export CONFIG_ENV_ARGS=/opt/freeware/bin/bash
+
+Recommended settings for IBM XLC/C++ (tested with V7 and V9):
+-------------------------------------------------------------
+export CC=xlc_r
+export CFLAGS="-qmaxmem=16384 -DSYSV -D_AIX -D_AIX32 -D_AIX41 -D_AIX43 -D_AIX51 -D_ALL_SOURCE -DFUNCPROTO=15 -O -I/opt/freeware/include"
+export LD=ld
+export LDFLAGS="-L/opt/freeware/lib -Wl,-bmaxdata:0x80000000 -Wl,-brtl"
+
+Recommended settings for GNU GCC (tested with V4.2.3):
+------------------------------------------------------
+export CC=gcc
+export CFLAGS="-DSYSV -D_AIX -D_AIX32 -D_AIX41 -D_AIX43 -D_AIX51 -D_ALL_SOURCE -DFUNCPROTO=15 -O -I/opt/freeware/include"
+export LD=ld
+export LDFLAGS="-L/opt/freeware/lib -Wl,-blibpath:/opt/freeware/lib:/usr/lib:/lib -Wl,-bmaxdata:0x80000000 -Wl,-brtl"
+
+In case you are running a higher AIX level then V5.1 you should add the following
+defines to $CFLAGS depending on your AIX level:
+
+-D_AIX52 -D_AIX53 -D_AIX61
+
+For example, for AIX V6.1 you would set $CFLAGS for XLC/C++ as follows:
+export CFLAGS="-qmaxmem=16384 -DSYSV -D_AIX -D_AIX32 -D_AIX41 -D_AIX43 -D_AIX51 -D_AIX52 -D_AIX53 -D_AIX61 -D_ALL_SOURCE -DFUNCPROTO=15 -O -I/opt/freeware/include"
+
 
 Known problems and Limitations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- No Power metrics are included
+- No IBM Power metrics are included.
+  If you want those you can get them from http://www.perzl.org/ganglia/
+- Python support was not tested up to now, therefore you should use the
+  "--disable-python" configure flag.
+- When compiling a new version of Ganglia please make sure no earlier
+  versions are installed in the default paths (-I/opt/freeware/include,
+  -L/opt/freeware/lib).
+- On AIX V6.1 TL 03 using GNU GCC the compilation of gmond runs into an
+  error with the system include file /usr/include/netinet/in6_var.h
+  The only solution at the moment is to comment out the offending line
+  in /usr/include/netinet/in6_var.h
+  Compilation with IBM XLC/C++ is fine though.
+
+
+Recommended configure setup:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using the environment settings above depending whether you are using
+IBM XLC/C++ or GNU GCC you should use the following "./configure" command
+to set up and compile Ganglia on AIX:
+
+./configure \
+    --prefix=<PREFIX> \
+    --sysconfdir=<SYSCONFDIR> \
+    --enable-shared --enable-static \
+    --with-gmetad \
+    --disable-python
+
+where <PREFIX> is your preferred prefix, the default is "/usr/local" whereas
+you *have* to set the value for <SYSCONFDIR> (recommended "/etc/ganglia/").
+
 
 Upgrading to 3.1 from 3.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~
