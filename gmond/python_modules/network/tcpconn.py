@@ -64,8 +64,11 @@ def TCP_Connections(name):
         return 0;
         
     if not _WorkerThread.running and not _WorkerThread.shuttingdown:
-        _WorkerThread.start()
-        
+        try:
+            _WorkerThread.start()
+        except AssertionError:
+            pass
+
     #Read the last connection total for the state requested. The metric
     # name passed in matches the dictionary slot for the state value.
     _glock.acquire()
