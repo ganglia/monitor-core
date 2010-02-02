@@ -31,6 +31,14 @@ CURRENT RELEASE NOTES:
 
   3.1.6:
 
+  * Bootstrapping with Debian 5.0 (lenny) versions of autotools for
+    this and future releases.
+  * Require user to explicitly specify sysconfdir when building from source,
+    due to the fact that the old behavior was not consistent with the 
+    documented behavior.
+  * Configuration files and scripts are now created during the install phase
+    rather than during configure.   This allows values such as @sysconfdir@
+    to be used in the template configuration files.
   * Abolish the use of release names - only release numbers will be used
     to distinguish versions in future
   * libmetrics: workaround system header conflict in DFBSD >= 2.4 (BUG245)
@@ -41,7 +49,12 @@ CURRENT RELEASE NOTES:
   * FreeBSD support: fixes for crashes and disk statistics (BUG153)
   * Further tweaks to Solaris build support (remove C99 hack)
   * Eliminate conflict with ncpus symbol name on older Solaris
+  * AIX support: determine if the host is a virtual server (BUG226)
+  * AIX support: setting linker flags (BUG227), add -lm
+  * AIX support: tweaks for AIX >= v6.1
   * Check for Python.h explicitly
+  * Include the necessary Python files in the distribution tarball, regardless
+    of how BUILD_PYTHON is set (r2215).
   * Remove references to GNU toolchain in documentation
   * Fortify write_data_to_rrd against overflows
   * Web interface: minor formatting changes
