@@ -30,8 +30,11 @@ my $VERBOSE = 0;
 # Limit % for cutting. Any peak representing less than this % will be cut
 my $LIMIT=0.6; # obs this is really %, so 0.6 means 0.6% (and not 0.006%!)
 
-# Threshhold for cutting. Exponents above it will be chopped
-my $THRESH=10000; # Just set it to a bogus default
+# Threshhold for cutting. Values above it will be chopped if "-t" is used
+my $THRESH=1.01e300; # Just set it to a very high default
+
+# Flag to indicate whether we are doing "binning" or threshold based chopping
+my $BINNING=1;
 
 if ($opt{h} || ($#ARGV < 0)) {
    print "REMOVESPIKES: Remove spikes from RRDtool databases.\n\n";
@@ -72,8 +75,8 @@ if ($opt{l}) {
 
 if ($opt{t}) { 
    $THRESH=$opt{t}; 
-   $LIMIT=-1;
-   print "Max Value set to $THRESH, disabling bin-based chopping\n" if $VERBOSE;
+   $BINNING=0;
+   printf("Max Value set to %g, disabling bin-based chopping\n",$THRESH) if $VERBOSE;
 }
 
 # temporary filename:
@@ -151,9 +154,11 @@ while (<FICH>) {
 	  $c=$&;
           $a=$1*1;                              # and exponent
           $b=substr("0$lino",-2).":$1";         # calculate the max percentage of this DS
-          if (($por{$b}< $LIMIT) ||             # if this line represents less than $LIMIT
-	      ($c > $THRESH)) {                 # or the exponent is larger then $THRESH
-            $linea=$tstamp.$linbak;             # we dump it.
+          if (($BINNING &&                      #
+		($por{$b}< $LIMIT)) ||          # if this line represents less than $LIMIT
+	      (!$BINNING &&			#
+		($c > $THRESH))) {              # or the value is larger then $THRESH
+            $linea=$tstamp.$linbak;             # we dump it
             $cdo=1;
             $tresto=$linbak;
           }
