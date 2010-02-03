@@ -52,6 +52,7 @@ CURRENT RELEASE NOTES:
   * AIX support: determine if the host is a virtual server (BUG226)
   * AIX support: setting linker flags (BUG227), add -lm
   * AIX support: tweaks for AIX >= v6.1
+  * AIX support: revised init scripts for gmond and gmetad
   * Check for Python.h explicitly
   * Include the necessary Python files in the distribution tarball, regardless
     of how BUILD_PYTHON is set (r2215).
