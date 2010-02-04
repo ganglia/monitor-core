@@ -7,10 +7,27 @@ GNU tools, therefore, Ganglia on Cygwin could be built using the same set of
 instructions as are used in the UNIX platforms as far as all dependencies are
 covered. 
 
+Supported Cygwin versions
+-------------------------
+
+Cygwin 1.5 was the current version of Cygwin at the time Ganglia 3.1.0 was
+released.
+
+Cygwin 1.7 was released in late 2009, just before the release of
+Ganglia 3.1.6.  Consequently, Ganglia has not yet been tested as
+extensively with Cygwin 1.7.  We can only confirm that the gmond
+binary can be compiled and executed on this platform, although we
+are not aware of any specific reason why it should not work.
+
+Users who want to keep using Cygwin 1.5 can use the setup-legacy.exe
+installer on the Cygwin web site:
+
+http://www.cygwin.com/win-9x.html
+
 Prerequisites
 ------------- 
 
-Latest version of Cygwin with the following packages:
+Cygwin with the following packages:
 
 * diffutils (Utils)
 * expat (Libs)
