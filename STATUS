@@ -7,7 +7,7 @@ The current version of this file can be found at:
 
 Release history:
 
-    3.1.6             : In Development
+    3.1.6             : Tagged: Feb  4, 2010
     3.1.5(hargrave)   : Tagged: Nov 24, 2009 (not released for GA)
     3.1.4(hargrave)   : Tagged: Oct 26, 2009 (not released for GA)
     3.1.3(avenger)    : Tagged: Sep 19, 2009 (not released for GA)
@@ -34,6 +34,8 @@ CURRENT RELEASE NOTES:
   * Merge commit 1966 from trunk to fix "contrib/removespikes.pl"
   * Bootstrapping with Debian 5.0 (lenny) versions of autotools for
     this and future releases.
+    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg05352.html
+    http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg04688.html
   * Require user to explicitly specify sysconfdir when building from source,
     due to the fact that the old behavior was not consistent with the 
     documented behavior.
@@ -101,13 +103,7 @@ CURRENT RELEASE NOTES:
 
 RELEASE SHOWSTOPPERS:
 
-  * Decide on a bootstrapping environment for releases
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg05352.html
-    carenas: delay decision and use in order of preference SLES (3.1.2),
-             Fedora 9 (3.1.5) or CentOS4 (3.1.1) to avoid regressions to
-             be introduced as shown by :
-             http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg04688.html
-             in the long run use Debian 5.0 (x86, 32bit).
+  * None outstanding
 
 BACKPORT PROPOSALS:
 
