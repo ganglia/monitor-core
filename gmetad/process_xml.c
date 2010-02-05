@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <expat.h>
+#include <ganglia.h>
 #include "gmetad.h"
 #include "rrd_helpers.h"
 
@@ -807,6 +808,13 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
         {
             hash_t *summary = xmldata->source.metric_summary;
             Metric_t sum_metric;
+
+            /* do not add every SPOOF_HOST element to the summary table.
+               if the same metric is SPOOF'd on more than ~MAX_EXTRA_ELEMENTS hosts
+               then its summary table is destroyed.
+             */
+            if ( strlen(new_name) == 10 && !strcasecmp(new_name, SPOOF_HOST) )
+                return 0;
 
             /* only update summary if metric is in hash */
             hash_datum = hash_lookup(&hashkey, summary);
