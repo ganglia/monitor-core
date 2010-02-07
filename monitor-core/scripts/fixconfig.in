@@ -15,6 +15,8 @@
 ##  which is under a BSD-style license
 ##
 
+AWK="@AWK@"
+
 # The paths set by configure.
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
@@ -26,8 +28,8 @@ sysconfdir="@sysconfdir@"
 includedir="@includedir@"
 
 # Additional variables set by configure
-CFLAGS="@CFLAGS@"
-LDFLAGS="@LDFLAGS@"
+CFLAGS="`echo '@CFLAGS@' | $AWK '{ gsub(/,/, "\\\\,"); print }'`"
+LDFLAGS="`echo '@LDFLAGS@' | $AWK '{ gsub(/,/, "\\\\,"); print }'`"
 LIBS="@LIBS@"
 VERSION="@VERSION@"
 host_cpu="@host_cpu@"
@@ -70,8 +72,8 @@ $SED -e "s,@prefix[@],$prefix,g" \
      -e "s,@sbindir[@],$sbindir,g" \
      -e "s,@sysconfdir[@],$sysconfdir,g" \
      -e "s,@includedir[@],$includedir,g" \
-     -e "s!@CFLAGS[@]!$CFLAGS!g" \
-     -e "s!@LDFLAGS[@]!$LDFLAGS!g" \
+     -e "s,@CFLAGS[@],$CFLAGS,g" \
+     -e "s,@LDFLAGS[@],$LDFLAGS,g" \
      -e "s,@LIBS[@],$LIBS,g" \
      -e "s,@VERSION[@],$VERSION,g" \
      -e "s,@host_cpu[@],$host_cpu,g" \
