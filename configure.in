@@ -345,6 +345,7 @@ AM_CONDITIONAL(BUILD_PYTHON, test x"$enable_python" = xyes)
 LIB_SUFFIX=lib
 case $host in
 x86_64-redhat-linux*)
+x86_64-suse-linux*)
   LIB_SUFFIX=lib64
   ;;
 esac
