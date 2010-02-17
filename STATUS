@@ -7,6 +7,7 @@ The current version of this file can be found at:
 
 Release history:
 
+    3.1.8             : (under development)
     3.1.7             : Tagged: Feb 17, 2010
     3.1.6             : Tagged: Feb  4, 2010 (not released for GA)
     3.1.5(hargrave)   : Tagged: Nov 24, 2009 (not released for GA)
@@ -29,6 +30,10 @@ CURRENT RELEASE NOTES:
 
   Note: 3.1.3, 3.1.4, 3.1.5 and 3.1.6 never became GA, therefore,
   the release notes for all of them are combined below.
+
+  3.1.8:
+
+  * nothing yet
 
   3.1.7:
 
