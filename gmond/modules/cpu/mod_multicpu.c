@@ -187,11 +187,13 @@ static void get_metric_name_cpu (char *metric, char *name, int *index)
     return;
 }
 
+static double total_jiffies_func (char *p);
+
 /*
  * Find the correct cpu info with the buffer,
  * given a cpu index
  */
-static char *find_cpu (char *p, int cpu_index)
+static char *find_cpu (char *p, int cpu_index, double *total_jiffies)
 {
     int i;
 
@@ -217,21 +219,20 @@ static char *find_cpu (char *p, int cpu_index)
     p = skip_token(p);
     p = skip_whitespace(p);
 
+    *total_jiffies = total_jiffies_func(p);
+
     return p;
 }
 
 /*
  * A helper function to return the total number of cpu jiffies
+ * Assumes that "p" has been aligned already to the CPU line to evaluate
  */
-static unsigned long total_jiffies_func ( void )
+static double total_jiffies_func (char *p)
 {
-    char *p;
     unsigned long user_jiffies, nice_jiffies, system_jiffies, idle_jiffies,
         wio_jiffies, irq_jiffies, sirq_jiffies;
-    
-    p = update_file(&proc_stat);
-    p = skip_token(p);
-    p = skip_whitespace(p);
+
     user_jiffies = strtod( p, &p );
     p = skip_whitespace(p);
     nice_jiffies = strtod( p, &p ); 
@@ -258,7 +259,6 @@ static unsigned long total_jiffies_func ( void )
 static void calculate_utilization (char *p, cpu_util *cpu)
 {
     cpu->curr_jiffies = strtod(p, (char **)NULL);
-    cpu->curr_total_jiffies = total_jiffies_func();
 
     cpu->diff = (cpu->curr_jiffies - cpu->last_jiffies); 
 
@@ -283,7 +283,7 @@ static g_val_t multi_cpu_user_func (int cpu_index)
        (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
-        p = find_cpu (p, cpu_index);
+        p = find_cpu (p, cpu_index, &cpu->curr_total_jiffies);
         calculate_utilization (p, cpu);
     }
 
@@ -300,7 +300,7 @@ static g_val_t multi_cpu_nice_func (int cpu_index)
        (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
-        p = find_cpu (p, cpu_index);
+        p = find_cpu (p, cpu_index, &cpu->curr_total_jiffies);
         p = skip_token(p);
         p = skip_whitespace(p);
 
@@ -320,7 +320,7 @@ static g_val_t multi_cpu_system_func (int cpu_index)
        (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
-        p = find_cpu (p, cpu_index);
+        p = find_cpu (p, cpu_index, &cpu->curr_total_jiffies);
         p = skip_token(p);
         p = skip_token(p);
         p = skip_whitespace(p);
@@ -335,7 +335,6 @@ static g_val_t multi_cpu_system_func (int cpu_index)
             p = skip_token(p);
             cpu->curr_jiffies += strtod(p , (char **)NULL); /* "sintr" counted in system */
         }
-        cpu->curr_total_jiffies = total_jiffies_func();
     
         cpu->diff = cpu->curr_jiffies - cpu->last_jiffies;
     
@@ -361,7 +360,7 @@ static g_val_t multi_cpu_idle_func (int cpu_index)
        (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
-        p = find_cpu (p, cpu_index);
+        p = find_cpu (p, cpu_index, &cpu->curr_total_jiffies);
         p = skip_token(p);
         p = skip_token(p);
         p = skip_token(p);
@@ -388,7 +387,7 @@ static g_val_t multi_cpu_wio_func (int cpu_index)
        (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
-        p = find_cpu (p, cpu_index);
+        p = find_cpu (p, cpu_index, &cpu->curr_total_jiffies);
         p = skip_token(p);
         p = skip_token(p);
         p = skip_token(p);
@@ -416,7 +415,7 @@ static g_val_t multi_cpu_intr_func (int cpu_index)
        (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
-        p = find_cpu (p, cpu_index);
+        p = find_cpu (p, cpu_index, &cpu->curr_total_jiffies);
         p = skip_token(p);
         p = skip_token(p);
         p = skip_token(p);
@@ -445,7 +444,7 @@ static g_val_t multi_cpu_sintr_func (int cpu_index)
        (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
         cpu->stamp = proc_stat.last_read;
     
-        p = find_cpu (p, cpu_index);
+        p = find_cpu (p, cpu_index, &cpu->curr_total_jiffies);
         p = skip_token(p);
         p = skip_token(p);
         p = skip_token(p);
