@@ -118,9 +118,6 @@ AC_DEFINE_UNQUOTED(GANGLIA_VERSION_FULL, "${VERSION}-${REL}", GANGLIA_VERSION_FU
 AC_CANONICAL_HOST
 AM_CONFIG_HEADER(config.h)
 
-dnl Install with /usr are the root by default
-AC_PREFIX_DEFAULT(/usr)
-
 dnl The following cpu_vendor_os string goes into config.h.
 dnl
 AC_DEFINE_UNQUOTED(HOST_OS, "$host_os", HOST_OS)
