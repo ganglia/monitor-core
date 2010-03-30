@@ -40,6 +40,9 @@ $rrdcached_socket = "";
 # Location for modular-graph files.
 $graphdir='./graph.d';
 
+# Display statistical values on RRD graphs; i.e.: average, min, max
+$graphreport_stats = true;
+
 #
 # If you want to grab data from a different ganglia source specify it here.
 # Although, it would be strange to alter the IP since the Round-Robin
