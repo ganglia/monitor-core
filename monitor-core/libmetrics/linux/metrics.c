@@ -23,6 +23,8 @@
 #define OSNAME "Linux"
 #define OSNAME_LEN strlen(OSNAME)
 
+#define JT unsigned long long
+
 /* /proc/net/dev hash table stuff */
 typedef struct net_dev_stats net_dev_stats;
 struct net_dev_stats {
@@ -593,11 +595,11 @@ os_release_func ( void )
 /*
  * A helper function to return the total number of cpu jiffies
  */
-unsigned long
+JT
 total_jiffies_func ( void )
 {
    char *p;
-   unsigned long user_jiffies, nice_jiffies, system_jiffies, idle_jiffies,
+   JT user_jiffies, nice_jiffies, system_jiffies, idle_jiffies,
                  wio_jiffies, irq_jiffies, sirq_jiffies;
 
    p = update_file(&proc_stat);
@@ -632,8 +634,8 @@ cpu_user_func ( void )
    char *p;
    static g_val_t val;
    static struct timeval stamp={0, 0};
-   static double last_user_jiffies,  user_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
+   static JT last_user_jiffies,  user_jiffies, 
+             last_total_jiffies, total_jiffies, diff;
 
    p = update_file(&proc_stat);
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
@@ -647,7 +649,7 @@ cpu_user_func ( void )
      diff = user_jiffies - last_user_jiffies;
 
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
+       val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
 
@@ -664,8 +666,8 @@ cpu_nice_func ( void )
    char *p;
    static g_val_t val;
    static struct timeval stamp={0, 0};
-   static double last_nice_jiffies,  nice_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
+   static JT last_nice_jiffies,  nice_jiffies,
+             last_total_jiffies, total_jiffies, diff;
 
    p = update_file(&proc_stat);
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
@@ -680,7 +682,7 @@ cpu_nice_func ( void )
      diff = (nice_jiffies  - last_nice_jiffies);
 
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
+       val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
 
@@ -697,8 +699,8 @@ cpu_system_func ( void )
    char *p;
    static g_val_t val;
    static struct timeval stamp={0, 0};
-   static double last_system_jiffies,  system_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
+   static JT last_system_jiffies,  system_jiffies,
+             last_total_jiffies, total_jiffies, diff;
 
    p = update_file(&proc_stat);
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
@@ -722,7 +724,7 @@ cpu_system_func ( void )
      diff = system_jiffies - last_system_jiffies;
 
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
+       val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
 
@@ -739,8 +741,8 @@ cpu_idle_func ( void )
    char *p;
    static g_val_t val;
    static struct timeval stamp={0, 0};
-   static double last_idle_jiffies,  idle_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
+   static JT last_idle_jiffies,  idle_jiffies,
+             last_total_jiffies, total_jiffies, diff;
 
    p = update_file(&proc_stat);
    if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
@@ -757,7 +759,7 @@ cpu_idle_func ( void )
      diff = idle_jiffies - last_idle_jiffies;
 
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
+       val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
 
@@ -774,7 +776,7 @@ cpu_aidle_func ( void )
 {
    char *p;
    g_val_t val;
-   double idle_jiffies, total_jiffies;
+   JT idle_jiffies, total_jiffies;
 
    p = update_file(&proc_stat);
 
@@ -782,10 +784,10 @@ cpu_aidle_func ( void )
    p = skip_token(p);
    p = skip_token(p);
    p = skip_token(p);
-   idle_jiffies  = strtod( p , (char **)NULL );
+   idle_jiffies  = (JT) strtod( p , (char **)NULL );
    total_jiffies = total_jiffies_func();
 
-   val.f = (idle_jiffies/total_jiffies) * 100;
+   val.f = ((double)(idle_jiffies/total_jiffies)) * 100.0;
    return val;
 }
 
@@ -795,8 +797,8 @@ cpu_wio_func ( void )
    char *p;
    static g_val_t val;
    static struct timeval stamp={0, 0};
-   static double last_wio_jiffies,  wio_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
+   static JT last_wio_jiffies,  wio_jiffies,
+             last_total_jiffies, total_jiffies, diff;
 
    if (num_cpustates == NUM_CPUSTATES_24X) {
      val.f = 0.0;
@@ -819,7 +821,7 @@ cpu_wio_func ( void )
      diff = wio_jiffies - last_wio_jiffies;
 
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
+       val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
 
@@ -837,8 +839,8 @@ cpu_intr_func ( void )
    char *p;
    static g_val_t val;
    static struct timeval stamp={0, 0};
-   static double last_intr_jiffies,  intr_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
+   static JT last_intr_jiffies,  intr_jiffies,
+             last_total_jiffies, total_jiffies, diff;
 
    if (num_cpustates == NUM_CPUSTATES_24X) {
      val.f = 0.;
@@ -862,7 +864,7 @@ cpu_intr_func ( void )
      diff = intr_jiffies - last_intr_jiffies;
 
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
+       val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
 
@@ -880,8 +882,8 @@ cpu_sintr_func ( void )
    char *p;
    static g_val_t val;
    static struct timeval stamp={0, 0};
-   static double last_sintr_jiffies,  sintr_jiffies,
-                 last_total_jiffies, total_jiffies, diff;
+   static JT last_sintr_jiffies,  sintr_jiffies,
+             last_total_jiffies, total_jiffies, diff;
 
    if (num_cpustates == NUM_CPUSTATES_24X) {
      val.f = 0.;
@@ -906,7 +908,7 @@ cpu_sintr_func ( void )
      diff = sintr_jiffies - last_sintr_jiffies;
 
      if ( diff )
-       val.f = (diff/(total_jiffies - last_total_jiffies)) * 100;
+       val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
 
