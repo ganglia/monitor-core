@@ -382,15 +382,10 @@ bytes_in_func ( void )
 g_val_t
 cpu_num_func ( void )
 {
-   static int cpu_num = 0;
    g_val_t val;
 
-   /* Only need to do this once */
-   if (! cpu_num) {
-      /* We'll use _SC_NPROCESSORS_ONLN to get operating cpus */
-      cpu_num = get_nprocs();
-   }
-   val.uint16 = cpu_num;
+   /* Use _SC_NPROCESSORS_ONLN to get operating cpus */
+   val.uint16 = get_nprocs();
 
    return val;
 }
