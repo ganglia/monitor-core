@@ -228,6 +228,7 @@ BACKPORT PROPOSALS:
 
   * build: Install manpages in appropriate locations when `make install` is run
     http://sourceforge.net/apps/trac/ganglia/changeset/2299
+    http://sourceforge.net/apps/trac/ganglia/changeset/2301
     +1: bernardli
 
 BACKPORT PROPOSALS FUTURE VERSION:
