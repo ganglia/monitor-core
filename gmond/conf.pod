@@ -188,6 +188,9 @@ You can use the B<bind> attribute to bind to a particular local address to
 be used as the source for the multicast packets sent or let gmond resolve the
 default hostname if B<bind_hostname> = yes.
 
+The B<ttl> attribute lets you modify the Time-To-Live (TTL) of the outgoing
+multicast messages.
+
 If only a B<host> and B<port> are specified then B<gmond> will send unicast UDP
 messages to the hosts specified.
 
@@ -535,6 +538,10 @@ a useful starting point for creating your own custom configuration.
 edit B<custom.conf> to taste and then
 
   % gmond -c ./custom.conf
+
+=head1 SEE ALSO
+
+gmond(1).
 
 =head1 NOTES
 
