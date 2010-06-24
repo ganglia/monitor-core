@@ -788,6 +788,7 @@ AC_OUTPUT(Makefile
           gmetad-python/plugins/rrd_plugin.py
           gmetric/Makefile
           include/Makefile
+          mans/Makefile
           web/Makefile)
 
 echo ""
