@@ -33,7 +33,7 @@ sbin_PROGRAMS = gmond
 # metric.h and dtd.h are for gmetad/gmetric for now....
 gmond_SOURCES = gmond.c cmdline.c cmdline.h dtd.h g25_config.c core_metrics.c g25_config.h
 
-noinst_MANS  = gmond.conf.5
+dist_man_MANS  = gmond.conf.5
 
 gmond.conf.5: conf.pod gmond.conf.html
 	pod2man --name="gmond.conf" --section=5 conf.pod --center="Ganglia Monitoring System" --release="ganglia/@VERSION@" > gmond.conf.5
