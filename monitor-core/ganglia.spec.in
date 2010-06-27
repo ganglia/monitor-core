@@ -4,9 +4,10 @@
 # @configure_input@
 #
 # IMPORTANT NOTE:
-# This spec file has a noarch section.  RPM is braindead in that it cannot
-# build mixed architecture packages.  As a workaround, you must build
-# the RPMs using the following commandline
+# This spec file has conditional constructs using the noarch target.
+# To get all packages build you must include noarch and your real target
+# (ex: i386, i686, x86_64) when calling rpmbuild as shown by the following
+# command line aimed at 80386 or higher CPUs :
 #
 # % rpmbuild -ta --target noarch,i386 ganglia-@VERSION@.tar.gz
 #
