@@ -41,7 +41,8 @@ To prepare a distribution tree, run:
   ./configure
   make distdir
 
-To build RPMs after building the tarball:
+To build RPMs in Linux after building the tarball, run (ex: 32bit x86
+Pentium or higher)
 
   rpmbuild -ta --clean --target i686,noarch <tarball>
 
