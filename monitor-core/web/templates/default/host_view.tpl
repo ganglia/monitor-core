@@ -80,10 +80,6 @@ function toggleLayer( whichLayer )
 <IMG BORDER=0 ALT="{cluster_url} PACKETS"
    SRC="./graph.php?{graphargs}&amp;g=packet_report&amp;z=medium&amp;c={cluster_url}">
 </A>
-<A HREF="./graph.php?{graphargs}&amp;g=nfs_report&amp;z=large&amp;c={cluster_url}">
-<IMG BORDER=0 ALT="{cluster_url} NFS"
-   SRC="./graph.php?{graphargs}&amp;g=nfs_report&amp;z=medium&amp;c={cluster_url}">
-</A>
 
 </TD>
 </TR>
