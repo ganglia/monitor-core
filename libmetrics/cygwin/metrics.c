@@ -172,7 +172,7 @@ pkts_in_func ( void )
    unsigned long diff;
 
    stamp = get_netbw(NULL, NULL, &in_pkts, NULL);
-   (unsigned long) diff = in_pkts - last_pkts_in;
+   diff = (unsigned long)(in_pkts - last_pkts_in);
    if ( diff && last_stamp ) {
      t = stamp - last_stamp;
      t = diff / t;
@@ -198,7 +198,7 @@ pkts_out_func ( void )
    unsigned long diff;
 
    stamp = get_netbw(NULL, NULL, NULL, &out_pkts);
-   (unsigned long) diff = out_pkts - last_pkts_out;
+   diff = (unsigned long)(out_pkts - last_pkts_out);
    if ( diff && last_stamp ) {
      t = stamp - last_stamp;
      t = diff / t;
@@ -224,7 +224,7 @@ bytes_out_func ( void )
    unsigned long diff;
 
    stamp = get_netbw(NULL, &out_bytes, NULL, NULL);
-   (unsigned long) diff = out_bytes - last_bytes_out;
+   diff = (unsigned long)(out_bytes - last_bytes_out);
    if ( diff && last_stamp ) {
      t = stamp - last_stamp;
      t = diff / t;
@@ -250,7 +250,7 @@ bytes_in_func ( void )
    unsigned long diff;
 
    stamp = get_netbw(&in_bytes, NULL, NULL, NULL);
-   (unsigned long) diff = in_bytes - last_bytes_in;
+   diff = (unsigned long)(in_bytes - last_bytes_in);
    if ( diff && last_stamp ) {
      t = stamp - last_stamp;
      t = diff / t;
