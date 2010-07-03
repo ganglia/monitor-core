@@ -1,9 +1,11 @@
 #ifndef GANGLIA_H
 #define GANGLIA_H 1
-#include <rpc/rpc.h>
+
+#include <rpc/xdr.h>
 
 #include <gm_msg.h>
 #ifndef GM_PROTOCOL_GUARD
+#include <netinet/in.h>
 #include <gm_protocol.h>
 #endif
 
