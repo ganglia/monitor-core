@@ -5,10 +5,11 @@
 #define _LARGEFILE64_SOURCE
 #endif
 
-#include <rpc/rpc.h>
+#include <rpc/xdr.h>
 
 #include <gm_mmn.h>
 #ifndef GM_PROTOCOL_GUARD
+#include <netinet/in.h>
 #include <gm_protocol.h>
 #endif
 #include <gm_value.h>
