@@ -10,34 +10,36 @@ covered.
 Supported Cygwin versions
 -------------------------
 
-Cygwin 1.5 was the current version of Cygwin at the time Ganglia 3.1.0 was
-released.
-
 Cygwin 1.7 was released in late 2009, just before the release of
 Ganglia 3.1.6.  Consequently, Ganglia has not yet been tested as
-extensively with Cygwin 1.7.  We can only confirm that the gmond
-binary can be compiled and executed on this platform, although we
-are not aware of any specific reason why it should not work.
+extensively with Cygwin 1.7.  We can only confirm that the ganglia
+binaries can be compiled (might require additional patches) and
+executed on this platform, although we are not aware of any specific
+reason why it should not work.
 
-Users who want to keep using Cygwin 1.5 can use the setup-legacy.exe
-installer on the Cygwin web site:
+Cygwin 1.5 has been used by ganglia since 3.0, for several years and is
+extensibly tested.  Users who want to deploy Cygwin 1.5 can use the
+setup-legacy.exe installer from the Cygwin web site:
 
-http://www.cygwin.com/win-9x.html
+  http://www.cygwin.com/win-9x.html
 
 Prerequisites
 ------------- 
 
 Cygwin with the following packages:
 
-* diffutils (Utils)
 * expat (Libs)
 * gcc (Devel)
 * libapr1-devel (Libs)
 * make (Devel)
-* pcre-devel (Devel)
-* python (Python)
-* sharutils (Archive)
 * sunrpc (Libs)
+
+Optionally you will need the following packages for additional functionality
+as described in the INSTALL document and which will be otherwise selected
+at build time by the configure call:
+
+* libpcre-devel (libs) : avoid "without-libpcre" parameter to configure
+* python (Python)
 
 Process
 -------
@@ -52,7 +54,7 @@ be linked statically and will only be needed in the build machine)
 Download a release or snapshot package and unpack it.
 Go to the ganglia directory, and run the following commands to build it:
 
-  ./configure --with-libconfuse=/usr/local --enable-static-build
+  ./configure --with-libconfuse=/usr/local --without-libpcre --enable-static-build
   make
 
 If everything works right, then you should see a gmond.exe, gstat.exe and 
@@ -60,8 +62,9 @@ gmetric.exe created in the gmond, gstat and gmetric directories
 respectively. 
 
 The binaries generated depend on cygwin (cygwin1.dll), the apr cygwin
-library (cygapr-1-0.dll), the expat cygwin library (cygexpat-1.dll)  and 
-the python cygwin library (libpython2.5.dll).
+library (cygapr-1-0.dll), the expat cygwin library (cygexpat-1.dll) and 
+depending of the options chosen the pcre cygwin library (cygpcre-0.dll)
+and the python cygwin library (libpython2.5.dll).
 
 if you want to use them in a different system you'll need to copy and
 install all of them together with an appropiate configuration.
