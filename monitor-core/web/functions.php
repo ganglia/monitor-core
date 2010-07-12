@@ -305,7 +305,7 @@ function nodebox($hostname, $verbose, $title="", $extrarow="")
    # Give memory in Gigabytes. 1GB = 2^20 bytes.
    $mem_total_gb = $m['mem_total']['VAL']/1048576;
    $load_one=$m['load_one']['VAL'];
-   $cpu_speed=$m['cpu_speed']['VAL']/1024;
+   $cpu_speed=round($m['cpu_speed']['VAL']/1000, 2);
    $cpu_num= $m['cpu_num']['VAL'];
    #
    # The nested tables are to get the formatting. Insane.

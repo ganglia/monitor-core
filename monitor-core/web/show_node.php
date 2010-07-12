@@ -54,7 +54,7 @@ $cpu_idle=$metrics['cpu_idle']['VAL'];
 $cpu_num=$metrics['cpu_num']['VAL'];
 # Cannot be zero, since we use it as a divisor.
 if (!$cpu_num) { $cpu_num=1; }
-$cpu_speed=$metrics['cpu_speed']['VAL']/1024;
+$cpu_speed=round($metrics['cpu_speed']['VAL']/1000, 2);
 $disk_total=$metrics['disk_total']['VAL'];
 $disk_free=$metrics['disk_free']['VAL'];
 $disk_use = $disk_total - $disk_free;
