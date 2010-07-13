@@ -341,15 +341,9 @@ AC_MSG_CHECKING(Python support)
 AC_MSG_RESULT($enable_python)
 AM_CONDITIONAL(BUILD_PYTHON, test x"$enable_python" = xyes)
 
-# On some platforms, there are different lib directories for 32 bit
-# and 64 bit code.
-# Redhat Linux: 32 bit code in lib, 64 bit code in lib64
-# Debian Linux: Always use lib, not lib64
-# (insert others here)
 LIB_SUFFIX=lib
 case $host in
-x86_64-redhat-linux*)
-x86_64-suse-linux*)
+x86_64*linux*)
   LIB_SUFFIX=lib64
   ;;
 esac
