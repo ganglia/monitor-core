@@ -27,7 +27,7 @@ $metrictitle = isset($_GET["ti"]) ?
 $sort = isset($_GET["s"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["s"]) ) ) : NULL;
 $controlroom = isset($_GET["cr"]) ?
-    clean_number( rawurldecode($_GET["cr"]) ) : NULL;
+    escapeshellcmd( clean_string( rawurldecode($_GET["cr"]) ) ): NULL;
 # Default value set in conf.php, Allow URL to overrride
 if (isset($_GET["hc"]))
     $hostcols = clean_number($_GET["hc"]);
