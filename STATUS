@@ -231,10 +231,6 @@ BACKPORT PROPOSALS:
     http://sourceforge.net/apps/trac/ganglia/changeset/2301
     +1: bernardli
 
-  * build: Add expat-devel to BuildRequires in spec file
-    http://sourceforge.net/apps/trac/ganglia/changeset/1999
-    +1: bernardli
-
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or
   haven't been tested enough to be considered for a stable release.

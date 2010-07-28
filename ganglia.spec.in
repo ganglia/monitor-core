@@ -29,7 +29,7 @@ BuildRequires: rrdtool-devel, libexpat-devel
 BuildRequires: rrdtool, expat
 %endif
 %else
-BuildRequires: rrdtool-devel, freetype-devel, apr-devel > 1
+BuildRequires: expat-devel, rrdtool-devel, freetype-devel, apr-devel > 1
 %endif
 %define conf_dir /etc/ganglia
 %define gmond_conf gmond/gmond.conf
@@ -370,6 +370,8 @@ fi
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Jul 28 2010 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
+- expat-devel is needed for building gstat
 * Sat Jan 12 2010 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
 - Instruct RPM to byte compile python modules at install time
 * Tue Jan 12 2010 Daniel Pocock <daniel@pocock.com.au>
