@@ -562,6 +562,13 @@ setup_listen_channels_pollset( int reset )
   Ganglia_channel *channel;
   int pollset_opts = 0;
 
+  /* check if gmond was really meant to be deaf */
+  if (total_listen_channels == 0)
+    {
+      deaf = 1;
+      return;
+    }
+
   /* Create my incoming pollset */
   if (!reset)
     {
@@ -2891,12 +2898,6 @@ main ( int argc, char *argv[] )
   if(!mute)
     {
       setup_collection_groups();
-    }
-
-  if(!listen_channels)
-    {
-      /* if there are no listen channels defined, we are equivalent to deaf */
-      deaf = 1;
     }
 
   /* Create the host hash table */
