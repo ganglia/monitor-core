@@ -262,8 +262,7 @@ fi
 
 %ifarch noarch
 
-%__make -C web conf.php
-%__make -C web version.php
+%__make -C web install
 %__install -d -m 0755 $RPM_BUILD_ROOT/%{web_prefixdir}
 %__cp -rf web/* $RPM_BUILD_ROOT/%{web_prefixdir}
 %__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/Makefile*
@@ -441,6 +440,9 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Aug 17 2010 Bernard Li <bernard@vanhpc.org>
+- Use the 'install' target for web/ instead of calling make on
+  conf.php and version.php individually
 * Tue Jan 12 2010 Daniel Pocock <daniel@pocock.com.au>
 - Add eval_config.php to files list
 * Tue Jan  5 2010 Daniel Pocock <daniel@pocock.com.au>
