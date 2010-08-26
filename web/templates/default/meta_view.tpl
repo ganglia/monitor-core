@@ -19,7 +19,7 @@
 <!-- START BLOCK : source_info -->
 <TR>
   <TD CLASS={class} COLSPAN=3>
-    <A HREF="{url}"><STRONG>{name}</STRONG></A>{alt_view}
+    <A HREF="{url}"><STRONG>{name}</STRONG></A> {alt_view}
   </TD>
 </TR>
 
