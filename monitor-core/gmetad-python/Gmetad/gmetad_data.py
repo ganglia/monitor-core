@@ -209,7 +209,7 @@ class DataStore:
     def updateFinished(self, clusterNode):
         ''' This method is called when the gmond reader has finished updating
             a cluster.  It indicates that a summary can be done over the
-            entire cluster and than the cluster transaction needs to be
+            entire cluster and then the cluster transaction needs to be
             entered and passed to the plugins. '''
         if clusterNode is not None:
             self._doSummary(clusterNode);
