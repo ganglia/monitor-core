@@ -226,8 +226,8 @@ class DataStore:
         logging.debug('DataStore lock released%s'%str(obj))
         
 class DataStoreGridSummary(threading.Thread):
-    ''' This class implments the thread the periodically runs a summary over all of the clusters.
-        It bases it's summary data on the summaries that have been previously calculated 
+    ''' This class implements the thread that periodically runs a summary over all of the clusters.
+        It bases its summary data on the summaries that have been previously calculated 
         for each cluster. '''
     def __init__(self):
         # Initialize the thread
@@ -238,7 +238,7 @@ class DataStoreGridSummary(threading.Thread):
         self._shuttingDown = False
 
     def _doGridSummary(self):
-        ''' The methods summarizes the entire grid based on summary data
+        ''' This method summarizes the entire grid based on summary data
             acquired from the cluster summaries. '''
         ds = DataStore()
         rootNode = ds.rootElement
