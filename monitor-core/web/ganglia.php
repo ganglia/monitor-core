@@ -33,7 +33,6 @@ $metrics = array();
 $version = array();
 
 # The web frontend version, from conf.php.
-#$version["webfrontend"] = "$majorversion.$minorversion.$microversion";
 $version["webfrontend"] = "$ganglia_version";
 
 # Get rrdtool version
