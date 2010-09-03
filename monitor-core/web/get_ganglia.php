@@ -20,7 +20,7 @@ if (!count($grid) and !count($cluster))
    }
 
 # If we only have one cluster source, suppress MetaCluster output.
-if (count($grid) == 2 and $context=="meta")
+if (count($grid) <= 2 and $context=="meta")
    {
       # Lets look for one cluster (the other is our grid).
       foreach($grid as $source)
