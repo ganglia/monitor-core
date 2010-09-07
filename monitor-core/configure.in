@@ -493,8 +493,13 @@ AC_CHECK_HEADER([sys/mount.h], [], [],
 #endif
 ])
 
-AC_CHECK_HEADERS([rpc/xdr.h],,
-   [AC_MSG_ERROR([your system is missing the Sun RPC (ONC/RPC) libraries])])
+AC_CHECK_HEADERS(rpc/types.h)
+AC_CHECK_HEADER([rpc/xdr.h], [],
+   [AC_MSG_ERROR([your system is missing the Sun RPC (ONC/RPC) libraries])],
+[#ifdef HAVE_RPC_TYPES_H
+# include <rpc/types.h>
+#endif
+])
 
 dnl ##################################################################
 dnl Checks for typedefs.

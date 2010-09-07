@@ -1,6 +1,7 @@
 #ifndef GANGLIA_H
 #define GANGLIA_H 1
 
+#include <rpc/types.h>
 #include <rpc/xdr.h>
 
 #include <gm_msg.h>
