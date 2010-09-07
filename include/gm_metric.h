@@ -5,6 +5,7 @@
 #define _LARGEFILE64_SOURCE
 #endif
 
+#include <rpc/types.h>
 #include <rpc/xdr.h>
 
 #include <gm_mmn.h>
