@@ -1,6 +1,6 @@
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
-  <TD CLASS=title><B>{self} Grid Tree</B></TD>
+  <TD CLASS=title><B>{$self} Grid Tree</B></TD>
 </TR>
 </TABLE>
 
@@ -8,13 +8,13 @@
 <table cellspacing=5 cellpadding=5 border=1>
 <tr>
 
-<!-- START BLOCK : parentgrid -->
+{if isset($parentgrid)}
 <td align=center>
 <table cellpadding=3 cellspacing=3 border=0>
-{parents}
+{$parents}
 </table>
 </td>
-<!-- END BLOCK : parentgrid -->
+{/if}
 </tr>
 
 <tr>
@@ -22,13 +22,13 @@
 
 <table cellpadding=3 cellspacing=3 border=0>
 <tr>
- <td colspan={n} class=self align=center style="border: thin solid rgb(47,47,47);">
-  {self}
+ <td colspan={$n} class=self align=center style="border: thin solid rgb(47,47,47);">
+  {$self}
  </td>
 </tr>
 
 <tr>
- {children}
+ {$children}
 </tr>
 </table>
 

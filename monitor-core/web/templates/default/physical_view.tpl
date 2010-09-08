@@ -1,25 +1,25 @@
 <TABLE CELLPADDING=1 BORDER="0" WIDTH="100%">
 <TR>
-<TD COLSPAN=3 CLASS=title>{cluster} cluster - Physical View |
- <FONT SIZE="-1">Columns&nbsp;&nbsp;{cols_menu}</FONT>
+<TD COLSPAN=3 CLASS=title>{$cluster} cluster - Physical View |
+ <FONT SIZE="-1">Columns&nbsp;&nbsp;{$cols_menu}</FONT>
 </TD>
 
 <TR>
 <TD align=center valign=top>
    Verbosity level (Lower is more compact):<br>
-   3 <INPUT type=radio name="p" value="3" OnClick="ganglia_form.submit();" {checked3}>&nbsp;
-   2 <INPUT type=radio name="p" value="2" OnClick="ganglia_form.submit();" {checked2}>&nbsp;
-   1 <INPUT type=radio name="p" value="1" OnClick="ganglia_form.submit();" {checked1}>&nbsp;
+   {foreach $verbosity_levels verbosity checked}
+   {$verbosity} <INPUT type=radio name="p" value="{$verbosity}" OnClick="ganglia_form.submit();" {$checked}>&nbsp;
+   {/foreach}
 </TD>
 
 <TD align=left valign=top width="25%">
-Total CPUs: <b>{CPUs}</b><br>
-Total Memory: <b>{Memory}</b><br>
+Total CPUs: <b>{$CPUs}</b><br>
+Total Memory: <b>{$Memory}</b><br>
 </TD>
 
 <TD align=left valign=top width="25%">
-Total Disk: <b>{Disk}</b><br>
-Most Full Disk: <b>{most_full}</b><br>
+Total Disk: <b>{$Disk}</b><br>
+Most Full Disk: <b>{$most_full}</b><br>
 </TD>
 
 </TR>
@@ -28,15 +28,15 @@ Most Full Disk: <b>{most_full}</b><br>
 
 <table cellspacing=20>
 <tr>
-<!-- START BLOCK : racks -->
+{foreach $racks rack}
    <td valign=top align=center>
       <table cellspacing=5 border=0>
-         {RackID}
-         {nodes}
+         {$rack.RackID}
+         {$rack.nodes}
       </table>
    </td>
-   {tr}
-<!-- END BLOCK : racks -->
+   {$rack.tr}
+{/foreach}
 </tr></table>
 
 </TD></TR>
@@ -79,5 +79,3 @@ Legend
 </td>
 </tr>
 </table>
-
-{Explanation}
