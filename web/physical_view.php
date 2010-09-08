@@ -13,17 +13,19 @@
 # ($metrics, $clusters, $hosts) are set, and header.php
 # already called.
 
-$tpl = new TemplatePower( template("physical_view.tpl") );
-$tpl->prepare();
-$tpl->assign("cluster",$clustername);
+$tpl = new Dwoo_Template_File( template("physical_view.tpl") );
+$data = new Dwoo_Data();
+$data->assign("cluster",$clustername);
 $cluster_url=rawurlencode($clustername);
-$tpl->assign("cluster_url",$cluster_url);
+$data->assign("cluster_url",$cluster_url);
+
+$verbosity_levels = array('3' => "", '2' => "", '1' => "");
 
 # Assign the verbosity level. Can take the value of the 'p' CGI variable.
 $verbose = $physical ? $physical : 2;
 
-# The name of the variable changes based on the level. Nice.
-$tpl->assign("checked$verbose","checked");
+$verbosity_levels[$verbose] = "checked";
+$data->assign("verbosity_levels", $verbosity_levels);
 
 #
 # Give the capacities of this cluster: total #CPUs, Memory, Disk, etc.
@@ -34,27 +36,29 @@ $Memory = sprintf("%.1f GB", cluster_sum("mem_total", $metrics)/(float)1048576);
 $Disk = cluster_sum("disk_total", $metrics);
 $Disk = $Disk ? sprintf("%.1f GB", $Disk) : "Unknown"; 
 list($most_full, $most_full_host) = cluster_min("part_max_used", $metrics);
-$tpl->assign("CPUs", $CPUs);
-$tpl->assign("Memory", $Memory);
-$tpl->assign("Disk", $Disk);
+$data->assign("CPUs", $CPUs);
+$data->assign("Memory", $Memory);
+$data->assign("Disk", $Disk);
 
 # Show which node has the most full disk.
 $most_full_hosturl=rawurlencode($most_full_host);
 $most_full = $most_full ? "<a href=\"./?p=1&amp;c=$cluster_url&amp;h=$most_full_host\">".
    "$most_full_host ($most_full% Used)</a>" : "Unknown";
-$tpl->assign("most_full", $most_full);
-$tpl->assign("cols_menu", $cols_menu);
+$data->assign("most_full", $most_full);
+$data->assign("cols_menu", $cols_menu);
 
 
 #-------------------------------------------------------------------------------
 # Displays a rack and all its nodes.
 function showrack($ID)
 {
-   global $verbose, $racks, $metrics, $cluster, $hosts_up, $hosts_down;
+   global $verbose, $racks, $racks_data, $metrics, $cluster, $hosts_up, $hosts_down;
    global $cluster_url, $tpl, $clusters;
 
+   $racks_data[$ID]["RackID"] = "";
+
    if ($ID>=0) {
-      $tpl->assign("RackID","<tr><th>Rack $ID</th></tr>");
+      $racks_data[$ID]["RackID"] = "<tr><th>Rack $ID</th></tr>";
    }
 
    # A string of node HTML for the template.
@@ -75,22 +79,22 @@ function showrack($ID)
 
 # 2Key = "Rack ID / Rank (order in rack)" = [hostname, UP|DOWN]
 $racks = physical_racks();
+$racks_data = array();
 
 # Make a $cols-wide table of Racks.
 $i=1;
 foreach ($racks as $rack=>$v)
    {
-      $tpl->newBlock("racks");
-
       $racknodes = showrack($rack);
 
-      $tpl->assign("nodes", $racknodes);
+      $racks_data[$rack]["nodes"] = $racknodes;
+      $racks_data[$rack]["tr"] = "";
 
       if (! ($i++ % $hostcols)) {
-         $tpl->assign("tr","</tr><tr>");
+         $racks_data["tr"] = "</tr><tr>";
       }
    }
 
-$tpl->printToScreen();
-
+$data->assign("racks", $racks_data);
+$dwoo->output($tpl, $data);
 ?>

@@ -19,15 +19,15 @@ function toggleLayer( whichLayer )
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD COLSPAN="2" BGCOLOR="#EEEEEE" ALIGN="CENTER">
-  <FONT SIZE="+2">{host} Overview</FONT>
+  <FONT SIZE="+2">{$host} Overview</FONT>
   </TD>
 </TR>
 
 <TR>
  <TD ALIGN="LEFT" VALIGN="TOP">
 
-<IMG SRC="{node_image}" HEIGHT="60" WIDTH="30" ALT="{host}" BORDER="0">
-{node_msg}
+<IMG SRC="{$node_image}" HEIGHT="60" WIDTH="30" ALT="{$host}" BORDER="0">
+{$node_msg}
 <P>
 
 <TABLE BORDER="0" WIDTH="100%">
@@ -35,11 +35,11 @@ function toggleLayer( whichLayer )
   <TD COLSPAN="2" CLASS=title>Time and String Metrics</TD>
 </TR>
 
-<!-- START BLOCK : string_metric_info -->
+{foreach $s_metrics_data s_metric}
 <TR>
- <TD CLASS=footer WIDTH="30%">{name}</TD><TD>{value}</TD>
+ <TD CLASS=footer WIDTH="30%">{$s_metric.name}</TD><TD>{$s_metric.value}</TD>
 </TR>
-<!-- END BLOCK : string_metric_info -->
+{/foreach}
 
 <TR><TD>&nbsp;</TD></TR>
 
@@ -47,38 +47,40 @@ function toggleLayer( whichLayer )
   <TD COLSPAN=2 CLASS=title>Constant Metrics</TD>
 </TR>
 
-<!-- START BLOCK : const_metric_info -->
+{foreach $c_metrics_data c_metric}
 <TR>
- <TD CLASS=footer WIDTH="30%">{name}</TD><TD>{value}</TD>
+ <TD CLASS=footer WIDTH="30%">{$c_metric.name}</TD><TD>{$c_metric.value}</TD>
 </TR>
-<!-- END BLOCK : const_metric_info -->
+{/foreach}
 </TABLE>
 
  <HR>
-<!-- INCLUDE BLOCK : extra -->
+{if isset($extra)}
+{include(file="$extra")}
+{/if}
 
 </TD>
 
 <TD ALIGN="CENTER" VALIGN="TOP" WIDTH="395">
-<A HREF="./graph.php?{graphargs}&amp;g=load_report&amp;z=large&amp;c={cluster_url}">
-<IMG BORDER=0 ALT="{cluster_url} LOAD"
-   SRC="./graph.php?{graphargs}&amp;g=load_report&amp;z=medium&amp;c={cluster_url}">
+<A HREF="./graph.php?{$graphargs}&amp;g=load_report&amp;z=large&amp;c={$cluster_url}">
+<IMG BORDER=0 ALT="{$cluster_url} LOAD"
+   SRC="./graph.php?{$graphargs}&amp;g=load_report&amp;z=medium&amp;c={$cluster_url}">
 </A>
-<A HREF="./graph.php?{graphargs}&amp;g=mem_report&amp;z=large&amp;c={cluster_url}">
-<IMG BORDER=0 ALT="{cluster_url} MEM"
-   SRC="./graph.php?{graphargs}&amp;g=mem_report&amp;z=medium&amp;c={cluster_url}">
+<A HREF="./graph.php?{$graphargs}&amp;g=mem_report&amp;z=large&amp;c={$cluster_url}">
+<IMG BORDER=0 ALT="{$cluster_url} MEM"
+   SRC="./graph.php?{$graphargs}&amp;g=mem_report&amp;z=medium&amp;c={$cluster_url}">
 </A>
-<A HREF="./graph.php?{graphargs}&amp;g=cpu_report&amp;z=large&amp;c={cluster_url}">
-<IMG BORDER=0 ALT="{cluster_url} CPU"
-   SRC="./graph.php?{graphargs}&amp;g=cpu_report&amp;z=medium&amp;c={cluster_url}">
+<A HREF="./graph.php?{$graphargs}&amp;g=cpu_report&amp;z=large&amp;c={$cluster_url}">
+<IMG BORDER=0 ALT="{$cluster_url} CPU"
+   SRC="./graph.php?{$graphargs}&amp;g=cpu_report&amp;z=medium&amp;c={$cluster_url}">
 </A>
-<A HREF="./graph.php?{graphargs}&amp;g=network_report&amp;z=large&amp;c={cluster_url}">
-<IMG BORDER=0 ALT="{cluster_url} NETWORK"
-   SRC="./graph.php?{graphargs}&amp;g=network_report&amp;z=medium&amp;c={cluster_url}">
+<A HREF="./graph.php?{$graphargs}&amp;g=network_report&amp;z=large&amp;c={$cluster_url}">
+<IMG BORDER=0 ALT="{$cluster_url} NETWORK"
+   SRC="./graph.php?{$graphargs}&amp;g=network_report&amp;z=medium&amp;c={$cluster_url}">
 </A>
-<A HREF="./graph.php?{graphargs}&amp;g=packet_report&amp;z=large&amp;c={cluster_url}">
-<IMG BORDER=0 ALT="{cluster_url} PACKETS"
-   SRC="./graph.php?{graphargs}&amp;g=packet_report&amp;z=medium&amp;c={cluster_url}">
+<A HREF="./graph.php?{$graphargs}&amp;g=packet_report&amp;z=large&amp;c={$cluster_url}">
+<IMG BORDER=0 ALT="{$cluster_url} PACKETS"
+   SRC="./graph.php?{$graphargs}&amp;g=packet_report&amp;z=medium&amp;c={$cluster_url}">
 </A>
 
 </TD>
@@ -89,15 +91,15 @@ function toggleLayer( whichLayer )
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD CLASS=title>
-  {host} <strong>graphs</strong>
-  last <strong>{range}</strong>
-  sorted <strong>{sort}</strong>
-<!-- START BLOCK : columns_dropdown -->
+  {$host} <strong>graphs</strong>
+  last <strong>{$range}</strong>
+  sorted <strong>{$sort}</strong>
+{if isset($columns_dropdown)}
   <FONT SIZE="-1">
-    Columns&nbsp;&nbsp;{metric_cols_menu}
-    Size&nbsp;&nbsp;{size_menu}
+    Columns&nbsp;&nbsp;{$metric_cols_menu}
+    Size&nbsp;&nbsp;{$size_menu}
   </FONT>
-<!-- END BLOCK : columns_dropdown -->
+{/if}
   </TD>
 </TR>
 </TABLE>
@@ -107,28 +109,28 @@ function toggleLayer( whichLayer )
 <TR>
  <TD>
 
-<!-- START BLOCK : vol_group_info -->
-<A HREF="javascript:;" ONMOUSEDOWN="javascript:toggleLayer('{group}');" TITLE="Toggle {group} metrics group on/off" NAME="{group}">
+{foreach $g_metrics_group_data group g_metrics}
+<A HREF="javascript:;" ONMOUSEDOWN="javascript:toggleLayer('{$group}');" TITLE="Toggle {$group} metrics group on/off" NAME="{$group}">
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD CLASS=metric>
-  {group} metrics ({group_metric_count})
+  {$group} metrics ({$g_metrics.group_metric_count})
   </TD>
 </TR>
 </TABLE>
 </A>
-<DIV ID="{group}">
+<DIV ID="{$group}">
 <TABLE><TR>
-<!-- START BLOCK : vol_metric_info -->
-<TD><A HREF="./graph.php?{graphargs}&amp;z=large">
-<IMG BORDER=0 ALT="{alt}" SRC="./graph.php?{graphargs}" TITLE="{desc}">
+{foreach $g_metrics["metrics"] g_metric}
+<TD><A HREF="./graph.php?{$g_metric.graphargs}&amp;z=large">
+<IMG BORDER=0 ALT="{$g_metric.alt}" SRC="./graph.php?{$g_metric.graphargs}" TITLE="{$g_metric.desc}">
 </A></TD>
-{new_row}
-<!-- END BLOCK : vol_metric_info -->
+{$g_metric.new_row}
+{/foreach}
 </TR>
 </TABLE>
 </DIV>
-<!-- END BLOCK : vol_group_info -->
+{/foreach}
 
  </TD>
 </TR>
