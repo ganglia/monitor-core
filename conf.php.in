@@ -21,6 +21,9 @@ $template_name = "default";
 $gmetad_root = "@varstatedir@/ganglia";
 $rrds = "$gmetad_root/rrds";
 
+# Where Dwoo (PHP templating engine) store compiled templates
+$dwoo_compiled_dir = "$gmetad_root/dwoo";
+
 # Where to find filter configuration files, if not set filtering
 # will be disabled
 #$filter_dir = "$gmetad_root/filters";
