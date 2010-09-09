@@ -268,6 +268,7 @@ fi
 %__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/Makefile*
 %__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*.in
 %__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/filters
+%__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/dwoo
 
 %else
 
@@ -403,12 +404,13 @@ cd gmetad-python
 %files web
 %defattr(-,root,root)
 %attr(0755,nobody,nobody)@varstatedir@/ganglia/filters
+%attr(0755,apache,apache)@varstatedir@/ganglia/dwoo
 %dir %{web_prefixdir}/
+%dir %{web_prefixdir}/dwoo
 %config(noreplace) %{web_prefixdir}/conf.php
 %{web_prefixdir}/AUTHORS
 %{web_prefixdir}/auth.php
 %{web_prefixdir}/calendar.php
-%{web_prefixdir}/class.TemplatePower.inc.php
 %{web_prefixdir}/cluster_legend.html
 %{web_prefixdir}/cluster_view.php
 %{web_prefixdir}/COPYING
@@ -433,6 +435,7 @@ cd gmetad-python
 %{web_prefixdir}/styles.css
 %{web_prefixdir}/templates
 %{web_prefixdir}/version.php
+%{web_prefixdir}/dwoo/*
 
 %endif
 
@@ -440,6 +443,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Sep  8 2010 Bernard Li <bernard@vanhpc.org>
+- Replace TemplatePower with Dwoo for PHP templating engine
 * Tue Aug 17 2010 Bernard Li <bernard@vanhpc.org>
 - Use the 'install' target for web/ instead of calling make on
   conf.php and version.php individually
