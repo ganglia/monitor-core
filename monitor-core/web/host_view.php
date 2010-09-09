@@ -26,7 +26,7 @@ $data->assign("node_view","./?p=2&amp;c=$cluster_url&amp;h=$hostname");
 # No reason to go on if this node is down.
 if ($hosts_down)
    {
-      $tpl->printToScreen();
+      $dwoo->output($tpl, $data);
       return;
    }
 
