@@ -68,8 +68,8 @@ Advertised capabilities of this version include:
 How To Write And Use A Gmetad Python Plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A new version of Gmetad did has been rewrite completely in
-the Python scription language.  This rewrite is functionally
+A new version of Gmetad has been rewritten completely in
+the Python scripting language.  This rewrite is functionally
 equivalent to the original Gmetad daemon however it provides
 a plugable interface so that Gmetad can be extended. The Gmetad
 daemon itself is only responsible for reading cluster data and 
