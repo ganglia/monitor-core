@@ -247,3 +247,10 @@ BACKPORT PROPOSALS FUTURE VERSION:
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=1632
     -1: carenas
     carenas: not a fix but a workaround to the problem
+
+  * web: Replace TemplatePower with Dwoo PHP Templating Engine
+    https://sourceforge.net/apps/trac/ganglia/changeset/2334
+    https://sourceforge.net/apps/trac/ganglia/changeset/2335
+    https://sourceforge.net/apps/trac/ganglia/changeset/2336
+    https://sourceforge.net/apps/trac/ganglia/changeset/2339
+    https://sourceforge.net/apps/trac/ganglia/changeset/2343
