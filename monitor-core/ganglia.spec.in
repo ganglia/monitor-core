@@ -52,7 +52,7 @@ Provides: ganglia-webfrontend = %{version}
 # We should put rrdtool as a Requires too but rrdtool rpm support is very weak
 # so most people install from source
 #Requires: ganglia-gmetad >=  @VERSION@
-Requires: php-gd
+Requires: php >= 5, php-gd
 %if 0%{?suse_version}
 %define web_prefixdir /srv/www/htdocs/ganglia
 %else
@@ -63,7 +63,7 @@ Prefix: %{web_prefixdir}
 %description web
 This package provides a web frontend to display the XML tree published by
 ganglia, and to provide historical graphs of collected metrics. This website is
-written in the PHP4 language.
+written in the PHP5 language and uses the Dwoo templating engine.
 
 #######################################################################
 #######################################################################
