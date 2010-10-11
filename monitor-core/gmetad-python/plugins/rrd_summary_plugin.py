@@ -86,21 +86,51 @@ class RRDSummaryPlugin(RRDPlugin):
         if ds is None:
             logging.info('No matching data source for %s'%clusterNode.getAttr('name'))
             return
-        # Create the summary RRD base path and validate it
-        clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.getAttr('name'))
-        self._checkDir(clusterPath)
-        clusterPath = '%s/__SummaryInfo__'%clusterPath
-        self._checkDir(clusterPath)
-        # Update metrics for each cluster
-        for metricNode in clusterNode.summaryData['summary'].itervalues():
-            # Create the summary RRD final path and validate it
-            rrdPath = '%s/%s.rrd'%(clusterPath,metricNode.getAttr('name'))
-            # Create the RRD metric summary file if it doesn't exist
-            if not os.path.isfile(rrdPath):
-                self._createRRD(clusterNode, metricNode, rrdPath, ds.interval, True)
-                #need to do some error checking here if the createRRD failed
-            # Update the RRD file.
-            self._updateRRD(clusterNode, metricNode, rrdPath, True)
+
+        if 'CLUSTER' == clusterNode.id:
+            # Create the summary RRD base path and validate it
+            clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.getAttr('name'))
+            self._checkDir(clusterPath)
+            clusterPath = '%s/__SummaryInfo__'%clusterPath
+            self._checkDir(clusterPath)
+            # Update metrics for each cluster
+            for metricNode in clusterNode.summaryData['summary'].itervalues():
+                # Create the summary RRD final path and validate it
+                rrdPath = '%s/%s.rrd'%(clusterPath,metricNode.getAttr('name'))
+                # Create the RRD metric summary file if it doesn't exist
+                if not os.path.isfile(rrdPath):
+                    self._createRRD(clusterNode, metricNode, rrdPath, ds.interval, True)
+                    #need to do some error checking here if the createRRD failed
+                # Update the RRD file.
+                try:
+                    self._updateRRD(clusterNode, metricNode, rrdPath, True)
+                except Exception:
+                    pass
+
+        if 'GRID' == clusterNode.id:
+            try:
+                # Create the summary RRD base path and validate it
+                gridPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.getAttr('name'))
+                self._checkDir(gridPath)
+                gridPath = '%s/__SummaryInfo__'%gridPath
+                # Update metrics for the grid
+                # If there isn't any summary data, then no need to continue.
+                if not hasattr(clusterNode, 'summaryData'): 
+                    return
+            
+                # Update metrics RRDs for grid summary
+                for metricNode in clusterNode.summaryData['summary'].itervalues():
+                    # Create the summary RRD final path and validate it.
+                    rrdPath = '%s/%s.rrd'%(gridPath,metricNode.getAttr('name'))
+                    # if the RRD file doesn't exist then create it
+                    if not os.path.isfile(rrdPath):
+                        self._createRRD(clusterNode, metricNode, rrdPath, 15, True)
+                        #need to do some error checking here if the createRRD failed
+                    # Update the RRD file.
+                    self._updateRRD(clusterNode, metricNode, rrdPath, True)
+            except Exception, e:
+                logging.error('Error writing to summary RRD %s'%str(e))
+
         #print "RRDSummary notify called"
 
 

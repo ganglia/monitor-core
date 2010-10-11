@@ -769,6 +769,21 @@ case $GANGLIA_VERSION in
   ;;
 esac
 
+dnl This is for gmetad-python, where @gsysconfdir@ needs to be
+dnl substituted into setup.py during the ./configure step as there is no 
+dnl make install step
+dnl
+if test x"$sysconfdir" = x"\${prefix}/etc"; then
+   if test x"$prefix" = xNONE; then
+      prefix="$ac_default_prefix"
+   else
+      prefix="$prefix"
+   fi
+fi
+gsysconfdir=`eval echo "$sysconfdir"`
+AC_DEFINE_UNQUOTED(GSYSCONFDIR, "$gsysconfdir", GSYSCONFDIR)
+AC_SUBST(gsysconfdir)
+
 AC_CONFIG_FILES([scripts/fixconfig], [chmod +x scripts/fixconfig])
 
 AC_OUTPUT(Makefile 

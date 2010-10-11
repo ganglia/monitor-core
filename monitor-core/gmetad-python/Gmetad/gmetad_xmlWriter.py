@@ -101,6 +101,7 @@ class XmlWriter:
         self.gridname = cfg[GmetadConfig.GRIDNAME]
         self.authority = cfg[GmetadConfig.AUTHORITY]
         self.localtime = time.time()
+        self.gridDepth = -1
         
     def _getNumHostsForCluster(self, clusternode):
         #Returns a tuple of the form (hosts_up, hosts_down).
@@ -125,11 +126,11 @@ class XmlWriter:
                 cbuf += self._getXmlImpl(m, filterList, queryargs)
         # Format the XML based on all of the results.
         rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n%s' % (hosts[0], hosts[1], cbuf)
-        cbuf = ''
-        # Generate the XML for each cluster node.
-        for c in gridnode.children.values():
-            if 'CLUSTER' == c.id:
-                rbuf += self._getXmlImpl(c, filterList, queryargs)
+        if self.gridDepth == 0:
+            # Generate the XML for each cluster/grid node.
+            for c in gridnode.children.values():
+                if 'CLUSTER' == c.id or 'GRID' == c.id:
+                    rbuf += self._getXmlImpl(c, filterList, queryargs)
         return rbuf
         
     def _getClusterSummary(self, clusternode, filterList, queryargs):
@@ -149,34 +150,47 @@ class XmlWriter:
     def _getXmlImpl(self, element, filterList=None, queryargs=None):
         ''' This method can be called recursively to traverse the data store and produce XML
             for specific nodes. It also respects the filter and query args when generating the XML.'''
-        # Add the XML tag
-        rbuf = '<%s' % element.tag
+        skipTag = None
+        rbuf = ''
+        if element.id in ['CLUSTER', 'HOST', 'EXTRA_DATA', 'EXTRA_ELEMENT'] and self.gridDepth > 0:
+            skipTag = True
         # If this is a grid tag, then get the local time since a time stamp was never provided by gmond.
         if 'GRID' == element.id:
             element.setAttr('localtime', int(time.time()))
-        # Add each attribute that is contained in the.  By pass some specific attributes.
-        for k,v in element.getAttrs().items():
-            rbuf += ' %s="%s"' % (k.upper(), v)
-        if queryargs is not None:
-            if ('GRID' == element.id or 'CLUSTER' == element.id) and (filterList is None or not len(filterList)):
+            self.gridDepth += 1
+            logging.info('Found <GRID> depth is now: %d' %self.gridDepth)
+        if not skipTag:
+            # Add the XML tag
+            rbuf = '<%s' % element.tag
+            # Add each attribute that is contained in the.  By pass some specific attributes.
+            for k,v in element.getAttrs().items():
+                rbuf += ' %s="%s"' % (k.upper(), v)
+        if queryargs is not None or ('GRID' == element.id and self.gridDepth > 0):
+            if (('GRID' == element.id or 'CLUSTER' == element.id) and (filterList is None or not len(filterList))) or ('GRID' == element.id and self.gridDepth > 0):
                 try:
                     # If the filter specifies that this is a summary rather than a regular XML dump, generate the 
                     #  summary XML.
-                    if queryargs['filter'].lower().strip() == 'summary':
+                    if (queryargs is not None and queryargs['filter'].lower().strip() == 'summary') or ('GRID' == element.id and self.gridDepth > 0):
                         # A summary XML dump will contain a grid summary as well as each cluster summary.  Each will
                         #  be added during recusive calls to this method.
                         if 'GRID' == element.id:
                             rbuf += '>\n%s</GRID>\n' % self._getGridSummary(element, filterList, queryargs)
+                            self.gridDepth -= 1
+                            logging.info('Found </GRID> depth is now %d' %self.gridDepth)
                             return rbuf
                         elif 'CLUSTER' == element.id:
-                            rbuf += '>\n%s</CLUSTER>\n' % self._getClusterSummary(element, filterList, queryargs)
+                            if not skipTag:
+                                rbuf += '>\n%s</CLUSTER>\n' % self._getClusterSummary(element, filterList, queryargs)
+                            else:
+                                rbuf += '%s' % self._getClusterSummary(element, filterList, queryargs)
                             return rbuf
                 except ValueError:
                     pass
         # If there aren't any children, then no reason to continue.
         if 0 < len(element.children):
-            # Close the last tag
-            rbuf += '>\n'
+            if not skipTag:
+                # Close the last tag
+                rbuf += '>\n'
             showAllChildren = True
             # If there was a specific filter specified, then only include the appropriate children.  Otherwise
             #  show all of the children.
@@ -192,9 +206,14 @@ class XmlWriter:
                 # For each child, call this method recusively.  This will produce a complete dump of all children
                 for c in element.children.values():
                     rbuf += self._getXmlImpl(c, filterList, queryargs)
-            rbuf += '</%s>\n' % element.tag
+            if 'GRID' == element.tag:
+                self.gridDepth -= 1
+                logging.info('Found </GRID> depth is now: %d' %self.gridDepth)
+            if not skipTag:
+                rbuf += '</%s>\n' % element.tag
         else:
-            rbuf += ' />\n'
+            if not skipTag:
+                rbuf += ' />\n'
         return rbuf
             
     def getXml(self, filter=None, queryargs=None):
