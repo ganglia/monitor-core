@@ -79,7 +79,90 @@ class DataStore:
             self.notifier.start()
             DataStore._initialized = True
 
-    def _doSummary(self, clusterNode):
+    def _doGridSummary(self, gridNode):
+        '''This private function will calculate the summaries for a
+            single grid.  It is called each time new data
+            has been read for a specific grid.  All summary data
+            is placed in the summaryData dictionary. '''
+        self.acquireLock(self)
+
+        # Clear out the summaryData from the last run and initialize
+        #  the dictionary for new summaries.
+        gridNode.summaryData = {}
+        gridNode.summaryData['summary'] = {}
+        gridNode.summaryData['hosts_up'] = 0
+        gridNode.summaryData['hosts_down'] = 0
+        gridUp = (gridNode.getAttr('status') == 'up')
+        summaryTime = int(time.time())
+
+        # Summarize over each host contained by the cluster
+        for clusterNode in gridNode:
+            # Assume that cluster is up if we get a clusterNode object
+            clusterUp = True
+            for hostNode in clusterNode:
+                reportedTime = summaryTime
+                # Sum up the status of all of the hosts
+                if 'HOST' == hostNode.id:
+                    # Calculate the difference between the last known reported time
+                    #  and the current time.  This determines if the host is up or down
+                    # ** There may still be some issues with the way that this calculation is done
+                    # ** The metric node below may also have the same issues.
+                    reportedTime = int(hostNode.getAttr('reported'))
+                    tn = int(hostNode.getAttr('tn'))
+                    # If the last reported time is the same as the current reported time, then
+                    #  the host has not been updated.  Therefore calculate the time offset from
+                    #  the current time.
+                    if hostNode.lastReportedTime == reportedTime:
+                        tn = summaryTime - reportedTime
+                        if tn < 0: tn = 0
+                        hostNode.setAttr('tn', str(tn))
+                    else:
+                        hostNode.lastReportedTime = reportedTime
+
+                    try:
+                        if clusterUp and (int(hostNode.getAttr('tn')) < int(hostNode.getAttr('tmax'))*4):
+                            gridNode.summaryData['hosts_up'] += 1
+                        else:
+                            gridNode.summaryData['hosts_down'] += 1
+                    except AttributeError:
+                        pass
+                    except KeyError:
+                        pass
+                # Summarize over each metric within a host
+                for metricNode in hostNode:
+                    tn = int(metricNode.getAttr('tn'))
+
+                    # If the last reported time is the same as the current reported time, then
+                    #  the host has not been updated.  Therefore calculate the time offset from
+                    #  the current time.
+                    if hostNode.lastReportedTime == reportedTime:
+                        tn = summaryTime - reportedTime
+                        if tn < 0: tn = 0
+                        metricNode.setAttr('tn', str(tn))
+
+                    # Don't include metrics that can not be summarized
+                    if metricNode.getAttr('type') in ['string', 'timestamp']:
+                        continue
+                    try:
+                        # Pull the existing summary node from the summary data
+                        # dictionary. If one doesn't exist, add it in the exception.
+                        summaryNode = gridNode.summaryData['summary'][str(metricNode)]
+                        currSum = summaryNode.getAttr('sum')
+                        summaryNode.incAttr('sum',  float(metricNode.getAttr('val')))
+                    except KeyError:
+                        # Since summary metrics use a different tag, create the new 
+                        #  summary node with correct tag.
+                        summaryNode = metricNode.summaryCopy(tag='METRICS')
+                        # Initialize the first summary value and change the data type
+                        # to double for all metric summaries
+                        summaryNode.setAttr('sum', float(metricNode.getAttr('val')))
+                        summaryNode.setAttr('type', 'double')
+                        # Add the summary node to the summary dictionary
+                        gridNode.summaryData['summary'][str(summaryNode)] = summaryNode
+                    summaryNode.incAttr('num', 1)
+        self.releaseLock(self)
+
+    def _doClusterSummary(self, clusterNode):
         '''This private function will calculate the summaries for a
             single cluster.  It is called each time that new data
             has been read for a specific cluster.  All summary data
@@ -212,7 +295,10 @@ class DataStore:
             entire cluster and then the cluster transaction needs to be
             entered and passed to the plugins. '''
         if clusterNode is not None:
-            self._doSummary(clusterNode);
+            if 'CLUSTER' == clusterNode.id:
+                self._doClusterSummary(clusterNode);
+            if 'GRID' == clusterNode.id:
+                self._doGridSummary(clusterNode)
             self.notifier.insertTransaction(clusterNode)
         
     def acquireLock(self, obj):

@@ -186,7 +186,14 @@ class RRDPlugin(GmetadPlugin):
             pass
         # Create the cluster RRD base path and validate it
         clusterPath = '%s/%s'%(self.cfg[RRDPlugin.RRD_ROOTDIR], clusterNode.getAttr('name'))
+        if 'GRID' == clusterNode.id:
+            clusterPath = '%s/__SummaryInfo__'%clusterPath
         self._checkDir(clusterPath)
+
+        # We do not want to process grid data
+        if 'GRID' == clusterNode.id:
+            return
+
         # Update metrics for each host in the cluster
         for hostNode in clusterNode:
             # Create the host RRD base path and validate it.

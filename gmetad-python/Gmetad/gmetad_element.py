@@ -57,6 +57,7 @@ class Element:
         for k,v in attrs.items():
             self.attrs[k.lower()] = v
         self.children = {}
+        self.gridDepth = -1
         
     def __setitem__(self, k, v):
         ''' This method adds or updates an attribute for the node. '''

@@ -67,8 +67,8 @@ class GmondContentHandler(xml.sax.ContentHandler):
             self._ancestry.append('GANGLIA_XML')
         # Insert the new node into the data store at the appropriate location
         self._elemStack.append(ds.setNode(e, self._elemStack[self._elemStackLen-1]))
-        # If this is a cluster node, then keep track of the data store path to this node.
-        if (self._ancestry[len(self._ancestry)-1].startswith('CLUSTER') == False):
+        # If this is a cluster or nested grid node, then keep track of the data store path to this node.
+        if (len(self._ancestry) < 2 or (len(self._ancestry) == 2 and e.id in ['GRID', 'CLUSTER'])):
             self._ancestry.append('%s:%s'%(e.id,e.getAttr('name')))
         self._elemStackLen += 1
         

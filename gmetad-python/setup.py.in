@@ -6,6 +6,6 @@ setup(name='gmetad-python',
       description='Gmetad implementation in Python.',
       packages=['Gmetad'],
       scripts=['gmetad.py'],
-      data_files=[('/etc/ganglia', ['gmetad-python.conf']),
+      data_files=[('@gsysconfdir@', ['gmetad-python.conf']),
                   ('@libdir@/ganglia/python_modules/gmetad', glob('plugins/*.py'))] 
      )
