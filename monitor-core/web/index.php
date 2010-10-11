@@ -19,7 +19,7 @@ catch (Exception $e)
       exit;
    }
 
-# Usefull for addons.
+# Useful for addons.
 $GHOME = ".";
 
 if ($context == "meta" or $context == "control")
