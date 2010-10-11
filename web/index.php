@@ -7,7 +7,7 @@ include_once "./get_context.php";
 include_once "./ganglia.php";
 include_once "./get_ganglia.php";
 include_once "./class.TemplatePower.inc.php";
-# Usefull for addons.
+# Useful for addons.
 $GHOME = ".";
 
 if ($context == "meta" or $context == "control")
