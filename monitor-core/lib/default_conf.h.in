@@ -65,6 +65,11 @@ udp_recv_channel {\n\
   bind = 239.2.11.71\n\
 }\n\
 \n\
+/* Channel to receive sFlow datagrams */\n\
+#udp_recv_channel {\n\
+#  port = 6343\n\
+#}\n\
+\n\
 /* You can specify as many tcp_accept_channels as you like to share\n\
    an xml description of the state of the cluster */\n\
 tcp_accept_channel {\n\

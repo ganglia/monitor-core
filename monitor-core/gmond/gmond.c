@@ -146,29 +146,13 @@ apr_socket_t **udp_recv_sockets = NULL;
 
 /* The hash to hold the hosts (key = host IP) */
 apr_hash_t *hosts = NULL;
-
 /* The "hosts" hash contains values of type "hostdata" */
-struct Ganglia_host {
-  /* Name of the host */
-  char *hostname;
-  /* The IP of this host */
-  char *ip;
-  /* The location of this host */
-  char *location;
-  /* Timestamp of when the remote host gmond started */
-  unsigned int gmond_started;
-  /* The pool used to malloc memory for this host */
-  apr_pool_t *pool;
-  /* A hash containing the full metric data from the host */
-  apr_hash_t *metrics;
-  /* A hash containing the last data update from the host */
-  apr_hash_t *gmetrics;
-  /* First heard from */
-  apr_time_t first_heard_from;
-  /* Last heard from */
-  apr_time_t last_heard_from;
-};
-typedef struct Ganglia_host Ganglia_host;
+
+#ifdef SFLOW
+#include "sflow.h"
+#endif
+
+#include "gmond_internal.h"
 
 /* This is the structure of the data save to each host->metric hash */
 struct Ganglia_metadata {
@@ -807,7 +791,7 @@ get_metric_names (Ganglia_metric_id *metric_id, char **metricName, char **realNa
     return;
 }
 
-static Ganglia_host *
+Ganglia_host *
 Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
 {
   apr_status_t status;
@@ -931,7 +915,7 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
   return hostdata;
 }
 
-static void
+void
 Ganglia_update_vidals( Ganglia_host *host, Ganglia_value_msg *vmsg)
 {
     char *metricName=NULL, *realName=NULL;
@@ -978,7 +962,7 @@ Ganglia_update_vidals( Ganglia_host *host, Ganglia_value_msg *vmsg)
     return;
 }
 
-static void
+void
 Ganglia_metadata_check(Ganglia_host *host, Ganglia_value_msg *vmsg )
 {
     char *metric_name = vmsg->Ganglia_value_msg_u.gstr.metric_id.name;
@@ -1031,7 +1015,7 @@ Ganglia_metadata_free( Ganglia_metadata *metric )
 }
 #endif
 
-static void
+void
 Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
 {
     /* Search for the Ganglia_metadata in the Ganglia_host */
@@ -1142,7 +1126,7 @@ Ganglia_metadata_request( Ganglia_host *host, Ganglia_metadata_msg *message )
   debug_msg("setting metadata request flag for metric: %s host: %s", name, host->hostname);
 }
 
-static void
+void
 Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
 {
     /* Search for the Ganglia_metric in the Ganglia_host */
@@ -1240,13 +1224,16 @@ Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
     }
 }
 
-
 static void
 process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
 {
   apr_status_t status;
   apr_socket_t *socket;
   apr_sockaddr_t *remotesa = NULL;
+#ifdef SFLOW
+  uint16_t localport;
+  char *errorMsg = NULL;
+#endif
   char  remoteip[256];
   char buf[max_udp_message_len];
   apr_size_t len = max_udp_message_len;
@@ -1270,6 +1257,10 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
      type socket is connectionless. */
   apr_pool_create(&p, global_context);
   status = apr_socket_addr_get(&remotesa, APR_LOCAL, socket);
+#ifdef SFLOW
+  /* remember this before it gets overwritten */
+  localport = remotesa->port;
+#endif
   status = apr_sockaddr_info_get(&remotesa, NULL, remotesa->family, remotesa->port, 0, p);
 
   /* Grab the data */
@@ -1293,6 +1284,22 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
     }
 
   ganglia_scoreboard_inc(PKTS_RECVD_ALL);
+
+#ifdef SFLOW
+  if(localport == SFLOW_IANA_REGISTERED_PORT) {
+    if(process_sflow_datagram(remotesa, buf, len, now, &errorMsg)) {
+      ganglia_scoreboard_inc(PKTS_RECVD_VALUE);
+    }
+    else {
+      if(errorMsg) {
+	debug_msg("sFlow error: %s", errorMsg);
+      }
+      ganglia_scoreboard_inc(PKTS_RECVD_FAILED);
+    }
+    apr_pool_destroy(p);
+    return;
+  }
+#endif
 
   /* Create the XDR receive stream */
   xdrmem_create(&x, buf, max_udp_message_len, XDR_DECODE);
