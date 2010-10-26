@@ -25,14 +25,19 @@ GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD = 
 GLDFLAGS = @EXPORT_SYMBOLS_DYNAMIC@
 endif
+if BUILD_SFLOW
+GCFLAGS += -DSFLOW
+endif
 
 INCLUDES = @APR_INCLUDES@
 AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/include/ -I$(top_builddir)/libmetrics $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"'
 
 sbin_PROGRAMS = gmond
 # metric.h and dtd.h are for gmetad/gmetric for now....
-gmond_SOURCES = gmond.c cmdline.c cmdline.h dtd.h g25_config.c core_metrics.c g25_config.h
-
+gmond_SOURCES = gmond.c cmdline.c cmdline.h dtd.h g25_config.c core_metrics.c g25_config.h gmond_internal.h
+if BUILD_SFLOW
+gmond_SOURCES += sflow.h sflow.c sflow_gmetric.h
+endif
 dist_man_MANS  = gmond.conf.5
 
 gmond.conf.5: conf.pod gmond.conf.html
@@ -62,4 +67,3 @@ gmond.solaris.init:	gmond.solaris.init.in $(FIXCONFIG)
 # something
 install-exec-hook:	gmond.solaris.init
 #	$(INSTALL_SCRIPT) gmond.solaris.init
-

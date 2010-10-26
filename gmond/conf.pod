@@ -264,6 +264,21 @@ Multicast Note: for multicast, specifying a B<bind> address with the same
 value used for B<mcast_join> will prevent unicast UDP messages to the same
 B<port> from being processed.
 
+The sFlow protocol (see http://www.sflow.org) can be used to collect
+a standard set of performance metrics from servers. For servers that
+don't include embedded sFlow agents, an open source sFlow agent is available
+on SourceForge (see http://host-sflow.sourceforge.net).
+
+To configure B<gmond> to receive sFlow datagrams, simply
+add a B<udp_recv_channel> with the B<port> set to 6343 (the IANA registered
+port for sFlow):
+
+  udp_recv_channel {
+    port = 6343
+  }
+
+Note: sFlow is unicast protocol, so don't include B<mcast_join> join.
+
 =head2 tcp_accept_channel
 
 You can specify as many B<tcp_accept_channel> sections as you like
