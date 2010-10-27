@@ -2,17 +2,32 @@
 #
 # description: gmond startup script
 #
-# Jul 03, 2006, Michael Perzl (michael@perzl.org)
+# Oct 27, 2010, Michael Perzl (michael@perzl.org)
 #
 
 GMOND_BIN=/opt/freeware/sbin/gmond
 
 PIDFILE=/var/run/gmond.pid
 
-# Check for missing binaries (stale symlinks should not happen)
+RUN_AS_USER="nobody"
+
+
+# define some generic commands
+AWK=/usr/bin/awk
+CAT=/usr/bin/cat
+ECHO=/usr/bin/echo
+GREP=/usr/bin/grep
+KILL=/usr/bin/kill
+MKDIR=/usr/bin/mkdir
+PRINTF=/usr/bin/printf
+PS=/usr/bin/ps
+RM=/usr/bin/rm
+
+
+# check for missing binaries (stale symlinks should not happen)
 test -x ${GMOND_BIN} ||
     {
-      echo "${GMOND_BIN} not installed"
+      $ECHO "${GMOND_BIN} not installed"
       if [ "$1" = "stop" ] ; then
           exit 0
       else
@@ -20,11 +35,11 @@ test -x ${GMOND_BIN} ||
       fi
     }
 
-# Check for existence of needed config file and read it
+# check for existence of necessary config file
 GMOND_CONFIG=/etc/ganglia/gmond.conf
 test -r ${GMOND_CONFIG} ||
     {
-      echo "${GMOND_CONFIG} does not exist"
+      $ECHO "${GMOND_CONFIG} does not exist"
       if [ "$1" = "stop" ] ; then
           exit 0
       else
@@ -32,44 +47,53 @@ test -r ${GMOND_CONFIG} ||
       fi
     }
 
-RUN_AS_USER="nobody"
 
 case "$1" in
     start)
-        if [ -r ${PIDFILE} ] ; then
-            echo "GANGLIA gmond daemon is already running with PID "`cat ${PIDFILE}`"."
-            exit 1
-        fi
-        echo "Starting GANGLIA gmond..."
+	if [ -r ${PIDFILE} ]; then
+            pid=`$CAT ${PIDFILE}`
+            if [ "`$PS -ef | $GREP -v grep | $GREP ${pid} | $AWK '{ print $2 }'`" = "${pid}" ] ; then
+	        $ECHO "GANGLIA gmond daemon is already running with PID ${pid}."
+	        exit 1
+	    else
+	        $RM -f ${PIDFILE}
+	    fi
+	fi
+	$PRINTF "Starting GANGLIA gmond... "
 
-        ## Start daemon and write PID to file $PIDFILE.
-        mkdir -p /var/run
-        ${GMOND_BIN} -p ${PIDFILE} -c ${GMOND_CONFIG}
-        ;;
+	## start daemon and write PID to file ${PIDFILE}
+	$MKDIR -p /var/run
+	${GMOND_BIN} -p ${PIDFILE} -c ${GMOND_CONFIG}
+        $ECHO "done."
+	;;
     stop)
-        echo "Shutting down GANGLIA gmond daemon... "
-        ## Stop daemon.
-        if [ -r ${PIDFILE} ] ; then
-            kill -15 `cat ${PIDFILE}`
-            rm -f ${PIDFILE}
-        fi
-        ;;
+	$PRINTF "Shutting down GANGLIA gmond daemon... "
+	## stop daemon
+	if [ -r ${PIDFILE} ]; then
+	    $KILL -HUP `$CAT ${PIDFILE}`
+	    $RM -f ${PIDFILE}
+	fi
+        $ECHO "done."
+	;;
     status)
-        if [ -r ${PIDFILE} ] ; then
-            echo "GANGLIA gmond daemon is running with PID "`cat ${PIDFILE}`"."
-        else
-            echo "GANGLIA gmond daemon is not running."
-        fi
-        ;;
+	if [ -r ${PIDFILE} ]; then
+            pid=`$CAT ${PIDFILE}`
+            if [ `$PS -ef | $GREP -v grep | $GREP ${pid} | $AWK '{ print $2 }'` = ${pid} ] ; then
+	        $ECHO "GANGLIA gmond daemon is running with PID ${pid}."
+	    fi
+	else
+	    $ECHO "GANGLIA gmond daemon is not running."
+	fi
+	;;
     restart)
-        ## Stop the service and regardless of whether it was
-        ## running or not, start it again.
-        $0 stop
-        $0 start
-        ;;
+	## Stop the service and regardless of whether it was
+	## running or not, start it again.
+	$0 stop
+	$0 start
+	;;
     *)
-        echo "Usage: $0 {start|stop|status|restart}"
-        exit 1
-        ;;
+	$ECHO "Usage: $0 {start|stop|status|restart}"
+	exit 1
+	;;
 esac
 
