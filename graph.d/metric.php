@@ -107,14 +107,14 @@ function graph_metric ( &$rrdtool_graph ) {
         $rrdtool_graph['lower-limit'] = $min;
 
     if ($vlabel) {
-        // We should set $vlabel, even if it isn't used for spacing
-        // and alignment reasons.  This is mostly for aesthetics
+        // We should set $vlabel--even if it isn't used--for spacing
+        // and alignment reasons.  This is mostly for aesthetics.
         $temp_vlabel = trim($vlabel);
         $rrdtool_graph['vertical-label'] = strlen($temp_vlabel)
                    ?  $temp_vlabel
                    :  ' ';
     } else {
-        $rrdtool_graph['vertical-label'] = ' ';
+        $rrdtool_graph['vertical-label'] = $metricname;
     }
 
     //# the actual graph...
