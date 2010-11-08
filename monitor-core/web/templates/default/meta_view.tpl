@@ -1,6 +1,6 @@
 {if isset($filters)}
 <TABLE BORDER="0" WIDTH="100%">
-  <tr>ABC
+  <tr>
     {foreach $filters filter}
       <td>
         <b>{$filter.filter_name}</b>
