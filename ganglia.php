@@ -172,6 +172,42 @@ function start_cluster ($parser, $tagname, $attrs)
       }
 }
 
+function start_everything ($parser, $tagname, $attrs)
+{
+   global $index_array, $hosts, $metrics, $cluster, $self, $grid, $hosts_up, $hosts_down;
+   static $hostname, $cluster_name;
+
+   switch ($tagname)
+      {
+         case "GANGLIA_XML":
+            preamble($attrs);
+            break;
+         case "GRID":
+            $self = $attrs['NAME'];
+            $grid = $attrs;
+            break;
+
+         case "CLUSTER":
+#	    $cluster = $attrs;
+            $cluster_name = $attrs['NAME'];
+            break;
+
+         case "HOST":
+            $hostname = $attrs['NAME'];
+	    $index_array['cluster'][$hostname] = $cluster_name;
+
+         case "METRIC":
+            $metricname = $attrs['NAME'];
+	    if ( $metricname != $hostname ) 
+	      $index_array['metrics'][$metricname][] = $hostname;
+            break;
+
+         default:
+            break;
+      }
+
+}
+
 
 function start_cluster_summary ($parser, $tagname, $attrs)
 {
@@ -301,6 +337,10 @@ function Gmetad ()
          case "cluster":
             xml_set_element_handler($parser, "start_cluster", "end_all");
             $request = "/$clustername";
+             break;
+         case "index_array":
+            xml_set_element_handler($parser, "start_everything", "end_all");
+            $request = "/";
              break;
          case "cluster-summary":
             xml_set_element_handler($parser, "start_cluster_summary", "end_all");
