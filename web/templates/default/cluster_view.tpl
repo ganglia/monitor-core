@@ -1,82 +1,80 @@
 <TABLE BORDER="0" CELLSPACING=5 WIDTH="100%">
 <TR>
   <TD CLASS=title COLSPAN="2">
-  <FONT SIZE="+1">Overview of {cluster}</FONT>
+  <FONT SIZE="+1">Overview of {$cluster}</FONT>
   </TD>
 </TR>
 
 <TR>
 <TD ALIGN=left VALIGN=top>
 <table cellspacing=1 cellpadding=1 width="100%" border=0>
- <tr><td>CPUs Total:</td><td align=left><B>{cpu_num}</B></td></tr>
- <tr><td width="60%">Hosts up:</td><td align=left><B>{num_nodes}</B></td></tr>
- <tr><td>Hosts down:</td><td align=left><B>{num_dead_nodes}</B></td></tr>
+ <tr><td>CPUs Total:</td><td align=left><B>{$cpu_num}</B></td></tr>
+ <tr><td width="60%">Hosts up:</td><td align=left><B>{$num_nodes}</B></td></tr>
+ <tr><td>Hosts down:</td><td align=left><B>{$num_dead_nodes}</B></td></tr>
  <tr><td>&nbsp;</td></tr>
- <tr><td colspan=2>Current Load Avg (15, 5, 1m):<br>&nbsp;&nbsp;<b>{cluster_load}</b></td></tr>
- <tr><td colspan=2>Avg Utilization (last {range}):<br>&nbsp;&nbsp;<b>{cluster_util}</b></td></tr>
- <tr><td colspan=2>Localtime:<br>&nbsp;&nbsp;<b>{localtime}</b></td></tr>
+ <tr><td colspan=2>Current Load Avg (15, 5, 1m):<br>&nbsp;&nbsp;<b>{$cluster_load}</b></td></tr>
+ <tr><td colspan=2>Avg Utilization (last {$range}):<br>&nbsp;&nbsp;<b>{$cluster_util}</b></td></tr>
+ <tr><td colspan=2>Localtime:<br>&nbsp;&nbsp;<b>{$localtime}</b></td></tr>
  </table>
-<!-- INCLUDE BLOCK : extra -->
+{if isset($extra)}
+{include(file="$extra")}
+{/if}
  <hr>
 </TD>
 
 <TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top>
-<A HREF="./graph_all_periods.php?{graph_args}&amp;g=load_report&amp;z=large">
-<IMG BORDER=0 ALT="{cluster} LOAD"
-   SRC="./graph.php?{graph_args}&amp;g=load_report&amp;z=medium">
+<A HREF="./graph.php?{$graph_args}&amp;g=load_report&amp;z=large">
+<IMG BORDER=0 ALT="{$cluster} LOAD"
+   SRC="./graph.php?{$graph_args}&amp;g=load_report&amp;z=medium">
 </A>
-<A HREF="./graph_all_periods.php?{graph_args}&amp;g=mem_report&amp;z=large">
-<IMG BORDER=0 ALT="{cluster} MEM"
-   SRC="./graph.php?{graph_args}&amp;g=mem_report&amp;z=medium">
+<A HREF="./graph.php?{$graph_args}&amp;g=mem_report&amp;z=large">
+<IMG BORDER=0 ALT="{$cluster} MEM"
+   SRC="./graph.php?{$graph_args}&amp;g=mem_report&amp;z=medium">
 </A>
-<A HREF="./graph_all_periods.php?{graph_args}&amp;g=cpu_report&amp;z=large">
-<IMG BORDER=0 ALT="{cluster} CPU"
-   SRC="./graph.php?{graph_args}&amp;g=cpu_report&amp;z=medium">
+<A HREF="./graph.php?{$graph_args}&amp;g=cpu_report&amp;z=large">
+<IMG BORDER=0 ALT="{$cluster} CPU"
+   SRC="./graph.php?{$graph_args}&amp;g=cpu_report&amp;z=medium">
 </A>
-<A HREF="./graph_all_periods.php?{graph_args}&amp;g=network_report&amp;z=large">
-<IMG BORDER=0 ALT="{cluster} NETWORK"
-    SRC="./graph.php?{graph_args}&amp;g=network_report&amp;z=medium">
+<A HREF="./graph.php?{$graph_args}&amp;g=network_report&amp;z=large">
+<IMG BORDER=0 ALT="{$cluster} NETWORK"
+    SRC="./graph.php?{$graph_args}&amp;g=network_report&amp;z=medium">
 </A>
-<!-- START BLOCK : optional_graphs -->
-<A HREF="./graph_all_periods.php?{graph_args}&amp;g={name}_report&amp;z=large">
-<IMG BORDER=0 ALT="{cluster} {name}" SRC="./graph.php?{graph_args}&amp;g={name}_report&amp;z=medium">
+{foreach $optional_graphs_data graph}
+<A HREF="./graph.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=large">
+<IMG BORDER=0 ALT="{$cluster} {$graph.name}" SRC="./graph.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=medium">
 </A>
-<!-- END BLOCK : optional_graphs -->
+{/foreach}
 </TD>
 </TR>
 
 <TR>
  <TD align=center valign=top>
-  <IMG SRC="./pie.php?{pie_args}" ALT="Pie Chart" BORDER="0">
+  <IMG SRC="./pie.php?{$pie_args}" ALT="Pie Chart" BORDER="0">
  </TD>
 </TR>
 </TABLE>
 
-<script>
-// Need to set the field value to metric name
-$("#metrics-picker").val("{metric_name}");
-</script>
 
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD CLASS=title COLSPAN="2">
   <FONT SIZE="-1">
   Show Hosts Scaled:
-  Auto<INPUT type=radio name="sh" value="2" OnClick="ganglia_form.submit();" {checked2}>
-  Same<INPUT type=radio name="sh" value="1" OnClick="ganglia_form.submit();" {checked1}>
-  None<INPUT type=radio name="sh" value="0" OnClick="ganglia_form.submit();" {checked0}>
+  {foreach $showhosts_levels id showhosts implode=""}
+  {$showhosts.name}<INPUT type=radio name="sh" value="{$id}" OnClick="ganglia_form.submit();" {$showhosts.checked}>
+  {/foreach}
   </FONT>
   |
-  {cluster} <strong>{metric}</strong>
-  last <strong>{range}</strong>
-  sorted <strong>{sort}</strong>
-<!-- START BLOCK : columns_size_dropdown -->
+  {$cluster} <strong>{$metric}</strong>
+  last <strong>{$range}</strong>
+  sorted <strong>{$sort}</strong>
+{if isset($columns_size_dropdown)}
   |
    <FONT SIZE="-1">
-   Size&nbsp;&nbsp;{size_menu}
-   Columns&nbsp;&nbsp;{cols_menu} (0 = metric + reports)
+   Size&nbsp;&nbsp;{$size_menu}
+   Columns&nbsp;&nbsp;{$cols_menu} (0 = metric + reports)
    </FONT>
-<!-- END BLOCK : columns_size_dropdown -->
+{/if}
   </TD>
 </TR>
 </TABLE>
@@ -84,15 +82,13 @@ $("#metrics-picker").val("{metric_name}");
 <CENTER>
 <TABLE>
 <TR>
-<!-- START BLOCK : sorted_list -->
-{metric_image}{br}
-<!-- END BLOCK : sorted_list -->
+{foreach $sorted_list host}
+{$host.metric_image}{$host.br}
+{/foreach}
 </TR>
 </TABLE>
 
 <p>
-<!-- START BLOCK : node_legend -->
-(Nodes colored by 1-minute load) | <A HREF="./node_legend.html">Legend</A>
-<!-- END BLOCK : node_legend -->
-
+{if isset($node_legend)}
+(Nodes colored by 1-minute load) | <A HREF="./node_legend.html">Legend</A>{/if}
 </CENTER>

@@ -1,5 +1,0 @@
-{
-   "report_name" : "packet_report",
-   "report_type" : "template",
-   "report_arguments"  : "target=alias(HOST_CLUSTER.pkts_in.sum%2C'Packets%20In')&target=alias(HOST_CLUSTER.pkts_out.sum%2C'Packets%20Out')&vtitle=packets"
-}

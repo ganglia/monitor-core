@@ -1,5 +1,0 @@
-{
-   "report_name" : "network_report",
-   "report_type" : "template",
-   "report_arguments"  : "target=alias(HOST_CLUSTER.bytes_in.sum%2C'Bytes%20In')&target=alias(HOST_CLUSTER.bytes_out.sum%2C'Bytes%20Out')&vtitle=packets"
-}

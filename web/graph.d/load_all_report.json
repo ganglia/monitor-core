@@ -1,5 +1,0 @@
-{
-   "report_name" : "cpu_report",
-   "report_type" : "template",
-   "report_arguments"  : "target=alias(HOST_CLUSTER.load_one.sum%2C'Load+One')&target=alias(HOST_CLUSTER.load_five.sum%2C'Load+Five')&target=alias(HOST_CLUSTER.load_fifteen.sum%2C'Load+Fifteen')&colorList=3333bb,ffea00,dd0000,ff8a60,e2e2f2"
-}
