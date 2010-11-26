@@ -1,0 +1,3 @@
+{
+	"included_reports": ["load_report","mem_report","cpu_report","network_report","packet_report"]
+}
