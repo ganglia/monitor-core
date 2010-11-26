@@ -3,7 +3,7 @@
 
 # Check if this context is private.
 include_once "./auth.php";
-// include_once "./calendar.php";
+include_once "./calendar.php";
 checkcontrol();
 checkprivate();
 
@@ -68,21 +68,21 @@ if(count($gridstack) > 1) {
   list($parentgrid, $parentlink) = explode("@", $gridstack[count($gridstack)-2]);
 }
 
-$tpl = new TemplatePower( template("$header.tpl") );
-$tpl->prepare();
-$tpl->assign("page_title", $title);
-$tpl->assign("refresh", $default_refresh);
+$tpl = new Dwoo_Template_File( template("$header.tpl") );
+$data = new Dwoo_Data();
+$data->assign("page_title", $title);
+$data->assign("refresh", $default_refresh);
 
 # Templated Logo image
-$tpl->assign("images","./templates/$template_name/images");
+$data->assign("images","./templates/$template_name/images");
 
-$tpl->assign( "date", date("r"));
+$data->assign( "date", date("r"));
 
 # The page to go to when "Get Fresh Data" is pressed.
 if (isset($page))
-      $tpl->assign("page",$page);
+      $data->assign("page",$page);
 else
-      $tpl->assign("page","./");
+      $data->assign("page","./");
 
 #
 # Used when making graphs via graph.php. Included in most URLs
@@ -101,26 +101,29 @@ $cluster_url=rawurlencode($clustername);
 $node_url=rawurlencode($hostname);
 
 # Make some information available to templates.
-$tpl->assign("cluster_url", $cluster_url);
+$data->assign("cluster_url", $cluster_url);
+$alt_view = "";
 
 if ($context=="cluster")
    {
-      $tpl->assign("alt_view", "<a href=\"./?p=2&amp;c=$cluster_url\">Physical View</a>");
+      $alt_view = "<a href=\"./?p=2&amp;c=$cluster_url\">Physical View</a>";
    }
 elseif ($context=="physical")
    {
-      $tpl->assign("alt_view", "<a href=\"./?c=$cluster_url\">Full View</a>");
+      $alt_view = "<a href=\"./?c=$cluster_url\">Full View</a>";
    }
 elseif ($context=="node")
    {
-      $tpl->assign("alt_view",
-      "<a href=\"./?c=$cluster_url&amp;h=$node_url&amp;$get_metric_string\">Host View</a>");
+      $alt_view =
+      "<a href=\"./?c=$cluster_url&amp;h=$node_url&amp;$get_metric_string\">Host View</a>";
    }
 elseif ($context=="host")
    {
-      $tpl->assign("alt_view",
-      "<a href=\"./?p=2&amp;c=$cluster_url&amp;h=$node_url\">Node View</a>");
+      $alt_view =
+      "<a href=\"./?p=2&amp;c=$cluster_url&amp;h=$node_url\">Node View</a>";
    }
+
+$data->assign("alt_view", $alt_view);
 
 # Build the node_menu
 $node_menu = "";
@@ -216,7 +219,7 @@ $node_menu .= hiddenvar("cr", $controlroom);
 $node_menu .= hiddenvar("js", $jobstart);
 $node_menu .= hiddenvar("jr", $jobrange);
 
-$tpl->assign("node_menu", $node_menu);
+$data->assign("node_menu", $node_menu);
 
 
 //////////////////// Build the metric menu ////////////////////////////////////
@@ -238,6 +241,7 @@ if( $context == "cluster" )
 #
 # If there are graphs present, show ranges.
 #
+$range_menu = "";
 if (!$physical) {
    $context_ranges = array_keys( $time_ranges );
    if ($jobrange)
@@ -245,45 +249,49 @@ if (!$physical) {
    if ($cs or $ce)
       $context_ranges[]="custom";
 
-   $range_menu = "<B>Last</B>&nbsp;&nbsp;";
+   $range_menu = "<B>Last</B>&nbsp;&nbsp;"
+      ."<SELECT NAME=\"r\" OnChange=\"ganglia_submit();\">\n";
    foreach ($context_ranges as $v) {
       $url=rawurlencode($v);
+      $range_menu .= "<OPTION VALUE=\"$url\"";
       if ($v == $range)
-	$checked = "checked=\"checked\"";
-      else
-	$checked = "";
-      $range_menu .= "<input OnChange=\"ganglia_submit();\" type=\"radio\" id=\"range-$v\" name=\"r\" value=\"$v\" $checked/><label for=\"range-$v\">$v</label>";
-
+         $range_menu .= "SELECTED";
+      $range_menu .= ">$v\n";
    }
+   $range_menu .= "</SELECT>\n";
 
-   $tpl->assign("range_menu", $range_menu);
 }
+
+$data->assign("range_menu", $range_menu);
 
 #
 # Only show metric list if we have some and are in cluster context.
 #
+$metric_menu = "";
 if (is_array($context_metrics) and $context == "cluster")
    {
+      $metric_menu = "<B>Metric</B>&nbsp;&nbsp;"
+         ."<SELECT NAME=\"m\" OnChange=\"ganglia_form.submit();\">\n";
 
       sort($context_metrics);
-      foreach( $context_metrics as $key )
+      foreach( $context_metrics as $k )
          {
-            $url = rawurlencode($key);
-            $metric_menu[] = "\"$url\"";
+            $url = rawurlencode($k);
+            $metric_menu .= "<OPTION VALUE=\"$url\" ";
+            if ($k == $metricname )
+                  $metric_menu .= "SELECTED";
+            $metric_menu .= ">$k\n";
          }
+      $metric_menu .= "</SELECT>\n";
 
-      $tpl->assign("available_metrics", join(",", $metric_menu) );       
-      $tpl->assign("is-metrics-picker-disabled", "");
-
-   } else {
-      // We have to disable the sort_menu if we are not in the cluster context
-      $tpl->assign("is-metrics-picker-disabled", '$("#sort_menu").toggle(); ');
    }
+$data->assign("metric_menu", $metric_menu );      
 
 
 #
 # Show sort order if there is more than one physical machine present.
 #
+$sort_menu = "";
 if ($context == "meta" or $context == "cluster")
    {
       $context_sorts[]="ascending";
@@ -298,20 +306,21 @@ if ($context == "meta" or $context == "cluster")
           $context_sorts[]="by hosts down";
       }
 
+      $sort_menu = "<B>Sorted</B>&nbsp;&nbsp;"
+         ."<SELECT NAME=\"s\" OnChange=\"ganglia_form.submit();\">\n";
+      foreach ( $context_sorts as $v )
+         {
+            $url = rawurlencode($v);
+            $sort_menu .= "<OPTION VALUE=\"$url\" ";
+            if ($v == $sort )
+                  $sort_menu .= "SELECTED";
 
-      $sort_menu = "<B>Sorted</B>&nbsp;&nbsp;";
-      foreach ($context_sorts as $v) {
-	  $url=rawurlencode($v);
-	  if ($v == $sort)
-	    $checked = "checked=\"checked\"";
-	  else
-	    $checked = "";
-	  $sort_menu .= "<input OnChange=\"ganglia_submit();\" type=\"radio\" id=\"radio-$url\" name=\"s\" value=\"$v\" $checked/><label for=\"radio-$url\">$v</label>";
+            $sort_menu .= ">$v\n";
+         }
+      $sort_menu .= "</SELECT>\n";
 
-      }
-
-      $tpl->assign("sort_menu", $sort_menu );
    }
+$data->assign("sort_menu", $sort_menu );
    
 if ($context == "physical" or $context == "cluster" or $context == 'host' )
    {
@@ -335,7 +344,7 @@ if ($context == "physical" or $context == "cluster" or $context == 'host' )
               continue;
           $size_menu .= "<OPTION VALUE=\"$size\"";
           if (    ( isset($clustergraphsize) && ($size === $clustergraphsize)) 
-               || (!isset($clustergraphsize) && ($size === 'small' ))) {
+               || (!isset($clustergraphsize) && ($size === 'medium' ))) {
               $size_menu .= " SELECTED";
           }
           $size_menu .= ">$size</OPTION>\n";
@@ -358,24 +367,31 @@ if ($context == "host")
          }
       $metric_cols_menu .= "</SELECT>\n";
    }
+
+$custom_time = "";
+
 if ($context == "meta" or $context == "cluster" or $context == "host")
    {
       $examples = "Feb 27 2007 00:00, 2/27/2007, 27.2.2007, now -1 week,"
          . " -2 days, start + 1 hour, etc.";
-      $custom_time = "&nbsp;&nbsp;or from <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"cs\" ID=\"datepicker-cs\" SIZE=\"17\"";
+      $custom_time = "or from <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"cs\" ID=\"cs\" SIZE=\"17\"";
       if ($cs)
          $custom_time .= " value=\"$cs\"";
-      $custom_time .= "> to <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"ce\" ID=\"datepicker-ce\" SIZE=\"17\"";
+      $custom_time .= "> to <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"ce\" ID=\"ce\" SIZE=\"17\"";
       if ($ce)
          $custom_time .= " value=\"$ce\"";
-      $custom_time .= "> <input type=\"submit\" value=\"Go\">\n";
+      $custom_time .= "><input type=\"submit\" value=\"Go\">\n";
       $custom_time .= "<input type=\"button\" value=\"Clear\" onclick=\"ganglia_submit(1)\">\n";
-#      $custom_time .= $calendar;
-      $tpl->assign("custom_time", $custom_time);
+      $custom_time .= $calendar;
 
-#      $tpl->assign("custom_time_head", $calendar_head);
-      $tpl->assign("custom_time_head", "");
+      $data->assign("custom_time_head", $calendar_head);
    }
+else
+   {
+      $data->assign("custom_time_head", "");
+   }
+
+$data->assign("custom_time", $custom_time);
 
 # Make sure that no data is cached..
 header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");    # Date in the past
@@ -383,5 +399,5 @@ header ("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); # always modifie
 header ("Cache-Control: no-cache, must-revalidate");  # HTTP/1.1
 header ("Pragma: no-cache");                          # HTTP/1.0
 
-$tpl->printToScreen();
+$dwoo->output($tpl, $data);
 ?>

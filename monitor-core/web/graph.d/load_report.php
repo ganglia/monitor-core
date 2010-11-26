@@ -93,6 +93,8 @@ function graph_load_report( &$rrdtool_graph )
         }
     }
 
+    $series .="LINE2:'cpu_num'#$cpu_num_color:'CPUs\\g' ";
+
     if ( $graphreport_stats ) {
         $series .= "CDEF:cpun_pos=cpu_num,0,LT,0,cpu_num,IF "
                 . "VDEF:cpun_last=cpun_pos,LAST "

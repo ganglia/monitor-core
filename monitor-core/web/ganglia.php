@@ -33,7 +33,6 @@ $metrics = array();
 $version = array();
 
 # The web frontend version, from conf.php.
-#$version["webfrontend"] = "$majorversion.$minorversion.$microversion";
 $version["webfrontend"] = "$ganglia_version";
 
 # Get rrdtool version
@@ -99,7 +98,7 @@ function start_meta ($parser, $tagname, $attrs)
             break;
 
          case "METRICS":
-            $metricname = $attrs['NAME'];
+            $metricname = rawurlencode($attrs['NAME']);
             $metrics[$sourcename][$metricname] = $attrs;
             break;
 
@@ -164,49 +163,13 @@ function start_cluster ($parser, $tagname, $attrs)
             break;
 
          case "METRIC":
-            $metricname = $attrs['NAME'];
+            $metricname = rawurlencode($attrs['NAME']);
             $metrics[$hostname][$metricname] = $attrs;
             break;
 
          default:
             break;
       }
-}
-
-function start_everything ($parser, $tagname, $attrs)
-{
-   global $index_array, $hosts, $metrics, $cluster, $self, $grid, $hosts_up, $hosts_down;
-   static $hostname, $cluster_name;
-
-   switch ($tagname)
-      {
-         case "GANGLIA_XML":
-            preamble($attrs);
-            break;
-         case "GRID":
-            $self = $attrs['NAME'];
-            $grid = $attrs;
-            break;
-
-         case "CLUSTER":
-#	    $cluster = $attrs;
-            $cluster_name = $attrs['NAME'];
-            break;
-
-         case "HOST":
-            $hostname = $attrs['NAME'];
-	    $index_array['cluster'][$hostname] = $cluster_name;
-
-         case "METRIC":
-            $metricname = $attrs['NAME'];
-	    if ( $metricname != $hostname ) 
-	      $index_array['metrics'][$metricname][] = $hostname;
-            break;
-
-         default:
-            break;
-      }
-
 }
 
 
@@ -267,7 +230,7 @@ function start_host ($parser, $tagname, $attrs)
             break;
 
          case "METRIC":
-            $metricname = $attrs['NAME'];
+            $metricname = rawurlencode($attrs['NAME']);
             $metrics[$metricname] = $attrs;
             break;
 
@@ -338,10 +301,6 @@ function Gmetad ()
          case "cluster":
             xml_set_element_handler($parser, "start_cluster", "end_all");
             $request = "/$clustername";
-             break;
-         case "index_array":
-            xml_set_element_handler($parser, "start_everything", "end_all");
-            $request = "/";
              break;
          case "cluster-summary":
             xml_set_element_handler($parser, "start_cluster_summary", "end_all");

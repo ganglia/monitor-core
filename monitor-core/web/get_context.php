@@ -151,7 +151,7 @@ if (!$metricname)
     $metricname = "$default_metric";
 
 if (!$sort)
-    $sort = "by name";
+    $sort = "descending";
 
 # Since cluster context do not have the option to sort "by hosts down" or
 # "by hosts up", therefore change sort order to "descending" if previous

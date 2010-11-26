@@ -1,5 +1,0 @@
-{
-   "report_name" : "load_report",
-   "report_type" : "template",
-   "report_arguments"  : "target=alias(HOST_CLUSTER.load_one.sum%2C'Load%20One')&target=alias(HOST_CLUSTER.proc_run.sum%2C'Running%20processes')&areaMode=first&colorList=BBBBBB,2030F4"
-}

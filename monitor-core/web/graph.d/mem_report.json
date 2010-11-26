@@ -1,5 +1,0 @@
-{
-   "report_name" : "mem_report",
-   "report_type" : "template",
-   "report_arguments"  : "target=alias(HOST_CLUSTER.mem_shared.sum%2C'Mem+shared')&target=alias(HOST_CLUSTER.mem_cached.sum%2C'Mem+cached')&target=alias(HOST_CLUSTER.mem_buffers.sum%2C'Mem+buffered')&target=alias(HOST_CLUSTER.mem_free.sum%2C'Mem+Free')&areaMode=stacked&colorList=0000aa,33cc33,99ff33,9900CC,5555cc"
-}
