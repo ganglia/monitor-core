@@ -19,15 +19,15 @@ if (empty($hostname)) {
    return;
 }
 
-$tpl = new Dwoo_Template_File( template("show_node.tpl") );
-$data = new Dwoo_Data();
-$data->assign("extra", template("node_extra.tpl"));
+$tpl = new TemplatePower( template("show_node.tpl") );
+$tpl->assignInclude("extra", template("node_extra.tpl"));
+$tpl->prepare();
 
 $up = $hosts_up ? 1 : 0;
 
 $class = ($up) ? "even" : "down";
-$data->assign("class",$class);
-$data->assign("name", $hostname);
+$tpl->assign("class",$class);
+$tpl->assign("name", $hostname);
 
 # $metrics is an array of [Metrics][Hostname][NAME|VAL|TYPE|UNITS|SOURCE].
 
@@ -35,12 +35,12 @@ $data->assign("name", $hostname);
 $hostattrs = ($up) ? $hosts_up : $hosts_down;
 list($rack,$rank,$plane) = findlocation($hostattrs);
 $location = ($rack<0) ? "Unknown" : "Rack $rack, Rank $rank, Plane $plane.";
-$data->assign("location",$location);
+$tpl->assign("location",$location);
 
 if(isset($hostattrs['ip'])) {
-	$data->assign("ip", $hostattrs['ip']);
+	$tpl->assign("ip", $hostattrs['ip']);
 } else {
-	$data->assign("ip", "");
+	$tpl->assign("ip", "");
 }
 
 # The metrics we need for this node.
@@ -63,32 +63,33 @@ $part_max_used=$metrics['part_max_used']['VAL'];
 # Disk metrics are newer (as of 2.5.0), so we check more carefully.
 $disk = ($disk_total) ? "Using $disk_use of $disk_total $disk_units" : "Unknown";
 $part_max = ($part_max_used) ? "$part_max_used% used." : "Unknown";
+   
 
 # Compute time of last heartbeat from node's dendrite.
 $clustertime=$cluster['LOCALTIME'];
-$data->assign("clustertime", strftime("%c", $clustertime));
+$tpl->assign("clustertime", strftime("%c", $clustertime));
 $heartbeat=$hostattrs['REPORTED'];
 $age = $clustertime - $heartbeat;
 if ($age > 3600) {
-   $data->assign("age", uptime($age));
+   $tpl->assign("age", uptime($age));
 } else {
    $s = ($age > 1) ? "s" : "";
-   $data->assign("age", "$age second$s");
+   $tpl->assign("age", "$age second$s");
 }
 
 # The these hardware units should be more flexible.
 $s = ($cpu_num>1) ? "s" : "";
-$data->assign("s",$s);
-$data->assign("cpu", sprintf("%s x %.2f GHz", $cpu_num, $cpu_speed));
-$data->assign("mem", sprintf("%.2f GB", $mem_total_gb));
-$data->assign("disk","$disk");
-$data->assign("part_max_used", "$part_max");
-$data->assign("load_one",$load_one);
-$data->assign("load_five",$load_five);
-$data->assign("load_fifteen",$load_fifteen);
-$data->assign("cpu_user",$cpu_user);
-$data->assign("cpu_system",$cpu_system);
-$data->assign("cpu_idle",$cpu_idle);
+$tpl->assign("s",$s);
+$tpl->assign("cpu", sprintf("%s x %.2f GHz", $cpu_num, $cpu_speed));
+$tpl->assign("mem", sprintf("%.2f GB", $mem_total_gb));
+$tpl->assign("disk","$disk");
+$tpl->assign("part_max_used", "$part_max");
+$tpl->assign("load_one",$load_one);
+$tpl->assign("load_five",$load_five);
+$tpl->assign("load_fifteen",$load_fifteen);
+$tpl->assign("cpu_user",$cpu_user);
+$tpl->assign("cpu_system",$cpu_system);
+$tpl->assign("cpu_idle",$cpu_idle);
 
 # Choose a load color from a unix load value.
 function loadindex($load) {
@@ -108,12 +109,12 @@ function percentindex($val) {
    return $level;
 }
 
-$data->assign("load1",loadindex($load_one));
-$data->assign("load5",loadindex($load_five));
-$data->assign("load15",loadindex($load_fifteen));
-$data->assign("user",percentindex($cpu_user));
-$data->assign("sys",percentindex($cpu_system));
-$data->assign("idle",percentindex(100 - $cpu_idle));
+$tpl->assign("load1",loadindex($load_one));
+$tpl->assign("load5",loadindex($load_five));
+$tpl->assign("load15",loadindex($load_fifteen));
+$tpl->assign("user",percentindex($cpu_user));
+$tpl->assign("sys",percentindex($cpu_system));
+$tpl->assign("idle",percentindex(100 - $cpu_idle));
 
 # Software metrics
 $os_name=$metrics['os_name']['VAL'];
@@ -128,20 +129,20 @@ $swap_free=$metrics['swap_free']['VAL']/1024.0;
 $swap_total=sprintf("%.1f", $metrics['swap_total']['VAL']/1024.0);
 $swap_used=sprintf("%.1f", $swap_total - $swap_free);
 
-$data->assign("OS","$os_name $os_release ($machine_type)");
-$data->assign("booted","$booted");
-$data->assign("uptime", $up ? $uptime : "[down]");
-$data->assign("swap","Using $swap_used of $swap_total MB swap.");
+$tpl->assign("OS","$os_name $os_release ($machine_type)");
+$tpl->assign("booted","$booted");
+$tpl->assign("uptime", $up ? $uptime : "[down]");
+$tpl->assign("swap","Using $swap_used of $swap_total MB swap.");
 
 # For the back link.
 $cluster_url=rawurlencode($clustername);
-$data->assign("physical_view","./?p=$physical&amp;c=$cluster_url");
+$tpl->assign("physical_view","./?p=$physical&amp;c=$cluster_url");
 
 # For the full host view link.
-$data->assign("full_host_view","./?c=$cluster_url&amp;h=$hostname&amp;$get_metric_string");
+$tpl->assign("full_host_view","./?c=$cluster_url&amp;h=$hostname&amp;$get_metric_string");
 
 # For the reload link.
-$data->assign("self","./?c=$cluster_url&amp;h=$hostname&amp;p=$physical");
+$tpl->assign("self","./?c=$cluster_url&amp;h=$hostname&amp;p=$physical");
 
-$dwoo->output($tpl, $data);
+$tpl->printToScreen();
 ?>

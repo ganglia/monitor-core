@@ -1,0 +1,17 @@
+#jquery-live-search {
+	background: #fff;
+
+	padding: 5px 10px;
+	max-height: 400px;
+	overflow: auto;
+
+	position: absolute;
+	z-index: 99;
+
+	border: 1px solid #A9A9A9;
+	border-width: 0 1px 1px 1px;
+
+	-webkit-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+}

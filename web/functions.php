@@ -662,4 +662,140 @@ function filter_permit($source_name)
 
    return isset($filter_permit_list[$source_name]);
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// Get all the available views
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+function get_available_views() {
+  /* -----------------------------------------------------------------------
+  Find available views by looking in the GANGLIA_DIR/conf directory
+  anything that matches view_*.json. Read them all and build a available_views
+  array
+  ----------------------------------------------------------------------- */
+  $available_views = array();
+
+  if ($handle = opendir($GLOBALS['views_dir'])) {
+
+      while (false !== ($file = readdir($handle))) {
+
+	if ( preg_match("/view_(.*)/", $file, $out) ) {
+
+	  $view_config_file = $GLOBALS['views_dir'] . "/" . $file;
+	  if ( ! is_file ($view_config_file) ) {
+	    echo("Can't read view config file " . $view_config_file . ". Please check permissions");
+	  }
+
+	  $view = json_decode(file_get_contents($view_config_file), TRUE);
+	  // Check whether view type has been specified ie. regex. If not it's standard view
+	  isset($view['view_type']) ? $view_type = $view['view_type'] : $view_type = "standard";
+	  $available_views[] = array ( "file_name" => $view_config_file, "view_name" => $view['view_name'],
+	    "items" => $view['items'], "view_type" => $view_type);
+	  unset($view);
+
+	}
+      }
+
+      closedir($handle);
+  }
+
+  foreach ($available_views as $key => $row) {
+    $name[$key]  = strtolower($row['view_name']);
+  }
+
+  array_multisort($name,SORT_ASC, $available_views);
+
+  return $available_views;
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// Get image graph URLS
+// This function returns an array of graph URLs to be used when rendering the view. It returns
+// only the base ie. cluster, host, metric information. It is up to the caller to add proper
+// size information, time ranges etc.
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+function get_view_graph_elements($view) {
+
+  require("./cache.php");
+
+  switch ( $view['view_type'] ) {
+
+    case "standard":
+    // Does view have any items/graphs defined
+    if ( sizeof($view['items']) == 0 ) {
+      print "No graphs defined for this view. Please add some";
+    } else {
+
+      foreach ( $view['items'] as $item_id => $item ) {
+
+	// Is it a metric or a graph(report)
+	if ( isset($item['metric']) ) {
+	  $graph_args_array[] = "m=" . $item['metric'];
+	  $name = $item['metric'];
+	} else {
+	  $graph_args_array[] = "g=" . $item['graph'];
+	  $name = $item['graph'];
+	}
+
+	$hostname = $item['hostname'];
+	$cluster = $index_array['cluster'][$hostname];
+	$graph_args_array[] = "h=$hostname";
+	$graph_args_array[] = "c=$cluster";
+
+	$view_elements[] = array ( "graph_args" => join("&", $graph_args_array), 
+	  "hostname" => $hostname,
+	  "cluster" => $cluster,
+	  "name" => $name
+	);
+
+	unset($graph_args_array);
+
+      } // end of foreach ( $view['items']
+    } // end of if ( sizeof($view['items'])
+    break;
+    ;;
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Currently only supports matching hosts.
+    ////////////////////////////////////////////////////////////////////////////////////
+    case "regex":
+      foreach ( $view['items'] as $item_id => $item ) {
+	// Is it a metric or a graph(report)
+	if ( isset($item['metric']) ) {
+	  $metric_suffix = "m=" . $item['metric'];
+	  $name = $item['metric'];
+	} else {
+	  $metric_suffix = "g=" . $item['graph'];
+	  $name = $item['graph'];
+	}
+
+	// Find hosts matching a criteria
+	$query = $item['hostname'];
+	foreach ( $index_array['hosts'] as $key => $host_name ) {
+	  if ( preg_match("/$query/", $host_name ) ) {
+	    $cluster = $index_array['cluster'][$host_name];
+	    $graph_args_array[] = "h=$host_name";
+	    $graph_args_array[] = "c=$cluster";
+
+	    $view_elements[] = array ( "graph_args" => $metric_suffix . "&" . join("&", $graph_args_array), 
+	      "hostname" => $host_name,
+	      "cluster" => $cluster,
+	      "name" => $name);
+
+	    unset($graph_args_array);
+
+	  }
+	}
+	
+      } // end of foreach ( $view['items'] as $item_id => $item )
+    break;;
+  
+  } // end of switch ( $view['view_type'] ) {
+
+
+  return ($view_elements);
+
+}
+
 ?>

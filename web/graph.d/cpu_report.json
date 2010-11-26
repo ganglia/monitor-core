@@ -1,0 +1,5 @@
+{
+   "report_name" : "cpu_report",
+   "report_type" : "template",
+   "report_arguments"  : "target=alias(HOST_CLUSTER.cpu_user.sum%2C'CPU+User')&target=alias(HOST_CLUSTER.cpu_nice.sum%2C'CPU+Nice')&target=alias(HOST_CLUSTER.cpu_system.sum%2C'CPU+System')&target=alias(HOST_CLUSTER.cpu_wio.sum%2C'CPU+Wait')&target=alias(HOST_CLUSTER.cpu_idle.sum%2C'CPU+Idle')&areaMode=stacked&max=100&colorList=3333bb,ffea00,dd0000,ff8a60,e2e2f2"
+}
