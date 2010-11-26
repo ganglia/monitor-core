@@ -1,14 +1,25 @@
 <?php
 /* $Id$ */
-$tpl = new Dwoo_Template_File( template("meta_view.tpl") );
-$data = new Dwoo_Data();
+$tpl = new TemplatePower( template("meta_view.tpl") );
+$tpl->prepare();
 
 discover_filters();
+foreach ($filter_defs as $filter_def)
+{
+   $filter_shortname = $filter_def["shortname"];
+   $tpl->newBlock("filter_block");
+   $tpl->assign("filter_shortname", $filter_shortname);
+   $tpl->assign("filter_name", $filter_def["name"]); 
 
-if ( !empty($filter_defs) ) {
-   $data->assign("filters", $filter_defs);
-   $data->assign("choose_filter", $choose_filter);
+   foreach ($filter_def["choices"] as $choice)
+   {
+      $tpl->newBlock("filter_choice_block");
+      $tpl->assign("filter_choice", $choice);
+      if($choose_filter[$filter_shortname] == $choice)
+         $tpl->assign("selected", "selected");
+   }
 }
+
 
 # Find the private clusters.  But no one is emabarrassed in the
 # control room (public only!). 
@@ -67,8 +78,6 @@ if ($sort == "descending") {
       $sorted_sources[$self] = -1;
       asort($sorted_sources);
 }
-
-$sources = array();
 
 # Display the sources. The first is ourself, the rest are our children.
 foreach ( $sorted_sources as $source => $val )
@@ -130,64 +139,70 @@ foreach ( $sorted_sources as $source => $val )
       if ($avg_cpu_num == 0) $avg_cpu_num = 1;
       $cluster_util = sprintf("%.0f", ((double) find_avg($clusname, "", "load_one") / $avg_cpu_num ) * 100);
 
-      $sources[$source]["name"] = $name;
-      $sources[$source]["cpu_num"] = $m["cpu_num"]['SUM'];
-      $sources[$source]["url"] = $url;
-      $sources[$source]["class"] = $class;
-
-      # Initialize some variables for the $sources array to be past to the template since private sources
-      # may not have these defined
-      $sources[$source]["alt_view"] = "";
-      $sources[$source]["cluster_load"] = "";
-      $sources[$source]["cluster_util"] = "";
-      $sources[$source]["num_dead_nodes"] = "";
-      $sources[$source]["range"] = "";
-      $sources[$source]["graph_url"] = "";
-      $sources[$source]["base64img"] = "";
-
-      if ($localtime)
-         $sources[$source]["localtime"] = "<font size=\"-1\">Localtime:</font><br>&nbsp;&nbsp;" 
-            . date("Y-m-d H:i", $localtime);
+      $tpl->newBlock ("source_info");
+      $tpl->assign("name", $name );
+      $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
+      $tpl->assign("url", $url);
+      $tpl->assign("class", $class);
+      if (isset($num_sources))
+         $tpl->assign("Sources: $num_sources");
 
       # I dont like this either, but we need to have private clusters because some
       # users are skittish about publishing the load info.
       if (!isset($private[$source]) or !$private[$source]) 
          {
-            $sources[$source]["alt_view"] = "<FONT SIZE=\"-2\">$alt_url</FONT>";
-            $sources[$source]["public"] = 1;
+            $tpl->assign("alt_view", "<FONT SIZE=\"-2\">$alt_url</FONT>");
+            # Each block has a different namespace, so we need to redefine variables.
+            $tpl->newBlock("public");
+            if ($localtime)
+               $tpl->assign("localtime",  "<font size=\"-1\">Localtime:</font><br>&nbsp;&nbsp;" 
+                  . date("Y-m-d H:i", $localtime) );
             if ($cluster_load)
-               $sources[$source]["cluster_load"] = "<font size=\"-1\">Current Load Avg (15, 5, 1m):</font>"
-                  ."<br>&nbsp;&nbsp;<b>$cluster_load</b>";
+               $tpl->assign("cluster_load", "<font size=\"-1\">Current Load Avg (15, 5, 1m):</font>"
+                  ."<br>&nbsp;&nbsp;<b>$cluster_load</b>");
             if (isset($cluster_util))
-               $sources[$source]["cluster_util"] = "<font size=\"-1\">Avg Utilization (last $range):</font>"
-                  ."<br>&nbsp;&nbsp;<b>$cluster_util%</b>";
-            $sources[$source]["num_nodes"] = $grid[$source]["HOSTS_UP"];
-            $sources[$source]["num_dead_nodes"] = $grid[$source]["HOSTS_DOWN"];
-            $sources[$source]["range"] = $range;
-            $sources[$source]["graph_url"] = $graph_url;
+               $tpl->assign("cluster_util", "<font size=\"-1\">Avg Utilization (last $range):</font>"
+                  ."<br>&nbsp;&nbsp;<b>$cluster_util%</b>");
+            $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
+            $tpl->assign("num_nodes", $grid[$source]["HOSTS_UP"] );
+            $tpl->assign("num_dead_nodes", $grid[$source]["HOSTS_DOWN"] );
+            $tpl->assign("range", $range);
+            $tpl->assign("name", $name );
+            $tpl->assign("url", $url);
+            $tpl->assign("graph_url", $graph_url);
 	    if(isset($base64img)) {
-                $sources[$source]["base64img"] = $base64img;
+                $tpl->assign("base64img", $base64img);
 	    }
             if ( $source == $self ) {
-               $sources[$source]["self_summary_graphs"] = 1;
+               $tpl->newBlock("self_summary_graphs");
+               $tpl->assign("range", $range);
+               $tpl->assign("name", $name );
+               $tpl->assign("url", $url);
+               $tpl->assign("graph_url", $graph_url);
             } else {
-               $sources[$source]["summary_graphs"] = 1;
+               $tpl->newBlock("summary_graphs");
+               $tpl->assign("range", $range);
+               $tpl->assign("name", $name );
+               $tpl->assign("url", $url);
+               $tpl->assign("graph_url", $graph_url);
             }
+
          }
       else 
          {
-            $sources[$source]["private"] = 1;
-            $sources[$source]["num_nodes"] = $grid[$source]["HOSTS_UP"] + $grid[$source]["HOSTS_DOWN"];
+            $tpl->newBlock("private");
+            $tpl->assign("num_nodes", $grid[$source]["HOSTS_UP"] + $grid[$source]["HOSTS_DOWN"] );
+            $tpl->assign("cpu_num", $m["cpu_num"]['SUM']);
+            if ($localtime)
+               $tpl->assign("localtime", "<font size=\"-1\">Localtime:</font><br>&nbsp;&nbsp;"
+                  . date("Y-m-d H:i",$localtime));
          }
    }
 
-$data->assign("sources", $sources);
-$snap_rows = array();
-
 # Show load images.
 if ($show_meta_snapshot=="yes") {
-   $data->assign("show_snapshot", 1);
-   $data->assign("self", "$self $meta_designator");
+   $tpl->newBlock("show_snapshot");
+   $tpl->assign("self", "$self $meta_designator");
 
    foreach ($sorted_sources as $c=>$value) {
       if ($c==$self) continue;
@@ -221,6 +236,7 @@ if ($show_meta_snapshot=="yes") {
       {
          $snapnames = "";
          $snapimgs = "";
+         $tpl->newBlock("snap_row");
          foreach(range(0, $cols-1) as $j)
             {
                $k = $i + $j;
@@ -237,12 +253,11 @@ if ($show_meta_snapshot=="yes") {
                   }
                $snapimgs .= "<img src=\"$Images[$k]\" alt=\"$names[$k]\" border=0 align=top></a></td>\n";
             }
-         $snap_rows[$i]["names"] = $snapnames;
-         $snap_rows[$i]["images"] = $snapimgs;
+         $tpl->assign("names", $snapnames);
+         $tpl->assign("images", $snapimgs);
          $i += $cols;
       }
-   $data->assign("snap_rows", $snap_rows);
 }
 
-$dwoo->output($tpl, $data);
+$tpl->printToScreen();
 ?>

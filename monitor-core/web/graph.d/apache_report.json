@@ -1,0 +1,5 @@
+{
+   "report_name" : "apache_report",
+   "report_type" : "template",
+   "report_arguments"  : "target=HOST_CLUSTER.apache_200.sum&target=HOST_CLUSTER.apache_300.sum&target=HOST_CLUSTER.apache_400.sum&target=HOST_CLUSTER.apache_500.sum&areaMode=stacked"
+}

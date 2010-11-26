@@ -1,9 +1,9 @@
 <?php
 /* $Id$ */
-$tpl = new Dwoo_Template_File( template("grid_tree.tpl") );
-$data = new Dwoo_Data();
+$tpl = new TemplatePower( template("grid_tree.tpl") );
+$tpl->prepare();
 
-$data->assign("self", "$self");
+$tpl->assign("self", "$self");
 
 # Not as complicated as before. No depth-first-search, and
 # we only show our immediate children.
@@ -14,7 +14,7 @@ $ancestors = $gridstack;
 array_pop($ancestors);
 
 if (count($ancestors)) {
-   $data->assign("parentgrid", 1);
+   $tpl->newBlock("parentgrid");
    $parentgridtable = "";
 
    $parentgridstack = array();
@@ -26,7 +26,8 @@ if (count($ancestors)) {
          "<a href=\"$link?t=yes&amp;gw=back&amp;gs=$parentgridstack_url\">$name</a></td></tr>\n";
    }
 
-   $data->assign("parents", $parentgridtable);
+   $tpl->assign("parents", $parentgridtable);
+   $tpl->gotoBlock("_ROOT");
 }
 
 $gridtable="";
@@ -34,7 +35,7 @@ $gridtable="";
 # Publish our children.
 if ($n = count($grid))
    {
-      $data->assign("n", $n);
+      $tpl->assign("n", $n);
       foreach ($grid as $source => $attrs)
          {
             if ($source == $self) continue;
@@ -55,8 +56,9 @@ if ($n = count($grid))
       $gridtable .= "</tr></table>";
    }
 
-$data->assign("children", $gridtable);
+$tpl->assign("children", $gridtable);
 
-$dwoo->output($tpl, $data);
+
+$tpl->printToScreen();
 
 ?>

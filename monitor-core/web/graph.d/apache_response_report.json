@@ -1,0 +1,5 @@
+{
+   "report_name" : "apache_response_report",
+   "report_type" : "template",
+   "report_arguments"  : "target=HOST_CLUSTER.apache_90th_dur.sum&target=HOST_CLUSTER.apache_avg_dur.sum"
+}

@@ -1,5 +1,7 @@
 /* The Ganglia Web-frontend Cascading Style Sheet. */
 
+body{ font: 75% "Trebuchet MS", sans-serif; margin: 5px;}
+
 A:link
 {
    color: rgb(32,41,204);
@@ -184,3 +186,36 @@ td strong
       color: rgb(100,100,100);
 }
 
+/* Views table and menu styling. */
+#views_table {
+      font-size: 12px
+}
+#table_top_chooser {
+      font-size: 12px
+}
+#views_menu { width: 200px; }
+#views_menu ul
+{
+margin-left: 0;
+padding-left: 0;
+list-style-type: none;
+font-family: Arial, Helvetica, sans-serif;
+}
+#views_menu a
+{
+display: block;
+padding: 3px;
+width: 160px;
+background-color: white;
+border-bottom: 1px solid #eee;
+}
+#views_menu a:link, #navlist a:visited
+{
+color: blue;
+text-decoration: none;
+}
+#views_menu a:hover
+{
+background-color: #dddddd;
+color: blue;
+}
