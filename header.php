@@ -3,7 +3,7 @@
 
 # Check if this context is private.
 include_once "./auth.php";
-include_once "./calendar.php";
+// include_once "./calendar.php";
 checkcontrol();
 checkprivate();
 
@@ -249,16 +249,16 @@ if (!$physical) {
    if ($cs or $ce)
       $context_ranges[]="custom";
 
-   $range_menu = "<B>Last</B>&nbsp;&nbsp;"
-      ."<SELECT NAME=\"r\" OnChange=\"ganglia_submit();\">\n";
+   $range_menu = "<B>Last</B>&nbsp;&nbsp;";
    foreach ($context_ranges as $v) {
       $url=rawurlencode($v);
-      $range_menu .= "<OPTION VALUE=\"$url\"";
       if ($v == $range)
-         $range_menu .= "SELECTED";
-      $range_menu .= ">$v\n";
+	$checked = "checked=\"checked\"";
+      else
+	$checked = "";
+      $range_menu .= "<input OnChange=\"ganglia_submit();\" type=\"radio\" id=\"range-$v\" name=\"r\" value=\"$v\" $checked/><label for=\"range-$v\">$v</label>";
+
    }
-   $range_menu .= "</SELECT>\n";
 
 }
 
@@ -267,25 +267,25 @@ $data->assign("range_menu", $range_menu);
 #
 # Only show metric list if we have some and are in cluster context.
 #
-$metric_menu = "";
+$metric_menu = array();
 if (is_array($context_metrics) and $context == "cluster")
    {
-      $metric_menu = "<B>Metric</B>&nbsp;&nbsp;"
-         ."<SELECT NAME=\"m\" OnChange=\"ganglia_form.submit();\">\n";
 
       sort($context_metrics);
-      foreach( $context_metrics as $k )
+      foreach( $context_metrics as $key )
          {
-            $url = rawurlencode($k);
-            $metric_menu .= "<OPTION VALUE=\"$url\" ";
-            if ($k == $metricname )
-                  $metric_menu .= "SELECTED";
-            $metric_menu .= ">$k\n";
+            $url = rawurlencode($key);
+            $metric_menu[] = "\"$url\"";
          }
-      $metric_menu .= "</SELECT>\n";
 
+      $data->assign("available_metrics", join(",", $metric_menu) );       
+      $data->assign("is_metrics_picker_disabled", "");
+
+   } else {
+      // We have to disable the sort_menu if we are not in the cluster context
+      $data->assign("is_metrics_picker_disabled", '$("#sort_menu").toggle(); ');
+      $data->assign("available_metrics", "" );       
    }
-$data->assign("metric_menu", $metric_menu );      
 
 
 #
@@ -306,18 +306,17 @@ if ($context == "meta" or $context == "cluster")
           $context_sorts[]="by hosts down";
       }
 
-      $sort_menu = "<B>Sorted</B>&nbsp;&nbsp;"
-         ."<SELECT NAME=\"s\" OnChange=\"ganglia_form.submit();\">\n";
-      foreach ( $context_sorts as $v )
-         {
-            $url = rawurlencode($v);
-            $sort_menu .= "<OPTION VALUE=\"$url\" ";
-            if ($v == $sort )
-                  $sort_menu .= "SELECTED";
 
-            $sort_menu .= ">$v\n";
-         }
-      $sort_menu .= "</SELECT>\n";
+      $sort_menu = "<B>Sorted</B>&nbsp;&nbsp;";
+      foreach ($context_sorts as $v) {
+	  $url=rawurlencode($v);
+	  if ($v == $sort)
+	    $checked = "checked=\"checked\"";
+	  else
+	    $checked = "";
+	  $sort_menu .= "<input OnChange=\"ganglia_submit();\" type=\"radio\" id=\"radio-$url\" name=\"s\" value=\"$v\" $checked/><label for=\"radio-$url\">$v</label>";
+
+      }
 
    }
 $data->assign("sort_menu", $sort_menu );
@@ -344,7 +343,7 @@ if ($context == "physical" or $context == "cluster" or $context == 'host' )
               continue;
           $size_menu .= "<OPTION VALUE=\"$size\"";
           if (    ( isset($clustergraphsize) && ($size === $clustergraphsize)) 
-               || (!isset($clustergraphsize) && ($size === 'medium' ))) {
+               || (!isset($clustergraphsize) && ($size === 'small' ))) {
               $size_menu .= " SELECTED";
           }
           $size_menu .= ">$size</OPTION>\n";
@@ -374,24 +373,27 @@ if ($context == "meta" or $context == "cluster" or $context == "host")
    {
       $examples = "Feb 27 2007 00:00, 2/27/2007, 27.2.2007, now -1 week,"
          . " -2 days, start + 1 hour, etc.";
-      $custom_time = "or from <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"cs\" ID=\"cs\" SIZE=\"17\"";
+      $custom_time = "&nbsp;&nbsp;or from <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"cs\" ID=\"datepicker-cs\" SIZE=\"17\"";
       if ($cs)
          $custom_time .= " value=\"$cs\"";
-      $custom_time .= "> to <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"ce\" ID=\"ce\" SIZE=\"17\"";
+      $custom_time .= "> to <INPUT TYPE=\"TEXT\" TITLE=\"$examples\" NAME=\"ce\" ID=\"datepicker-ce\" SIZE=\"17\"";
       if ($ce)
          $custom_time .= " value=\"$ce\"";
-      $custom_time .= "><input type=\"submit\" value=\"Go\">\n";
+      $custom_time .= "> <input type=\"submit\" value=\"Go\">\n";
       $custom_time .= "<input type=\"button\" value=\"Clear\" onclick=\"ganglia_submit(1)\">\n";
-      $custom_time .= $calendar;
+#      $custom_time .= $calendar;
+      $data->assign("custom_time", $custom_time);
 
-      $data->assign("custom_time_head", $calendar_head);
+#      $tpl->assign("custom_time_head", $calendar_head);
+      $data->assign("custom_time_head", "");
    }
 else
    {
       $data->assign("custom_time_head", "");
    }
-
+ 
 $data->assign("custom_time", $custom_time);
+
 
 # Make sure that no data is cached..
 header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");    # Date in the past
@@ -400,4 +402,5 @@ header ("Cache-Control: no-cache, must-revalidate");  # HTTP/1.1
 header ("Pragma: no-cache");                          # HTTP/1.0
 
 $dwoo->output($tpl, $data);
+
 ?>

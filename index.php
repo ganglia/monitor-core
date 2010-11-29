@@ -14,12 +14,13 @@ try
    }
 catch (Exception $e)
    {
+   global $dwoo_compiled_dir;
    print "<H4>There was an error initializing the Dwoo PHP Templating Engine: ".
       $e->getMessage() . "<br><br>The compile directory should be owned and writable by the apache user.</H4>";
       exit;
    }
 
-# Useful for addons.
+# Usefull for addons.
 $GHOME = ".";
 
 if ($context == "meta" or $context == "control")

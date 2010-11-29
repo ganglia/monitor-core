@@ -1,14 +1,25 @@
 <?php
 /* $Id$ */
-$tpl = new Dwoo_Template_File( template("meta_view.tpl") );
-$data = new Dwoo_Data();
+$tpl = new TemplatePower( template("meta_view.tpl") );
+$tpl->prepare();
 
 discover_filters();
+foreach ($filter_defs as $filter_def)
+{
+   $filter_shortname = $filter_def["shortname"];
+   $tpl->newBlock("filter_block");
+   $tpl->assign("filter_shortname", $filter_shortname);
+   $tpl->assign("filter_name", $filter_def["name"]); 
 
-if ( !empty($filter_defs) ) {
-   $data->assign("filters", $filter_defs);
-   $data->assign("choose_filter", $choose_filter);
+   foreach ($filter_def["choices"] as $choice)
+   {
+      $tpl->newBlock("filter_choice_block");
+      $tpl->assign("filter_choice", $choice);
+      if($choose_filter[$filter_shortname] == $choice)
+         $tpl->assign("selected", "selected");
+   }
 }
+
 
 # Find the private clusters.  But no one is emabarrassed in the
 # control room (public only!). 

@@ -10,6 +10,53 @@ $data->assign("host", $hostname);
 $data->assign("node_image", node_image($metrics));
 $data->assign("sort",$sort);
 $data->assign("range",$range);
+$data->assign("hostname", $hostname);
+
+$graph_args = "h=$hostname&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]";
+
+$optional_reports = "";
+
+
+####################################################################################
+# Let's find out what optional reports are included
+# First we find out what the default (site-wide) reports are then look
+# for host specific included or excluded reports
+####################################################################################
+$conf_dir = "./conf";
+
+$default_reports = array("included_reports" => array(), "excluded_reports" => array());
+if ( is_file($conf_dir . "/default.json") ) {
+  $default_reports = array_merge($default_reports,json_decode(file_get_contents($conf_dir . "/default.json"), TRUE));
+}
+
+$host_file = $conf_dir . "/host_" . $hostname . ".json";
+$override_reports = array("included_reports" => array(), "excluded_reports" => array());
+if ( is_file($host_file) ) {
+  $override_reports = array_merge($override_reports, json_decode(file_get_contents($host_file), TRUE));
+}
+
+# Merge arrays
+$reports["included_reports"] = array_merge( $default_reports["included_reports"] , $override_reports["included_reports"]);
+$reports["excluded_reports"] = array_merge($default_reports["excluded_reports"] , $override_reports["excluded_reports"]);
+
+# Remove duplicates
+$reports["included_reports"] = array_unique($reports["included_reports"]);
+$reports["excluded_reports"] = array_unique($reports["excluded_reports"]);
+
+foreach ( $reports["included_reports"] as $index => $report_name ) {
+
+  if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
+    $optional_reports .= "<a name=metric_" . $report_name . ">
+    <A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
+    <IMG BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
+    <a style=\"background-color: #dddddd\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph'); return false;\" href=\"#\">+</a>
+";
+  }
+
+}
+
+$data->assign("optional_reports", $optional_reports);
+
 
 if($hosts_up)
       $data->assign("node_msg", "This host is up and running."); 
@@ -18,7 +65,7 @@ else
 
 $cluster_url=rawurlencode($clustername);
 $data->assign("cluster_url", $cluster_url);
-$data->assign("graphargs", "h=$hostname&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]");
+$data->assign("graphargs", $graph_args);
 
 # For the node view link.
 $data->assign("node_view","./?p=2&amp;c=$cluster_url&amp;h=$hostname");
@@ -26,7 +73,7 @@ $data->assign("node_view","./?p=2&amp;c=$cluster_url&amp;h=$hostname");
 # No reason to go on if this node is down.
 if ($hosts_down)
    {
-      $dwoo->output($tpl, $data);
+      $tpl->printToScreen();
       return;
    }
 
@@ -192,8 +239,10 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
                      $g_metrics_group_data[$group]["metrics"][$name]["graphargs"] = $v['graph'];
                      $g_metrics_group_data[$group]["metrics"][$name]["alt"] = "$hostname $name";
                      $g_metrics_group_data[$group]["metrics"][$name]["desc"] = "";
+		     $g_metrics_group_data[$group]["metrics"][$name]["host_name"] = $hostname;
+                     $g_metrics_group_data[$group]["metrics"][$name]["metric_name"] = $name;
                      if (isset($v['description']))
-                        $g_metrics_group_data[$group]["metrics"][$name]["desc"] = $v['description'];
+                       $g_metrics_group_data[$group]["metrics"][$name]["desc"] = $v['description'];
                      $g_metrics_group_data[$group]["metrics"][$name]["new_row"] = "";
                      if ( !(++$i % $metriccols) && ($i != $c) )
                         $g_metrics_group_data[$group]["metrics"][$name]["new_row"] = "</TR><TR>";
@@ -202,6 +251,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
          }
 
    }
+
 $data->assign("g_metrics_group_data", $g_metrics_group_data);
 $dwoo->output($tpl, $data);
 ?>

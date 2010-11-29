@@ -16,7 +16,7 @@ function embarrassed ()
       while(!feof($fp)) {
          $line=chop(fgets($fp,255));
          if (!$line or !strcspn($line,"#")) { continue; }
-         $list=explode("=",$line);
+         $list=split("=",$line);
          if (count($list)!=2) { continue; }
          $name=trim($list[0]);
          $pass=trim($list[1]);

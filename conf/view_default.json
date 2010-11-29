@@ -1,4 +1,1 @@
-{"view_name":"default",
-  "items": [
-          ]
-}
+{"view_name":"default","items":[{"hostname":"localhost.localdomain","graph":"cpu_report"}],"view_type":"standard"}

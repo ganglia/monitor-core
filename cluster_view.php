@@ -1,5 +1,5 @@
-<?php
-/* $Id$ */
+ <?php
+ /* $Id$ */
 $tpl = new Dwoo_Template_File( template("cluster_view.tpl") );
 $data = new Dwoo_Data();
 $data->assign("extra", template("cluster_extra.tpl"));
@@ -63,8 +63,10 @@ if (!isset($optional_graphs))
 $optional_graphs_data = array();
 foreach ($optional_graphs as $g) {
   $optional_graphs_data[$g]['name'] = $g;
+#  $data->assign("name", $optional_graphs_data[$g]['name']);
   $optional_graphs_data[$g]['graph_args'] = $graph_args;
 }
+
 $data->assign('optional_graphs_data', $optional_graphs_data);
 
 #
@@ -83,6 +85,7 @@ $data->assign("metric","$metricname $units");
 $data->assign("metric_name","$metricname");
 $data->assign("sort", $sort);
 $data->assign("range", $range);
+#$data->assign("checked$showhosts", "checked");
 
 $showhosts_levels = array(
    2 => array('checked'=>'', 'name'=>'Auto'),
@@ -91,6 +94,7 @@ $showhosts_levels = array(
 );
 $showhosts_levels[$showhosts]['checked'] = 'checked';
 $data->assign("showhosts_levels", $showhosts_levels);
+
 
 $sorted_hosts = array();
 $down_hosts = array();

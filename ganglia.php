@@ -33,6 +33,7 @@ $metrics = array();
 $version = array();
 
 # The web frontend version, from conf.php.
+#$version["webfrontend"] = "$majorversion.$minorversion.$microversion";
 $version["webfrontend"] = "$ganglia_version";
 
 # Get rrdtool version
@@ -98,7 +99,7 @@ function start_meta ($parser, $tagname, $attrs)
             break;
 
          case "METRICS":
-            $metricname = rawurlencode($attrs['NAME']);
+            $metricname = $attrs['NAME'];
             $metrics[$sourcename][$metricname] = $attrs;
             break;
 
@@ -163,7 +164,7 @@ function start_cluster ($parser, $tagname, $attrs)
             break;
 
          case "METRIC":
-            $metricname = rawurlencode($attrs['NAME']);
+            $metricname = $attrs['NAME'];
             $metrics[$hostname][$metricname] = $attrs;
             break;
 
@@ -266,7 +267,7 @@ function start_host ($parser, $tagname, $attrs)
             break;
 
          case "METRIC":
-            $metricname = rawurlencode($attrs['NAME']);
+            $metricname = $attrs['NAME'];
             $metrics[$metricname] = $attrs;
             break;
 

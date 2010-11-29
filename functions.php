@@ -719,6 +719,8 @@ function get_view_graph_elements($view) {
 
   require("./cache.php");
 
+  $view_elements = array();
+
   switch ( $view['view_type'] ) {
 
     case "standard":
