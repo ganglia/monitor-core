@@ -99,7 +99,7 @@ function start_meta ($parser, $tagname, $attrs)
             break;
 
          case "METRICS":
-            $metricname = $attrs['NAME'];
+            $metricname = rawurlencode($attrs['NAME']);
             $metrics[$sourcename][$metricname] = $attrs;
             break;
 
@@ -164,7 +164,7 @@ function start_cluster ($parser, $tagname, $attrs)
             break;
 
          case "METRIC":
-            $metricname = $attrs['NAME'];
+            $metricname = rawurlencode($attrs['NAME']);
             $metrics[$hostname][$metricname] = $attrs;
             break;
 
@@ -198,7 +198,7 @@ function start_everything ($parser, $tagname, $attrs)
 	    $index_array['cluster'][$hostname] = $cluster_name;
 
          case "METRIC":
-            $metricname = $attrs['NAME'];
+            $metricname = rawurlencode($attrs['NAME']);
 	    if ( $metricname != $hostname ) 
 	      $index_array['metrics'][$metricname][] = $hostname;
             break;
@@ -267,7 +267,7 @@ function start_host ($parser, $tagname, $attrs)
             break;
 
          case "METRIC":
-            $metricname = $attrs['NAME'];
+            $metricname = rawurlencode($attrs['NAME']);
             $metrics[$metricname] = $attrs;
             break;
 
