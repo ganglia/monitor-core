@@ -1,9 +1,9 @@
 <?php
 /* $Id$ */
-$tpl = new TemplatePower( template("grid_tree.tpl") );
-$tpl->prepare();
+$tpl = new Dwoo_Template_File( template("grid_tree.tpl") );
+$data = new Dwoo_Data();
 
-$tpl->assign("self", "$self");
+$data->assign("self", "$self");
 
 # Not as complicated as before. No depth-first-search, and
 # we only show our immediate children.
