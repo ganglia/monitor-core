@@ -37,7 +37,11 @@ if ( ! isset($_GET['view_name']) ) {
 
   unset($available_views);
 
-  $timeout = 30;
+  # If timeout is specified use it. Otherwise default to 30 seconds.
+  if ( isset($_GET['timeout']))
+    $timeout = $_GET['timeout'];
+  else
+    $timeout = 30;
 
   # This defines times when updates are happening. For instance if you want
   # to turn off updating during non-business hours you would set 
@@ -76,7 +80,7 @@ if ( ! isset($_GET['view_name']) ) {
   <html>
   <head>
   <title>Ganglia - Graph View</title>
-  <meta http-equiv="refresh" content="<?php print "$timeout;url=" . $_SERVER["SCRIPT_NAME"] . "?view_name=" . $_GET['view_name'] ."&id=" . $nextid; ?>">
+  <meta http-equiv="refresh" content="<?php print "$timeout;url=" . $_SERVER["SCRIPT_NAME"] . "?view_name=" . $_GET['view_name'] ."&id=" . $nextid; ?>&timeout=<?php print $timeout ?>">
   <style>
   body { 
 	  margin: 0px;
@@ -112,6 +116,21 @@ if ( ! isset($_GET['view_name']) ) {
       <img src="<?php echo $gangliapath . "&r=week&z=${small_size}&" . $view_elements[$id]['graph_args']; ?>">
       <img src="<?php echo $gangliapath . "&r=month&z=${small_size}&" . $view_elements[$id]['graph_args']; ?>">
     <div style="margin-top: 10px; font-size: 48px; text-align: center;"><?php echo date(DATE_RFC850); ?></div>
+    <p>
+    <center><form>
+    <input type="hidden" name="view_name" value="<?php print $_GET['view_name'] ?>">
+    <input type="hidden" name="id" value="<?php print $nextid ?>">
+    Rotate graphs every <select onChange="form.submit();" name="timeout">
+    <?php
+      for ( $i = 10 ; $i <= 90 ; $i += 5 ) {
+	if ( $timeout == $i )
+	  $selected = "selected";
+	else
+	  $selected = "";
+	print "<option value='" . $i . "' $selected>$i</option>";
+      }
+    ?>
+    </select> seconds.</form></center>
     <p>
     <center><a href="/ganglia/">Go back to Ganglia</a></center></div>
 	  </td>
