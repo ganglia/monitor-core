@@ -16,7 +16,7 @@
  <tr><td colspan=2>Avg Utilization (last {$range}):<br>&nbsp;&nbsp;<b>{$cluster_util}</b></td></tr>
  <tr><td colspan=2>Localtime:<br>&nbsp;&nbsp;<b>{$localtime}</b></td></tr>
  </table>
-<!-- INCLUDE BLOCK : extra -->
+
 {if isset($extra)}
 {include(file="$extra")}
 {/if}
@@ -40,12 +40,11 @@
 <IMG BORDER=0 ALT="{$cluster} NETWORK"
     SRC="./graph.php?{$graph_args}&amp;g=network_report&amp;z=medium">
 </A>
-<!-- START BLOCK : optional_graphs -->
+
 {foreach $optional_graphs_data graph}
 <A HREF="./graph_all_periods.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=large">
 <IMG BORDER=0 ALT="{$cluster} {$graph.name}" SRC="./graph.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=medium">
 </A>
-<!-- END BLOCK : optional_graphs -->
 {/foreach}
 </TD>
 </TR>

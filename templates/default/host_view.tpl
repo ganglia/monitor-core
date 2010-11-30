@@ -98,12 +98,10 @@ $(function() {
   <TD COLSPAN="2" CLASS=title>Time and String Metrics</TD>
 </TR>
 
-<!-- START BLOCK : string_metric_info -->
 {foreach $s_metrics_data s_metric}
 <TR>
  <TD CLASS=footer WIDTH="30%">{$s_metric.name}</TD><TD>{$s_metric.value}</TD>
 </TR>
-<!-- END BLOCK : string_metric_info -->
 {/foreach}
 
 <TR><TD>&nbsp;</TD></TR>
@@ -112,17 +110,14 @@ $(function() {
   <TD COLSPAN=2 CLASS=title>Constant Metrics</TD>
 </TR>
 
-<!-- START BLOCK : const_metric_info -->
 {foreach $c_metrics_data c_metric}
 <TR>
  <TD CLASS=footer WIDTH="30%">{$c_metric.name}</TD><TD>{$c_metric.value}</TD>
 </TR>
-<!-- END BLOCK : const_metric_info -->
 {/foreach}
 </TABLE>
 
  <HR>
-<!-- INCLUDE BLOCK : extra -->
 {if isset($extra)}
 {include(file="$extra")}
 {/if}
@@ -186,7 +181,6 @@ $(function() {
  <TD>
 
 {foreach $g_metrics_group_data group g_metrics}
-<!-- START BLOCK : vol_group_info -->
 <A HREF="javascript:;" ONMOUSEDOWN="javascript:toggleLayer('{$group}');" TITLE="Toggle {$group} metrics group on/off" NAME="{$group}">
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
@@ -198,7 +192,6 @@ $(function() {
 </A>
 <DIV ID="{$group}">
 <TABLE><TR>
-<!-- START BLOCK : vol_metric_info -->
 {foreach $g_metrics["metrics"] g_metric}
 <TD>
 <a name=metric_{$g_metric.metric_name}>
@@ -209,11 +202,9 @@ $(function() {
 </TD>
 {$g_metric.new_row}
 {/foreach}
-<!-- END BLOCK : vol_metric_info -->
 </TR>
 </TABLE>
 </DIV>
-<!-- END BLOCK : vol_group_info -->
 {/foreach}
  </TD>
 </TR>

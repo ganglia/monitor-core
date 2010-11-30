@@ -358,7 +358,7 @@ if ( $use_graphite == "no" ) {
 
 }
 
-#if ($debug) {   error_log("Final rrdtool command:  $command");   }
+if ($debug) {   error_log("Final rrdtool command:  $command");   }
 
 # Did we generate a command?   Run it.
 if($command) {

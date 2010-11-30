@@ -33,7 +33,6 @@ $metrics = array();
 $version = array();
 
 # The web frontend version, from conf.php.
-#$version["webfrontend"] = "$majorversion.$minorversion.$microversion";
 $version["webfrontend"] = "$ganglia_version";
 
 # Get rrdtool version
@@ -208,7 +207,6 @@ function start_everything ($parser, $tagname, $attrs)
       }
 
 }
-
 
 function start_cluster_summary ($parser, $tagname, $attrs)
 {
