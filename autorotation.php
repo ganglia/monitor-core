@@ -37,6 +37,10 @@ if ( ! isset($_GET['view_name']) ) {
 
   unset($available_views);
 
+  if ( sizeof($view['items']) == 0 ) {
+      die ("<font color=red size=4>There are no graphs in view '" . $_GET['view_name'] . "'. Please go back and add some.</font>");
+  }
+
   # If timeout is specified use it. Otherwise default to 30 seconds.
   if ( isset($_GET['timeout']))
     $timeout = $_GET['timeout'];
