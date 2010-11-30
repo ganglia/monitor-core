@@ -118,6 +118,11 @@ $proc_run_color = "0000FF";
 $cpu_num_color  = "FF0000";
 $num_nodes_color = "00FF00";
 
+#
+# Display number of cores in LOAD report graph
+#
+$show_cores = false;
+
 # Other colors
 $jobstart_color = "ff3300";
 

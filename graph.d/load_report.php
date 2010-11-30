@@ -14,6 +14,7 @@ function graph_load_report( &$rrdtool_graph )
            $rrd_dir,
            $size,
            $strip_domainname,
+           $show_cores,
            $graphreport_stats;
 
     if ($strip_domainname) {
@@ -93,16 +94,20 @@ function graph_load_report( &$rrdtool_graph )
         }
     }
 
-    if ( $graphreport_stats ) {
-        $series .= "CDEF:cpun_pos=cpu_num,0,LT,0,cpu_num,IF "
-                . "VDEF:cpun_last=cpun_pos,LAST "
-                . "VDEF:cpun_min=cpun_pos,MINIMUM "
-                . "VDEF:cpun_avg=cpun_pos,AVERAGE "
-                . "VDEF:cpun_max=cpun_pos,MAXIMUM "
-                . "GPRINT:'cpun_last':'  ${space1}Now\:%6.1lf%s' "
-                . "GPRINT:'cpun_min':'Min\:%6.1lf%s${eol1}' "
-                . "GPRINT:'cpun_avg':'${space2}Avg\:%6.1lf%s' "
-                . "GPRINT:'cpun_max':'Max\:%6.1lf%s\\l' ";
+    if ( $show_cores ) {
+        $series .="LINE2:'cpu_num'#$cpu_num_color:'Cores\\g' ";
+
+        if ( $graphreport_stats ) {
+            $series .= "CDEF:cpun_pos=cpu_num,0,LT,0,cpu_num,IF "
+                    . "VDEF:cpun_last=cpun_pos,LAST "
+                    . "VDEF:cpun_min=cpun_pos,MINIMUM "
+                    . "VDEF:cpun_avg=cpun_pos,AVERAGE "
+                    . "VDEF:cpun_max=cpun_pos,MAXIMUM "
+                    . "GPRINT:'cpun_last':' ${space1}Now\:%6.1lf%s' "
+                    . "GPRINT:'cpun_min':'Min\:%6.1lf%s${eol1}' "
+                    . "GPRINT:'cpun_avg':'${space2}Avg\:%6.1lf%s' "
+                    . "GPRINT:'cpun_max':'Max\:%6.1lf%s\\l' ";
+        }
     }
     $series .="LINE2:'proc_run'#$proc_run_color:'Procs\\g' ";
 
