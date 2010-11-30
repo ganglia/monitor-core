@@ -52,28 +52,5 @@ dt code, dd code { font-size:1.3em; line-height:150%; }
 	</div><!-- /content -->
 
 </div><!-- /page -->
-
-
-<!-- Start of second page -->
-<div data-role="page" id="bar">
-
-	<div data-role="header">
-		<h1>Bar</h1>
-	</div><!-- /header -->
-
-	<div data-role="content">	
-		<p>I'm first in the source order so I'm shown as the page.</p>		
-		<p><a href="#jqm-home">Back to foo</a></p>	
-	</div><!-- /content -->
-
-	<div data-role="footer">	
-  <div data-role="navbar">
-    <ul>
-      <li><a href="a.html" class="ui-btn-active">One</a></li>
-      <li><a href="b.html">Two</a></li>
-    </ul>
-  </div><!-- /navbar -->
-	</div><!-- /footer -->
-</div><!-- /page -->
 </body>
 </html>

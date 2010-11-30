@@ -265,6 +265,8 @@ $(function(){
 
    $range_menu = "";
 
+    $range = $_GET['r'];
+
    foreach ($context_ranges as $v) {
       $url=rawurlencode($v);
       if ($v == $range)
