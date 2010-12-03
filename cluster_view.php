@@ -53,10 +53,51 @@ $cluster_url=rawurlencode($clustername);
 
 
 $data->assign("cluster", $clustername);
+
+$graph_args = "c=$cluster_url&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]";
+
+$optional_reports = "";
+
+####################################################################################
+# Let's find out what optional reports are included
+# First we find out what the default (site-wide) reports are then look
+# for host specific included or excluded reports
+####################################################################################
+$default_reports = array("included_reports" => array(), "excluded_reports" => array());
+if ( is_file($GLOBALS['conf_dir'] . "/default.json") ) {
+  $default_reports = array_merge($default_reports,json_decode(file_get_contents($GLOBALS['conf_dir'] . "/default.json"), TRUE));
+}
+
+$cluster_file = $GLOBALS['conf_dir'] . "/cluster_" . $clustername . ".json";
+$override_reports = array("included_reports" => array(), "excluded_reports" => array());
+if ( is_file($cluster_file) ) {
+  $override_reports = array_merge($override_reports, json_decode(file_get_contents($cluster_file), TRUE));
+}
+
+# Merge arrays
+$reports["included_reports"] = array_merge( $default_reports["included_reports"] , $override_reports["included_reports"]);
+$reports["excluded_reports"] = array_merge($default_reports["excluded_reports"] , $override_reports["excluded_reports"]);
+
+# Remove duplicates
+$reports["included_reports"] = array_unique($reports["included_reports"]);
+$reports["excluded_reports"] = array_unique($reports["excluded_reports"]);
+
+foreach ( $reports["included_reports"] as $index => $report_name ) {
+  if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
+    $optional_reports .= "<a name=metric_" . $report_name . ">
+    <A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
+    <IMG BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
+";
+  }
+
+}
+
+$data->assign("optional_reports", $optional_reports);
+
+
 #
 # Summary graphs
 #
-$graph_args = "c=$cluster_url&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]";
 $data->assign("graph_args", $graph_args);
 if (!isset($optional_graphs))
   $optional_graphs = array();

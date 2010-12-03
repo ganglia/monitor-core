@@ -12,18 +12,13 @@
 <link type="text/css" href="css/jquery.liveSearch.css" rel="stylesheet" />
 <LINK rel="stylesheet" href="./styles.css" type="text/css">
 <script>
-  var availablemetrics = [
-      {$available_metrics}
-  ];
+  var availablemetrics = [ {$available_metrics} ];
 
-$(function(){
-
-  $( "#metrics-picker" ).autocomplete({
+  $(function(){
+    $( "#metrics-picker" ).autocomplete({
       source: availablemetrics
-  });
-
-  {$is_metrics_picker_disabled}
-
+    });
+  {$is_metrics_picker_disabled} 
 });
 </script>
 {$custom_time_head}
@@ -38,6 +33,7 @@ $(function(){
   <li><a href="#tabs-search" onclick="getSearchContent();">Search</a></li>
   <li><a href="#tabs-views" onclick="getViewsContent();">Views</a></li>
   <li><a href="#tabs-autorotation" onclick="autoRotationChooser();">Automatic Rotation</a></li>
+  <a id="mobile_view_link" href="mobile.php">Mobile</a>
 </ul>
 
 <div id="tabs-main">

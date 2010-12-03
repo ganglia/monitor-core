@@ -22,14 +22,12 @@ $optional_reports = "";
 # First we find out what the default (site-wide) reports are then look
 # for host specific included or excluded reports
 ####################################################################################
-$conf_dir = "./conf";
-
 $default_reports = array("included_reports" => array(), "excluded_reports" => array());
-if ( is_file($conf_dir . "/default.json") ) {
-  $default_reports = array_merge($default_reports,json_decode(file_get_contents($conf_dir . "/default.json"), TRUE));
+if ( is_file($GLOBALS['conf_dir'] . "/default.json") ) {
+  $default_reports = array_merge($default_reports,json_decode(file_get_contents($GLOBALS['conf_dir'] . "/default.json"), TRUE));
 }
 
-$host_file = $conf_dir . "/host_" . $hostname . ".json";
+$host_file = $GLOBALS['conf_dir'] . "/host_" . $hostname . ".json";
 $override_reports = array("included_reports" => array(), "excluded_reports" => array());
 if ( is_file($host_file) ) {
   $override_reports = array_merge($override_reports, json_decode(file_get_contents($host_file), TRUE));

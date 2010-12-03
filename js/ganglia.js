@@ -3,6 +3,7 @@ $(function(){
   $("#tabs").tabs();
   $( "#range_menu" ).buttonset();
   $( "#sort_menu" ).buttonset();
+  $( "#mobile_view_link").button();
   jQuery('#metric-search input[name="q"]').liveSearch({url: 'search.php?q=', typeDelay: 800});
   $( "#datepicker-cs" ).datepicker({
 	  showOn: "button",

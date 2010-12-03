@@ -22,7 +22,6 @@ if ( ! isset($index_array) ) {
   if ( $debug == 1 ) {
                   echo("DEBUG: Querying GMond for new data\n");
   }
-  include_once $GLOBALS['ganglia_dir'] . "/conf.php";
   # Set up for cluster summary
   $context = "index_array";
   include_once $GLOBALS['ganglia_dir'] . "/functions.php";

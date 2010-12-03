@@ -23,29 +23,15 @@
  <hr>
 </TD>
 
-<TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top>
-<A HREF="./graph_all_periods.php?{$graph_args}&amp;g=load_report&amp;z=large">
-<IMG BORDER=0 ALT="{$cluster} LOAD"
-   SRC="./graph.php?{$graph_args}&amp;g=load_report&amp;z=medium">
-</A>
-<A HREF="./graph_all_periods.php?{$graph_args}&amp;g=mem_report&amp;z=large">
-<IMG BORDER=0 ALT="{$cluster} MEM"
-   SRC="./graph.php?{$graph_args}&amp;g=mem_report&amp;z=medium">
-</A>
-<A HREF="./graph_all_periods.php?{$graph_args}&amp;g=cpu_report&amp;z=large">
-<IMG BORDER=0 ALT="{$cluster} CPU"
-   SRC="./graph.php?{$graph_args}&amp;g=cpu_report&amp;z=medium">
-</A>
-<A HREF="./graph_all_periods.php?{$graph_args}&amp;g=network_report&amp;z=large">
-<IMG BORDER=0 ALT="{$cluster} NETWORK"
-    SRC="./graph.php?{$graph_args}&amp;g=network_report&amp;z=medium">
-</A>
+<TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top
+<div id="optional_graphs">
+  {$optional_reports}<br>
+  {foreach $optional_graphs_data graph}
+  <A HREF="./graph_all_periods.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=large">
+  <IMG BORDER=0 ALT="{$cluster} {$graph.name}" SRC="./graph.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=medium"></A>
+  {/foreach}
+</div>
 
-{foreach $optional_graphs_data graph}
-<A HREF="./graph_all_periods.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=large">
-<IMG BORDER=0 ALT="{$cluster} {$graph.name}" SRC="./graph.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=medium">
-</A>
-{/foreach}
 </TD>
 </TR>
 
