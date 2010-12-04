@@ -45,8 +45,8 @@ dt code, dd code { font-size:1.3em; line-height:150%; }
     <ul data-role="listview" data-theme="g">
       <li><a href="#views">Views</a></li>
       <?php
-	if ( sizeof($cluster_names == 1)) {
-           print '<li><a href="#cluster-' . urlencode($clustername) . '">Clusters</a></li>';
+	if ( sizeof($cluster_names) == 1) {
+           print '<li><a href="#cluster-' . str_replace(" ","_", $cluster_names[0]) . '">Clusters</a></li>';
         } else {
       ?>
       <li><a href="#clusters">Clusters</a></li>
@@ -68,7 +68,7 @@ if ( sizeof($cluster_names) > 1 ) {
       <?php
       // List all clusters
       foreach ( $cluster_names as $index => $clustername ) {
-	print '<li><a href="#cluster-' . urlencode($clustername) . '">' . $clustername . '</a></li>';  
+	print '<li><a href="#cluster-' . str_replace(" ","_", $clustername) . '">' . $clustername . '</a></li>';  
       }
       ?>
     </ul>
@@ -78,7 +78,7 @@ if ( sizeof($cluster_names) > 1 ) {
 } // end of if (sizeof(cluster_names))
 foreach ( $cluster_names as $index => $clustername ) {
 ?>
-  <div data-role="page" class="ganglia-mobile" id="cluster-<?php print urlencode($clustername); ?>">
+  <div data-role="page" class="ganglia-mobile" id="cluster-<?php print str_replace(" ","_", $clustername); ?>">
     <div data-role="header">
 	    <h1>Cluster <?php print $clustername; ?></h1>
     </div>
