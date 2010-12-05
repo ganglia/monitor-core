@@ -230,7 +230,7 @@ $graph_sizes = array(
 
    'mobile'=>array(
      'height'=>95,
-     'width'=>220,
+     'width'=>210,
      'fudge_0'=>0,
      'fudge_1'=>0,
      'fudge_2'=>0
