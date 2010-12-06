@@ -16,12 +16,11 @@ $graph_args = "h=$hostname&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]";
 
 $optional_reports = "";
 
-
-####################################################################################
-# Let's find out what optional reports are included
-# First we find out what the default (site-wide) reports are then look
-# for host specific included or excluded reports
-####################################################################################
+///////////////////////////////////////////////////////////////////////////
+// Let's find out what optional reports are included
+// First we find out what the default (site-wide) reports are then look
+// for host specific included or excluded reports
+///////////////////////////////////////////////////////////////////////////
 $default_reports = array("included_reports" => array(), "excluded_reports" => array());
 if ( is_file($GLOBALS['conf_dir'] . "/default.json") ) {
   $default_reports = array_merge($default_reports,json_decode(file_get_contents($GLOBALS['conf_dir'] . "/default.json"), TRUE));
@@ -33,11 +32,11 @@ if ( is_file($host_file) ) {
   $override_reports = array_merge($override_reports, json_decode(file_get_contents($host_file), TRUE));
 }
 
-# Merge arrays
+// Merge arrays
 $reports["included_reports"] = array_merge( $default_reports["included_reports"] , $override_reports["included_reports"]);
 $reports["excluded_reports"] = array_merge($default_reports["excluded_reports"] , $override_reports["excluded_reports"]);
 
-# Remove duplicates
+// Remove duplicates
 $reports["included_reports"] = array_unique($reports["included_reports"]);
 $reports["excluded_reports"] = array_unique($reports["excluded_reports"]);
 

@@ -1,6 +1,9 @@
 <?php
-include_once("./conf.php");
+include_once "./eval_config.php";
 include_once("./functions.php");
+include_once "./get_context.php";
+include_once "./ganglia.php";
+include_once "./get_ganglia.php";
 ?>
 <!DOCTYPE html> 
 <html>
@@ -44,7 +47,7 @@ if ( isset($_GET['view_name'])) {
      else
        $checked = "";
 
-     $range_menu .= "<li><a href='mobile-helper.php?view_name=" . $_GET['view_name'] . "&r=" . $v . "&cs=&ce='>$v</a></li>";
+     $range_menu .= "<li><a href='mobile_helper.php?view_name=" . $_GET['view_name'] . "&r=" . $v . "&cs=&ce='>$v</a></li>";
   }
     print $range_menu;
   ?>
@@ -89,8 +92,8 @@ if ( isset($_GET['show_host_metrics'])) {
   $clustername = $_GET['c'];
 ?>  
   <div data-role="page" class="ganglia-mobile" id="viewhost-<?php print $hostname; ?>">
-    <div data-role="header">
-      <h2>Hostname <?php print $hostname; ?></h2>
+    <div data-role="header" data-position="fixed">
+      <h3>Host <?php print $hostname; ?></h3>
         <div data-role="navbar">
 	<ul>
   <?php
@@ -111,7 +114,7 @@ if ( isset($_GET['show_host_metrics'])) {
 	   else
 	     $checked = "";
       
-	   $range_menu .= "<li><a href='mobile-helper.php?show_host_metrics=1&h=" . $hostname . "&c=" . $clustername . "&r=" . $v . "&cs=&ce='>$v</a></li>";
+	   $range_menu .= "<li><a href='mobile_helper.php?show_host_metrics=1&h=" . $hostname . "&c=" . $clustername . "&r=" . $v . "&cs=&ce='>$v</a></li>";
 	}
 	  print $range_menu;
     ?>
@@ -123,11 +126,11 @@ if ( isset($_GET['show_host_metrics'])) {
 <?php
     $graph_args = "h=$hostname&c=$clustername&r=$range";
     
-    ####################################################################################
-    # Let's find out what optional reports are included
-    # First we find out what the default (site-wide) reports are then look
-    # for host specific included or excluded reports
-    ####################################################################################
+    ///////////////////////////////////////////////////////////////////////////
+    // Let's find out what optional reports are included
+    // First we find out what the default (site-wide) reports are then look
+    // for host specific included or excluded reports
+    ///////////////////////////////////////////////////////////////////////////
     $default_reports = array("included_reports" => array(), "excluded_reports" => array());
     if ( is_file($GLOBALS['conf_dir'] . "/default.json") ) {
       $default_reports = array_merge($default_reports,json_decode(file_get_contents($GLOBALS['conf_dir'] . "/default.json"), TRUE));
@@ -152,11 +155,76 @@ if ( isset($_GET['show_host_metrics'])) {
       if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
 	print "
 	<A HREF=\"./graph_all_periods.php?mobile=1&$graph_args&amp;g=" . $report_name . "&amp;z=large\">
-	<IMG BORDER=0 ALT=\"$clustername\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium\"></A>";
+	<IMG BORDER=0 ALT=\"$clustername\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=mobile\"></A>";
       }
     }
-    ?>
-    <p><font color=red>Metric graphs not implemented yet.</font>
+    ?>  
+<?php
+
+$g_metrics_group = array();
+$groups = array();
+
+$size = "mobile";
+
+foreach ($metrics as $metric_name => $metric_attributes) {
+
+  if ($metric_attributes['TYPE'] == "string" or $metric_attributes['TYPE']=="timestamp" or
+      (isset($always_timestamp[$metric_name]) and $always_timestamp[$metric_name])) {
+	$s_metrics[$metric_name] = $v;
+  } elseif ($metric_attributes['SLOPE'] == "zero" or (isset($always_constant[$metric_name]) and $always_constant[$metric_name])) {
+	$c_metrics[$metric_name] = $v;
+  } else if (isset($reports[$metric_name]) and $reports[$metric])
+    continue;
+  else {
+    $metric_graphargs = "c=$clustername&amp;h=$hostname&amp;v=$metric_attributes[VAL]"
+      ."&amp;m=$metric_name&amp;r=$range&amp;z=$size&amp;jr=$jobrange"
+      ."&amp;js=$jobstart&amp;st=$cluster[LOCALTIME]";
+    if ($cs)
+       $metric_graphargs .= "&amp;cs=" . rawurlencode($cs);
+    if ($ce)
+       $metric_graphargs .= "&amp;ce=" . rawurlencode($ce);
+    # Adding units to graph 2003 by Jason Smith <smithj4@bnl.gov>.
+    if ($metric_attributes['UNITS']) {
+       $encodeUnits = rawurlencode($metric_attributes['UNITS']);
+       $metric_graphargs .= "&amp;vl=$encodeUnits";
+    }
+    if (isset($metric_attributes['TITLE'])) {
+       $title = $metric_attributes['TITLE'];
+       $metric_graphargs .= "&amp;ti=$title";
+    }
+    $g_metrics[$metric_name]['graph'] = $graph_args . "&" . $metric_graphargs;
+    $g_metrics[$metric_name]['description'] = isset($metric_attributes['DESC']) ? $metric_attributes['DESC'] : '';
+
+    if ( !isset($metrics[$metric_name]['GROUP']) )
+      $group_name = "no group";
+    else
+      $group_name = $metrics[$metric_name]['GROUP'][0];
+
+    // Make an array of groups
+    if ( ! in_array($group_name, $groups) ) {
+      $groups[] = $group_name;
+    }
+    
+    $g_metrics_group[$group_name][] = $metric_name;
+ }
+}
+
+ksort($g_metrics_group);
+foreach ( $g_metrics_group as $metric_group_name => $metric_group_members ) {
+?>
+      <div data-role="collapsible" data-collapsed="true">
+	<h3><?php print $metric_group_name . " (" . sizeof($metric_group_members) . ")"; ?></h3>
+<?php
+      foreach ( $metric_group_members as $index => $metric_name ) {
+	print "
+	<A HREF=\"./graph_all_periods.php?mobile=1&" . $g_metrics[$metric_name]['graph'] .  "\">
+	<IMG BORDER=0 ALT=\"$clustername\" SRC=\"./graph.php?" . $g_metrics[$metric_name]['graph'] . "\"></A>";
+      }
+?>
+      </div> <!-- /collapsible -->
+<?php
+} // end of foreach ( $g_metrics_group
+?>
     </div><!-- /content -->
   </div><!-- /page -->
 <?php

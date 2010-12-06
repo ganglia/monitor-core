@@ -6,6 +6,10 @@ include_once("./functions.php");
 // Load the metric caching code
 require_once('./cache.php');
 
+/////////////////////////////////////////////////////////////////////////////
+// With Mobile view we are gonna utilize the capability of putting in
+// multiple pages in the same payload so that we avoid HTTP round trips
+/////////////////////////////////////////////////////////////////////////////
 ?>
 <!DOCTYPE html> 
 <html> 
@@ -16,7 +20,6 @@ require_once('./cache.php');
 <script src="js/jquery.mobile-1.0a2.min.js"></script>
 <style>
 .ui-mobile .ganglia-mobile {  background: #e5e5e5 url(../images/jqm-sitebg.png) top center repeat-x; }
-.ui-mobile #mobile-home {  background: #e5e5e5 url(../images/jqm-sitebg.png) top center repeat-x; }
 .ui-mobile #mobile-homeheader { padding: 55px 25px 0; text-align: center }
 .ui-mobile #mobile-homeheader h1 { margin: 0 0 10px; }
 .ui-mobile #mobile-homeheader p { margin: 0; }
@@ -35,6 +38,9 @@ dt code, dd code { font-size:1.3em; line-height:150%; }
     $cluster_array[$clustername][] = $hostname;
   }
   $cluster_names = array_keys($cluster_array);
+  
+  $available_views = get_available_views();
+
 ?>
 <div data-role="page" class="ganglia-mobile" id="mobile-home">
   <div data-role="header">
@@ -43,13 +49,13 @@ dt code, dd code { font-size:1.3em; line-height:150%; }
   <div data-role="content">
     Please select a category:<p>
     <ul data-role="listview" data-theme="g">
-      <li><a href="#views">Views</a></li>
+      <li><a href="#views">Views</a><span class="ui-li-count"><?php print sizeof($available_views); ?></span></li>
       <?php
-	if ( sizeof($cluster_names == 1)) {
-           print '<li><a href="#cluster-' . urlencode($clustername) . '">Clusters</a></li>';
+	if ( sizeof($cluster_names) == 1) {
+           print '<li><a href="#cluster-' . urlencode($clustername) . '">Clusters</a><span class="ui-li-count">1</span></li>';
         } else {
       ?>
-      <li><a href="#clusters">Clusters</a></li>
+      <li><a href="#clusters">Clusters</a><span class="ui-li-count"><?php print sizeof($cluster_names); ?></span></li>
       <?php
       }
       ?>
@@ -105,13 +111,11 @@ foreach ( $cluster_names as $index => $clustername ) {
   </div>
   <div data-role="content">
     <ul data-role="listview" data-theme="g">
-      <?php
-      $available_views = get_available_views();
-  
-      # List all the available views
+      <?php  
+      // List all the available views
       foreach ( $available_views as $view_id => $view ) {
 	$v = $view['view_name'];
-	print '<li><a href="mobile_helper.php?view_name=' . $v . '&just_graphs=1&r=' . $default_time_range . '&cs=&ce=">' . $v . '</a></li>';  
+	print '<li><a href="mobile_helper.php?view_name=' . $v . '&just_graphs=1&r=' . $default_time_range . '&cs=&ce=">' . $v . '</a><span class="ui-li-count">' .  sizeof($view['items']) . '</span></li>';  
       }
       ?>
     </ul>
