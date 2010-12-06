@@ -42,12 +42,13 @@ if ( isset($_GET['view_name'])) {
 
   foreach ($context_ranges as $v) {
      $url=rawurlencode($v);
-     if ($v == $range)
-       $checked = "class=\"ui-btn-active\"";
-     else
-       $checked = "";
+     if ($v == $range) {
+      $checked = "class=\"ui-btn-active\"";
+      $range_menu .= "<li><a $checked href='#' onclick='return false;'>$v</a></li>";
+    } else {
+      $range_menu .= "<li><a href='mobile_helper.php?view_name=" . $_GET['view_name'] . "&r=" . $v . "&cs=&ce='>$v</a></li>";
+    }
 
-     $range_menu .= "<li><a href='mobile_helper.php?view_name=" . $_GET['view_name'] . "&r=" . $v . "&cs=&ce='>$v</a></li>";
   }
     print $range_menu;
   ?>
@@ -115,12 +116,12 @@ if ( isset($_GET['show_host_metrics'])) {
       
 	foreach ($context_ranges as $v) {
 	   $url=rawurlencode($v);
-	   if ($v == $range)
+	   if ($v == $range) {
 	     $checked = "class=\"ui-btn-active\"";
-	   else
-	     $checked = "";
-      
-	   $range_menu .= "<li><a href='mobile_helper.php?show_host_metrics=1&h=" . $hostname . "&c=" . $clustername . "&r=" . $v . "&cs=&ce='>$v</a></li>";
+      	     $range_menu .= "<li><a $checked href='#'>$v</a></li>";
+	  } else {
+      	     $range_menu .= "<li><a href='mobile_helper.php?show_host_metrics=1&h=" . $hostname . "&c=" . $clustername . "&r=" . $v . "&cs=&ce='>$v</a></li>";
+	  }
 	}
 	  print $range_menu;
     ?>

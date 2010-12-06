@@ -94,7 +94,7 @@ foreach ( $cluster_names as $index => $clustername ) {
 	// List all hosts in the cluster
 	asort($cluster_array[$clustername]);
 	foreach ( $cluster_array[$clustername] as $index => $hostname ) {
-	  print '<li><a href="mobile_helper.php?show_host_metrics=1&h=' . $hostname . '&c=' . $clustername . '&r=' . $default_time_range . '">' . strip_domainname($hostname) . '</a></li>';  
+	  print '<li><a href="mobile_helper.php?show_host_metrics=1&h=' . $hostname . '&c=' . $clustername . '&r=' . $default_time_range . '&cs=&ce=">' . strip_domainname($hostname) . '</a></li>';  
 	}
 	?>
       </ul>
@@ -117,7 +117,7 @@ foreach ( $cluster_names as $index => $clustername ) {
       foreach ( $available_views as $view_id => $view ) {
 	$v = $view['view_name'];
 	$elements = get_view_graph_elements($view);
-	print '<li><a href="mobile_helper.php?view_name=' . $v . '&just_graphs=1&r=' . $default_time_range . '&cs=&ce=">' . $v . '</a><span class="ui-li-count">' .  sizeof($elements) . '</span></li>';  
+	print '<li><a href="mobile_helper.php?view_name=' . $v . '&r=' . $default_time_range . '&cs=&ce=">' . $v . '</a><span class="ui-li-count">' .  sizeof($elements) . '</span></li>';  
       }
       ?>
     </ul>
