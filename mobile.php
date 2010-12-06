@@ -52,7 +52,7 @@ dt code, dd code { font-size:1.3em; line-height:150%; }
       <li><a href="#views">Views</a><span class="ui-li-count"><?php print sizeof($available_views); ?></span></li>
       <?php
 	if ( sizeof($cluster_names) == 1) {
-           print '<li><a href="#cluster-' . urlencode($clustername) . '">Clusters</a><span class="ui-li-count">1</span></li>';
+           print '<li><a href="#cluster-' . str_replace(" ", "_", $clustername) . '">Clusters</a><span class="ui-li-count">1</span></li>';
         } else {
       ?>
       <li><a href="#clusters">Clusters</a><span class="ui-li-count"><?php print sizeof($cluster_names); ?></span></li>
@@ -74,7 +74,7 @@ if ( sizeof($cluster_names) > 1 ) {
       <?php
       // List all clusters
       foreach ( $cluster_names as $index => $clustername ) {
-	print '<li><a href="#cluster-' . urlencode($clustername) . '">' . $clustername . '</a></li>';  
+	print '<li><a href="#cluster-' . str_replace(" ", "_", $clustername) . '">' . $clustername . '</a></li>';  
       }
       ?>
     </ul>
@@ -84,7 +84,7 @@ if ( sizeof($cluster_names) > 1 ) {
 } // end of if (sizeof(cluster_names))
 foreach ( $cluster_names as $index => $clustername ) {
 ?>
-  <div data-role="page" class="ganglia-mobile" id="cluster-<?php print urlencode($clustername); ?>">
+  <div data-role="page" class="ganglia-mobile" id="cluster-<?php print str_replace(" ", "_", $clustername); ?>">
     <div data-role="header">
 	    <h1>Cluster <?php print $clustername; ?></h1>
     </div>
@@ -92,8 +92,9 @@ foreach ( $cluster_names as $index => $clustername ) {
       <ul data-role="listview" data-theme="g">
 	<?php
 	// List all hosts in the cluster
+	asort($cluster_array[$clustername]);
 	foreach ( $cluster_array[$clustername] as $index => $hostname ) {
-	  print '<li><a href="mobile_helper.php?show_host_metrics=1&h=' . $hostname . '&c=' . $clustername . '&r=' . $default_time_range . '">' . $hostname . '</a></li>';  
+	  print '<li><a href="mobile_helper.php?show_host_metrics=1&h=' . $hostname . '&c=' . $clustername . '&r=' . $default_time_range . '">' . strip_domainname($hostname) . '</a></li>';  
 	}
 	?>
       </ul>
@@ -115,7 +116,8 @@ foreach ( $cluster_names as $index => $clustername ) {
       // List all the available views
       foreach ( $available_views as $view_id => $view ) {
 	$v = $view['view_name'];
-	print '<li><a href="mobile_helper.php?view_name=' . $v . '&just_graphs=1&r=' . $default_time_range . '&cs=&ce=">' . $v . '</a><span class="ui-li-count">' .  sizeof($view['items']) . '</span></li>';  
+	$elements = get_view_graph_elements($view);
+	print '<li><a href="mobile_helper.php?view_name=' . $v . '&just_graphs=1&r=' . $default_time_range . '&cs=&ce=">' . $v . '</a><span class="ui-li-count">' .  sizeof($elements) . '</span></li>';  
       }
       ?>
     </ul>

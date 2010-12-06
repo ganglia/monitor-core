@@ -185,7 +185,8 @@ if ( sizeof($available_views) == 0 ) {
     # List all the available views
     foreach ( $available_views as $view_id => $view ) {
       $v = $view['view_name'];
-      print '<li><a href="#" onClick="getViewsContentJustGraphs(\'' . $v . '\', \'1hour\', \'\',\'\'); return false;">' . $v . ' (' . sizeof($view['items']) . ')</a></li>';  
+      $elements = get_view_graph_elements($view);
+      print '<li><a href="#" onClick="getViewsContentJustGraphs(\'' . $v . '\', \'1hour\', \'\',\'\'); return false;">' . $v . ' (' . sizeof($elements) . ')</a></li>';  
     }
 
     ?>
