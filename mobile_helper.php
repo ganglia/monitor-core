@@ -71,11 +71,17 @@ if ( isset($_GET['view_name'])) {
       if ( isset($_GET['cs']) && isset($_GET['ce']) ) 
 	    $range_args .= "&cs=" . $_GET['cs'] . "&ce=" . $_GET['ce'];
 
-      foreach ( $view_elements as $id => $element ) {
-	print "
-	<A HREF=\"./graph_all_periods.php?mobile=1&" . $element['graph_args'] ."&z=mobile\">
-	<IMG ALT=\"" . $element['hostname'] . " - " . $element['name'] . "\" BORDER=0 SRC=\"./graph.php?" . $element['graph_args'] . "&z=mobile" . $range_args .  "\"></A>";
+      if ( count($view_elements) != 0 ) {
+	foreach ( $view_elements as $id => $element ) {
+	  print "
+	  <A HREF=\"./graph_all_periods.php?mobile=1&" . $element['graph_args'] ."&z=mobile\">
+	  <IMG ALT=\"" . $element['hostname'] . " - " . $element['name'] . "\" BORDER=0 SRC=\"./graph.php?" . $element['graph_args'] . "&z=mobile" . $range_args .  "\"></A>";
+	}
+      } else {
+	print "No graphs defined for this view. Please add some";
       }
+	
+	
   
      }  // end of if ( $view['view_name'] == $view_name
     } // end of foreach ( $views as $view_id 

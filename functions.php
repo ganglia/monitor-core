@@ -726,7 +726,8 @@ function get_view_graph_elements($view) {
     case "standard":
     // Does view have any items/graphs defined
     if ( sizeof($view['items']) == 0 ) {
-      print "No graphs defined for this view. Please add some";
+      continue;
+      // print "No graphs defined for this view. Please add some";
     } else {
 
       foreach ( $view['items'] as $item_id => $item ) {

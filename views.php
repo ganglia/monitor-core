@@ -186,7 +186,8 @@ if ( sizeof($available_views) == 0 ) {
     foreach ( $available_views as $view_id => $view ) {
       $v = $view['view_name'];
       $elements = get_view_graph_elements($view);
-      print '<li><a href="#" onClick="getViewsContentJustGraphs(\'' . $v . '\', \'1hour\', \'\',\'\'); return false;">' . $v . ' (' . sizeof($elements) . ')</a></li>';  
+      print '<li><a href="#" onClick="getViewsContentJustGraphs(\'' . $v . '\', \'1hour\', \'\',\'\'); return false;">' . $v . ' (' . count($elements) . ')</a></li>';
+      unset($elements);
     }
 
     ?>
@@ -259,11 +260,14 @@ $(function(){
       if ( isset($_GET['cs']) && isset($_GET['ce']) ) 
 	    $range_args .= "&cs=" . $_GET['cs'] . "&ce=" . $_GET['ce'];
 
-      foreach ( $view_elements as $id => $element ) {
-
-	  print "
-	  <A HREF=\"./graph_all_periods.php?" . $element['graph_args'] ."&z=large\">
-	  <IMG ALT=\"" . $element['hostname'] . " - " . $element['name'] . "\" BORDER=0 SRC=\"./graph.php?" . $element['graph_args'] . "&z=medium" . $range_args .  "\"></A>";
+      if ( count($view_elements) != 0 ) {
+	foreach ( $view_elements as $id => $element ) {
+	    print "
+	    <A HREF=\"./graph_all_periods.php?" . $element['graph_args'] ."&z=large\">
+	    <IMG ALT=\"" . $element['hostname'] . " - " . $element['name'] . "\" BORDER=0 SRC=\"./graph.php?" . $element['graph_args'] . "&z=medium" . $range_args .  "\"></A>";
+	}
+      } else {
+	print "No graphs defined for this view. Please add some";
       }
 
    }  // end of if ( $view['view_name'] == $view_name
