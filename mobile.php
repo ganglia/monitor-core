@@ -19,12 +19,7 @@ require_once('./cache.php');
 <script src="js/jquery-1.4.4.min.js"></script>
 <script src="js/jquery.mobile-1.0a2.min.js"></script>
 <style>
-.ui-mobile .ganglia-mobile {  background: #e5e5e5 url(../images/jqm-sitebg.png) top center repeat-x; }
-.ui-mobile #mobile-homeheader { padding: 55px 25px 0; text-align: center }
-.ui-mobile #mobile-homeheader h1 { margin: 0 0 10px; }
-.ui-mobile #mobile-homeheader p { margin: 0; }
-.ui-mobile #mobile-version { text-indent: -99999px; background: url(../images/version.png) top right no-repeat; width: 119px; height: 122px; overflow: hidden; position: absolute; top: 0; right: 0; }
-.ui-mobile .mobile-themeswitcher { clear: both; margin: 20px 0 0; }
+.ui-mobile .ganglia-mobile {  background: #e5e5e5 top center repeat-x; }
 h2 { margin-top:1.5em; }
 p code { font-size:1.2em; font-weight:bold; } 
 dt { font-weight: bold; margin: 2em 0 .5em; }
