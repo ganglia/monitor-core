@@ -159,7 +159,7 @@ if ( isset($_GET['show_cluster_metrics'])) {
     foreach ( $reports["included_reports"] as $index => $report_name ) {
       if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
 	print "<a name=metric_" . $report_name . ">
-	<A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=mobile&amp;c=$clustername\">
+	<A HREF=\"./graph_all_periods.php?mobile=1&$graph_args&amp;g=" . $report_name . "&amp;z=mobile&amp;c=$clustername\">
 	<IMG BORDER=0 ALT=\"$clustername\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=mobile&amp;c=$clustername\"></A>
 	";
       }
