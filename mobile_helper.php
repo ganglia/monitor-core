@@ -92,6 +92,86 @@ if ( isset($_GET['view_name'])) {
     </div> <!-- /page -->";
 } // end of if ( isset($_GET['view_name']))
 ///////////////////////////////////////////////////////////////////////////////
+// Generate cluster summary view
+///////////////////////////////////////////////////////////////////////////////
+if ( isset($_GET['show_cluster_metrics'])) {
+  $clustername = $_GET['c'];
+?>  
+  <div data-role="page" class="ganglia-mobile" id="viewhost-<?php print $hostname; ?>">
+    <div data-role="header" data-position="fixed">
+      <h3>Cluster <?php print $clustername; ?></h3>
+        <div data-role="navbar">
+	<ul>
+  <?php
+	// Header bar support up to 5 items. 5+ items will be shown in multiple
+	// rows. Thus we'll limit to first 5 time ranges
+	$my_ranges = array_keys( $time_ranges );     
+	for ( $i = 0 ; $i < 5 ; $i++ ) {
+	   $context_ranges[] = $my_ranges[$i]; 
+	}
+      
+	$range_menu = "";
+	$range = $_GET['r'];
+      
+	foreach ($context_ranges as $v) {
+	   $url=rawurlencode($v);
+	   if ($v == $range) {
+	     $checked = "class=\"ui-btn-active\"";
+      	     $range_menu .= "<li><a $checked href='#'>$v</a></li>";
+	  } else {
+      	     $range_menu .= "<li><a href='mobile_helper.php?show_cluster_metrics=1&c=" . $clustername . "&r=" . $v . "&cs=&ce='>$v</a></li>";
+	  }
+	}
+	  print $range_menu;
+    ?>
+	</ul>
+      </div><!-- /navbar -->
+    </div><!-- /header -->
+  
+    <div data-role="content">
+<?php
+    $graph_args = "c=$clustername&r=$range";
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // Let's find out what optional reports are included
+    // First we find out what the default (site-wide) reports are then look
+    // for host specific included or excluded reports
+    ///////////////////////////////////////////////////////////////////////////
+    $default_reports = array("included_reports" => array(), "excluded_reports" => array());
+    if ( is_file($GLOBALS['conf_dir'] . "/default.json") ) {
+      $default_reports = array_merge($default_reports,json_decode(file_get_contents($GLOBALS['conf_dir'] . "/default.json"), TRUE));
+    }
+    
+    $cluster_file = $GLOBALS['conf_dir'] . "/cluster_" . $clustername . ".json";
+    $override_reports = array("included_reports" => array(), "excluded_reports" => array());
+    if ( is_file($cluster_file) ) {
+      $override_reports = array_merge($override_reports, json_decode(file_get_contents($cluster_file), TRUE));
+    }
+    
+    # Merge arrays
+    $reports["included_reports"] = array_merge( $default_reports["included_reports"] , $override_reports["included_reports"]);
+    $reports["excluded_reports"] = array_merge($default_reports["excluded_reports"] , $override_reports["excluded_reports"]);
+    
+    # Remove duplicates
+    $reports["included_reports"] = array_unique($reports["included_reports"]);
+    $reports["excluded_reports"] = array_unique($reports["excluded_reports"]);
+    
+    foreach ( $reports["included_reports"] as $index => $report_name ) {
+      if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
+	print "<a name=metric_" . $report_name . ">
+	<A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=mobile&amp;c=$clustername\">
+	<IMG BORDER=0 ALT=\"$clustername\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=mobile&amp;c=$clustername\"></A>
+	";
+      }
+
+    }
+
+?>
+      </div><!-- /content -->
+    </div> <!-- /page -->";
+<?php
+}
+///////////////////////////////////////////////////////////////////////////////
 // Generate host view
 ///////////////////////////////////////////////////////////////////////////////
 if ( isset($_GET['show_host_metrics'])) {

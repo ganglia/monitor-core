@@ -32,6 +32,8 @@ dt code, dd code { font-size:1.3em; line-height:150%; }
   foreach ( $index_array['cluster'] as $hostname => $clustername ) {
     $cluster_array[$clustername][] = $hostname;
   }
+  
+  print_r($index_array);
   $cluster_names = array_keys($cluster_array);
   
   $available_views = get_available_views();
@@ -69,7 +71,7 @@ if ( sizeof($cluster_names) > 1 ) {
       <?php
       // List all clusters
       foreach ( $cluster_names as $index => $clustername ) {
-	print '<li><a href="#cluster-' . str_replace(" ", "_", $clustername) . '">' . $clustername . '</a></li>';  
+	print '<li><a href="#cluster-' . str_replace(" ", "_", $clustername) . '">' . $clustername . '</a><span class="ui-li-count">' .  sizeof($cluster_array[$clustername]) . '</span></li>';  
       }
       ?>
     </ul>
@@ -77,6 +79,10 @@ if ( sizeof($cluster_names) > 1 ) {
 </div><!-- /page -->
 <?php
 } // end of if (sizeof(cluster_names))
+
+///////////////////////////////////////////////////////////////////////////////
+// Create a sub-page for every cluster
+///////////////////////////////////////////////////////////////////////////////
 foreach ( $cluster_names as $index => $clustername ) {
 ?>
   <div data-role="page" class="ganglia-mobile" id="cluster-<?php print str_replace(" ", "_", $clustername); ?>">
@@ -86,6 +92,7 @@ foreach ( $cluster_names as $index => $clustername ) {
     <div data-role="content">	
       <ul data-role="listview" data-theme="g">
 	<?php
+	  print '<li><a href="mobile_helper.php?show_cluster_metrics=1&c=' . $clustername . '&r=' . $default_time_range . '&cs=&ce=">Cluster Summary</a></li>';  
 	// List all hosts in the cluster
 	asort($cluster_array[$clustername]);
 	foreach ( $cluster_array[$clustername] as $index => $hostname ) {
