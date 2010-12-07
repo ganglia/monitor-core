@@ -22,7 +22,7 @@ if ( isset($_GET['q']) && $_GET['q'] != "" ) {
   $query = $_GET['q'];
   // First we look for the hosts
   foreach ( $index_array['hosts'] as $key => $host_name ) {
-    if ( preg_match("/$query/", $host_name ) ) {
+    if ( preg_match("/$query/i", $host_name ) ) {
       $cluster_name = $index_array['cluster'][$host_name];
       if ( $mobile )
 	$results .= 'Host: <a onclick="jQuery(\'#jquery-live-search\').slideUp(0)" href="mobile_helper.php?show_host_metrics=1&h=' . $host_name . '&c=' . $cluster_name . '&r=' . $default_time_range . '&cs=&ce=">' . $host_name . '</a><br />';  
@@ -33,7 +33,7 @@ if ( isset($_GET['q']) && $_GET['q'] != "" ) {
 
   // Now let's look through metrics.
   foreach ( $index_array['metrics'] as $metric_name => $hosts ) {
-    if ( preg_match("/$query/", $metric_name ) ) {
+    if ( preg_match("/$query/i", $metric_name ) ) {
       foreach ( $hosts as $key => $host_name ) {
 	$cluster_name = $index_array['cluster'][$host_name];
 
