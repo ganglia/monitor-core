@@ -92,7 +92,7 @@ foreach ( $cluster_names as $index => $clustername ) {
 	    <h1>Cluster <?php print $clustername; ?></h1>
     </div>
     <div data-role="content">	
-      <ul data-role="listview" data-theme="g">
+      <ul data-role="listview" data-filter="true" data-theme="g">
 	<?php
 	  print '<li><a href="mobile_helper.php?show_cluster_metrics=1&c=' . $clustername . '&r=' . $default_time_range . '&cs=&ce=">Cluster Summary</a></li>';  
 	// List all hosts in the cluster
@@ -115,7 +115,7 @@ foreach ( $cluster_names as $index => $clustername ) {
 	  <h1>Ganglia Views</h1>
   </div>
   <div data-role="content">
-    <ul data-role="listview" data-theme="g">
+    <ul data-role="listview" data-filter="true" data-theme="g">
       <?php  
       // List all the available views
       foreach ( $available_views as $view_id => $view ) {
