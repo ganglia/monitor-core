@@ -1,9 +1,19 @@
+<script>
+$( "#tabs" ).bind( "tabsshow", function(event, ui) {
+    jQuery('#jquery-live-search').slideUp(0);
+  });
+</script>
 <?php
 
 require_once('./conf.php');
 
 // Load the metric caching code
 require_once('./cache.php');
+
+if ( isset($_GET['mobile']))
+  $mobile = 1;
+else
+  $mobile = 0;
 
 $results = "";
 
@@ -14,7 +24,10 @@ if ( isset($_GET['q']) && $_GET['q'] != "" ) {
   foreach ( $index_array['hosts'] as $key => $host_name ) {
     if ( preg_match("/$query/", $host_name ) ) {
       $cluster_name = $index_array['cluster'][$host_name];
-      $results .= "Host: <a target=\"_blank\" href=\"?c=" . $cluster_name . "&h=" . $host_name . "&m=cpu_report&r=hour&s=descending&hc=4&mc=2\">" . $host_name . "</a><br>";
+      if ( $mobile )
+	$results .= 'Host: <a onclick="jQuery(\'#jquery-live-search\').slideUp(0)" href="mobile_helper.php?show_host_metrics=1&h=' . $host_name . '&c=' . $cluster_name . '&r=' . $default_time_range . '&cs=&ce=">' . $host_name . '</a><br />';  
+      else
+        $results .= "Host: <a target=\"_blank\" href=\"?c=" . $cluster_name . "&h=" . $host_name . "&m=cpu_report&r=" . $default_time_range  ."&s=descending&hc=4&mc=2\">" . $host_name . "</a><br>";
     }
   }
 
@@ -23,7 +36,11 @@ if ( isset($_GET['q']) && $_GET['q'] != "" ) {
     if ( preg_match("/$query/", $metric_name ) ) {
       foreach ( $hosts as $key => $host_name ) {
 	$cluster_name = $index_array['cluster'][$host_name];
-	$results .= "Metric: <a target=\"_blank\" href=\"?c=" . $cluster_name . "&h=" . $host_name . "&m=cpu_report&r=hour&s=descending&hc=4&mc=2#metric_" . $metric_name  . "\">" . $host_name . " (" . $metric_name .  " )</a><br>";
+
+        if ( $mobile )
+	  $results .= 'Metric: <a onclick="jQuery(\'#jquery-live-search\').slideUp(0)" href="mobile_helper.php?show_host_metrics=1&h=' . $host_name . '&c=' . $cluster_name . '&r=' . $default_time_range . '&cs=&ce=">' . $host_name . " (" . $metric_name .  " )</a><br>";
+	else
+	  $results .= "Metric: <a target=\"_blank\" href=\"?c=" . $cluster_name . "&h=" . $host_name . "&m=cpu_report&r=hour&s=descending&hc=4&mc=2#metric_" . $metric_name  . "\">" . $host_name . " (" . $metric_name .  " )</a><br>";
       }
     }
   }

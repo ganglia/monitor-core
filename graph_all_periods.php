@@ -3,10 +3,6 @@
 <head>
 <title>Ganglia: Metric <?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?></title>
 </head>
-<style>
-.ui-mobile .ganglia-mobile {  background: #e5e5e5 url(../images/jqm-sitebg.png) top center repeat-x; }
-</style>
-</head>
 <body>
 <?php
 

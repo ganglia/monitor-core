@@ -13,7 +13,6 @@
 <LINK rel="stylesheet" href="./styles.css" type="text/css">
 <script>
   var availablemetrics = [ {$available_metrics} ];
-
   $(function(){
     $( "#metrics-picker" ).autocomplete({
       source: availablemetrics
@@ -30,7 +29,7 @@
 <div id="tabs">
 <ul>
   <li><a href="#tabs-main">Main</a></li>
-  <li><a href="#tabs-search" onclick="getSearchContent();">Search</a></li>
+  <li><a href="#tabs-search">Search</a></li>
   <li><a href="#tabs-views" onclick="getViewsContent();">Views</a></li>
   <li><a href="#tabs-autorotation" onclick="autoRotationChooser();">Automatic Rotation</a></li>
   <a id="mobile_view_link" href="mobile.php">Mobile</a>

@@ -4,7 +4,8 @@ $(function(){
   $( "#range_menu" ).buttonset();
   $( "#sort_menu" ).buttonset();
   $( "#mobile_view_link").button();
-  jQuery('#metric-search input[name="q"]').liveSearch({url: 'search.php?q=', typeDelay: 800});
+  jQuery('#metric-search input[name="q"]').liveSearch({url: 'search.php?q=', typeDelay: 500});
+
   $( "#datepicker-cs" ).datepicker({
 	  showOn: "button",
 	  buttonImage: "img/calendar.gif",

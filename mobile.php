@@ -18,6 +18,8 @@ require_once('./cache.php');
 <link rel="stylesheet" href="css/jquery.mobile-1.0a2.min.css" />
 <script src="js/jquery-1.4.4.min.js"></script>
 <script src="js/jquery.mobile-1.0a2.min.js"></script>
+<script type="text/javascript" src="js/jquery.liveSearch.js"></script>
+<link type="text/css" href="css/jquery.liveSearch.css" rel="stylesheet" />
 <style>
 .ui-mobile .ganglia-mobile {  background: #e5e5e5 top center repeat-x; }
 h2 { margin-top:1.5em; }
@@ -55,6 +57,7 @@ dt code, dd code { font-size:1.3em; line-height:150%; }
       <?php
       }
       ?>
+      <li><a href="#search">Search</a></li>
     </ul>
   </div><!-- /content -->
 </div><!-- /page -->
@@ -121,6 +124,33 @@ foreach ( $cluster_names as $index => $clustername ) {
       }
       ?>
     </ul>
+  </div><!-- /content -->
+</div><!-- /page -->
+<?php
+///////////////////////////////////////////////////////////////////////////////
+// Search
+///////////////////////////////////////////////////////////////////////////////
+?>
+<script>
+$(function(){
+  jQuery('#search input[name="q"]').liveSearch({url: 'search.php?mobile=1&q=', typeDelay: 1000});
+});
+
+</script>
+<div data-role="page" class="ganglia-mobile" id="search">
+  <div data-role="header">
+	  <h1>Search</h1>
+  </div>
+  <div data-role="content">
+    <form method="post" action="/search/">
+    <p>
+      <label>
+	Search for host or a metric: <br />
+	<input type="text" name="q" id="search-field-q" on size=40 />
+      </label>
+    </p>
+    </form>
+  </div>
   </div><!-- /content -->
 </div><!-- /page -->
 </body>
