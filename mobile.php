@@ -33,7 +33,6 @@ dt code, dd code { font-size:1.3em; line-height:150%; }
     $cluster_array[$clustername][] = $hostname;
   }
   
-  print_r($index_array);
   $cluster_names = array_keys($cluster_array);
   
   $available_views = get_available_views();
@@ -118,8 +117,7 @@ foreach ( $cluster_names as $index => $clustername ) {
       // List all the available views
       foreach ( $available_views as $view_id => $view ) {
 	$v = $view['view_name'];
-	$elements = get_view_graph_elements($view);
-	print '<li><a href="mobile_helper.php?view_name=' . $v . '&r=' . $default_time_range . '&cs=&ce=">' . $v . '</a><span class="ui-li-count">' .  sizeof($elements) . '</span></li>';  
+	print '<li><a href="mobile_helper.php?view_name=' . $v . '&r=' . $default_time_range . '&cs=&ce=">' . $v . '</a></li>';  
       }
       ?>
     </ul>
