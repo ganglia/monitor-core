@@ -1,0 +1,47 @@
+Graphs
+
+- Cross-rendering engine graphs using JSON ie. a single definition file that works on
+  both rrdtool and graphite. Something along these lines
+
+{
+   "report_name" : "apache_report",
+   "report_type" : "standard",
+   "items" : [ "apache_200", "apache_300", "apache_400", "apache_500" ],
+   "colors" : [ "aaaaaa", "bbbbbb", "cccccc", "dddddd" ],
+   "ylegend" : "hps"
+}
+
+- Zooming 
+
+Views
+
+- Support regex expressions for metrics in regex views
+Suggestions from Ben Hartshorne. 
+- Color code by host or metric, so as to easily differentiate
+- Do something else to sort by host or metric, such as all metrics from a specific host in a row
+- group by metric or group by host - right now it lists all hosts metric A, then all hosts metric B (when
+using the regex)
+
+
+Caching
+
+- Figure out a better way to cache metrics
+- Avoid race conditions
+
+Mobile
+
+- Add ability to specify arbitrary time ranges
+
+Graphite
+
+- Add polish to Graphite integration
+- Fix CPU report for Cluster summary. Needs to be "scaled" by number of nodes
+
+Documentation
+
+- Add user guide
+
+
+New features
+
+- Implement aggregate graphs (line and stacked)

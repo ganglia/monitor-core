@@ -25,7 +25,7 @@ if ( isset($_GET['q']) && $_GET['q'] != "" ) {
     if ( preg_match("/$query/i", $host_name ) ) {
       $cluster_name = $index_array['cluster'][$host_name];
       if ( $mobile )
-	$results .= 'Host: <a onclick="jQuery(\'#jquery-live-search\').slideUp(0)" href="mobile_helper.php?show_host_metrics=1&h=' . $host_name . '&c=' . $cluster_name . '&r=' . $default_time_range . '&cs=&ce=">' . $host_name . '</a><br />';  
+	$results .= '<a onclick="jQuery(\'#jquery-live-search\').slideUp(0)" href="mobile_helper.php?show_host_metrics=1&h=' . $host_name . '&c=' . $cluster_name . '&r=' . $default_time_range . '&cs=&ce=">Host: ' . $host_name . '</a>';  
       else
         $results .= "Host: <a target=\"_blank\" href=\"?c=" . $cluster_name . "&h=" . $host_name . "&m=cpu_report&r=" . $default_time_range  ."&s=descending&hc=4&mc=2\">" . $host_name . "</a><br>";
     }
@@ -50,9 +50,16 @@ if ( isset($_GET['q']) && $_GET['q'] != "" ) {
 }
 
 if ( $results == "" ) {
-  print "No results. Try a different search term. Currently only one search term supported.";
+  print "No results. Try a different search term. One term only.";
 } else {
-  print $results;
+  
+  if ( $mobile ) {
+    
+   print $results;
+  } else {
+    print $results;
+  }
+  
 }
 
 ?>
