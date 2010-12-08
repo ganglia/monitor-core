@@ -1,3 +1,8 @@
+General
+
+- Add back the Ganglia logo
+- Provide an easy method for user to add their organization's logo
+
 Graphs
 
 - Cross-rendering engine graphs using JSON ie. a single definition file that works on
@@ -22,7 +27,6 @@ Suggestions from Ben Hartshorne.
 - group by metric or group by host - right now it lists all hosts metric A, then all hosts metric B (when
 using the regex)
 
-
 Caching
 
 - Figure out a better way to cache metrics
@@ -31,6 +35,12 @@ Caching
 Mobile
 
 - Add ability to specify arbitrary time ranges
+- Add support for multi-touch enlarging of graphs
+- Allow hosts to be named the same in multiple clusters (right now they are filtered out)
+- Add a "Home" button to quickly go back to main page
+- Mobile browser detection code to automatically use mobile version
+- Clicking on a metric search result should bring up the host page anchoring at the
+  metric graph in question
 
 Graphite
 
@@ -40,7 +50,8 @@ Graphite
 Documentation
 
 - Add user guide
-
+- Add installation guide (expand on README)
+- Add templating guide
 
 New features
 
