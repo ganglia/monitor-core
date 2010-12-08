@@ -1,0 +1,80 @@
+This is an attempt to make the Ganglia UI more usable. You should be able to drop this into
+your $HTTPD_ROOT/ganglia and it should just work.
+
+New features
+============
+
+Views
+=====
+
+Views are an arbitrary collection of hostname/metric graphs. They are defined using JSON files and stored in the
+/conf directory. View file names have to start with view ie.
+
+view_web_servers_vitals.json
+
+There are two types of views, standard (default) and regex views. 
+
+Standard views are defined as follows
+
+{"view_name":"web_servers_vitals",
+  "items": [
+    { "hostname":"web1", "metric":"disk_free"},
+    { "hostname":"web2", "graph":"cpu_report"}
+          ]
+}
+
+Regex views allow using regex to match hostnames (need to specify view_type regex) e.g.
+
+{"view_name":"web_servers_wiki",
+ "view_type":"regex",
+  "items": [
+    { "hostname":"web-wiki.*", "metric":"disk_free"},
+    { "hostname":".*wiki", "graph":"cpu_report"}
+          ]
+}
+
+Obviously you can write a regex that matches a single host. 
+
+Auto Rotation
+=============
+
+Automatically rotate view graphs every 30 seconds with hour, day, week and month overview for each metric
+on a single page. It will rotate until page closed. 
+
+Optional Graphs
+===============
+
+Ability to define optional graphs that are show at the top of the page for any host.
+Those are defined using overrides stored in $GANGLIA_DIR/conf directory. You need
+to make sure that directory is writeable by the Apache/Web user.
+
+This should work like the normal Ganglia web UI. The difference is that
+you need to make the conf/ directory writeable by the Apache user.
+
+Search
+======
+
+You can search for a metric or a host in a live manner. You should be able to click on the
+host or metric in the search and 
+
+Installation notes
+==================
+
+IMPORTANT:
+You will need PHP JSON extension. It comes with PHP 5.2+. If you are on 5.1
+use 
+
+pecl install json
+
+pecl is part of php-pear package on RHEL/CentOS. Make sure you have 
+
+# cat /etc/php.d/json.ini 
+extension=json.so
+
+On RHEL/CentOS 4, you will also need phpize which comes with the php-devel package.
+
+BUGS
+====
+
+In the search window when you click on a metric it should actually jump to the metric once the
+page is opened. That doesn't work. If you just press enter in the Location bar it does jump.
