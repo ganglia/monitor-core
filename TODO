@@ -41,6 +41,7 @@ Mobile
 - Mobile browser detection code to automatically use mobile version
 - Clicking on a metric search result should bring up the host page anchoring at the
   metric graph in question
+- Add ability to add metrics to views
 
 Graphite
 
