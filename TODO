@@ -41,6 +41,7 @@ Mobile
 - Clicking on a metric search result should bring up the host page anchoring at the
   metric graph in question
 - Add ability to add metrics to views
+- Implement "refresh" for pages to prevent stale data from being displayed via ajax
 
 Graphite
 
