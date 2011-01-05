@@ -2,6 +2,9 @@ General
 
 - Add back the Ganglia logo
 - Provide an easy method for user to add their organization's logo
+- Centralize sanitization of user input (Extract this from get_context.php and graph.php, no other scripts
+  should use $_GET directly)
+- Make indentation consistent - mixed usage of 2 spaces, 3 spaces, 4 spaces, or tabs makes code harder to read
 
 Graphs
 
@@ -15,7 +18,10 @@ Graphs
    "colors" : [ "aaaaaa", "bbbbbb", "cccccc", "dddddd" ],
    "ylegend" : "hps"
 }
-
+- Eliminate usage of global variables
+- network_report.php & packet_report.php use $mem_cached_color and $mem_used_color
+- $rrdtool_graph['lower-limit'] should default to 0, since this is the value used in all current graphs
+- graph.d/.php files all modify the global $hostname, should be a local variable
 - Zooming 
 
 Views
@@ -42,6 +48,7 @@ Mobile
   metric graph in question
 - Add ability to add metrics to views
 - Implement "refresh" for pages to prevent stale data from being displayed via ajax
+- Fix XSS vuln. in input handling (See general 'Centralize sanitization' task above)
 
 Graphite
 
