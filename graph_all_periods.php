@@ -10,7 +10,9 @@ if ( isset($_GET['mobile'])) {
 ?>
     <div data-role="page" class="ganglia-mobile" id="view-home">
     <div data-role="header">
+      <a href="#" class="ui-btn-left" data-icon="arrow-l" onclick="history.back(); return false">Back</a>
       <h3><?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?></h3>
+      <a href="#mobile-home">Home</a>
     </div>
     <div data-role="content">
 <?php

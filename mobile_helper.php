@@ -22,7 +22,9 @@ if ( isset($_GET['view_name'])) {
 ?>  
   <div data-role="page" class="ganglia-mobile" id="view-home">
     <div data-role="header">
+      <a href="#" class="ui-btn-left" data-icon="arrow-l" onclick="history.back(); return false">Back</a>
       <h1>View <?php print $_GET['view_name']; ?></h1>
+      <a href="#mobile-home">Home</a>
       <div data-role="navbar">
 	<ul>
   <?php
@@ -99,7 +101,9 @@ if ( isset($_GET['show_cluster_metrics'])) {
 ?>  
   <div data-role="page" class="ganglia-mobile" id="viewhost-<?php print $hostname; ?>">
     <div data-role="header" data-position="fixed">
+      <a href="#" class="ui-btn-left" data-icon="arrow-l" onclick="history.back(); return false">Back</a>
       <h3>Cluster <?php print $clustername; ?></h3>
+      <a href="#mobile-home">Home</a>
         <div data-role="navbar">
 	<ul>
   <?php
@@ -180,7 +184,9 @@ if ( isset($_GET['show_host_metrics'])) {
 ?>  
   <div data-role="page" class="ganglia-mobile" id="viewhost-<?php print $hostname; ?>">
     <div data-role="header" data-position="fixed">
+      <a href="#" class="ui-btn-left" data-icon="arrow-l" onclick="history.back(); return false">Back</a>
       <h3>Host <?php print $hostname; ?></h3>
+      <a href="#mobile-home">Home</a>
         <div data-role="navbar">
 	<ul>
   <?php
