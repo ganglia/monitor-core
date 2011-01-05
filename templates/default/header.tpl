@@ -32,7 +32,7 @@
   <li><a href="#tabs-search">Search</a></li>
   <li><a href="#tabs-views" onclick="getViewsContent();">Views</a></li>
   <li><a href="#tabs-autorotation" onclick="autoRotationChooser();">Automatic Rotation</a></li>
-  <a id="mobile_view_link" href="mobile.php">Mobile</a>
+  <li><a href="mobile.php">Mobile</a></li>
 </ul>
 
 <div id="tabs-main">
