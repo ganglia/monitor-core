@@ -23,7 +23,7 @@
  <hr>
 </TD>
 
-<TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top
+<TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top>
 <div id="optional_graphs">
   {$optional_reports}<br>
   {foreach $optional_graphs_data graph}
