@@ -12,13 +12,37 @@
 <link type="text/css" href="css/jquery.liveSearch.css" rel="stylesheet" />
 <LINK rel="stylesheet" href="./styles.css" type="text/css">
 <script>
-  var availablemetrics = [ {$available_metrics} ];
-  $(function(){
-    $( "#metrics-picker" ).autocomplete({
-      source: availablemetrics
+    var availablemetrics = [ {$available_metrics} ];
+    $(function(){
+        $( "#metrics-picker" ).autocomplete({
+          source: availablemetrics
+        });
+        {$is_metrics_picker_disabled} 
+
     });
-  {$is_metrics_picker_disabled} 
-});
+
+  $(function () {
+    $(".zoomable").gangZoom({
+        startTime: {$start_timestamp},
+        endTime: {$end_timestamp},
+        paddingLeft: 67,
+        paddingRight: 30,
+        done: function (startTime, endTime) {
+            setStartAndEnd(startTime, endTime);
+            document.forms['ganglia_form'].submit();
+        },
+        cancel: function (startTime, endTime) {
+            setStartAndEnd(startTime, endTime);
+        }
+    });
+
+    function setStartAndEnd(startTime, endTime) {
+        $("#datepicker-cs").val(Math.floor(startTime));
+        $("#datepicker-ce").val(Math.floor(endTime));
+    }
+  });
+
+
 </script>
 {$custom_time_head}
 </HEAD>
