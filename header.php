@@ -96,6 +96,32 @@ if ($cs)
 if ($ce)
     $get_metric_string .= "&amp;ce=" . rawurlencode($ce);
 
+$start_timestamp = null;
+$end_timestamp = null;
+if ($cs) {
+    if (! is_numeric($cs)) {
+        $start_timestamp = strtotime($cs);
+    } else {
+        $start_timestamp = $cs;
+    }
+
+    if ($ce) {
+        if (! is_numeric($ce)) {
+            $end_timestamp = strtotime($ce);
+        } else {
+            $end_timestamp = $ce;
+        }
+    } else {
+        $end_timestamp = strtotime("+1 $range", $start_timestamp);
+    }
+} else {
+    $end_timestamp = time();
+    $start_timestamp = strtotime("-1 $range", $end_timestamp);
+}
+
+$data->assign("start_timestamp", $start_timestamp);
+$data->assign("end_timestamp", $end_timestamp);
+
 # Set the Alternate view link.
 $cluster_url=rawurlencode($clustername);
 $node_url=rawurlencode($hostname);
