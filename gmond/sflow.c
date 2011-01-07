@@ -31,19 +31,19 @@ static const char *SFLOWMachineTypes[] = {
 #define SFLOW_MAX_MACHINE_TYPE 12
 
 static const char *SFLOWOSNames[] = {
-  "unknown",
-  "other",
-  "linux",
-  "windows",
-  "darwin",
-  "hpux",
-  "aix",
-  "dragonfly",
-  "freebsd",
-  "netbsd",
-  "openbsd",
-  "osf",
-  "solaris",
+  "Unknown",
+  "Other",
+  "Linux",
+  "Windows",
+  "Darwin",
+  "HP-UX",
+  "AIX",
+  "DragonflyBSD",
+  "FreeBSD",
+  "NetBSD",
+  "OpenBSD",
+  "OSF1",
+  "SunOS",
 };
 #define SFLOW_MAX_OS_NAME 12
 
