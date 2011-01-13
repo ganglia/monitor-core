@@ -11,6 +11,8 @@
 #
 # % rpmbuild -ta --target noarch,i386 ganglia-@VERSION@.tar.gz
 #
+%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+
 Summary: Ganglia Distributed Monitoring System
 Name: @PACKAGE@
 Version: @VERSION@
@@ -170,6 +172,8 @@ gmetad packages
 %ifnarch noarch
 make
 %endif
+cd gmetad-python
+%{__python} setup.py build
 
 %pre
 
@@ -309,11 +313,13 @@ fi
 # Copy the python metric modules and .conf files
 %__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/
 %{__python} -c 'import compileall; compileall.compile_dir("gmond/python_modules", 1, "/", 1)' > /dev/null
-%__cp -f gmond/python_modules/*/*.{py,pyc} $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
+%{__python} -O -c 'import compileall; compileall.compile_dir("gmond/python_modules", 1, "/", 1)' > /dev/null
+%__cp -f gmond/python_modules/*/*.{py,pyc,pyo} $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
 
 # Don't install the example modules
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/example.conf
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/example.pyconf
+%__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/spfexample.pyconf
 
 # Clean up the .conf.in files
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/*.conf.in
@@ -328,7 +334,12 @@ fi
 
 # gmetad-python
 cd gmetad-python
-%{__python} setup.py install --install-scripts=/usr/sbin --root=$RPM_BUILD_ROOT --record=GMETAD_PYTHON_FILES
+%{__python} setup.py install --prefix=/usr --skip-build --install-scripts=%{_sbindir} --root=$RPM_BUILD_ROOT
+%{__python} -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/gmetad"'", 1, "/", 1)' > /dev/null
+%{__python} -O -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/gmetad"'", 1, "/", 1)' > /dev/null
+%{__python} -O -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{python_sitelib}/Gmetad"'", 1, "/", 1)' > /dev/null
+%{__python} -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_sbindir}"'", 1, "/", 1)' > /dev/null
+%{__python} -O -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_sbindir}"'", 1, "/", 1)' > /dev/null
 
 %endif
 
@@ -343,10 +354,15 @@ cd gmetad-python
 %{_mandir}/man1/gmetad.1*
 %config(noreplace) %{conf_dir}/gmetad.conf
 
-%files gmetad-python -f gmetad-python/GMETAD_PYTHON_FILES
+%files gmetad-python
 %defattr(-,root,root)
+%{_sbindir}/gmetad.py*
 /etc/init.d/gmetad-python
 %config(noreplace) %{conf_dir}/gmetad-python.conf
+%{python_sitelib}/*
+%dir %{_libdir}/ganglia
+%dir %{_libdir}/ganglia/python_modules
+%{_libdir}/ganglia/python_modules/gmetad*
 
 %files gmond
 %defattr(-,root,root)
@@ -443,6 +459,11 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Jan 12 2011 Bernard Li <bernard@vanhpc.org>
+- Fix gmetad-python subpackage not including files from Python site-packages dir
+- Break gmetad-python installation into build and install stages
+- Byte compile additional gmond-modules-python and gmetad-python scripts
+- Do not include spfexample.pyconf
 * Wed Sep  8 2010 Bernard Li <bernard@vanhpc.org>
 - Replace TemplatePower with Dwoo for PHP templating engine
 * Tue Aug 17 2010 Bernard Li <bernard@vanhpc.org>
