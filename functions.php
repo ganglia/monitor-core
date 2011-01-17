@@ -837,13 +837,16 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   $stack_counter = 0;
   
   // Loop through all the graph items
-  foreach( $config[ 'series' ] as $item ) {
+  foreach( $config[ 'series' ] as $index => $item ) {
    
+    # Need this when defining graphs that may use same metric names
+    $unique_id = "a" . $index;
+    
     $rrd_dir = $GLOBALS['rrds'] . "/" . $item['clustername'] . "/" . $item['hostname'];
 
     $label = str_pad( sanitize( $item[ 'label' ] ), $max_label_length );
     $metric = sanitize( $item[ 'metric' ] );
-    $series .= " DEF:'$metric'='${rrd_dir}/$metric.rrd':'sum':AVERAGE ";
+    $series .= " DEF:'$unique_id'='${rrd_dir}/$metric.rrd':'sum':AVERAGE ";
     
     // By default graph is a line graph
    isset( $item['type']) ? $item_type = $item['type'] : $item_type = "line";
@@ -851,16 +854,16 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
    switch ( $item_type ) {
       
       case "line":
-         $series .= strtoupper( sanitize( $item['style'] ) ).":'$metric'#${item['color']}:'${label}'";
+         $series .= strtoupper( sanitize( $item['style'] ) ).":'$unique_id'#${item['color']}:'${label}'";
          break;
       
       case "stack":
-         
+         // First element in a stack has to be AREA
          if ( $stack_counter == 0 ) {
-            $series .= "AREA:'$metric'#${item['color']}:'${label}'";
+            $series .= "AREA:'$unique_id'#${item['color']}:'${label}'";
             $stack_counter++;
          } else {
-            $series .= "STACK:'$metric'#${item['color']}:'${label}'";
+            $series .= "STACK:'$unique_id'#${item['color']}:'${label}'";
          }
          break;
       
