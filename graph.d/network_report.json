@@ -1,5 +1,11 @@
 {
    "report_name" : "network_report",
-   "report_type" : "template",
-   "report_arguments"  : "target=alias(HOST_CLUSTER.bytes_in.sum%2C'Bytes%20In')&target=alias(HOST_CLUSTER.bytes_out.sum%2C'Bytes%20Out')&vtitle=packets"
+   "report_type" : "standard",
+   "title" : "Network",
+   "graphite"  : "target=alias(HOST_CLUSTER.bytes_in.sum%2C'Bytes%20In')&target=alias(HOST_CLUSTER.bytes_out.sum%2C'Bytes%20Out')&vtitle=packets",
+   "vertical-label" : "Bytes/sec",
+   "series" : [
+      { "metric": "bytes_in", "color": "33cc33", "label": "In", "style": "line2" },
+      { "metric": "bytes_out", "color": "5555cc", "label": "Out", "style": "line2" }
+   ]
 }

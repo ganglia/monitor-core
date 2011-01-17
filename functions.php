@@ -801,4 +801,73 @@ function get_view_graph_elements($view) {
 
 }
 
+/**
+ * Populate $rrdtool_graph from $config (from JSON file).
+ */
+function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
+  global $context,
+         $hostname,
+         $range,
+         $rrd_dir,
+         $size,
+         $strip_domainname,
+         $graphreport_stats;
+  
+  if ($strip_domainname)     {
+    $hostname = strip_domainname($hostname);
+  }
+   
+  $title = sanitize( $config[ 'title' ] );
+  $rrdtool_graph[ 'title' ] =  ($context == 'host') ? "$hostname $title last $range" : $title;
+  $rrdtool_graph[ 'vertical-label' ] = sanitize( $config[ 'vertical-label' ] );
+  
+  $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
+  if( $graphreport_stats ) {
+    $rrdtool_graph['height'] += ($size == 'medium') ? 52 : 0;
+  }
+  
+  // find longest label length, so we pad the others accordingly to get consistent column alignment
+  $max_label_length = 0;
+  foreach( $config[ 'series' ] as $item ) {
+    $max_label_length = max( strlen( $item[ 'label' ] ), $max_label_length );
+  }
+  
+  $series = '';
+  foreach( $config[ 'series' ] as $item ) {
+    $label = str_pad( sanitize( $item[ 'label' ] ), $max_label_length );
+    $metric = sanitize( $item[ 'metric' ] );
+    $series .= "DEF:'$metric'='${rrd_dir}/$metric.rrd':'sum':AVERAGE "
+      . strtoupper( sanitize( $item['style'] ) ).":'$metric'#${item['color']}:'${label}'"
+      . ( isset($item[ 'stack' ]) && $item[ 'stack' ] ? ":STACK" : "" ) . " ";
+
+    if ( $graphreport_stats ) {
+      $series .= "VDEF:${metric}_last=$metric,LAST "
+              . "VDEF:${metric}_min=$metric,MINIMUM "
+              . "VDEF:${metric}_avg=$metric,AVERAGE "
+              . "VDEF:${metric}_max=$metric,MAXIMUM "
+              . "GPRINT:'${metric}_last':'Now\:%5.1lf%s' "
+              . "GPRINT:'${metric}_min':'Min\:%5.1lf%s' "
+              . "GPRINT:'${metric}_avg':'Avg\:%5.1lf%s' "
+              . "GPRINT:'${metric}_max':'Max\:%5.1lf%s\\l' ";
+    }
+  }
+  $rrdtool_graph[ 'series' ] = $series;
+  return $rrdtool_graph;
+}
+
+
+// TODO: create graphite areaMode
+function build_graphite_series( $config, $host_cluster ) {
+  $targets = array();
+  $colors = array();
+  foreach( $config[ 'series' ] as $item ) {
+    $targets[] = "target=". urlencode( "alias($host_cluster.${item['metric']}.sum,'${item['label']}')" );
+    $colors[] = $item['color'];
+  }
+  $output = implode( $targets, '&' );
+  $output .= "&colorList=" . implode( $colors, ',' );
+  $output .= "&vtitle=" . urlencode( $config[ 'vertical-label' ] );
+  
+  return $output;
+}
 ?>

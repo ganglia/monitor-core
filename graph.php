@@ -178,23 +178,17 @@ if (!$graph) {
     $graph = 'metric';
 }
 
-
-// Only in rrdtool this check is necessary
-if ( $use_graphite == "no" ) {
-
-  $graph_file = "$graphdir/$graph.php";
-
-  if ( is_readable($graph_file) ) {
-      include_once($graph_file);
-
-      $graph_function = "graph_${graph}";
-      $graph_function($rrdtool_graph);  // Pass by reference call, $rrdtool_graph modified inplace
-  } else {
-      /* Bad stuff happened. */
-      error_log("Tried to load graph file [$graph_file], but failed.  Invalid graph, aborting.");
-      exit();
+if( $use_graphite == "no" ) {
+  $php_report_file = $graphdir . "/" . $graph . ".php";
+  $json_report_file = $graphdir . "/" . $graph . ".json";
+  if( is_file( $php_report_file ) ) {
+    include_once $php_report_file;
+    $graph_function = "graph_${graph}";
+    $graph_function( $rrdtool_graph );  // Pass by reference call, $rrdtool_graph modified inplace
+  } else if ( is_file( $json_report_file ) ) {
+    $config = json_decode( file_get_contents( $json_report_file ), TRUE );
+    build_rrdtool_args_from_json ( $rrdtool_graph, $config );
   }
-
 }
 
 # Calculate time range.
@@ -338,7 +332,7 @@ if ( $use_graphite == "no" ) {
       switch ( $report_array["report_type"] ) {
 
 	case "template":
-	  $target = str_replace("HOST_CLUSTER", $host_cluster, $report_array["report_arguments"]);
+	  $target = str_replace("HOST_CLUSTER", $host_cluster, $report_array["graphite"]);
 	  break;
 
 	default:

@@ -34,7 +34,7 @@ if ( isset($_GET['mobile'])) {
   $xlargesize = "xlarge";  
 }
 ?>
-<b>Host: </b><?php echo $_GET['h'] ?>&nbsp;<b>Metric/Graph: </b><?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?>
+<b>Host/Cluster: </b><?php isset($_GET['h']) ? print $_GET['h'] : print $_GET['c']; ?>&nbsp;<b>Metric/Graph: </b><?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?>
 <br />
 <img src="graph.php?r=hour&z=<?php print $largesize . $query_string ?>">
 <img src="graph.php?r=day&z=<?php print $largesize . $query_string ?>">
