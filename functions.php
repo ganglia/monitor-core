@@ -819,7 +819,13 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
    
   $title = sanitize( $config[ 'title' ] );
   $rrdtool_graph[ 'title' ] =  ($context == 'host') ? "$hostname $title last $range" : $title;
-  $rrdtool_graph[ 'vertical-label' ] = sanitize( $config[ 'vertical-label' ] );
+  // If vertical label is empty or non-existent set it to space otherwise rrdtool will fail
+  if ( ! isset($config[ 'vertical-label' ]) || $config[ 'vertical-label' ] == "" ) {
+     $rrdtool_graph[ 'vertical-label' ] = " ";   
+  } else {
+     $rrdtool_graph[ 'vertical-label' ] = sanitize( $config[ 'vertical-label' ] );
+  }
+  
   
   $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
   if( $graphreport_stats ) {
@@ -835,6 +841,9 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   $series = '';
   
   $stack_counter = 0;
+
+  // Available line types
+  $line_types = array("LINE1", "LINE2", "LINE3");
   
   // Loop through all the graph items
   foreach( $config[ 'series' ] as $index => $item ) {
@@ -851,10 +860,14 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
     // By default graph is a line graph
    isset( $item['type']) ? $item_type = $item['type'] : $item_type = "line";
    
+   // TODO sanitize color
+   
    switch ( $item_type ) {
       
       case "line":
-         $series .= strtoupper( sanitize( $item['style'] ) ).":'$unique_id'#${item['color']}:'${label}'";
+         // Make sure it's a recognized line type
+         in_array(strtoupper( $item['style'] ), $line_types) ? $line_type = strtoupper( $item['style'] ) : $line_type = "LINE1";
+         $series .= $line_type . ":'$unique_id'#${item['color']}:'${label}'";
          break;
       
       case "stack":
