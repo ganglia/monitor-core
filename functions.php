@@ -820,10 +820,10 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   $title = sanitize( $config[ 'title' ] );
   $rrdtool_graph[ 'title' ] =  ($context == 'host') ? "$hostname $title last $range" : $title;
   // If vertical label is empty or non-existent set it to space otherwise rrdtool will fail
-  if ( ! isset($config[ 'vertical-label' ]) || $config[ 'vertical-label' ] == "" ) {
+  if ( ! isset($config[ 'vertical_label' ]) || $config[ 'vertical_label' ] == "" ) {
      $rrdtool_graph[ 'vertical-label' ] = " ";   
   } else {
-     $rrdtool_graph[ 'vertical-label' ] = sanitize( $config[ 'vertical-label' ] );
+     $rrdtool_graph[ 'vertical-label' ] = sanitize( $config[ 'vertical_label' ] );
   }
   
   
@@ -843,7 +843,7 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   $stack_counter = 0;
 
   // Available line types
-  $line_types = array("LINE1", "LINE2", "LINE3");
+  $line_widths = array("1","2","3");
   
   // Loop through all the graph items
   foreach( $config[ 'series' ] as $index => $item ) {
@@ -866,8 +866,8 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
       
       case "line":
          // Make sure it's a recognized line type
-         in_array(strtoupper( $item['style'] ), $line_types) ? $line_type = strtoupper( $item['style'] ) : $line_type = "LINE1";
-         $series .= $line_type . ":'$unique_id'#${item['color']}:'${label}'";
+         in_array( $item['line_width'], $line_widths) ? $line_width = $item['line_width'] : $line_width = "1";
+         $series .= "LINE" . $line_width . ":'$unique_id'#${item['color']}:'${label}'";
          break;
       
       case "stack":
@@ -897,7 +897,6 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   return $rrdtool_graph;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: create graphite areaMode
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -910,7 +909,7 @@ function build_graphite_series( $config, $host_cluster ) {
   }
   $output = implode( $targets, '&' );
   $output .= "&colorList=" . implode( $colors, ',' );
-  $output .= "&vtitle=" . urlencode( $config[ 'vertical-label' ] );
+  $output .= "&vtitle=" . urlencode( $config[ 'vertical_label' ] );
   
   return $output;
 }
