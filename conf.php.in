@@ -181,8 +181,10 @@ $time_ranges = array(
 # this key must exist in $time_ranges
 $default_time_range = 'hour';
 
-# Use graphite
-$use_graphite = "no";
+# Graph Engine to use
+$GLOBALS['graph_engine'] = "rrdtool";
+
+#$GLOBALS['graph_engine'] = "graphite";
 $graphite_url_base = "http://127.0.0.1/render";
 $graphite_rrd_dir = "/opt/graphite/storage/rrd";
 

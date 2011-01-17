@@ -8,19 +8,7 @@ General
 
 Graphs
 
-- Cross-rendering engine graphs using JSON ie. a single definition file that works on
-  both rrdtool and graphite. Something along these lines
-
-{
-   "report_name" : "apache_report",
-   "report_type" : "standard",
-   "items" : [ "apache_200", "apache_300", "apache_400", "apache_500" ],
-   "colors" : [ "aaaaaa", "bbbbbb", "cccccc", "dddddd" ],
-   "ylegend" : "hps"
-}
 - Eliminate usage of global variables
-- network_report.php & packet_report.php use $mem_cached_color and $mem_used_color
-- $rrdtool_graph['lower-limit'] should default to 0, since this is the value used in all current graphs
 - graph.d/.php files all modify the global $hostname, should be a local variable
 - Zooming 
 

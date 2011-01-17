@@ -6,6 +6,6 @@
    "series" : [
       { "metric": "load_one", "color": "3333bb", "label": "Load 1", "line_width": "2", "type": "line" },
       { "metric": "load_five", "color": "ffea00", "label": "Load 5", "line_width": "2", "type": "line" },
-      { "metric": "load_fifteen", "color": "dd0000", "label": "Load 15", "line_width": "2", "type": "line" },      
+      { "metric": "load_fifteen", "color": "dd0000", "label": "Load 15", "line_width": "2", "type": "line" }
    ]
 }

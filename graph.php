@@ -4,7 +4,6 @@ include_once "./eval_config.php";
 include_once "./get_context.php";
 include_once "./functions.php";
 
-
 $ganglia_dir = dirname(__FILE__);
 
 # RFM - Added all the isset() tests to eliminate "undefined index"
@@ -16,13 +15,12 @@ $size = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $graph_sizes_keys )
              ? $_GET["z"]
              : NULL;
 
-# ATD - TODO, should encapsulate these custom graphs in some type of container, then this code could check list of defined containers for valid graph labels.
-$graph      = isset($_GET["g"])  ?  sanitize ( $_GET["g"] )   : NULL;
+# If graph arg is not specified default to metric
+$graph      = isset($_GET["g"])  ?  sanitize ( $_GET["g"] )   : "metric";
 $grid       = isset($_GET["G"])  ?  sanitize ( $_GET["G"] )   : NULL;
 $self       = isset($_GET["me"]) ?  sanitize ( $_GET["me"] )  : NULL;
 $vlabel     = isset($_GET["vl"]) ?  sanitize ( $_GET["vl"] )  : NULL;
 $value      = isset($_GET["v"])  ?  sanitize ( $_GET["v"] )   : NULL;
-
 
 $metric_name = isset($_GET["m"])  ?  sanitize ( $_GET["m"] )   : NULL;
 
@@ -35,7 +33,9 @@ $load_color = isset($_GET["l"]) && is_valid_hex_color( rawurldecode( $_GET[ 'l' 
 
 $summary    = isset( $_GET["su"] )    ? 1 : 0;
 $debug      = isset( $_GET['debug'] ) ? clean_number ( sanitize( $_GET["debug"] ) ) : 0;
+// 
 $command    = '';
+$graphite_url = '';
 
 // Get hostname
 $raw_host = isset($_GET["h"])  ?  sanitize ( $_GET["h"]  )   : "__SummaryInfo__";  
@@ -65,56 +65,41 @@ $fudge_0 = $graph_sizes[ $size ][ 'fudge_0' ];
 $fudge_1 = $graph_sizes[ $size ][ 'fudge_1' ];
 $fudge_2 = $graph_sizes[ $size ][ 'fudge_2' ];
 
-
-/* ------------------------------------------------------------------------
-  Graphite stuff
-------------------------------------------------------------------------- */
-
-function create_graphite_target_string($host_cluster, $array) {
-
-  global $host;
-  foreach ( $array as $metric => $metric_description ) {
-    $elements[] = "target=alias($host_cluster." . $metric . ".sum%2C'" . urlencode($metric_description) . "')";
-  }
-
-  return join("&", $elements);
-
-}
-
-
-
-#
-# Since the $command variable is explicitly set to an empty string, above, do we really need
-# this check anymore?  --jb Jan 2008
-#
-# This security fix was brought to my attention by Peter Vreugdenhil <petervre@sci.kun.nl>
-# Dont want users specifying their own malicious command via GET variables e.g.
-# http://ganglia.mrcluster.org/graph.php?graph=blob&command=whoami;cat%20/etc/passwd
-#
-if($command) {
-    error_log("Command variable sent, exiting!");
-    exit();
-}
-
+///////////////////////////////////////////////////////////////////////////
+// Set some variables depending on the context. Context is set in
+// get_context.php
+///////////////////////////////////////////////////////////////////////////
 switch ($context)
 {
     case "meta":
       $rrd_dir = "$rrds/__SummaryInfo__";
       $rrd_graphite_link = "$graphite_rrd_dir/__SummaryInfo__";
+      $title = "$self Grid";
       break;
     case "grid":
       $rrd_dir = "$rrds/$grid/__SummaryInfo__";
       $rrd_graphite_link = "$graphite_rrd_dir/$grid/__SummaryInfo__";
+      if (preg_match('/grid/i', $gridname))
+          $title  = $gridname;
+      else
+          $title  = "$gridname Grid";
       break;
     case "cluster":
       $rrd_dir = "$rrds/$clustername/__SummaryInfo__";
       $rrd_graphite_link = "$graphite_rrd_dir/$clustername/__SummaryInfo__";
+      if (preg_match('/cluster/i', $clustername))
+          $title  = $clustername;
+      else
+          $title  = "$clustername Cluster";
       break;
     case "host":
       $rrd_dir = "$rrds/$clustername/$raw_host";
       $rrd_graphite_link = $graphite_rrd_dir . "/" . $clustername . "/" . $host;
+      if (!$summary)
+        $title = $metric_name ;
       break;
     default:
+      $title = $clustername;
       exit;
 }
 
@@ -173,198 +158,180 @@ if ($debug) {
  * common variables passed and used.
  */
 
-// No report requested, so use 'metric'
-if (!$graph) {
-    $graph = 'metric';
-}
 
-if( $use_graphite == "no" ) {
-  $php_report_file = $graphdir . "/" . $graph . ".php";
-  $json_report_file = $graphdir . "/" . $graph . ".json";
-  if( is_file( $php_report_file ) ) {
-    include_once $php_report_file;
-    $graph_function = "graph_${graph}";
-    $graph_function( $rrdtool_graph );  // Pass by reference call, $rrdtool_graph modified inplace
-  } else if ( is_file( $json_report_file ) ) {
-    $config = json_decode( file_get_contents( $json_report_file ), TRUE );
-    
-    # We need to add hostname and clustername if it's not specified
-    foreach ( $config['series'] as $index => $item ) {
-      if ( ! isset($config['series'][$index]['hostname'])) {
-        $config['series'][$index]['hostname'] = $raw_host;
-        $config['series'][$index]['clustername'] = $clustername;
-      }
-    }
-    
-    build_rrdtool_args_from_json ( $rrdtool_graph, $config );
-  }
-}
-
-# Calculate time range.
+// Calculate time range.
 if ($sourcetime)
    {
       $end = $sourcetime;
       # Get_context makes start negative.
       $start = $sourcetime + $start;
    }
-# Fix from Phil Radden, but step is not always 15 anymore.
-if ($range=="month")
+// Fix from Phil Radden, but step is not always 15 anymore.
+if ($range == "month")
    $rrdtool_graph['end'] = floor($rrdtool_graph['end'] / 672) * 672;
 
-# Tidy up the title a bit
-switch ($context) {
-    case 'meta':
-        $title = "$self Grid";
-        break;
-
-    case 'cluster':
-        if (preg_match('/cluster/i', $clustername))
-            $title  = $clustername;
-        else
-            $title  = "$clustername Cluster";
-        break;
-
-    case 'grid':
-        if (preg_match('/grid/i', $gridname))
-            $title  = $gridname;
-        else
-            $title  = "$gridname Grid";
-        break;
-
-    case 'host':
-        if (!$summary)
-            $title = null ;
-        break;
-
-    default:
-        $title = $clustername;
-        break;
-}
-
-if ($context != 'host') {
+if ( isset( $rrdtool_graph['title'])) 
    $rrdtool_graph['title'] = $rrdtool_graph['title'] . " last $range";
-}
+else
+   $rrdtool_graph['title'] = $title . " last $range";
 
 if (isset($title)) {
-   $rrdtool_graph['title'] = "$title " . $rrdtool_graph['title'];
+   $rrdtool_graph['title'] = $title . " last $range";
 }
 
-//--------------------------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////////////
+// Check what graph engine we are using
+//////////////////////////////////////////////////////////////////////////////
+switch ( $GLOBALS['graph_engine'] ) {
 
-if ( $use_graphite == "no" ) {
-
-  // We must have a 'series' value, or this is all for naught
-  if (!array_key_exists('series', $rrdtool_graph) || !strlen($rrdtool_graph['series']) ) {
-      error_log("\$series invalid for this graph request ".$_SERVER['PHP_SELF']);
-      exit();
-  }
-
-}
-
-  # Make small graphs (host list) cleaner by removing the too-big
-  # legend: it is displayed above on larger cluster summary graphs.
-  if ($size == "small" and ! isset($subtitle))
-      $rrdtool_graph['extras'] = "-g";
-
-  $command = RRDTOOL . " graph - $rrd_options ";
-
-  // The order of the other arguments isn't important, except for the
-  // 'extras' and 'series' values.  These two require special handling.
-  // Otherwise, we just loop over them later, and tack $extras and
-  // $series onto the end of the command.
-  foreach (array_keys ($rrdtool_graph) as $key) {
-
-      if (preg_match('/extras|series/', $key))
-	  continue;
-
-      $value = $rrdtool_graph[$key];
-
-      if (preg_match('/\W/', $value)) {
-	  //more than alphanumerics in value, so quote it
-	  $value = "'$value'";
+  case "rrdtool":  
+  
+    $php_report_file = $graphdir . "/" . $graph . ".php";
+    $json_report_file = $graphdir . "/" . $graph . ".json";
+    if( is_file( $php_report_file ) ) {
+      include_once $php_report_file;
+      $graph_function = "graph_${graph}";
+      $graph_function( $rrdtool_graph );  // Pass by reference call, $rrdtool_graph modified inplace
+    } else if ( is_file( $json_report_file ) ) {
+      $config = json_decode( file_get_contents( $json_report_file ), TRUE );
+      
+      # We need to add hostname and clustername if it's not specified
+      foreach ( $config['series'] as $index => $item ) {
+        if ( ! isset($config['series'][$index]['hostname'])) {
+          $config['series'][$index]['hostname'] = $raw_host;
+          $config['series'][$index]['clustername'] = $clustername;
+        }
       }
-      $command .= " --$key $value";
-  }
+      
+      build_rrdtool_args_from_json ( $rrdtool_graph, $config );
+    }
+  
+    // We must have a 'series' value, or this is all for naught
+    if (!array_key_exists('series', $rrdtool_graph) || !strlen($rrdtool_graph['series']) ) {
+        error_log("\$series invalid for this graph request ".$_SERVER['PHP_SELF']);
+        exit();
+    }
+  
+    # Make small graphs (host list) cleaner by removing the too-big
+    # legend: it is displayed above on larger cluster summary graphs.
+    if ($size == "small" and ! isset($subtitle))
+        $rrdtool_graph['extras'] = "-g";
+  
+    $command = RRDTOOL . " graph - $rrd_options ";
+  
+    // The order of the other arguments isn't important, except for the
+    // 'extras' and 'series' values.  These two require special handling.
+    // Otherwise, we just loop over them later, and tack $extras and
+    // $series onto the end of the command.
+    foreach (array_keys ($rrdtool_graph) as $key) {
+  
+        if (preg_match('/extras|series/', $key))
+            continue;
+  
+        $value = $rrdtool_graph[$key];
+  
+        if (preg_match('/\W/', $value)) {
+            //more than alphanumerics in value, so quote it
+            $value = "'$value'";
+        }
+        $command .= " --$key $value";
+    }
+  
+    // And finish up with the two variables that need special handling.
+    // See above for how these are created
+    $command .= array_key_exists('extras', $rrdtool_graph) ? ' '.$rrdtool_graph['extras'].' ' : '';
+    $command .= " $rrdtool_graph[series]";
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// Let's check if we are using graphite
-// USING RRDTOOL
-//////////////////////////////////////////////////////////////////////////////////////////////////
-if ( $use_graphite == "no" ) {
+    break;
 
-  // And finish up with the two variables that need special handling.
-  // See above for how these are created
-  $command .= array_key_exists('extras', $rrdtool_graph) ? ' '.$rrdtool_graph['extras'].' ' : '';
-  $command .= " $rrdtool_graph[series]";
-
-} else {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
-  // Let's check if we are using graphite
   // USING Graphite
   //////////////////////////////////////////////////////////////////////////////////////////////////
-  // Check whether the link exists from Ganglia RRD tree to the graphite storage/rrd_dir
-  // area
-  if ( ! is_link($rrd_graphite_link) ) {
-    // Does the directory exist for the cluster. If not create it
-    if ( ! is_dir ($graphite_rrd_dir . "/" . $clustername) )
-      mkdir ( $graphite_rrd_dir . "/" . $clustername );
-    symlink($rrd_dir, $rrd_graphite_link);
-  }
+  case "graphite":  
 
-  // Generate host cluster string
-  $host_cluster = $clustername . "." . $host;
-
-  $height += 70;
-
-  if ($size == "small") {
-    $width += 20;
-  }
-
-//  $title = urlencode($rrdtool_graph["title"]);
-
-  if ( isset($_GET['g'])) {
-
-    // if it's a report increase the height for additional 30 pixels
-    $height += 40;
-
-    $report_name = sanitize($_GET['g']);
-
-    $report_definition_file = $ganglia_dir . "/graph.d/" . $report_name . ".json";
-    // Check whether report is defined in graph.d directory
-    if ( is_file($report_definition_file) ) {
-      $report_array = json_decode(file_get_contents($report_definition_file), TRUE);
+    // Check whether the link exists from Ganglia RRD tree to the graphite storage/rrd_dir
+    // area
+    if ( ! is_link($rrd_graphite_link) ) {
+      // Does the directory exist for the cluster. If not create it
+      if ( ! is_dir ($graphite_rrd_dir . "/" . $clustername) )
+        mkdir ( $graphite_rrd_dir . "/" . $clustername );
+      symlink($rrd_dir, $rrd_graphite_link);
     }
-
-    if ( isset($report_array) ) {
-
-      switch ( $report_array["report_type"] ) {
-
-	case "template":
-	  $target = str_replace("HOST_CLUSTER", $host_cluster, $report_array["graphite"]);
-	  break;
-
-	default:
-	  error_log("No report_type specified in the $report_name definition.");
-	  break;
+  
+    // Generate host cluster string
+    $host_cluster = $clustername . "." . $host;
+  
+    $height += 70;
+  
+    if ($size == "small") {
+      $width += 20;
+    }
+  
+  //  $title = urlencode($rrdtool_graph["title"]);
+  
+    if ( isset($_GET['g'])) {
+  
+      // if it's a report increase the height for additional 30 pixels
+      $height += 40;
+  
+      $report_name = sanitize($_GET['g']);
+  
+      $report_definition_file = $ganglia_dir . "/graph.d/" . $report_name . ".json";
+      // Check whether report is defined in graph.d directory
+      if ( is_file($report_definition_file) ) {
+        $config = json_decode(file_get_contents($report_definition_file), TRUE);
+      } else {
+        error_log("There is JSON config file specifying $report_name.");
+        exit(1);
       }
-
+  
+      if ( isset($config) ) {
+  
+        switch ( $config["report_type"] ) {
+  
+          case "template":
+            $target = str_replace("HOST_CLUSTER", $host_cluster, $config["graphite"]);
+            break;
+  
+          case "standard":
+            $target = build_graphite_series( $config, $host_cluster );
+            break;
+  
+          default:
+            error_log("No valid report_type specified in the $report_name definition.");
+            break;
+        }
+  
+        $title = $config['title'];
+  
+      } else {
+        error_log("Configuration file to $report_name exists however it doesn't appear it's a valid JSON file");
+        exit(1);
+  
+      }
+  
+    } else {
+      // It's a simple metric graph
+      $target = "target=$host_cluster.$metric_name.sum&hideLegend=true&vtitle=$vlabel&areaMode=all";
+      $title = " ";
+      
     }
+  
+  
+    $graphite_url = $graphite_url_base . "?width=$width&height=$height&" . $target . "&from=" . $start . "&yMin=0&bgcolor=FFFFFF&fgcolor=000000&title=" . urlencode($title . " last " . $range);
 
-  } else {
-    // It's a simple metric graph
-    $target = "target=$host_cluster.$metric_name.sum&hideLegend=true&vtitle=$vlabel&areaMode=all";
-  }
+    break;
 
-  $url = $graphite_url_base . "?width=$width&height=$height&" . $target . "&title=$title&from=" . $start . "&yMin=0&bgcolor=FFFFFF&fgcolor=000000";
+} // end of switch ( $GLOBALS['graph_engine'])
 
 
+if ($debug) {
+  error_log("Final rrdtool command:  $command");
 }
 
-if ($debug) {   error_log("Final rrdtool command:  $command");   }
-
 # Did we generate a command?   Run it.
-if($command) {
+if($command || $graphite_url) {
     /*Make sure the image is not cached*/
     header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");   // Date in the past
     header ("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
@@ -373,19 +340,29 @@ if($command) {
     if ($debug>2) {
         header ("Content-type: text/html");
         print "<html><body>";
-	if ( $use_graphite == "no" ) {
-	  print htmlentities( $command );
-	} else {
-	  print $url;
-	}
+        
+        switch ( $GLOBALS['graph_engine'] ) {  
+          case "rrdtool":
+            print htmlentities( $command );
+            break;
+          case "graphite":
+            print $graphite_url;
+            break;
+          
+        }        
         print "</body></html>";
     } else {
+      
         header ("Content-type: image/png");
-	if ( $use_graphite == "no" ) {
-	  passthru($command);
-	} else {
-          echo file_get_contents($url);
-	}
+        switch ( $GLOBALS['graph_engine'] ) {  
+          case "rrdtool":
+            passthru($command);
+            break;
+          case "graphite":
+            echo file_get_contents($graphite_url);
+            break;
+          
+        }        
 
     }
 }

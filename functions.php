@@ -825,6 +825,8 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   } else {
      $rrdtool_graph[ 'vertical-label' ] = sanitize( $config[ 'vertical_label' ] );
   }
+
+  $rrdtool_graph['lower-limit']    = '0';
   
   
   $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
@@ -898,18 +900,34 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-// TODO: create graphite areaMode
+// Graphite graphs
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 function build_graphite_series( $config, $host_cluster ) {
   $targets = array();
   $colors = array();
+  // Keep track of stacked items
+  $stacked = 0;
   foreach( $config[ 'series' ] as $item ) {
+   
+    if ( $item['type'] == "stack" )
+      $stacked++;
+      
     $targets[] = "target=". urlencode( "alias($host_cluster.${item['metric']}.sum,'${item['label']}')" );
     $colors[] = $item['color'];
+
   }
   $output = implode( $targets, '&' );
   $output .= "&colorList=" . implode( $colors, ',' );
   $output .= "&vtitle=" . urlencode( $config[ 'vertical_label' ] );
+
+  // Do we have any stacked elements. We assume if there is only one element
+  // that is stacked that rest of it is line graphs
+  if ( $stacked > 0 ) {
+    if ( $stacked > 1 )
+      $output .= "&areaMode=stacked";
+    else
+      $output .= "&areaMode=first";
+  }
   
   return $output;
 }
