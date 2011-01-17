@@ -801,9 +801,9 @@ function get_view_graph_elements($view) {
 
 }
 
-/**
- * Populate $rrdtool_graph from $config (from JSON file).
- */
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// Populate $rrdtool_graph from $config (from JSON file).
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   global $context,
          $hostname,
@@ -834,6 +834,9 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   
   $series = '';
   foreach( $config[ 'series' ] as $item ) {
+   
+    $rrd_dir = $GLOBALS['rrds'] . "/" . $item['clustername'] . "/" . $item['hostname'];
+
     $label = str_pad( sanitize( $item[ 'label' ] ), $max_label_length );
     $metric = sanitize( $item[ 'metric' ] );
     $series .= "DEF:'$metric'='${rrd_dir}/$metric.rrd':'sum':AVERAGE "
@@ -855,8 +858,9 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   return $rrdtool_graph;
 }
 
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: create graphite areaMode
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 function build_graphite_series( $config, $host_cluster ) {
   $targets = array();
   $colors = array();

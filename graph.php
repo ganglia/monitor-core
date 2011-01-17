@@ -187,6 +187,15 @@ if( $use_graphite == "no" ) {
     $graph_function( $rrdtool_graph );  // Pass by reference call, $rrdtool_graph modified inplace
   } else if ( is_file( $json_report_file ) ) {
     $config = json_decode( file_get_contents( $json_report_file ), TRUE );
+    
+    # We need to add hostname and clustername if it's not specified
+    foreach ( $config['series'] as $index => $item ) {
+      if ( ! isset($config['series'][$index]['hostname'])) {
+        $config['series'][$index]['hostname'] = $raw_host;
+        $config['series'][$index]['clustername'] = $clustername;
+      }
+    }
+    
     build_rrdtool_args_from_json ( $rrdtool_graph, $config );
   }
 }
