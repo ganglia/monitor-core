@@ -833,16 +833,39 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   }
   
   $series = '';
+  
+  $stack_counter = 0;
+  
+  // Loop through all the graph items
   foreach( $config[ 'series' ] as $item ) {
    
     $rrd_dir = $GLOBALS['rrds'] . "/" . $item['clustername'] . "/" . $item['hostname'];
 
     $label = str_pad( sanitize( $item[ 'label' ] ), $max_label_length );
     $metric = sanitize( $item[ 'metric' ] );
-    $series .= "DEF:'$metric'='${rrd_dir}/$metric.rrd':'sum':AVERAGE "
-      . strtoupper( sanitize( $item['style'] ) ).":'$metric'#${item['color']}:'${label}'"
-      . ( isset($item[ 'stack' ]) && $item[ 'stack' ] ? ":STACK" : "" ) . " ";
-
+    $series .= " DEF:'$metric'='${rrd_dir}/$metric.rrd':'sum':AVERAGE ";
+    
+    // By default graph is a line graph
+   isset( $item['type']) ? $item_type = $item['type'] : $item_type = "line";
+   
+   switch ( $item_type ) {
+      
+      case "line":
+         $series .= strtoupper( sanitize( $item['style'] ) ).":'$metric'#${item['color']}:'${label}'";
+         break;
+      
+      case "stack":
+         
+         if ( $stack_counter == 0 ) {
+            $series .= "AREA:'$metric'#${item['color']}:'${label}'";
+            $stack_counter++;
+         } else {
+            $series .= "STACK:'$metric'#${item['color']}:'${label}'";
+         }
+         break;
+      
+    }
+      
     if ( $graphreport_stats ) {
       $series .= "VDEF:${metric}_last=$metric,LAST "
               . "VDEF:${metric}_min=$metric,MINIMUM "
@@ -857,6 +880,7 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
   $rrdtool_graph[ 'series' ] = $series;
   return $rrdtool_graph;
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: create graphite areaMode
