@@ -1,5 +1,10 @@
 {
-   "report_name" : "packet_report",
-   "report_type" : "template",
-   "report_arguments"  : "target=alias(HOST_CLUSTER.pkts_in.sum%2C'Packets%20In')&target=alias(HOST_CLUSTER.pkts_out.sum%2C'Packets%20Out')&vtitle=packets"
+   "report_name" : "network_report",
+   "report_type" : "standard",
+   "title" : "Packet Report",
+   "vertical_label" : "pkts/sec",
+   "series" : [
+      { "metric": "pkts_in", "color": "33cc33", "label": "In", "line_width": "2", "type": "line" },
+      { "metric": "pkts_out", "color": "5555cc", "label": "Out", "line_width": "2", "type": "line" }
+   ]
 }
