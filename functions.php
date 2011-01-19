@@ -885,10 +885,10 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
     }
       
     if ( $graphreport_stats ) {
-      $series .= "VDEF:${metric}_last=$metric,LAST "
-              . "VDEF:${metric}_min=$metric,MINIMUM "
-              . "VDEF:${metric}_avg=$metric,AVERAGE "
-              . "VDEF:${metric}_max=$metric,MAXIMUM "
+      $series .= "VDEF:${metric}_last=${unique_id},LAST "
+              . "VDEF:${metric}_min=${unique_id},MINIMUM "
+              . "VDEF:${metric}_avg=${unique_id},AVERAGE "
+              . "VDEF:${metric}_max=${unique_id},MAXIMUM "
               . "GPRINT:'${metric}_last':'Now\:%5.1lf%s' "
               . "GPRINT:'${metric}_min':'Min\:%5.1lf%s' "
               . "GPRINT:'${metric}_avg':'Avg\:%5.1lf%s' "
