@@ -2,5 +2,5 @@
    "report_name" : "mem_report",
    "report_type" : "template",
    "title": "Memory Report",
-   "graphite"  : "target=alias(HOST_CLUSTER.mem_shared.sum%2C'Mem+shared')&target=alias(HOST_CLUSTER.mem_cached.sum%2C'Mem+cached')&target=alias(HOST_CLUSTER.mem_buffers.sum%2C'Mem+buffered')&target=alias(HOST_CLUSTER.mem_free.sum%2C'Mem+Free')&areaMode=stacked&colorList=0000aa,33cc33,99ff33,9900CC,5555cc"
+   "graphite"  : "target=alias(scale(HOST_CLUSTER.mem_shared.sum,1024),'Mem+shared')&target=alias(scale(HOST_CLUSTER.mem_cached.sum,1024),'Mem+cached')&target=alias(scale(HOST_CLUSTER.mem_buffers.sum,1024),'Mem+buffered')&target=alias(scale(HOST_CLUSTER.mem_free.sum,1024),'Mem+Free')&target=alias(scale(HOST_CLUSTER.mem_total.sum,1024),'Mem+used')&colorList=0000aa,33cc33,99ff33,9900CC,5555cc&areaMode=stacked"
 }
