@@ -132,6 +132,8 @@ function create_radio_button($variable_name, $variable_value = "ignored") {
   return $str;
 }
 
+// Initialize the available reports array
+$available_reports = array();
 
 /* -----------------------------------------------------------------------
  Find available graphs by looking in the GANGLIA_DIR/graph.d directory

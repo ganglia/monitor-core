@@ -869,16 +869,16 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
       case "line":
          // Make sure it's a recognized line type
          in_array( $item['line_width'], $line_widths) ? $line_width = $item['line_width'] : $line_width = "1";
-         $series .= "LINE" . $line_width . ":'$unique_id'#${item['color']}:'${label}'";
+         $series .= "LINE" . $line_width . ":'$unique_id'#${item['color']}:'${label}' ";
          break;
       
       case "stack":
          // First element in a stack has to be AREA
          if ( $stack_counter == 0 ) {
-            $series .= "AREA:'$unique_id'#${item['color']}:'${label}'";
+            $series .= "AREA:'$unique_id'#${item['color']}:'${label}' ";
             $stack_counter++;
          } else {
-            $series .= "STACK:'$unique_id'#${item['color']}:'${label}'";
+            $series .= "STACK:'$unique_id'#${item['color']}:'${label}' ";
          }
          break;
       
