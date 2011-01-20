@@ -868,7 +868,7 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
       
       case "line":
          // Make sure it's a recognized line type
-         in_array( $item['line_width'], $line_widths) ? $line_width = $item['line_width'] : $line_width = "1";
+         isset($item['line_width']) && in_array( $item['line_width'], $line_widths) ? $line_width = $item['line_width'] : $line_width = "1";
          $series .= "LINE" . $line_width . ":'$unique_id'#${item['color']}:'${label}' ";
          break;
       
@@ -881,19 +881,18 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $config ) {
             $series .= "STACK:'$unique_id'#${item['color']}:'${label}' ";
          }
          break;
-      
-    }
-      
-    if ( $graphreport_stats ) {
-      $series .= "VDEF:${metric}_last=${unique_id},LAST "
-              . "VDEF:${metric}_min=${unique_id},MINIMUM "
-              . "VDEF:${metric}_avg=${unique_id},AVERAGE "
-              . "VDEF:${metric}_max=${unique_id},MAXIMUM "
-              . "GPRINT:'${metric}_last':'Now\:%5.1lf%s' "
-              . "GPRINT:'${metric}_min':'Min\:%5.1lf%s' "
-              . "GPRINT:'${metric}_avg':'Avg\:%5.1lf%s' "
-              . "GPRINT:'${metric}_max':'Max\:%5.1lf%s\\l' ";
-    }
+   }
+    
+   if ( $graphreport_stats ) {
+      $series .= "VDEF:${unique_id}_last=${unique_id},LAST "
+              . "VDEF:${unique_id}_min=${unique_id},MINIMUM "
+              . "VDEF:${unique_id}_avg=${unique_id},AVERAGE "
+              . "VDEF:${unique_id}_max=${unique_id},MAXIMUM "
+              . "GPRINT:'${unique_id}_last':'Now\:%5.1lf%s' "
+              . "GPRINT:'${unique_id}_min':'Min\:%5.1lf%s' "
+              . "GPRINT:'${unique_id}_avg':'Avg\:%5.1lf%s' "
+              . "GPRINT:'${unique_id}_max':'Max\:%5.1lf%s\\l' ";
+   }
   }
   $rrdtool_graph[ 'series' ] = $series;
   return $rrdtool_graph;
