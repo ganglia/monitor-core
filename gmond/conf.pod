@@ -188,9 +188,6 @@ You can use the B<bind> attribute to bind to a particular local address to
 be used as the source for the multicast packets sent or let gmond resolve the
 default hostname if B<bind_hostname> = yes.
 
-The B<ttl> attribute lets you modify the Time-To-Live (TTL) of the outgoing
-multicast messages.
-
 If only a B<host> and B<port> are specified then B<gmond> will send unicast UDP
 messages to the hosts specified.
 
@@ -213,6 +210,9 @@ For example...
 
 would configure gmond to send messages to two hosts.  The B<host> specification
 can be an IPv4/IPv6 address or a resolvable hostname.
+
+The B<ttl> attribute lets you modify the Time-To-Live (TTL) of outgoing messages
+(unicast or multicast).
 
 =head2 udp_recv_channel
 
