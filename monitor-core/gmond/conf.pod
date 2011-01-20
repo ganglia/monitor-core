@@ -197,7 +197,7 @@ messages to the hosts specified.
 You could specify multiple unicast hosts for redundancy as B<gmond> will send
 UDP messages to all UDP channels.
 
-Be carefull though not to mix multicast and unicast attributes in the same
+Be careful though not to mix multicast and unicast attributes in the same
 udp_send_channel definition.
 
 For example...
