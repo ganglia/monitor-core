@@ -185,26 +185,34 @@ if (isset($title)) {
 switch ( $GLOBALS['graph_engine'] ) {
 
   case "rrdtool":  
-  
-    $php_report_file = $graphdir . "/" . $graph . ".php";
-    $json_report_file = $graphdir . "/" . $graph . ".json";
-    if( is_file( $php_report_file ) ) {
-      include_once $php_report_file;
-      $graph_function = "graph_${graph}";
-      $graph_function( $rrdtool_graph );  // Pass by reference call, $rrdtool_graph modified inplace
-    } else if ( is_file( $json_report_file ) ) {
-      $config = json_decode( file_get_contents( $json_report_file ), TRUE );
+
+    if ( isset($_GET['graph_config'])) {
       
-      # We need to add hostname and clustername if it's not specified
-      foreach ( $config['series'] as $index => $item ) {
-        if ( ! isset($config['series'][$index]['hostname'])) {
-          $config['series'][$index]['hostname'] = $raw_host;
-          $config['series'][$index]['clustername'] = $clustername;
-        }
-      }
-      
+      $config = unserialize($_GET['graph_config']);
       build_rrdtool_args_from_json ( $rrdtool_graph, $config );
-    }
+      
+    } else {
+    
+      $php_report_file = $graphdir . "/" . $graph . ".php";
+      $json_report_file = $graphdir . "/" . $graph . ".json";
+      if( is_file( $php_report_file ) ) {
+        include_once $php_report_file;
+        $graph_function = "graph_${graph}";
+        $graph_function( $rrdtool_graph );  // Pass by reference call, $rrdtool_graph modified inplace
+      } else if ( is_file( $json_report_file ) ) {
+        $config = json_decode( file_get_contents( $json_report_file ), TRUE );
+        
+        // We need to add hostname and clustername if it's not specified
+        foreach ( $config['series'] as $index => $item ) {
+          if ( ! isset($config['series'][$index]['hostname'])) {
+            $config['series'][$index]['hostname'] = $raw_host;
+            $config['series'][$index]['clustername'] = $clustername;
+          }
+        }
+        
+      }
+    
+    } // end of graph_config
   
     // We must have a 'series' value, or this is all for naught
     if (!array_key_exists('series', $rrdtool_graph) || !strlen($rrdtool_graph['series']) ) {
@@ -212,8 +220,8 @@ switch ( $GLOBALS['graph_engine'] ) {
         exit();
     }
   
-    # Make small graphs (host list) cleaner by removing the too-big
-    # legend: it is displayed above on larger cluster summary graphs.
+    // Make small graphs (host list) cleaner by removing the too-big
+    // legend: it is displayed above on larger cluster summary graphs.
     if ($size == "small" and ! isset($subtitle))
         $rrdtool_graph['extras'] = "-g";
   

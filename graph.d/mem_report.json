@@ -1,6 +1,6 @@
 {
    "report_name" : "mem_report",
    "report_type" : "template",
-   "title": "Memory Report",
-   "graphite"  : "target=alias(scale(HOST_CLUSTER.mem_shared.sum,1024),'Mem+shared')&target=alias(scale(HOST_CLUSTER.mem_cached.sum,1024),'Mem+cached')&target=alias(scale(HOST_CLUSTER.mem_buffers.sum,1024),'Mem+buffered')&target=alias(scale(HOST_CLUSTER.mem_free.sum,1024),'Mem+Free')&target=alias(scale(HOST_CLUSTER.mem_total.sum,1024),'Mem+used')&colorList=0000aa,33cc33,99ff33,9900CC,5555cc&areaMode=stacked"
+   "title" : "Memory Report",
+   "graphite" : "target=alias(scale(diffSeries(HOST_CLUSTER.mem_total.sum,sumSeries(HOST_CLUSTER.mem_shared.sum,HOST_CLUSTER.mem_free.sum,HOST_CLUSTER.mem_cached.sum,HOST_CLUSTER.mem_buffers.sum)),1024),'Mem+Used')&target=alias(scale(HOST_CLUSTER.mem_shared.sum,1024),'Mem+shared')&target=alias(scale(HOST_CLUSTER.mem_cached.sum,1024),'Mem+cached')&target=alias(scale(HOST_CLUSTER.mem_buffers.sum,1024),'Mem+buffered')&target=alias(scale(diffSeries(HOST_CLUSTER.swap_total.sum,HOST_CLUSTER.swap_free.sum),1024),'Swap')&areaMode=stacked&colorList=5555cc,0000aa,33cc33,99ff33,9900CC"
 }
