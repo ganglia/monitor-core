@@ -389,6 +389,16 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
 #define SFLOW_CTR_LATCH(field) hostdata->sflow->field = field
 #define SFLOW_CTR_DELTA(field) (field - hostdata->sflow->field)
 #define SFLOW_CTR_RATE(field) (SFLOW_CTR_DELTA(field) * 1000 / ctr_ival_mS)
+
+  /* metrics may be marked as "unsupported" by the sender,  so check for those reserved values */
+#define SFLOW_OK_FLOAT(field) (field != (float)-1)
+#define SFLOW_OK_GAUGE32(field) (field != (uint32_t)-1)
+#define SFLOW_OK_GAUGE64(field) (field != (uint64_t)-1)
+#define SFLOW_OK_COUNTER32(field) (field != (uint32_t)-1)
+#define SFLOW_OK_COUNTER64(field) (field != (uint64_t)-1)
+
+  /* always send a heartbeat */
+  process_sflow_uint32(hostdata, SFLOW_M_heartbeat, 0);
   
   if(offset_HID) {
     /* sumbit the system fields that we already extracted above */
@@ -423,14 +433,15 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
     cpu_intr   = SFLOWXDR_next(x);
     cpu_sintr  = SFLOWXDR_next(x);
     /* skip interrupts, contexts */
-    process_sflow_float(hostdata, SFLOW_M_load_one, load_one);
-    process_sflow_float(hostdata, SFLOW_M_load_five, load_five);
-    process_sflow_float(hostdata, SFLOW_M_load_fifteen, load_fifteen);
-    process_sflow_uint32(hostdata, SFLOW_M_proc_run, proc_run);
-    process_sflow_uint32(hostdata, SFLOW_M_proc_total, proc_total);
-    process_sflow_uint16(hostdata, SFLOW_M_cpu_num, cpu_num);
-    process_sflow_uint32(hostdata, SFLOW_M_cpu_speed, cpu_speed);
-    process_sflow_uint32(hostdata, SFLOW_M_cpu_boottime, (apr_time_as_msec(now) / 1000) - cpu_uptime);
+
+    if(SFLOW_OK_FLOAT(load_one))     process_sflow_float(hostdata, SFLOW_M_load_one, load_one);
+    if(SFLOW_OK_FLOAT(load_five))    process_sflow_float(hostdata, SFLOW_M_load_five, load_five);
+    if(SFLOW_OK_FLOAT(load_fifteen)) process_sflow_float(hostdata, SFLOW_M_load_fifteen, load_fifteen);
+    if(SFLOW_OK_GAUGE32(proc_run))   process_sflow_uint32(hostdata, SFLOW_M_proc_run, proc_run);
+    if(SFLOW_OK_GAUGE32(proc_total)) process_sflow_uint32(hostdata, SFLOW_M_proc_total, proc_total);
+    if(SFLOW_OK_GAUGE32(cpu_num))    process_sflow_uint16(hostdata, SFLOW_M_cpu_num, cpu_num);
+    if(SFLOW_OK_GAUGE32(cpu_speed))  process_sflow_uint32(hostdata, SFLOW_M_cpu_speed, cpu_speed);
+    if(SFLOW_OK_GAUGE32(cpu_uptime)) process_sflow_uint32(hostdata, SFLOW_M_cpu_boottime, (apr_time_as_msec(now) / 1000) - cpu_uptime);
 
     if(counterDeltas) {
       uint32_t delta_cpu_user =   SFLOW_CTR_DELTA(cpu_user);
@@ -451,13 +462,13 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
 	delta_cpu_sintr;
 
 #define SFLOW_CTR_CPU_PC(field) (cpu_total ? ((float)field * 100.0 / (float)cpu_total) : 0)
-      process_sflow_float(hostdata, SFLOW_M_cpu_user, SFLOW_CTR_CPU_PC(delta_cpu_user));
-      process_sflow_float(hostdata, SFLOW_M_cpu_nice, SFLOW_CTR_CPU_PC(delta_cpu_nice));
-      process_sflow_float(hostdata, SFLOW_M_cpu_system, SFLOW_CTR_CPU_PC(delta_cpu_system));
-      process_sflow_float(hostdata, SFLOW_M_cpu_idle, SFLOW_CTR_CPU_PC(delta_cpu_idle));
-      process_sflow_float(hostdata, SFLOW_M_cpu_wio, SFLOW_CTR_CPU_PC(delta_cpu_wio));
-      process_sflow_float(hostdata, SFLOW_M_cpu_intr, SFLOW_CTR_CPU_PC(delta_cpu_intr));
-      process_sflow_float(hostdata, SFLOW_M_cpu_sintr, SFLOW_CTR_CPU_PC(delta_cpu_sintr));
+      if(SFLOW_OK_COUNTER32(cpu_user))   process_sflow_float(hostdata, SFLOW_M_cpu_user, SFLOW_CTR_CPU_PC(delta_cpu_user));
+      if(SFLOW_OK_COUNTER32(cpu_nice))   process_sflow_float(hostdata, SFLOW_M_cpu_nice, SFLOW_CTR_CPU_PC(delta_cpu_nice));
+      if(SFLOW_OK_COUNTER32(cpu_system)) process_sflow_float(hostdata, SFLOW_M_cpu_system, SFLOW_CTR_CPU_PC(delta_cpu_system));
+      if(SFLOW_OK_COUNTER32(cpu_idle))   process_sflow_float(hostdata, SFLOW_M_cpu_idle, SFLOW_CTR_CPU_PC(delta_cpu_idle));
+      if(SFLOW_OK_COUNTER32(cpu_wio))    process_sflow_float(hostdata, SFLOW_M_cpu_wio, SFLOW_CTR_CPU_PC(delta_cpu_wio));
+      if(SFLOW_OK_COUNTER32(cpu_intr))   process_sflow_float(hostdata, SFLOW_M_cpu_intr, SFLOW_CTR_CPU_PC(delta_cpu_intr));
+      if(SFLOW_OK_COUNTER32(cpu_sintr))  process_sflow_float(hostdata, SFLOW_M_cpu_sintr, SFLOW_CTR_CPU_PC(delta_cpu_sintr));
     }
     
     SFLOW_CTR_LATCH(cpu_user);
@@ -481,13 +492,13 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
     SFLOWXDR_next_int64(x,&swap_free);
     /* skip page_in, page_out, swap_in, swap_out */
 #define SFLOW_MEM_KB(bytes) (float)(bytes / 1000)
-    process_sflow_float(hostdata, SFLOW_M_mem_total, SFLOW_MEM_KB(mem_total));
-    process_sflow_float(hostdata, SFLOW_M_mem_free, SFLOW_MEM_KB(mem_free));
-    process_sflow_float(hostdata, SFLOW_M_mem_shared, SFLOW_MEM_KB(mem_shared));
-    process_sflow_float(hostdata, SFLOW_M_mem_buffers, SFLOW_MEM_KB(mem_buffers));
-    process_sflow_float(hostdata, SFLOW_M_mem_cached, SFLOW_MEM_KB(mem_cached));
-    process_sflow_float(hostdata, SFLOW_M_swap_total, SFLOW_MEM_KB(swap_total));
-    process_sflow_float(hostdata, SFLOW_M_swap_free, SFLOW_MEM_KB(swap_free));
+    if(SFLOW_OK_GAUGE64(mem_total))   process_sflow_float(hostdata, SFLOW_M_mem_total, SFLOW_MEM_KB(mem_total));
+    if(SFLOW_OK_GAUGE64(mem_free))    process_sflow_float(hostdata, SFLOW_M_mem_free, SFLOW_MEM_KB(mem_free));
+    if(SFLOW_OK_GAUGE64(mem_shared))  process_sflow_float(hostdata, SFLOW_M_mem_shared, SFLOW_MEM_KB(mem_shared));
+    if(SFLOW_OK_GAUGE64(mem_buffers)) process_sflow_float(hostdata, SFLOW_M_mem_buffers, SFLOW_MEM_KB(mem_buffers));
+    if(SFLOW_OK_GAUGE64(mem_cached))  process_sflow_float(hostdata, SFLOW_M_mem_cached, SFLOW_MEM_KB(mem_cached));
+    if(SFLOW_OK_GAUGE64(swap_total))  process_sflow_float(hostdata, SFLOW_M_swap_total, SFLOW_MEM_KB(swap_total));
+    if(SFLOW_OK_GAUGE64(swap_free))   process_sflow_float(hostdata, SFLOW_M_swap_free, SFLOW_MEM_KB(swap_free));
   }
   
   if(offset_DSK) {
@@ -498,9 +509,10 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
     SFLOWXDR_next_int64(x,&disk_free);
     part_max_used = SFLOWXDR_next(x);
     /* skip reads, bytes_read, read_time, writes, bytes_written, write_time */
-    process_sflow_double(hostdata, SFLOW_M_disk_total, (double)disk_total / 1000000000.0);
-    process_sflow_double(hostdata, SFLOW_M_disk_free, (double)disk_free / 1000000000.0);
-    process_sflow_float(hostdata, SFLOW_M_part_max_used, (float)part_max_used / 100.0);
+    /* convert bytes to GB (1024*1024*1024=1073741824) */
+    if(SFLOW_OK_GAUGE64(disk_total))    process_sflow_double(hostdata, SFLOW_M_disk_total, (double)disk_total / 1073741824.0);
+    if(SFLOW_OK_GAUGE64(disk_free))     process_sflow_double(hostdata, SFLOW_M_disk_free, (double)disk_free / 1073741824.0);
+    if(SFLOW_OK_GAUGE32(part_max_used)) process_sflow_float(hostdata, SFLOW_M_part_max_used, (float)part_max_used / 100.0);
   }
   
   if(offset_NIO) {
@@ -515,10 +527,10 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
     /* skip errs_out, drops_out */
     
     if(counterDeltas) {
-      process_sflow_float(hostdata, SFLOW_M_bytes_in, SFLOW_CTR_RATE(bytes_in));
-      process_sflow_float(hostdata, SFLOW_M_pkts_in, SFLOW_CTR_RATE(pkts_in));
-      process_sflow_float(hostdata, SFLOW_M_bytes_out, SFLOW_CTR_RATE(bytes_out));
-      process_sflow_float(hostdata, SFLOW_M_pkts_out, SFLOW_CTR_RATE(pkts_out));
+      if(SFLOW_OK_GAUGE64(bytes_in))  process_sflow_float(hostdata, SFLOW_M_bytes_in, SFLOW_CTR_RATE(bytes_in));
+      if(SFLOW_OK_GAUGE32(pkts_in))   process_sflow_float(hostdata, SFLOW_M_pkts_in, SFLOW_CTR_RATE(pkts_in));
+      if(SFLOW_OK_GAUGE64(bytes_out)) process_sflow_float(hostdata, SFLOW_M_bytes_out, SFLOW_CTR_RATE(bytes_out));
+      if(SFLOW_OK_GAUGE32(pkts_out))  process_sflow_float(hostdata, SFLOW_M_pkts_out, SFLOW_CTR_RATE(pkts_out));
     }
     
     SFLOW_CTR_LATCH(bytes_in);
