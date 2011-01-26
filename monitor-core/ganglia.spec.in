@@ -359,6 +359,7 @@ cd gmetad-python
 %dir %{_libdir}/ganglia
 %dir %{_libdir}/ganglia/python_modules
 %{_libdir}/ganglia/python_modules/gmetad*
+%{_mandir}/man1/gmetad.py.1*
 
 %files gmond
 %defattr(-,root,root)
@@ -457,6 +458,7 @@ cd gmetad-python
 %changelog
 * Wed Jan 26 2011 Bernard Li <bernard@vanhpc.org>
 - Remove manual steps to install manpages as they are now installed via `make install`
+- Include manpage for gmetad-python
 * Wed Jan 12 2011 Bernard Li <bernard@vanhpc.org>
 - Fix gmetad-python subpackage not including files from Python site-packages dir
 - Break gmetad-python installation into build and install stages
