@@ -239,7 +239,7 @@ BACKPORT PROPOSALS:
   * RPM: Remove manual steps for installing manpages
     http://sourceforge.net/apps/trac/ganglia/changeset/2459
     http://sourceforge.net/apps/trac/ganglia/changeset/2460
-    +1: bernardli
+    +1: bernardli, hawson
     bernardli: depends on "Install manpages in appropriate locations when `make install` is run"
 
 BACKPORT PROPOSALS FUTURE VERSION:
