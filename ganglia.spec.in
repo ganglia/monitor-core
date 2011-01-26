@@ -280,8 +280,6 @@ fi
 %__install -d -m 0755 $RPM_BUILD_ROOT/etc/init.d
 %__install -d -m 0755 $RPM_BUILD_ROOT/etc/sysconfig
 %__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/rrds
-%__install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man1
-%__install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man5
 
 # Move the files into the structure
 %if 0%{?suse_version}
@@ -329,8 +327,6 @@ fi
 
 %__make DESTDIR=$RPM_BUILD_ROOT install
 %__make -C gmond gmond.conf.5
-%__install -m 0644 mans/*.1* $RPM_BUILD_ROOT%{_mandir}/man1/
-%__install -m 0644 gmond/gmond.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/gmond.conf.5
 
 # gmetad-python
 cd gmetad-python
@@ -459,6 +455,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Wed Jan 26 2011 Bernard Li <bernard@vanhpc.org>
+- Remove manual steps to install manpages as they are now installed via `make install` 
 * Wed Jan 12 2011 Bernard Li <bernard@vanhpc.org>
 - Fix gmetad-python subpackage not including files from Python site-packages dir
 - Break gmetad-python installation into build and install stages
