@@ -456,7 +456,7 @@ cd gmetad-python
 
 %changelog
 * Wed Jan 26 2011 Bernard Li <bernard@vanhpc.org>
-- Remove manual steps to install manpages as they are now installed via `make install` 
+- Remove manual steps to install manpages as they are now installed via `make install`
 * Wed Jan 12 2011 Bernard Li <bernard@vanhpc.org>
 - Fix gmetad-python subpackage not including files from Python site-packages dir
 - Break gmetad-python installation into build and install stages
