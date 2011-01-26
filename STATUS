@@ -28,90 +28,9 @@ CURRENT RELEASE NOTES:
   (Please update this area with a brief description of bug fixes and
    enhancements that have been backported for the current release)
 
-  Note: 3.1.3, 3.1.4, 3.1.5 and 3.1.6 never became GA, therefore,
-  the release notes for all of them are combined below.
-
   3.1.8:
 
-  * nothing yet
-
-  3.1.7:
-
-  * Fix build support for RHEL5/issue with commas in CFLAGS
-  * multicpu module: show CPU utilization as a value between 0-100% for
-    each core
-
-  3.1.6:
-
-  * Merge commit 1966 from trunk to fix "contrib/removespikes.pl"
-  * Bootstrapping with Debian 5.0 (lenny) versions of autotools for
-    this and future releases.
-    http://www.mail-archive.com/ganglia-developers@lists.sourceforge.net/msg05352.html
-    http://www.mail-archive.com/ganglia-general@lists.sourceforge.net/msg04688.html
-  * Require user to explicitly specify sysconfdir when building from source,
-    due to the fact that the old behavior was not consistent with the 
-    documented behavior.
-  * Configuration files and scripts are now created during the install phase
-    rather than during configure.   This allows values such as @sysconfdir@
-    to be used in the template configuration files.
-  * Abolish the use of release names - only release numbers will be used
-    to distinguish versions in future
-  * libmetrics: workaround system header conflict in DFBSD >= 2.4 (BUG245)
-  * Use PCRE regex matching to configure metrics using the name_match directive
-  * rrdcached support
-  * gmetad now uses apr and the sleep intervals between polls are randomized
-    in a way that supports shorter polling intervals
-  * FreeBSD support: fixes for crashes and disk statistics (BUG153)
-  * Further tweaks to Solaris build support (remove C99 hack)
-  * Eliminate conflict with ncpus symbol name on older Solaris
-  * AIX support: determine if the host is a virtual server (BUG226)
-  * AIX support: setting linker flags (BUG227), add -lm
-  * AIX support: tweaks for AIX >= v6.1
-  * AIX support: revised init scripts for gmond and gmetad
-  * Check for Python.h explicitly
-  * Include the necessary Python files in the distribution tarball, regardless
-    of how BUILD_PYTHON is set (r2215).
-  * Remove references to GNU toolchain in documentation
-  * Fortify write_data_to_rrd against overflows
-  * Web interface: minor formatting changes
-  * mcast_if implementation tweaked so that the send channel will be bound
-    to the IP of the outgoing interface
-  * Documentation updates relating to the options for multihomed hosts,
-    particularly bind, bind_hostname and mcast_if
-
-  3.1.5:
-
-  * No change to source code, just modified configure.in and STATUS file
-    and will be bootstrapping on Fedora 9 with newer autotools version than
-    CentOS 4
-
-  3.1.4:
-
-  * gmond: Limit the use of APR_POLLSET_THREADSAFE to Linux >= 2.6
-  * gmond: improve/revert setuid behavior in configure script
-
-  3.1.3:
-
-  * gmond: Fix the allow_extra_data configuration directive (BUG199)
-  * gmond: Ensure that a complete XML dump is delivered before closing
-           the send socket. Submitted by: Jerry <adawzq 126 com>
-  * gmond: add bind and bind_hostname parameters for udp_send_channel()
-  * gmetad: BUG232: eliminate case-sensitive hostname bug, user can choose to
-            maintain legacy behavior though.
-  * gmond: BUG237: revise fix for segfault on Solaris where first CPU not in
-           slot 0
-  * gmond: support for HUP signal on platforms with execve
-  * gmond: status module: return gmond version info as string metrics
-  * gmond: Check return status of apr_pollset_create.  Use
-           APR_POLLSET_THREADSAFE on Linux.
-  * build: various configure options: Solaris 8 with Sun Studio 11 support,
-           extra modules for static linking, default setuid, release number,
-           build multicpu and status during static builds, support for
-           SYSCONFDIR (BUG16)
-  * RPM: include status module, allow packager to supply own gmond.conf
-  * build: Look in lib64 rather than lib for apr, confuse and expat on x86_64
-           Linux builds
-  * Bug fixes and Enhancements
+  * build: `make install` target now installs manpages automatically
 
 RELEASE SHOWSTOPPERS:
 
@@ -225,22 +144,6 @@ BACKPORT PROPOSALS:
      summary data from being stored in rrd.
     http://ganglia.svn.sourceforge.net/viewvc/ganglia?view=rev&revision=2277
     +1: bnicholes
-
-  * build: Install manpages in appropriate locations when `make install` is run
-    http://sourceforge.net/apps/trac/ganglia/changeset/2299
-    http://sourceforge.net/apps/trac/ganglia/changeset/2301
-    +1: bernardli, hawson
-
-  * build: Include BUGS file to distribution tarball
-    http://sourceforge.net/apps/trac/ganglia/changeset/2455
-    +1: bernardli, hawson
-    bernardli: depends on "Install manpages in appropriate locations when `make install` is run"
-
-  * RPM: Remove manual steps for installing manpages
-    http://sourceforge.net/apps/trac/ganglia/changeset/2459
-    http://sourceforge.net/apps/trac/ganglia/changeset/2460
-    +1: bernardli, hawson
-    bernardli: depends on "Install manpages in appropriate locations when `make install` is run"
 
 BACKPORT PROPOSALS FUTURE VERSION:
   These proposals are too unstabilizing for the current version, incomplete or

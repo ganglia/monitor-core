@@ -772,6 +772,7 @@ AC_OUTPUT(Makefile
           gmetad/conf.c
           gmetric/Makefile
           include/Makefile
+          mans/Makefile
           web/Makefile)
 
 echo ""
