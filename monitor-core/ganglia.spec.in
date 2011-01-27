@@ -147,18 +147,19 @@ Group: Development/Libraries
 # revisit this list. it might be libtool bloat
 Requires: expat-devel, apr-devel > 1
 %if 0%{?suse_version}
-Requires: libconfuse-devel, libexpat-devel, libapr1-devel, libganglia-3_1_0
+Requires: libconfuse-devel, libexpat-devel, libapr1-devel, libganglia
 %endif
 
 %description devel
 The Ganglia Monitoring Core library provides a set of functions that programmers
 can use to build scalable cluster or grid applications
 
-%package -n libganglia-3_1_0
+%package -n libganglia
 Summary: Ganglia Shared Libraries http://ganglia.sourceforge.net/
 Group: System Environment/Base
+Obsoletes: libganglia-3_1_0
 
-%description -n libganglia-3_1_0
+%description -n libganglia
 The Ganglia Shared Libraries contains common libraries required by both gmond and
 gmetad packages
 
@@ -254,9 +255,9 @@ then
    /sbin/chkconfig --del gmond
 fi
 
-%post   -n libganglia-3_1_0 -p /sbin/ldconfig
+%post   -n libganglia -p /sbin/ldconfig
 
-%postun -n libganglia-3_1_0 -p /sbin/ldconfig
+%postun -n libganglia -p /sbin/ldconfig
 
 %endif #ifnarch noarch
 
@@ -408,7 +409,7 @@ cd gmetad-python
 %{_libdir}/libganglia*.*a
 %{_bindir}/ganglia-config
 
-%files -n libganglia-3_1_0
+%files -n libganglia
 %defattr(-,root,root,-)
 %{_libdir}/libganglia*.so.*
 
@@ -459,6 +460,7 @@ cd gmetad-python
 * Wed Jan 26 2011 Bernard Li <bernard@vanhpc.org>
 - Remove manual steps to install manpages as they are now installed via `make install`
 - Include manpage for gmetad-python
+- Remove hardcoded library version for libganglia
 * Wed Jan 12 2011 Bernard Li <bernard@vanhpc.org>
 - Fix gmetad-python subpackage not including files from Python site-packages dir
 - Break gmetad-python installation into build and install stages
