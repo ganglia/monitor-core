@@ -46,7 +46,6 @@ $host = str_replace(".","_", $raw_host);
 
 # Assumes we have a $start variable (set in get_context.php).
 # $graph_sizes and $graph_sizes_keys defined in conf.php.  Add custom sizes there.
-
 $size = in_array( $size, $graph_sizes_keys ) ? $size : 'default';
 
 if ( isset($_GET['height'] ) ) 
@@ -158,7 +157,6 @@ if ($debug) {
  * common variables passed and used.
  */
 
-
 // Calculate time range.
 if ($sourcetime)
    {
@@ -183,9 +181,7 @@ if (isset($title)) {
 // Check what graph engine we are using
 //////////////////////////////////////////////////////////////////////////////
 switch ( $GLOBALS['graph_engine'] ) {
-
   case "rrdtool":  
-  
     $php_report_file = $graphdir . "/" . $graph . ".php";
     $json_report_file = $graphdir . "/" . $graph . ".json";
     if( is_file( $php_report_file ) ) {
@@ -224,7 +220,6 @@ switch ( $GLOBALS['graph_engine'] ) {
     // Otherwise, we just loop over them later, and tack $extras and
     // $series onto the end of the command.
     foreach (array_keys ($rrdtool_graph) as $key) {
-  
         if (preg_match('/extras|series/', $key))
             continue;
   
@@ -241,15 +236,12 @@ switch ( $GLOBALS['graph_engine'] ) {
     // See above for how these are created
     $command .= array_key_exists('extras', $rrdtool_graph) ? ' '.$rrdtool_graph['extras'].' ' : '';
     $command .= " $rrdtool_graph[series]";
-
     break;
-
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // USING Graphite
   //////////////////////////////////////////////////////////////////////////////////////////////////
   case "graphite":  
-
     // Check whether the link exists from Ganglia RRD tree to the graphite storage/rrd_dir
     // area
     if ( ! is_link($rrd_graphite_link) ) {
@@ -271,7 +263,6 @@ switch ( $GLOBALS['graph_engine'] ) {
   //  $title = urlencode($rrdtool_graph["title"]);
   
     if ( isset($_GET['g'])) {
-  
       // if it's a report increase the height for additional 30 pixels
       $height += 40;
   
@@ -287,9 +278,7 @@ switch ( $GLOBALS['graph_engine'] ) {
       }
   
       if ( isset($config) ) {
-  
         switch ( $config["report_type"] ) {
-  
           case "template":
             $target = str_replace("HOST_CLUSTER", $host_cluster, $config["graphite"]);
             break;
@@ -304,27 +293,19 @@ switch ( $GLOBALS['graph_engine'] ) {
         }
   
         $title = $config['title'];
-  
       } else {
         error_log("Configuration file to $report_name exists however it doesn't appear it's a valid JSON file");
         exit(1);
-  
       }
-  
     } else {
       // It's a simple metric graph
       $target = "target=$host_cluster.$metric_name.sum&hideLegend=true&vtitle=$vlabel&areaMode=all";
       $title = " ";
-      
     }
   
-  
     $graphite_url = $graphite_url_base . "?width=$width&height=$height&" . $target . "&from=" . $start . "&yMin=0&bgcolor=FFFFFF&fgcolor=000000&title=" . urlencode($title . " last " . $range);
-
     break;
-
 } // end of switch ( $GLOBALS['graph_engine'])
-
 
 if ($debug) {
   error_log("Final rrdtool command:  $command");
@@ -348,11 +329,9 @@ if($command || $graphite_url) {
           case "graphite":
             print $graphite_url;
             break;
-          
         }        
         print "</body></html>";
     } else {
-      
         header ("Content-type: image/png");
         switch ( $GLOBALS['graph_engine'] ) {  
           case "rrdtool":
@@ -361,9 +340,7 @@ if($command || $graphite_url) {
           case "graphite":
             echo file_get_contents($graphite_url);
             break;
-          
         }        
-
     }
 }
 
