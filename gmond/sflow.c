@@ -398,7 +398,7 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
 #define SFLOW_OK_COUNTER64(field) (field != (uint64_t)-1)
 
   /* always send a heartbeat */
-  process_sflow_uint32(hostdata, SFLOW_M_heartbeat, 0);
+  process_sflow_uint32(hostdata, SFLOW_M_heartbeat, (apr_time_as_msec(now) - x.uptime_mS) / 1000);
   
   if(offset_HID) {
     /* sumbit the system fields that we already extracted above */
