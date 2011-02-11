@@ -10,7 +10,8 @@ Graphs
 
 - Eliminate usage of global variables
 - graph.d/.php files all modify the global $hostname, should be a local variable
-- Zooming 
+- Zooming
+- graph.d/ JSON definition should allow optional metrics to be added to the graph only if they exist
 
 Views
 
