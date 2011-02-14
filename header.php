@@ -360,7 +360,7 @@ if ($context == "physical" or $context == "cluster" or $context == 'host' )
             $cols_menu .= ">$cols\n";
          }
       $cols_menu .= "</SELECT>\n";
-      
+
       $size_menu = '<SELECT NAME="z" OnChange="ganglia_form.submit();">';
       
       $size_arr = $graph_sizes_keys;
@@ -369,7 +369,7 @@ if ($context == "physical" or $context == "cluster" or $context == 'host' )
               continue;
           $size_menu .= "<OPTION VALUE=\"$size\"";
           if (    ( isset($clustergraphsize) && ($size === $clustergraphsize)) 
-               || (!isset($clustergraphsize) && ($size === 'small' ))) {
+               || (!isset($clustergraphsize) && ($size === 'small' )) || ( !isset($_GET['z']) && $context == 'host' && $size == "medium" ) ) {
               $size_menu .= " SELECTED";
           }
           $size_menu .= ">$size</OPTION>\n";
