@@ -57,11 +57,19 @@ function graph_cpu_report( &$rrdtool_graph )
        $space2 = '                 ';
     }
 
+    $cpu_nice_def = '';
+    $cpu_nice_cdef = '';
+
+    if (file_exists("$rrd_dir/cpu_nice.rrd")) {
+        $cpu_nice_def = "DEF:'cpu_nice'='${rrd_dir}/cpu_nice.rrd':'sum':AVERAGE ";
+        $cpu_nice_cdef = "CDEF:'ccpu_nice'=cpu_nice,num_nodes,/ ";
+    }
+
     if ($context != "host" ) {
         $series .= "DEF:'num_nodes'='${rrd_dir}/cpu_user.rrd':'num':AVERAGE ";
     }
     $series .= "DEF:'cpu_user'='${rrd_dir}/cpu_user.rrd':'sum':AVERAGE "
-            . "DEF:'cpu_nice'='${rrd_dir}/cpu_nice.rrd':'sum':AVERAGE "
+            . $cpu_nice_def
             . "DEF:'cpu_system'='${rrd_dir}/cpu_system.rrd':'sum':AVERAGE "
             . "DEF:'cpu_idle'='${rrd_dir}/cpu_idle.rrd':'sum':AVERAGE ";
 
@@ -71,7 +79,7 @@ function graph_cpu_report( &$rrdtool_graph )
 
     if ($context != "host" ) {
         $series .= "CDEF:'ccpu_user'=cpu_user,num_nodes,/ "
-                . "CDEF:'ccpu_nice'=cpu_nice,num_nodes,/ "
+                . $cpu_nice_cdef
                 . "CDEF:'ccpu_system'=cpu_system,num_nodes,/ "
                 . "CDEF:'ccpu_idle'=cpu_idle,num_nodes,/ ";
 
@@ -97,19 +105,23 @@ function graph_cpu_report( &$rrdtool_graph )
                 . "GPRINT:'user_avg':'${space2}Avg\:%5.1lf%%' "
                 . "GPRINT:'user_max':'${space1}Max\:%5.1lf%%\\l' ";
     }
-    $series .= "STACK:'${plot_prefix}_nice'#$cpu_nice_color:'Nice${rmspace}' ";
 
-    if ( $graphreport_stats ) {
-        $series .= "CDEF:nice_pos=${plot_prefix}_nice,0,INF,LIMIT " 
-                . "VDEF:nice_last=nice_pos,LAST "
-                . "VDEF:nice_min=nice_pos,MINIMUM "
-                . "VDEF:nice_avg=nice_pos,AVERAGE "
-                . "VDEF:nice_max=nice_pos,MAXIMUM "
-                . "GPRINT:'nice_last':'  ${space1}Now\:%5.1lf%%' "
-                . "GPRINT:'nice_min':'${space1}Min\:%5.1lf%%${eol1}' "
-                . "GPRINT:'nice_avg':'${space2}Avg\:%5.1lf%%' "
-                . "GPRINT:'nice_max':'${space1}Max\:%5.1lf%%\\l' ";
+    if (file_exists("$rrd_dir/cpu_nice.rrd")) {
+        $series .= "STACK:'${plot_prefix}_nice'#$cpu_nice_color:'Nice${rmspace}' ";
+
+        if ( $graphreport_stats ) {
+            $series .= "CDEF:nice_pos=${plot_prefix}_nice,0,INF,LIMIT " 
+                    . "VDEF:nice_last=nice_pos,LAST "
+                    . "VDEF:nice_min=nice_pos,MINIMUM "
+                    . "VDEF:nice_avg=nice_pos,AVERAGE "
+                    . "VDEF:nice_max=nice_pos,MAXIMUM "
+                    . "GPRINT:'nice_last':'  ${space1}Now\:%5.1lf%%' "
+                    . "GPRINT:'nice_min':'${space1}Min\:%5.1lf%%${eol1}' "
+                    . "GPRINT:'nice_avg':'${space2}Avg\:%5.1lf%%' "
+                    . "GPRINT:'nice_max':'${space1}Max\:%5.1lf%%\\l' ";
+        }
     }
+
     $series .= "STACK:'${plot_prefix}_system'#$cpu_system_color:'System${rmspace}' ";
 
     if ( $graphreport_stats ) {
