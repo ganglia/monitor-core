@@ -30,20 +30,29 @@
                 opts.cancel(box.startTime, box.endTime);
             };
 
+            self.go = function () {
+                self.mouseDown = false;
+                var box = self.getTimes();
+                opts.done(box.startTime, box.endTime);
+            };
+
             $(document.body).mouseup(function (event) {
                 if (self.mouseDown) {
-                    self.mouseDown = false;
-                    self.cancel();
+                    if (event.target == self.img || event.target == self.float[0]) {
+                        self.go();
+                    } else {
+                        self.cancel();
+                    }
                 }
             })
             .keyup(function (event) {
                 if (event.keyCode == 27 && self.mouseDown) {
-                    self.mouseDown = false;
                     self.cancel();
                 }
             });
 
             self.img.mousedown(function (event) {
+                event.preventDefault();
                 self.shouldStopClick = false;
                 var evt = event;
 
@@ -52,6 +61,7 @@
 
                     self.shouldStopClick = true;
                     self.mouseDown = true;
+                    console.log("setting mousedown: " + self.mouseDown);
 
                     $("#" + opts.floatId).remove();
 
@@ -63,7 +73,7 @@
                     var float = $("<div id='" + opts.floatId + "'>")
                         .css({ position: "absolute", left: clickX, top: clickY - 5, zIndex: 1000 })
                         .width(10)
-                        .height(10)
+                        .height(25)
                         .mousemove(function() { return true; })
                         .mouseup(function() { return true; })
                         .keyup(function() { return true; })
@@ -84,13 +94,14 @@
                 }
             })
             .mouseup(function (evt) {
+                console.log("MOUSE UP");
+                console.log(self.mouseDown);
                 if (self.mouseDown) {
-                    self.mouseDown = false;
-                    var box = self.getTimes();
-                    opts.done(box.startTime, box.endTime);
+                    self.go();
                 }
             })
             .click(function (event) {
+                console.log("click");
                 if (self.shouldStopClick) {
                     event.preventDefault();
                 }

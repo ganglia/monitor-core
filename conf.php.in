@@ -164,6 +164,10 @@ $strip_domainname = false;
 #
 #$optional_graphs = array('packet');
 
+# Enable Zoom support on graphs
+$GLOBALS['zoom_support'] = true;
+
+
 # 
 # Time ranges
 # Each value is the # of seconds in that range.

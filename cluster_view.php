@@ -51,6 +51,13 @@ $data->assign("cluster_util", "$cluster_util%");
 
 $cluster_url=rawurlencode($clustername);
 
+// If we want zoomable support on graphs we need to add class zoomable to every image
+if ( isset($GLOBALS['zoom_support']) && $GLOBALS['zoom_support'] === true )
+   $additional_img_html_args = "class=zoomable";
+else
+   $additional_img_html_args = "";
+$data->assign("additional_img_html_args", $additional_img_html_args);
+
 
 $data->assign("cluster", $clustername);
 
@@ -86,7 +93,7 @@ foreach ( $reports["included_reports"] as $index => $report_name ) {
   if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
     $optional_reports .= "<a name=metric_" . $report_name . ">
     <A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
-    <IMG BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
+    <IMG BORDER=0 $additional_img_html_args ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
 ";
   }
 
@@ -311,7 +318,7 @@ foreach ( $sorted_hosts as $host => $value )
          }
       else
          {
-            $cell="<td><div><font style='font-size: 8px'>$host</font><br><a href=$host_link><img src=\"./graph.php?";
+            $cell="<td><div><font style='font-size: 8px'>$host</font><br><a href=$host_link><img $additional_img_html_args src=\"./graph.php?";
             $cell .= (isset($reports[$metricname]) and $reports[$metricname])
                ? "g=$metricname" : "m=$metricname";
             $cell .= "&amp;$graphargs\" alt=\"$host\" border=0></a></div></td>";
@@ -319,7 +326,7 @@ foreach ( $sorted_hosts as $host => $value )
 
       if ($hostcols == 0) {
          $pre = "<td><a href=$host_link><img src=\"./graph.php?g=";
-         $post = "&amp;$graphargs\" alt=\"$host\" border=0></a></td>";
+         $post = "&amp;$graphargs\" $additional_img_html_args alt=\"$host\" border=0></a></td>";
          $cell .= $pre . "load_report" . $post;
          $cell .= $pre . "mem_report" . $post;
          $cell .= $pre . "cpu_report" . $post;

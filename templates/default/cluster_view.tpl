@@ -28,7 +28,7 @@
   {$optional_reports}<br>
   {foreach $optional_graphs_data graph}
   <A HREF="./graph_all_periods.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=large">
-  <IMG BORDER=0 ALT="{$cluster} {$graph.name}" SRC="./graph.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=medium"></A>
+  <IMG BORDER=0 {$additional_img_html_args} ALT="{$cluster} {$graph.name}" SRC="./graph.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=medium"></A>
   {/foreach}
 </div>
 

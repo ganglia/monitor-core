@@ -40,12 +40,20 @@ $reports["excluded_reports"] = array_merge($default_reports["excluded_reports"] 
 $reports["included_reports"] = array_unique($reports["included_reports"]);
 $reports["excluded_reports"] = array_unique($reports["excluded_reports"]);
 
+// If we want zoomable support on graphs we need to add class zoomable to every image
+if ( isset($GLOBALS['zoom_support']) && $GLOBALS['zoom_support'] === true )
+   $additional_img_html_args = "class=zoomable";
+else
+   $additional_img_html_args = "";
+
+$data->assign("additional_img_html_args", $additional_img_html_args);
+
 foreach ( $reports["included_reports"] as $index => $report_name ) {
 
   if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
     $optional_reports .= "<a name=metric_" . $report_name . ">
     <A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
-    <IMG BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
+    <IMG $additional_img_html_args BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
     <a style=\"background-color: #dddddd\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph'); return false;\" href=\"#\">+</a>
 ";
   }
@@ -53,6 +61,7 @@ foreach ( $reports["included_reports"] as $index => $report_name ) {
 }
 
 $data->assign("optional_reports", $optional_reports);
+
 
 
 if($hosts_up)
