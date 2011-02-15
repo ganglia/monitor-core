@@ -31,11 +31,13 @@ function graph_metric ( &$rrdtool_graph ) {
 
     $rrdtool_graph['height'] += 0; //no fudge needed
     $rrdtool_graph['extras'] = '';
+    //$rrdtool_graph['extras'] .= ($graphreport_stats == true) ? ' --font LEGEND:10' : '';
 
-    if ($size == 'medium') {
-       $rrdtool_graph['extras']        .= ($graphreport_stats == true) ? ' --font LEGEND:7' : '';
-    } else if ($size == 'large') {
-       $rrdtool_graph['extras']        .= ($graphreport_stats == true) ? ' --font LEGEND:10' : '';
+    if ($size == 'large') {
+       //$space1 = '           ';
+       $space1 = '\t';
+    } else {
+       $space1 = '';
     }
 
     switch ($context) {
@@ -117,32 +119,36 @@ function graph_metric ( &$rrdtool_graph ) {
         $rrdtool_graph['vertical-label'] = $metricname;
     }
 
+    if ($size == 'small') {
+        $eol1 = '\\n';
+        $eol2 = '\\l';
+    } else if ($size == 'large') {
+        $eol1 = '';
+        $eol2 = '';
+    } else if ($size == 'medium' || $size == 'default') {
+        $eol1 = '\\n';
+        $eol2 = '';
+    }
     //# the actual graph...
-    $series  = "DEF:'sum'='$rrd_dir/$metricname.rrd:sum':AVERAGE ";
-    $series .= "AREA:'sum'#$default_metric_color:'$subtitle_one\\n'";
+    $series  = "DEF:'sum'='$rrd_dir/$metricname.rrd:sum':AVERAGE "
+             . "AREA:'sum'#$default_metric_color:'$subtitle_one${eol1}'";
 
     if ($graphreport_stats == false) {
         $series .= ":STACK: COMMENT:'$subtitle_two\\l'";
     }
     $series .= " ";
 
-    if ($size == 'small') {
-        $eol2        = '\\l';
-    } else {
-        $eol2        = '';
-    }
 
     if($graphreport_stats == true) {
-
-        $series .= "CDEF:sum_pos=sum,0,LT,0,sum,IF "
+        $series .= "CDEF:sum_pos=sum,0,INF,LIMIT "
                 . "VDEF:sum_last=sum_pos,LAST "
                 . "VDEF:sum_min=sum_pos,MINIMUM "
                 . "VDEF:sum_avg=sum_pos,AVERAGE "
                 . "VDEF:sum_max=sum_pos,MAXIMUM "
-                . "GPRINT:'sum_last':'Now\:%7.2lf%s' "
-                . "GPRINT:'sum_min':'Min\:%7.2lf%s${eol2}' "
-                . "GPRINT:'sum_avg':'Avg\:%7.2lf%s' "
-                . "GPRINT:'sum_max':'Max\:%7.2lf%s\\l' ";
+                . "GPRINT:'sum_last':'${space1}Now\:%7.2lf%s' "
+                . "GPRINT:'sum_min':'${space1}Min\:%7.2lf%s${eol2}' "
+                . "GPRINT:'sum_avg':'${space1}Avg\:%7.2lf%s' "
+                . "GPRINT:'sum_max':'${space1}Max\:%7.2lf%s\\l' ";
     }
 
     if ($jobstart) {
@@ -152,7 +158,6 @@ function graph_metric ( &$rrdtool_graph ) {
     $rrdtool_graph['series'] = $series;
 
     return $rrdtool_graph;
-
 }
 
 ?>
