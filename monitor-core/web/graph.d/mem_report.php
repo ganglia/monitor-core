@@ -54,17 +54,32 @@ function graph_mem_report ( &$rrdtool_graph ) {
        $space1 = '                 ';
        $space2 = '                 ';
     }
+
+    $bmem_shared_defs = '';
+    $bmem_buffers_defs = '';
+    $bmem_used_cdef = "CDEF:'bmem_used'='bmem_total','bmem_free',-,'bmem_cached',-";
+
+    if (file_exists("$rrd_dir/mem_shared.rrd")) {
+       $bmem_used_cdef .= ",'bmem_shared',-";
+       $bmem_shared_defs = "DEF:'mem_shared'='${rrd_dir}/mem_shared.rrd':'sum':AVERAGE "
+           ."CDEF:'bmem_shared'=mem_shared,1024,* ";
+    }
+
+    if (file_exists("$rrd_dir/mem_buffers.rrd")) {
+       $bmem_used_cdef .= ",'bmem_buffers',-";
+       $bmem_buffers_defs = "DEF:'mem_buffers'='${rrd_dir}/mem_buffers.rrd':'sum':AVERAGE "
+           ."CDEF:'bmem_buffers'=mem_buffers,1024,* ";
+    }
+
     $series = "DEF:'mem_total'='${rrd_dir}/mem_total.rrd':'sum':AVERAGE "
         ."CDEF:'bmem_total'=mem_total,1024,* "
-        ."DEF:'mem_shared'='${rrd_dir}/mem_shared.rrd':'sum':AVERAGE "
-        ."CDEF:'bmem_shared'=mem_shared,1024,* "
+        .$bmem_shared_defs
         ."DEF:'mem_free'='${rrd_dir}/mem_free.rrd':'sum':AVERAGE "
         ."CDEF:'bmem_free'=mem_free,1024,* "
         ."DEF:'mem_cached'='${rrd_dir}/mem_cached.rrd':'sum':AVERAGE "
         ."CDEF:'bmem_cached'=mem_cached,1024,* "
-        ."DEF:'mem_buffers'='${rrd_dir}/mem_buffers.rrd':'sum':AVERAGE "
-        ."CDEF:'bmem_buffers'=mem_buffers,1024,* "
-        ."CDEF:'bmem_used'='bmem_total','bmem_shared',-,'bmem_free',-,'bmem_cached',-,'bmem_buffers',- "
+        .$bmem_buffers_defs
+        ."$bmem_used_cdef "
         ."AREA:'bmem_used'#$mem_used_color:'Use${rmspace}' ";
 
     if ( $graphreport_stats ) {
@@ -78,19 +93,23 @@ function graph_mem_report ( &$rrdtool_graph ) {
                 . "GPRINT:'used_avg':'${space2}Avg\:%6.1lf%s' "
                 . "GPRINT:'used_max':'${space1}Max\:%6.1lf%s\\l' ";
     }
-    $series .= "STACK:'bmem_shared'#$mem_shared_color:'Share${rmspace}' ";
 
-    if ( $graphreport_stats ) {
-        $series .= "CDEF:shared_pos=bmem_shared,0,INF,LIMIT "
-                . "VDEF:shared_last=shared_pos,LAST "
-                . "VDEF:shared_min=shared_pos,MINIMUM " 
-                . "VDEF:shared_avg=shared_pos,AVERAGE " 
-                . "VDEF:shared_max=shared_pos,MAXIMUM " 
-                . "GPRINT:'shared_last':' ${space1}Now\:%6.1lf%s' "
-                . "GPRINT:'shared_min':'${space1}Min\:%6.1lf%s${eol1}' "
-                . "GPRINT:'shared_avg':'${space2}Avg\:%6.1lf%s' "
-                . "GPRINT:'shared_max':'${space1}Max\:%6.1lf%s\\l' ";
+    if (file_exists("$rrd_dir/mem_shared.rrd")) {
+        $series .= "STACK:'bmem_shared'#$mem_shared_color:'Share${rmspace}' ";
+
+        if ( $graphreport_stats ) {
+            $series .= "CDEF:shared_pos=bmem_shared,0,INF,LIMIT "
+                    . "VDEF:shared_last=shared_pos,LAST "
+                    . "VDEF:shared_min=shared_pos,MINIMUM " 
+                    . "VDEF:shared_avg=shared_pos,AVERAGE " 
+                    . "VDEF:shared_max=shared_pos,MAXIMUM " 
+                    . "GPRINT:'shared_last':' ${space1}Now\:%6.1lf%s' "
+                    . "GPRINT:'shared_min':'${space1}Min\:%6.1lf%s${eol1}' "
+                    . "GPRINT:'shared_avg':'${space2}Avg\:%6.1lf%s' "
+                    . "GPRINT:'shared_max':'${space1}Max\:%6.1lf%s\\l' ";
+        }
     }
+
     $series .= "STACK:'bmem_cached'#$mem_cached_color:'Cache${rmspace}' ";
 
     if ( $graphreport_stats ) {
@@ -104,18 +123,21 @@ function graph_mem_report ( &$rrdtool_graph ) {
                 . "GPRINT:'cached_avg':'${space2}Avg\:%6.1lf%s' "
                 . "GPRINT:'cached_max':'${space1}Max\:%6.1lf%s\\l' ";
     }
-    $series .= "STACK:'bmem_buffers'#$mem_buffered_color:'Buffer${rmspace}' ";
 
-    if ( $graphreport_stats ) {
-        $series .= "CDEF:buffers_pos=bmem_buffers,0,INF,LIMIT "
-                . "VDEF:buffers_last=buffers_pos,LAST "
-                . "VDEF:buffers_min=buffers_pos,MINIMUM " 
-                . "VDEF:buffers_avg=buffers_pos,AVERAGE " 
-                . "VDEF:buffers_max=buffers_pos,MAXIMUM " 
-                . "GPRINT:'buffers_last':'${space1}Now\:%6.1lf%s' "
-                . "GPRINT:'buffers_min':'${space1}Min\:%6.1lf%s${eol1}' "
-                . "GPRINT:'buffers_avg':'${space2}Avg\:%6.1lf%s' "
-                . "GPRINT:'buffers_max':'${space1}Max\:%6.1lf%s\\l' ";
+    if (file_exists("$rrd_dir/mem_buffers.rrd")) {
+        $series .= "STACK:'bmem_buffers'#$mem_buffered_color:'Buffer${rmspace}' ";
+
+        if ( $graphreport_stats ) {
+            $series .= "CDEF:buffers_pos=bmem_buffers,0,INF,LIMIT "
+                    . "VDEF:buffers_last=buffers_pos,LAST "
+                    . "VDEF:buffers_min=buffers_pos,MINIMUM " 
+                    . "VDEF:buffers_avg=buffers_pos,AVERAGE " 
+                    . "VDEF:buffers_max=buffers_pos,MAXIMUM " 
+                    . "GPRINT:'buffers_last':'${space1}Now\:%6.1lf%s' "
+                    . "GPRINT:'buffers_min':'${space1}Min\:%6.1lf%s${eol1}' "
+                    . "GPRINT:'buffers_avg':'${space2}Avg\:%6.1lf%s' "
+                    . "GPRINT:'buffers_max':'${space1}Max\:%6.1lf%s\\l' ";
+        }
     }
 
     if (file_exists("$rrd_dir/swap_total.rrd")) {
