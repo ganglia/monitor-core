@@ -24,16 +24,40 @@
                 return { startTime: selStartTime, endTime: selEndTime };
             }
 
+            self.setMouseDown = function (down) {
+                self.mouseDown = down;
+                if (down) {
+                    $(document.body).css("cursor", "crosshair");
+                } else {
+                    $(document.body).css("cursor", "default");
+                }
+            }
+
             self.cancel = function () {
-                self.mouseDown = false;
+                self.setMouseDown(false);
                 var box = self.getTimes();
                 opts.cancel(box.startTime, box.endTime);
             };
 
             self.go = function () {
-                self.mouseDown = false;
+                self.setMouseDown(false);
                 var box = self.getTimes();
                 opts.done(box.startTime, box.endTime);
+            };
+
+            self.updateOverlay = function (evt) {
+                var curX = evt.pageX;
+
+                if (self.startX > curX) {
+                    if (curX < self.minWidth) {
+                        curX = self.minWidth;
+                    }
+                    self.float.css({ left: curX });
+                } else if (curX > self.maxWidth) {
+                    curX = self.maxWidth;
+                }
+
+                self.float.width(Math.abs(curX - self.startX));
             };
 
             $(document.body).mouseup(function (event) {
@@ -42,6 +66,13 @@
                         self.go();
                     } else {
                         self.cancel();
+                    }
+                }
+            })
+            .mousemove(function (event) {
+                if (self.mouseDown) {
+                    if (event.target == self.float[0]) {
+                        self.updateOverlay(event);
                     }
                 }
             })
@@ -58,23 +89,29 @@
 
                 setTimeout(function () {
                     evt.stopPropagation();
-
-                    self.shouldStopClick = true;
-                    self.mouseDown = true;
-                    console.log("setting mousedown: " + self.mouseDown);
+                    var clickX = evt.pageX;
+                    var clickY = evt.pageY;
+                    self.startX = clickX;
 
                     $("#" + opts.floatId).remove();
 
-                    var clickX = evt.pageX;
-                    var clickY = evt.pageY;
+                    self.minWidth = self.img.offset().left + opts.paddingLeft;
+                    self.maxWidth = self.img.offset().left + (self.img.width() - opts.paddingRight);
+                    if ((clickX > self.maxWidth) || (clickX < self.minWidth)) {
+                        return;
+                    }
 
-                    self.startX = clickX;
+                    self.shouldStopClick = true;
+                    self.setMouseDown(true);
 
                     var float = $("<div id='" + opts.floatId + "'>")
-                        .css({ position: "absolute", left: clickX, top: clickY - 5, zIndex: 1000 })
+                        .css({
+                          position: "absolute", left: clickX,
+                          top: self.img.position().top + opts.paddingTop, zIndex: 1000,
+                          height: self.img.height() - (opts.paddingBottom + opts.paddingTop)
+                        })
                         .width(10)
-                        .height(25)
-                        .mousemove(function() { return true; })
+                        .mousemove(function(evt) { return true; })
                         .mouseup(function() { return true; })
                         .keyup(function() { return true; })
                         .appendTo(document.body);
@@ -85,23 +122,15 @@
             })
             .mousemove(function (evt) {
                 if (self.mouseDown && self.float) {
-                    var clickX = evt.pageX;
-                    if (self.startX > clickX) {
-                        self.float.css({ left: clickX });
-                    }
-
-                    self.float.width(Math.abs(clickX - self.startX));
+                    self.updateOverlay(evt);
                 }
             })
             .mouseup(function (evt) {
-                console.log("MOUSE UP");
-                console.log(self.mouseDown);
                 if (self.mouseDown) {
                     self.go();
                 }
             })
             .click(function (event) {
-                console.log("click");
                 if (self.shouldStopClick) {
                     event.preventDefault();
                 }
@@ -109,14 +138,24 @@
         });
     }
 
+    $.fn.gangZoom.defStyle = "#gangZoomFloater {";
+    $.fn.gangZoom.defStyle += "border: 1px solid black;";
+    $.fn.gangZoom.defStyle += "background: white;";
+    $.fn.gangZoom.defStyle += "opacity: 0.7;";
+    $.fn.gangZoom.defStyle += "position: absolute;";
+    $.fn.gangZoom.defStyle += "top: 0;";
+    $.fn.gangZoom.defStyle += "height: 100%;";
+
     $.fn.gangZoom.defaults = {
         clickTimeout: 500,
         floatId: 'gangZoomFloater',
-        defaultStyle: "#gangZoomFloater { border: 1px solid black; background: white; opacity: 0.7 }",
+        defaultStyle: $.fn.gangZoom.defStyle,
         startTime: ((new Date()).getTime() / 1000) - 3600,
         endTime: (new Date()).getTime() / 1000,
         paddingLeft: 20,
         paddingRight: 20,
+        paddingTop: 20,
+        paddingBottom: 40,
         done: function (startTime, endTime) {},
         cancel: function (startTime, endTime) {}
     }
