@@ -35,7 +35,7 @@ $CPUs = cluster_sum("cpu_num", $metrics);
 $Memory = sprintf("%.1f GB", cluster_sum("mem_total", $metrics)/(float)1048576);
 $Disk = cluster_sum("disk_total", $metrics);
 $Disk = $Disk ? sprintf("%.1f GB", $Disk) : "Unknown"; 
-list($most_full, $most_full_host) = cluster_min("part_max_used", $metrics);
+list($most_full, $most_full_host) = cluster_max("part_max_used", $metrics);
 $data->assign("CPUs", $CPUs);
 $data->assign("Memory", $Memory);
 $data->assign("Disk", $Disk);
