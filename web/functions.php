@@ -94,20 +94,20 @@ function cluster_sum($name, $metrics)
 }
 
 #-------------------------------------------------------------------------------
-function cluster_min($name, $metrics)
+function cluster_max($name, $metrics)
 {
-   $min = "";
+   $max = "";
 
    foreach ($metrics as $host => $val)
       {
          $v = $val[$name]['VAL'];
-         if (!is_numeric($min) or $min < $v)
+         if (!is_numeric($max) or $max < $v)
             {
-               $min = $v;
-               $minhost = $host;
+               $max = $v;
+               $maxhost = $host;
             }
       }
-   return array($min, $minhost);
+   return array($max, $maxhost);
 }
 
 #-------------------------------------------------------------------------------
