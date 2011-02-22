@@ -40,20 +40,20 @@ $reports["excluded_reports"] = array_merge($default_reports["excluded_reports"] 
 $reports["included_reports"] = array_unique($reports["included_reports"]);
 $reports["excluded_reports"] = array_unique($reports["excluded_reports"]);
 
-// If we want zoomable support on graphs we need to add class zoomable to every image
+// If we want zoomable support on graphs we need to add correct zoomable class to every image
+$additional_cluster_img_html_args = "";
+$additional_host_img_html_args = "";
 if ( isset($GLOBALS['zoom_support']) && $GLOBALS['zoom_support'] === true )
-   $additional_img_html_args = "class=zoomable";
-else
-   $additional_img_html_args = "";
+   $additional_cluster_img_html_args = "class=cluster_zoomable";
 
-$data->assign("additional_img_html_args", $additional_img_html_args);
+$data->assign("additional_cluster_img_html_args", $additional_cluster_img_html_args);
 
 foreach ( $reports["included_reports"] as $index => $report_name ) {
 
   if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
     $optional_reports .= "<a name=metric_" . $report_name . ">
     <A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
-    <IMG $additional_img_html_args BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
+    <IMG $additional_cluster_img_html_args BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
     <a style=\"background-color: #dddddd\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph'); return false;\" href=\"#\">+</a>
 ";
   }
@@ -107,6 +107,13 @@ foreach ($metrics as $name => $v)
           {
              $size = isset($clustergraphsize) ? $clustergraphsize : 'default';
              $size = $size == 'medium' ? 'default' : $size; //set to 'default' to preserve old behavior
+
+             // set host zoom class based on the size of the graph shown
+             if ( isset($GLOBALS['zoom_support']) && $GLOBALS['zoom_support'] === true )
+                $additional_host_img_html_args = "class=host_${size}_zoomable";
+
+             $data->assign("additional_host_img_html_args", $additional_host_img_html_args);
+
              $graphargs = "c=$cluster_url&amp;h=$hostname&amp;v=$v[VAL]"
                ."&amp;m=$name&amp;r=$range&amp;z=$size&amp;jr=$jobrange"
                ."&amp;js=$jobstart&amp;st=$cluster[LOCALTIME]";

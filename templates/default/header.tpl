@@ -23,19 +23,50 @@
     });
 
   $(function () {
-    $(".zoomable").gangZoom({
-        startTime: {$start_timestamp},
-        endTime: {$end_timestamp},
-        paddingLeft: 67,
-        paddingRight: 30,
-        done: function (startTime, endTime) {
+
+    done = function done(startTime, endTime) {
             setStartAndEnd(startTime, endTime);
             document.forms['ganglia_form'].submit();
-        },
-        cancel: function (startTime, endTime) {
+    }
+
+    cancel = function (startTime, endTime) {
             setStartAndEnd(startTime, endTime);
-        }
-    });
+    }
+
+    defaults = {
+        startTime: {$start_timestamp},
+        endTime: {$end_timestamp},
+        done: done,
+        cancel: cancel
+    }
+
+    $(".host_small_zoomable").gangZoom($.extend({
+        paddingLeft: 67,
+        paddingRight: 30,
+        paddingTop: 38,
+        paddingBottom: 27,
+    }, defaults));
+
+    $(".host_default_zoomable").gangZoom($.extend({
+        paddingLeft: 66,
+        paddingRight: 30,
+        paddingTop: 37,
+        paddingBottom: 50,
+    }, defaults));
+
+    $(".host_large_zoomable").gangZoom($.extend({
+        paddingLeft: 66,
+        paddingRight: 29,
+        paddingTop: 37,
+        paddingBottom: 56,
+    }, defaults));
+
+    $(".cluster_zoomable").gangZoom($.extend({
+        paddingLeft: 67,
+        paddingRight: 30,
+        paddingTop: 37,
+        paddingBottom: 50,
+    }, defaults));
 
     function setStartAndEnd(startTime, endTime) {
         $("#datepicker-cs").val(Math.floor(startTime));

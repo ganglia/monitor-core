@@ -177,7 +177,7 @@ $(function() {
 <a name=metric_{$g_metric.metric_name}>
 <font style="font-size: 9px">{$g_metric.metric_name}</font> <a style="background-color: #dddddd" onclick="metricActions('{$g_metric.host_name}','{$g_metric.metric_name}', 'metric'); return false;" href="#">+</a><br>
 <A HREF="./graph_all_periods.php?{$g_metric.graphargs}&amp;z=large">
-<IMG BORDER=0 {$additional_img_html_args} ALT="{$g_metric.alt}" SRC="./graph.php?{$g_metric.graphargs}" TITLE="{$g_metric.desc}">
+<IMG BORDER=0 {$additional_host_img_html_args} ALT="{$g_metric.alt}" SRC="./graph.php?{$g_metric.graphargs}" TITLE="{$g_metric.desc}">
 </A>
 </TD>
 {$g_metric.new_row}
