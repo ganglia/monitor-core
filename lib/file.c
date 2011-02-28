@@ -122,7 +122,7 @@ slurpfile (char * filename, char **buffer, int buflen)
 
 read:
    read_len = read(fd, db, buflen);
-   if (read_len <= 0)
+   if (read_len < 0)
       {
          if (errno == EINTR)
             goto read;
