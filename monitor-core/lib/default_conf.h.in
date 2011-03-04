@@ -70,6 +70,12 @@ udp_recv_channel {\n\
 #  port = 6343\n\
 #}\n\
 \n\
+/* optional sFlow settings */\n\
+#sflow {\n\
+# udp_port = 6343\n\
+# accept_vm_metrics = no\n\
+#}\n\
+\n\
 /* You can specify as many tcp_accept_channels as you like to share\n\
    an xml description of the state of the cluster */\n\
 tcp_accept_channel {\n\
