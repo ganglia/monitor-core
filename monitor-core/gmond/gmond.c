@@ -150,6 +150,7 @@ apr_hash_t *hosts = NULL;
 
 #ifdef SFLOW
 #include "sflow.h"
+uint16_t sflow_udp_port = SFLOW_IANA_REGISTERED_PORT;
 #endif
 
 #include "gmond_internal.h"
@@ -1286,7 +1287,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   ganglia_scoreboard_inc(PKTS_RECVD_ALL);
 
 #ifdef SFLOW
-  if(localport == SFLOW_IANA_REGISTERED_PORT) {
+  if(localport == sflow_udp_port) {
     if(process_sflow_datagram(remotesa, buf, len, now, &errorMsg)) {
       ganglia_scoreboard_inc(PKTS_RECVD_VALUE);
     }
@@ -2838,6 +2839,10 @@ main ( int argc, char *argv[] )
     }
 
   process_configuration_file();
+
+#ifdef SFLOW
+  sflow_udp_port = init_sflow(config_file);
+#endif
 
   /* Should over-ride any value from the configuration file */
   if(args_info.location_given)

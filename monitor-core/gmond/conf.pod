@@ -278,6 +278,8 @@ port for sFlow):
   }
 
 Note: sFlow is unicast protocol, so don't include B<mcast_join> join.
+Note: To use some other port for sFlow, set it here and then specify the port
+in an B<sflow> section (see below).
 
 =head2 tcp_accept_channel
 
@@ -469,6 +471,34 @@ metrics can be discovered by invoking B<gmond -m>.
          value = 25
        }
      }
+   }
+
+=head2 sFlow
+
+The B<sflow> group is optional and has the following optional
+attributes: B<udp_port>, B<accept_vm_metrics>. By default, a
+B<udp_recv_channel> on port 6343 (the IANA registered port for
+sFlow) is all that is required to accept and process sFlow
+datagrams.  To receive sFlow on some other port requires both
+a B<udp_recv_channel> for the other port and a B<udp_port>
+setting here. For example:
+
+   udp_recv_channel {
+     port = 7343
+   }
+
+   sflow {
+     udp_port = 7343
+   }
+
+An sFlow agent running on a hypervisor may also be sending
+metrics for its local virtual machines.  By default these
+metrics are ignored, but the B<accept_vm_metrics> flag can
+be used to accept those metrics too,  and instantiate the
+virtual machines as hosts in the cluster:
+
+   sflow {
+     accept_vm_metrics = yes
    }
 
 =head2 Include
