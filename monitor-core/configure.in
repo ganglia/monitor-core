@@ -256,7 +256,7 @@ AC_ARG_ENABLE( status,
 AM_CONDITIONAL(BUILD_STATUS, test x"$enable_status" = xyes)
 
 AC_ARG_ENABLE( sflow,
-[  --disable-sflow         exclude sflow gateway],
+[  --disable-sflow         exclude sFlow gateway],
 [ if test x"$enableval" != xyes; then enable_sflow="no"; fi ], [ enable_sflow="yes" ] )
 AM_CONDITIONAL(BUILD_SFLOW, test x"$enable_sflow" = xyes)
 
