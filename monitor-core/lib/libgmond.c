@@ -158,6 +158,14 @@ static cfg_opt_t metric_modules_opts[] = {
   CFG_END()
 };
 
+#ifdef SFLOW
+static cfg_opt_t sflow_opts[] = {
+  CFG_INT("udp_port", 6343, CFGF_NONE ),
+  CFG_BOOL("accept_vm_metrics", 0, CFGF_NONE ),
+  CFG_END()
+};
+#endif
+
 static cfg_opt_t gmond_opts[] = {
   CFG_SEC("cluster",   cluster_opts, CFGF_NONE),
   CFG_SEC("host",      host_opts, CFGF_NONE),
@@ -168,6 +176,9 @@ static cfg_opt_t gmond_opts[] = {
   CFG_SEC("collection_group",  collection_group_opts, CFGF_MULTI),
   CFG_FUNC("include", Ganglia_cfg_include),
   CFG_SEC("modules",  metric_modules_opts, CFGF_NONE),
+#ifdef SFLOW
+CFG_SEC("sflow", sflow_opts, CFGF_NONE),
+#endif
   CFG_END()
 }; 
 

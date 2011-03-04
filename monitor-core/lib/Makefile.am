@@ -10,6 +10,9 @@ GCFLAGS = -D_LARGEFILE64_SOURCE
 GLDADD = 
 GLDFLAGS =
 endif
+if BUILD_SFLOW
+GCFLAGS += -DSFLOW
+endif
 
 INCLUDES = @APR_INCLUDES@
 AM_CFLAGS = -I.. -I. -I$(top_builddir)/include/ $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"'
