@@ -194,6 +194,9 @@ build_default_gmond_configuration(Ganglia_pool p)
   apr_pool_t *context=(apr_pool_t*)p;
 
   default_gmond_configuration = apr_pstrdup(context, BASE_GMOND_CONFIGURATION);
+#ifdef SFLOW
+  default_gmond_configuration = apr_pstrcat(context, default_gmond_configuration, SFLOW_CONFIGURATION, NULL);
+#endif
   default_gmond_configuration = apr_pstrcat(context, default_gmond_configuration, COLLECTION_GROUP_LIST, NULL);
 #if SOLARIS
   default_gmond_configuration = apr_pstrcat(context, default_gmond_configuration, SOLARIS_SPECIFIC_CONFIGURATION, NULL);
