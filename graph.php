@@ -217,24 +217,27 @@ if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
       }
     } 
 
-    $matches_unique = array_unique($matches);
+    if ( isset($matches)) {
 
-    // Create graph_config series from matched hosts
-    foreach ( $matches_unique as $key => $host_cluster ) {
-      // We need to cycle the available colors
-      $color_index = $counter % $color_count;
-      
-      $out = explode("|", $host_cluster);
-      
-      $host_name = $out[0];
-      $cluster_name = $out[1];
-      
-      $graph_config['series'][] = array ( "hostname" => $host_name , "clustername" => $cluster_name,
-         "metric" => $metric_name,  "color" => $colors[$color_index], "label" => $host_name, "line_width" => $line_width, "type" => $graph_type);
-         $counter++;
- 
-    }
+        $matches_unique = array_unique($matches);
     
+        // Create graph_config series from matched hosts
+        foreach ( $matches_unique as $key => $host_cluster ) {
+          // We need to cycle the available colors
+          $color_index = $counter % $color_count;
+          
+          $out = explode("|", $host_cluster);
+          
+          $host_name = $out[0];
+          $cluster_name = $out[1];
+          
+          $graph_config['series'][] = array ( "hostname" => $host_name , "clustername" => $cluster_name,
+             "metric" => $metric_name,  "color" => $colors[$color_index], "label" => $host_name, "line_width" => $line_width, "type" => $graph_type);
+             $counter++;
+     
+        }
+    
+    }
     #print "<PRE>"; print_r($graph_config); exit(1);
  
 }
