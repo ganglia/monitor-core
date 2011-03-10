@@ -40,7 +40,7 @@ isset ($_GET['graph_type']) ? $graph_type = $_GET['graph_type'] : $graph_type = 
 // Show graph only if host_group is set
 if ( isset($_GET['host_group'])) {
   
-  print "<img src=graph.php?r=hour&z=xlarge&m=" . $_GET['metric_name'] . "&aggregate=1&hreg[]=" . $_GET['host_group'] . "&gt=" . $_GET['graph_type'] .  ">";
+  print "<img src=graph.php?r=hour&z=xlarge&m=" . $_GET['metric_name'] . "&aggregate=1&hreg[]=" . $_GET['host_group'] . "&gtype=" . $_GET['graph_type'] .  ">";
 
 }
 

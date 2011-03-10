@@ -182,8 +182,8 @@ if (isset($title)) {
 if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
     
     // If graph type is not specified default to line graph
-    if ( isset($_GET["gt"]) && in_array($_GET["gt"], array("stack","line") )  ) 
-        $graph_type = $_GET["gt"];
+    if ( isset($_GET["gtype"]) && in_array($_GET["gtype"], array("stack","line") )  ) 
+        $graph_type = $_GET["gtype"];
     else
         $graph_type = "line";
     
