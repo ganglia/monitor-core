@@ -5,6 +5,10 @@
 #
 include_once "./conf.php";
 
+if(isSet($conf)) {
+  extract($conf);
+}
+
 # These are settings derived from the configuration settings, and
 # should not be modified.  This file will be overwritten on package upgrades,
 # while changes made in conf.php should be preserved

@@ -51,18 +51,18 @@ $size = in_array( $size, $graph_sizes_keys ) ? $size : 'default';
 if ( isset($_GET['height'] ) ) 
   $height = $_GET['height'];
 else 
-  $height  = $graph_sizes[ $size ][ 'height' ];
+  $height  = $conf['graph_sizes'][ $size ][ 'height' ];
 
 if ( isset($_GET['width'] ) ) 
   $width =  $_GET['width'];
 else
-  $width = $graph_sizes[ $size ][ 'width' ];
+  $width = $conf['graph_sizes'][ $size ][ 'width' ];
 
-#$height  = $graph_sizes[ $size ][ 'height' ];
-#$width   = $graph_sizes[ $size ][ 'width' ];
-$fudge_0 = $graph_sizes[ $size ][ 'fudge_0' ];
-$fudge_1 = $graph_sizes[ $size ][ 'fudge_1' ];
-$fudge_2 = $graph_sizes[ $size ][ 'fudge_2' ];
+#$height  = $conf['graph_sizes'][ $size ][ 'height' ];
+#$width   = $conf['graph_sizes'][ $size ][ 'width' ];
+$fudge_0 = $conf['graph_sizes'][ $size ][ 'fudge_0' ];
+$fudge_1 = $conf['graph_sizes'][ $size ][ 'fudge_1' ];
+$fudge_2 = $conf['graph_sizes'][ $size ][ 'fudge_2' ];
 
 ///////////////////////////////////////////////////////////////////////////
 // Set some variables depending on the context. Context is set in
@@ -71,29 +71,30 @@ $fudge_2 = $graph_sizes[ $size ][ 'fudge_2' ];
 switch ($context)
 {
     case "meta":
-      $rrd_dir = "$rrds/__SummaryInfo__";
-      $rrd_graphite_link = "$graphite_rrd_dir/__SummaryInfo__";
+      $rrd_dir = $conf['rrds'] . "/__SummaryInfo__";
+      $rrd_graphite_link = $conf['graphite_rrd_dir'] . "/__SummaryInfo__";
       $title = "$self Grid";
       break;
     case "grid":
-      $rrd_dir = "$rrds/$grid/__SummaryInfo__";
-      $rrd_graphite_link = "$graphite_rrd_dir/$grid/__SummaryInfo__";
+      $rrd_dir = $conf['rrds'] . "/$grid/__SummaryInfo__";
+      $rrd_graphite_link = $conf['graphite_rrd_dir'] . "/$grid/__SummaryInfo__";
       if (preg_match('/grid/i', $gridname))
           $title  = $gridname;
       else
           $title  = "$gridname Grid";
       break;
     case "cluster":
-      $rrd_dir = "$rrds/$clustername/__SummaryInfo__";
-      $rrd_graphite_link = "$graphite_rrd_dir/$clustername/__SummaryInfo__";
+      $rrd_dir = $conf['rrds'] . "/$clustername/__SummaryInfo__";
+      $rrd_graphite_link = $conf['graphite_rrd_dir'] . "/$clustername/__SummaryInfo__";
       if (preg_match('/cluster/i', $clustername))
           $title  = $clustername;
       else
           $title  = "$clustername Cluster";
       break;
     case "host":
-      $rrd_dir = "$rrds/$clustername/$raw_host";
-      $rrd_graphite_link = $graphite_rrd_dir . "/" . $clustername . "/" . $host;
+      $rrd_dir = $conf['rrds'] . "/$clustername/$raw_host";
+      $rrd_graphite_link = $conf['graphite_rrd_dir'] . "/" . $clustername . "/" . $host;
+      $title = "";
       if (!$summary)
         $title = $metric_name ;
       break;
@@ -177,29 +178,97 @@ if (isset($title)) {
    $rrdtool_graph['title'] = $title . " last $range";
 }
 
+// Are we generating aggregate graphs
+if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
+    
+    // If graph type is not specified default to line graph
+    if ( isset($_GET["gt"]) && in_array($_GET["gt"], array("stack","line") )  ) 
+        $graph_type = $_GET["gt"];
+    else
+        $graph_type = "line";
+    
+    // If line width not specified default to 2
+    if ( isset($_GET["lw"]) && in_array($_GET["lw"], array("1","2", "3") )  ) 
+        $line_width = $_GET["lw"];
+    else
+        $line_width = "2";
+    
+    // Set up 
+    $graph_config["report_name"] = $metric_name;
+    $graph_config["report_type"] = "standard";
+    $graph_config["title"] = $metric_name;
+
+    // Colors to use
+    $colors = array("128936","FF8000","158499","CC3300","996699","FFAB11","3366CC","01476F");
+    $color_count = sizeof($colors);
+
+    // Load the host cache
+    require_once('./cache.php');
+    
+    $counter = 0;
+
+    // Find matching hosts    
+    foreach ( $_GET['hreg'] as $key => $query ) {
+      foreach ( $index_array['hosts'] as $key => $host_name ) {
+        if ( preg_match("/$query/i", $host_name ) ) {
+          // We can have same hostname in multiple clusters
+          $matches[] = $host_name . "|" . $index_array['cluster'][$host_name]; 
+        }
+      }
+    } 
+
+    $matches_unique = array_unique($matches);
+
+    // Create graph_config series from matched hosts
+    foreach ( $matches_unique as $key => $host_cluster ) {
+      // We need to cycle the available colors
+      $color_index = $counter % $color_count;
+      
+      $out = explode("|", $host_cluster);
+      
+      $host_name = $out[0];
+      $cluster_name = $out[1];
+      
+      $graph_config['series'][] = array ( "hostname" => $host_name , "clustername" => $cluster_name,
+         "metric" => $metric_name,  "color" => $colors[$color_index], "label" => $host_name, "line_width" => $line_width, "type" => $graph_type);
+         $counter++;
+ 
+    }
+    
+    #print "<PRE>"; print_r($graph_config); exit(1);
+ 
+}
 //////////////////////////////////////////////////////////////////////////////
 // Check what graph engine we are using
 //////////////////////////////////////////////////////////////////////////////
-switch ( $GLOBALS['graph_engine'] ) {
-  case "rrdtool":  
-    $php_report_file = $graphdir . "/" . $graph . ".php";
-    $json_report_file = $graphdir . "/" . $graph . ".json";
-    if( is_file( $php_report_file ) ) {
-      include_once $php_report_file;
-      $graph_function = "graph_${graph}";
-      $graph_function( $rrdtool_graph );  // Pass by reference call, $rrdtool_graph modified inplace
-    } else if ( is_file( $json_report_file ) ) {
-      $config = json_decode( file_get_contents( $json_report_file ), TRUE );
-      
-      # We need to add hostname and clustername if it's not specified
-      foreach ( $config['series'] as $index => $item ) {
-        if ( ! isset($config['series'][$index]['hostname'])) {
-          $config['series'][$index]['hostname'] = $raw_host;
-          $config['series'][$index]['clustername'] = $clustername;
+switch ( $conf['graph_engine'] ) {
+  case "rrdtool":
+    
+    if ( ! isset($graph_config) ) {
+        $php_report_file = $graphdir . "/" . $graph . ".php";
+        $json_report_file = $graphdir . "/" . $graph . ".json";
+        if( is_file( $php_report_file ) ) {
+          include_once $php_report_file;
+          $graph_function = "graph_${graph}";
+          $graph_function( $rrdtool_graph );  // Pass by reference call, $rrdtool_graph modified inplace
+        } else if ( is_file( $json_report_file ) ) {
+          $graph_config = json_decode( file_get_contents( $json_report_file ), TRUE );
+          
+          # We need to add hostname and clustername if it's not specified
+          foreach ( $graph_config['series'] as $index => $item ) {
+            if ( ! isset($graph_config['series'][$index]['hostname'])) {
+              $graph_config['series'][$index]['hostname'] = $raw_host;
+              $graph_config['series'][$index]['clustername'] = $clustername;
+            }
+          }
+          
+          build_rrdtool_args_from_json ( $rrdtool_graph, $graph_config );
         }
-      }
-      
-      build_rrdtool_args_from_json ( $rrdtool_graph, $config );
+    
+    } else {
+        
+        build_rrdtool_args_from_json ( $rrdtool_graph, $graph_config );
+
     }
   
     // We must have a 'series' value, or this is all for naught
@@ -246,8 +315,8 @@ switch ( $GLOBALS['graph_engine'] ) {
     // area
     if ( ! is_link($rrd_graphite_link) ) {
       // Does the directory exist for the cluster. If not create it
-      if ( ! is_dir ($graphite_rrd_dir . "/" . $clustername) )
-        mkdir ( $graphite_rrd_dir . "/" . $clustername );
+      if ( ! is_dir ($conf['graphite_rrd_dir'] . "/" . $clustername) )
+        mkdir ( $conf['graphite_rrd_dir'] . "/" . $clustername );
       symlink($rrd_dir, $rrd_graphite_link);
     }
   
@@ -268,23 +337,23 @@ switch ( $GLOBALS['graph_engine'] ) {
   
       $report_name = sanitize($_GET['g']);
   
-      $report_definition_file = $ganglia_dir . "/graph.d/" . $report_name . ".json";
+      $report_definition_file = $conf['ganglia_dir'] . "/graph.d/" . $report_name . ".json";
       // Check whether report is defined in graph.d directory
       if ( is_file($report_definition_file) ) {
-        $config = json_decode(file_get_contents($report_definition_file), TRUE);
+        $graph_config = json_decode(file_get_contents($report_definition_file), TRUE);
       } else {
         error_log("There is JSON config file specifying $report_name.");
         exit(1);
       }
   
-      if ( isset($config) ) {
-        switch ( $config["report_type"] ) {
+      if ( isset($graph_config) ) {
+        switch ( $graph_config["report_type"] ) {
           case "template":
-            $target = str_replace("HOST_CLUSTER", $host_cluster, $config["graphite"]);
+            $target = str_replace("HOST_CLUSTER", $host_cluster, $graph_config["graphite"]);
             break;
   
           case "standard":
-            $target = build_graphite_series( $config, $host_cluster );
+            $target = build_graphite_series( $graph_config, $host_cluster );
             break;
   
           default:
@@ -292,7 +361,7 @@ switch ( $GLOBALS['graph_engine'] ) {
             break;
         }
   
-        $title = $config['title'];
+        $title = $graph_config['title'];
       } else {
         error_log("Configuration file to $report_name exists however it doesn't appear it's a valid JSON file");
         exit(1);
@@ -303,9 +372,9 @@ switch ( $GLOBALS['graph_engine'] ) {
       $title = " ";
     }
   
-    $graphite_url = $graphite_url_base . "?width=$width&height=$height&" . $target . "&from=" . $start . "&yMin=0&bgcolor=FFFFFF&fgcolor=000000&title=" . urlencode($title . " last " . $range);
+    $graphite_url = $conf['graphite_url_base'] . "?width=$width&height=$height&" . $target . "&from=" . $start . "&yMin=0&bgcolor=FFFFFF&fgcolor=000000&title=" . urlencode($title . " last " . $range);
     break;
-} // end of switch ( $GLOBALS['graph_engine'])
+} // end of switch ( $conf['graph_engine'])
 
 if ($debug) {
   error_log("Final rrdtool command:  $command");
@@ -322,7 +391,7 @@ if($command || $graphite_url) {
         header ("Content-type: text/html");
         print "<html><body>";
         
-        switch ( $GLOBALS['graph_engine'] ) {  
+        switch ( $conf['graph_engine'] ) {  
           case "rrdtool":
             print htmlentities( $command );
             break;
@@ -333,7 +402,7 @@ if($command || $graphite_url) {
         print "</body></html>";
     } else {
         header ("Content-type: image/png");
-        switch ( $GLOBALS['graph_engine'] ) {  
+        switch ( $conf['graph_engine'] ) {  
           case "rrdtool":
             passthru($command);
             break;

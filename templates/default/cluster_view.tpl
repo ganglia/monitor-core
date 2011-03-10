@@ -1,3 +1,63 @@
+<script type="text/javascript">
+$(function() {
+  // Modified from http://jqueryui.com/demos/toggle/
+  //run the currently selected effect
+  function runEffect(id){
+    //most effect types need no options passed by default
+    var options = { };
+
+    options = { to: { width: 200,height: 60 } }; 
+    
+    //run the effect
+    $("#"+id+"_div").toggle("blind",options,500);
+  };
+ 
+  //set effect from select menu value
+  $('.button').click(function(event) {
+    runEffect(event.target.id);
+    return false;
+  });
+
+    $(function() {
+        $( "#edit_optional_graphs" ).dialog({ autoOpen: false, minWidth: 550,
+          beforeClose: function(event, ui) {  location.reload(true); } })
+        $( "#edit_optional_graphs_button" ).button();
+        $( "#save_optional_graphs_button" ).button();
+        $( "#close_edit_optional_graphs_link" ).button();
+    });
+
+    $("#edit_optional_graphs_button").click(function(event) {
+      $("#edit_optional_graphs").dialog('open');
+      $('#edit_optional_graphs_content').html('<img src="img/spinner.gif">');
+      $.get('edit_optional_graphs.php', "clustername={$cluster}", function(data) {
+          $('#edit_optional_graphs_content').html(data);
+      })
+      return false;
+    });
+
+    $("#save_optional_graphs_button").click(function(event) {
+       $.get('edit_optional_graphs.php', $("#edit_optional_reports_form").serialize(), function(data) {
+          $('#edit_optional_graphs_content').html(data);
+        });
+      return false;
+    });
+
+
+});
+</script>
+<style type="text/css">
+  .toggler { width: 500px; height: 200px; }
+  a.button { padding: .15em 1em; text-decoration: none; }
+  #effect { width: 240px; height: 135px; padding: 0.4em; position: relative; }
+  #effect h3 { margin: 0; padding: 0.4em; text-align: center; }
+</style>
+
+<div id="metric-actions-dialog" title="Metric Actions">
+  <div id="metric-actions-dialog-content">
+    Available Metric actions.
+  </div>
+</div>
+
 <TABLE BORDER="0" CELLSPACING=5 WIDTH="100%">
 <TR>
   <TD CLASS=title COLSPAN="2">
@@ -22,6 +82,21 @@
 {/if}
  <hr>
 </TD>
+</div>
+<style>
+#edit_optional_graphs_button {
+    font-size:12px;
+}
+#edit_optional_graphs_content {
+    padding: .4em 1em .4em 10px;
+}
+</style>
+<div id="edit_optional_graphs">
+  <div style="text-align: center;">
+    <button  id='save_optional_graphs_button'>Save</button>
+  </div>
+  <div id="edit_optional_graphs_content">Empty</div>
+</div>
 
 <TD ROWSPAN=2 ALIGN="CENTER" VALIGN=top>
 <div id="optional_graphs">
@@ -31,6 +106,7 @@
   <IMG BORDER=0 {$additional_cluster_img_html_args} ALT="{$cluster} {$graph.name}" SRC="./graph.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=medium"></A>
   {/foreach}
 </div>
+<button id="edit_optional_graphs_button">Edit Optional Graphs</button>
 
 </TD>
 </TR>

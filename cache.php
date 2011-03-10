@@ -1,6 +1,6 @@
 <?php
 
-include_once("./conf.php");
+include_once("./eval_config.php");
 
 $debug = 0;
 
@@ -24,9 +24,9 @@ if ( ! isset($index_array) ) {
   }
   # Set up for cluster summary
   $context = "index_array";
-  include_once $GLOBALS['ganglia_dir'] . "/functions.php";
-  include_once $GLOBALS['ganglia_dir'] . "/ganglia.php";
-  include_once $GLOBALS['ganglia_dir'] . "/get_ganglia.php";
+  include_once $conf['ganglia_dir'] . "/functions.php";
+  include_once $conf['ganglia_dir'] . "/ganglia.php";
+  include_once $conf['ganglia_dir'] . "/get_ganglia.php";
 
   foreach ( $index_array['cluster'] as $hostname => $elements ) {
     $hosts[] = $hostname;

@@ -22,11 +22,11 @@ $optional_reports = "";
 // for host specific included or excluded reports
 ///////////////////////////////////////////////////////////////////////////
 $default_reports = array("included_reports" => array(), "excluded_reports" => array());
-if ( is_file($GLOBALS['conf_dir'] . "/default.json") ) {
-  $default_reports = array_merge($default_reports,json_decode(file_get_contents($GLOBALS['conf_dir'] . "/default.json"), TRUE));
+if ( is_file($conf['conf_dir'] . "/default.json") ) {
+  $default_reports = array_merge($default_reports,json_decode(file_get_contents($conf['conf_dir'] . "/default.json"), TRUE));
 }
 
-$host_file = $GLOBALS['conf_dir'] . "/host_" . $hostname . ".json";
+$host_file = $conf['conf_dir'] . "/host_" . $hostname . ".json";
 $override_reports = array("included_reports" => array(), "excluded_reports" => array());
 if ( is_file($host_file) ) {
   $override_reports = array_merge($override_reports, json_decode(file_get_contents($host_file), TRUE));
@@ -43,7 +43,7 @@ $reports["excluded_reports"] = array_unique($reports["excluded_reports"]);
 // If we want zoomable support on graphs we need to add correct zoomable class to every image
 $additional_cluster_img_html_args = "";
 $additional_host_img_html_args = "";
-if ( isset($GLOBALS['zoom_support']) && $GLOBALS['zoom_support'] === true )
+if ( isset($conf['zoom_support']) && $conf['zoom_support'] === true )
    $additional_cluster_img_html_args = "class=cluster_zoomable";
 
 $data->assign("additional_cluster_img_html_args", $additional_cluster_img_html_args);
@@ -109,7 +109,7 @@ foreach ($metrics as $name => $v)
              $size = $size == 'medium' ? 'default' : $size; //set to 'default' to preserve old behavior
 
              // set host zoom class based on the size of the graph shown
-             if ( isset($GLOBALS['zoom_support']) && $GLOBALS['zoom_support'] === true )
+             if ( isset($conf['zoom_support']) && $conf['zoom_support'] === true )
                 $additional_host_img_html_args = "class=host_${size}_zoomable";
 
              $data->assign("additional_host_img_html_args", $additional_host_img_html_args);
@@ -212,6 +212,7 @@ $data->assign("name", "Avg Utilization (last $range)");
 $data->assign("value", "$cluster_util%");
 
 # Show constant metrics.
+$c_metrics_data = null;
 if (isset($c_metrics) and is_array($c_metrics))
    {
       $c_metrics_data = array();

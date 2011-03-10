@@ -54,7 +54,7 @@ $cluster_url=rawurlencode($clustername);
 // If we want zoomable support on graphs we need to add correct zoomable class to every image
 $additional_cluster_img_html_args = "";
 $additional_host_img_html_args = "";
-if ( isset($GLOBALS['zoom_support']) && $GLOBALS['zoom_support'] === true )
+if ( isset($conf['zoom_support']) && $conf['zoom_support'] === true )
    $additional_cluster_img_html_args = "class=cluster_zoomable";
 
 $data->assign("additional_cluster_img_html_args", $additional_cluster_img_html_args);
@@ -71,11 +71,11 @@ $optional_reports = "";
 # for host specific included or excluded reports
 ####################################################################################
 $default_reports = array("included_reports" => array(), "excluded_reports" => array());
-if ( is_file($GLOBALS['conf_dir'] . "/default.json") ) {
-  $default_reports = array_merge($default_reports,json_decode(file_get_contents($GLOBALS['conf_dir'] . "/default.json"), TRUE));
+if ( is_file($conf['conf_dir'] . "/default.json") ) {
+  $default_reports = array_merge($default_reports,json_decode(file_get_contents($conf['conf_dir'] . "/default.json"), TRUE));
 }
 
-$cluster_file = $GLOBALS['conf_dir'] . "/cluster_" . $clustername . ".json";
+$cluster_file = $conf['conf_dir'] . "/cluster_" . $clustername . ".json";
 $override_reports = array("included_reports" => array(), "excluded_reports" => array());
 if ( is_file($cluster_file) ) {
   $override_reports = array_merge($override_reports, json_decode(file_get_contents($cluster_file), TRUE));
@@ -296,7 +296,7 @@ foreach ( $sorted_hosts as $host => $value )
          $size = 'small';
 
       // set host zoom class based on the size of the graph shown
-      if ( isset($GLOBALS['zoom_support']) && $GLOBALS['zoom_support'] === true )
+      if ( isset($conf['zoom_support']) && $conf['zoom_support'] === true )
          $additional_host_img_html_args = "class=host_${size}_zoomable";
 
       $data->assign("additional_host_img_html_args", $additional_host_img_html_args);

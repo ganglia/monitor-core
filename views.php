@@ -1,6 +1,6 @@
 <?php
 
-include_once("./conf.php");
+include_once("./eval_config.php");
 include_once("./functions.php");
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // Create new view
@@ -30,7 +30,7 @@ if ( isset($_GET['create_view']) ) {
     $empty_view = array ( "view_name" => $_GET['view_name'],
       "items" => array() );
     $view_suffix = str_replace(" ", "_", $_GET['view_name']);
-    $view_filename = $GLOBALS['views_dir'] . "/view_" . $view_suffix . ".json";
+    $view_filename = $conf['views_dir'] . "/view_" . $view_suffix . ".json";
     $json = json_encode($empty_view);
     if ( file_put_contents($view_filename, $json) === FALSE ) {
     ?>
