@@ -21,8 +21,8 @@ if ( isset($_GET['host_group'])) {
 ?>
 <form>
   
-  Host Group: <input name="host_group"><br>
-  Metric: <input name="metric_name"><br>
+  Host Regular expression e.g. web-[0,4], web or (web|db): <input name="host_reg" <?php isset($_GET['host_reg']) ? print "value='" . $_GET['host_reg'] . "'" : print ""; ?>><br>
+  Metric (not a report e.g. load_one, cpu_system): <input name="metric_name" <?php isset($_GET['metric_name']) ? print "value='" . $_GET['metric_name'] . "'" : print ""; ?>><br>
   Graph Type:  <input type="radio" name="graph_type" value="line" checked>Line</input>
     <input type="radio" name="graph_type" value="stack">Stacked</input><br>
   <input type=submit>
@@ -38,7 +38,7 @@ if ( isset($_GET['metric_name']) )
 isset ($_GET['graph_type']) ? $graph_type = $_GET['graph_type'] : $graph_type = "line";
 
 // Show graph only if host_group is set
-if ( isset($_GET['host_group'])) {
+if ( isset($_GET['host_reg'])) {
   
   print "<img src=graph.php?r=hour&z=xlarge&m=" . $_GET['metric_name'] . "&aggregate=1&hreg[]=" . $_GET['host_group'] . "&gtype=" . $_GET['graph_type'] .  ">";
 
