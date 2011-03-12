@@ -17,6 +17,12 @@ GWEB_STATEDIR = /var/lib
 # Dwoo compile directory
 GWEB_DWOO = $(GWEB_STATEDIR)/ganglia/dwoo
 
+# Default location of RRDtool binary
+RRDTOOL = $(shell which rrdtool >/dev/null 2>&1 && which rrdtool))
+ifeq ($(RRDTOOL),)
+	RRDTOOL = /usr/bin/rrdtool
+endif
+
 ifeq ($(SNAPSHOT),yes)
 	GWEB_NANO_VERSION = $(shell svnversion)
 	GWEB_VERSION = ${GWEB_MAJOR_VERSION}.${GWEB_MINOR_VERSION}.${GWEB_MICRO_VERSION}.${GWEB_NANO_VERSION}
@@ -35,7 +41,7 @@ clean:
 	rm -rf $(TARGETS) $(DIST_DIR) $(DIST_TARBALL)
 
 conf.php:	conf.php.in
-	sed -e "s|@varstatedir@|$(GWEB_STATEDIR)|" conf.php.in > conf.php
+	sed -e "s|@varstatedir@|$(GWEB_STATEDIR)|" -e "s|@rrdtool@|$(RRDTOOL)|" conf.php.in > conf.php
 
 gweb.spec:	gweb.spec.in
 	sed -e s/@GWEB_VERSION@/$(GWEB_VERSION)/ -e "s|@varstatedir@|$(GWEB_STATEDIR)|" gweb.spec.in > gweb.spec

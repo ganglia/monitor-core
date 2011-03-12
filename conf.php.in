@@ -34,7 +34,7 @@ $conf['dwoo_compiled_dir'] = "${conf['gmetad_root']}/dwoo";
 
 # Leave this alone if rrdtool is installed in $conf['gmetad_root'],
 # otherwise, change it if it is installed elsewhere (like /usr/bin)
-define("RRDTOOL", "/usr/bin/rrdtool");
+define("RRDTOOL", "@rrdtool@");
 
 # If rrdcached is being used, this argument must specify the 
 # socket to use.
