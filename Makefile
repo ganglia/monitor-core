@@ -18,7 +18,7 @@ GWEB_STATEDIR = /var/lib
 GWEB_DWOO = $(GWEB_STATEDIR)/ganglia/dwoo
 
 # Default location of RRDtool binary
-RRDTOOL = $(shell which rrdtool >/dev/null 2>&1 && which rrdtool))
+RRDTOOL = $(shell which rrdtool >/dev/null 2>&1 && which rrdtool)
 ifeq ($(RRDTOOL),)
 	RRDTOOL = /usr/bin/rrdtool
 endif
