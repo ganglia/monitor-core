@@ -30,9 +30,8 @@
 #* Author: Brad Nicholes (bnicholes novell.com)
 #******************************************************************************/
 
-import os, sys, popen2
+import os, popen2
 import threading
-import select
 import time
 
 _WorkerThread = None    #Worker thread object

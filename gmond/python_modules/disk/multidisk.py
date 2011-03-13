@@ -74,7 +74,6 @@ def DiskUsed_Handler(name):
     st = os.statvfs(d['mount'])
     free = st[statvfs.F_BAVAIL]
     size = st[statvfs.F_BLOCKS]
-    blocksize = st[statvfs.F_BSIZE]
     
     if size:
         return ((size - free) / float(size)) * 100
