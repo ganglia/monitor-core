@@ -1,4 +1,4 @@
-#/*******************************************************************************
+#/******************************************************************************
 #* Portions Copyright (C) 2007 Novell, Inc. All rights reserved.
 #*
 #* Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ Constant_Value = 50
 def Random_Numbers(name):
     '''Return a random number.'''
     global Random_Max
-    return int(random.uniform(0,Random_Max))
+    return int(random.uniform(0, Random_Max))
 
 def Constant_Number(name):
     '''Return a constant number.'''
@@ -80,7 +80,7 @@ def metric_init(params):
         'format': '%hu',
         'description': 'Example module metric (constant number)'}
 
-    descriptors = [d1,d2]
+    descriptors = [d1, d2]
     return descriptors
 
 def metric_cleanup():
