@@ -1,4 +1,4 @@
-#/*******************************************************************************
+#/******************************************************************************
 #* Copyright (C) 2007 Novell, Inc. All rights reserved.
 #*
 #* Redistribution and use in source and binary forms, with or without
