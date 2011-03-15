@@ -11,14 +11,14 @@ $clustername = isset($_GET["c"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["c"]) ) ) : NULL;
 $gridname = isset($_GET["G"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["G"]) ) ) : NULL;
-if($case_sensitive_hostnames == 1) {
+if($conf['case_sensitive_hostnames'] == 1) {
     $hostname = isset($_GET["h"]) ?
         escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) : NULL;
 } else {
     $hostname = isset($_GET["h"]) ?
         strtolower( escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) ) : NULL;
 }
-$range = isset( $_GET["r"] ) && in_array($_GET["r"], array_keys( $time_ranges ) ) ?
+$range = isset( $_GET["r"] ) && in_array($_GET["r"], array_keys( $conf['time_ranges'] ) ) ?
     escapeshellcmd( rawurldecode($_GET["r"])) : NULL;
 $metricname = isset($_GET["m"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["m"]) ) ) : NULL;
@@ -30,9 +30,10 @@ $controlroom = isset($_GET["cr"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["cr"]) ) ): NULL;
 # Default value set in conf.php, Allow URL to overrride
 if (isset($_GET["hc"]))
-    $hostcols = clean_number($_GET["hc"]);
+    //TODO: shouldn't set $conf from user input.
+    $conf['hostcols'] = clean_number($_GET["hc"]);
 if (isset($_GET["mc"]))
-    $metriccols = clean_number($_GET["mc"]);
+    $conf['metriccols'] = clean_number($_GET["mc"]);
 # Flag, whether or not to show a list of hosts
 $showhosts = isset($_GET["sh"]) ?
     clean_number( $_GET["sh"] ) : NULL;
@@ -56,7 +57,7 @@ $ce = isset($_GET["ce"]) ?
 $gridwalk = isset($_GET["gw"]) ?
     escapeshellcmd( clean_string( $_GET["gw"] ) ) : NULL;
 # Size of the host graphs in the cluster view
-$clustergraphsize = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $graph_sizes_keys ) ?
+$clustergraphsize = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $conf['graph_sizes_keys'] ) ?
     escapeshellcmd($_GET["z"]) : NULL;
 # A stack of grid parents. Prefer a GET variable, default to cookie.
 if (isset($_GET["gs"]) and $_GET["gs"])
@@ -75,8 +76,8 @@ if ( !isset($gridstack) or !strstr($gridstack[0], "http://"))
     $initgrid = TRUE;
 
 # Default values
-if (!isset($hostcols) || !is_numeric($hostcols)) $hostcols = 4;
-if (!isset($metriccols) || !is_numeric($metriccols)) $metriccols = 2;
+if (!isset($conf['hostcols']) || !is_numeric($conf['hostcols'])) $conf['hostcols'] = 4;
+if (!isset($conf['metriccols']) || !is_numeric($conf['metriccols'])) $conf['metriccols'] = 2;
 if (!is_numeric($showhosts)) $showhosts = 1;
 
 # Filters
@@ -131,24 +132,24 @@ else if($clustername and $hostname)
    }
 
 if (!$range)
-    $range = "$default_time_range";
+    $range = "${conf['default_time_range']}";
 
 $end = "N";
 
-# $time_ranges defined in conf.php
+# $conf['time_ranges'] defined in conf.php
 if( $range == 'job' && isSet( $jobrange ) ) {
     $start = $jobrange;
-} else if( isSet( $time_ranges[ $range ] ) ) {
-    $start = $time_ranges[ $range ] * -1;
+} else if( isSet( $conf['time_ranges'][ $range ] ) ) {
+    $start = $conf['time_ranges'][ $range ] * -1;
 } else {
-    $start = $time_ranges[ $default_time_range ] * -1;
+    $start = $conf['time_ranges'][ $conf['default_time_range'] ] * -1;
 }
 
 if ($cs or $ce)
     $range = "custom";
 
 if (!$metricname)
-    $metricname = "$default_metric";
+    $metricname = "${conf['default_metric']}";
 
 if (!$sort)
     $sort = "by name";

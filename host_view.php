@@ -258,7 +258,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
                      if (isset($v['description']))
                        $g_metrics_group_data[$group]["metrics"][$name]["desc"] = $v['description'];
                      $g_metrics_group_data[$group]["metrics"][$name]["new_row"] = "";
-                     if ( !(++$i % $metriccols) && ($i != $c) )
+                     if ( !(++$i % $conf['metriccols']) && ($i != $c) )
                         $g_metrics_group_data[$group]["metrics"][$name]["new_row"] = "</TR><TR>";
                   }
                }

@@ -1,5 +1,9 @@
 This is an attempt to make the Ganglia UI more usable. You should be able to drop this into
-your $HTTPD_ROOT/ganglia and it should just work.
+your $HTTPD_ROOT/ganglia then run make to generate conf.php.
+
+Please modify Makefile to point the directory where you installed the code. Also note
+that Makefile will create directories /var/lib/ganglia/rrds and /var/lib/ganglia/dwoo
+which are required for UI to function.
 
 New features
 ============

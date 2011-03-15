@@ -65,22 +65,17 @@ function graph_sample_report ( &$rrdtool_graph ) {
  * with extra comments
  */
 
-// pull in a number of global variables, many set in conf.php (such as colors
-// and $rrd_dir), but other from elsewhere, such as get_context.php
+// pull in a number of global variables, many set in conf.php (such as colors)
+// but other from elsewhere, such as get_context.php
 
-    global $context,
-           $cpu_idle_color,
-           $cpu_nice_color,
-           $cpu_system_color,
-           $cpu_user_color,
-           $cpu_wio_color,
+    global $conf,
+           $context,
            $hostname,
            $range,
            $rrd_dir,
-           $size,
-           $strip_domainname;
+           $size;
 
-    if ($strip_domainname) {
+    if ($conf['strip_domainname']) {
        $hostname = strip_domainname($hostname);
     }
 
@@ -124,17 +119,17 @@ function graph_sample_report ( &$rrdtool_graph ) {
             . "'CDEF:ccpu_system=cpu_system,num_nodes,/' "
             . "'DEF:cpu_idle=${rrd_dir}/cpu_idle.rrd:sum:AVERAGE' "
             . "'CDEF:ccpu_idle=cpu_idle,num_nodes,/' "
-            . "'AREA:ccpu_user#$cpu_user_color:User CPU' "
-            . "'STACK:ccpu_nice#$cpu_nice_color:Nice CPU' "
-            . "'STACK:ccpu_system#$cpu_system_color:System CPU' ";
+            . "'AREA:ccpu_user#${conf['cpu_user_color']}:User CPU' "
+            . "'STACK:ccpu_nice#${conf['cpu_nice_color']}:Nice CPU' "
+            . "'STACK:ccpu_system#${conf['cpu_system_color']}:System CPU' ";
 
         if (file_exists("$rrd_dir/cpu_wio.rrd")) {
             $series .= "'DEF:cpu_wio=${rrd_dir}/cpu_wio.rrd:sum:AVERAGE' "
                 . "'CDEF:ccpu_wio=cpu_wio,num_nodes,/' "
-                . "'STACK:ccpu_wio#$cpu_wio_color:WAIT CPU' ";
+                . "'STACK:ccpu_wio#${conf['cpu_wio_color']}:WAIT CPU' ";
         }
 
-        $series .= "'STACK:ccpu_idle#$cpu_idle_color:Idle CPU' ";
+        $series .= "'STACK:ccpu_idle#${conf['cpu_idle_color']}:Idle CPU' ";
 
     } else {
 
@@ -143,16 +138,16 @@ function graph_sample_report ( &$rrdtool_graph ) {
         . "'DEF:cpu_nice=${rrd_dir}/cpu_nice.rrd:sum:AVERAGE' "
         . "'DEF:cpu_system=${rrd_dir}/cpu_system.rrd:sum:AVERAGE' "
         . "'DEF:cpu_idle=${rrd_dir}/cpu_idle.rrd:sum:AVERAGE' "
-        . "'AREA:cpu_user#$cpu_user_color:User CPU' "
-        . "'STACK:cpu_nice#$cpu_nice_color:Nice CPU' "
-        . "'STACK:cpu_system#$cpu_system_color:System CPU' ";
+        . "'AREA:cpu_user#${conf['cpu_user_color']}:User CPU' "
+        . "'STACK:cpu_nice#${conf['cpu_nice_color']}:Nice CPU' "
+        . "'STACK:cpu_system#${conf['cpu_system_color']}:System CPU' ";
 
         if (file_exists("$rrd_dir/cpu_wio.rrd")) {
             $series .= "'DEF:cpu_wio=${rrd_dir}/cpu_wio.rrd:sum:AVERAGE' ";
-            $series .= "'STACK:cpu_wio#$cpu_wio_color:WAIT CPU' ";
+            $series .= "'STACK:cpu_wio#${conf['cpu_wio_color']}:WAIT CPU' ";
         }
 
-        $series .= "'STACK:cpu_idle#$cpu_idle_color:Idle CPU' ";
+        $series .= "'STACK:cpu_idle#${conf['cpu_idle_color']}:Idle CPU' ";
     }
 
     // We have everything now, so add it to the array, and go on our way.

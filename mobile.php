@@ -94,11 +94,11 @@ foreach ( $cluster_names as $index => $clustername ) {
     <div data-role="content">	
       <ul data-role="listview" data-filter="true" data-theme="g">
 	<?php
-	  print '<li><a href="mobile_helper.php?show_cluster_metrics=1&c=' . $clustername . '&r=' . $default_time_range . '&cs=&ce=">Cluster Summary</a></li>';  
+	  print '<li><a href="mobile_helper.php?show_cluster_metrics=1&c=' . $clustername . '&r=' . $conf['default_time_range'] . '&cs=&ce=">Cluster Summary</a></li>';  
 	// List all hosts in the cluster
 	asort($cluster_array[$clustername]);
 	foreach ( $cluster_array[$clustername] as $index => $hostname ) {
-	  print '<li><a href="mobile_helper.php?show_host_metrics=1&h=' . $hostname . '&c=' . $clustername . '&r=' . $default_time_range . '&cs=&ce=">' . strip_domainname($hostname) . '</a></li>';  
+	  print '<li><a href="mobile_helper.php?show_host_metrics=1&h=' . $hostname . '&c=' . $clustername . '&r=' . $conf['default_time_range'] . '&cs=&ce=">' . strip_domainname($hostname) . '</a></li>';  
 	}
 	?>
       </ul>
@@ -120,7 +120,7 @@ foreach ( $cluster_names as $index => $clustername ) {
       // List all the available views
       foreach ( $available_views as $view_id => $view ) {
 	$v = $view['view_name'];
-	print '<li><a href="mobile_helper.php?view_name=' . $v . '&r=' . $default_time_range . '&cs=&ce=">' . $v . '</a></li>';  
+	print '<li><a href="mobile_helper.php?view_name=' . $v . '&r=' . $conf['default_time_range'] . '&cs=&ce=">' . $v . '</a></li>';  
       }
       ?>
     </ul>
@@ -142,14 +142,12 @@ $(function(){
 	  <h1>Search</h1>
   </div>
   <div data-role="content">
-    <form method="post" action="/search/">
     <p>
       <label>
 	Search for host or a metric: <br />
 	<input type="text" name="q" id="search-field-q" on size=40 />
       </label>
     </p>
-    </form>
   </div>
   </div><!-- /content -->
 </div><!-- /page -->

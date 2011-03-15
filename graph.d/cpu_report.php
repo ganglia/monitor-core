@@ -3,20 +3,14 @@
 /* Pass in by reference! */
 function graph_cpu_report( &$rrdtool_graph ) 
 {
-    global $context,
-           $cpu_idle_color,
-           $cpu_nice_color,
-           $cpu_system_color,
-           $cpu_user_color,
-           $cpu_wio_color,
+    global $conf,
+           $context,
            $hostname,
            $range,
            $rrd_dir,
-           $size,
-           $strip_domainname,
-           $graphreport_stats;
+           $size;
 
-    if ($strip_domainname) {
+    if ($conf['strip_domainname']) {
        $hostname = strip_domainname($hostname);
     }
 
@@ -30,9 +24,9 @@ function graph_cpu_report( &$rrdtool_graph )
     $rrdtool_graph['lower-limit'] = '0';
     $rrdtool_graph['vertical-label'] = 'Percent';
     $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
-    $rrdtool_graph['extras'] = ($graphreport_stats == true) ? ' --font LEGEND:7' : '';
+    $rrdtool_graph['extras'] = ($conf['graphreport_stats'] == true) ? ' --font LEGEND:7' : '';
 
-    if ( $graphreport_stats ) {
+    if ( $conf['graphreport_stats'] ) {
         $rrdtool_graph['height'] += ($size == 'medium') ? 16 : 0;
         $rmspace = '\\g';
     } else {
@@ -43,6 +37,9 @@ function graph_cpu_report( &$rrdtool_graph )
 
     // RB: Perform some formatting/spacing magic.. tinkered to fit
     //
+    $eol1 = '';
+    $space1 = '';
+    $space2 = '';
     if ($size == 'small') {
        $eol1 = '\\l';
        $space1 = ' ';
@@ -92,9 +89,9 @@ function graph_cpu_report( &$rrdtool_graph )
         $plot_prefix ='cpu';
     }
 
-    $series .= "AREA:'${plot_prefix}_user'#$cpu_user_color:'User${rmspace}' ";
+    $series .= "AREA:'${plot_prefix}_user'#${conf['cpu_user_color']}:'User${rmspace}' ";
 
-    if ( $graphreport_stats ) {
+    if ( $conf['graphreport_stats'] ) {
         $series .= "CDEF:user_pos=${plot_prefix}_user,0,INF,LIMIT "
                 . "VDEF:user_last=user_pos,LAST "
                 . "VDEF:user_min=user_pos,MINIMUM "
@@ -107,9 +104,9 @@ function graph_cpu_report( &$rrdtool_graph )
     }
 
     if (file_exists("$rrd_dir/cpu_nice.rrd")) {
-        $series .= "STACK:'${plot_prefix}_nice'#$cpu_nice_color:'Nice${rmspace}' ";
+        $series .= "STACK:'${plot_prefix}_nice'#${conf['cpu_nice_color']}:'Nice${rmspace}' ";
 
-        if ( $graphreport_stats ) {
+        if ( $conf['graphreport_stats'] ) {
             $series .= "CDEF:nice_pos=${plot_prefix}_nice,0,INF,LIMIT " 
                     . "VDEF:nice_last=nice_pos,LAST "
                     . "VDEF:nice_min=nice_pos,MINIMUM "
@@ -122,9 +119,9 @@ function graph_cpu_report( &$rrdtool_graph )
         }
     }
 
-    $series .= "STACK:'${plot_prefix}_system'#$cpu_system_color:'System${rmspace}' ";
+    $series .= "STACK:'${plot_prefix}_system'#${conf['cpu_system_color']}:'System${rmspace}' ";
 
-    if ( $graphreport_stats ) {
+    if ( $conf['graphreport_stats'] ) {
         $series .= "CDEF:system_pos=${plot_prefix}_system,0,INF,LIMIT "
                 . "VDEF:system_last=system_pos,LAST "
                 . "VDEF:system_min=system_pos,MINIMUM "
@@ -137,9 +134,9 @@ function graph_cpu_report( &$rrdtool_graph )
     }
 
     if (file_exists("$rrd_dir/cpu_wio.rrd")) {
-        $series .= "STACK:'${plot_prefix}_wio'#$cpu_wio_color:'Wait${rmspace}' ";
+        $series .= "STACK:'${plot_prefix}_wio'#${conf['cpu_wio_color']}:'Wait${rmspace}' ";
 
-        if ( $graphreport_stats ) {
+        if ( $conf['graphreport_stats'] ) {
                 $series .= "CDEF:wio_pos=${plot_prefix}_wio,0,INF,LIMIT "
                         . "VDEF:wio_last=wio_pos,LAST "
                         . "VDEF:wio_min=wio_pos,MINIMUM "
@@ -152,9 +149,9 @@ function graph_cpu_report( &$rrdtool_graph )
         }
     }
 
-    $series .= "STACK:'${plot_prefix}_idle'#$cpu_idle_color:'Idle${rmspace}' ";
+    $series .= "STACK:'${plot_prefix}_idle'#${conf['cpu_idle_color']}:'Idle${rmspace}' ";
 
-    if ( $graphreport_stats ) {
+    if ( $conf['graphreport_stats'] ) {
                 $series .= "CDEF:idle_pos=${plot_prefix}_idle,0,INF,LIMIT "
                         . "VDEF:idle_last=idle_pos,LAST "
                         . "VDEF:idle_min=idle_pos,MINIMUM "

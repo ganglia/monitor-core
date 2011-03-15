@@ -10,7 +10,7 @@ include_once "./dwoo/dwooAutoload.php";
 
 try
    {
-      $dwoo = new Dwoo($dwoo_compiled_dir);
+      $dwoo = new Dwoo($conf['dwoo_compiled_dir']);
    }
 catch (Exception $e)
    {

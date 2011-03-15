@@ -34,7 +34,7 @@ if ( isset($_GET['view_name'])) {
   
   // Header bar support up to 5 items. 5+ items will be shown in multiple
   // rows. Thus we'll limit to first 5 time ranges
-  $my_ranges = array_keys( $time_ranges );     
+  $my_ranges = array_keys( $conf['time_ranges'] );     
   for ( $i = 0 ; $i < 5 ; $i++ ) {
      $context_ranges[] = $my_ranges[$i]; 
   }
@@ -109,7 +109,7 @@ if ( isset($_GET['show_cluster_metrics'])) {
   <?php
 	// Header bar support up to 5 items. 5+ items will be shown in multiple
 	// rows. Thus we'll limit to first 5 time ranges
-	$my_ranges = array_keys( $time_ranges );     
+	$my_ranges = array_keys( $conf['time_ranges'] );     
 	for ( $i = 0 ; $i < 5 ; $i++ ) {
 	   $context_ranges[] = $my_ranges[$i]; 
 	}
@@ -181,7 +181,7 @@ if ( isset($_GET['show_cluster_metrics'])) {
 if ( isset($_GET['show_host_metrics'])) {
   $hostname = $_GET['h'];
   $clustername = $_GET['c'];
-?>  
+?>
   <div data-role="page" class="ganglia-mobile" id="viewhost-<?php print $hostname; ?>">
     <div data-role="header" data-position="fixed">
       <a href="#" class="ui-btn-left" data-icon="arrow-l" onclick="history.back(); return false">Back</a>
@@ -192,7 +192,7 @@ if ( isset($_GET['show_host_metrics'])) {
   <?php
 	// Header bar support up to 5 items. 5+ items will be shown in multiple
 	// rows. Thus we'll limit to first 5 time ranges
-	$my_ranges = array_keys( $time_ranges );     
+	$my_ranges = array_keys( $conf['time_ranges'] );     
 	for ( $i = 0 ; $i < 5 ; $i++ ) {
 	   $context_ranges[] = $my_ranges[$i]; 
 	}

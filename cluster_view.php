@@ -4,7 +4,7 @@ $tpl = new Dwoo_Template_File( template("cluster_view.tpl") );
 $data = new Dwoo_Data();
 $data->assign("extra", template("cluster_extra.tpl"));
 
-$data->assign("images","./templates/$template_name/images");
+$data->assign("images","./templates/${conf['template_name']}/images");
 
 $cpu_num = !$showhosts ? $metrics["cpu_num"]['SUM'] : cluster_sum("cpu_num", $metrics);
 $load_one_sum = !$showhosts ? $metrics["load_one"]['SUM'] : cluster_sum("load_one", $metrics);
@@ -106,10 +106,10 @@ $data->assign("optional_reports", $optional_reports);
 # Summary graphs
 #
 $data->assign("graph_args", $graph_args);
-if (!isset($optional_graphs))
-  $optional_graphs = array();
+if (!isset($conf['optional_graphs']))
+  $conf['optional_graphs'] = array();
 $optional_graphs_data = array();
-foreach ($optional_graphs as $g) {
+foreach ($conf['optional_graphs'] as $g) {
   $optional_graphs_data[$g]['name'] = $g;
 #  $data->assign("name", $optional_graphs_data[$g]['name']);
   $optional_graphs_data[$g]['graph_args'] = $graph_args;
@@ -190,7 +190,7 @@ if ($showhosts)
       # Show pie chart of loads
       $pie_args = "title=" . rawurlencode("Cluster Load Percentages");
       $pie_args .= "&amp;size=250x150";
-      foreach($load_colors as $name=>$color)
+      foreach($conf['load_colors'] as $name=>$color)
          {
             if (!array_key_exists($color, $percent_hosts))
                continue;
@@ -211,8 +211,8 @@ else
       # Show pie chart of hosts up/down
       $pie_args = "title=" . rawurlencode("Host Status");
       $pie_args .= "&amp;size=250x150";
-      $up_color = $load_colors["25-50"];
-      $down_color = $load_colors["down"];
+      $up_color = $conf['load_colors']["25-50"];
+      $down_color = $conf['load_colors']["down"];
       $pie_args .= "&amp;Up=$cluster[HOSTS_UP],$up_color";
       $pie_args .= "&amp;Down=$cluster[HOSTS_DOWN],$down_color";
       $data->assign("pie_args", $pie_args);
@@ -282,7 +282,7 @@ foreach ( $sorted_hosts as $host => $value )
             elseif ($val['TYPE']=="string" or $val['SLOPE']=="zero" or
                     (isset($always_constant[$metricname]) and
                     $always_constant[$metricname] or
-                    ($max_graphs > 0 and $i > $max_graphs )))
+                    ($conf['max_graphs'] > 0 and $i > $conf['max_graphs'] )))
                {
                   $textval = "$val[VAL]";
                   if (isset($val['UNITS']))
@@ -292,7 +292,7 @@ foreach ( $sorted_hosts as $host => $value )
 
       $size = isset($clustergraphsize) ? $clustergraphsize : 'small';
 
-      if ($hostcols == 0) # enforce small size in multi-host report
+      if ($conf['hostcols'] == 0) # enforce small size in multi-host report
          $size = 'small';
 
       // set host zoom class based on the size of the graph shown
@@ -330,7 +330,7 @@ foreach ( $sorted_hosts as $host => $value )
             $cell .= "&amp;$graphargs\" alt=\"$host\" border=0></a></div></td>";
          }
 
-      if ($hostcols == 0) {
+      if ($conf['hostcols'] == 0) {
          $pre = "<td><a href=$host_link><img src=\"./graph.php?g=";
          $post = "&amp;$graphargs\" $additional_host_img_html_args alt=\"$host\" border=0></a></td>";
          $cell .= $pre . "load_report" . $post;
@@ -340,7 +340,7 @@ foreach ( $sorted_hosts as $host => $value )
       }
 
       $sorted_list[$host]["metric_image"] = $cell;
-      if (! ($i++ % $hostcols) ) {
+      if (! ($i++ % $conf['hostcols']) ) {
          $sorted_list[$host]["br"] = "</tr><tr>";
       } else {
          $sorted_list[$host]["br"] = "";

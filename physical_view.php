@@ -90,7 +90,7 @@ foreach ($racks as $rack=>$v)
       $racks_data[$rack]["nodes"] = $racknodes;
       $racks_data[$rack]["tr"] = "";
 
-      if (! ($i++ % $hostcols)) {
+      if (! ($i++ % $conf['hostcols'])) {
          $racks_data["tr"] = "</tr><tr>";
       }
    }

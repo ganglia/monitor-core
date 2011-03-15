@@ -11,7 +11,7 @@ $ganglia_dir = dirname(__FILE__);
 
 # Graph specific variables
 # ATD - No need for escapeshellcmd or rawurldecode on $size or $graph.  Not used directly in rrdtool calls.
-$size = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $graph_sizes_keys )
+$size = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $conf['graph_sizes_keys'] )
              ? $_GET["z"]
              : NULL;
 
@@ -45,8 +45,8 @@ $raw_host = isset($_GET["h"])  ?  sanitize ( $_GET["h"]  )   : "__SummaryInfo__"
 $host = str_replace(".","_", $raw_host);
 
 # Assumes we have a $start variable (set in get_context.php).
-# $graph_sizes and $graph_sizes_keys defined in conf.php.  Add custom sizes there.
-$size = in_array( $size, $graph_sizes_keys ) ? $size : 'default';
+# $conf['graph_sizes'] and $conf['graph_sizes_keys'] defined in conf.php.  Add custom sizes there.
+$size = in_array( $size, $conf['graph_sizes_keys'] ) ? $size : 'default';
 
 if ( isset($_GET['height'] ) ) 
   $height = $_GET['height'];
@@ -118,7 +118,7 @@ $rrdtool_graph = array(
 
 # automatically strip domainname from small graphs where it won't fit
 if ($size == "small") {
-    $strip_domainname = true;
+    $conf['strip_domainname'] = true;
     # Let load coloring work for little reports in the host list.
     if (! isset($subtitle) and $load_color)
         $rrdtool_graph['color'] = "BACK#'$load_color'";
@@ -154,7 +154,7 @@ if ($debug) {
  * forcibly override other settings, since rrdtool will use the last version of an option passed.
  * (For example, if you call 'rrdtool' with two --title statements, the second one will be used.)
  *
- * See $graphdir/sample.php for more documentation, and details on the
+ * See ${conf['graphdir']}/sample.php for more documentation, and details on the
  * common variables passed and used.
  */
 
@@ -248,8 +248,8 @@ switch ( $conf['graph_engine'] ) {
   case "rrdtool":
     
     if ( ! isset($graph_config) ) {
-        $php_report_file = $graphdir . "/" . $graph . ".php";
-        $json_report_file = $graphdir . "/" . $graph . ".json";
+        $php_report_file = $conf['graphdir'] . "/" . $graph . ".php";
+        $json_report_file = $conf['graphdir'] . "/" . $graph . ".json";
         if( is_file( $php_report_file ) ) {
           include_once $php_report_file;
           $graph_function = "graph_${graph}";

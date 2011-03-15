@@ -13,9 +13,9 @@
 # default is used. Cuts down on code duplication.
 function template ($name)
 {
-   global $template_name;
+   global $conf;
 
-   $fn = "./templates/$template_name/$name";
+   $fn = "./templates/${conf['template_name']}/$name";
    $default = "./templates/default/$name";
 
    if (file_exists($fn)) {
@@ -116,9 +116,9 @@ function cluster_min($name, $metrics)
 # load. Scope is "node | cluster | grid". Value is 0 <= v <= 1.
 function load_image ($scope, $value)
 {
-   global $load_scale;
+   global $conf;
 
-   $scaled_load = $value / $load_scale;
+   $scaled_load = $value / $conf['load_scale'];
    if ($scaled_load>1.00) {
       $image = template("images/${scope}_overloaded.jpg");
    }
@@ -143,26 +143,25 @@ function load_image ($scope, $value)
 # based on load. Quantizes the load figure into 6 sets.
 function load_color ($value)
 {
-   global $load_colors;
-   global $load_scale;
+   global $conf;
 
-   $scaled_load = $value / $load_scale;
+   $scaled_load = $value / $conf['load_scale'];
    if ($scaled_load>1.00) {
-      $color = $load_colors["100+"];
+      $color = $conf['load_colors']["100+"];
    }
    else if ($scaled_load>=0.75) {
-      $color = $load_colors["75-100"];
+      $color = $conf['load_colors']["75-100"];
    }
    else if ($scaled_load >= 0.50) {
-      $color = $load_colors["50-75"];
+      $color = $conf['load_colors']["50-75"];
    }
    else if ($scaled_load>=0.25) {
-      $color = $load_colors["25-50"];
+      $color = $conf['load_colors']["25-50"];
    }
    else if ($scaled_load < 0.0)
-      $color = $load_colors["down"];
+      $color = $conf['load_colors']["down"];
    else {
-      $color = $load_colors["0-25"];
+      $color = $conf['load_colors']["0-25"];
    }
 
    return $color;
@@ -175,7 +174,6 @@ function load_color ($value)
 function node_image ($metrics)
 {
    global $hosts_down;
-
 
    # More rigorous checking if variables are set before trying to use them.
    if ( isset($metrics['cpu_num']['VAL']) and $metrics['cpu_num']['VAL'] != 0 ) {
@@ -209,7 +207,7 @@ function node_image ($metrics)
 #
 function find_limits($nodes, $metricname)
 {
-   global $metrics, $clustername, $rrds, $rrd_dir, $start, $end, $rrd_options;
+   global $conf, $metrics, $clustername, $rrd_dir, $start, $end, $rrd_options;
 
    if (!count($metrics))
       return array(0, 0);
@@ -231,7 +229,7 @@ function find_limits($nodes, $metricname)
       {
          $out = array();
 
-         $rrd_dir = "$rrds/$clustername/$host";
+         $rrd_dir = "${conf['rrds']}/$clustername/$host";
          if (file_exists("$rrd_dir/$metricname.rrd")) {
             $command = RRDTOOL . " graph /dev/null $rrd_options ".
                "--start $start --end $end ".
@@ -263,13 +261,13 @@ function find_limits($nodes, $metricname)
 #
 function find_avg($clustername, $hostname, $metricname)
 {
-    global $rrds, $start, $end, $rrd_options;
+    global $conf, $start, $end, $rrd_options;
     $avg = 0;
 
     if ($hostname)
-        $sum_dir = "$rrds/$clustername/$hostname";
+        $sum_dir = "${conf['rrds']}/$clustername/$hostname";
     else
-        $sum_dir = "$rrds/$clustername/__SummaryInfo__";
+        $sum_dir = "${conf['rrds']}/$clustername/__SummaryInfo__";
 
     $command = RRDTOOL . " graph /dev/null $rrd_options ".
         "--start $start --end $end ".
@@ -547,29 +545,28 @@ function hash_get_distinct_values($h)
 $filter_defs = array();
 
 #-------------------------------------------------------------------------------
-# Scan $filter_dir and populate $filter_defs
+# Scan $conf['filter_dir'] and populate $filter_defs
 function discover_filters()
 {
-  global $filter_dir;
-  global $filter_defs;
+  global $conf, $filter_defs;
 
   # Check whether filtering is configured or not
-  if(!isset($filter_dir))
+  if(!isset($conf['filter_dir']))
     return;
 
-  if(!is_dir($filter_dir))
+  if(!is_dir($conf['filter_dir']))
   {
-    error_log("discover_filters(): not a directory: $filter_dir");
+    error_log("discover_filters(): not a directory: ${conf['filter_dir']}");
     return;
   }
 
-  if($dh = opendir($filter_dir))
+  if($dh = opendir($conf['filter_dir']))
   {
     while(($filter_conf_filename = readdir($dh)) !== false) {
       if(!is_dir($filter_conf_filename))
       {
         # Parse the file contents
-        $full_filename = "$filter_dir/$filter_conf_filename";
+        $full_filename = "${conf['filter_dir']}/$filter_conf_filename";
         $filter_params = file_to_hash($full_filename, '=');
         $filter_shortname = $filter_params["shortname"];
         $filter_type = $filter_params["type"];
@@ -592,14 +589,14 @@ $filter_permit_list = NULL;
 # Initialise the filter permit list, if necessary
 function filter_init()
 {
-   global $filter_dir, $filter_permit_list, $filter_defs, $choose_filter;
+   global $conf, $filter_permit_list, $filter_defs, $choose_filter;
 
    if(!is_null($filter_permit_list))
    {
       return;
    }
 
-   if(!isset($filter_dir))
+   if(!isset($conf['filter_dir']))
    {
       $filter_permit_list = FALSE;
       return;
@@ -807,17 +804,10 @@ function get_view_graph_elements($view) {
 // Populate $rrdtool_graph from $config (from JSON file).
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
-  global $context,
-         $hostname,
-         $range,
-         $rrd_dir,
-         $size,
-         $strip_domainname,
-         $graphreport_stats,
-         $conf;
   
+  global $context, $hostname, $range, $rrd_dir, $size, $conf;
   
-  if ($strip_domainname)     {
+  if ($conf['strip_domainname'])     {
     $hostname = strip_domainname($hostname);
   }
    
@@ -834,7 +824,7 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
   
   
   $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
-  if( $graphreport_stats ) {
+  if( $conf['graphreport_stats'] ) {
     $rrdtool_graph['height'] += ($size == 'medium') ? 52 : 0;
   }
   
@@ -892,7 +882,7 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
            break;
         } // end of switch ( $item_type )
      
-        if ( $graphreport_stats ) {
+        if ( $conf['graphreport_stats'] ) {
           $series .= "VDEF:${unique_id}_last=${unique_id},LAST "
                . "VDEF:${unique_id}_min=${unique_id},MINIMUM "
                . "VDEF:${unique_id}_avg=${unique_id},AVERAGE "

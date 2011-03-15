@@ -71,10 +71,10 @@ if(count($gridstack) > 1) {
 $tpl = new Dwoo_Template_File( template("$header.tpl") );
 $data = new Dwoo_Data();
 $data->assign("page_title", $title);
-$data->assign("refresh", $default_refresh);
+$data->assign("refresh", $conf['default_refresh']);
 
 # Templated Logo image
-$data->assign("images","./templates/$template_name/images");
+$data->assign("images","./templates/${conf['template_name']}/images");
 
 $data->assign( "date", date("r"));
 
@@ -88,7 +88,7 @@ else
 # Used when making graphs via graph.php. Included in most URLs
 #
 $sort_url=rawurlencode($sort);
-$get_metric_string = "m=$metricname&amp;r=$range&amp;s=$sort_url&amp;hc=$hostcols&amp;mc=$metriccols";
+$get_metric_string = "m=$metricname&amp;r=$range&amp;s=$sort_url&amp;hc=${conf['hostcols']}&amp;mc=${conf['metriccols']}";
 if ($jobrange and $jobstart)
     $get_metric_string .= "&amp;jr=$jobrange&amp;js=$jobstart";
 if ($cs)
@@ -254,7 +254,7 @@ if( $context == "cluster" )
    {
    if (!count($metrics)) {
       echo "<h4>Cannot find any metrics for selected cluster \"$clustername\", exiting.</h4>\n";
-      echo "Check ganglia XML tree (telnet $ganglia_ip $ganglia_port)\n";
+      echo "Check ganglia XML tree (telnet ${conf['ganglia_ip']} ${conf['ganglia_port']})\n";
       exit;
    }
    $firsthost = key($metrics);
@@ -269,7 +269,7 @@ if( $context == "cluster" )
 #
 $range_menu = "";
 if (!$physical) {
-   $context_ranges = array_keys( $time_ranges );
+   $context_ranges = array_keys( $conf['time_ranges'] );
    if ($jobrange)
       $context_ranges[]="job";
    if ($cs or $ce)
@@ -355,7 +355,7 @@ if ($context == "physical" or $context == "cluster" or $context == 'host' )
       foreach(range(0,25) as $cols)
          {
             $cols_menu .= "<OPTION VALUE=$cols ";
-            if ($cols == $hostcols)
+            if ($cols == $conf['hostcols'])
                $cols_menu .= "SELECTED";
             $cols_menu .= ">$cols\n";
          }
@@ -363,7 +363,7 @@ if ($context == "physical" or $context == "cluster" or $context == 'host' )
 
       $size_menu = '<SELECT NAME="z" OnChange="ganglia_form.submit();">';
       
-      $size_arr = $graph_sizes_keys;
+      $size_arr = $conf['graph_sizes_keys'];
       foreach ($size_arr as $size) {
           if ($size == "default")
               continue;
@@ -386,7 +386,7 @@ if ($context == "host")
       foreach(range(1,25) as $metric_cols)
          {
             $metric_cols_menu .= "<OPTION VALUE=$metric_cols ";
-            if ($metric_cols == $metriccols)
+            if ($metric_cols == $conf['metriccols'])
                $metric_cols_menu .= "SELECTED";
             $metric_cols_menu .= ">$metric_cols\n";
          }

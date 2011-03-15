@@ -185,7 +185,7 @@ $data->assign("sources", $sources);
 $snap_rows = array();
 
 # Show load images.
-if ($show_meta_snapshot=="yes") {
+if ($conf['show_meta_snapshot']=="yes") {
    $data->assign("show_snapshot", 1);
    $data->assign("self", "$self $meta_designator");
 

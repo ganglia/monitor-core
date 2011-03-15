@@ -3,21 +3,14 @@
 /* Pass in by reference! */
 function graph_mem_report ( &$rrdtool_graph ) {
 
-    global $context,
+    global $conf,
+           $context,
            $hostname,
-           $mem_shared_color,
-           $mem_cached_color,
-           $mem_buffered_color,
-           $mem_swapped_color,
-           $mem_used_color,
-           $cpu_num_color,
            $range,
            $rrd_dir,
-           $size,
-           $strip_domainname,
-           $graphreport_stats;
+           $size;
 
-    if ($strip_domainname) {
+    if ($conf['strip_domainname']) {
        $hostname = strip_domainname($hostname);
     }
 
@@ -33,13 +26,13 @@ function graph_mem_report ( &$rrdtool_graph ) {
     $rrdtool_graph['extras'] = '--base 1024';
     $rrdtool_graph['height'] += ($size == 'medium') ? 28 : 0;
 
-    if ( $graphreport_stats ) {
+    if ( $conf['graphreport_stats'] ) {
         $rrdtool_graph['height'] += ($size == 'medium') ? 4 : 0;
         $rmspace = '\\g';
     } else {
         $rmspace = '';
     }
-    $rrdtool_graph['extras'] .= ($graphreport_stats == true) ? ' --font LEGEND:7' : '';
+    $rrdtool_graph['extras'] .= ($conf['graphreport_stats'] == true) ? ' --font LEGEND:7' : '';
 
     if ($size == 'small') {
        $eol1 = '\\l';
@@ -80,9 +73,9 @@ function graph_mem_report ( &$rrdtool_graph ) {
         ."CDEF:'bmem_cached'=mem_cached,1024,* "
         .$bmem_buffers_defs
         ."$bmem_used_cdef "
-        ."AREA:'bmem_used'#$mem_used_color:'Use${rmspace}' ";
+        ."AREA:'bmem_used'#${conf['mem_used_color']}:'Use${rmspace}' ";
 
-    if ( $graphreport_stats ) {
+    if ( $conf['graphreport_stats'] ) {
         $series .= "CDEF:used_pos=bmem_used,0,INF,LIMIT " 
                 . "VDEF:used_last=used_pos,LAST "
                 . "VDEF:used_min=used_pos,MINIMUM " 
@@ -95,9 +88,9 @@ function graph_mem_report ( &$rrdtool_graph ) {
     }
 
     if (file_exists("$rrd_dir/mem_shared.rrd")) {
-        $series .= "STACK:'bmem_shared'#$mem_shared_color:'Share${rmspace}' ";
+        $series .= "STACK:'bmem_shared'#${conf['mem_shared_color']}:'Share${rmspace}' ";
 
-        if ( $graphreport_stats ) {
+        if ( $conf['graphreport_stats'] ) {
             $series .= "CDEF:shared_pos=bmem_shared,0,INF,LIMIT "
                     . "VDEF:shared_last=shared_pos,LAST "
                     . "VDEF:shared_min=shared_pos,MINIMUM " 
@@ -110,9 +103,9 @@ function graph_mem_report ( &$rrdtool_graph ) {
         }
     }
 
-    $series .= "STACK:'bmem_cached'#$mem_cached_color:'Cache${rmspace}' ";
+    $series .= "STACK:'bmem_cached'#${conf['mem_cached_color']}:'Cache${rmspace}' ";
 
-    if ( $graphreport_stats ) {
+    if ( $conf['graphreport_stats'] ) {
         $series .= "CDEF:cached_pos=bmem_cached,0,INF,LIMIT "
                 . "VDEF:cached_last=cached_pos,LAST "
                 . "VDEF:cached_min=cached_pos,MINIMUM " 
@@ -125,9 +118,9 @@ function graph_mem_report ( &$rrdtool_graph ) {
     }
 
     if (file_exists("$rrd_dir/mem_buffers.rrd")) {
-        $series .= "STACK:'bmem_buffers'#$mem_buffered_color:'Buffer${rmspace}' ";
+        $series .= "STACK:'bmem_buffers'#${conf['mem_buffered_color']}:'Buffer${rmspace}' ";
 
-        if ( $graphreport_stats ) {
+        if ( $conf['graphreport_stats'] ) {
             $series .= "CDEF:buffers_pos=bmem_buffers,0,INF,LIMIT "
                     . "VDEF:buffers_last=buffers_pos,LAST "
                     . "VDEF:buffers_min=buffers_pos,MINIMUM " 
@@ -144,9 +137,9 @@ function graph_mem_report ( &$rrdtool_graph ) {
         $series .= "DEF:'swap_total'='${rrd_dir}/swap_total.rrd':'sum':AVERAGE "
                 . "DEF:'swap_free'='${rrd_dir}/swap_free.rrd':'sum':AVERAGE "
                 . "CDEF:'bmem_swapped'='swap_total','swap_free',-,1024,* "
-                . "STACK:'bmem_swapped'#$mem_swapped_color:'Swap${rmspace}' ";
+                . "STACK:'bmem_swapped'#${conf['mem_swapped_color']}:'Swap${rmspace}' ";
 
-    	if ( $graphreport_stats ) {
+    	if ( $conf['graphreport_stats'] ) {
                 $series .= "CDEF:swapped_pos=bmem_swapped,0,INF,LIMIT "
                         . "VDEF:swapped_last=swapped_pos,LAST "
                         . "VDEF:swapped_min=swapped_pos,MINIMUM " 
@@ -159,9 +152,9 @@ function graph_mem_report ( &$rrdtool_graph ) {
 	}
     }
 
-    $series .= "LINE2:'bmem_total'#$cpu_num_color:'Total${rmspace}' ";
+    $series .= "LINE2:'bmem_total'#${conf['cpu_num_color']}:'Total${rmspace}' ";
 
-    if ( $graphreport_stats ) {
+    if ( $conf['graphreport_stats'] ) {
         $series .= "CDEF:total_pos=bmem_total,0,INF,LIMIT "
                 . "VDEF:total_last=total_pos,LAST "
                 . "VDEF:total_min=total_pos,MINIMUM " 
