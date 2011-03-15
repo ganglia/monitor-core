@@ -260,9 +260,11 @@ $(function(){
 
       if ( count($view_elements) != 0 ) {
 	foreach ( $view_elements as $id => $element ) {
+	    $legend = isset($element['hostname']) ? $element['hostname'] : "Aggregate graph";
 	    print "
 	    <A HREF=\"./graph_all_periods.php?" . $element['graph_args'] ."&z=large\">
-	    <IMG ALT=\"" . $element['hostname'] . " - " . $element['name'] . "\" BORDER=0 SRC=\"./graph.php?" . $element['graph_args'] . "&z=medium" . $range_args .  "\"></A>";
+	    <IMG ALT=\"" . $legend . " - " . $element['name'] . "\" BORDER=0 SRC=\"./graph.php?" . $element['graph_args'] . "&z=medium" . $range_args .  "\"></A>";
+
 	}
       } else {
 	print "No graphs defined for this view. Please add some";

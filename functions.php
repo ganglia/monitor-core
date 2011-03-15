@@ -729,29 +729,56 @@ function get_view_graph_elements($view) {
       // print "No graphs defined for this view. Please add some";
     } else {
 
+      // Loop through graph items
       foreach ( $view['items'] as $item_id => $item ) {
 
-	// Is it a metric or a graph(report)
-	if ( isset($item['metric']) ) {
-	  $graph_args_array[] = "m=" . $item['metric'];
-	  $name = $item['metric'];
+	// Check if item is an aggregate graph
+	if ( isset($item['aggregate_graph']) ) {
+
+	  foreach ( $item['host_regex'] as $reg_id => $reg_array ) {
+	    $graph_args_array[] = "hreg[]=" . urlencode($reg_array['regex']);
+	  }
+
+	  // If graph type is not specified default to line graph
+	  if ( isset($item['graph_type']) && in_array($item['graph_type'], array('line', 'stack') ) )
+	    $graph_args_array[] = "gtype=" . $item['graph_type'];
+	  else
+	    $graph_args_array[] = "gtype=line";
+
+	  if ( isset($item['metric']) ) {
+	    $graph_args_array[] = "aggregate=1";
+	    $graph_args_array[] = "m=" . $item['metric'];
+	    $view_elements[] = array ( "graph_args" => join("&", $graph_args_array), 
+	      "aggregate_graph" => 1,
+	      "name" => $item['metric']
+	    );
+	  }
+
+	// It's standard metric graph
 	} else {
-	  $graph_args_array[] = "g=" . $item['graph'];
-	  $name = $item['graph'];
+	  // Is it a metric or a graph(report)
+	  if ( isset($item['metric']) ) {
+	    $graph_args_array[] = "m=" . $item['metric'];
+	    $name = $item['metric'];
+	  } else {
+	    $graph_args_array[] = "g=" . $item['graph'];
+	    $name = $item['graph'];
+	  }
+
+	  $hostname = $item['hostname'];
+	  $cluster = $index_array['cluster'][$hostname];
+	  $graph_args_array[] = "h=$hostname";
+	  $graph_args_array[] = "c=$cluster";
+
+	  $view_elements[] = array ( "graph_args" => join("&", $graph_args_array), 
+	    "hostname" => $hostname,
+	    "cluster" => $cluster,
+	    "name" => $name
+	  );
+
+	  unset($graph_args_array);
+
 	}
-
-	$hostname = $item['hostname'];
-	$cluster = $index_array['cluster'][$hostname];
-	$graph_args_array[] = "h=$hostname";
-	$graph_args_array[] = "c=$cluster";
-
-	$view_elements[] = array ( "graph_args" => join("&", $graph_args_array), 
-	  "hostname" => $hostname,
-	  "cluster" => $cluster,
-	  "name" => $name
-	);
-
-	unset($graph_args_array);
 
       } // end of foreach ( $view['items']
     } // end of if ( sizeof($view['items'])
