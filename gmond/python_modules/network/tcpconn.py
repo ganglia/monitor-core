@@ -65,7 +65,7 @@ def TCP_Connections(name):
     if not _WorkerThread.running and not _WorkerThread.shuttingdown:
         try:
             _WorkerThread.start()
-        except AssertionError:
+        except (AssertionError, RuntimeError):
             pass
 
     #Read the last connection total for the state requested. The metric
