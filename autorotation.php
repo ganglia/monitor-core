@@ -74,11 +74,11 @@ if ( ! isset($_GET['view_name']) ) {
 	  $nextid = 0;
   }
 
-  # Set up some variables 
-  $host = $view_elements[$id]['hostname'];
   // The title of the graph
   $title = $view_elements[$id]['name'];
-  $nexttitle = $view_elements[$nextid]['name'] . " for " . $view_elements[$nextid]['hostname'];
+  # If it's not an aggregate graph put hostname in the title
+  $suffix = isset($view_elements[$nextid]['hostname']) ? " for " . $view_elements[$nextid]['hostname'] : "";
+  $nexttitle = $view_elements[$nextid]['name'] . $suffix;
 
   ?>
   <html>

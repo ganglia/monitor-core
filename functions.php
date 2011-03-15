@@ -750,7 +750,7 @@ function get_view_graph_elements($view) {
 	    $graph_args_array[] = "m=" . $item['metric'];
 	    $view_elements[] = array ( "graph_args" => join("&", $graph_args_array), 
 	      "aggregate_graph" => 1,
-	      "name" => $item['metric']
+	      "name" => isset($item['description']) ? $item['description'] : $item['metric'] . " aggregate graph"
 	    );
 	  }
 
