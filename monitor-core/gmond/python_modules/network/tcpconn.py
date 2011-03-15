@@ -1,4 +1,4 @@
-#*******************************************************************************
+#/******************************************************************************
 #* Portions Copyright (C) 2007 Novell, Inc. All rights reserved.
 #*
 #* Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ def TCP_Connections(name):
     
     if _WorkerThread is None:
         print 'Error: No netstat data gathering thread created for metric %s' % name
-        return 0;
+        return 0
         
     if not _WorkerThread.running and not _WorkerThread.shuttingdown:
         try:
