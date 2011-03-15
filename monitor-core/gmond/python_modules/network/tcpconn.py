@@ -1,4 +1,4 @@
-#/*******************************************************************************
+#*******************************************************************************
 #* Portions Copyright (C) 2007 Novell, Inc. All rights reserved.
 #*
 #* Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@ def TCP_Connections(name):
     global _WorkerThread
     
     if _WorkerThread is None:
-        print 'Error: No netstat data gathering thread created for metric %s'%name
+        print 'Error: No netstat data gathering thread created for metric %s' % name
         return 0;
         
     if not _WorkerThread.running and not _WorkerThread.shuttingdown:
@@ -334,13 +334,13 @@ def metric_cleanup():
 
 #This code is for debugging and unit testing    
 if __name__ == '__main__':
-    try:
-        params = {'Refresh': '20'}
-        metric_init(params)
-        while True:
+    params = {'Refresh': '20'}
+    metric_init(params)
+    while True:
+        try:
             for d in _descriptors:
                 v = d['call_back'](d['name'])
                 print 'value for %s is %u' % (d['name'],  v)
             time.sleep(5)
-    except KeyboardInterrupt:
-        os._exit(1)
+        except KeyboardInterrupt:
+            os._exit(1)
