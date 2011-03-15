@@ -39,6 +39,32 @@ Regex views allow using regex to match hostnames (need to specify view_type rege
 
 Obviously you can write a regex that matches a single host. 
 
+Easy Graph Aggregation
+======================
+
+You can also define add graphs created through easy graph aggregation by specifying
+"aggregate_graph": true then specifying all the regex rules to match host_regexes.
+For example this is one example. Save it as view_myview.json and put in the conf 
+directory.
+
+{
+ "view_name":"myview",
+ "items":[
+  { "hostname":"web01.domain.com","graph":"cpu_report"},
+  { "aggregate_graph":"true",
+      "host_regex":[ 
+        {"regex":"web-0[1-6]"},
+        {"regex":"web-2[3-6]"}
+      ],
+      "metric":"load_one",
+      "graph_type":"line",
+      "description":"Prod Web Servers load1"
+  }
+ ],
+ "view_type":"standard"
+}
+
+
 Auto Rotation
 =============
 
