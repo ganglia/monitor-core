@@ -337,12 +337,10 @@ if __name__ == '__main__':
     try:
         params = {'Refresh': '20'}
         metric_init(params)
-        time.sleep(0.2)
         while True:
             for d in _descriptors:
                 v = d['call_back'](d['name'])
                 print 'value for %s is %u' % (d['name'],  v)
             time.sleep(5)
     except KeyboardInterrupt:
-        time.sleep(0.2)
         os._exit(1)
