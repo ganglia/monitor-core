@@ -9,7 +9,6 @@
 # Get list of private clusters. Put in $private[cluster name]="password"
 function embarrassed ()
 {
-   global $gmetad_root;
    # The @ in front of a function name suppresses any warnings from it.
    $fp=@fopen("./private_clusters","r");
    if ($fp) {
