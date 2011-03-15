@@ -3,13 +3,11 @@ modules {
     name = "tcpconn"
     language = "python"
     param RefreshRate {
-        value = 5 
+        value = 5
     }
   }
 }
 
-#/* Collection groups for the
-#    example python module */
 collection_group {
   collect_every = 10
   time_threshold = 20
