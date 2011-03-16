@@ -196,7 +196,7 @@ if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
     // Set up 
     $graph_config["report_name"] = $metric_name;
     $graph_config["report_type"] = "standard";
-    $graph_config["title"] = $metric_name;
+    $graph_config["title"] = $metric_name . " last " . $range;
 
     // Colors to use
     $colors = array("128936","FF8000","158499","CC3300","996699","FFAB11","3366CC","01476F");

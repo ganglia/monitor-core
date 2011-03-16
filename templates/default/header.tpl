@@ -87,8 +87,9 @@
   <li><a href="#tabs-main">Main</a></li>
   <li><a href="#tabs-search">Search</a></li>
   <li><a href="#tabs-views" onclick="getViewsContent();">Views</a></li>
+  <li><a href="aggregate_graphs.php">Aggregate Graphs</a></li>
   <li><a href="#tabs-autorotation" onclick="autoRotationChooser();">Automatic Rotation</a></li>
-  <li><a href="mobile.php">Mobile</a></li>
+  <li><a href="#mobile" onclick="location.href = 'mobile.php';">Mobile</a></li>
 </ul>
 
 <div id="tabs-main">

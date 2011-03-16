@@ -1,16 +1,7 @@
 $(function(){
 
   // Follow tab's URL instead of loading its content via ajax
-  $("#tabs").tabs({
-       select: function(event, ui) {
-           var url = $.data(ui.tab, 'load.tabs');
-           if ( url ) {
-               location.href = url;
-               return false;
-           }
-           return true;
-       }
-  });
+  $("#tabs").tabs();
   $( "#range_menu" ).buttonset();
   $( "#sort_menu" ).buttonset();
 
