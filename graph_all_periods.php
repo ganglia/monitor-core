@@ -55,10 +55,13 @@ else if (isset($_GET['aggregate']) )
   $description = "Aggregate graph";
 else
   $description = "Unknown";
+
+// Skip printing the 
+if ( ! isset($_GET['aggregate'] )  ) {
 ?>
-<b>Host/Cluster/Aggregate: </b><?php print $description ?>&nbsp;<b>Metric/Graph: </b><?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?>
-<br />
+<b>Host/Cluster/Aggregate: </b><?php print $description ?>&nbsp;<b>Metric/Graph: </b><?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?><br />
 <?php
+}
 
 include_once "./eval_config.php";
 
