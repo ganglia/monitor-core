@@ -280,8 +280,8 @@ class NetstatThread(threading.Thread):
             # position and the state information in the tcp_state_at position. Count each 
             # occurance of each state.
             for tcp in lines:
-                # skip empty strings
-                if len(tcp) == 0:
+                # skip empty lines
+                if tcp == '':
                     continue
 
                 line = tcp.split()
