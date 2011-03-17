@@ -30,7 +30,15 @@
 #* Author: Brad Nicholes (bnicholes novell.com)
 #******************************************************************************/
 
-import os, popen2
+import os
+
+OBSOLETE_POPEN = False
+try:
+    import subprocess
+except ImportError:
+    import popen2
+    OBSOLETE_POPEN = True
+
 import threading
 import time
 
@@ -255,8 +263,12 @@ class NetstatThread(threading.Thread):
                 tempconns[conn] = 0
 
             #Call the netstat utility and split the output into separate lines
-            self.popenChild = popen2.Popen3("netstat -t -a -n")
-            lines = self.popenChild.fromchild.readlines()
+            if not OBSOLETE_POPEN:
+                self.popenChild = subprocess.Popen(["netstat", '-t', '-a', '-n'], stdout=subprocess.PIPE)
+                lines = self.popenChild.communicate()[0].split('\n')
+            else:
+                self.popenChild = popen2.Popen3("netstat -t -a -n")
+                lines = self.popenChild.fromchild.readlines()
 
             try:
                 self.popenChild.wait()
@@ -268,6 +280,10 @@ class NetstatThread(threading.Thread):
             # position and the state information in the tcp_state_at position. Count each 
             # occurance of each state.
             for tcp in lines:
+                # skip empty strings
+                if len(tcp) == 0:
+                    continue
+
                 line = tcp.split()
                 if line[tcp_at] == 'tcp':
                     if line[tcp_state_at] == 'ESTABLISHED':
