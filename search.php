@@ -5,7 +5,7 @@ $( "#tabs" ).bind( "tabsshow", function(event, ui) {
 </script>
 <?php
 
-require_once('./conf.php');
+require_once('./eval_conf.php');
 
 // Load the metric caching code
 require_once('./cache.php');

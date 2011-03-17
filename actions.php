@@ -1,6 +1,6 @@
 <?php
 
-include_once("./eval_config.php");
+include_once("./eval_conf.php");
 include_once("./functions.php");
 
 if ( isset($_GET['action']) && $_GET['action'] == "show_views" ) {

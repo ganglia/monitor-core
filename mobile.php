@@ -1,6 +1,6 @@
 <?php
 
-include_once("./conf.php");
+include_once("./eval_conf.php");
 include_once("./functions.php");
 
 // Load the metric caching code

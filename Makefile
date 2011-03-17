@@ -33,15 +33,15 @@ endif
 DIST_DIR = gweb-$(GWEB_VERSION)
 DIST_TARBALL = $(DIST_DIR).tar.gz
 
-TARGETS = conf.php gweb.spec version.php
+TARGETS = conf_default.php gweb.spec version.php
 
 default:	$(TARGETS)
 
 clean:
 	rm -rf $(TARGETS) $(DIST_DIR) $(DIST_TARBALL)
 
-conf.php:	conf.php.in
-	sed -e "s|@varstatedir@|$(GWEB_STATEDIR)|" -e "s|@rrdtool@|$(RRDTOOL)|" conf.php.in > conf.php
+conf_default.php:	conf_default.php.in
+	sed -e "s|@varstatedir@|$(GWEB_STATEDIR)|" conf_default.php.in > conf_default.php
 
 gweb.spec:	gweb.spec.in
 	sed -e s/@GWEB_VERSION@/$(GWEB_VERSION)/ -e "s|@varstatedir@|$(GWEB_STATEDIR)|" gweb.spec.in > gweb.spec

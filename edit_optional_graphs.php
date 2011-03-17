@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 // This file generates the Edit Optional Graphs dialog. 
 //////////////////////////////////////////////////////////////////////////
-require_once('./conf.php');
+require_once('./eval_conf.php');
 
 $hostname = isset($_GET['hostname'])  ?  $_GET['hostname']   : "none";
 $clustername = isset($_GET['clustername'])  ? $_GET['clustername'] : "none";

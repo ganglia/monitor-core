@@ -1,6 +1,6 @@
 <?php
 
-include_once("./eval_config.php");
+include_once("./eval_conf.php");
 
 $debug = 0;
 

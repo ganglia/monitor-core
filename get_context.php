@@ -7,26 +7,26 @@ $meta_designator = "Grid";
 $cluster_designator = "Cluster Overview";
 
 # Blocking malicious CGI input.
-$clustername = isset($_GET["c"]) ?
+$user['clustername'] = isset($_GET["c"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["c"]) ) ) : NULL;
-$gridname = isset($_GET["G"]) ?
+$user['gridname'] = isset($_GET["G"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["G"]) ) ) : NULL;
 if($conf['case_sensitive_hostnames'] == 1) {
-    $hostname = isset($_GET["h"]) ?
+    $user['hostname'] = isset($_GET["h"]) ?
         escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) : NULL;
 } else {
-    $hostname = isset($_GET["h"]) ?
+    $user['hostname'] = isset($_GET["h"]) ?
         strtolower( escapeshellcmd( clean_string( rawurldecode($_GET["h"]) ) ) ) : NULL;
 }
-$range = isset( $_GET["r"] ) && in_array($_GET["r"], array_keys( $conf['time_ranges'] ) ) ?
+$user['range'] = isset( $_GET["r"] ) && in_array($_GET["r"], array_keys( $conf['time_ranges'] ) ) ?
     escapeshellcmd( rawurldecode($_GET["r"])) : NULL;
-$metricname = isset($_GET["m"]) ?
+$user['metricname'] = isset($_GET["m"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["m"]) ) ) : NULL;
-$metrictitle = isset($_GET["ti"]) ?
+$user['metrictitle'] = isset($_GET["ti"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["ti"]) ) ) : NULL;
-$sort = isset($_GET["s"]) ?
+$user['sort'] = isset($_GET["s"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["s"]) ) ) : NULL;
-$controlroom = isset($_GET["cr"]) ?
+$user['controlroom'] = isset($_GET["cr"]) ?
     escapeshellcmd( clean_string( rawurldecode($_GET["cr"]) ) ): NULL;
 # Default value set in conf.php, Allow URL to overrride
 if (isset($_GET["hc"]))
@@ -35,133 +35,136 @@ if (isset($_GET["hc"]))
 if (isset($_GET["mc"]))
     $conf['metriccols'] = clean_number($_GET["mc"]);
 # Flag, whether or not to show a list of hosts
-$showhosts = isset($_GET["sh"]) ?
+$user['showhosts'] = isset($_GET["sh"]) ?
     clean_number( $_GET["sh"] ) : NULL;
 # The 'p' variable specifies the verbosity level in the physical view.
-$physical = isset($_GET["p"]) ?
+$user['physical'] = isset($_GET["p"]) ?
     clean_number( $_GET["p"] ) : NULL;
-$tree = isset($_GET["t"]) ?
+$user['tree'] = isset($_GET["t"]) ?
     escapeshellcmd($_GET["t"] ) : NULL;
 # A custom range value for job graphs, in -sec.
-$jobrange = isset($_GET["jr"]) ?
+$user['jobrange'] = isset($_GET["jr"]) ?
     clean_number( $_GET["jr"] ) : NULL;
 # A red vertical line for various events. Value specifies the event time.
-$jobstart = isset($_GET["js"]) ?
+$user['jobstart'] = isset($_GET["js"]) ?
     clean_number( $_GET["js"] ) : NULL;
 # custom start and end
-$cs = isset($_GET["cs"]) ?
+$user['cs'] = isset($_GET["cs"]) ?
     escapeshellcmd($_GET["cs"]) : NULL;
-$ce = isset($_GET["ce"]) ?
+$user['ce'] = isset($_GET["ce"]) ?
     escapeshellcmd($_GET["ce"]) : NULL;
 # The direction we are travelling in the grid tree
-$gridwalk = isset($_GET["gw"]) ?
+$user['gridwalk'] = isset($_GET["gw"]) ?
     escapeshellcmd( clean_string( $_GET["gw"] ) ) : NULL;
 # Size of the host graphs in the cluster view
-$clustergraphsize = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $conf['graph_sizes_keys'] ) ?
+$user['clustergraphsize'] = isset($_GET["z"]) && in_array( $_GET[ 'z' ], $conf['graph_sizes_keys'] ) ?
     escapeshellcmd($_GET["z"]) : NULL;
 # A stack of grid parents. Prefer a GET variable, default to cookie.
 if (isset($_GET["gs"]) and $_GET["gs"])
-    $gridstack = explode( ">", rawurldecode( $_GET["gs"] ) );
+    $user['gridstack'] = explode( ">", rawurldecode( $_GET["gs"] ) );
 else if ( isset($_COOKIE['gs']) and $_COOKIE['gs'])
-    $gridstack = explode( ">", $_COOKIE["gs"] );
+    $user['gridstack'] = explode( ">", $_COOKIE["gs"] );
 
-if (isset($gridstack) and $gridstack) {
-   foreach( $gridstack as $key=>$value )
-      $gridstack[ $key ] = clean_string( $value );
+if (isset($user['gridstack']) and $user['gridstack']) {
+   foreach( $user['gridstack'] as $key=>$value )
+      $user['gridstack'][ $key ] = clean_string( $value );
 }
 
 # Assume we are the first grid visited in the tree if there is no gridwalk
 # or gridstack is not well formed. Gridstack always has at least one element.
-if ( !isset($gridstack) or !strstr($gridstack[0], "http://"))
+if ( !isset($user['gridstack']) or !strstr($user['gridstack'][0], "http://"))
     $initgrid = TRUE;
 
 # Default values
 if (!isset($conf['hostcols']) || !is_numeric($conf['hostcols'])) $conf['hostcols'] = 4;
 if (!isset($conf['metriccols']) || !is_numeric($conf['metriccols'])) $conf['metriccols'] = 2;
-if (!is_numeric($showhosts)) $showhosts = 1;
+if (!is_numeric($user['showhosts'])) $user['showhosts'] = 1;
 
 # Filters
 if(isset($_GET["choose_filter"]))
 {
   $req_choose_filter = $_GET["choose_filter"];
-  $choose_filter = array();
+  $user['choose_filter'] = array();
   foreach($req_choose_filter as $k_req => $v_req)
   {
     $k = escapeshellcmd( clean_string( rawurldecode ($k_req)));
     $v = escapeshellcmd( clean_string( rawurldecode ($v_req)));
-    $choose_filter[$k] = $v;
+    $user['choose_filter'][$k] = $v;
   }
 }
 
 # Set context.
-if(!$clustername && !$hostname && $controlroom)
+if(!$user['clustername'] && !$user['hostname'] && $user['controlroom'])
    {
       $context = "control";
    }
-else if (isset($tree))
+else if (isset($user['tree']))
    {
       $context = "tree";
    }
-else if(!$clustername and !$gridname and !$hostname)
+else if(!$user['clustername'] and !$user['gridname'] and !$user['hostname'])
    {
       $context = "meta";
    }
-else if($gridname)
+else if($user['gridname'])
    {
       $context = "grid";
    }
-else if ($clustername and !$hostname and $physical)
+else if ($user['clustername'] and !$user['hostname'] and $user['physical'])
    {
       $context = "physical";
    }
-else if ($clustername and !$hostname and !$showhosts)
+else if ($user['clustername'] and !$user['hostname'] and !$user['showhosts'])
    {
       $context = "cluster-summary";
    }
-else if($clustername and !$hostname)
+else if($user['clustername'] and !$user['hostname'])
    {
       $context = "cluster";
    }
-else if($clustername and $hostname and $physical)
+else if($user['clustername'] and $user['hostname'] and $user['physical'])
    {
       $context = "node";
    }
-else if($clustername and $hostname)
+else if($user['clustername'] and $user['hostname'])
    {
       $context = "host";
    }
 
-if (!$range)
-    $range = "${conf['default_time_range']}";
+if (!$user['range'])
+    $user['range'] = $conf['default_time_range'];
 
 $end = "N";
 
 # $conf['time_ranges'] defined in conf.php
-if( $range == 'job' && isSet( $jobrange ) ) {
-    $start = $jobrange;
-} else if( isSet( $conf['time_ranges'][ $range ] ) ) {
-    $start = $conf['time_ranges'][ $range ] * -1;
+if( $user['range'] == 'job' && isSet( $user['jobrange'] ) ) {
+    $start = $user['jobrange'];
+} else if( isSet( $conf['time_ranges'][ $user['range'] ] ) ) {
+    $start = $conf['time_ranges'][ $user['range'] ] * -1;
 } else {
     $start = $conf['time_ranges'][ $conf['default_time_range'] ] * -1;
 }
 
-if ($cs or $ce)
-    $range = "custom";
+if ($user['cs'] or $user['ce'])
+    $user['range'] = "custom";
 
-if (!$metricname)
-    $metricname = "${conf['default_metric']}";
+if (!$user['metricname'])
+    $user['metricname'] = $conf['default_metric'];
 
-if (!$sort)
-    $sort = "by name";
+if (!$user['sort'])
+    $user['sort'] = "by name";
 
 # Since cluster context do not have the option to sort "by hosts down" or
 # "by hosts up", therefore change sort order to "descending" if previous
 # sort order is either "by hosts down" or "by hosts up"
 if ($context == "cluster") {
-    if ($sort == "by hosts up" || $sort == "by hosts down") {
-        $sort = "descending";
+    if ($user['sort'] == "by hosts up" || $user['sort'] == "by hosts down") {
+        $user['sort'] = "descending";
     }
 }
+
+// TODO: temporary step until all scripts expect $user.
+extract( $user );
 
 # A hack for pre-2.5.0 ganglia data sources.
 $always_constant = array(

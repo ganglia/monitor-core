@@ -63,7 +63,7 @@ if ( ! isset($_GET['aggregate'] )  ) {
 <?php
 }
 
-include_once "./eval_config.php";
+include_once "./eval_conf.php";
 
 foreach ( $conf['time_ranges'] as $key => $value ) {
 
