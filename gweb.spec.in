@@ -54,7 +54,7 @@ written in the PHP5 language and uses the Dwoo templating engine.
 #%dir %{web_prefixdir}/img
 #%dir %{web_prefixdir}/js
 %{web_prefixdir}/*
-%config(noreplace) %{web_prefixdir}/conf.php
+%config(noreplace) %{web_prefixdir}/conf_default.php
 #%{web_prefixdir}/conf/*
 #%{web_prefixdir}/css/*
 #%{web_prefixdir}/dwoo/*
@@ -65,5 +65,7 @@ written in the PHP5 language and uses the Dwoo templating engine.
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Mar 17 2011 Bernard Li <bernard@vanhpc.org>
+- Renamed conf.php -> conf_default.php
 * Fri Dec 17 2010 Bernard Li <bernard@vanhpc.org>
 - Spec file for gweb which is split from ganglia-web subpackage

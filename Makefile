@@ -40,7 +40,7 @@ default:	$(TARGETS)
 clean:
 	rm -rf $(TARGETS) $(DIST_DIR) $(DIST_TARBALL)
 
-conf.php:	conf.php.in
+conf_default.php:	conf_default.php.in
 	sed -e "s|@varstatedir@|$(GWEB_STATEDIR)|" -e "s|@rrdtool@|$(RRDTOOL)|" conf_default.php.in > conf_default.php
 
 gweb.spec:	gweb.spec.in
