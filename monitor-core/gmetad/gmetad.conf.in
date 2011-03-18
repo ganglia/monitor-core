@@ -27,6 +27,12 @@
 # seconds. The source will be polled at this interval on average. 
 # If the polling interval is omitted, 15sec is asssumed. 
 #
+# If you choose to set the polling interval to something other than the default,
+# note that the web frontend determines a host as down if its TN value is less
+# than 4 * TMAX (20sec by default).  Therefore, if you set the polling interval
+# to something around or greater than 80sec, this will cause the frontend to
+# incorrectly display hosts as down even though they are not.
+#
 # A list of machines which service the data source follows, in the 
 # format ip:port, or name:port. If a port is not specified then 8649
 # (the default gmond port) is assumed.
