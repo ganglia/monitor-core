@@ -1,14 +1,15 @@
 </div>
 <div id="tabs-search">
-  Search by host or metric e.g. web or disk.
+  Search term matches any number of metrics and hosts. For example type web or disk, wait a split seconds
+  and drop down menu will show up with choices.
   <!---- Uses LiveSearch from http://andreaslagerkvist.com/jquery/live-search/ ---->
   <div id="metric-search">
     <form method="post" action="/search/">
     <p>
 	<label>
-	    Enter search terms<br />
+	    Search as you type<br />
 	    <input type="text" name="q" id="search-field-q" on size=40 />
-	</label> <input type="submit" value="Go" />
+	</label>
     </p>
     </form>
   </div>

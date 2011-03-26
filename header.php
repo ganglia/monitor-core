@@ -420,6 +420,11 @@ else
  
 $data->assign("custom_time", $custom_time);
 
+// Additional filter to add after the list of nodes.
+if ( $context == "cluster" )
+  $data->assign("additional_filter_options", 'Show only nodes matching <input name=host_regex><INPUT TYPE="SUBMIT" VALUE="Filter">');
+else
+  $data->assign("additional_filter_options", '');
 
 # Make sure that no data is cached..
 header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");    # Date in the past

@@ -70,6 +70,9 @@ if (isset($user['gridstack']) and $user['gridstack']) {
       $user['gridstack'][ $key ] = clean_string( $value );
 }
 
+if ( isset($_GET['host_regex']) )
+  $user['host_regex'] = $_GET['host_regex'];
+
 # Assume we are the first grid visited in the tree if there is no gridwalk
 # or gridstack is not well formed. Gridstack always has at least one element.
 if ( !isset($user['gridstack']) or !strstr($user['gridstack'][0], "http://"))

@@ -231,7 +231,7 @@ function find_limits($nodes, $metricname)
 
          $rrd_dir = "${conf['rrds']}/$clustername/$host";
          if (file_exists("$rrd_dir/$metricname.rrd")) {
-            $command = RRDTOOL . " graph /dev/null $rrd_options ".
+            $command = $conf['rrdtool'] . " graph /dev/null $rrd_options ".
                "--start $start --end $end ".
                "DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
                "PRINT:limits:MAX:%.2lf ".
@@ -269,7 +269,7 @@ function find_avg($clustername, $hostname, $metricname)
     else
         $sum_dir = "${conf['rrds']}/$clustername/__SummaryInfo__";
 
-    $command = RRDTOOL . " graph /dev/null $rrd_options ".
+    $command = $conf['rrdtool'] . " graph /dev/null $rrd_options ".
         "--start $start --end $end ".
         "DEF:avg='$sum_dir/$metricname.rrd':'sum':AVERAGE ".
         "PRINT:avg:AVERAGE:%.2lf ";
@@ -715,7 +715,7 @@ function get_available_views() {
 // size information, time ranges etc.
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 function get_view_graph_elements($view) {
-
+  global $conf;
   require("./cache.php");
 
   $view_elements = array();

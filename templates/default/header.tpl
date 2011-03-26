@@ -122,7 +122,8 @@
   </TD>
   </TR>
 
-  <tr><td colspan="2">{$node_menu}</td></tr>
+  <tr><td colspan="2">{$node_menu}&nbsp;&nbsp;{$additional_filter_options}</td>
+</tr>
 
   </TABLE>
 

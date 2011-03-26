@@ -4,16 +4,16 @@ include_once("./eval_conf.php");
 
 $debug = 0;
 
-if(CACHEDATA == 1 && file_exists(CACHEFILE)){
+if($conf['cachedata'] == 1 && file_exists($conf['cachefile'])){
         // check for the cached file
         // snag it and return it if it is still fresh
-        $time_diff = time() - filemtime(CACHEFILE);
-        $expires_in = CACHETIME - $time_diff;
-        if( $time_diff < CACHETIME){
+        $time_diff = time() - filemtime($conf['cachefile']);
+        $expires_in = $conf['cachetime'] - $time_diff;
+        if( $time_diff < $conf['cachetime']){
                 if ( $debug == 1 ) {
                   echo("DEBUG: Fetching data from cache. Expires in " . $expires_in . " seconds.\n");
                 }
-                $index_array = unserialize(file_get_contents(CACHEFILE));
+                $index_array = unserialize(file_get_contents($conf['cachefile']));
         }
 }
 
@@ -35,7 +35,7 @@ if ( ! isset($index_array) ) {
   asort($hosts);
   $index_array['hosts'] = $hosts;
 
-  file_put_contents(CACHEFILE, serialize($index_array));
+  file_put_contents($conf['cachefile'], serialize($index_array));
 
 }
 

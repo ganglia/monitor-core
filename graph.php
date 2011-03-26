@@ -285,7 +285,7 @@ switch ( $conf['graph_engine'] ) {
     if ($size == "small" and ! isset($subtitle))
         $rrdtool_graph['extras'] = "-g";
   
-    $command = RRDTOOL . " graph - $rrd_options ";
+    $command = $conf['rrdtool'] . " graph - $rrd_options ";
   
     // The order of the other arguments isn't important, except for the
     // 'extras' and 'series' values.  These two require special handling.

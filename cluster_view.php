@@ -151,7 +151,11 @@ if ($showhosts)
    {
       foreach ($hosts_up as $host => $val)
          {
-               if ( isset($metrics[$host]["cpu_num"]['VAL']) and $metrics[$host]["cpu_num"]['VAL'] != 0 ){
+
+	  // If host_regex is defined
+	  if ( isset($user['host_regex']) && ! preg_match("/" .$user['host_regex'] . "/", $host  ) )
+	    continue;
+            if ( isset($metrics[$host]["cpu_num"]['VAL']) and $metrics[$host]["cpu_num"]['VAL'] != 0 ){
                $cpus = $metrics[$host]["cpu_num"]['VAL'];
             } else {
                $cpus = 1;
@@ -174,6 +178,7 @@ if ($showhosts)
                $sorted_hosts[$host] = $metrics[$host][$metricname]['VAL'];
             else
                $sorted_hosts[$host] = "";
+
          }
          
       foreach ($hosts_down as $host => $val)

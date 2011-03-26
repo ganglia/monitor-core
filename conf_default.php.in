@@ -34,7 +34,7 @@ $conf['dwoo_compiled_dir'] = "${conf['gmetad_root']}/dwoo";
 
 # Leave this alone if rrdtool is installed in $conf['gmetad_root'],
 # otherwise, change it if it is installed elsewhere (like /usr/bin)
-define("RRDTOOL", "@rrdtool@");
+$conf['rrdtool'] = "/usr/bin/rrdtool";
 
 # If rrdcached is being used, this argument must specify the 
 # socket to use.
@@ -195,9 +195,9 @@ $conf['graphite_rrd_dir'] = "/opt/graphite/storage/rrd";
 # One of the bottlenecks is that to get individual metrics we query gmond which
 # returns every single host and all the metrics. If you have lots of hosts and lots of 
 # checks this may be quite heavy so you may want to cache data
-define("CACHEDATA", 1);
-define("CACHEFILE", $conf['ganglia_dir'] . "/conf/ganglia_metrics.cache");
-define("CACHETIME", 1200); // How long to cache the data in seconds
+$conf['cachedata'] = 1;
+$conf['cachefile'] = $conf['ganglia_dir'] . "/conf/ganglia_metrics.cache";
+$conf['cachetime'] = 1200; // How long to cache the data in seconds
 
 #
 # Graph sizes
