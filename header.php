@@ -421,9 +421,13 @@ else
 $data->assign("custom_time", $custom_time);
 
 // Additional filter to add after the list of nodes.
-if ( $context == "cluster" )
-  $data->assign("additional_filter_options", 'Show only nodes matching <input name=host_regex><INPUT TYPE="SUBMIT" VALUE="Filter">');
-else
+if ( $context == "cluster" ) {
+  if ( isset($user['host_regex']) && $user['host_regex'] != "" )
+    $set_host_regex_value="value='" . $user['host_regex'] . "'";
+  else
+    $set_host_regex_value="";
+  $data->assign("additional_filter_options", 'Show only nodes matching <input name=host_regex ' .$set_host_regex_value . '><INPUT TYPE="SUBMIT" VALUE="Filter">');
+} else
   $data->assign("additional_filter_options", '');
 
 # Make sure that no data is cached..
