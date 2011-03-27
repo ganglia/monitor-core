@@ -1,9 +1,31 @@
 This is an attempt to make the Ganglia UI more usable. You should be able to drop this into
-your $HTTPD_ROOT/ganglia then run make to generate conf.php.
+your $HTTPD_ROOT/ganglia then run make to generate conf_default.php. make install will
+create all the 
 
-Please modify Makefile to point the directory where you installed the code. Also note
-that Makefile will create directories /var/lib/ganglia/rrds and /var/lib/ganglia/dwoo
-which are required for UI to function.
+Configuration
+=============
+
+All the configuration options are in conf_default.php. You can override any of the values by
+creating and editing conf.php. If you want to use standard directories such as 
+
+/var/lib/ganglia/rrds for RRDs
+
+and
+
+/var/lib/ganglia/dwoo
+
+for DWOO (templating engine) compiled templates you don't need to do anything. If however you
+want to change it create a conf.php like this
+
+<?php
+
+$conf['rrds'] = "/my/rrds";
+$conf['dwoo_compiled_dir'] = "/my/dwoo";
+
+?>
+
+This will make the upgrade process much easier since upgrade will not clobber your custom
+conf.php.
 
 New features
 ============
