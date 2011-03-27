@@ -5,6 +5,8 @@ General
 - Centralize sanitization of user input (Extract this from get_context.php and graph.php, no other scripts
   should use $_GET directly)
 - Make indentation consistent - mixed usage of 2 spaces, 3 spaces, 4 spaces, or tabs makes code harder to read
+- In Cluster Report, when one clicks on the text box besides "Metric", it should bring up a dropbox with a 
+  list of paginated metrics and continue to show metric name hints as you type
 
 Graphs
 
