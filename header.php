@@ -426,7 +426,7 @@ if ( $context == "cluster" ) {
     $set_host_regex_value="value='" . $user['host_regex'] . "'";
   else
     $set_host_regex_value="";
-  $data->assign("additional_filter_options", 'Show only nodes matching <input name=host_regex ' .$set_host_regex_value . '><INPUT TYPE="SUBMIT" VALUE="Filter">');
+  $data->assign("additional_filter_options", 'Show only nodes matching <input name=host_regex ' .$set_host_regex_value . '><input class=submit_button type="SUBMIT" VALUE="Filter">');
 } else
   $data->assign("additional_filter_options", '');
 

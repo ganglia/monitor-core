@@ -5,11 +5,11 @@
 <META http-equiv="Content-type" content="text/html; charset=utf-8">
 <META http-equiv="refresh" content="{$refresh}">
 <script TYPE="text/javascript" SRC="js/jquery-1.4.4.min.js"></script>
-<script type="text/javascript" src="js/jquery-ui-1.8.5.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.11.custom.min.js"></script>
 <script type="text/javascript" src="js/jquery.liveSearch.js"></script>
 <script type="text/javascript" src="js/ganglia.js"></script>
 <script type="text/javascript" src="js/jquery.gangZoom.js"></script>
-<link type="text/css" href="css/smoothness/jquery-ui-1.8.5.custom.css" rel="stylesheet" />
+<link type="text/css" href="css/smoothness/jquery-ui-1.8.11.custom.css" rel="stylesheet" />
 <link type="text/css" href="css/jquery.liveSearch.css" rel="stylesheet" />
 <LINK rel="stylesheet" href="./styles.css" type="text/css">
 <script>
@@ -18,7 +18,10 @@
         $( "#metrics-picker" ).autocomplete({
           source: availablemetrics
         });
+
         {$is_metrics_picker_disabled} 
+
+	$(".submit_button").button();
 
     });
 
@@ -102,7 +105,7 @@
      </FONT>
      </TD>
      <TD BGCOLOR="#DDDDDD" ALIGN="RIGHT">
-     <INPUT TYPE="SUBMIT" VALUE="Get Fresh Data">
+     <INPUT class="submit_button" TYPE="SUBMIT" VALUE="Get Fresh Data">
      </TD>
   </TR>
   <TR>
