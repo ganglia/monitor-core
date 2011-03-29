@@ -181,6 +181,9 @@ if (isset($title)) {
 // Are we generating aggregate graphs
 if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
     
+    // Set start time
+    $start = time() + $start;
+
     // If graph type is not specified default to line graph
     if ( isset($_GET["gtype"]) && in_array($_GET["gtype"], array("stack","line") )  ) 
         $graph_type = $_GET["gtype"];
@@ -334,49 +337,59 @@ switch ( $conf['graph_engine'] ) {
   
   //  $title = urlencode($rrdtool_graph["title"]);
   
-    if ( isset($_GET['g'])) {
-      // if it's a report increase the height for additional 30 pixels
-      $height += 40;
-  
-      $report_name = sanitize($_GET['g']);
-  
-      $report_definition_file = $conf['ganglia_dir'] . "/graph.d/" . $report_name . ".json";
-      // Check whether report is defined in graph.d directory
-      if ( is_file($report_definition_file) ) {
-        $graph_config = json_decode(file_get_contents($report_definition_file), TRUE);
-      } else {
-        error_log("There is JSON config file specifying $report_name.");
-        exit(1);
-      }
-  
-      if ( isset($graph_config) ) {
-        switch ( $graph_config["report_type"] ) {
-          case "template":
-            $target = str_replace("HOST_CLUSTER", $host_cluster, $graph_config["graphite"]);
-            break;
-  
-          case "standard":
-            $target = build_graphite_series( $graph_config, $host_cluster );
-            break;
-  
-          default:
-            error_log("No valid report_type specified in the $report_name definition.");
-            break;
-        }
-  
-        $title = $graph_config['title'];
-      } else {
-        error_log("Configuration file to $report_name exists however it doesn't appear it's a valid JSON file");
-        exit(1);
-      }
+    // If graph_config is already set we can use it immediately
+    if ( isset($graph_config) ) {
+
+      $target = build_graphite_series( $graph_config, "" );
+
     } else {
-      // It's a simple metric graph
-      $target = "target=$host_cluster.$metric_name.sum&hideLegend=true&vtitle=$vlabel&areaMode=all";
-      $title = " ";
-    }
+
+      if ( isset($_GET['g'])) {
+	// if it's a report increase the height for additional 30 pixels
+	$height += 40;
+    
+	$report_name = sanitize($_GET['g']);
+    
+	$report_definition_file = $conf['ganglia_dir'] . "/graph.d/" . $report_name . ".json";
+	// Check whether report is defined in graph.d directory
+	if ( is_file($report_definition_file) ) {
+	  $graph_config = json_decode(file_get_contents($report_definition_file), TRUE);
+	} else {
+	  error_log("There is JSON config file specifying $report_name.");
+	  exit(1);
+	}
+    
+	if ( isset($graph_config) ) {
+	  switch ( $graph_config["report_type"] ) {
+	    case "template":
+	      $target = str_replace("HOST_CLUSTER", $host_cluster, $graph_config["graphite"]);
+	      break;
+    
+	    case "standard":
+	      $target = build_graphite_series( $graph_config, $host_cluster );
+	      break;
+    
+	    default:
+	      error_log("No valid report_type specified in the $report_name definition.");
+	      break;
+	  }
+    
+	  $title = $graph_config['title'];
+	} else {
+	  error_log("Configuration file to $report_name exists however it doesn't appear it's a valid JSON file");
+	  exit(1);
+	}
+      } else {
+	// It's a simple metric graph
+	$target = "target=$host_cluster.$metric_name.sum&hideLegend=true&vtitle=$vlabel&areaMode=all";
+	$title = " ";
+      }
+
+    } // end of if ( ! isset($graph_config) ) {
   
     $graphite_url = $conf['graphite_url_base'] . "?width=$width&height=$height&" . $target . "&from=" . $start . "&yMin=0&bgcolor=FFFFFF&fgcolor=000000&title=" . urlencode($title . " last " . $range);
     break;
+
 } // end of switch ( $conf['graph_engine'])
 
 if ($debug) {

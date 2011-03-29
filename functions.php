@@ -932,23 +932,28 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // Graphite graphs
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-function build_graphite_series( $config, $host_cluster ) {
+function build_graphite_series( $config, $host_cluster = "" ) {
   $targets = array();
   $colors = array();
   // Keep track of stacked items
   $stacked = 0;
+
   foreach( $config[ 'series' ] as $item ) {
    
     if ( $item['type'] == "stack" )
       $stacked++;
-      
+
+    if ( isset($item['hostname']) && isset($item['clustername']) ) {
+      $host_cluster = $item['clustername'] . "." . str_replace(".","_", $item['hostname']);
+    }
+
     $targets[] = "target=". urlencode( "alias($host_cluster.${item['metric']}.sum,'${item['label']}')" );
     $colors[] = $item['color'];
 
   }
   $output = implode( $targets, '&' );
   $output .= "&colorList=" . implode( $colors, ',' );
-  $output .= "&vtitle=" . urlencode( $config[ 'vertical_label' ] );
+  $output .= "&vtitle=" . urlencode( isset($config[ 'vertical_label' ]) ? $config[ 'vertical_label' ] : "" );
 
   // Do we have any stacked elements. We assume if there is only one element
   // that is stacked that rest of it is line graphs
