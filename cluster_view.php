@@ -287,11 +287,15 @@ foreach ( $sorted_hosts as $host => $value )
             elseif ($val['TYPE']=="string" or $val['SLOPE']=="zero" or
                     (isset($always_constant[$metricname]) and
                     $always_constant[$metricname] or
-                    ($conf['max_graphs'] > 0 and $i > $conf['max_graphs'] )))
+                    ($conf['max_graphs'] > 0 and $i > $conf['$max_graphs'] and $hostcols != 0)))
                {
-                  $textval = "$val[VAL]";
-                  if (isset($val['UNITS']))
-                     $textval .= " $val[UNITS]";
+                  if (isset($reports[$metricname]) and $reports[$metricname])
+                     // No "current" values available for reports
+                     $textval = "N/A";
+                  else
+                     $textval = "$val[VAL]";
+                     if (isset($val['UNITS']))
+                        $textval .= " $val[UNITS]";
                }
          }
 
