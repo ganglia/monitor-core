@@ -70,8 +70,13 @@ if (isset($user['gridstack']) and $user['gridstack']) {
       $user['gridstack'][ $key ] = clean_string( $value );
 }
 
+// 
 if ( isset($_GET['host_regex']) )
   $user['host_regex'] = $_GET['host_regex'];
+
+if ( isset($_GET['max_graphs']) && is_numeric($_GET['max_graphs'] ) )
+  $user['max_graphs'] = $_GET['max_graphs'];
+
 
 # Assume we are the first grid visited in the tree if there is no gridwalk
 # or gridstack is not well formed. Gridstack always has at least one element.

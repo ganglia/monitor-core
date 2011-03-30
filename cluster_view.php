@@ -253,6 +253,11 @@ list($min, $max) = find_limits($sorted_hosts, $metricname);
 # Second pass to output the graphs or metrics.
 $i = 1;
 
+if ( isset($user['max_graphs']) )
+  $max_graphs = $user['max_graphs'];
+else
+  $max_graphs = $conf['max_graphs'];
+
 foreach ( $sorted_hosts as $host => $value )
    {
       $host_url = rawurlencode($host);
@@ -287,7 +292,7 @@ foreach ( $sorted_hosts as $host => $value )
             elseif ($val['TYPE']=="string" or $val['SLOPE']=="zero" or
                     (isset($always_constant[$metricname]) and
                     $always_constant[$metricname] or
-                    ($conf['max_graphs'] > 0 and $i > $conf['$max_graphs'] and $hostcols != 0)))
+                    ($max_graphs > 0 and $i > $max_graphs and $hostcols != 0 )))
                {
                   if (isset($reports[$metricname]) and $reports[$metricname])
                      // No "current" values available for reports

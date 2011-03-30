@@ -420,13 +420,40 @@ else
  
 $data->assign("custom_time", $custom_time);
 
-// Additional filter to add after the list of nodes.
+/////////////////////////////////////////////////////////////////////////
+// Additional filter to add after the list of nodes. Only useful in
+// cluster_view
+/////////////////////////////////////////////////////////////////////////
 if ( $context == "cluster" ) {
   if ( isset($user['host_regex']) && $user['host_regex'] != "" )
     $set_host_regex_value="value='" . $user['host_regex'] . "'";
   else
     $set_host_regex_value="";
-  $data->assign("additional_filter_options", 'Show only nodes matching <input name=host_regex ' .$set_host_regex_value . '><input class=submit_button type="SUBMIT" VALUE="Filter">');
+
+  // In some clusters you may have thousands of hosts which may load
+  // for a long time. For those cases we have the ability to display
+  // only the max amount of graphs and put place holders for the rest ie.
+  // it will say only print host name without an image
+  $max_graphs_options = array(1000,500,200,100,50,25,20,15,10);
+
+  if ( isset($user['max_graphs']) && is_numeric($user['max_graphs']) )
+    $max_graphs = $user['max_graphs'];
+  else 
+    $max_graphs = $conf['max_graphs'];
+  
+  $max_graphs_values = "<option value=0>all</option>";
+  foreach ( $max_graphs_options as $key => $value ) {
+      if ( $max_graphs == $value ) 
+	$max_graphs_values .= "<option selected>" . $value . "</option>";
+      else
+	$max_graphs_values .= "<option>" . $value . "</option>";
+
+  }
+
+  $data->assign("additional_filter_options", 'Show only nodes matching <input name=host_regex ' .$set_host_regex_value . '>'
+   . '<input class=submit_button type="SUBMIT" VALUE="Filter">'
+   . '&nbsp;Max graphs to show <select onChange="ganglia_submit();" name="max_graphs">' . $max_graphs_values . '</select>'
+    );
 } else
   $data->assign("additional_filter_options", '');
 
