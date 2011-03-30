@@ -292,7 +292,7 @@ foreach ( $sorted_hosts as $host => $value )
             elseif ($val['TYPE']=="string" or $val['SLOPE']=="zero" or
                     (isset($always_constant[$metricname]) and
                     $always_constant[$metricname] or
-                    ($max_graphs > 0 and $i > $max_graphs and $hostcols != 0 )))
+                    ($max_graphs > 0 and $i > $max_graphs )))
                {
                   if (isset($reports[$metricname]) and $reports[$metricname])
                      // No "current" values available for reports
