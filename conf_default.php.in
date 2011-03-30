@@ -3,11 +3,11 @@
 #
 # Gmetad-webfrontend version. Used to check for updates.
 #
-include_once "./version.php";
-
 $conf['ganglia_dir'] = dirname(__FILE__);
 $conf['views_dir'] = $conf['ganglia_dir'] . '/conf';
 $conf['conf_dir'] = $conf['ganglia_dir'] . '/conf';
+
+include_once $conf['ganglia_dir'] . "/version.php";
 
 #
 # The name of the directory in "./templates" which contains the
