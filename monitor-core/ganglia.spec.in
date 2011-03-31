@@ -364,8 +364,8 @@ cd gmetad-python
 
 %files gmond
 %defattr(-,root,root)
-%attr(0500,root,root)%{_bindir}/gmetric
-%attr(0555,root,root)%{_bindir}/gstat
+%{_bindir}/gmetric
+%{_bindir}/gstat
 %{_sbindir}/gmond
 /etc/init.d/gmond
 %{_mandir}/man1/gmetric.1*
@@ -457,6 +457,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Mar 31 2011 Bernard Li <bernard@vanhpc.org>
+- Allow file permissions for gmetric and gstat to be automatically set
 * Wed Jan 26 2011 Bernard Li <bernard@vanhpc.org>
 - Remove manual steps to install manpages as they are now installed via `make install`
 - Include manpage for gmetad-python
