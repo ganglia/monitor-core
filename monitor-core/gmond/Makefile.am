@@ -30,11 +30,15 @@ GCFLAGS += -DSFLOW
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/include/ -I$(top_builddir)/libmetrics $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"'
+AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/include/ -I$(top_builddir)/libmetrics $(GCFLAGS)
 
 sbin_PROGRAMS = gmond
+
+cmdline.c: cmdline.c.in $(FIXCONFIG)
+	$(FIXCONFIG) cmdline.c.in
+
 # metric.h and dtd.h are for gmetad/gmetric for now....
-gmond_SOURCES = gmond.c cmdline.c cmdline.h dtd.h g25_config.c core_metrics.c g25_config.h gmond_internal.h
+gmond_SOURCES = gmond.c cmdline.c.in cmdline.c cmdline.h dtd.h g25_config.c core_metrics.c g25_config.h gmond_internal.h
 if BUILD_SFLOW
 gmond_SOURCES += sflow.h sflow.c sflow_gmetric.h
 endif
@@ -67,3 +71,5 @@ gmond.solaris.init:	gmond.solaris.init.in $(FIXCONFIG)
 # something
 install-exec-hook:	gmond.solaris.init
 #	$(INSTALL_SCRIPT) gmond.solaris.init
+
+CLEANFILES = cmdline.c	
