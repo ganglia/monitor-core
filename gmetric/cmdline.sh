@@ -5,7 +5,7 @@ package "gmetric"
 purpose "The Ganglia Metric Client (gmetric) announces a metric
 on the list of defined send channels defined in a configuration file"
 
-option "conf" c "The configuration file to use for finding send channels" string default="/etc/ganglia/gmond.conf" no
+option "conf" c "The configuration file to use for finding send channels" string default="@sysconfdir@/gmond.conf" no
 option "name" n "Name of the metric" string no
 option "value" v "Value of the metric" string no
 option "type" t "Either string|int8|uint8|int16|uint16|int32|uint32|float|double" string no
@@ -13,6 +13,9 @@ option "units" u "Unit of measure for the value e.g. Kilobytes, Celcius" string 
 option "slope" s "Either zero|positive|negative|both" string default="both"  no
 option "tmax" x "The maximum time in seconds between gmetric calls" int default="60" no
 option "dmax" d "The lifetime in seconds of this metric" int default="0" no
+option "group" g "Group of the metric" string no
+option "desc" D "Description of the metric" string no
+option "title" T "Title of the metric" string no
 option "spoof" S "IP address and name of host/device (colon separated) we are spoofing" string default="" no
 option "heartbeat" H "spoof a heartbeat message (use with spoof option)" no
 

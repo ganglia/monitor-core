@@ -12,10 +12,14 @@ GLDFLAGS =
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/include $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"'
+AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/include $(GCFLAGS)
 
-sbin_PROGRAMS = gmetad 
-gmetad_SOURCES =  gmetad.c cmdline.c cmdline.h gmetad.h data_thread.c \
+sbin_PROGRAMS = gmetad
+
+cmdline.c: cmdline.c.in $(FIXCONFIG)
+	$(FIXCONFIG) cmdline.c.in
+
+gmetad_SOURCES =  gmetad.c cmdline.c.in cmdline.c cmdline.h gmetad.h data_thread.c \
    server.c process_xml.c rrd_helpers.c conf.c conf.h type_hash.c \
    xml_hash.c cleanup.c rrd_helpers.h daemon_init.c daemon_init.h
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
@@ -39,3 +43,4 @@ install-data-hook:	gmetad.conf
 	mkdir -p $(DESTDIR)$(sysconfdir) && \
 	  $(INSTALL_DATA) gmetad.conf $(DESTDIR)$(sysconfdir)/gmetad.conf
 
+CLEANFILES = cmdline.c
