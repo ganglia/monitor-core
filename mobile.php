@@ -15,9 +15,9 @@ require_once('./cache.php');
 <html> 
 <head> 
 <title>Ganglia Mobile</title> 
-<link rel="stylesheet" href="css/jquery.mobile-1.0a2.min.css" />
-<script src="js/jquery-1.4.4.min.js"></script>
-<script src="js/jquery.mobile-1.0a2.min.js"></script>
+<link rel="stylesheet" href="css/jquery.mobile-1.0a4.min.css" />
+<script src="js/jquery-1.5.2.min.js"></script>
+<script src="js/jquery.mobile-1.0a4.min.js"></script>
 <script type="text/javascript" src="js/jquery.liveSearch.js"></script>
 <link type="text/css" href="css/jquery.liveSearch.css" rel="stylesheet" />
 <style>

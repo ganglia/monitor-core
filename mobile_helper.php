@@ -5,15 +5,6 @@ include_once "./get_context.php";
 include_once "./ganglia.php";
 include_once "./get_ganglia.php";
 ?>
-<!DOCTYPE html> 
-<html>
-<head>
-<title>Ganglia Mobile</title>
-<style>
-.ui-mobile .ganglia-mobile {  background: #e5e5e5 top center repeat-x; }
-</style>
-</head>
-<body>
 <?php
 ///////////////////////////////////////////////////////////////////////////////
 // Generating mobile view
@@ -323,6 +314,3 @@ foreach ( $g_metrics_group as $metric_group_name => $metric_group_members ) {
 <?php
 }
 ?>  
-
-</body>
-</html>

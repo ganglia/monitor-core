@@ -340,7 +340,7 @@ if ($context == "meta" or $context == "cluster")
 	    $checked = "checked=\"checked\"";
 	  else
 	    $checked = "";
-	  $sort_menu .= "<input OnChange=\"ganglia_submit();\" type=\"radio\" id=\"radio-$url\" name=\"s\" value=\"$v\" $checked/><label for=\"radio-$url\">$v</label>";
+	  $sort_menu .= "<input OnChange=\"ganglia_submit();\" type=\"radio\" id=\"radio-" .str_replace(" ", "_", $v) . "\" name=\"s\" value=\"$v\" $checked/><label for=\"radio-" . str_replace(" ", "_", $v) . "\">$v</label>";
 
       }
 
