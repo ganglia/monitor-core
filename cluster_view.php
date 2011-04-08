@@ -362,9 +362,9 @@ foreach ( $sorted_hosts as $host => $value )
       if ($max_graphs > 0 and $i > $max_graphs ) {
 	$overflow_list[$host]["metric_image"] = $cell;
 	if (! ($overflow_counter++ % $conf['hostcols']) ) {
-	  $sorted_list[$host]["br"] = "</tr><tr>";
+	  $overflow_list[$host]["br"] = "</tr><tr>";
 	} else {
-	  $sorted_list[$host]["br"] = "";
+	  $overflow_list[$host]["br"] = "";
 	}
 
       } else {
