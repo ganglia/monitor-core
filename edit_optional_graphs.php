@@ -2,16 +2,34 @@
 
 //////////////////////////////////////////////////////////////////////////
 // This file generates the Edit Optional Graphs dialog. 
+// Depending whether we are editing hostname or clusters filenames
+// are going start with either host_ or cluster_
 //////////////////////////////////////////////////////////////////////////
 require_once('./eval_conf.php');
+// Load the host cache for validation purposes
+include_once('./cache.php');
 
 $hostname = isset($_GET['hostname'])  ?  $_GET['hostname']   : "none";
+// Does host exist in the metric cache. If it doesn't something's wrong
+if ( ! isset($index_array['cluster'][$hostname] ) && $hostname != "none" ) {
+  ?>
+    <div class="ui-widget">
+              <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+                  <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+                  <strong>Alert:</strong> I can't find the hostname <strong><?php print $hostname; ?></strong> you supplied. It's either invalid or this host hasn't made it into the cache yet.</p>
+              </div>
+    </div>
+  <?php  
+  exit(1);
+}
+
+// TODO Add validation for clusters
 $clustername = isset($_GET['clustername'])  ? $_GET['clustername'] : "none";
 
 if ( $hostname != "none" ) {
-    $filename = "/host_" . $hostname . ".json";
+    $json_filename_suffix = "/host_" . $hostname . ".json";
 } else if ( $clustername != "none" ) {
-    $filename = "/cluster_" . $clustername . ".json";
+    $json_filename_suffix = "/cluster_" . str_replace(" ", "_", $clustername) . ".json";
 }
 
 $default_reports = array("included_reports" => array(), "excluded_reports" => array());
@@ -20,10 +38,10 @@ if ( is_file($default_file) ) {
   $default_reports = array_merge($default_reports,json_decode(file_get_contents($default_file), TRUE));
 }
 
-$file = $conf['conf_dir'] . $filename;
+$override_file = $conf['conf_dir'] . $json_filename_suffix;
 $override_reports = array("included_reports" => array(), "excluded_reports" => array());
-if ( is_file($file) ) {
-  $override_reports = array_merge($override_reports, json_decode(file_get_contents($file), TRUE));
+if ( is_file($override_file) ) {
+  $override_reports = array_merge($override_reports, json_decode(file_get_contents($override_file), TRUE));
 }
 
 if ( isset($_GET['action']) ) {
@@ -49,8 +67,7 @@ if ( isset($_GET['action']) ) {
 
   if ( is_array($reports) ) {
     $json = json_encode($reports);
-    $file = $conf['conf_dir'] . $filename;
-    if ( file_put_contents($file, $json) === FALSE ) {
+    if ( file_put_contents($override_file, $json) === FALSE ) {
   ?>
     <div class="ui-widget">
               <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
@@ -114,8 +131,8 @@ if ( isset($_GET['action']) ) {
 ?>
 
 <form id=edit_optional_reports_form>
-<input type=hidden name=hostname value=<?php print $hostname ?>>
-<input type=hidden name=clustername value=<?php print $clustername; ?>>
+<input type=hidden name=hostname value="<?php print $hostname ?>">
+<input type=hidden name=clustername value="<?php print $clustername; ?>">
 <input type=hidden name=action value=change>
 <table border=1 width=90%>
 <style>
