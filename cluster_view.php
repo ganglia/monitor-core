@@ -258,6 +258,10 @@ if ( isset($user['max_graphs']) )
 else
   $max_graphs = $conf['max_graphs'];
 
+# Initialize overflow list
+$overflow_list = array();
+$overflow_counter = 1;
+
 foreach ( $sorted_hosts as $host => $value )
    {
       $host_url = rawurlencode($host);
@@ -353,14 +357,45 @@ foreach ( $sorted_hosts as $host => $value )
          $cell .= $pre . "network_report" . $post;
       }
 
-      $sorted_list[$host]["metric_image"] = $cell;
-      if (! ($i++ % $conf['hostcols']) ) {
-         $sorted_list[$host]["br"] = "</tr><tr>";
+      // Check if max_graphs is set. If it put cells in an overflow list since that one is hidden
+      // by default
+      if ($max_graphs > 0 and $i > $max_graphs ) {
+	$overflow_list[$host]["metric_image"] = $cell;
+	if (! ($overflow_counter++ % $conf['hostcols']) ) {
+	  $sorted_list[$host]["br"] = "</tr><tr>";
+	} else {
+	  $sorted_list[$host]["br"] = "";
+	}
+
       } else {
-         $sorted_list[$host]["br"] = "";
-      }
+	$sorted_list[$host]["metric_image"] = $cell;
+	if (! ($i++ % $conf['hostcols']) ) {
+	  $sorted_list[$host]["br"] = "</tr><tr>";
+	} else {
+	  $sorted_list[$host]["br"] = "";
+	}
+
+      } // end of if ($max_graphs > 0 and $i > $max_graphs ) {
+
    }
 
 $data->assign("sorted_list", $sorted_list);
+
+# If there is an overflow list
+if ( sizeof($overflow_list) > 0 ) {
+  $data->assign("overflow_list_header", '<p><table width=80%><tr><td align=center class=metric>
+  <a href="#" id="overflow_list_button"onclick="$(\'#overflow_list\').toggle();" class="button ui-state-default ui-corner-all" title="Toggle overflow list">Show more hosts (' 
+  . ($overflow_counter - 1) .')</a>
+  </td></tr></table>
+  <div style="display: none;" id="overflow_list"><table>
+  <tr>
+     ');
+  $data->assign("overflow_list_footer", "</div></tr></table></div>");
+} else {
+  $data->assign("overflow_list_header", "");
+  $data->assign("overflow_list_footer", "");
+}
+$data->assign("overflow_list", $overflow_list);
+
 $dwoo->output($tpl, $data);
 ?>
