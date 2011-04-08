@@ -148,14 +148,21 @@ $("#metrics-picker").val("{$metric_name}");
 </TR>
 </TABLE>
 
-<CENTER>
-<TABLE>
-<TR>
+<center>
+<table id=graph_sorted_list>
+<tr>
 {foreach $sorted_list host}
 {$host.metric_image}{$host.br}
 {/foreach}
-</TR>
-</TABLE>
+</tr>
+</table>
+
+{$overflow_list_header}
+{foreach $overflow_list host}
+{$host.metric_image}{$host.br}
+{/foreach}
+{$overflow_list_footer}
+
 
 <p>
 {if isset($node_legend)}
