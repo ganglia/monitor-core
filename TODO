@@ -45,6 +45,7 @@ Graphite
 
 - Add polish to Graphite integration
 - Fix CPU report for Cluster summary. Needs to be "scaled" by number of nodes
+- Support zooming
 
 Documentation
 
