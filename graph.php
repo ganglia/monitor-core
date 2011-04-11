@@ -329,13 +329,17 @@ switch ( $conf['graph_engine'] ) {
     // area
     if ( ! is_link($rrd_graphite_link) ) {
       // Does the directory exist for the cluster. If not create it
-      if ( ! is_dir ($conf['graphite_rrd_dir'] . "/" . $clustername) )
-        mkdir ( $conf['graphite_rrd_dir'] . "/" . $clustername );
-      symlink($rrd_dir, $rrd_graphite_link);
+      if ( ! is_dir ($conf['graphite_rrd_dir'] . "/" . str_replace(" ", "_", $clustername)) )
+        mkdir ( $conf['graphite_rrd_dir'] . "/" . str_replace(" ", "_", $clustername ));
+      symlink($rrd_dir, str_replace(" ", "_", $rrd_graphite_link));
     }
   
     // Generate host cluster string
-    $host_cluster = $clustername . "." . $host;
+    if ( isset($clustername) ) {
+      $host_cluster = str_replace(" ", "_", $clustername) . "." . $host;
+    } else {
+      $host_cluster = $host;
+    }
   
     $height += 70;
   
@@ -394,7 +398,7 @@ switch ( $conf['graph_engine'] ) {
       }
 
     } // end of if ( ! isset($graph_config) ) {
-  
+    
     $graphite_url = $conf['graphite_url_base'] . "?width=$width&height=$height&" . $target . "&from=" . $start . "&yMin=0&bgcolor=FFFFFF&fgcolor=000000&title=" . urlencode($title . " last " . $range);
     break;
 
