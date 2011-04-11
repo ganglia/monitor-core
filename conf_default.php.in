@@ -36,6 +36,9 @@ $conf['dwoo_compiled_dir'] = "${conf['gmetad_root']}/dwoo";
 # otherwise, change it if it is installed elsewhere (like /usr/bin)
 $conf['rrdtool'] = "/usr/bin/rrdtool";
 
+# Render graphs with rrdtool's --slope-mode option
+$conf['rrdtool_slope_mode'] = false;
+
 # If rrdcached is being used, this argument must specify the 
 # socket to use.
 #

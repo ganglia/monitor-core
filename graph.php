@@ -287,6 +287,10 @@ switch ( $conf['graph_engine'] ) {
     # legend: it is displayed above on larger cluster summary graphs.
     if ($size == "small" and ! isset($subtitle))
         $rrdtool_graph['extras'] = "-g";
+
+    # add slope-mode if rrdtool_slope_mode is set
+    if (isset($conf['rrdtool_slope_mode']) && $conf['rrdtool_slope_mode'] == True)
+        $rrdtool_graph['slope-mode'] = '';
   
     $command = $conf['rrdtool'] . " graph - $rrd_options ";
   
