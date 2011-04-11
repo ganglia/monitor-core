@@ -37,7 +37,8 @@ $debug      = isset( $_GET['debug'] ) ? clean_number ( sanitize( $_GET["debug"] 
 $command    = '';
 $graphite_url = '';
 
-$user['json_graph'] = isset($_GET["json"]) ? 1 : NULL; 
+$user['json_output'] = isset($_GET["json"]) ? 1 : NULL; 
+$user['csv_output'] = isset($_GET["csv"]) ? 1 : NULL; 
 
 // Get hostname
 $raw_host = isset($_GET["h"])  ?  sanitize ( $_GET["h"]  )   : "__SummaryInfo__";  
@@ -328,17 +329,13 @@ switch ( $conf['graph_engine'] ) {
     // area
     if ( ! is_link($rrd_graphite_link) ) {
       // Does the directory exist for the cluster. If not create it
-      if ( ! is_dir ($conf['graphite_rrd_dir'] . "/" . str_replace(" ", "_", $clustername)) )
-        mkdir ( $conf['graphite_rrd_dir'] . "/" . str_replace(" ", "_", $clustername ));
-      symlink($rrd_dir, str_replace(" ", "_", $rrd_graphite_link));
+      if ( ! is_dir ($conf['graphite_rrd_dir'] . "/" . $clustername) )
+        mkdir ( $conf['graphite_rrd_dir'] . "/" . $clustername );
+      symlink($rrd_dir, $rrd_graphite_link);
     }
   
     // Generate host cluster string
-    if ( isset($clustername) ) {
-      $host_cluster = str_replace(" ", "_", $clustername) . "." . $host;
-    } else {
-      $host_cluster = $host;
-    }
+    $host_cluster = $clustername . "." . $host;
   
     $height += 70;
   
@@ -397,7 +394,7 @@ switch ( $conf['graph_engine'] ) {
       }
 
     } // end of if ( ! isset($graph_config) ) {
-    
+  
     $graphite_url = $conf['graphite_url_base'] . "?width=$width&height=$height&" . $target . "&from=" . $start . "&yMin=0&bgcolor=FFFFFF&fgcolor=000000&title=" . urlencode($title . " last " . $range);
     break;
 
@@ -405,7 +402,7 @@ switch ( $conf['graph_engine'] ) {
 
 
 // Output to JSON
-if ( $user['json_graph'] ) {
+if ( $user['json_output'] || $user['csv_output'] ) {
 
   $rrdtool_graph_args = "";
   $graph_series = explode(" ", $rrdtool_graph['series']);
@@ -413,17 +410,20 @@ if ( $user['json_graph'] ) {
   // First find RRDtool DEFs
   foreach ( $graph_series as $key => $value ) {
     if ( preg_match("/^DEF/", $value ) )  {
-      if ( preg_match("/(.*)\/(.*)\/(.*)\/(.*)(\.rrd)/", $value, $out ) ) {
-	$cluster_name = $out[2];
-	$host_name = $out[3];
-	$metric_name = $out[4];
-	$rrdtool_graph_args .= $value . " " . "XPORT:sum:" . $metric_name;
+      if ( preg_match("/(DEF:\')(.*)(\'=\')(.*)\/(.*)\/(.*)\/(.*)(\.rrd)/", $value, $out ) ) {
+	$ds_name = $out[2];
+	$cluster_name = $out[5];
+	$host_name = $out[6];
+	$metric_name = $out[7];
+	$output_array[] = array( "ds_name" => $ds_name, "cluster_name" => $out[5], "host_name" => $out[6], "metric_name" => $out[7] );
+	$rrdtool_graph_args .= $value . " " . "XPORT:" . $ds_name . ":" . $metric_name . " ";
       }
     }
   }
 
   // This command will export values for the specified format in XML
   $command = $conf['rrdtool'] . " xport --start " . $rrdtool_graph['start'] . " --end " .  $rrdtool_graph['end'] . " " . $rrdtool_graph_args;
+
   // Read in the XML
   $fp = popen($command,"r"); 
   $string = "";
@@ -433,21 +433,59 @@ if ( $user['json_graph'] ) {
   }
   // Parse it
   $xml = simplexml_load_string($string);
+
+  # If there are multiple metrics columns will be > 1
+  $num_of_metrics = $xml->meta->columns;
+
   // 
   $metric_values = array();
   // Build the metric_values array
+
   foreach ( $xml->data->row as $key => $objects ) {
     $values = get_object_vars($objects);
-    $metric_array[] = array( "timestamp" => intval($values['t']), "value" => floatval($values['v']));
+    // If $values["v"] is an array we have multiple data sources/metrics and we 
+    // need to iterate over those
+    if ( is_array($values["v"]) ) {
+      foreach ( $values["v"] as $key => $value ) {
+        $output_array[$key]["metrics"][] = array( "timestamp" => intval($values['t']), "value" => floatval($value));
+      }
+    } else {
+      $output_array[0]["metrics"][] = array( "timestamp" => intval($values['t']), "value" => floatval($values['v']));
+    }
+
   }
 
-  $output[] = array ( "cluster_name" => $cluster_name,
-      "host_name" => $host_name,
-      "target" => $metric_name, 
-      "metrics" => $metric_array);
+  // If JSON output request simple encode the array as JSON
+  if ( $user['json_output'] ) {
 
-  header("Content-type: application/json");
-  print json_encode($output);
+    header("Content-type: application/json");
+    print json_encode($output_array);
+
+  }
+
+  if ( $user['csv_output'] ) {
+
+    header("Content-Type: application/csv");
+    header("Content-Disposition: inline; filename=\"ganglia-metrics.csv\"");
+
+    print "Timestamp";
+
+    // Print out headers
+    for ( $i = 0 ; $i < sizeof($output_array) ; $i++ ) {
+      print "," . $output_array[$i]["metric_name"];
+    }
+
+    print "\n";
+
+    foreach ( $output_array[0]["metrics"] as $key => $row ) {
+      print date("c", $row["timestamp"]);
+      for ( $j = 0 ; $j < $num_of_metrics ; $j++ ) {
+	print "," .$output_array[$j]["metrics"][$key]["value"];
+      }
+      print "\n";
+    }
+
+  }
 
   exit(1);
 }
