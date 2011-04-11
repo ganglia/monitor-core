@@ -148,9 +148,9 @@ $end = "N";
 if( $user['range'] == 'job' && isSet( $user['jobrange'] ) ) {
     $start = $user['jobrange'];
 } else if( isSet( $conf['time_ranges'][ $user['range'] ] ) ) {
-    $start = $conf['time_ranges'][ $user['range'] ] * -1;
+    $start = $conf['time_ranges'][ $user['range'] ] * -1 . "s";
 } else {
-    $start = $conf['time_ranges'][ $conf['default_time_range'] ] * -1;
+    $start = $conf['time_ranges'][ $conf['default_time_range'] ] * -1 . "s";
 }
 
 if ($user['cs'] or $user['ce'])
