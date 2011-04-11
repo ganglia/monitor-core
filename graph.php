@@ -37,6 +37,8 @@ $debug      = isset( $_GET['debug'] ) ? clean_number ( sanitize( $_GET["debug"] 
 $command    = '';
 $graphite_url = '';
 
+$user['json_graph'] = isset($_GET["json"]) ? 1 : NULL; 
+
 // Get hostname
 $raw_host = isset($_GET["h"])  ?  sanitize ( $_GET["h"]  )   : "__SummaryInfo__";  
 
@@ -244,6 +246,7 @@ if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
     #print "<PRE>"; print_r($graph_config); exit(1);
  
 }
+
 //////////////////////////////////////////////////////////////////////////////
 // Check what graph engine we are using
 //////////////////////////////////////////////////////////////////////////////
@@ -395,6 +398,56 @@ switch ( $conf['graph_engine'] ) {
     break;
 
 } // end of switch ( $conf['graph_engine'])
+
+
+// Output to JSON
+if ( $user['json_graph'] ) {
+
+  $rrdtool_graph_args = "";
+  $graph_series = explode(" ", $rrdtool_graph['series']);
+
+  // First find RRDtool DEFs
+  foreach ( $graph_series as $key => $value ) {
+    if ( preg_match("/^DEF/", $value ) )  {
+      if ( preg_match("/(.*)\/(.*)\/(.*)\/(.*)(\.rrd)/", $value, $out ) ) {
+	$cluster_name = $out[2];
+	$host_name = $out[3];
+	$metric_name = $out[4];
+	$rrdtool_graph_args .= $value . " " . "XPORT:sum:" . $metric_name;
+      }
+    }
+  }
+
+  // This command will export values for the specified format in XML
+  $command = $conf['rrdtool'] . " xport --start " . $rrdtool_graph['start'] . " --end " .  $rrdtool_graph['end'] . " " . $rrdtool_graph_args;
+  // Read in the XML
+  $fp = popen($command,"r"); 
+  $string = "";
+  while (!feof($fp)) { 
+    $buffer = fgets($fp, 4096);
+    $string .= $buffer;
+  }
+  // Parse it
+  $xml = simplexml_load_string($string);
+  // 
+  $metric_values = array();
+  // Build the metric_values array
+  foreach ( $xml->data->row as $key => $objects ) {
+    $values = get_object_vars($objects);
+    $metric_array[] = array( "timestamp" => intval($values['t']), "value" => floatval($values['v']));
+  }
+
+  $output[] = array ( "cluster_name" => $cluster_name,
+      "host_name" => $host_name,
+      "target" => $metric_name, 
+      "metrics" => $metric_array);
+
+  header("Content-type: application/json");
+  print json_encode($output);
+
+  exit(1);
+}
+
 
 if ($debug) {
   error_log("Final rrdtool command:  $command");
