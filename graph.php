@@ -409,19 +409,18 @@ switch ( $conf['graph_engine'] ) {
 if ( $user['json_output'] || $user['csv_output'] ) {
 
   $rrdtool_graph_args = "";
-  $graph_series = explode(" ", $rrdtool_graph['series']);
 
-  // First find RRDtool DEFs
-  foreach ( $graph_series as $key => $value ) {
-    if ( preg_match("/^DEF/", $value ) )  {
-      if ( preg_match("/(DEF:\')(.*)(\'=\')(.*)\/(.*)\/(.*)\/(.*)(\.rrd)/", $value, $out ) ) {
+  // First find RRDtool DEFs by parsing $rrdtool_graph['series']
+  preg_match_all("| DEF:(.*) |U", $rrdtool_graph['series'], $matches);
+
+  foreach ( $matches[0] as $key => $value ) {
+    if ( preg_match("/(DEF:\')(.*)(\'=\')(.*)\/(.*)\/(.*)\/(.*)(\.rrd)/", $value, $out ) ) {
 	$ds_name = $out[2];
 	$cluster_name = $out[5];
 	$host_name = $out[6];
 	$metric_name = $out[7];
 	$output_array[] = array( "ds_name" => $ds_name, "cluster_name" => $out[5], "host_name" => $out[6], "metric_name" => $out[7] );
 	$rrdtool_graph_args .= $value . " " . "XPORT:" . $ds_name . ":" . $metric_name . " ";
-      }
     }
   }
 
