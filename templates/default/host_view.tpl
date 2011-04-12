@@ -176,7 +176,10 @@ $(function() {
 {foreach $g_metrics["metrics"] g_metric}
 <TD>
 <a name=metric_{$g_metric.metric_name}>
-<font style="font-size: 9px">{$g_metric.metric_name}</font> <a style="background-color: #dddddd" onclick="metricActions('{$g_metric.host_name}','{$g_metric.metric_name}', 'metric'); return false;" href="#">+</a><br>
+<font style="font-size: 9px">{$g_metric.metric_name}</font> <a style="background-color: #dddddd" onclick="metricActions('{$g_metric.host_name}','{$g_metric.metric_name}', 'metric'); return false;" href="#">+</a>
+<a href="./graph.php?{$g_metric.graphargs}&csv=1"><img alt="Export to CSV" height=16 width=16 src="img/csv.png"></a>
+<a href="./graph.php?{$g_metric.graphargs}&json=1"><img alt="Export as JSON" height=16 width=16 src="img/js.png"></a>
+<br>
 <A HREF="./graph_all_periods.php?{$g_metric.graphargs}&amp;z=large">
 <IMG BORDER=0 {$additional_host_img_html_args} ALT="{$g_metric.alt}" SRC="./graph.php?{$g_metric.graphargs}" TITLE="{$g_metric.desc}">
 </A>

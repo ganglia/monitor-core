@@ -52,9 +52,11 @@ foreach ( $reports["included_reports"] as $index => $report_name ) {
 
   if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
     $optional_reports .= "<a name=metric_" . $report_name . ">
-    <A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
+    <a href=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
     <IMG $additional_cluster_img_html_args BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
-    <a style=\"background-color: #dddddd\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph'); return false;\" href=\"#\">+</a>
+    <a style=\"background-color: #dddddd\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph'); return false;\" href=\"#\">+</a> 
+    <a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&csv=1\"><img alt=\"Export to CSV\" height=16 width=16 src=\"img/csv.png\"></a>
+    <a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&json=1\"><img alt=\"Export to JSON\" height=16 width=16 src=\"img/js.png\"></a>
 ";
   }
 
