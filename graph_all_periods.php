@@ -22,8 +22,10 @@ $query_string = "";
 
 // build a query string but drop r and z since those designate time window and size. Also if the 
 // get arguments are an array rebuild them
+$ignore_keys_list = array("r", "z", "st", "cs", "ce");
+
 foreach ($_GET as $key => $value) {
-  if ($key != "r" && $key != "z" && ! is_array($value))
+  if ( ! in_array($key, $ignore_keys_list) && ! is_array($value))
     $query_string_array[] = "$key=$value";
 
   // $_GET argument is an array. Rebuild it to pass it on
