@@ -411,7 +411,7 @@ if ( $user['json_output'] || $user['csv_output'] ) {
   $rrdtool_graph_args = "";
 
   // First find RRDtool DEFs by parsing $rrdtool_graph['series']
-  preg_match_all("| DEF:(.*) |U", $rrdtool_graph['series'], $matches);
+  preg_match_all("| DEF:(.*):AVERAGE|U", $rrdtool_graph['series'], $matches);
 
   foreach ( $matches[0] as $key => $value ) {
     if ( preg_match("/(DEF:\')(.*)(\'=\')(.*)\/(.*)\/(.*)\/(.*)(\.rrd)/", $value, $out ) ) {
