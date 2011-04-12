@@ -24,6 +24,7 @@ $(function() {
   $( "#metric_chooser" ).autocomplete({
 	source: availableMetrics
   });
+  $( ".ag_buttons" ).button();
 });
 </script>
 <div id="aggregate_graph_header">
@@ -43,7 +44,7 @@ $(function() {
 <div id="graph_type_menu"><input type="radio" name="gtype" value="line" checked>Line</input>
 <input type="radio" name="gtype" value="stack">Stacked</input></div></td>
 <td>
-<input type=submit onclick="createAggregateGraph(); return false" value="Create Graph"></td>
+<button class="ag_buttons" onclick="createAggregateGraph(); return false">Create Graph</button></td>
 </tr>
 </table>
 </form>
