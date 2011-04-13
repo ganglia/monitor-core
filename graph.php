@@ -39,6 +39,8 @@ $graphite_url = '';
 
 $user['json_output'] = isset($_GET["json"]) ? 1 : NULL; 
 $user['csv_output'] = isset($_GET["csv"]) ? 1 : NULL; 
+$user['flot_output'] = isset($_GET["flot"]) ? 1 : NULL; 
+
 
 // Get hostname
 $raw_host = isset($_GET["h"])  ?  sanitize ( $_GET["h"]  )   : "__SummaryInfo__";  
@@ -406,7 +408,7 @@ switch ( $conf['graph_engine'] ) {
 
 
 // Output to JSON
-if ( $user['json_output'] || $user['csv_output'] ) {
+if ( $user['json_output'] || $user['csv_output'] || $user['flot_output'] ) {
 
   $rrdtool_graph_args = "";
 
@@ -462,7 +464,28 @@ if ( $user['json_output'] || $user['csv_output'] ) {
   if ( $user['json_output'] ) {
 
     header("Content-type: application/json");
+    header("Content-Disposition: inline; filename=\"ganglia-metrics.json\"");
     print json_encode($output_array);
+
+  }
+
+  // If Flot output massage the data JSON
+  if ( $user['flot_output'] ) {
+
+    foreach ( $output_array as $key => $metric_array ) {
+      foreach ( $metric_array['metrics'] as $key => $values ) {
+	$data_array[] = array ( $values['timestamp'] * 1000,  $values['value']);  
+      }
+
+      $flot_array[] = array( 'label' =>  strip_domainname($metric_array['host_name']) . " " . $metric_array['metric_name'], 
+	  'data' => $data_array);
+
+      unset($data_array);
+
+    }
+
+    header("Content-type: application/json");
+    print json_encode($flot_array);
 
   }
 
