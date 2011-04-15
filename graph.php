@@ -233,9 +233,15 @@ if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
           
           $host_name = $out[0];
           $cluster_name = $out[1];
-          
+
+          $label = ''; 
+          if ($conf['strip_domainname'] == True )
+             $label = strip_domainname($host_name);
+          else
+             $label = $host_name;
+ 
           $graph_config['series'][] = array ( "hostname" => $host_name , "clustername" => $cluster_name,
-             "metric" => $metric_name,  "color" => $colors[$color_index], "label" => $host_name, "line_width" => $line_width, "type" => $graph_type);
+             "metric" => $metric_name,  "color" => $colors[$color_index], "label" => $label, "line_width" => $line_width, "type" => $graph_type);
              $counter++;
      
         }
