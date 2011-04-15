@@ -1,7 +1,7 @@
 {
    "report_name" : "network_report",
    "report_type" : "standard",
-   "title" : "Network Report",
+   "title" : "Network",
    "vertical_label" : "Bytes/sec",
    "series" : [
       { "metric": "bytes_in", "color": "33cc33", "label": "In", "line_width": "2", "type": "line" },

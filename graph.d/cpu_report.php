@@ -15,11 +15,7 @@ function graph_cpu_report( &$rrdtool_graph )
     }
 
     $title = 'CPU';
-    if ($context != 'host') {
-       $rrdtool_graph['title'] = $title;
-    } else {
-       $rrdtool_graph['title'] = "$hostname $title last $range";
-    }
+    $rrdtool_graph['title'] = $title;
     $rrdtool_graph['upper-limit'] = '100';
     $rrdtool_graph['lower-limit'] = '0';
     $rrdtool_graph['vertical-label'] = 'Percent';

@@ -1,7 +1,7 @@
 {
    "report_name" : "load_report",
    "report_type" : "standard",
-   "title" : "Load Report",
+   "title" : "Load",
    "vertical_label" : "Loads/Procs",
    "series" : [
       { "metric": "load_one", "color": "BBBBBB", "label": "1-min", "type": "stack" },

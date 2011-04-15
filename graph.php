@@ -99,9 +99,12 @@ switch ($context)
     case "host":
       $rrd_dir = $conf['rrds'] . "/$clustername/$raw_host";
       $rrd_graphite_link = $conf['graphite_rrd_dir'] . "/" . $clustername . "/" . $host;
-      $title = "";
-      if (!$summary)
-        $title = $metric_name ;
+      // Add hostname to report graphs' title in host view
+      if ($graph != 'metric')
+         if ($conf['strip_domainname'])
+            $title = strip_domainname($raw_host);
+         else
+            $title = $raw_host;
       break;
     default:
       $title = $clustername;
@@ -174,15 +177,6 @@ if ($sourcetime)
 if ($range == "month")
    $rrdtool_graph['end'] = floor($rrdtool_graph['end'] / 672) * 672;
 
-if ( isset( $rrdtool_graph['title'])) 
-   $rrdtool_graph['title'] = $rrdtool_graph['title'] . " last $range";
-else
-   $rrdtool_graph['title'] = $title . " last $range";
-
-if (isset($title)) {
-   $rrdtool_graph['title'] = $title . " last $range";
-}
-
 // Are we generating aggregate graphs
 if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
     
@@ -204,7 +198,8 @@ if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
     // Set up 
     $graph_config["report_name"] = $metric_name;
     $graph_config["report_type"] = "standard";
-    $graph_config["title"] = $metric_name . " last " . $range;
+    $graph_config["title"] = $metric_name;
+    $title = "Aggregate";
 
     // Colors to use
     $colors = array("128936","FF8000","158499","CC3300","996699","FFAB11","3366CC","01476F");
@@ -298,6 +293,12 @@ switch ( $conf['graph_engine'] ) {
     if (isset($conf['rrdtool_slope_mode']) && $conf['rrdtool_slope_mode'] == True)
         $rrdtool_graph['slope-mode'] = '';
   
+    if (isset($rrdtool_graph['title']))
+       if (isset($title))
+          $rrdtool_graph['title'] = $title . " " . $rrdtool_graph['title'] . " last $range";
+       else
+          $rrdtool_graph['title'] = $rrdtool_graph['title'];
+
     $command = $conf['rrdtool'] . " graph - $rrd_options ";
   
     // The order of the other arguments isn't important, except for the

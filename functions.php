@@ -839,7 +839,7 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
   }
    
   $title = sanitize( $graph_config[ 'title' ] );
-  $rrdtool_graph[ 'title' ] =  ($context == 'host') ? "$hostname $title last $range" : $title;
+  $rrdtool_graph[ 'title' ] = $title; 
   // If vertical label is empty or non-existent set it to space otherwise rrdtool will fail
   if ( ! isset($graph_config[ 'vertical_label' ]) || $graph_config[ 'vertical_label' ] == "" ) {
      $rrdtool_graph[ 'vertical-label' ] = " ";   
