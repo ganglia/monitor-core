@@ -400,7 +400,7 @@ switch ( $conf['graph_engine'] ) {
 	}
       } else {
 	// It's a simple metric graph
-	$target = "target=$host_cluster.$metric_name.sum&hideLegend=true&vtitle=$vlabel&areaMode=all";
+	$target = "target=$host_cluster.$metric_name.sum&hideLegend=true&vtitle=" . urlencode($vlabel) . "&areaMode=all";
 	$title = " ";
       }
 
