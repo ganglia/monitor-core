@@ -302,8 +302,6 @@ switch ( $conf['graph_engine'] ) {
     if (isset($rrdtool_graph['title']))
        if (isset($title))
           $rrdtool_graph['title'] = $title . " " . $rrdtool_graph['title'] . " last $range";
-       else
-          $rrdtool_graph['title'] = $rrdtool_graph['title'];
 
     $command = $conf['rrdtool'] . " graph - $rrd_options ";
   
