@@ -121,6 +121,7 @@ $data->assign('optional_graphs_data', $optional_graphs_data);
 # Correctly handle *_report cases and blank (" ") units
 #
 if (isset($units)) {
+  $vlabel = $units;
   if ($units == " ")
     $units = "";
   else
@@ -333,6 +334,9 @@ foreach ( $sorted_hosts as $host => $value )
 
       if ($showhosts == 1)
          $graphargs .= "&amp;x=$max&amp;n=$min";
+
+      if (isset($vlabel))
+         $graphargs .= "&amp;vl=" . urlencode($vlabel);
 
       if ($textval)
          {
