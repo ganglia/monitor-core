@@ -141,7 +141,7 @@ $(function() {
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
   <TD CLASS=title>
-  {$host} <strong>graphs</strong>
+  {$host} <strong>graphs</strong> ({$host_metrics_count})
   last <strong>{$range}</strong>
   sorted <strong>{$sort}</strong>
 {if isset($columns_dropdown)}

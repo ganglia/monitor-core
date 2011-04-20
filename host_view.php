@@ -239,7 +239,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
    {
       $g_metrics_group_data = array();
       ksort($g_metrics_group);
-
+      $host_metrics = 0;
       foreach ( $g_metrics_group as $group => $metric_array )
          {
             if ( $group == "" ) {
@@ -247,6 +247,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
             }
             $c = count($metric_array);
             $g_metrics_group_data[$group]["group_metric_count"] = $c;
+            $host_metrics += $c;
             $i = 0;
             ksort($g_metrics);
             foreach ( $g_metrics as $name => $v )
@@ -265,7 +266,7 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
                   }
                }
          }
-
+      $data->assign("host_metrics_count", $host_metrics);
    }
 
 $data->assign("g_metrics_group_data", $g_metrics_group_data);
