@@ -121,11 +121,6 @@ $conf['proc_run_color'] = "0000FF";
 $conf['cpu_num_color']  = "FF0000";
 $conf['num_nodes_color'] = "00FF00";
 
-#
-# Display number of cores in LOAD report graph
-#
-$conf['show_cores'] = false;
-
 # Other colors
 $conf['jobstart_color'] = "ff3300";
 

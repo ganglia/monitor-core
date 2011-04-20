@@ -37,7 +37,4 @@ if( isset( $conf['rrdcached_socket'] ) )
         $rrd_options .= " --daemon ${conf['rrdcached_socket']}";
     }
 }
-
-
-
 ?>

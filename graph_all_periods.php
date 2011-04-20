@@ -78,7 +78,7 @@ foreach ( $conf['time_ranges'] as $key => $value ) {
   print '<div class="img_view">' .
   '<a href="./graph.php?r=' . $key . $query_string .'&csv=1"><img alt="Export to CSV" height=16 width=16 src="img/csv.png"></a> ' .
   '<a href="./graph.php?r=' . $key . $query_string .'&json=1"><img alt="Export to JSON" height=16 width=16 src="img/js.png"></a>' .
-  '<br /><img alt="Last ' . $key . '" src="graph.php?r=' . $key . '&z=' . $largesize . $query_string . '"></div>';
+  '<br /><a href="./graph.php?r=' . $key . '&z=' . $xlargesize . $query_string . '"><img alt="Last ' . $key . '" src="graph.php?r=' . $key . '&z=' . $largesize . $query_string . '"></a></div>';
 
 }
 // The div below needs to be added to clear float left since in aggregate view things

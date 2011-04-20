@@ -5,6 +5,8 @@
    "vertical_label" : "Loads/Procs",
    "series" : [
       { "metric": "load_one", "color": "BBBBBB", "label": "1-min", "type": "stack" },
+      { "metric": "cpu_num", "color": "00FF00", "label": "Nodes", "line_width": "2", "type": "line", "ds": "num", "contexts": [ "cluster", "meta" ] },
+      { "metric": "cpu_num", "color": "FF0000", "label": "CPUs", "line_width": "2", "type": "line" },
       { "metric": "proc_run", "color": "2030F4", "label": "Procs", "line_width": "2", "type": "line" }
    ]
 }

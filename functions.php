@@ -867,10 +867,13 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
 
   // Available line types
   $line_widths = array("1","2","3");
-  
+
   // Loop through all the graph items
   foreach( $graph_config[ 'series' ] as $index => $item ) {
-   
+     // ignore item if context is not defined in json template
+     if ( isSet($item[ 'contexts' ]) and in_array($context, $item['contexts'])==false )
+         continue;
+
      $rrd_dir = $conf['rrds'] . "/" . $item['clustername'] . "/" . $item['hostname'];
 
      $metric = sanitize( $item[ 'metric' ] );
@@ -884,11 +887,18 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
       $unique_id = "a" . $index;
      
        $label = str_pad( sanitize( $item[ 'label' ] ), $max_label_length );
-       $series .= " DEF:'$unique_id'='$metric_file':'sum':AVERAGE ";
-     
+
+       // use custom DS defined in json template if it's defined (default = 'sum')
+       if ( isset($item[ 'ds' ]) ) {
+           $DS = sanitize( $item[ 'ds' ] );
+           $series .= " DEF:'$unique_id'='$metric_file':'$DS':AVERAGE ";
+       } else {
+           $series .= " DEF:'$unique_id'='$metric_file':'sum':AVERAGE ";
+       }
+
        // By default graph is a line graph
        isset( $item['type']) ? $item_type = $item['type'] : $item_type = "line";
-    
+
        // TODO sanitize color
        switch ( $item_type ) {
        

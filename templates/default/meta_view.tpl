@@ -45,21 +45,21 @@
 
 {if isset($source.self_summary_graphs)}
   <TD ALIGN="RIGHT" VALIGN="TOP">
-    <A HREF="./graph.php?{$source.graph_url}&amp;g=load_report&amp;z=large">
+    <A HREF="./graph_all_periods.php?{$source.graph_url}&amp;g=load_report&amp;z=large">
       <IMG SRC="./graph.php?{$source.graph_url}&amp;g=load_report&amp;z=medium"
            ALT="{$source.name} LOAD" BORDER="0">
     </A><BR>
-    <A HREF="./graph.php?{$source.graph_url}&amp;g=cpu_report&amp;z=large">
+    <A HREF="./graph_all_periods.php?{$source.graph_url}&amp;g=cpu_report&amp;z=large">
       <IMG SRC="./graph.php?{$source.graph_url}&amp;g=cpu_report&amp;z=medium"
            ALT="{$source.name} CPU" BORDER="0">
     </A>
   </TD>
   <TD VALIGN="TOP">
-    <A HREF="./graph.php?{$source.graph_url}&amp;g=mem_report&amp;z=large">
+    <A HREF="./graph_all_periods.php?{$source.graph_url}&amp;g=mem_report&amp;z=large">
       <IMG SRC="./graph.php?{$source.graph_url}&amp;g=mem_report&amp;z=medium"
            ALT="{$source.name} MEM" BORDER="0">
     </A><BR>
-    <A HREF="./graph.php?{$source.graph_url}&amp;g=network_report&amp;z=large">
+    <A HREF="./graph_all_periods.php?{$source.graph_url}&amp;g=network_report&amp;z=large">
       <IMG SRC="./graph.php?{$source.graph_url}&amp;g=network_report&amp;z=medium"
            ALT="{$source.name} NETWORK" BORDER="0">
     </A>
