@@ -153,9 +153,9 @@ if ($showhosts)
       foreach ($hosts_up as $host => $val)
          {
 
-	  // If host_regex is defined
-	  if ( isset($user['host_regex']) && ! preg_match("/" .$user['host_regex'] . "/", $host  ) )
-	    continue;
+            // If host_regex is defined
+            if ( isset($user['host_regex']) && ! preg_match("/" .$user['host_regex'] . "/", $host  ) )
+               continue;
             if ( isset($metrics[$host]["cpu_num"]['VAL']) and $metrics[$host]["cpu_num"]['VAL'] != 0 ){
                $cpus = $metrics[$host]["cpu_num"]['VAL'];
             } else {
@@ -184,6 +184,9 @@ if ($showhosts)
          
       foreach ($hosts_down as $host => $val)
          {
+            if ( isset($user['host_regex']) && ! preg_match("/" .$user['host_regex'] . "/", $host  ) )
+                continue;
+
             $load = -1.0;
             $down_hosts[$host] = $load;
             if(isset($percent_hosts[load_color($load)])) {
