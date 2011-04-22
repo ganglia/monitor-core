@@ -64,8 +64,6 @@
                 if (self.mouseDown) {
                     if (event.target == self.img || event.target == self.float[0]) {
                         self.go();
-                    } else {
-                        self.cancel();
                     }
                 }
             })
@@ -85,9 +83,13 @@
             self.img.mousedown(function (event) {
                 event.preventDefault();
                 self.shouldStopClick = false;
+                self.stopped = false;
                 var evt = event;
 
                 setTimeout(function () {
+                    if (self.stopped) {
+                        return;
+                    }
                     evt.stopPropagation();
                     var clickX = evt.pageX;
                     var clickY = evt.pageY;
@@ -128,11 +130,15 @@
             .mouseup(function (evt) {
                 if (self.mouseDown) {
                     self.go();
+                } else {
+                    self.cancel();
                 }
             })
             .click(function (event) {
                 if (self.shouldStopClick) {
                     event.preventDefault();
+                } else {
+                    self.stopped = true;
                 }
             });
         });
