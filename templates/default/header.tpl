@@ -85,6 +85,18 @@
 <style type="text/css">
     body{ font: 75% "Trebuchet MS", sans-serif; margin: 5px;}
 </style>
+
+{if $auth_system}
+<div style="float:right">
+  {if $username}
+    Currently logged in as: {$username} | <a href="logout.php">Logout</a>
+  {else}
+    You are not currently logged in. | <a href="login.php">Login</a>
+  {/if}
+</div>
+<br style="clear:both"/>
+{/if}
+
 <div id="tabs">
 <ul>
   <li><a href="#tabs-main">Main</a></li>

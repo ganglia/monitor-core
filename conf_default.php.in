@@ -4,10 +4,11 @@
 # Gmetad-webfrontend version. Used to check for updates.
 #
 $conf['ganglia_dir'] = dirname(__FILE__);
-$conf['views_dir'] = $conf['ganglia_dir'] . '/conf';
-$conf['conf_dir'] = $conf['ganglia_dir'] . '/conf';
 
 include_once $conf['ganglia_dir'] . "/version.php";
+
+# Enable access restrictions defined in auth.php?
+$conf['auth_system'] = false;
 
 #
 # The name of the directory in "./templates" which contains the
@@ -27,6 +28,10 @@ $conf['rrds'] = "${conf['gmetad_root']}/rrds";
 
 # Where Dwoo (PHP templating engine) store compiled templates
 $conf['dwoo_compiled_dir'] = "${conf['gmetad_root']}/dwoo";
+
+# Where to store web-based configuration
+$conf['views_dir'] = $conf['gmetad_root'] . '/conf';
+$conf['conf_dir'] = $conf['gmetad_root'] . '/conf';
 
 # Where to find filter configuration files, if not set filtering
 # will be disabled
