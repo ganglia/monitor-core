@@ -1,7 +1,7 @@
 # Location where gweb should be installed to
 DESTDIR = /var/www/html/gweb
 
-APACHE_USER = apache
+APACHE_USER = apache 
 
 # Gweb version
 GWEB_MAJOR_VERSION = 2
@@ -27,7 +27,7 @@ endif
 DIST_DIR = gweb-$(GWEB_VERSION)
 DIST_TARBALL = $(DIST_DIR).tar.gz
 
-TARGETS = conf_default.php gweb.spec version.php
+TARGETS = conf_default.php gweb.spec version.php .htaccess
 
 default:	$(TARGETS)
 
@@ -47,10 +47,15 @@ dist-dir:	default
 	svn --force export . $(DIST_DIR) > /dev/null 2>&1 && \
 	cp -a $(TARGETS) $(DIST_DIR)
 
+.htaccess:	.htaccess.in
+	secret=`php -r 'echo sha1(rand().microtime());'` && \
+	sed -e "s/@ganglia_secret@/$$secret/" .htaccess.in > .htaccess
+
 install:	dist-dir
 	mkdir -p $(DESTDIR) $(GWEB_DWOO) && \
+	mv $(DIST_DIR)/conf $(GWEB_STATEDIR)/ganglia && \
 	cp -a $(DIST_DIR)/* $(DESTDIR) && \
-	chown -R $(APACHE_USER):$(APACHE_USER) $(GWEB_DWOO) $(DESTDIR)/conf
+	chown -R $(APACHE_USER):$(APACHE_USER) $(GWEB_DWOO) $(GWEB_STATEDIR)/ganglia/conf
 
 dist-gzip:	dist-dir
 	if [ -f $(DIST_TARBALL) ]; then \
