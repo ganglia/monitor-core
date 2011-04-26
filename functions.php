@@ -976,4 +976,58 @@ function build_graphite_series( $config, $host_cluster = "" ) {
   
   return $output;
 }
+
+
+/**
+ * Check if current user has a privilege (view, edit, etc) on a resource.
+ * If resource is unspecified, we assume GangliaAcl::ALL.
+ *
+ * Examples
+ *   checkAccess( 'edit', $conf ); // user has global edit?
+ *   checkAccess( 'view', $conf ); // user has global view?
+ *   checkAccess( 'edit', $cluster ); // user can edit current cluster?
+ *   checkAccess( 'edit', 'cluster1', $conf ); // user has edit privilege on cluster1?
+ *   checkAccess( 'view', 'cluster1', $conf ); // user has view privilege on cluster1?
+ */
+function checkAccess() {
+  $args = func_get_args();
+  $privilege = $args[0];
+  switch(count($args)) {
+    case 2:
+      $resource=GangliaAcl::ALL;
+      $conf = $args[1];
+      break;
+    case 3:
+      $resource = $args[1];
+      $conf = $args[2];
+      break;
+    default:
+      trigger_error('checkAccess requires 2 or 3 arguments.',E_USER_ERROR);
+      break;
+  }
+  
+  // if auth system is disabled, everything is allowed.
+  if(!$conf['auth_system']) {
+    return true;
+  }
+  
+  // TODO: 'edit' needs to check for writeability of data directory.  error log if edit is allowed but we're unable to due to fs problems.
+  
+  $acl = GangliaAcl::getInstance();
+  $auth = GangliaAuth::getInstance();
+  
+  if(!$auth->isAuthenticated()) {
+    $user = GangliaAcl::GUEST;
+  } else {
+    $user = $auth->getUser();
+  }
+  
+  if(!$acl->has($resource)) {
+    throw new Exception("Unknown resource '$resource'.");
+  }
+  if($acl->hasRole($user)) {
+    return (bool) $acl->isAllowed($user, $resource, $privilege);
+  }
+  return false;
+}
 ?>

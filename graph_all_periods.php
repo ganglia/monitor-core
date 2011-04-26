@@ -8,23 +8,8 @@
   margin: 0 0 10px 10px;
 }
 </style>
-</head>
-<body>
 <?php
-
-if ( isset($_GET['mobile'])) {
-?>
-    <div data-role="page" class="ganglia-mobile" id="view-home">
-    <div data-role="header">
-      <a href="#" class="ui-btn-left" data-icon="arrow-l" onclick="history.back(); return false">Back</a>
-      <h3><?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?></h3>
-      <a href="#mobile-home">Home</a>
-    </div>
-    <div data-role="content">
-<?php
-}
-
-$query_string = "";
+include_once "./eval_conf.php";
 
 // build a query string but drop r and z since those designate time window and size. Also if the 
 // get arguments are an array rebuild them. For example with hreg (host regex)
@@ -40,7 +25,6 @@ foreach ($_GET as $key => $value) {
       $query_string_array[] = $key . "[]=" . $value2;
 
   }
-
 }
 
 // If we are in the mobile mode set the proper graph sizes
@@ -64,6 +48,44 @@ else if (isset($_GET['aggregate']) )
 else
   $description = "Unknown";
 
+
+if ( $conf['graph_engine'] == "flot" ) {
+?>
+<style>
+.flotgraph {
+  height: <?php print $conf['graph_sizes'][$largesize]["height"] ?>px;
+  width:  <?php print $conf['graph_sizes'][$largesize]["width"] ?>px;
+}
+</style>
+<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="js/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="js/jquery-1.5.2.min.js"></script>
+<script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
+
+<script type="text/javascript">
+  var default_time = 'hour';
+  var metric = "<?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?>";
+  var base_url = "<?php print 'graph.php?flot=1&' . $_GET['m'] . $query_string ?>" + "&r=" + default_time;
+</script>
+<script type="text/javascript" src="js/create-flot-graphs.js"></script>
+<?php
+} // end of if ( $conf['graph_engine'] == "flot" ) {
+?>
+</head>
+
+<body>
+<?php
+if ( isset($_GET['mobile'])) {
+?>
+    <div data-role="page" class="ganglia-mobile" id="view-home">
+    <div data-role="header">
+      <a href="#" class="ui-btn-left" data-icon="arrow-l" onclick="history.back(); return false">Back</a>
+      <h3><?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?></h3>
+      <a href="#mobile-home">Home</a>
+    </div>
+    <div data-role="content">
+<?php
+}
+
 // Skip printing the 
 if ( ! isset($_GET['aggregate'] )  ) {
 ?>
@@ -71,14 +93,25 @@ if ( ! isset($_GET['aggregate'] )  ) {
 <?php
 }
 
-include_once "./eval_conf.php";
-
 foreach ( $conf['time_ranges'] as $key => $value ) {
 
-  print '<div class="img_view">' .
+   print '<div class="img_view">' .
   '<a href="./graph.php?r=' . $key . $query_string .'&csv=1"><img alt="Export to CSV" height=16 width=16 src="img/csv.png"></a> ' .
   '<a href="./graph.php?r=' . $key . $query_string .'&json=1"><img alt="Export to JSON" height=16 width=16 src="img/js.png"></a>' .
-  '<br /><a href="./graph.php?r=' . $key . '&z=' . $xlargesize . $query_string . '"><img alt="Last ' . $key . '" src="graph.php?r=' . $key . '&z=' . $largesize . $query_string . '"></a></div>';
+  '<br />';
+
+  // If we are using flot we need to use a div instead of an image reference
+  if ( $conf['graph_engine'] == "flot" ) {
+
+    print '<div id="placeholder_' . $key . '" class="flotgraph img_view"></div>';
+
+  } else {
+
+    print '<a href="./graph.php?r=' . $key . '&z=' . $xlargesize . $query_string . '"><img alt="Last ' . $key . '" src="graph.php?r=' . $key . '&z=' . $largesize . $query_string . '"></a>';
+
+  }
+
+  print "</div>";
 
 }
 // The div below needs to be added to clear float left since in aggregate view things

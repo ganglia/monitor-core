@@ -255,6 +255,7 @@ if ( isset( $_GET["aggregate"] ) && $_GET['aggregate'] == 1 ) {
 // Check what graph engine we are using
 //////////////////////////////////////////////////////////////////////////////
 switch ( $conf['graph_engine'] ) {
+  case "flot":
   case "rrdtool":
     
     if ( ! isset($graph_config) ) {
@@ -411,7 +412,6 @@ switch ( $conf['graph_engine'] ) {
 
 } // end of switch ( $conf['graph_engine'])
 
-
 // Output to JSON
 if ( $user['json_output'] || $user['csv_output'] || $user['flot_output'] ) {
 
@@ -537,7 +537,8 @@ if($command || $graphite_url) {
         header ("Content-type: text/html");
         print "<html><body>";
         
-        switch ( $conf['graph_engine'] ) {  
+        switch ( $conf['graph_engine'] ) {
+	  case "flot":
           case "rrdtool":
             print htmlentities( $command );
             break;
@@ -549,6 +550,7 @@ if($command || $graphite_url) {
     } else {
         header ("Content-type: image/png");
         switch ( $conf['graph_engine'] ) {  
+	  case "flot":
           case "rrdtool":
             passthru($command);
             break;
