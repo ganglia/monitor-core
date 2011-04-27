@@ -1,7 +1,7 @@
 # Location where gweb should be installed to
 DESTDIR = /var/www/html/gweb
 
-APACHE_USER = apache 
+APACHE_USER = apache
 
 # Gweb version
 GWEB_MAJOR_VERSION = 2
