@@ -272,7 +272,10 @@ switch ( $conf['graph_engine'] ) {
           foreach ( $graph_config['series'] as $index => $item ) {
             if ( ! isset($graph_config['series'][$index]['hostname'])) {
               $graph_config['series'][$index]['hostname'] = $raw_host;
-              $graph_config['series'][$index]['clustername'] = $clustername;
+              if (isset($grid))
+                 $graph_config['series'][$index]['clustername'] = $grid;
+              else
+                 $graph_config['series'][$index]['clustername'] = $clustername;
             }
           }
           
