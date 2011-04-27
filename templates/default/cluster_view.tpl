@@ -39,6 +39,9 @@ $(function() {
        $.get('edit_optional_graphs.php', $("#edit_optional_reports_form").serialize(), function(data) {
           $('#edit_optional_graphs_content').html(data);
           $("#save_optional_graphs_button").hide();
+          setTimeout(function() {
+             $('#edit_optional_graphs').dialog('close');
+          }, 5000);
         });
       return false;
     });
