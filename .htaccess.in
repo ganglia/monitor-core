@@ -1,0 +1,10 @@
+# This should be moved to the main server config.
+# So it can't be read by other users on the server.
+SetEnv ganglia_secret @ganglia_secret@
+
+<Files "login.php">
+  AuthType Basic
+  AuthName "Ganglia Access"
+  AuthUserFile /var/lib/ganglia/htpasswd
+  Require valid-user
+</Files>
