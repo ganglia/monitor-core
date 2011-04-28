@@ -1,0 +1,11 @@
+List of third-party libraries and their respective licenses that are bundled with Ganglia Web Frontend.
+
+For license of Ganglia Web Frontend, please see the file COPYING in the same directory.
+
+PHP Class for creating pie charts using GD Library	Public Domain
+Dwoo PHP Template Engine				Modified BSD License		http://dwoo.org
+jQuery JavaScript Library				MIT License			http://jquery.org
+jQuery Mobile						MIT License			http://jquerymobile.com
+jQuery Live Search					CC Attribution 3.0 Unported	http://andreaslagerkvist.com/jquery/live-search
+Flot Javascript plotting library for jQuery		MIT License			http://code.google.com/p/flot
+Zend Framework Acl Library				New BSD License			http://framework.zend.com
