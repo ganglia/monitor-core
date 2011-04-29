@@ -44,7 +44,7 @@ version.php:	version.php.in
 	sed -e s/@GWEB_VERSION@/$(GWEB_VERSION)/ version.php.in > version.php
 
 dist-dir:	default
-	svn --force export . $(DIST_DIR) > /dev/null 2>&1 && \
+	rsync --exclude "$(DIST_DIR)" --exclude ".svn" --exclude ".git*" -a . $(DIST_DIR) && \
 	cp -a $(TARGETS) $(DIST_DIR)
 
 .htaccess:	.htaccess.in
