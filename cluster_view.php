@@ -153,9 +153,9 @@ if ($showhosts)
       foreach ($hosts_up as $host => $val)
          {
 
-            // If host_regex is defined
-            if ( isset($user['host_regex']) && ! preg_match("/" .$user['host_regex'] . "/", $host  ) )
-               continue;
+	  // If host_regex is defined
+	  if ( isset($user['host_regex']) && ! preg_match("/" .$user['host_regex'] . "/", $host  ) )
+	    continue;
             if ( isset($metrics[$host]["cpu_num"]['VAL']) and $metrics[$host]["cpu_num"]['VAL'] != 0 ){
                $cpus = $metrics[$host]["cpu_num"]['VAL'];
             } else {
@@ -184,9 +184,6 @@ if ($showhosts)
          
       foreach ($hosts_down as $host => $val)
          {
-            if ( isset($user['host_regex']) && ! preg_match("/" .$user['host_regex'] . "/", $host  ) )
-                continue;
-
             $load = -1.0;
             $down_hosts[$host] = $load;
             if(isset($percent_hosts[load_color($load)])) {
@@ -249,18 +246,22 @@ switch ($sort)
 
 $sorted_hosts = array_merge($down_hosts, $sorted_hosts);
 
-# First pass to find the max value in all graphs for this
-# metric. The $start,$end variables comes from get_context.php, 
-# included in index.php.
-list($min, $max) = find_limits($sorted_hosts, $metricname);
-
-# Second pass to output the graphs or metrics.
-$i = 1;
-
 if ( isset($user['max_graphs']) )
   $max_graphs = $user['max_graphs'];
 else
   $max_graphs = $conf['max_graphs'];
+
+# First pass to find the max value in all graphs for this
+# metric. The $start,$end variables comes from get_context.php, 
+# included in index.php.
+# Do this only if person has not selected a maximum set of graphs to display
+if ( $max_graphs == 0 ) {
+  list($min, $max) = find_limits($sorted_hosts, $metricname);
+}
+
+# Second pass to output the graphs or metrics.
+$i = 1;
+
 
 # Initialize overflow list
 $overflow_list = array();
@@ -335,7 +336,7 @@ foreach ( $sorted_hosts as $host => $value )
       if ($ce)
          $graphargs .= "&amp;ce=" . rawurlencode($ce);
 
-      if ($showhosts == 1)
+      if ($showhosts == 1 && $max_graphs == 0 )
          $graphargs .= "&amp;x=$max&amp;n=$min";
 
       if (isset($vlabel))
