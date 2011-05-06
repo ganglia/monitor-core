@@ -207,7 +207,7 @@ function node_image ($metrics)
 #
 function find_limits($nodes, $metricname)
 {
-   global $conf, $metrics, $clustername, $rrd_dir, $start, $end, $rrd_options;
+   global $conf, $metrics, $clustername, $rrd_dir, $start, $end, $rrd_options, $loaded_extensions;
 
    if (!count($metrics))
       return array(0, 0);
@@ -230,23 +230,39 @@ function find_limits($nodes, $metricname)
          $out = array();
 
          $rrd_dir = "${conf['rrds']}/$clustername/$host";
-         if (file_exists("$rrd_dir/$metricname.rrd")) {
-            $command = $conf['rrdtool'] . " graph /dev/null $rrd_options ".
-               "--start $start --end $end ".
-               "DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
-               "PRINT:limits:MAX:%.2lf ".
-               "PRINT:limits:MIN:%.2lf";
-            exec($command, $out);
-            if(isset($out[1])) {
-               $thismax = $out[1];
+         $rrd_file = "$rrd_dir/$metricname.rrd";
+         if (file_exists($rrd_file)) {
+            if (in_array('rrd', $loaded_extensions)) {
+              $values = rrd_fetch($rrd_file,
+                array(
+                  "--start", $start,
+                  "--end", $end,
+                  "AVERAGE"
+                )
+              );
+
+              $values = (array_filter(array_values($values['data']['sum']), 'is_finite'));
+              $thismax = max($values);
+              $thismin = min($values);
             } else {
-               $thismax = NULL;
+              $command = $conf['rrdtool'] . " graph /dev/null $rrd_options ".
+                 "--start $start --end $end ".
+                 "DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
+                 "PRINT:limits:MAX:%.2lf ".
+                 "PRINT:limits:MIN:%.2lf";
+              exec($command, $out);
+              if(isset($out[1])) {
+                 $thismax = $out[1];
+              } else {
+                 $thismax = NULL;
+              }
+              if (!is_numeric($thismax)) continue;
+              $thismin=$out[2];
+              if (!is_numeric($thismin)) continue;
             }
-            if (!is_numeric($thismax)) continue;
+
             if ($max < $thismax) $max = $thismax;
 
-            $thismin=$out[2];
-            if (!is_numeric($thismin)) continue;
             if ($min > $thismin) $min = $thismin;
             #echo "$host: $thismin - $thismax (now $value)<br>\n";
          }
