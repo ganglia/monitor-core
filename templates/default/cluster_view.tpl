@@ -110,8 +110,9 @@ $(function() {
   <IMG BORDER=0 {$additional_cluster_img_html_args} ALT="{$cluster} {$graph.name}" SRC="./graph.php?{$graph.graph_args}&amp;g={$graph.name}_report&amp;z=medium"></A>
   {/foreach}
 </div>
+{if $user_may_edit}
 <button id="edit_optional_graphs_button">Edit Optional Graphs</button>
-
+{/if}
 </TD>
 </TR>
 

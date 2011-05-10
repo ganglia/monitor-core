@@ -999,51 +999,58 @@ function build_graphite_series( $config, $host_cluster = "" ) {
  * If resource is unspecified, we assume GangliaAcl::ALL.
  *
  * Examples
- *   checkAccess( 'edit', $conf ); // user has global edit?
- *   checkAccess( 'view', $conf ); // user has global view?
- *   checkAccess( 'edit', $cluster ); // user can edit current cluster?
- *   checkAccess( 'edit', 'cluster1', $conf ); // user has edit privilege on cluster1?
- *   checkAccess( 'view', 'cluster1', $conf ); // user has view privilege on cluster1?
+ *   checkAccess( GangliaAcl::ALL_CLUSTERS, GangliaAcl::EDIT, $conf ); // user has global edit?
+ *   checkAccess( GangliaAcl::ALL_CLUSTERS, GangliaAcl::VIEW, $conf ); // user has global view?
+ *   checkAccess( $cluster, GangliaAcl::EDIT, $conf ); // user can edit current cluster?
+ *   checkAccess( 'cluster1', GangliaAcl::EDIT, $conf ); // user has edit privilege on cluster1?
+ *   checkAccess( 'cluster1', GangliaAcl::VIEW, $conf ); // user has view privilege on cluster1?
  */
-function checkAccess() {
-  $args = func_get_args();
-  $privilege = $args[0];
-  switch(count($args)) {
-    case 2:
-      $resource=GangliaAcl::ALL;
-      $conf = $args[1];
+function checkAccess($resource, $privilege, $conf) {
+  
+  if(!is_array($conf)) {
+    trigger_error('checkAccess: $conf is not an array.', E_USER_ERROR);
+  }
+  if(!isSet($conf['auth_system'])) {
+    trigger_error("checkAccess: \$conf['auth_system'] is not defined.", E_USER_ERROR);
+  }
+  
+  switch( $conf['auth_system'] ) {
+    case 'readonly':
+      $out = ($privilege == GangliaAcl::VIEW);
       break;
-    case 3:
-      $resource = $args[1];
-      $conf = $args[2];
+      
+    case 'enabled':
+      // TODO: 'edit' needs to check for writeability of data directory.  error log if edit is allowed but we're unable to due to fs problems.
+      
+      $acl = GangliaAcl::getInstance();
+      $auth = GangliaAuth::getInstance();
+      
+      if(!$auth->isAuthenticated()) {
+        $user = GangliaAcl::GUEST;
+      } else {
+        $user = $auth->getUser();
+      }
+      
+      if(!$acl->has($resource)) {
+        $resource = GangliaAcl::ALL_CLUSTERS;
+      }
+      
+      $out = false;
+      if($acl->hasRole($user)) {
+        $out = (bool) $acl->isAllowed($user, $resource, $privilege);
+      }
+      // error_log("checkAccess() user=$user, resource=$resource, priv=$privilege == $out");
       break;
+    
+    case 'disabled':
+      $out = true;
+      break;
+    
     default:
-      trigger_error('checkAccess requires 2 or 3 arguments.',E_USER_ERROR);
-      break;
+      trigger_error( "Invalid value '".$conf['auth_system']."' for \$conf['auth_system'].", E_USER_ERROR );
+      return false;
   }
   
-  // if auth system is disabled, everything is allowed.
-  if(!$conf['auth_system']) {
-    return true;
-  }
-  
-  // TODO: 'edit' needs to check for writeability of data directory.  error log if edit is allowed but we're unable to due to fs problems.
-  
-  $acl = GangliaAcl::getInstance();
-  $auth = GangliaAuth::getInstance();
-  
-  if(!$auth->isAuthenticated()) {
-    $user = GangliaAcl::GUEST;
-  } else {
-    $user = $auth->getUser();
-  }
-  
-  if(!$acl->has($resource)) {
-    throw new Exception("Unknown resource '$resource'.");
-  }
-  if($acl->hasRole($user)) {
-    return (bool) $acl->isAllowed($user, $resource, $privilege);
-  }
-  return false;
+  return $out;
 }
 ?>

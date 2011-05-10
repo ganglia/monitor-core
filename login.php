@@ -1,11 +1,11 @@
 <?php
 require_once 'eval_conf.php';
-require_once 'auth.php';
 
-if($conf['auth_system'] && isSet($_SERVER['REMOTE_USER']) && !empty($_SERVER['REMOTE_USER']) ){
+if($conf['auth_system'] == 'enabled' && isSet($_SERVER['REMOTE_USER']) && !empty($_SERVER['REMOTE_USER']) ){
   $auth = GangliaAuth::getInstance();
   $auth->setAuthCookie($_SERVER['REMOTE_USER']);
-  header("Location: index.php");
+  $redirect_to = isSet( $_SERVER['HTTP_REFERER'] ) ? $_SERVER['HTTP_REFERER'] : 'index.php';
+  header("Location: $redirect_to");
   die();
 }
 ?>
@@ -16,12 +16,13 @@ if($conf['auth_system'] && isSet($_SERVER['REMOTE_USER']) && !empty($_SERVER['RE
 <body>
   <h1>We were unable to log you in.</h1>
   <div>
-    <?php if(!$conf['auth_system']) { ?>
+    <?php if( ! isSet($conf['auth_system'] ) ) { ?>
+      <code>$conf['auth_system']</code> is not defined.<br/>  Please notify an administrator.
+    <?php } else if($conf['auth_system'] == 'disabled' || $conf['auth_system'] == 'readonly') { ?>
       Authentication is disabled by Ganglia configuration.<br/>
-      <code>$conf['auth_system'] = false;</code>
+      <code>$conf['auth_system'] = '<?php echo $conf['auth_system']; ?>';</code>
     <?php } else { ?>
-      Your administrator may have disabled authentication, or it may not be configured correctly.<br/>
-      This will occur if no authentication mechanism is configured in Apache.
+      Authentication is not configured correctly.  The web server must provide an authenticated username.
     <?php } ?>
   </div>
 </body>

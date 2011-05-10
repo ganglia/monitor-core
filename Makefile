@@ -52,7 +52,7 @@ dist-dir:	default
 	sed -e "s/@ganglia_secret@/$$secret/" .htaccess.in > .htaccess
 
 install:	dist-dir
-	mkdir -p $(DESTDIR) $(GWEB_DWOO) && \
+	mkdir -p $(DESTDIR) $(DESTDIR)/conf $(GWEB_DWOO) && \
 	mv $(DIST_DIR)/conf $(GWEB_STATEDIR)/ganglia && \
 	cp -a $(DIST_DIR)/* $(DESTDIR) && \
 	chown -R $(APACHE_USER):$(APACHE_USER) $(GWEB_DWOO) $(GWEB_STATEDIR)/ganglia/conf

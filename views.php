@@ -2,56 +2,52 @@
 
 include_once("./eval_conf.php");
 include_once("./functions.php");
+
+if( ! checkAccess(GangliaAcl::ALL_VIEWS, GangliaAcl::VIEW, $conf) ) {
+  die("You do not have access to view views.");
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // Create new view
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 if ( isset($_GET['create_view']) ) {
-  // Check whether the view name already exists
-  $view_exists = 0;
-
-  $available_views = get_available_views();
-
-  foreach ( $available_views as $view_id => $view ) {
-    if ( $view['view_name'] == $_GET['view_name'] ) {
-      $view_exists = 1;
-    }
-  }
-
-  if ( $view_exists == 1 ) {
-  ?>
-      <div class="ui-widget">
-	<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-	  <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-	  <strong>Alert:</strong> View with the name <?php print $_GET['view_name']; ?> already exists.</p>
-	</div>
-      </div>
-    <?php
+  if( ! checkAccess( GangliaAcl::ALL_VIEWS, GangliaAcl::EDIT, $conf ) ) {
+    $output = "You do not have access to edit views.";
   } else {
-    $empty_view = array ( "view_name" => $_GET['view_name'],
-      "items" => array() );
-    $view_suffix = str_replace(" ", "_", $_GET['view_name']);
-    $view_filename = $conf['views_dir'] . "/view_" . $view_suffix . ".json";
-    $json = json_encode($empty_view);
-    if ( file_put_contents($view_filename, $json) === FALSE ) {
-    ?>
-      <div class="ui-widget">
-	<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-	  <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-	  <strong>Alert:</strong> Can't write to file <?php print $view_filename; ?>. Perhaps permissions are wrong.</p>
-	</div>
-      </div>
-    <?php
+    // Check whether the view name already exists
+    $view_exists = 0;
+
+    $available_views = get_available_views();
+
+    foreach ( $available_views as $view_id => $view ) {
+      if ( $view['view_name'] == $_GET['view_name'] ) {
+        $view_exists = 1;
+      }
+    }
+
+    if ( $view_exists == 1 ) {
+      $output = "<strong>Alert:</strong> View with the name ".$_GET['view_name']." already exists.";
     } else {
-    ?>
-      <div class="ui-widget">
-	<div class="ui-state-default ui-corner-all" style="padding: 0 .7em;"> 
-	  <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-	  View has been created successfully.</p>
-	</div>
-	</div>
-    <?php
-    } // end of if ( file_put_contents($view_filename, $json) === FALSE ) 
-  }  // end of if ( $view_exists == 1 )
+      $empty_view = array ( "view_name" => $_GET['view_name'],
+        "items" => array() );
+      $view_suffix = str_replace(" ", "_", $_GET['view_name']);
+      $view_filename = $conf['views_dir'] . "/view_" . $view_suffix . ".json";
+      $json = json_encode($empty_view);
+      if ( file_put_contents($view_filename, $json) === FALSE ) {
+        $output = "<strong>Alert:</strong> Can't write to file $view_filename. Perhaps permissions are wrong.";
+      } else {
+        $output = "View has been created successfully.";
+      } // end of if ( file_put_contents($view_filename, $json) === FALSE ) 
+    }  // end of if ( $view_exists == 1 )
+  }
+?>
+<div class="ui-widget">
+  <div class="ui-state-default ui-corner-all" style="padding: 0 .7em;"> 
+    <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+    <?php echo $output ?></p>
+  </div>
+</div>
+<?php
   exit(1);
 } 
 
@@ -59,61 +55,51 @@ if ( isset($_GET['create_view']) ) {
 // Create new view
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 if ( isset($_GET['add_to_view']) ) {
-
-  $view_exists = 0;
-  // Check whether the view name already exists
-  $available_views = get_available_views();
-
-  foreach ( $available_views as $view_id => $view ) {
-    if ( $view['view_name'] == $_GET['view_name'] ) {
-      $view_exists = 1;
-      break;
-    }
-  }
-
-  if ( $view_exists == 0 ) {
-  ?>
-      <div class="ui-widget">
-	<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-	  <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-	  <strong>Alert:</strong> View <?php print $_GET['view_name']; ?> does not exist. This should not happen.</p>
-	</div>
-      </div>
-    <?php
+  if( ! checkAccess( GangliaAcl::ALL_VIEWS, GangliaAcl::EDIT, $conf ) ) {
+    $output = "You do not have access to edit views.";
   } else {
+    $view_exists = 0;
+    // Check whether the view name already exists
+    $available_views = get_available_views();
 
-    // Read in contents of an existing view
-    $view_filename = $view['file_name'];
-    // Delete the file_name index
-    unset($view['file_name']);
+    foreach ( $available_views as $view_id => $view ) {
+      if ( $view['view_name'] == $_GET['view_name'] ) {
+        $view_exists = 1;
+        break;
+      }
+    }
 
-    if ( $_GET['type'] == "metric" ) 
-      $view['items'][] = array( "hostname" => $_GET['host_name'], "metric" => $_GET['metric_name']);
-    else
-      $view['items'][] = array( "hostname" => $_GET['host_name'], "graph" => $_GET['metric_name']);
-
-    $json = json_encode($view);
-
-    if ( file_put_contents($view_filename, $json) === FALSE ) {
-    ?>
-      <div class="ui-widget">
-	<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-	  <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-	  <strong>Alert:</strong> Can't write to file <?php print $view_filename; ?>. Perhaps permissions are wrong.</p>
-	</div>
-      </div>
-    <?php
+    if ( $view_exists == 0 ) {
+      $output = "<strong>Alert:</strong> View ".$_GET['view_name']." does not exist. This should not happen.";
     } else {
-    ?>
-      <div class="ui-widget">
-	<div class="ui-state-default ui-corner-all" style="padding: 0 .7em;"> 
-	  <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-	  View has been updated successfully.</p>
-	</div>
-	</div>
-    <?php
-    } // end of if ( file_put_contents($view_filename, $json) === FALSE ) 
-  }  // end of if ( $view_exists == 1 )
+
+      // Read in contents of an existing view
+      $view_filename = $view['file_name'];
+      // Delete the file_name index
+      unset($view['file_name']);
+
+      if ( $_GET['type'] == "metric" ) 
+        $view['items'][] = array( "hostname" => $_GET['host_name'], "metric" => $_GET['metric_name']);
+      else
+        $view['items'][] = array( "hostname" => $_GET['host_name'], "graph" => $_GET['metric_name']);
+
+      $json = json_encode($view);
+
+      if ( file_put_contents($view_filename, $json) === FALSE ) {
+        $output = "<strong>Alert:</strong> Can't write to file $view_filename. Perhaps permissions are wrong.";
+      } else {
+        $output = "View has been updated successfully.";
+      } // end of if ( file_put_contents($view_filename, $json) === FALSE ) 
+    }  // end of if ( $view_exists == 1 )
+  }
+?>
+<div class="ui-widget">
+  <div class="ui-state-default ui-corner-all" style="padding: 0 .7em;"> 
+    <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+    <?php echo $output ?></p>
+  </div>
+</div>
+<?php
   exit(1);
 } 
 
@@ -148,10 +134,11 @@ if ( sizeof($available_views) == 0 ) {
   if ( isset($_GET['standalone']) ) {
     ?>
 <html><head>
-<script TYPE="text/javascript" SRC="js/jquery-1.4.4.min.js"></script>
+<script TYPE="text/javascript" SRC="js/jquery-1.5.2.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.8.11.custom.min.js"></script>
 <script type="text/javascript" src="js/jquery.liveSearch.js"></script>
 <script type="text/javascript" src="js/ganglia.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
 <link type="text/css" href="css/smoothness/jquery-ui-1.8.11.custom.css" rel="stylesheet" />
 <link type="text/css" href="css/jquery.liveSearch.css" rel="stylesheet" />
 <LINK rel="stylesheet" href="./styles.css" type="text/css">
@@ -171,8 +158,12 @@ if ( sizeof($available_views) == 0 ) {
 
   <?php
     if ( ! isset($_GET['standalone']) ) {
+      if(  checkAccess( GangliaAcl::ALL_VIEWS, GangliaAcl::EDIT, $conf ) ) {
   ?>
       <button onclick="return false" id=create_view_button>Create View</button>
+  <?php
+      }
+  ?>
       <a href="views.php?standalone=1" id="detach-tab-button">Detach Tab</a> 
   <?php
    }
@@ -185,7 +176,7 @@ if ( sizeof($available_views) == 0 ) {
     # List all the available views
     foreach ( $available_views as $view_id => $view ) {
       $v = $view['view_name'];
-      print '<li><a href="#" onClick="getViewsContentJustGraphs(\'' . $v . '\', \'1hour\', \'\',\'\'); return false;">' . $v . '</a></li>';
+      print '<li><a href="#" onClick="selectView(\'' . $v . '\'); return false;">' . $v . '</a></li>';
     }
 
     ?>
@@ -222,7 +213,7 @@ $(function(){
       else
 	$checked = "";
 #	$range_menu .= "<input OnChange=\"getViewsContentJustGraphs(document.getElementById('view_name').value);\" type=\"radio\" id=\"view-range-$v\" name=\"r\" value=\"$v\" $checked/><label for=\"view-range-$v\">$v</label>";
-      $range_menu .= "<input OnChange=\"document.getElementById('view-cs').value = ''; document.getElementById('view-ce').value = ''; getViewsContentJustGraphs(document.getElementById('view_name').value, '" . $v . "', '','');\" type=\"radio\" id=\"view-range-$v\" name=\"r\" value=\"$v\" $checked/><label for=\"view-range-$v\">$v</label>";
+      $range_menu .= "<input OnChange=\"$.cookie('ganglia-view-range', '" . $v . "'); document.getElementById('view-cs').value = ''; document.getElementById('view-ce').value = ''; getViewsContentJustGraphs(document.getElementById('view_name').value, '" . $v . "', '','');\" type=\"radio\" id=\"view-range-$v\" name=\"r\" value=\"$v\" $checked/><label for=\"view-range-$v\">$v</label>";
 
    }
   print $range_menu;

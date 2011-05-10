@@ -5,32 +5,43 @@
 // Depending whether we are editing hostname or clusters filenames
 // are going start with either host_ or cluster_
 //////////////////////////////////////////////////////////////////////////
-require_once('./eval_conf.php');
+require_once './eval_conf.php';
+require_once 'functions.php';
 // Load the host cache for validation purposes
-include_once('./cache.php');
+include_once './cache.php';
 
-$hostname = isset($_GET['hostname'])  ?  $_GET['hostname']   : "none";
+$hostname = isset($_GET['hostname'])  ? sanitize( $_GET['hostname'] ) : "none";
+if ( $hostname != "none" ) {
+    $json_filename_suffix = "/host_" . $hostname . ".json";
+    $clustername = $index_array['cluster'][$hostname];
+} else if ( $clustername != "none" ) {
+    // TODO Add validation for clusters
+    $clustername = isset($_GET['clustername'])  ? sanitize( $_GET['clustername'] ) : "none";
+    $json_filename_suffix = "/cluster_" . str_replace(" ", "_", $clustername) . ".json";
+}
+
+$error = false;
+if( ! checkAccess( $clustername, GangliaAcl::EDIT, $conf ) ) {
+  $error = "You do not have permission to make changes in cluster '$clustername'.";
 // Does host exist in the metric cache. If it doesn't something's wrong
-if ( ! isset($index_array['cluster'][$hostname] ) && $hostname != "none" ) {
-  ?>
-    <div class="ui-widget">
-              <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-                  <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-                  <strong>Alert:</strong> I can't find the hostname <strong><?php print $hostname; ?></strong> you supplied. It's either invalid or this host hasn't made it into the cache yet.</p>
-              </div>
+} else if ( ! isset($index_array['cluster'][$hostname] ) && $hostname != "none" ) {
+  $error = "I can't find the hostname <strong>$hostname</strong> you supplied. It's either invalid or this host hasn't made it into the cache yet.";
+}
+
+if( $error ) {
+?>
+  <div class="ui-widget">
+    <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+      <p>
+        <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+        <strong>Alert: <?php echo $error ?></strong> 
+      </p>
     </div>
-  <?php  
+  </div>
+<?php  
   exit(1);
 }
 
-// TODO Add validation for clusters
-$clustername = isset($_GET['clustername'])  ? $_GET['clustername'] : "none";
-
-if ( $hostname != "none" ) {
-    $json_filename_suffix = "/host_" . $hostname . ".json";
-} else if ( $clustername != "none" ) {
-    $json_filename_suffix = "/cluster_" . str_replace(" ", "_", $clustername) . ".json";
-}
 
 $default_reports = array("included_reports" => array(), "excluded_reports" => array());
 $default_file = $conf['conf_dir'] . "/default.json";

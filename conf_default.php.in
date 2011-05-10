@@ -7,8 +7,12 @@ $conf['ganglia_dir'] = dirname(__FILE__);
 
 include_once $conf['ganglia_dir'] . "/version.php";
 
-# Enable access restrictions defined in auth.php?
-$conf['auth_system'] = false;
+#
+# 'readonly': No authentication is required.  All users may view all resources.  No edits are allowed.
+#  'enabled': Guest users may view public clusters.  Login is required to make changes.  
+#             An administrator must configure an authentication scheme and ACL rules.
+# 'disabled': Guest users may perform any actions, including edits.  No authentication is required.
+$conf['auth_system'] = 'readonly';
 
 #
 # The name of the directory in "./templates" which contains the
@@ -266,4 +270,8 @@ $conf['graph_sizes_keys'] = array_keys( $conf['graph_sizes'] );
 # default: true  (for gmetad < 3.2)
 # default: false (for gmetad >= 3.2)
 $conf['case_sensitive_hostnames'] = true;
+
+# The following property controls whether the graphs contained in metric
+# groups are initially displayed or collapsed
+$conf['metric_groups_initially_collapsed'] = true;
 ?>

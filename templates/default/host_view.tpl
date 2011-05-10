@@ -131,7 +131,9 @@ $(function() {
 <TD ALIGN="CENTER" VALIGN="TOP" WIDTH="395">
 
 {$optional_reports}<br>
+{if $may_edit_cluster}
 <button id="edit_optional_graphs_button">Edit Optional Graphs</button>
+{/if}
 </TD>
 </TR>
 </TABLE>
@@ -171,12 +173,19 @@ $(function() {
   </TD>
 </TR>
 </TABLE>
+{if isset($metric_groups_initially_collapsed) && $metric_groups_initially_collapsed}
+<div id="{$group}_div" class="ui-helper-hidden">
+{else}
 <div id="{$group}_div">
+{/if}
 <TABLE><TR>
 {foreach $g_metrics["metrics"] g_metric}
 <TD>
 <a name=metric_{$g_metric.metric_name}>
-<font style="font-size: 9px">{$g_metric.metric_name}</font> <a style="background-color: #dddddd" onclick="metricActions('{$g_metric.host_name}','{$g_metric.metric_name}', 'metric'); return false;" href="#">+</a>
+<font style="font-size: 9px">{$g_metric.metric_name}</font>
+{if $may_edit_views}
+<a style="background-color: #dddddd" onclick="metricActions('{$g_metric.host_name}','{$g_metric.metric_name}', 'metric'); return false;" href="#">+</a>
+{/if}
 <a href="./graph.php?{$g_metric.graphargs}&csv=1"><img alt="Export to CSV" height=16 width=16 src="img/csv.png"></a>
 <a href="./graph.php?{$g_metric.graphargs}&json=1"><img alt="Export as JSON" height=16 width=16 src="img/js.png"></a>
 <br>

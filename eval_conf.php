@@ -39,12 +39,19 @@ if( ! isSet($conf['conf_dir']) || ! is_readable($conf['conf_dir']) ) {
   "Please adjust <code>\$conf['conf_dir']</code>.";
 }
 
-if($conf['auth_system']) {
-  $auth = GangliaAuth::getInstance();
-  if(!$auth->environmentIsValid()) {
-    $errors[] = "Problems found with authorization system configuration:".
-    "<ul><li>".implode("</li><li>",$auth->getEnvironmentErrors())."</li></ul>".
-    "You may also disable the authorization system with <code>\$conf['auth_system'] = false;</code>";
+$valid_auth_options = array( 'disabled', 'readonly', 'enabled' );
+if( ! isSet( $conf['auth_system'] ) ) {
+  $errors[] = "Please define \$conf['auth_system'] and set it to one of these values: '".implode( "','", $valid_auth_options ) ."'";
+} else {
+  if( ! in_array( $conf['auth_system'], $valid_auth_options ) ) {
+    $errors[] = "Please set \$conf['auth_system'] to one of these values: '".implode( "','", $valid_auth_options ) ."'";
+  } else if( $conf['auth_system'] == 'enabled' ) {    
+    $auth = GangliaAuth::getInstance();
+    if(!$auth->environmentIsValid()) {
+      $errors[] = "Problems found with authorization system configuration:".
+      "<ul><li>".implode("</li><li>",$auth->getEnvironmentErrors())."</li></ul>".
+      "You may also use <code>\$conf['auth_system'] = 'readonly';</code> or <code>\$conf['auth_system'] = 'disabled';</code>";
+    }
   }
 }
 

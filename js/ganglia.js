@@ -39,6 +39,14 @@ $(function(){
 
 });
 
+function selectView(view_name) {
+  $.cookie('ganglia-selected-view', view_name); 
+  var range = $.cookie('ganglia-view-range');
+  if (range == null)
+    range = '1hour';
+  getViewsContentJustGraphs(view_name, range, '', '');
+}
+
 function getViewsContent() {
   $.get('views.php', "" , function(data) {
     $("#tabs-views-content").html('<img src="img/spinner.gif">');
@@ -49,7 +57,18 @@ function getViewsContent() {
 	$( "#create-new-view-dialog" ).dialog( "open" );
       });;
     $( "#view_range_chooser" ).buttonset();
-    document.getElementById('view_name').value = "default";
+
+    // Restore previously selected view
+    var view_name = document.getElementById('view_name');
+    var selected_view = $.cookie("ganglia-selected-view");
+    if (selected_view != null) {
+        view_name.value = selected_view;
+	var range = $.cookie("ganglia-view-range");
+	if (range == null)
+          range = "hour";
+	$("#view-range-"+range).click();
+    } else
+      view_name.value = "default";
   });
   return false;
 }
