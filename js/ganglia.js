@@ -2,6 +2,34 @@ $(function(){
 
   // Follow tab's URL instead of loading its content via ajax
   $("#tabs").tabs();
+  // Restore previously selected tab
+  var selected_tab = $.cookie("ganglia-selected-tab");
+  if ((selected_tab != null) && (selected_tab.length > 0)) {
+    try {
+      var tab_index = parseInt(selected_tab, 10);
+      if (!isNaN(tab_index)) {
+        //alert("ganglia-selected-tab: " + tab_index);
+        $("#tabs").tabs("select", tab_index);
+        switch (tab_index) {
+          case 2:
+            getViewsContent();
+            break;
+          case 4:
+            autoRotationChooser();
+            break;
+        }
+      }
+    } catch (err) {
+      alert("Error(ganglia.js): Unable to select tab: " + 
+            tab_index + ". " + err.getDescription());
+    }
+  }
+
+  $("#tabs").bind("tabsselect", function(event, ui) {
+    // Store selected tab in a session cookie
+    $.cookie("ganglia-selected-tab", ui.index);
+  });
+
   $( "#range_menu" ).buttonset();
   $( "#sort_menu" ).buttonset();
 
