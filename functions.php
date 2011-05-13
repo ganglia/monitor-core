@@ -207,7 +207,7 @@ function node_image ($metrics)
 #
 function find_limits($nodes, $metricname)
 {
-   global $conf, $metrics, $clustername, $rrd_dir, $start, $end, $rrd_options, $loaded_extensions;
+   global $conf, $metrics, $clustername, $rrd_dir, $start, $end, $rrd_options;
 
    if (!count($metrics))
       return array(0, 0);
@@ -232,7 +232,7 @@ function find_limits($nodes, $metricname)
          $rrd_dir = "${conf['rrds']}/$clustername/$host";
          $rrd_file = "$rrd_dir/$metricname.rrd";
          if (file_exists($rrd_file)) {
-            if (in_array('rrd', $loaded_extensions)) {
+            if ( extension_loaded( 'rrd' ) ) {
               $values = rrd_fetch($rrd_file,
                 array(
                   "--start", $start,

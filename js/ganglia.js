@@ -7,7 +7,7 @@ $(function(){
   if ((selected_tab != null) && (selected_tab.length > 0)) {
     try {
       var tab_index = parseInt(selected_tab, 10);
-      if (!isNaN(tab_index)) {
+      if (!isNaN(tab_index) && (tab_index >= 0)) {
         //alert("ganglia-selected-tab: " + tab_index);
         $("#tabs").tabs("select", tab_index);
         switch (tab_index) {

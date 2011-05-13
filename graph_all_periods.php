@@ -96,8 +96,8 @@ if ( ! isset($_GET['aggregate'] )  ) {
 foreach ( $conf['time_ranges'] as $key => $value ) {
 
    print '<div class="img_view">' .
-  '<a href="./graph.php?r=' . $key . $query_string .'&csv=1"><img alt="Export to CSV" height=16 width=16 src="img/csv.png"></a> ' .
-  '<a href="./graph.php?r=' . $key . $query_string .'&json=1"><img alt="Export to JSON" height=16 width=16 src="img/js.png"></a>' .
+  '<a href="./graph.php?r=' . $key . $query_string .'&csv=1"><img title="Export to CSV" height=16 width=16 src="img/csv.png"></a> ' .
+  '<a href="./graph.php?r=' . $key . $query_string .'&json=1"><img title="Export to JSON" height=16 width=16 src="img/js.png"></a>' .
   '<br />';
 
   // If we are using flot we need to use a div instead of an image reference

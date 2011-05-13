@@ -52,7 +52,7 @@ class GangliaAuth {
   public function getEnvironmentErrors() {
     $errors = array();
     if(!isSet($_SERVER['ganglia_secret'])) {
-      $errors[] = "No ganglia_secret set in the Apache environment.  Try 'SetEnv ganglia_secret ".sha1(mt_rand().microtime())."'.";
+      $errors[] = "No ganglia_secret set in the server environment.  If you are using Apache, try adding 'SetEnv ganglia_secret ".sha1(mt_rand().microtime())."' to your configuration.";
     }
     return $errors;
   }

@@ -27,7 +27,7 @@ endif
 DIST_DIR = gweb-$(GWEB_VERSION)
 DIST_TARBALL = $(DIST_DIR).tar.gz
 
-TARGETS = conf_default.php gweb.spec version.php .htaccess
+TARGETS = conf_default.php gweb.spec version.php
 
 default:	$(TARGETS)
 
@@ -47,10 +47,6 @@ dist-dir:	default
 	rsync --exclude "$(DIST_DIR)" --exclude ".svn" --exclude ".git*" -a . $(DIST_DIR) && \
 	cp -a $(TARGETS) $(DIST_DIR)
 
-.htaccess:	.htaccess.in
-	secret=`php -r 'echo sha1(rand().microtime());'` && \
-	sed -e "s/@ganglia_secret@/$$secret/" .htaccess.in > .htaccess
-
 install:	dist-dir
 	mkdir -p $(DESTDIR) $(DESTDIR)/conf $(GWEB_DWOO) && \
 	mv $(DIST_DIR)/conf $(GWEB_STATEDIR)/ganglia && \
@@ -64,4 +60,4 @@ dist-gzip:	dist-dir
 	tar -czf $(DIST_TARBALL) $(DIST_DIR)/*
 
 uninstall:
-	rm -rf $(DESTDIR) $(GWEB_DWOO)
+	rm -rf $(DESTDIR) $(GWEB_DWOO) $(GWEB_STATEDIR)/ganglia/conf

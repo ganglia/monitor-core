@@ -41,7 +41,16 @@ if( ! isSet($conf['conf_dir']) || ! is_readable($conf['conf_dir']) ) {
 
 $valid_auth_options = array( 'disabled', 'readonly', 'enabled' );
 if( ! isSet( $conf['auth_system'] ) ) {
-  $errors[] = "Please define \$conf['auth_system'] and set it to one of these values: '".implode( "','", $valid_auth_options ) ."'";
+  $errors[] = "Please define \$conf['auth_system'] and set it to one of these values:
+  <ul>
+    <li><code>'readonly'</code> : All users can view.  No-one can edit.</li>
+    <li><code>'disabled'</code> : All users can view and edit anything.</li>
+    <li><code>'enabled'</code> : All users can view public clusters.  
+      Users may authenticate to gain additional access. (View private clusters, edit views, etc.)  
+      Requires configuration of an authentication mechanism in your web server.
+    </li>
+  </ul>
+  <br/>See <a href='https://sourceforge.net/apps/trac/ganglia/wiki/ganglia-web-2/AuthSystem'>https://sourceforge.net/apps/trac/ganglia/wiki/ganglia-web-2/AuthSystem</a> for more information.";
 } else {
   if( ! in_array( $conf['auth_system'], $valid_auth_options ) ) {
     $errors[] = "Please set \$conf['auth_system'] to one of these values: '".implode( "','", $valid_auth_options ) ."'";
@@ -50,7 +59,7 @@ if( ! isSet( $conf['auth_system'] ) ) {
     if(!$auth->environmentIsValid()) {
       $errors[] = "Problems found with authorization system configuration:".
       "<ul><li>".implode("</li><li>",$auth->getEnvironmentErrors())."</li></ul>".
-      "You may also use <code>\$conf['auth_system'] = 'readonly';</code> or <code>\$conf['auth_system'] = 'disabled';</code>";
+      "<br/>You may also use <code>\$conf['auth_system'] = 'readonly';</code> or <code>\$conf['auth_system'] = 'disabled';</code>";
     }
   }
 }
