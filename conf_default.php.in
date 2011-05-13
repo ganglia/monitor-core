@@ -273,5 +273,5 @@ $conf['case_sensitive_hostnames'] = true;
 
 # The following property controls whether the graphs contained in metric
 # groups are initially displayed or collapsed
-$conf['metric_groups_initially_collapsed'] = true;
+$conf['metric_groups_initially_collapsed'] = false;
 ?>
