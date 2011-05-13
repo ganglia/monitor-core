@@ -13,6 +13,7 @@ $data->assign("node_image", node_image($metrics));
 $data->assign("sort",$sort);
 $data->assign("range",$range);
 $data->assign("hostname", $hostname);
+$data->assign("graph_engine", $conf['graph_engine']);
 
 if ( isset($conf['metric_groups_initially_collapsed']) && 
      $conf['metric_groups_initially_collapsed'] === true )
@@ -60,8 +61,13 @@ foreach ( $reports["included_reports"] as $index => $report_name ) {
 
   if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
     $optional_reports .= "<a name=metric_" . $report_name . ">
-    <a href=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
-    <IMG $additional_cluster_img_html_args BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>";
+    <a href=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">";
+
+    if ( $conf['graph_engine'] == "flot" ) 
+      $optional_reports .= '<div id="placeholder_' . $graph_args . '&amp;g=' . $report_name .'&amp;z=medium&amp;c=' . $cluster_url . '" class="flotgraph2 img_view"></div>';
+    else
+      $optional_reports .= "<IMG $additional_cluster_img_html_args BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>";
+
     if(checkAccess(GangliaAcl::ALL_VIEWS, GangliaAcl::EDIT, $conf)) {
       $optional_reports .= "<a style=\"background-color: #dddddd\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph'); return false;\" href=\"#\">+</a> ";
     }
@@ -278,6 +284,10 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
       $data->assign("host_metrics_count", $host_metrics);
    }
 
+if ( $conf['graph_engine'] == "flot" ) {
+  $data->assign("graph_height", $conf['graph_sizes'][$size]["height"] + 50);
+  $data->assign("graph_width", $conf['graph_sizes'][$size]["width"]);
+}
 $data->assign("g_metrics_group_data", $g_metrics_group_data);
 $dwoo->output($tpl, $data);
 ?>

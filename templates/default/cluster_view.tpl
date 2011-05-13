@@ -49,6 +49,18 @@ $(function() {
 
 });
 </script>
+
+{if $graph_engine == "flot"}
+<script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
+<script type="text/javascript" src="js/create-flot-graphs.js"></script>
+<style>
+.flotgraph2 {
+  height: {$graph_height}px;
+  width:  {$graph_width}px;
+}
+</style>
+{/if}
+
 <style type="text/css">
   .toggler { width: 500px; height: 200px; }
   a.button { padding: .15em 1em; text-decoration: none; }

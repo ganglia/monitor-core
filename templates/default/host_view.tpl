@@ -46,6 +46,18 @@ $(function() {
 
 });
 </script>
+
+{if $graph_engine == "flot"}
+<script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
+<script type="text/javascript" src="js/create-flot-graphs.js"></script>
+<style>
+.flotgraph2 {
+  height: {$graph_height}px;
+  width:  {$graph_width}px;
+}
+</style>
+{/if}
+
 <style type="text/css">
   .toggler { width: 500px; height: 200px; }
   a.button { padding: .15em 1em; text-decoration: none; }
@@ -189,9 +201,13 @@ $(function() {
 <a href="./graph.php?{$g_metric.graphargs}&csv=1"><img alt="Export to CSV" height=16 width=16 src="img/csv.png"></a>
 <a href="./graph.php?{$g_metric.graphargs}&json=1"><img alt="Export as JSON" height=16 width=16 src="img/js.png"></a>
 <br>
+{if $graph_engine == "flot"}
+<div id="placeholder_{$g_metric.graphargs}" class="flotgraph2 img_view"></div>
+{else}
 <A HREF="./graph_all_periods.php?{$g_metric.graphargs}&amp;z=large">
 <IMG BORDER=0 {$additional_host_img_html_args} ALT="{$g_metric.alt}" SRC="./graph.php?{$g_metric.graphargs}" TITLE="{$g_metric.desc}">
 </A>
+{/if}
 </TD>
 {$g_metric.new_row}
 {/foreach}
