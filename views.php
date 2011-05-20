@@ -152,6 +152,13 @@ if ( sizeof($available_views) == 0 ) {
 <link type="text/css" href="css/smoothness/jquery-ui-1.8.11.custom.css" rel="stylesheet" />
 <link type="text/css" href="css/jquery.liveSearch.css" rel="stylesheet" />
 <LINK rel="stylesheet" href="./styles.css" type="text/css">
+<?php
+if ( isset($_GET['standalone']) && isset($_GET['view_name']) ) {
+
+  print "<script>selectView('" . $_GET['view_name'] . "');</script>";
+
+}
+?>
 </head>
 <body>
   <div id="tabs-views-content">
@@ -167,16 +174,12 @@ if ( sizeof($available_views) == 0 ) {
     <tr><td valign=top>
 
   <?php
-    if ( ! isset($_GET['standalone']) ) {
-      if(  checkAccess( GangliaAcl::ALL_VIEWS, GangliaAcl::EDIT, $conf ) ) {
-  ?>
-      <button onclick="return false" id=create_view_button>Create View</button>
-  <?php
-      }
-  ?>
-      <a href="views.php?standalone=1" id="detach-tab-button">Detach Tab</a> 
-  <?php
-   }
+    if(  checkAccess( GangliaAcl::ALL_VIEWS, GangliaAcl::EDIT, $conf ) ) {
+       print '<button onclick="return false" id=create_view_button>Create View</button>';
+    }
+    if ( ! isset($_GET['standalone']) && ! isset($_GET['just_graphs']) ) {
+       print '<a href="views.php?standalone=1" id="detach-tab-button">Detach Tab</a>';
+    }
   ?>
     <p>  <div id="views_menu">
       Existing views:
@@ -193,7 +196,13 @@ if ( sizeof($available_views) == 0 ) {
 <script>
 $(function(){
     $( "#view_range_chooser" ).buttonset();
+    <?php
+    if ( ! isset($_GET['standalone']) && ! isset($_GET['just_graphs']) ) {
+    ?>
     $( "#detach-tab-button").button();
+    <?php
+    }
+    ?>
     document.getElementById('view_name').value = "default";
 });
 </script>
