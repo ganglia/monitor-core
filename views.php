@@ -78,10 +78,20 @@ if ( isset($_GET['add_to_view']) ) {
       // Delete the file_name index
       unset($view['file_name']);
 
-      if ( $_GET['type'] == "metric" ) 
-        $view['items'][] = array( "hostname" => $_GET['host_name'], "metric" => $_GET['metric_name']);
-      else
-        $view['items'][] = array( "hostname" => $_GET['host_name'], "graph" => $_GET['metric_name']);
+      # If it's an aggregate
+      if ( isset($_GET['aggregate']) ) {
+
+	  $view['items'][] = array( "aggregate_graph" => "true", "metric" => $_GET['metric_name'], 
+	    "host_regex" => array( "regex" => $_GET['hreg'] ), "graph_type" => $_GET['graph_type']);
+
+      } else {
+
+	if ( $_GET['type'] == "metric" ) 
+	  $view['items'][] = array( "hostname" => $_GET['host_name'], "metric" => $_GET['metric_name']);
+	else
+	  $view['items'][] = array( "hostname" => $_GET['host_name'], "graph" => $_GET['metric_name']);
+
+      }
 
       $json = json_encode($view);
 

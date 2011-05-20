@@ -120,7 +120,7 @@ function createView() {
   return false;
 }
 
-function addMetricToView() {
+function addItemToView() {
   $.get('views.php', $("#add_metric_to_view_form").serialize() + "&add_to_view=1" , function(data) {
       $("#metric-actions-dialog-content").html('<img src="img/spinner.gif">');
       $("#metric-actions-dialog-content").html(data);
@@ -135,6 +135,15 @@ function metricActions(host_name,metric_name,type) {
      });
     return false;
 }
+function metricActionsAggregateGraph(hreg,metric_name,type) {
+    $( "#metric-actions-dialog" ).dialog( "open" );
+    $("#metric-actions-dialog-content").html('<img src="img/spinner.gif">');
+    $.get('actions.php', "action=show_views&hreg=" + hreg + "&metric_name=" + metric_name + "&graph_type=" + type, function(data) {
+      $("#metric-actions-dialog-content").html(data);
+     });
+    return false;
+}
+
 
 function autoRotationChooser() {
   $("#tabs-autorotation-chooser").html('<img src="img/spinner.gif">');

@@ -34,7 +34,7 @@ $(function() {
 <table id="aggregate_graph_table_form">
 <tr>
 <td>Host Regular expression e.g. web-[0,4], web or (web|db):</td>
-<td colspan=2><input name="hreg[]" size=60></td>
+<td colspan=2><input name="hreg[]" id="hreg" size=60></td>
 <tr>
 <tr><td>Metric (not a report e.g. load_one, cpu_system):</td>
 <td colspan=2><input name="m" id="metric_chooser"></td>
@@ -44,7 +44,8 @@ $(function() {
 <div id="graph_type_menu"><input type="radio" name="gtype" value="line" checked>Line</input>
 <input type="radio" name="gtype" value="stack">Stacked</input></div></td>
 <td>
-<button class="ag_buttons" onclick="createAggregateGraph(); return false">Create Graph</button></td>
+<button class="ag_buttons" onclick="createAggregateGraph(); return false">Create Graph</button>
+<button class="ag_buttons" onclick="metricActionsAggregateGraph($('#hreg').val(), $('#metric_chooser').val(), $('input[name=gtype]:checked').val()); return false">Add To View</button></td>
 </tr>
 </table>
 </form>
