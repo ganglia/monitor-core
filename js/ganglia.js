@@ -1,9 +1,14 @@
 $(function(){
+  // Ensure that the window has a unique name
+  if ((window.name == null) || window.name == "") {
+    var d = new Date();
+    window.name = d.getTime();
+  }
 
   // Follow tab's URL instead of loading its content via ajax
   $("#tabs").tabs();
   // Restore previously selected tab
-  var selected_tab = $.cookie("ganglia-selected-tab");
+  var selected_tab = $.cookie("ganglia-selected-tab-" + window.name);
   if ((selected_tab != null) && (selected_tab.length > 0)) {
     try {
       var tab_index = parseInt(selected_tab, 10);
@@ -27,7 +32,7 @@ $(function(){
 
   $("#tabs").bind("tabsselect", function(event, ui) {
     // Store selected tab in a session cookie
-    $.cookie("ganglia-selected-tab", ui.index);
+    $.cookie("ganglia-selected-tab-" + window.name, ui.index);
   });
 
   $( "#range_menu" ).buttonset();
@@ -67,9 +72,13 @@ $(function(){
 
 });
 
+function selectTab(tab_index) {
+  $("#tabs").tabs("select", tab_index);
+}
+
 function selectView(view_name) {
-  $.cookie('ganglia-selected-view', view_name); 
-  var range = $.cookie('ganglia-view-range');
+  $.cookie('ganglia-selected-view-' + window.name, view_name); 
+  var range = $.cookie('ganglia-view-range-' + window.name);
   if (range == null)
     range = '1hour';
   getViewsContentJustGraphs(view_name, range, '', '');
@@ -88,10 +97,10 @@ function getViewsContent() {
 
     // Restore previously selected view
     var view_name = document.getElementById('view_name');
-    var selected_view = $.cookie("ganglia-selected-view");
+    var selected_view = $.cookie("ganglia-selected-view-" + window.name);
     if (selected_view != null) {
         view_name.value = selected_view;
-	var range = $.cookie("ganglia-view-range");
+	var range = $.cookie("ganglia-view-range-" + window.name);
 	if (range == null)
           range = "hour";
 	$("#view-range-"+range).click();
