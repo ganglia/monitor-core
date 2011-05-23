@@ -11,18 +11,10 @@ function createAggregateGraph() {
   });
   return false;
 }
-var availableMetrics = [ <?php
-  require_once('./cache.php');
-  foreach ( $index_array['metrics'] as $key => $value)
-    $metrics[] = "'" . $key . "'";
-
-  print join(',', $metrics);
-  ?>
-];
 
 $(function() {
   $( "#metric_chooser" ).autocomplete({
-	source: availableMetrics
+	source: availablemetrics
   });
   $( ".ag_buttons" ).button();
 });
