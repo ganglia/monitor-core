@@ -4,14 +4,6 @@
 }
 </style>
 <script>
-function createAggregateGraph() {
-  $("#aggregate_graph_display").html('<img src="img/spinner.gif">');
-  $.get('graph_all_periods.php', $("#aggregate_graph_form").serialize() + "&aggregate=1" , function(data) {
-    $("#aggregate_graph_display").html(data);
-  });
-  return false;
-}
-
 $(function() {
   $( "#metric_chooser" ).autocomplete({
 	source: availablemetrics

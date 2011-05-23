@@ -144,6 +144,19 @@ function metricActions(host_name,metric_name,type) {
      });
     return false;
 }
+
+function createAggregateGraph() {
+  if ( $('#hreg').val() == "" ||  $('#metric_chooser').val() == "" ) {
+      alert("Host regular expression and metric name can't be blank");
+      return false;
+  }
+  $("#aggregate_graph_display").html('<img src="img/spinner.gif">');
+  $.get('graph_all_periods.php', $("#aggregate_graph_form").serialize() + "&aggregate=1" , function(data) {
+    $("#aggregate_graph_display").html(data);
+  });
+  return false;
+}
+
 function metricActionsAggregateGraph(hreg,metric_name,type) {
     $( "#metric-actions-dialog" ).dialog( "open" );
     $("#metric-actions-dialog-content").html('<img src="img/spinner.gif">');
