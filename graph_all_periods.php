@@ -57,10 +57,17 @@ if ( $conf['graph_engine'] == "flot" ) {
   width:  <?php print $conf['graph_sizes'][$largesize]["width"] ?>px;
 }
 </style>
+<?php
+// Add JQuery and flot loading only if this is not embedded in the Aggregate Graphs
+// Tab
+if ( ! isset($_GET['embed'] ) ) {
+?>
 <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="js/excanvas.min.js"></script><![endif]-->
 <script language="javascript" type="text/javascript" src="js/jquery-1.5.2.min.js"></script>
 <script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
-
+<?php
+} // end of if ( ! isset($_GET['embed'] )
+?>
 <script type="text/javascript">
   var default_time = 'hour';
   var metric = "<?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?>";
