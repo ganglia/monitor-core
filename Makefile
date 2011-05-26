@@ -51,7 +51,7 @@ install:	dist-dir
 	mkdir -p $(DESTDIR) $(DESTDIR)/conf $(GWEB_DWOO) && \
 	mv $(DIST_DIR)/conf $(GWEB_STATEDIR)/ganglia && \
 	cp -a $(DIST_DIR)/* $(DESTDIR) && \
-	chown -R $(APACHE_USER):$(APACHE_USER) $(GWEB_DWOO) $(GWEB_STATEDIR)/ganglia/conf
+	chown -R $(APACHE_USER):$(APACHE_USER) $(GWEB_DWOO) $(GWEB_STATEDIR)/ganglia/conf ${DESTDIR}/conf
 
 dist-gzip:	dist-dir
 	if [ -f $(DIST_TARBALL) ]; then \
