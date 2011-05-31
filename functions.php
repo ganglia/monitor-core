@@ -751,13 +751,13 @@ function get_view_graph_elements($view) {
 	// Check if item is an aggregate graph
 	if ( isset($item['aggregate_graph']) ) {
 
-	  foreach ( $item['host_regex'] as $reg_id => $regex ) {
-	    $graph_args_array[] = "hreg[]=" . urlencode($regex);
+	  foreach ( $item['host_regex'] as $reg_id => $regex_array ) {
+	    $graph_args_array[] = "hreg[]=" . urlencode($regex_array["regex"]);
 	  }
 
 	  if ( isset($item['metric_regex']) ) {
-	    foreach ( $item['metric_regex'] as $reg_id => $regex ) {
-	      $graph_args_array[] = "mreg[]=" . urlencode($regex);
+	    foreach ( $item['metric_regex'] as $reg_id => $regex_array ) {
+	      $graph_args_array[] = "mreg[]=" . urlencode($regex_array["regex"]);
 	    }
 	  }
 
