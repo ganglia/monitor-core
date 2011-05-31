@@ -1,7 +1,7 @@
 <!DOCTYPE html> 
 <html>
 <head>
-<title>Ganglia: Metric <?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?></title>
+<title>Ganglia: Graph all periods</title>
 <style>
 .img_view {
   float: left;
@@ -39,14 +39,24 @@ if ( isset($_GET['mobile'])) {
 // Join all the query_string arguments
 $query_string = "&" . join("&", $query_string_array);
 
+// Descriptive host/aggregate graph
 if (isset($_GET['h']))
   $description = $_GET['h'];
 else if (isset($_GET['c']))
   $description = $_GET['c'];
-else if (isset($_GET['aggregate']) )
-  $description = "Aggregate graph";
+else if (is_array($_GET['hreg']) )
+  $description = join(",", $_GET['hreg']);
 else
   $description = "Unknown";
+
+if (isset($_GET['g'])) 
+  $metric_description = $_GET['g'];
+else if ( isset($_GET['m'] ))
+  $metric_description = $_GET['m'];
+else if (is_array($_GET['mreg']) )
+  $metric_description = join(",", $_GET['mreg']);
+else
+  $metric_description = "Unknown";
 
 
 if ( $conf['graph_engine'] == "flot" ) {
@@ -93,10 +103,12 @@ if ( isset($_GET['mobile'])) {
 <?php
 }
 
-// Skip printing the 
-if ( ! isset($_GET['aggregate'] )  ) {
+// Skip printing if this is an aggregate graphs 
+if ( ! isset($_GET['embed'] )  ) {
 ?>
-<b>Host/Cluster/Aggregate: </b><?php print $description ?>&nbsp;<b>Metric/Graph: </b><?php if (isset($_GET['g'])) echo $_GET['g']; else echo $_GET['m']; ?><br />
+<b>Host/Cluster/Host Regex: </b><?php print $description ?>&nbsp;<b>Metric/Graph/Metric Regex: </b><?php 
+  print $metric_description; 
+?><br />
 <?php
 }
 
