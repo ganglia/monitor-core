@@ -108,7 +108,8 @@ static u_char bin2hex(int nib) {
 static int printHex(const char *a, int len, char *buf, int bufLen)
 {
   int b = 0;
-  for(int i = 0; i < len; i++) {
+  int i;
+  for(i = 0; i < len; i++) {
     if(b > (bufLen - 2)) return 0;
     u_char byte = a[i];
     buf[b++] = bin2hex(byte >> 4);
@@ -264,8 +265,8 @@ process_sflow_string(Ganglia_host *hostdata, EnumSFLOWGMetric tag, const char *v
   /* convenience macros for handling counters */
 #define SFLOW_CTR_LATCH(hdata,field) hdata->sflow->field = field
 #define SFLOW_CTR_DELTA(hdata,field) (field - hdata->sflow->field)
-#define SFLOW_CTR_RATE(hdata, field, mS) ((float)(SFLOW_CTR_DELTA(hdata, field)) * (float)1000.0 / (float)mS)
-#define SFLOW_CTR_MS_PC(hdata, field, mS) ((float)(SFLOW_CTR_DELTA(hdata, field)) * (float)100.0 / (float)mS)
+#define SFLOW_CTR_RATE(hdata, field, mS) ((mS) ? ((float)(SFLOW_CTR_DELTA(hdata, field)) * (float)1000.0 / (float)mS) : 0)
+#define SFLOW_CTR_MS_PC(hdata, field, mS) ((mS) ? ((float)(SFLOW_CTR_DELTA(hdata, field)) * (float)100.0 / (float)mS) : 0)
 
   /* metrics may be marked as "unsupported" by the sender,  so check for those reserved values */
 #define SFLOW_OK_FLOAT(field) (field != (float)-1)
