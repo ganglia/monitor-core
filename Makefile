@@ -9,7 +9,7 @@ GWEB_MINOR_VERSION = 0
 GWEB_MICRO_VERSION = 0
 
 # When set to "yes", GWEB_VERSION will include SVN revision
-SNAPSHOT = yes
+SNAPSHOT = no
 
 # Gweb statedir (where RRD files, Dwoo templates are stored)
 GWEB_STATEDIR = /var/lib
