@@ -68,6 +68,7 @@ static cfg_opt_t globals_opts[] = {
   CFG_STR("module_dir", NULL, CFGF_NONE),
   CFG_STR("override_hostname", NULL, CFGF_NONE),
   CFG_STR("override_ip", NULL, CFGF_NONE),
+  CFG_STR("tags", NULL, CFGF_NONE),
   CFG_END()
 };
 
