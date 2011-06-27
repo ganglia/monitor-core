@@ -80,6 +80,10 @@ apr_time_t udp_last_heard;
 int cluster_tag = 0;
 /* This host's location */
 char *host_location = NULL;
+/* This host name, spoofed */
+char *override_hostname = NULL;
+/* This host ip, spoofed */
+char *override_ip = NULL;
 /* Boolean. Will this host received gexec requests? */
 int gexec_on = 0;
 /* This is tweakable by globals{max_udp_msg_len=...} */
@@ -292,6 +296,9 @@ process_configuration_file(void)
   send_metadata_interval = cfg_getint( tmp, "send_metadata_interval");
   /* Get the DSO module dir */
   module_dir = cfg_getstr(tmp, "module_dir");
+  /* Acquire spoof name/ip, if they are specified */
+  override_hostname = cfg_getstr(tmp, "override_hostname");
+  override_ip = cfg_getstr(tmp, "override_ip");
 
   /* Commandline for debug_level trumps configuration file behaviour ... */
   if (args_info.debug_given) 
@@ -1166,7 +1173,7 @@ Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
        * since the xdr_free below will blast the value later (along with the other
        * allocated structure elements).  This is only performed once at gmetric creation */
       metric->name = apr_pstrdup(host->pool, message->Ganglia_value_msg_u.gstr.metric_id.name );
-      debug_msg("***Allocating value packet for host--%s-- and metric --%s-- ****\n", host->hostname, metric->name);
+      debug_msg("***Allocating value packet for host--%s-- and metric --%s-- ****\n", message->Ganglia_value_msg_u.gstr.metric_id.host, metric->name);
     }
 
 
@@ -2536,8 +2543,13 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
                 /* no memory */
                 return;
               }
-        
+
             name = cb->msg.Ganglia_value_msg_u.gstr.metric_id.name;
+            if (override_hostname != NULL)
+              {
+                cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrcat(gm_pool, override_ip != NULL ? override_ip : override_hostname, ":", override_hostname, NULL);
+                cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
+              }
             val = apr_pstrdup(gm_pool, host_metric_value(cb->info, &(cb->msg)));
             type = apr_pstrdup(gm_pool, host_metric_type(cb->info->type));
         
@@ -2574,7 +2586,14 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
                 debug_msg("\tsending metadata for metric: %s", cb->name);
 
                 ganglia_scoreboard_inc(PKTS_SENT_METADATA);
-                errors = Ganglia_metadata_send(gmetric, udp_send_channels);
+                if (override_hostname != NULL)
+                  {
+                    errors = Ganglia_metadata_send_real(gmetric, udp_send_channels, cb->msg.Ganglia_value_msg_u.gstr.metric_id.host);
+                  }
+                else
+                  {
+                    errors = Ganglia_metadata_send(gmetric, udp_send_channels);
+                  }
                 if (errors) 
                   {
                     err_msg("Error %d sending the modular data for %s\n", errors, cb->name);

@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <confuse.h>   /* header for libconfuse */
+
+#include <apr.h>
+#include <apr_strings.h>
+#include <apr_pools.h>
 
 #include "ganglia.h"
 #include "cmdline.h"
@@ -34,6 +39,10 @@ main( int argc, char *argv[] )
   /* parse the configuration file */
   gmond_config = Ganglia_gmond_config_create( args_info.conf_arg, !args_info.conf_given);
 
+  /* deal with spoof overrides */
+  cfg_t *globals = (cfg_t*) cfg_getsec( gmond_config, "globals" );
+  char *override_hostname = cfg_getstr( globals, "override_hostname" );
+  char *override_ip = cfg_getstr( globals, "override_ip" );
 
   /* build the udp send channels */
   send_channels = Ganglia_udp_send_channels_create(global_context, gmond_config);
@@ -50,6 +59,8 @@ main( int argc, char *argv[] )
       fprintf(stderr,"Unable to allocate gmetric structure. Exiting.\n");
       exit(1);
     }
+  apr_pool_t *gm_pool = (apr_pool_t*)gmetric->pool;
+
   if(args_info.spoof_given && args_info.heartbeat_given){
     rval = Ganglia_metric_set(gmetric, "heartbeat", "0", "uint32", "", 0, 0, 0);
   }else{
@@ -90,6 +101,11 @@ main( int argc, char *argv[] )
 
   if(args_info.spoof_given)
       Ganglia_metadata_add(gmetric, SPOOF_HOST, args_info.spoof_arg);
+  if(!args_info.spoof_given && override_hostname != NULL)
+    {
+      char *spoof_string = apr_pstrcat(gm_pool, override_ip != NULL ? override_ip : override_hostname, ":", override_hostname, NULL);
+      Ganglia_metadata_add(gmetric, SPOOF_HOST, spoof_string);
+    }
   if(args_info.heartbeat_given)
       Ganglia_metadata_add(gmetric, SPOOF_HEARTBEAT, "yes");
   if(args_info.group_given)
