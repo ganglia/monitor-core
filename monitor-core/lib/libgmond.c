@@ -66,6 +66,8 @@ static cfg_opt_t globals_opts[] = {
   CFG_BOOL("gexec", 0, CFGF_NONE),
   CFG_INT("send_metadata_interval", 0, CFGF_NONE),
   CFG_STR("module_dir", NULL, CFGF_NONE),
+  CFG_STR("override_hostname", NULL, CFGF_NONE),
+  CFG_STR("override_ip", NULL, CFGF_NONE),
   CFG_END()
 };
 
@@ -430,6 +432,12 @@ Ganglia_metric_create( Ganglia_pool parent_pool )
 int
 Ganglia_metadata_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels )
 {
+  return Ganglia_metadata_send_real( gmetric, send_channels, NULL );
+}
+
+int
+Ganglia_metadata_send_real( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels, char *override_string )
+{
   int len, i;
   XDR x;
   char gmetricmsg[GANGLIA_MAX_MESSAGE_LEN];
@@ -444,9 +452,17 @@ Ganglia_metadata_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_ch
 
   msg.id = gmetadata_full;
   memcpy( &(msg.Ganglia_metadata_msg_u.gfull.metric), gmetric->msg, sizeof(Ganglia_metadata_message));
-  msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gm_pool, (char*)myhost);
   msg.Ganglia_metadata_msg_u.gfull.metric_id.name = apr_pstrdup (gm_pool, gmetric->msg->name);
-  msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = FALSE;
+  if ( override_string != NULL )
+    {
+      msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gm_pool, (char*)override_string);
+      msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = TRUE;
+    }
+    else
+    {
+      msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gm_pool, (char*)myhost);
+      msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = FALSE;
+    }
 
   arr = apr_table_elts(gmetric->extra);
   elts = (const apr_table_entry_t *)arr->elts;
@@ -492,6 +508,12 @@ Ganglia_metadata_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_ch
 int
 Ganglia_value_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels )
 {
+  return Ganglia_value_send_real( gmetric, send_channels, NULL );
+}
+
+int
+Ganglia_value_send_real( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels, char *override_string )
+{
   int len, i;
   XDR x;
   char gmetricmsg[GANGLIA_MAX_MESSAGE_LEN];
@@ -505,9 +527,17 @@ Ganglia_value_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_chann
       apr_gethostname( (char*)myhost, APRMAXHOSTLEN+1, gm_pool);
 
   msg.id = gmetric_string;
-  msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gm_pool, (char*)myhost);
+  if (override_string != NULL)
+    {
+      msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gm_pool, (char*)override_string);
+      msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
+    }
+    else
+    {
+      msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup (gm_pool, (char*)myhost);
+      msg.Ganglia_value_msg_u.gstr.metric_id.spoof = FALSE;
+    }
   msg.Ganglia_value_msg_u.gstr.metric_id.name = apr_pstrdup (gm_pool, gmetric->msg->name);
-  msg.Ganglia_value_msg_u.gstr.metric_id.spoof = FALSE;
   msg.Ganglia_value_msg_u.gstr.fmt = apr_pstrdup (gm_pool, "%s");
   msg.Ganglia_value_msg_u.gstr.str = apr_pstrdup (gm_pool, gmetric->value);
 

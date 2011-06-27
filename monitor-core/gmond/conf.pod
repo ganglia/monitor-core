@@ -152,6 +152,10 @@ because any node can request the metadata of all other nodes in the cluster.
 However in unicast mode, a resend interval must be established. The interval
 value is the minimum number of seconds between resends.
 
+The B<override_hostname> and B<override_ip> parameters allow an arbitrary
+hostname and/or IP (hostname can be optionally specified without IP) to
+use when identifying metrics coming from this host.
+
 The B<module_dir> is an optional parameter indicating the directory where
 the DSO modules are to be located.  If absent, the value to use is set at
 configure time with the --with-moduledir option which will default if omitted
