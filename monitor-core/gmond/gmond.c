@@ -84,6 +84,8 @@ char *host_location = NULL;
 char *override_hostname = NULL;
 /* This host ip, spoofed */
 char *override_ip = NULL;
+/* Tags */
+char *tags = NULL;
 /* Boolean. Will this host received gexec requests? */
 int gexec_on = 0;
 /* This is tweakable by globals{max_udp_msg_len=...} */
@@ -299,6 +301,9 @@ process_configuration_file(void)
   /* Acquire spoof name/ip, if they are specified */
   override_hostname = cfg_getstr(tmp, "override_hostname");
   override_ip = cfg_getstr(tmp, "override_ip");
+
+  /* Any tags for this host */
+  tags = cfg_getstr(tmp, "tags");
 
   /* Commandline for debug_level trumps configuration file behaviour ... */
   if (args_info.debug_given) 
@@ -1475,9 +1480,10 @@ print_host_start( apr_socket_t *client, Ganglia_host *hostinfo)
   int tn = (now - hostinfo->last_heard_from) / APR_USEC_PER_SEC;
 
   len = apr_snprintf(hostxml, 1024, 
-           "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%d\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" LOCATION=\"%s\" GMOND_STARTED=\"%d\">\n",
+           "<HOST NAME=\"%s\" IP=\"%s\" TAGS=\"%s\" REPORTED=\"%d\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" LOCATION=\"%s\" GMOND_STARTED=\"%d\">\n",
                      hostinfo->hostname, 
-                     hostinfo->ip, 
+                     hostinfo->ip,
+                     tags ? tags : "",
                      (int)(hostinfo->last_heard_from / APR_USEC_PER_SEC),
                      tn,
                      host_tmax,
