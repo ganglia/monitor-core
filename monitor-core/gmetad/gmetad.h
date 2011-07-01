@@ -69,7 +69,8 @@ typedef enum
       SUM_TAG,
       NUM_TAG,
       EXTRA_DATA_TAG,
-      EXTRA_ELEMENT_TAG
+      EXTRA_ELEMENT_TAG,
+      TAGS_TAG
    }
 xml_tag_t;
 
