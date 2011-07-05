@@ -1,0 +1,325 @@
+ganglia (3.2.0-3) unstable; urgency=low
+  
+  * Fix jasons broken adduser
+
+ -- Artur Bergman <artur@fastly.com>  Tue, 05 Jul 2011 02:32:59 +0000
+
+ganglia (3.2.0-2) unstable; urgency=low
+  
+  * Replace useradd with adduser for gmetad too
+
+ -- Jason Cook <jason@fastly.com>  Mon, 04 Jul 2011 18:36:20 -0700
+
+ganglia (3.2.0-1) unstable; urgency=low
+  
+  * Replace useradd with adduser
+
+ -- Jason Cook <jason@fastly.com>  Fri, 01 Jul 2011 16:21:42 -0700
+
+ganglia (3.2.0-0) unstable; urgency=low
+  
+  * Rebase against 3.2.x svn
+
+ -- Jason Cook <jason@fastly.com>  Fri, 01 Jul 2011 15:15:49 -0700
+
+ganglia (3.1.7-2) unstable; urgency=low
+  
+  * Stop ganglia-monitor from changing permissions on /var/lib/ganglia
+    in postinst. Closes: #586909
+  * Switch from adduser to useradd in postinst and prerm. Closes: #620505 
+  * Include Danish debconf template. Closes: #605328
+  * Remove la files from dependency_libs. Closes: #621232 #620721
+  * Switch to dpkg-source 3.0 (quilt) format
+
+ -- Stuart Teasdale <sdt@debian.org>  Thu, 07 Apr 2011 21:26:32 +0100
+
+ganglia (3.1.7-1) unstable; urgency=low
+
+  * New upstream version. Closes: #584276. 
+  * Bump of standards-version to 3.8.4 
+  * Add build-dep on libpcre3-dev
+
+ -- Stuart Teasdale <sdt@debian.org>  Tue, 15 Jun 2010 22:33:13 +0100
+
+ganglia (3.1.2-3.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Fix pending l10n issues. Debconf translations:
+    - Czech (Michal Simunek).  Closes: #538741
+    - Italian (Vincenzo Campanella).  Closes: #556105
+    - Czech (Michal Simunek).  Closes: #574010
+
+ -- Christian Perrier <bubulle@debian.org>  Mon, 22 Mar 2010 00:45:10 +0100
+
+ganglia (3.1.2-3) unstable; urgency=high
+
+  * Adjust the default umask of the daemons. Closes: #567175
+  * Fix in postinst to change the umask of existing rrds
+  * Add build dependency for libdbi0-dev. Closes: #569395
+  * Horrid directory mangling in postinst hacked around for permissions 
+
+ -- Stuart Teasdale <sdt@debian.org>  Sat, 13 Feb 2010 23:15:02 +0000
+
+ganglia (3.1.2-2.1) unstable; urgency=low
+
+  * Non-maintainer upload by arrangement with maintainer.
+
+  [ Jonathan Wiltshire ]
+  * Debconf templates and debian/control reviewed by the debian-l10n-
+    english team as part of the Smith review project. Closes: #539204
+  * Debconf translation updates:
+     - Swedish (closes: #539217)
+     - Finnish (closes: #539325)
+     - Czech (closes: #539614)
+     - Basque (closes: #539872)
+     - French (closes: #540038)
+     - Italian (closes: #540200)
+     - German (closes: #540220)
+     - Spanish (closes: #540708)
+     - Portugese (closes: #540769)
+     - Russian (closes: #540849)
+     - Vietnamese (closes: #547916)
+     - Japanese (closes: #551022)
+  * Refactor ganglia-webfrontend.{post,pre}inst for changed templates, and
+    simultaneously purge old code now that apache2 is the only package in
+    Squeeze. Use the a2enmod and a2dismod helpers to enable and disable the
+    Apache module instead of directly creating symbolic links.
+
+  [ Christian Perrier ]
+  * Debconf translation updates:
+    - Galician (Marce Villarino).  Closes: #555451
+
+ -- Christian Perrier <bubulle@debian.org>  Tue, 10 Nov 2009 22:02:43 +0100
+
+ganglia (3.1.2-2) unstable; urgency=low
+
+  * Tweaks to ganglia-webfrontend debconf templates
+  * If we have an old gmond.conf convert it. Closes: #512154 
+  * Changes to the example apache aliases. Closes: #518255
+
+ -- Stuart Teasdale <sdt@debian.org>  Thu, 02 Jul 2009 19:59:35 +0100
+
+ganglia (3.1.2-1) experimental; urgency=low
+
+  * New upstream version with security fixes. (Closes: #512365.)
+  * Include the gmond.conf manpage in the ganglia-monitor package.
+    Closes: #512695.
+  * Fix up the apache config stub. Closes: #512153.
+
+ -- Stu Teasdale <sdt@debian.org>  Sat, 31 Jan 2009 21:43:26 +0000
+
+ganglia (3.1.1-3)
+experimental; urgency=low
+
+  * Extra dependencies to allow php5-gd to be loaded 
+  * Fix gmond.conf to run gmond as the ganglia user. Closes: #510381
+
+ -- Stu Teasdale <sdt@debian.org>  Tue,  6 Dec 2008 13:30:30 +0000
+
+ganglia (3.1.1-2) experimental; urgency=low
+
+  * Ensure all archs use $prefix/lib for library installs. 
+    Closes: #507008.
+  * Build option tweaks
+  * Ensure graph.d is correctly pulled in. Closes: #507012.
+  * actually ship the apapche.conf 
+
+ -- Stuart Teasdale <sdt@debian.org>  Wed, 12 Nov 2008 21:47:51 +0000
+
+ganglia (3.1.1-1) experimental; urgency=low
+
+  * New upstream version
+  * Fix libganglia1 version dependencies
+  * Change maintainer to sdt@debian.org
+  * Add explicit libxml2-dev build-dep. Closes: #493947.
+
+ -- Stuart Teasdale <sdt@debian.org>  Sun, 31 Aug 2008 10:34:13 +0100
+
+ganglia (3.1.0-1) experimental; urgency=low
+
+  * New Upstream version
+  * Includes ganglia-webfrontend package. Closes: #284346.
+
+ -- Stuart Teasdale <stu@drogna.org.uk>  Sun, 29 Jun 2008 10:13:45 +0100
+
+ganglia-monitor-core (2.5.7-2) unstable; urgency=low
+
+  * Autoreconfed again for mips/mipsel shared library support.
+    Closes: #285212.
+
+ -- Stuart Teasdale <stu@drogna.org.uk>  Sat, 11 Dec 2004 18:07:29 +0000
+
+ganglia-monitor-core (2.5.7-1) unstable; urgency=low
+
+  * New upstream release, closes #281526.
+
+ -- Stuart Teasdale <stu@drogna.org.uk>  Sat, 20 Nov 2004 13:06:30 +0000
+
+ganglia-monitor-core (2.5.5-8) unstable; urgency=low
+
+  * Friendly package takeover, thanks to Preston Smith for his work up to
+    now.
+  * New maintainer is Stuart Teasdale.
+  * New uploaders are Stephen Quinney and Andrew Stribblehill.
+  * Removed conflicts with firebird2-utils-super and
+    firebird2-utils-classic. firebird2 changed the name of its gstat
+    binary to fbstat, closes: #281527.
+
+ -- Stephen Quinney <stephen@jadevine.org.uk>  Tue, 16 Nov 2004 18:40:32 +0000
+
+ganglia-monitor-core (2.5.5-7) unstable; urgency=low
+
+  * Updated conflicts with /usr/bin/gstat for packages 
+    firebird2-utils-super firebird2-utils-classic. 
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Wed, 20 Oct 2004 10:10:29 -0500
+
+ganglia-monitor-core (2.5.5-6) unstable; urgency=low
+
+  * Added patch to check for matching strings while parsing /proc files.
+    Some architectures, or UML, etc. don't match all the regular cases.
+    Fix sprouted from segfaults in determining cpu MHz on UML.
+    (Closes: #235827)
+
+ -- Preston Smith <psmith@foobird.net>  Mon, 17 May 2004 13:52:45 -0500
+
+ganglia-monitor-core (2.5.5-5) unstable; urgency=low
+
+  * Make install wasn't putting ganglia header files in /usr/include, fixed.
+    (Closes: #237202)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Wed, 10 Mar 2004 09:03:38 -0500
+
+ganglia-monitor-core (2.5.5-4) unstable; urgency=low
+
+  * Fixed postinst scripts that didn't have --system for creating 
+    the ganglia group. (Closes: #227020)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Sat, 10 Jan 2004 10:55:05 -0500
+
+ganglia-monitor-core (2.5.5-3) unstable; urgency=low
+
+  * Fixed bad logic in postrms, for removing /var/lib/ganglia/rrds. 
+    Made sure that rm uses -f to catch any errors. (Closes: #222706) 
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Fri,  5 Dec 2003 14:20:13 -0500
+
+ganglia-monitor-core (2.5.5-2) unstable; urgency=low
+
+  * Configure script lacked the proper version number (thought it was still
+    2.5.4). Fixed. (Closes: #221264)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Mon, 17 Nov 2003 12:57:17 -0500
+
+ganglia-monitor-core (2.5.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * This release fixes DOS that can crash gmond if a specially crafted packet
+    is sent to it.
+  * Fixed gmetad's dependencies, which for some reason manually specified a
+    libc version, which was keeping it out of testing.
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Thu,  6 Nov 2003 14:09:57 -0500
+
+ganglia-monitor-core (2.5.4-2) unstable; urgency=low
+
+  * Re-autoconf'd to fix mips/mipsel so that shlibs can be build right. 
+    (Closes: #208711)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Mon,  8 Sep 2003 09:08:08 -0500
+
+ganglia-monitor-core (2.5.4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Thu,  4 Sep 2003 09:29:40 -0500
+
+ganglia-monitor-core (2.5.3-6) unstable; urgency=low
+
+  * Ok, patched ltmain.sh and aclocal.m4 to set link_all_deplibs=no and
+    set dependency libs correctly. (Closes: #192000, 187606)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Tue,  1 Jul 2003 11:02:59 -0500
+
+ganglia-monitor-core (2.5.3-5) unstable; urgency=low
+
+  * build-deps cleanup was overzealous, removed dependency on cgilib.
+    Sigh. (Closes: #191342)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Tue, 29 Apr 2003 21:19:10 -0500
+
+ganglia-monitor-core (2.5.3-4) unstable; urgency=low
+
+  * Changed build-depends to not specify libpng-dev, and get it from
+    librrd0. (Closes: #180981)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Mon, 28 Apr 2003 22:35:41 -0500
+
+ganglia-monitor-core (2.5.3-3) unstable; urgency=low
+
+  * Fixed build failure on hppa (Closes: #186928)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Sun, 27 Apr 2003 23:32:11 -0500
+
+ganglia-monitor-core (2.5.3-2) unstable; urgency=low
+
+  * Re-made autoconf scripts so that mips and mipsel can make proper
+    shared libraries. (Closes: #186431)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Thu, 27 Mar 2003 23:09:16 -0500
+
+ganglia-monitor-core (2.5.3-1) unstable; urgency=low
+
+  * New upstream release
+  * Added a conflicts: with firebird-utils until upstream decides if
+    "gstat" will get renamed. (Closes: #175154)
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Wed, 12 Mar 2003 13:07:24 -0500
+
+ganglia-monitor-core (2.5.1-4) unstable; urgency=low
+
+  * Egad, libganglia1-dev put include files in /usr/include.. Put in 
+    /usr/include/ganglia
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Sun, 15 Dec 2002 00:10:19 -0500
+
+ganglia-monitor-core (2.5.1-3) unstable; urgency=low
+
+  * Changed package short description.
+  * Upped the standards-version to 3.5.7.
+
+ -- Preston Smith <psmith@foobird.net>  Fri, 15 Nov 2002 18:02:15 -0500
+
+ganglia-monitor-core (2.5.1-2) unstable; urgency=low
+
+  * Autobuilders gagged on a missing build-dep.
+
+ -- Preston Smith <psmith@foobird.net>  Thu, 14 Nov 2002 18:53:19 -0500
+
+ganglia-monitor-core (2.5.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Removed unnecessary Depends on libganglia1 for gmond/gmetad.
+
+ -- Preston Smith <psmith@foobird.net>  Sun, 10 Nov 2002 14:21:05 -0500
+
+ganglia-monitor-core (2.5.0-3) unstable; urgency=low
+
+  * Another fix, upstream's autoconf stuff doesn't make config scripts
+   all correctly.
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Mon, 23 Sep 2002 17:30:16 -0500
+
+ganglia-monitor-core (2.5.0-2) unstable; urgency=low
+
+  * Fixed a problematic build-depends: changed the dependency on any libgd-dev
+    package to libgd-gif1-dev, since that's what rrdtool explicitly depends on. 
+
+ -- Preston Smith <psmith@physics.purdue.edu>  Mon, 23 Sep 2002 14:28:38 -0500
+
+ganglia-monitor-core (2.5.0-1) unstable; urgency=low
+
+  * Intitial release of ganglia 2.5.0
+
+ -- Preston Smith <psmith@foobird.net>  Thu, 19 Sep 2002 20:07:48 -0500
+

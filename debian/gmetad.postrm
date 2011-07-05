@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+if [ "$1" = "purge" ] ; then
+   # rm the rrds if this is the last ganglia package being removed.
+   if [ ! -f /usr/sbin/gmond ] ; then
+        if [ -d /var/lib/ganglia ]; then
+		# Remove rrd dir
+                rm -rf /var/lib/ganglia/rrds
+        fi
+   	# remove ganglia user only if gmond isn't installed
+        if getent passwd ganglia >/dev/null; then
+                userdel ganglia
+        fi
+        if getent group ganglia >/dev/null; then
+                groupdel ganglia
+        fi
+   fi
+fi
+
+#DEBHELPER#

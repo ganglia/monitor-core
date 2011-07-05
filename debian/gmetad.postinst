@@ -1,0 +1,30 @@
+#!/bin/sh
+set -e
+
+if ! getent group ganglia >/dev/null; then
+	echo Adding group: ganglia.
+	addgroup --system ganglia
+fi
+
+if ! getent passwd ganglia >/dev/null; then
+	echo Adding system user: ganglia.
+	adduser --system ganglia --ingroup ganglia --home /var/lib/ganglia
+	usermod -c "Ganglia Monitor" 	ganglia
+	usermod -d "/var/lib/ganglia" 	ganglia
+	usermod -g "ganglia" 		ganglia
+	usermod -s "/bin/false" 	ganglia
+fi
+
+if [ ! -d /var/lib/ganglia/rrds ]; then
+  mkdir -p /var/lib/ganglia/rrds
+fi
+if [ -d /var/lib/ganglia/rrds ]; then
+  chown -R ganglia:ganglia /var/lib/ganglia
+  chown -R nobody /var/lib/ganglia/rrds
+  chmod 0755 /var/lib/ganglia
+  chmod -R o-w /var/lib/ganglia/rrds
+fi
+ 
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,29 @@
+#!/bin/sh
+set -e
+
+if ! getent group ganglia >/dev/null; then
+	echo Adding group: ganglia.
+        addgroup --system ganglia
+fi
+
+if ! getent passwd ganglia >/dev/null; then
+	echo Adding system user: ganglia.
+        adduser --system --ingroup ganglia --home /var/lib/ganglia ganglia
+	usermod -c "Ganglia Monitor" 	ganglia
+	usermod -d "/var/lib/ganglia" 	ganglia
+	usermod -g "ganglia" 		ganglia
+	usermod -s "/bin/false" 	ganglia
+fi
+
+#if we have an old 2.5.x gmond
+if [ -f /etc/gmond.conf ]; then
+  if [ ! -e /etc/ganglia/gmond.conf ]; then
+    gmond -r /etc/gmond.conf >/etc/ganglia/gmond.conf
+  else
+    gmond -r /etc/gmond.conf >/etc/ganglia/gmond.conf.old
+  fi
+  rm /etc/gmond.conf
+fi
+#DEBHELPER#
+
+exit 0

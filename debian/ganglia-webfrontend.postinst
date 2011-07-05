@@ -1,0 +1,39 @@
+#!/bin/sh
+
+set -e
+
+. /usr/share/debconf/confmodule
+db_version 2.0 || [ $? -lt 30 ]
+
+if [ "$1" = "configure" ]; then
+
+    db_get ganglia-webfrontend/webserver
+    autoconfigure="$RET"
+    webserver="apache2"
+
+    if [ "$autoconfigure" = true ]; then
+        test -x /usr/sbin/$webserver || continue
+
+        # Auto-configure module dependencies
+        a2enmod php5 || true
+        a2enmod cgi || true
+
+        if [ ! -f /etc/$webserver/conf.d/ganglia-webfrontend -a ! -h /etc/$webserver/conf.d/ganglia-webfrontend ]; then
+            ln -s /etc/ganglia-webfrontend/apache.conf /etc/$webserver/conf.d/ganglia-webfrontend
+        fi
+
+        # Restart apache2 if requested
+        db_get ganglia-webfrontend/restart
+        if [ "$RET" = "true" ]; then
+            if [ -x /usr/sbin/invoke-rc.d ]; then
+                invoke-rc.d $webserver restart
+            else
+                /etc/init.d/$webserver restart
+            fi
+        fi
+
+    fi
+
+fi
+
+#DEBHELPER#

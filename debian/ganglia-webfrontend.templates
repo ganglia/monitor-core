@@ -1,0 +1,23 @@
+# These templates have been reviewed by the debian-l10n-english
+# team
+#
+# If modifications/additions/rewording are needed, please ask
+# debian-l10n-english@lists.debian.org for advice.
+#
+# Even minor modifications require translation updates and such
+# changes should be coordinated with translators and reviewers.
+
+Template: ganglia-webfrontend/webserver
+Type: boolean
+Default: false
+_Description: Automatically configure apache2?
+ The ganglia front-end will be unavailable until a web server is configured.
+ Automatic configuration can be performed for the Apache 2 web server.
+
+Template: ganglia-webfrontend/restart
+Type: boolean
+Default: false
+_Description: Restart apache2?
+ In order to activate the new configuration, the web server needs
+ to be restarted. If you choose not to do this automatically, you should
+ do so manually at the first opportunity.

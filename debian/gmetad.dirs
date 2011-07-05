@@ -1,0 +1,6 @@
+etc
+etc/ganglia
+usr/sbin
+usr/share/man
+var/lib/ganglia
+var/lib/ganglia/rrds
