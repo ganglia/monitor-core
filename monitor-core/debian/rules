@@ -1,0 +1,137 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses debhelper.
+# GNU copyright 1997 to 1999 by Joey Hess.
+PACKAGE = ganglia
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+CFLAGS = -O2 -Wall 
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -g
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
+endif
+
+
+config.status: configure
+	dh_testdir
+	# Add here commands to configure the package.
+#	autoreconf
+	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) \
+		--prefix=/usr --mandir=\$${prefix}/share/man \
+		--libdir=\$${prefix}/lib \
+		--sysconfdir=/etc/ganglia \
+		--infodir=\$${prefix}/share/info --enable-shared \
+		--with-gmetad  
+build: build-stamp
+
+build-stamp:  config.status
+	dh_testdir
+
+	# Add here commands to compile the package.
+	$(MAKE)
+	#/usr/bin/docbook-to-man debian/ganglia.sgml > ganglia.1
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp 
+
+	# Add here commands to clean up after the build process.
+	[ ! -f Makefile ] || $(MAKE) distclean
+#	-rm -f dotconf-1.0.9/conftest.o
+#	-rm -f dotconf-1.0.9/conftest
+	-test -r /usr/share/misc/config.sub && \
+	  rm -f config.sub config/config.sub
+	  cp -f /usr/share/misc/config.sub config.sub
+	  #cp -f /usr/share/misc/config.sub config/config.sub
+	-test -r /usr/share/misc/config.guess && \
+	  rm -f config.guess config/config.guess
+	  cp -f /usr/share/misc/config.guess config.guess
+	  #cp -f /usr/share/misc/config.guess config/config.guess
+	-rm -f libtool.old	
+	debconf-updatepo
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+	
+	# Add here commands to install the package into debian/ganglia.
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp/
+
+	# Empty out the dependency field in our .la files
+	for file in $(CURDIR)/debian/tmp/usr/lib/*.la; do \
+		sed -i "/dependency_libs/ s/'.*'/''/" $$file ; \
+        done
+
+	# Seed the package directories
+	dh_install --sourcedir=debian/tmp
+
+#Install webfrontend
+	      cp -a web/*.php web/*.css web/templates web/graph.d \
+                 debian/ganglia-webfrontend/usr/share/ganglia-webfrontend
+	      cp web/private_clusters debian/apache.conf \
+		 debian/ganglia-webfrontend/etc/ganglia-webfrontend
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs -i
+	dh_fixperms -i
+	dh_compress -i
+	dh_installdebconf -i
+	dh_installdeb -i
+	dh_shlibdeps -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+	
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+#	dh_installdebconf	
+	dh_installdocs -pganglia-monitor -Xlibganglia 
+	dh_installdocs -plibganglia1-dev 
+	dh_installdocs -plibganglia1 
+	dh_installdocs -pgmetad
+	cp $(CURDIR)/gmetad/gmetad.conf $(CURDIR)/debian/gmetad/etc/ganglia
+	cp $(CURDIR)/debian/gmond.conf $(CURDIR)/debian/ganglia-monitor/etc/ganglia
+	dh_installexamples
+	dh_installmenu -s
+	dh_installinit -s
+	dh_installcron -s
+	dh_installman -pganglia-monitor
+	dh_installman -plibganglia1-dev
+	dh_installman -pgmetad
+	dh_installinfo -s
+	dh_installchangelogs
+	dh_link -s
+	dh_strip -s
+	dh_compress -s
+	dh_fixperms -s
+	dh_makeshlibs -s
+	dh_installdeb -s
+	dh_shlibdeps -s
+	dh_gencontrol -s
+	dh_md5sums -s
+	dh_builddeb -s
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install 

@@ -1,0 +1,42 @@
+#! /bin/sh
+
+set -e
+
+. /usr/share/debconf/confmodule
+db_version 2.0 || [ $? -lt 30 ]
+
+if [ "$1" = "purge" ]; then
+
+    db_get ganglia-webfrontend/webserver || true
+
+    if [ "$RET" = "true" ]; then
+        webserver="apache2"
+
+        if [ -h /etc/$webserver/conf.d/ganglia-webfrontend ]; then
+            rm -f /etc/$webserver/conf.d/ganglia-webfrontend
+        fi
+
+        if [ -x /usr/sbin/$webserver ]; then
+            db_reset ganglia-webfrontend/restart
+            db_input high ganglia-webfrontend/restart || true
+            db_go
+
+            # Restart apache2 if requested
+            db_get ganglia-webfrontend/restart
+            if [ "$RET" = "true" ]; then
+                if [ -x /usr/sbin/invoke-rc.d ]; then
+                    invoke-rc.d $webserver restart
+                else
+                    /etc/init.d/$webserver restart
+                fi
+            fi
+        fi
+    fi
+
+    rmdir --ignore-fail-on-non-empty /etc/ganglia-webfrontend || true
+
+    db_purge
+
+fi
+
+#DEBHELPER#
