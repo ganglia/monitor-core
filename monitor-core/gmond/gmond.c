@@ -833,6 +833,8 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
       spoofIP = buff;
       if( !(spoofName = strchr(buff+1,':')) ){
           err_msg("Incorrect format for spoof argument. exiting.\n");
+          if (spoofIP) debug_msg("spoofIP: %s \n",spoofIP);
+          if (buff) debug_msg("buff: %s \n",buff);
           if (buff) free(buff);
           return NULL;
       }
@@ -1622,13 +1624,14 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
     }
   
   len = apr_snprintf(metricxml, 1024,
-          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\">\n",
+          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" SLOPE=\"%s\">\n",
               metricName,
               gmetric_value_to_str(&(val->message_u.v_message)),
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.type,
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.units,
               (int)((now - val->last_heard_from) / APR_USEC_PER_SEC),
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.tmax,
+              data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.dmax,
               slope_to_cstr(data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.slope));
 
   if (metricName) free(metricName);
@@ -2553,7 +2556,17 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
             name = cb->msg.Ganglia_value_msg_u.gstr.metric_id.name;
             if (override_hostname != NULL)
               {
-                cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrcat(gm_pool, override_ip != NULL ? override_ip : override_hostname, ":", override_hostname, NULL);
+#if 1
+                char* tmpstr = malloc( strlen(( override_ip != NULL ? override_ip : override_hostname )) + strlen( override_hostname ) + 1 );
+                strcpy (tmpstr, (char *)( override_ip != NULL ? override_ip : override_hostname ) );
+                strcat (tmpstr, ":");
+                strcat (tmpstr, (char *) override_hostname);
+
+                cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = tmpstr;
+#endif
+#if 0
+                cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrcat(gm_pool, (char *)( override_ip != NULL ? override_ip : override_hostname ), ":", (char *) override_hostname, NULL);
+#endif
                 cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
               }
             val = apr_pstrdup(gm_pool, host_metric_value(cb->info, &(cb->msg)));

@@ -482,6 +482,7 @@ startElement_HOST(void *data, const char *el, const char **attr)
    edge = 0;
 
    host->location = -1;
+   host->tags = -1;
    host->reported = reported;
    host->tn = tn;
    host->tmax = tmax;
@@ -508,6 +509,9 @@ startElement_HOST(void *data, const char *el, const char **attr)
                case LOCATION_TAG:
                   host->location = addstring(host->strings, &edge, attr[i+1]);
                   break;
+	       case TAGS_TAG:
+		  host->tags = addstring(host->strings, &edge, attr[i+1]);
+		  break;
                case STARTED_TAG:
                   host->started = strtoul(attr[i+1], (char **)NULL, 10);
                   break;
@@ -628,6 +632,10 @@ startElement_METRIC(void *data, const char *el, const char **attr)
       {
          /* Save the data to a round robin database if the data source is alive
           */
+         fillmetric(attr, metric, type);
+	 if (metric->dmax && metric->tn > metric->dmax)
+	 	   return;
+
          if (do_summary && !xmldata->ds->dead && !xmldata->rval)
             {
                   debug_msg("Updating host %s, metric %s", 
@@ -640,7 +648,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
          metric->report_start = metric_report_start;
          metric->report_end = metric_report_end;
 
-         fillmetric(attr, metric, type);
+
          edge = metric->stringslen;
          metric->name = addstring(metric->strings, &edge, name);
          metric->stringslen = edge;
@@ -1164,7 +1172,7 @@ end (void *data, const char *el)
       {
          case GRID_TAG:
             rc = endElement_GRID(data, el);
-            /* No break. */
+	    break;
 
          case CLUSTER_TAG:
             rc = endElement_CLUSTER(data, el);
