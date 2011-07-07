@@ -26,7 +26,7 @@ svn export "https://ganglia.svn.sourceforge.net/svnroot/ganglia/tags/${TAG}" "$T
 		cd monitor-core
 
 		# Create all configure scripts, etc
-		./bootstrap
+		#./bootstrap
 
 		# Create initial ganglia.spec file with RHEL5 defaults
 		cp ganglia.spec.in ganglia.spec -f
@@ -36,7 +36,8 @@ svn export "https://ganglia.svn.sourceforge.net/svnroot/ganglia/tags/${TAG}" "$T
 		perl -pi -e 's/\@varstatedir\@/\/var\/lib/g;' ganglia.spec
 
 		# Clean extra stuff
-		rm -rf autom4te.cache
+		#rm -rf autom4te.cache aclocal.m4 autom4te.cache config.cache config.h config.log config.status libtool Makefile stamp-h1 
+		#rm -rf libmetrics/autom4te.cache libmetrics/aclocal.m4 libmetrics/autom4te.cache libmetrics/config.cache libmetrics/config.h libmetrics/config.log libmetrics/config.status libmetrics/libtool libmetrics/Makefile libmetrics/stamp-h1 
 	)
 	mv -v "monitor-core" "ganglia-$TAG"
 	tar czvf "$CURDIR/ganglia-$TAG.tar.gz" "ganglia-$TAG"
