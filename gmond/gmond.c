@@ -1624,13 +1624,14 @@ print_host_metric( apr_socket_t *client, Ganglia_metadata *data, Ganglia_metadat
     }
   
   len = apr_snprintf(metricxml, 1024,
-          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"0\" SLOPE=\"%s\">\n",
+          "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" UNITS=\"%s\" TN=\"%d\" TMAX=\"%d\" DMAX=\"%d\" SLOPE=\"%s\">\n",
               metricName,
               gmetric_value_to_str(&(val->message_u.v_message)),
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.type,
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.units,
               (int)((now - val->last_heard_from) / APR_USEC_PER_SEC),
               data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.tmax,
+              data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.dmax,
               slope_to_cstr(data->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.slope));
 
   if (metricName) free(metricName);

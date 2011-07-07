@@ -189,6 +189,7 @@ typedef struct
       uint32_t tmax;
       uint32_t dmax;
       short int location;
+      short int tags;
       uint32_t reported;
       uint32_t started;
       short int stringslen;

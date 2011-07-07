@@ -1,3 +1,34 @@
+ganglia (3.2.0-7) unstable; urgency=low
+  
+  * Stop recording and propagating dmax entries asap
+  * Dont save the last grid twice
+
+ -- Artur Bergman <artur@fastly.com>  Thu, 07 Jul 2011 03:23:28 +0000
+
+ganglia (3.2.0-6) unstable; urgency=low
+  
+  * Propagate DMAX you piece of shit
+
+ -- Artur Bergman <artur@fastly.com>  Thu, 07 Jul 2011 01:54:48 +0000
+
+ganglia (3.2.0-5) unstable; urgency=low
+  
+  * Fix to read the string value
+
+ -- Artur Bergman <artur@fastly.com>  Wed, 06 Jul 2011 19:42:52 +0000
+
+ganglia (3.2.0-4) unstable; urgency=low
+  
+  * Actually fix code
+
+ -- Artur Bergman <artur@fastly.com>  Wed, 06 Jul 2011 17:32:13 +0000
+
+ganglia (3.2.0-4) unstable; urgency=low
+  
+  * Re-export tags from gmetad
+
+ -- Artur Bergman <artur@fastly.com>  Wed, 06 Jul 2011 16:38:49 +0000
+
 ganglia (3.2.0-3) unstable; urgency=low
   
   * Fix jasons broken adduser
