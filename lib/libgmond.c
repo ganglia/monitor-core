@@ -454,14 +454,17 @@ Ganglia_metadata_send_real( Ganglia_metric gmetric, Ganglia_udp_send_channels se
   msg.id = gmetadata_full;
   memcpy( &(msg.Ganglia_metadata_msg_u.gfull.metric), gmetric->msg, sizeof(Ganglia_metadata_message));
   msg.Ganglia_metadata_msg_u.gfull.metric_id.name = apr_pstrdup (gm_pool, gmetric->msg->name);
+  debug_msg("  msg.Ganglia_metadata_msg_u.gfull.metric_id.name: %s\n", msg.Ganglia_metadata_msg_u.gfull.metric_id.name);
   if ( override_string != NULL )
     {
       msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gm_pool, (char*)override_string);
+      debug_msg("  msg.Ganglia_metadata_msg_u.gfull.metric_id.host: %s\n", msg.Ganglia_metadata_msg_u.gfull.metric_id.host);
       msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = TRUE;
     }
     else
     {
       msg.Ganglia_metadata_msg_u.gfull.metric_id.host = apr_pstrdup (gm_pool, (char*)myhost);
+      debug_msg("  msg.Ganglia_metadata_msg_u.gfull.metric_id.host: %s\n", msg.Ganglia_metadata_msg_u.gfull.metric_id.host);
       msg.Ganglia_metadata_msg_u.gfull.metric_id.spoof = FALSE;
     }
 
