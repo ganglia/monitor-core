@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+#	$Id$
+#	$Author$
+#
+
+TAG=$1
+FROM=$2
+
+if [ "$TAG" == "" -o "$FROM" == "" ]; then
+	echo "syntax: $0 TAG FROM"
+	echo "	TAG : destination subversion tag / version"
+	echo "	FROM : source in subversion tree ( 'trunk' or 'branches/X.X' )"
+	exit
+fi
+
+svn cp -m "Tag release ${TAG}" https://ganglia.svn.sourceforge.net/svnroot/ganglia/${FROM} https://ganglia.svn.sourceforge.net/svnroot/ganglia/tags/${TAG}
+
