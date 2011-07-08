@@ -1,2 +1,2 @@
-pys = multidisk.py
+pys = diskfree.py multidisk.py
 EXTRA_DIST = $(pys)

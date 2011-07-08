@@ -1,0 +1,38 @@
+#
+
+modules {
+  module {
+    name = 'procstat'
+    language = 'python'
+
+    param httpd {
+      value = '/var/run/httpd.pid'
+    }
+
+    param mysqld {
+      value = '/\/usr\/libexec\/mysqld/'
+    }
+
+    param splunk {
+      value = '/splunkd.*start/'
+    }
+
+    param splunk-web {
+      value = '/twistd.*SplunkWeb/'
+    }
+  }
+}
+
+collection_group {
+  collect_every = 30
+  time_threshold = 30
+
+  metric {
+    name_match = "procstat_(.+)_cpu"
+  }
+
+  metric {
+    name_match = "procstat_(.+)_mem"
+  }
+}
+

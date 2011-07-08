@@ -1,0 +1,23 @@
+modules {
+    module {
+        name = "diskfree"
+        language = "python"
+        param mounts {
+            value = '/proc/mounts'
+        }
+    }
+}
+
+collection_group {
+    collect_every = 40
+    time_threshold = 180
+    metric {
+        name = "disk_free_rootfs"
+        title = "Disk Space Available On /"
+    }
+    metric {
+        name = "disk_free_mnt"
+        title = "Disk Space Available On /mnt"
+    }
+}
+
