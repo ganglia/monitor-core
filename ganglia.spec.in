@@ -169,7 +169,6 @@ gmetad packages
 %setup -n %{name}-%{version}
 
 %build
-./bootstrap
 %configure --with-gmetad --enable-status --sysconfdir=%{conf_dir}
 %ifnarch noarch
 make
