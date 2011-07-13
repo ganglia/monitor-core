@@ -1,0 +1,37 @@
+modules {
+   module {
+      name = "xenstats"
+      language = "python"
+   }
+}
+
+collection_group {
+   collect_every = 15
+   time_threshold = 30
+
+   metric {
+     name = "xen_vms"
+     value_threshold = 0
+   }
+
+   metric {
+      name = "xen_mem_use"
+      value_threshold = 1.0
+   }
+}
+
+collection_group {
+   collect_once = yes
+   time_threshold = 20
+   metric {
+      name = "xen_mem"
+      value_threshold = 1.0
+   }
+
+   metric {
+      name = "xen_cpu"
+      value_threshold = 0
+  }
+}
+
+

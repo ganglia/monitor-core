@@ -820,6 +820,8 @@ AC_OUTPUT(Makefile
           gmond/python_modules/memcached/Makefile
           gmond/python_modules/network/Makefile
           gmond/python_modules/process/Makefile
+          gmond/python_modules/redis/Makefile
+          gmond/python_modules/xen/Makefile
           gmetad/conf.c
           gmetad-python/setup.py
           gmetad-python/Gmetad/gmetad_config.py

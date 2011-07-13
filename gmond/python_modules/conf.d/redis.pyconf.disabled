@@ -1,0 +1,26 @@
+modules {
+  module {
+    name = "redis"
+    language = "python"
+    param host { value = "127.0.0.1" }
+    param port { value = 6379 }
+  }
+}
+collection_group {
+  collect_every = 10
+  time_threshold = 60
+  metric { name = "connected_clients" }
+  metric { name = "connected_slaves" }
+  metric { name = "blocked_clients" }
+  metric { name = "used_memory" }
+  metric { name = "changes_since_last_save" }
+  metric { name = "bgsave_in_progress" }
+  metric { name = "bgrewriteaof_in_progress" }
+  metric { name = "total_connections_received" }
+  metric { name = "total_commands_processed" }
+  metric { name = "expired_keys" }
+  metric { name = "pubsub_channels" }
+  metric { name = "pubsub_patterns" }
+  metric { name = "vm_enabled" }
+  metric { name = "master_last_io_seconds_ago" }
+}
