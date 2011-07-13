@@ -1,0 +1,120 @@
+modules {
+  module {
+    name     = "riak"
+    language = "python"
+    param url {
+        value = "http://localhost:8098/stats"
+    }
+  }
+}
+
+collection_group {
+  collect_every  = 20
+  time_threshold = 90
+
+  metric {
+    name  = "riak_node_get_fsm_time_mean"
+    title = "Mean for riak_kv_get_fsm calls"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_ring_creation_size"
+    title = "riak_ring_creation_size"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_vnode_puts"
+    title = "Puts handled by local vnodes in the last minute"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_get_fsm_time_95"
+    title = "95th percentile for riak_kv_get_fsm calls"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_put_fsm_time_mean"
+    title = "Mean for riak_kv_put_fsm calls"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_put_fsm_time_100"
+    title = "100th percentile for riak_kv_put_fsm calls"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_pbc_active"
+    title = "Active pb socket connections"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_get_fsm_time_median"
+    title = "Median for riak_kv_get_fsm calls"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_puts"
+    title = "Puts coordinated by this node in the last minute"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_sys_process_count"
+    title = "riak_sys_process_count"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_put_fsm_time_median"
+    title = "Median for riak_kv_put_fsm calls"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_vnode_gets"
+    title = "Gets handled by local vnodes in the last minute"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_get_fsm_time_99"
+    title = "99th percentile for riak_kv_get_fsm calls"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_get_fsm_time_100"
+    title = "100th percentile for riak_kv_get_fsm calls"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_put_fsm_time_95"
+    title = "95th percentile for riak_kv_put_fsm calls"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_read_repairs"
+    title = "riak_read_repairs"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_gets"
+    title = "Gets coordinated by this node in the last minute"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_mem_total"
+    title = "riak_mem_total"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_ring_num_partitions"
+    title = "riak_ring_num_partitions"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_mem_allocated"
+    title = "riak_mem_allocated"
+    value_threshold = 0
+  }
+  metric {
+    name  = "riak_node_put_fsm_time_99"
+    title = "99th percentile for riak_kv_put_fsm calls"
+    value_threshold = 0
+  }
+}
