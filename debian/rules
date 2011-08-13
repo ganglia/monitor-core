@@ -23,7 +23,8 @@ endif
 config.status: configure
 	dh_testdir
 	# Add here commands to configure the package.
-#	autoreconf
+	autoreconf
+	chmod +x configure libmetrics/configure
 	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) \
 		--prefix=/usr --mandir=\$${prefix}/share/man \
 		--libdir=\$${prefix}/lib \
@@ -78,6 +79,14 @@ install: build
 
 	# Seed the package directories
 	dh_install --sourcedir=debian/tmp
+
+	# Install the python modules
+	mkdir -p debian/ganglia-monitor-python/etc/ganglia/conf.d/
+	mkdir -p debian/ganglia-monitor-python/usr/lib/ganglia/python_modules/
+	cp gmond/python_modules/*/*.pyconf* \
+		debian/ganglia-monitor-python/etc/ganglia/conf.d/
+	cp gmond/python_modules/*/*.py \
+		debian/ganglia-monitor-python/usr/lib/ganglia/python_modules/
 
 #Install webfrontend
 	      cp -a web/*.php web/*.css web/templates web/graph.d \

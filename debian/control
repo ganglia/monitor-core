@@ -15,6 +15,15 @@ Description: cluster monitoring toolkit - node daemon
  .
  This package contains the monitor core program.
 
+Package: ganglia-monitor-python
+Architecture: all
+Depends: ${misc:Depends}, ${shlibs:Depends}, python, ganglia-monitor (=${binary:Version})
+Description: cluster monitoring toolkit - python modules
+ Ganglia is a scalable, real-time cluster monitoring environment 
+ that collects cluster statistics in an open and well-defined XML format.
+ .
+ This package contains the monitor core python plugins.
+
 Package: gmetad
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, adduser, libganglia1 (=${binary:Version})

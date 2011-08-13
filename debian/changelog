@@ -1,3 +1,9 @@
+ganglia (3.2.0-8) unstable; urgency=low
+
+  * Add python packaging
+
+ -- Jeff Buchbinder <jeff@freemedsoftware.org>  Sat, 13 Aug 2011 09:37:55 -0400
+
 ganglia (3.2.0-7) unstable; urgency=low
   
   * Stop recording and propagating dmax entries asap

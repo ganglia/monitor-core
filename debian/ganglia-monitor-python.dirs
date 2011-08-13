@@ -1,0 +1,5 @@
+etc
+etc/ganglia
+etc/ganglia/conf.d
+usr/lib/ganglia/
+usr/lib/ganglia/python_modules
