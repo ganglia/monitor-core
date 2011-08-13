@@ -1,0 +1,19 @@
+multi_traffic
+===============
+
+python module for ganglia 3.1.
+
+This module is based on hirose31's traffic1 DSO module. Thanks for his work.
+
+multi_traffic send metrics of transmitted and received network traffic on multiple 
+network devices. And Web_front could show these metrics seperately, Unlike ganglia's 
+net_module show all traffic metrics together. 
+
+## example
+
+See conf.d/multi_traffic.conf, to send traffic on eth0 and eth1.
+
+## AUTHOR
+
+jacky wu <jacky.wucheng@gmail.com>
+

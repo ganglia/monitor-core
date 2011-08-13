@@ -1,0 +1,48 @@
+modules {
+  module {
+    name     = "traffic1"
+    language = "python"
+    param target_device {
+        value = "bond0.2"
+    }
+    param spoof_host {
+        value = "10.10.0.1:lvs"
+    }
+  }
+}
+
+collection_group {
+  collect_every  = 15
+  time_threshold = 90
+  metric {
+    name  = "recv_bytes_bond0.2"
+    title = "Received bytes/sec"
+    value_threshold = 0.0
+  }
+  metric {
+    name  = "recv_pkts_bond0.2"
+    title = "Received pkts/sec"
+    value_threshold = 0.0
+  }
+  metric {
+    name  = "recv_errs_bond0.2"
+    title = "Received error pkts/sec"
+    value_threshold = 0.0
+  }
+
+  metric {
+    name  = "trans_bytes_bond0.2"
+    title = "Transmitted bytes/sec"
+    value_threshold = 0.0
+  }
+  metric {
+    name  = "trans_pkts_bond0.2"
+    title = "Transmitted pkts/sec"
+    value_threshold = 0.0
+  }
+  metric {
+    name  = "trans_errs_bond0.2"
+    title = "Transmitted error pkts/sec"
+    value_threshold = 0.0
+  }
+}
