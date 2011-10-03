@@ -17,6 +17,9 @@ typedef struct
       int should_setuid;
       char *setuid_username;
       char *rrd_rootdir;
+      char *carbon_server;
+      int carbon_port;
+      char *graphite_prefix;
       int scalable_mode;
       int all_trusted;
       int num_RRAs;

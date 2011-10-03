@@ -11,6 +11,9 @@
 #include <errno.h>
 #include <pthread.h>
 #include <time.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 
 #include "rrd_helpers.h"
 
@@ -213,3 +216,123 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
 
    return push_data_to_rrd( rrd, sum, num, step, process_time, slope);
 }
+
+void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port)
+{
+  struct hostent *hostinfo;
+
+  name->sin_family = AF_INET;
+  name->sin_port = htons (port);
+  hostinfo = gethostbyname (hostname);
+  if (hostinfo == NULL)
+    {
+      fprintf (stderr, "Unknown host %s.\n", hostname);
+      exit (EXIT_FAILURE);
+    }
+  name->sin_addr = *(struct in_addr *) hostinfo->h_addr;
+}
+
+static int
+push_data_to_carbon( char *graphite_msg)
+{
+  int port;
+  int sock;
+  struct sockaddr_in server;
+  int nbytes;
+
+  port = gmetad_config.carbon_port ? gmetad_config.carbon_port : 2003;
+
+  debug_msg("Carbon Proxy:: sending \'%s\' to %s", graphite_msg, gmetad_config.carbon_server);
+
+  /* Create a socket. */
+  sock = socket (PF_INET, SOCK_STREAM, 0);
+  if (sock < 0)
+    {
+      perror ("socket (client)");
+      close (sock);
+      return EXIT_FAILURE;
+    }
+
+  /* Connect to the server. */
+  init_sockaddr (&server, gmetad_config.carbon_server, port);
+  if (0 > connect (sock,
+                   (struct sockaddr *) &server,
+                   sizeof (server)))
+    {
+      perror ("connect (client)");
+      close (sock);
+      return EXIT_FAILURE;
+    }
+
+  /* Send data to the server. */
+  nbytes = write (sock, graphite_msg, strlen(graphite_msg) + 1);
+  if (nbytes < 0)
+    {
+      perror ("write");
+      close (sock);
+      return EXIT_FAILURE;
+    }
+
+  close (sock);
+  return EXIT_SUCCESS;
+}
+
+int
+write_data_to_carbon ( const char *source, const char *host, const char *metric, 
+                    const char *sum, unsigned int process_time )
+{
+
+   char s_process_time[15];
+   char graphite_msg[ PATHSIZE + 1 ];
+   int i;
+
+   /*  if process_time is undefined, we set it to the current time */
+   if (!process_time)
+      process_time = time(0);
+
+   sprintf(s_process_time, "%u", process_time);
+
+   /* Build the path */
+   strncpy(graphite_msg, gmetad_config.graphite_prefix, PATHSIZE);
+
+   if (source) {
+      strncat(graphite_msg, ".", PATHSIZE-strlen(graphite_msg));
+      strncat(graphite_msg, source, PATHSIZE-strlen(graphite_msg));
+   }
+
+
+   if (host) {
+      int hostlen=strlen(host);
+      char hostcp[hostlen+1]; 
+
+      /* find and replace . for _ in the hostname*/
+      for (i=0; i<=hostlen; i++) {
+         hostcp[i] = ( host[i] == '.') ? '_' : host[i];
+      }
+      hostcp[i+1]=0;
+
+      strncat(graphite_msg, ".", PATHSIZE-strlen(graphite_msg));
+
+      i = strlen(graphite_msg);
+      strncat(graphite_msg, hostcp, PATHSIZE-strlen(graphite_msg));
+
+      if(gmetad_config.case_sensitive_hostnames == 0) {
+         /* Convert the hostname to lowercase */
+         for( ; graphite_msg[i] != 0; i++)
+            graphite_msg[i] = tolower(graphite_msg[i]);
+      }
+   }
+
+   strncat(graphite_msg, ".", PATHSIZE-strlen(graphite_msg));
+   strncat(graphite_msg, metric, PATHSIZE-strlen(graphite_msg));
+   strncat(graphite_msg, " ", PATHSIZE-strlen(graphite_msg));
+   strncat(graphite_msg, sum, PATHSIZE-strlen(graphite_msg));
+   strncat(graphite_msg, " ", PATHSIZE-strlen(graphite_msg));
+   strncat(graphite_msg, s_process_time, PATHSIZE-strlen(graphite_msg));
+   strncat(graphite_msg, "\n", PATHSIZE-strlen(graphite_msg));
+
+   graphite_msg[strlen(graphite_msg)+1] = 0;
+
+   return push_data_to_carbon( graphite_msg );
+}
+
