@@ -19,6 +19,7 @@ typedef struct
       char *rrd_rootdir;
       char *carbon_server;
       int carbon_port;
+      int carbon_timeout;
       char *graphite_prefix;
       int scalable_mode;
       int all_trusted;

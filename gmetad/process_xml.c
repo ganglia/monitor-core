@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: process_xml.c 2626 2011-07-07 15:44:35Z rufustfirefly $ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -643,16 +643,13 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                   xmldata->rval = write_data_to_rrd(xmldata->sourcename,
                         xmldata->hostname, name, metricval, NULL,
                         xmldata->ds->step, xmldata->source.localtime, slope);
-
-                  /* If the user has specified a carbon server, send the metric
-                   * to carbon as well.
-                   */
-                  if (gmetad_config.carbon_server)
-                        carbon_ret = write_data_to_carbon(xmldata->sourcename, xmldata->hostname, name, metricval, xmldata->source.localtime);
+						if (gmetad_config.carbon_server) // if the user has specified a carbon server, send the metric to carbon as well
+                  carbon_ret=write_data_to_carbon(xmldata->sourcename, xmldata->hostname, name, metricval,xmldata->source.localtime);
             }
          metric->id = METRIC_NODE;
          metric->report_start = metric_report_start;
          metric->report_end = metric_report_end;
+
 
          edge = metric->stringslen;
          metric->name = addstring(metric->strings, &edge, name);
