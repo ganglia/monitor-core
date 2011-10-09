@@ -261,6 +261,14 @@ static DOTCONF_CB(cb_carbon_port)
    return NULL;
 }
 
+static DOTCONF_CB(cb_carbon_timeout)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Setting carbon timeout to %d", cmd->data.value);
+   c->carbon_timeout = cmd->data.value;
+   return NULL;
+}
+
 static DOTCONF_CB(cb_graphite_prefix)
 {
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
@@ -295,6 +303,7 @@ static configoption_t gmetad_options[] =
       {"case_sensitive_hostnames", ARG_INT, cb_case_sensitive_hostnames, &gmetad_config, 0},
       {"carbon_server", ARG_STR, cb_carbon_server, &gmetad_config, 0},
       {"carbon_port", ARG_INT, cb_carbon_port, &gmetad_config, 0},
+      {"carbon_timeout", ARG_INT, cb_carbon_timeout, &gmetad_config, 0},
       {"graphite_prefix", ARG_STR, cb_graphite_prefix, &gmetad_config, 0},
       LAST_OPTION
    };

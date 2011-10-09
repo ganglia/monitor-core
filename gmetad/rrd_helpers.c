@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: rrd_helpers.c 2200 2010-01-08 17:17:00Z d_pocock $ */
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <rrd.h>
 #include <gmetad.h>
 #include <errno.h>
@@ -14,6 +15,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <sys/poll.h>
 
 #include "rrd_helpers.h"
 
@@ -236,44 +238,70 @@ static int
 push_data_to_carbon( char *graphite_msg)
 {
   int port;
-  int sock;
+  int carbon_socket;
   struct sockaddr_in server;
+  int carbon_timeout = 500;
   int nbytes;
+  struct pollfd carbon_struct_poll;
+  int poll_rval;
+  int fl;
 
-  port = gmetad_config.carbon_port ? gmetad_config.carbon_port : 2003;
+  if (gmetad_config.carbon_port)
+     port=gmetad_config.carbon_port;
+  else
+     port=2003;
+
 
   debug_msg("Carbon Proxy:: sending \'%s\' to %s", graphite_msg, gmetad_config.carbon_server);
 
-  /* Create a socket. */
-  sock = socket (PF_INET, SOCK_STREAM, 0);
-  if (sock < 0)
+      /* Create a socket. */
+  carbon_socket = socket (PF_INET, SOCK_STREAM, 0);
+  if (carbon_socket < 0)
     {
       perror ("socket (client)");
-      close (sock);
+      close (carbon_socket);
       return EXIT_FAILURE;
     }
+
+  /* Set the socket to not block */
+  fl = fcntl(carbon_socket,F_GETFL,0);
+  fcntl(carbon_socket,F_SETFL,fl | O_NONBLOCK);
 
   /* Connect to the server. */
   init_sockaddr (&server, gmetad_config.carbon_server, port);
-  if (0 > connect (sock,
-                   (struct sockaddr *) &server,
-                   sizeof (server)))
-    {
-      perror ("connect (client)");
-      close (sock);
+  connect (carbon_socket, (struct sockaddr *) &server, sizeof (server));
+
+  /* Start Poll */
+   carbon_struct_poll.fd=carbon_socket;
+   carbon_struct_poll.events = POLLOUT;
+   poll_rval = poll( &carbon_struct_poll, 1, carbon_timeout ); // default timeout .5s
+
+  /* Send data to the server when the socket becomes ready */
+  if( poll_rval < 0 ) {
+    debug_msg("carbon proxy:: poll() error");
+  } else if ( poll_rval == 0 ) {
+    debug_msg("carbon proxy:: Timeout connecting to %s",gmetad_config.carbon_server);
+  } else {
+    if( carbon_struct_poll.revents & POLLOUT ) {
+      /* Ready to send data to the server. */
+      debug_msg("carbon proxy:: %s is ready to receive",gmetad_config.carbon_server);
+      nbytes = write (carbon_socket, graphite_msg, strlen(graphite_msg) + 1);
+      if (nbytes < 0) {
+        perror ("write");
+        close(carbon_socket);
+        return EXIT_FAILURE;
+      }
+    } else if ( carbon_struct_poll.revents & POLLHUP ) {
+      debug_msg("carbon proxy:: Recvd an RST from %s during transmission",gmetad_config.carbon_server);
+     close(carbon_socket);
+     return EXIT_FAILURE;
+    } else if ( carbon_struct_poll.revents & POLLERR ) {
+      debug_msg("carbon proxy:: Recvd an POLLERR from %s during transmission",gmetad_config.carbon_server);
+      close(carbon_socket);
       return EXIT_FAILURE;
     }
-
-  /* Send data to the server. */
-  nbytes = write (sock, graphite_msg, strlen(graphite_msg) + 1);
-  if (nbytes < 0)
-    {
-      perror ("write");
-      close (sock);
-      return EXIT_FAILURE;
-    }
-
-  close (sock);
+  }
+  close (carbon_socket);
   return EXIT_SUCCESS;
 }
 
@@ -282,7 +310,7 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
                     const char *sum, unsigned int process_time )
 {
 
-   char s_process_time[15];
+	char s_process_time[15];
    char graphite_msg[ PATHSIZE + 1 ];
    int i;
 
@@ -290,7 +318,8 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
    if (!process_time)
       process_time = time(0);
 
-   sprintf(s_process_time, "%u", process_time);
+
+	sprintf(s_process_time, "%u", process_time);
 
    /* Build the path */
    strncpy(graphite_msg, gmetad_config.graphite_prefix, PATHSIZE);
@@ -302,14 +331,18 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 
 
    if (host) {
-      int hostlen=strlen(host);
-      char hostcp[hostlen+1]; 
+		int hostlen=strlen(host);
+		char hostcp[hostlen+1]; 
 
-      /* find and replace . for _ in the hostname*/
-      for (i=0; i<=hostlen; i++) {
-         hostcp[i] = ( host[i] == '.') ? '_' : host[i];
+		/* find and replace . for _ in the hostname*/
+		for(i=0; i<=hostlen; i++){
+         if ( host[i] == '.') {
+           hostcp[i]='_';
+         }else{
+           hostcp[i]=host[i];
+         }
       }
-      hostcp[i+1]=0;
+		hostcp[i+1]=0;
 
       strncat(graphite_msg, ".", PATHSIZE-strlen(graphite_msg));
 
@@ -321,6 +354,7 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
          for( ; graphite_msg[i] != 0; i++)
             graphite_msg[i] = tolower(graphite_msg[i]);
       }
+
    }
 
    strncat(graphite_msg, ".", PATHSIZE-strlen(graphite_msg));
@@ -331,8 +365,7 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
    strncat(graphite_msg, s_process_time, PATHSIZE-strlen(graphite_msg));
    strncat(graphite_msg, "\n", PATHSIZE-strlen(graphite_msg));
 
-   graphite_msg[strlen(graphite_msg)+1] = 0;
+	graphite_msg[strlen(graphite_msg)+1] = 0;
 
    return push_data_to_carbon( graphite_msg );
 }
-
