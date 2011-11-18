@@ -778,6 +778,7 @@ void sanitize_metric_name(char *metric_name)
         if (
                !(*p >= 'A' && *p <= 'Z')
             && !(*p >= 'a' && *p <= 'z')
+            && !(*p >= '0' && *p <= '9')
             && (*p != '_')
             && (*p != '-')
             && (*p != '.')
