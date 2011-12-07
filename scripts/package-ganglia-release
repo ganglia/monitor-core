@@ -16,7 +16,16 @@ fi
 TMP="/tmp/ganglia-export-$TAG"
 
 echo "Exporting tag $TAG"
-svn export "https://ganglia.svn.sourceforge.net/svnroot/ganglia/tags/${TAG}" "$TMP"
+( \
+	rm -rf "${TMP}"; \
+	mkdir -p "${TMP}"; \
+	cd "${TMP}" ; \
+	git clone git://github.com/ganglia/monitor-core.git ; \
+	cd monitor-core ; \
+	git checkout ${TAG}; \
+	rm -Rf .git
+)
+#svn export "https://ganglia.svn.sourceforge.net/svnroot/ganglia/tags/${TAG}" "$TMP"
 #svn export "https://ganglia.svn.sourceforge.net/svnroot/ganglia/branches/3.2" "$TMP"
 #svn export "https://ganglia.svn.sourceforge.net/svnroot/ganglia/trunk" "$TMP"
 
