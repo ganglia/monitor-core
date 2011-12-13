@@ -23,7 +23,7 @@ dnl
 
 #AC_PREREQ(2.61)
 
-AC_REVISION([$Revision$])
+AC_REVISION([m4_esyscmd_s([git describe --always])])
 AC_INIT(gmond/gmond.c)
 AC_CONFIG_AUX_DIR(build)
 
