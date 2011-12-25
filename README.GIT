@@ -1,6 +1,6 @@
 Welcome to the Bleeding Edge of Ganglia Development
 
-The SVN source represents the latest snapshot of Ganglia
+The git source represents the latest snapshot of Ganglia
 development.
 
 For best results, make sure you have in your development environment
@@ -17,15 +17,7 @@ Additionally,  you might need the following
 
 CheckOut the source files of Ganglia:
 
-  svn co http://ganglia.svn.sourceforge.net/svnroot/ganglia/trunk/monitor-core ganglia
-
-If you are interested in getting a snapshot for distribution
-you have to edit the configure.in file to set the variable GANGLIA_SNAPSHOT
-to "yes" and update the value of the GANGLIA_NANO_VERSION variable with the
-version number that your snapshot represents and that usually corresponds
-to the numeric value returned by:
-
-  ./svnversion .
+  git clone git://github.com/ganglia/monitor-core.git ganglia
 
 To prepare the distribution for compilation, run the bootstrapping script:
 
