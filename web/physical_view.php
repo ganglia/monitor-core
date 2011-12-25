@@ -1,5 +1,4 @@
 <?php
-/* $Id$ */
 #
 # Displays the cluster in a physical view. Cluster nodes in
 # this view are located by Rack, Rank, and Plane in the physical

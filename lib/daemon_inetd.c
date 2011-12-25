@@ -1,7 +1,6 @@
 /**
  * @file daemon_inetd.c Functions for inetd daemons
  */
-/* $Id$ */
 #include <stdarg.h>
 #include <syslog.h>
 

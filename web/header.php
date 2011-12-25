@@ -1,5 +1,4 @@
 <?php
-/* $Id$ */
 
 # Check if this context is private.
 include_once "./auth.php";

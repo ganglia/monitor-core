@@ -1,5 +1,4 @@
 <?php
-/* $Id$ */
 include_once "./eval_config.php";
 include_once "./get_context.php";
 include_once "./functions.php";

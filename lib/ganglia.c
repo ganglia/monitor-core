@@ -1,7 +1,6 @@
 /**
  * @file gexec_funcs.c Functions to support gexec, gstat et al
  */
-/* $Id$ */
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>

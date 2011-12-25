@@ -1,4 +1,3 @@
-/* $Id$ */
 #include <stdio.h>
 #include <dotconf.h>
 #include "ganglia_priv.h"

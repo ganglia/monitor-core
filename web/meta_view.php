@@ -1,5 +1,4 @@
 <?php
-/* $Id$ */
 $tpl = new Dwoo_Template_File( template("meta_view.tpl") );
 $data = new Dwoo_Data();
 
