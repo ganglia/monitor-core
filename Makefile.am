@@ -35,16 +35,9 @@ ganglia.html: ganglia.sub
 README: ganglia.sub
 	pod2text ganglia.sub README
 
-CHANGE_LOG_GEN_BIN = scripts/svn2cl.sh
-CHANGE_LOG_GEN_FLAGS = -i --alternate-strip-prefix="/trunk/monitor-core/" --break-before-msg=1 --reparagraph --revision HEAD:1
-
-ChangeLog:
-	touch ChangeLog
-	$(CHANGE_LOG_GEN_BIN) $(CHANGE_LOG_GEN_FLAGS)
-
 CLEANFILES = ganglia.sub pod2htm*
 
-dist-local: README ganglia.html ChangeLog
+dist-local: README ganglia.html
 
 
 # We go through and make sure all the files have

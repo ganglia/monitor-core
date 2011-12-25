@@ -22,9 +22,9 @@ autoheader &&
 echo "Creating build" &&
 mkdir -p build &&
 echo "Running automake" &&
-automake --add-missing --copy 2>/dev/null
+automake --add-missing --copy --foreign 2>/dev/null
 echo "Running libtoolize" &&
-libtoolize --automake --copy && automake --add-missing --copy &&
+libtoolize --automake --copy && automake --add-missing --copy --foreign &&
 echo "Running autoconf" &&
 autoconf -f || exit 1
 
