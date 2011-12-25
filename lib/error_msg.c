@@ -1,7 +1,6 @@
 /**
  * @file error_msg.c Error Handling Functions
  */
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

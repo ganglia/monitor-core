@@ -1,4 +1,3 @@
-# $Id$
 #
 
 include $(top_srcdir)/ganglia.inc

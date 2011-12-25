@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 #
 # chkconfig: 2345 20 80
 # description: gmetad startup script

@@ -1,7 +1,6 @@
 /**
  * @file daemon_init.c Functions for standalone daemons
  */ 
-/* $Id$ */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>

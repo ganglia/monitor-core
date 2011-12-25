@@ -1,6 +1,5 @@
 #ifndef NET_H
 #define NET_H 1
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>

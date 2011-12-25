@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 echo "Bootstrapping libmetrics"
 cd libmetrics && ./bootstrap || exit 1
 cd ..

@@ -1,5 +1,4 @@
 <?php
-# $Id$
 #
 # Shows information on a particular node, specified by
 # node host name. Used in concert with the physical_view page.

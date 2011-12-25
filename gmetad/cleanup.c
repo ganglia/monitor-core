@@ -1,4 +1,3 @@
-/* $Id$ */
 /*
  * cleanup.c - Enforces metric/host delete time. Helps keep
  *    memory usage trim and fit by deleting expired metrics from hash.

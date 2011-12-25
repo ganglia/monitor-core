@@ -1,7 +1,6 @@
 /**
  * @file debug_msg.c Debug Message function
  */
-/* $Id$ */
 #include <stdio.h>
 #include <stdarg.h>
 

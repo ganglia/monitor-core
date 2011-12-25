@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 #
 # chkconfig: 2345 70 40
 # description: gmond startup script

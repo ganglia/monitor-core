@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 #echo "Running make distclean"
 #make distclean
 echo "Running aclocal" &&
