@@ -1,6 +1,5 @@
 /* C code produced by gperf version 2.7.2 */
 /* Command-line: gperf -G -l -H metric_hash -t -F ', 0' -N in_metric_list -k '1,6,$' -W metrics ./metric_hash.gperf  */
-/* $Id$ */
 /* Included for the metric_tyep definition */
 #include <gmetad.h>
 

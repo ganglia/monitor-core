@@ -1,5 +1,4 @@
 <?php
-/* $Id$ */
 include_once "./eval_config.php";
 # ATD - function.php must be included before get_context.php.  It defines some needed functions.
 include_once "./functions.php";

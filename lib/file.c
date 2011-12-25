@@ -1,7 +1,6 @@
 /**
  * @file file.c Some file functions
  */
-/* $Id$ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>

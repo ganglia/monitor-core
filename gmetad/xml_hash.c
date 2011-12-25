@@ -30,7 +30,6 @@ error "gperf generated tables don't work with this execution character set. Plea
 
 #line 1 "xml_hash.gperf"
 
-/* $Id$ */
 #include <gmetad.h>
 #line 5 "xml_hash.gperf"
 struct xml_tag;

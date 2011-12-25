@@ -1,5 +1,4 @@
 dnl
-dnl $Id$
 dnl
 dnl "Copyright (c) 2001 by Matt Massie and The Regents of the University
 dnl  of California.  All rights reserved."
@@ -54,10 +53,6 @@ GANGLIA_MICRO_VERSION=1
 #   appears to be consistent with the way Blastwave does things
 REL=1
 
-# If we are releasing a snapshot (beta), set GANGLIA_SNAPSHOT to "yes"
-# If we are creating an official release, set it to "no" 
-GANGLIA_SNAPSHOT="yes"
-
 # If there are any changes to libganglia in this release, you need to...
 #   LIBGANGLIA_MICRO_VERSION += 1;
 #   LIBGANGLIA_INTERFACE_AGE += 1;
@@ -70,14 +65,7 @@ LIBGANGLIA_INTERFACE_AGE=0
 LIBGANGLIA_BINARY_AGE=0
 ### END RELEASE VARIABLES #############################
 
-if test x"$GANGLIA_SNAPSHOT" != xyes;
-then
 GANGLIA_VERSION=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION.$GANGLIA_MICRO_VERSION
-else
-GANGLIA_NANO_VERSION=0
-AC_DEFINE_UNQUOTED(GANGLIA_NANO_VERSION, $GANGLIA_NANO_VERSION, GANGLIA_NANO_VERSION)
-GANGLIA_VERSION=$GANGLIA_MAJOR_VERSION.$GANGLIA_MINOR_VERSION.$GANGLIA_MICRO_VERSION.$GANGLIA_NANO_VERSION
-fi
 
 AM_INIT_AUTOMAKE(ganglia, $GANGLIA_VERSION)
 

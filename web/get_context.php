@@ -1,5 +1,4 @@
 <?php
-/* $Id$ */
 
 include_once "./functions.php";
 
