@@ -83,7 +83,7 @@ function graph_io_report ( &$rrdtool_graph ) {
         ."AREA:'adjaggdatarate'#e2e2f2:'Transfer rate' "
         . $series_g;
 
-    $rrdtool_graph['right-axis-label'] = 'MB/sec';
+    $rrdtool_graph['right-axis-label'] = 'Bytes/sec';
     $rrdtool_graph['right-axis'] = $scalefactor.':0';
 
     $rrdtool_graph['series'] = $series;
