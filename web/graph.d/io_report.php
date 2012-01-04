@@ -61,7 +61,7 @@ function graph_io_report ( &$rrdtool_graph ) {
             $disk_name = $matches[1];
             if($col_num >= count($io_colours))
                 $col_num = 0;
-            $disk_col = $disk_colours[$col_num];
+            $disk_col = $io_colours[$col_num];
             $series = $series."DEF:'avgsvct${disk_name}'='${rrd_dir}/${content}':'sum':AVERAGE "
                               ."DEF:'nread${disk_name}'='${rrd_dir}/io_nread_${disk_name}.rrd':'sum':AVERAGE "
                               ."DEF:'nwrite${disk_name}'='${rrd_dir}/io_nwrite_${disk_name}.rrd':'sum':AVERAGE "
