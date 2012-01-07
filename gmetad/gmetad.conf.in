@@ -133,3 +133,25 @@ data_source "my cluster" localhost
 # default: 0   (for gmetad >= 3.2)
 case_sensitive_hostnames 1
 
+#-------------------------------------------------------------------------------
+# It is now possible to export all the metrics collected by gmetad directly to
+# graphite by setting the following attributes. 
+#
+# The hostname or IP address of the Graphite server
+# default: unspecified
+# carbon_server "my.graphite.box"
+#
+# The port on which Graphite is listening
+# default: 2003
+# carbon_port 2003
+#
+# A prefix to prepend to the metric names exported by gmetad. Graphite uses dot-
+# separated paths to organize and refer to metrics. 
+# default: unspecified
+# graphite_prefix "datacenter1.gmetad"
+#
+# Number of milliseconds gmetad will wait for a response from the graphite server 
+# default: 500
+# carbon_timeout 500
+#
+
