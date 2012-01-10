@@ -59,7 +59,7 @@ struct Ganglia_host {
   /* Last heard from */
   apr_time_t last_heard_from;
 #ifdef SFLOW
-  struct _SFlowCounterState *sflow;
+  struct _SFlowAgent *sflow;
 #endif
 };
 typedef struct Ganglia_host Ganglia_host;
