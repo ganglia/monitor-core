@@ -164,7 +164,13 @@ static cfg_opt_t metric_modules_opts[] = {
 #ifdef SFLOW
 static cfg_opt_t sflow_opts[] = {
   CFG_INT("udp_port", 6343, CFGF_NONE ),
-  CFG_BOOL("accept_vm_metrics", 0, CFGF_NONE ),
+  CFG_BOOL("accept_vm_metrics", 1, CFGF_NONE ),
+  CFG_BOOL("accept_http_metrics", 1, CFGF_NONE ),
+  CFG_BOOL("multiple_http_instances", 0, CFGF_NONE ),
+  CFG_BOOL("accept_memcache_metrics", 1, CFGF_NONE ),
+  CFG_BOOL("multiple_memcache_instances", 0, CFGF_NONE ),
+  CFG_BOOL("accept_jvm_metrics", 1, CFGF_NONE ),
+  CFG_BOOL("multiple_jvm_instances", 0, CFGF_NONE ),
   CFG_END()
 };
 #endif

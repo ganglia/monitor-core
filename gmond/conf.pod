@@ -480,7 +480,10 @@ metrics can be discovered by invoking B<gmond -m>.
 =head2 sFlow
 
 The B<sflow> group is optional and has the following optional
-attributes: B<udp_port>, B<accept_vm_metrics>. By default, a
+attributes: B<udp_port>, B<accept_vm_metrics>, B<accept_http_metrics>,
+B<accept_memcache_metrics>, B<accept_jvm_metrics>,
+B<multiple_http_instances>,B<multiple_memcache_instances>,
+B<multiple_jvm_instances>. By default, a
 B<udp_recv_channel> on port 6343 (the IANA registered port for
 sFlow) is all that is required to accept and process sFlow
 datagrams.  To receive sFlow on some other port requires both
@@ -498,12 +501,27 @@ setting here. For example:
 An sFlow agent running on a hypervisor may also be sending
 metrics for its local virtual machines.  By default these
 metrics are ignored, but the B<accept_vm_metrics> flag can
-be used to accept those metrics too,  and instantiate the
-virtual machines as hosts in the cluster:
+be used to accept those metrics too,  and prefix them with
+an identifier for each virtual machine.
 
    sflow {
      accept_vm_metrics = yes
    }
+
+The sFlow feed may also contain metrics sent from HTTP or memcached
+servers,  or from Java VMs.  Extra options can be used to ignore
+or accept these metrics,  and to indicate that there may be multiple
+instances per host.  For example:
+
+    sflow {
+      accept_http_metrics = yes
+      multiple_http_instances = yes
+    }
+
+will allow the HTTP metrics, and also mark them with a distinguishing
+identifier so that each instance can be trended separately.  (If multiple
+instances are reporting and this flag is not set,  the results are likely
+to be garbled.)
 
 =head2 Include
 
