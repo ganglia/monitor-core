@@ -213,5 +213,5 @@ $graph_sizes_keys = array_keys( $graph_sizes );
 # From version 3.2, backwards compatibility will be disabled by default.
 # default: true  (for gmetad < 3.2)
 # default: false (for gmetad >= 3.2)
-$case_sensitive_hostnames = true;
+$case_sensitive_hostnames = false;
 ?>
