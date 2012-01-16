@@ -19,6 +19,12 @@ CheckOut the source files of Ganglia:
 
   git clone git://github.com/ganglia/monitor-core.git ganglia
 
+and update the submodules
+
+  cd ganglia
+  git submodule init
+  git submodule update
+
 To prepare the distribution for compilation, run the bootstrapping script:
 
   ./bootstrap
