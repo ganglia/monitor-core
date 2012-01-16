@@ -1,8 +1,0 @@
-It is highly recommended that the new web UI be used, which is available
-from here:
-
-  https://github.com/vvuksan/ganglia-misc
-
-graph.d components from this repository should still be able to be used
-with the new web UI.
-
