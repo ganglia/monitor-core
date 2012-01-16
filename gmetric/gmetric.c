@@ -108,6 +108,8 @@ main( int argc, char *argv[] )
     }
   if(args_info.heartbeat_given)
       Ganglia_metadata_add(gmetric, SPOOF_HEARTBEAT, "yes");
+  if(args_info.cluster_given)
+      Ganglia_metadata_add(gmetric, "CLUSTER", args_info.cluster_arg);
   if(args_info.group_given)
       Ganglia_metadata_add(gmetric, "GROUP", args_info.group_arg);
   if(args_info.desc_given)

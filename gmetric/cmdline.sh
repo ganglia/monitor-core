@@ -14,6 +14,7 @@ option "slope" s "Either zero|positive|negative|both" string default="both"  no
 option "tmax" x "The maximum time in seconds between gmetric calls" int default="60" no
 option "dmax" d "The lifetime in seconds of this metric" int default="0" no
 option "group" g "Group of the metric" string no
+option "cluster" C "Cluster of the metric" string no
 option "desc" D "Description of the metric" string no
 option "title" T "Title of the metric" string no
 option "spoof" S "IP address and name of host/device (colon separated) we are spoofing" string default="" no
