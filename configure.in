@@ -818,7 +818,7 @@ AC_OUTPUT(Makefile
           gmetric/Makefile
           include/Makefile
           mans/Makefile
-          web/Makefile)
+          )
 
 echo ""
 echo "Welcome to.."
