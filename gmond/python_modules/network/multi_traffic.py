@@ -116,7 +116,7 @@ def metric_init(params):
         'units'       : 'XXX',
         'slope'       : 'both',
         'description' : 'XXX',
-        'groups'      : 'Network Interface Traffic',
+        'groups'      : 'network_interface_traffic',
         }
 
     if "refresh_rate" not in params:
