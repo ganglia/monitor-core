@@ -22,7 +22,8 @@ echo "Exporting tag $TAG"
 	git clone git://github.com/ganglia/monitor-core.git ; \
 	cd monitor-core ; \
 	git checkout ${TAG}; \
-	rm -Rf .git
+	git submodule init; \
+	git submodule update
 )
 #svn export "https://ganglia.svn.sourceforge.net/svnroot/ganglia/tags/${TAG}" "$TMP"
 #svn export "https://ganglia.svn.sourceforge.net/svnroot/ganglia/branches/3.2" "$TMP"
@@ -35,6 +36,9 @@ echo "Exporting tag $TAG"
 
 		# Create all configure scripts, etc
 		./bootstrap
+
+		# Cleanup git repo directories after autoconf uses them
+		rm -Rf .git */.git
 
 		# Create initial ganglia.spec file with RHEL5 defaults
 		cp ganglia.spec.in ganglia.spec -f

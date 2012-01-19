@@ -86,30 +86,30 @@ well-defined XML format.
 This gmetad daemon aggregates monitoring data from several clusters
 to form a monitoring grid. It also keeps metric history using rrdtool.
 
-%package gmetad-python
-Summary: Ganglia Meta daemon in Python http://ganglia.sourceforge.net/
-Group: System Environment/Base
-Requires: python-rrdtool
-Obsoletes: ganglia-monitor-core-gmetad < %{version}
-Obsoletes: ganglia-monitor-core < %{version}
-Provides: ganglia-monitor-core-gmetad = %{version}
-Provides: ganglia-monitor-core = %{version}
-Conflicts: ganglia-gmetad
+#%package gmetad-python
+#Summary: Ganglia Meta daemon in Python http://ganglia.sourceforge.net/
+#Group: System Environment/Base
+#Requires: python-rrdtool
+#Obsoletes: ganglia-monitor-core-gmetad < %{version}
+#Obsoletes: ganglia-monitor-core < %{version}
+#Provides: ganglia-monitor-core-gmetad = %{version}
+#Provides: ganglia-monitor-core = %{version}
+#Conflicts: ganglia-gmetad
 
-%description gmetad-python
-Ganglia is a scalable, real-time monitoring and execution environment
-with all execution requests and statistics expressed in an open
-well-defined XML format.
+#%description gmetad-python
+#Ganglia is a scalable, real-time monitoring and execution environment
+#with all execution requests and statistics expressed in an open
+#well-defined XML format.
 
-This gmetad daemon aggregates monitoring data from several clusters
-to form a monitoring grid. It also keeps metric history using rrdtool.
+#This gmetad daemon aggregates monitoring data from several clusters
+#to form a monitoring grid. It also keeps metric history using rrdtool.
 
-gmetad-python is a re-write of the original gmetad code (written in C)
-with pluggable interface.  The RRD files, both the metric RRDs and summary
-RRDs are being written by RRD plugins rather than directly from gmetad.
-This provides the ability to plug in new metric storage modules to support
-other types of storage mechanisms other than RRD and also the ability to
-plug in any type of gmetad-level analysis.
+#gmetad-python is a re-write of the original gmetad code (written in C)
+#with pluggable interface.  The RRD files, both the metric RRDs and summary
+#RRDs are being written by RRD plugins rather than directly from gmetad.
+#This provides the ability to plug in new metric storage modules to support
+#other types of storage mechanisms other than RRD and also the ability to
+#plug in any type of gmetad-level analysis.
 
 %package gmond
 Summary: Ganglia Monitor daemon http://ganglia.sourceforge.net/
@@ -186,8 +186,8 @@ if [ -e /etc/gmetad.conf ]; then
   %__mv /etc/gmetad.conf %{conf_dir}
 fi
 
-%post gmetad-python
-/sbin/chkconfig --add gmetad-python
+#%post gmetad-python
+#/sbin/chkconfig --add gmetad-python
 
 %post gmond
 /sbin/chkconfig --add gmond
@@ -240,12 +240,12 @@ then
    /sbin/chkconfig --del gmetad
 fi
 
-%preun gmetad-python
-if [ "$1" = 0 ]
-then
-   /etc/init.d/gmetad-python stop
-   /sbin/chkconfig --del gmetad-python
-fi
+#%preun gmetad-python
+#if [ "$1" = 0 ]
+#then
+#   /etc/init.d/gmetad-python stop
+#   /sbin/chkconfig --del gmetad-python
+#fi
 
 %preun gmond
 if [ "$1" = 0 ]
@@ -350,16 +350,16 @@ cd gmetad-python
 %{_mandir}/man1/gmetad.1*
 %config(noreplace) %{conf_dir}/gmetad.conf
 
-%files gmetad-python
-%defattr(-,root,root)
-%{_sbindir}/gmetad.py*
-/etc/init.d/gmetad-python
-%config(noreplace) %{conf_dir}/gmetad-python.conf
-%{python_sitelib}/*
-%dir %{_libdir}/ganglia
-%dir %{_libdir}/ganglia/python_modules
-%{_libdir}/ganglia/python_modules/gmetad*
-%{_mandir}/man1/gmetad.py.1*
+#%files gmetad-python
+#%defattr(-,root,root)
+#%{_sbindir}/gmetad.py*
+#/etc/init.d/gmetad-python
+#%config(noreplace) %{conf_dir}/gmetad-python.conf
+#%{python_sitelib}/*
+#%dir %{_libdir}/ganglia
+#%dir %{_libdir}/ganglia/python_modules
+#%{_libdir}/ganglia/python_modules/gmetad*
+#%{_mandir}/man1/gmetad.py.1*
 
 %files gmond
 %defattr(-,root,root)
@@ -456,6 +456,8 @@ cd gmetad-python
 %__rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Mar 31 2011 Bernard Li <bernard@vanhpc.org>
+- Allow file permissions for gmetric and gstat to be automatically set
 * Thu Mar 31 2011 Bernard Li <bernard@vanhpc.org>
 - Allow file permissions for gmetric and gstat to be automatically set
 * Wed Jan 26 2011 Bernard Li <bernard@vanhpc.org>
