@@ -25,9 +25,9 @@ modules {
     param splunk-web {
       value = '/twistd.*SplunkWeb/'
     }
-  }
 
 */
+  }
 }
 
 collection_group {
