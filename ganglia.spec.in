@@ -172,8 +172,8 @@ gmetad packages
 %ifnarch noarch
 make
 %endif
-cd gmetad-python
-%{__python} setup.py build
+#cd gmetad-python
+#%{__python} setup.py build
 
 %pre
 
@@ -267,10 +267,10 @@ fi
 %ifarch noarch
 
 %__make -C web 
-%__install -d -m 0755 $RPM_BUILD_ROOT/%{web_prefixdir}
-%__cp -rf web/* $RPM_BUILD_ROOT/%{web_prefixdir}
-%__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/Makefile*
-%__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*.in
+%__install -d -m 0755 $RPM_BUILD_ROOT%{web_prefixdir}
+%__cp -rf web/* $RPM_BUILD_ROOT%{web_prefixdir}
+%__rm -f $RPM_BUILD_ROOT%{web_prefixdir}/Makefile*
+%__rm -f $RPM_BUILD_ROOT%{web_prefixdir}/*.in
 %__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/dwoo
 %__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/conf
 %__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/dwoo/cache
@@ -288,13 +288,13 @@ fi
 %if 0%{?suse_version}
    %__cp -f gmond/gmond.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmond
    %__cp -f gmetad/gmetad.init.SuSE $RPM_BUILD_ROOT/etc/init.d/gmetad
-   sed -e 's/sbin\/gmetad/sbin\/gmetad.py/' gmetad/gmetad.init.SuSE > $RPM_BUILD_ROOT/etc/init.d/gmetad-python
-   chmod +x $RPM_BUILD_ROOT/etc/init.d/gmetad-python
+   #sed -e 's/sbin\/gmetad/sbin\/gmetad.py/' gmetad/gmetad.init.SuSE > $RPM_BUILD_ROOT/etc/init.d/gmetad-python
+   #chmod +x $RPM_BUILD_ROOT/etc/init.d/gmetad-python
 %else
    %__cp -f gmond/gmond.init $RPM_BUILD_ROOT/etc/init.d/gmond
    %__cp -f gmetad/gmetad.init $RPM_BUILD_ROOT/etc/init.d/gmetad
-   sed -e 's/sbin\/gmetad/sbin\/gmetad.py/' gmetad/gmetad.init > $RPM_BUILD_ROOT/etc/init.d/gmetad-python
-   chmod +x $RPM_BUILD_ROOT/etc/init.d/gmetad-python
+   #sed -e 's/sbin\/gmetad/sbin\/gmetad.py/' gmetad/gmetad.init > $RPM_BUILD_ROOT/etc/init.d/gmetad-python
+   #chmod +x $RPM_BUILD_ROOT/etc/init.d/gmetad-python
 %endif
 %__cp -f gmetad/gmetad-default $RPM_BUILD_ROOT/etc/sysconfig/gmetad
 
@@ -332,13 +332,13 @@ fi
 %__make -C gmond gmond.conf.5
 
 # gmetad-python
-cd gmetad-python
-%{__python} setup.py install --prefix=/usr --skip-build --install-scripts=%{_sbindir} --root=$RPM_BUILD_ROOT
-%{__python} -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/gmetad"'", 1, "/", 1)' > /dev/null
-%{__python} -O -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/gmetad"'", 1, "/", 1)' > /dev/null
-%{__python} -O -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{python_sitelib}/Gmetad"'", 1, "/", 1)' > /dev/null
-%{__python} -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_sbindir}"'", 1, "/", 1)' > /dev/null
-%{__python} -O -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_sbindir}"'", 1, "/", 1)' > /dev/null
+#cd gmetad-python
+#%{__python} setup.py install --prefix=/usr --skip-build --install-scripts=%{_sbindir} --root=$RPM_BUILD_ROOT
+#%{__python} -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/gmetad"'", 1, "/", 1)' > /dev/null
+#%{__python} -O -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/gmetad"'", 1, "/", 1)' > /dev/null
+#%{__python} -O -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{python_sitelib}/Gmetad"'", 1, "/", 1)' > /dev/null
+#%{__python} -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_sbindir}"'", 1, "/", 1)' > /dev/null
+#%{__python} -O -c 'import compileall; compileall.compile_dir("'"$RPM_BUILD_ROOT%{_sbindir}"'", 1, "/", 1)' > /dev/null
 
 %endif
 
@@ -419,39 +419,13 @@ cd gmetad-python
 
 %files web
 %defattr(-,root,root)
-%attr(0755,nobody,nobody)@varstatedir@/ganglia/filters
 %attr(0755,apache,apache)@varstatedir@/ganglia/dwoo
+%attr(0755,apache,apache)@varstatedir@/ganglia/dwoo/compiled
+%attr(0755,apache,apache)@varstatedir@/ganglia/dwoo/cache
 %dir %{web_prefixdir}/
 %dir %{web_prefixdir}/dwoo
 %config(noreplace) %{web_prefixdir}/conf.php
-%{web_prefixdir}/AUTHORS
-%{web_prefixdir}/auth.php
-%{web_prefixdir}/calendar.php
-%{web_prefixdir}/cluster_legend.html
-%{web_prefixdir}/cluster_view.php
-%{web_prefixdir}/COPYING
-%{web_prefixdir}/eval_config.php
-%{web_prefixdir}/footer.php
-%{web_prefixdir}/functions.php
-%{web_prefixdir}/ganglia.php
-%{web_prefixdir}/get_context.php
-%{web_prefixdir}/get_ganglia.php
-%{web_prefixdir}/graph.d
-%{web_prefixdir}/graph.php
-%{web_prefixdir}/grid_tree.php
-%{web_prefixdir}/header.php
-%{web_prefixdir}/host_view.php
-%{web_prefixdir}/index.php
-%{web_prefixdir}/meta_view.php
-%{web_prefixdir}/node_legend.html
-%{web_prefixdir}/physical_view.php
-%{web_prefixdir}/pie.php
-%{web_prefixdir}/private_clusters
-%{web_prefixdir}/show_node.php
-%{web_prefixdir}/styles.css
-%{web_prefixdir}/templates
-%{web_prefixdir}/version.php
-%{web_prefixdir}/dwoo/*
+%{web_prefixdir}/*
 
 %endif
 
