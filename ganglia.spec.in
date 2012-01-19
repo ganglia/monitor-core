@@ -275,7 +275,7 @@ fi
 %__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/conf
 %__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/dwoo/cache
 %__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/dwoo/compiled
-%__cp -rf web/conf/* $RPM_BUILD_ROOT/var/lib/ganglia/conf
+%__cp -f web/conf/*.json $RPM_BUILD_ROOT/var/lib/ganglia/conf
 
 %else
 
@@ -350,7 +350,7 @@ fi
 %{_sbindir}/gmetad
 /etc/init.d/gmetad
 %config(noreplace) /etc/sysconfig/gmetad
-%{_mandir}/man1/gmetad.1*
+%{_mandir}/man1/gmetad*1*
 %config(noreplace) %{conf_dir}/gmetad.conf
 
 #%files gmetad-python
@@ -424,7 +424,7 @@ fi
 %attr(0755,apache,apache)@varstatedir@/ganglia/dwoo/cache
 %dir %{web_prefixdir}/
 %dir %{web_prefixdir}/dwoo
-%config(noreplace) %{web_prefixdir}/conf.php
+/var/lib/ganglia/conf
 %{web_prefixdir}/*
 
 %endif
