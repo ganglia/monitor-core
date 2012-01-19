@@ -3,7 +3,7 @@
 include $(top_srcdir)/ganglia.inc
 
 if BUILD_GMETAD
-GMETAD_SUBDIR = gmetad web
+GMETAD_SUBDIR = gmetad
 else
 GMETAD_SUBDIR = 
 endif
@@ -18,7 +18,7 @@ GANGLIA_SUBDIRS = lib libmetrics tests $(GMETAD_SUBDIR) gmond gstat gmetric incl
 SUBDIRS = $(GANGLIA_SUBDIRS)
 # Make sure that no matter the setting for --with-gmetad
 # that the gmetad directory gets distributed
-GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad web gmond gstat gmetric include mans
+GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gstat gmetric include mans
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
 EXTRA_DIST = BUGS README.WIN README.AIX ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html ganglia-config.in $(EXTRA_DIST_FILES)
