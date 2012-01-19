@@ -9,9 +9,11 @@ modules {
     param target_device0 {
         value = "eth0"
     }
+/*
     param target_device1 {
         value = "eth1"
     }
+*/
 
   }
 }
@@ -52,7 +54,7 @@ collection_group {
   }
 }
 
-
+/*
 collection_group {
   collect_every  = 15
   time_threshold = 90
@@ -88,3 +90,5 @@ collection_group {
     value_threshold = 0.0
   }
 }
+
+*/

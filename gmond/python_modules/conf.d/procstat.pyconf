@@ -5,6 +5,11 @@ modules {
     name = 'procstat'
     language = 'python'
 
+    param gmond {
+      value = '/gmond/'
+    }
+
+/*
     param httpd {
       value = '/var/run/httpd.pid'
     }
@@ -21,6 +26,8 @@ modules {
       value = '/twistd.*SplunkWeb/'
     }
   }
+
+*/
 }
 
 collection_group {
