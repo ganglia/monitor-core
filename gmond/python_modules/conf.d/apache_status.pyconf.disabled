@@ -1,0 +1,102 @@
+modules {
+  module {
+    name     = "apache_status"
+    language = "python"
+    param url {
+        value = "http://localhost/server-status?auto"
+    }
+
+    param virtual_host {
+        value = "health"
+    }
+
+    # Which metric group should these metrics be put into
+    param metric_group {
+        value = "apache"
+    }
+
+  }
+}
+
+collection_group {
+  collect_every  = 20
+  time_threshold = 90
+
+  metric {
+    name  = "ap_busy_workers"
+    title = "Busy Threads"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_idle_workers"
+    title = "Idle Threads"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_logging"
+    title = "Logging"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_open_slot"
+    title = "Open slot with no current process"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_reading_request"
+    title = "Reading Request"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_waiting"
+    title = "Waiting for Connection"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_sending_reply"
+    title = "Sending Reply"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_idle"
+    title = "Idle cleanup of worker"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_dns_lookup"
+    title = "DNS Lookup"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_closing"
+    title = "Closing connection"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_starting"
+    title = "Starting up"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_gracefully_fin"
+    title = "Gracefully finishing"
+    value_threshold = 0
+  }
+  metric {
+    name  = "ap_keepalive"
+    title = "Keepalive (read)"
+    value_threshold = 0
+  }
+
+  metric {
+    name  = "ap_rps"
+    title = "Request per second"
+    value_threshold = 0.0
+  }
+
+  metric {
+    name  = "ap_requests"
+    title = "Requests"
+    value_threshold = 0.0
+  }
+}

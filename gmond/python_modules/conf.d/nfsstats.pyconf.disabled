@@ -1,0 +1,179 @@
+modules {
+  module {
+    name = "nfsstats"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 120
+  metric {
+    name = "nfs_v3_getattr"
+    title = "NFS v3 getattr"
+  }
+  metric {
+    name = "nfs_v3_setattr"
+    title = "NFS v3 setattr"
+  }
+  metric {
+    name = "nfs_v3_lookup"
+    title = "NFS v3 lookup"
+  }
+  metric {
+    name = "nfs_v3_access"
+    title = "NFS v3 access"
+  }
+  metric {
+    name = "nfs_v3_readlink"
+    title = "NFS v3 readlink"
+  }
+  metric {
+    name = "nfs_v3_read"
+    title = "NFS v3 read"
+  }
+  metric {
+    name = "nfs_v3_write"
+    title = "NFS v3 write"
+  }
+  metric {
+    name = "nfs_v3_create"
+    title = "NFS v3 create"
+  }
+  metric {
+    name = "nfs_v3_mkdir"
+    title = "NFS v3 mkdir"
+  }
+  metric {
+    name = "nfs_v3_symlink"
+    title = "NFS v3 symlink"
+  }
+  metric {
+    name = "nfs_v3_mknod"
+    title = "NFS v3 mknod"
+  }
+  metric {
+    name = "nfs_v3_remove"
+    title = "NFS v3 remove"
+  }
+  metric {
+    name = "nfs_v3_rmdir"
+    title = "NFS v3 rmdir"
+  }
+  metric {
+    name = "nfs_v3_rename"
+    title = "NFS v3 rename"
+  }
+  metric {
+    name = "nfs_v3_link"
+    title = "NFS v3 link"
+  }
+  metric {
+    name = "nfs_v3_readdir"
+    title = "NFS v3 readdir"
+  }
+  metric {
+    name = "nfs_v3_readdirplus"
+    title = "NFS v3 readdirplus"
+  }
+  metric {
+    name = "nfs_v3_fsstat"
+    title = "NFS v3 fsstat"
+  }
+  metric {
+    name = "nfs_v3_fsinfo"
+    title = "NFS v3 fsinfo"
+  }
+  metric {
+    name = "nfs_v3_pathconf"
+    title = "NFS v3 pathconf"
+  }
+  metric {
+    name = "nfs_v3_commit"
+    title = "NFS v3 commit"
+  }
+  metric {
+    name = "nfsd_v3_getattr"
+    title = "NFSD v3 getattr"
+  }
+  metric {
+    name = "nfsd_v3_setattr"
+    title = "NFSD v3 setattr"
+  }
+  metric {
+    name = "nfsd_v3_lookup"
+    title = "NFSD v3 lookup"
+  }
+  metric {
+    name = "nfsd_v3_access"
+    title = "NFSD v3 access"
+  }
+  metric {
+    name = "nfsd_v3_readlink"
+    title = "NFSD v3 readlink"
+  }
+  metric {
+    name = "nfsd_v3_read"
+    title = "NFSD v3 read"
+  }
+  metric {
+    name = "nfsd_v3_write"
+    title = "NFSD v3 write"
+  }
+  metric {
+    name = "nfsd_v3_create"
+    title = "NFSD v3 create"
+  }
+  metric {
+    name = "nfsd_v3_mkdir"
+    title = "NFSD v3 mkdir"
+  }
+  metric {
+    name = "nfsd_v3_symlink"
+    title = "NFSD v3 symlink"
+  }
+  metric {
+    name = "nfsd_v3_mknod"
+    title = "NFSD v3 mknod"
+  }
+  metric {
+    name = "nfsd_v3_remove"
+    title = "NFSD v3 remove"
+  }
+  metric {
+    name = "nfsd_v3_rmdir"
+    title = "NFSD v3 rmdir"
+  }
+  metric {
+    name = "nfsd_v3_rename"
+    title = "NFSD v3 rename"
+  }
+  metric {
+    name = "nfsd_v3_link"
+    title = "NFSD v3 link"
+  }
+  metric {
+    name = "nfsd_v3_readdir"
+    title = "NFSD v3 readdir"
+  }
+  metric {
+    name = "nfsd_v3_readdirplus"
+    title = "NFSD v3 readdirplus"
+  }
+  metric {
+    name = "nfsd_v3_fsstat"
+    title = "NFSD v3 fsstat"
+  }
+  metric {
+    name = "nfsd_v3_fsinfo"
+    title = "NFSD v3 fsinfo"
+  }
+  metric {
+    name = "nfsd_v3_pathconf"
+    title = "NFSD v3 pathconf"
+  }
+  metric {
+    name = "nfsd_v3_commit"
+    title = "NFSD v3 commit"
+  }
+}

@@ -1,0 +1,34 @@
+modules {
+  module {
+    name = "mem_stats"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 30
+  time_threshold = 45
+  metric {
+    name = "mem_writeback"
+    title = "Mem actively being written to disk"
+    value_threshold = 1.0
+  }
+  metric {
+    name = "mem_dirty"
+    title = "Mem waiting to be written to disk"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "mem_mapped"
+    title = "Memory Mapped"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "mem_hardware_corrupted"
+    title = "Memory HardwareCorrupted"
+    value_threshold = 1.0
+  }
+
+}

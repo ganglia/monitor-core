@@ -1,0 +1,57 @@
+modules {
+    module {
+        name = "varnish"
+        language = "python"
+        param stats_command {
+            value = "varnishstat -1"
+        }
+    }
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 60
+
+#    If you want all of metrics kept track by varnishstat ie. all 100 of them
+#    you can simply uncomment line below and comment out all the other ones
+#    metric {
+#        name_match = "varnish_(.+)"
+#    }
+
+    metric {
+        name = "varnish_client_req"
+        title = "Client Requests"
+    }
+
+    metric {
+        name = "varnish_backend_req"
+        title = "Backend Requests"
+    }
+    metric {
+        name = "varnish_backend_unhealthy"
+        title = "Backend conn. not attempted"
+    }
+    metric {
+        name = "varnish_backend_busy"
+        title = "Backend conn. too many"
+    }
+    metric {
+        name = "varnish_cache_hit_ratio"
+        title = "Cache Hit Ratio"
+    }
+    metric {
+        name = "varnish_n_object"
+        title = "Objects in Cache"
+    }
+    metric {
+        name = "varnish_sm_balloc"
+        title = "Allocated Storage"
+    }
+    metric {
+        name = "varnish_n_wrk"
+        title = "Worker Threads"
+    }
+
+
+
+}

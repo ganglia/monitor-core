@@ -1,0 +1,22 @@
+#
+
+modules {
+  module {
+    name = 'diskstat'
+    language = 'python'
+
+    param devices {
+      value = ''
+    }
+  }
+}
+
+collection_group {
+  collect_every = 30
+  time_threshold = 30
+
+  metric {
+    name_match = "diskstat_(.+)"
+  }
+}
+

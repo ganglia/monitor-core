@@ -1,0 +1,36 @@
+modules {
+  module {
+    name = "vm_stats"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 30
+  time_threshold = 45
+
+  metric {
+      name = "vm_vmeff"
+      title = "VM Efficiency"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name = "vm_pgmajfault"
+      title = "Major fault - loading a memory page from disk"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name = "vm_pgpgin"
+      title = "Pages in from disk"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name = "vm_pgpgout"
+      title = "Pages out to disk"
+      value_threshold = 1.0
+  }
+
+}
