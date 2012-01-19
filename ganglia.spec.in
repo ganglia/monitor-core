@@ -312,7 +312,7 @@ fi
 %__cp -f gmond/modules/conf.d/* $RPM_BUILD_ROOT%{conf_dir}/conf.d
 
 # Copy the python metric modules and .conf files
-%__cp -f gmond/python_modules/conf.d/*.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/
+%__cp -f gmond/python_modules/conf.d/*.pyconf* $RPM_BUILD_ROOT%{conf_dir}/conf.d/
 %{__python} -c 'import compileall; compileall.compile_dir("gmond/python_modules", 1, "/", 1)' > /dev/null
 %{__python} -O -c 'import compileall; compileall.compile_dir("gmond/python_modules", 1, "/", 1)' > /dev/null
 %__cp -f gmond/python_modules/*/*.{py,pyc,pyo} $RPM_BUILD_ROOT%{_libdir}/ganglia/python_modules/
@@ -326,7 +326,7 @@ fi
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/*.conf.in
 
 # Disable the diskusage module until it is configured properly
-%__mv $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf.off
+%__mv $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf.disabled
 
 %__make DESTDIR=$RPM_BUILD_ROOT install
 %__make -C gmond gmond.conf.5
