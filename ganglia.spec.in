@@ -266,13 +266,16 @@ fi
 
 %ifarch noarch
 
-%__make -C web install
+%__make -C web 
 %__install -d -m 0755 $RPM_BUILD_ROOT/%{web_prefixdir}
 %__cp -rf web/* $RPM_BUILD_ROOT/%{web_prefixdir}
 %__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/Makefile*
 %__rm -f $RPM_BUILD_ROOT/%{web_prefixdir}/*.in
-%__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/filters
-%__install -d -m 0755 $RPM_BUILD_ROOT@varstatedir@/ganglia/dwoo
+%__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/dwoo
+%__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/conf
+%__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/dwoo/cache
+%__install -d -m 0755 $RPM_BUILD_ROOT/var/lib/ganglia/dwoo/compiled
+%__cp -rf web/conf/* $RPM_BUILD_ROOT/var/lib/ganglia/conf
 
 %else
 
