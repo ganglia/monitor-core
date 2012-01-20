@@ -17,7 +17,7 @@ collection_group {
 
   metric {
       name = "vm_pgmajfault"
-      title = "Major fault - loading a memory page from disk"
+      title = "Major page fault"
       value_threshold = 1.0
   }
 
