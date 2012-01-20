@@ -217,7 +217,7 @@ def get_percent_time(dev, key, val):
 	logging.debug(' get_percent_time for ' + dev +  '_' + key)
 	global stats, last_val
 
-	interval = (cur_time - last_update) * 1000
+	interval = cur_time - last_update
 
 	if interval > 0:
 		stats[dev][key] = (val / interval) * 100
@@ -303,7 +303,7 @@ def metric_init(params):
 
 		write_bytes_per_sec = {
 			'units': 'bytes/sec',
-			'description': 'The number of Kbytes written per second'},
+			'description': 'The number of bbytes written per second'},
 
 		write_time = {
 			'units': 's',
@@ -334,10 +334,10 @@ def metric_init(params):
 					'name': 'diskstat_' + dev + '_' + label,
 					'call_back': get_stat,
 					'time_max': time_max,
-					'value_type': 'uint',
+					'value_type': 'float',
 					'units': '',
 					'slope': 'both',
-					'format': '%u',
+					'format': '%f',
 					'description': label,
 					'groups': 'diskstat'
 				}
