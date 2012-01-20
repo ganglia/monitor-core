@@ -1,4 +1,4 @@
-#!/usr/local/bin/gengetopt --input
+#!/usr/bin/gengetopt --input
 # See http://www.gnu.org/software/gengetopt/gengetopt.html for details
 
 package "gmetad"
