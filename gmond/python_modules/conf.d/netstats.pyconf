@@ -1,0 +1,52 @@
+#######################################################################
+# Use this config only if you interested in few metrics instead of
+# the 100 or so metrics possible
+#######################################################################
+
+modules {
+  module {
+    name = "netstats"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 15
+  time_threshold = 45
+
+  metric {
+      name = "tcpext_tcploss_percentage"
+      title = "TCP loss percentage"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name = "tcp_retrans_percentage"
+      title = "TCP retransmit percentage"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name = "tcp_outsegs"
+      title = "TCP segments sent"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name = "tcp_insegs"
+      title = "TCP segments received"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name = "udp_indatagrams"
+      title = "UDP packets in"
+      value_threshold = 1.0
+  }
+  metric {
+      name = "udp_outdatagrams"
+      title = "UDP packets out"
+      value_threshold = 1.0
+  }
+
+}
