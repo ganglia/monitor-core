@@ -76,7 +76,7 @@ Build a development version of Ganglia using Cygwin in Windows
 ==============================================================
 
 The procedure to build a development version of Ganglia in Windows is described
-in README.SVN as it is the same that is used in other platforms and as far as
+in README.GIT as it is the same that is used in other platforms and as far as
 all dependencies are covered:
 
 Prerequisites
@@ -92,4 +92,4 @@ ones needed to build it and that are listed above:
 * flex (Devel)
 * libtool (Devel)
 * sharutils (Archive)
-* subversion (Devel)
+* git (Devel)
