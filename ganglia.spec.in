@@ -23,7 +23,7 @@ Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
 Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
 Buildroot: %{_tmppath}/%{name}-%{version}-buildroot
-BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel, make, pcre-devel, autoconf, automake, libtool, libxslt
+BuildRequires: libpng-devel, libart_lgpl-devel, gcc-c++, python-devel, libconfuse-devel, make, pcre-devel, autoconf, automake, libtool, pkgconfig
 %if 0%{?suse_version}
 BuildRequires:  freetype2-devel, libapr1-devel
 %if 0%{?suse_version} > 1020

@@ -7,6 +7,7 @@ Dependencies
 * APR (http://apr.apache.org/)
 * libConfuse (http://www.nongnu.org/confuse/)
 * expat (http://expat.sourceforge.net/)
+* pkg-config (http://www.freedesktop.org/wiki/Software/pkg-config)
 * python (http://www.python.org/)
 * PCRE (http://www.pcre.org/)
 * RRDtool (http://oss.oetiker.ch/rrdtool/)
