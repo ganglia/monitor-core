@@ -39,13 +39,12 @@ CLEANFILES = ganglia.sub pod2htm*
 
 dist-local: README ganglia.html
 
-
 # We go through and make sure all the files have
 # the same timestamp with the last command here...
 dist-hook:
 	for subdir in $(EXTRA_SUBDIRS); do \
 	  tar -c --exclude=".libs" --exclude "core.*" \
-	  --exclude ".svn" --exclude="*.o"  --exclude="*.lo" \
+	  --exclude="*.o"  --exclude="*.lo" \
 	  --exclude="*.la" --exclude=".deps" \
 	  --exclude="Makefile" --exclude="libtool" \
 	  --exclude="config.h" \
@@ -56,7 +55,6 @@ dist-hook:
 	  --exclude="configure.lineno" --exclude="configure.status.lineno" \
 	  -f - $$subdir | (cd $(distdir) && tar -xf -)\
 	done;
-	find $(distdir) -name ".svn" -type d -prune -exec rm -rf {} \;
 	touch $(distdir)/Makefile.am
 	find $(distdir) -exec touch -r $(distdir)/Makefile.am {} \;
 
