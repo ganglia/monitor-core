@@ -9,7 +9,7 @@ at least the following tools installed.
   automake (GNU automake) 1.8.3
   autoconf (GNU autoconf) 2.53
   ltmain.sh (GNU libtool) 1.4.2
-  xsltproc (The XSLT C library for GNOME)
+  pkg-config (FreeDesktop)
 
 Additionally,  you might need the following
 

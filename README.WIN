@@ -33,13 +33,14 @@ Cygwin with the following packages:
 * libapr1-devel (Libs)
 * make (Devel)
 * sunrpc (Libs)
+* pkg-config (Devel)
 
 Optionally you will need the following packages for additional functionality
 as described in the INSTALL document and which will be otherwise selected
 at build time by the configure call:
 
-* libpcre-devel (libs) : avoid "without-libpcre" parameter to configure
-* python (Python)
+* libpcre-devel (libs) : disabled by "without-libpcre" flag to configure
+* python (Python)      : disabled by "disable-python" flag to configure
 
 Process
 -------
@@ -76,7 +77,7 @@ Build a development version of Ganglia using Cygwin in Windows
 ==============================================================
 
 The procedure to build a development version of Ganglia in Windows is described
-in README.SVN as it is the same that is used in other platforms and as far as
+in README.GIT as it is the same that is used in other platforms and as far as
 all dependencies are covered:
 
 Prerequisites
@@ -92,4 +93,4 @@ ones needed to build it and that are listed above:
 * flex (Devel)
 * libtool (Devel)
 * sharutils (Archive)
-* subversion (Devel)
+* git (Devel)
