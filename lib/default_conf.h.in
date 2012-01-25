@@ -21,7 +21,7 @@ globals {\n\
   mute = no\n\
   deaf = no\n\
   allow_extra_data = yes\n\
-  host_dmax = 0 /*secs */\n\
+  host_dmax = 86400 /*secs. Expires (removes from web interface) hosts in 1 day */\n\
   host_tmax = 20 /*secs */\n\
   cleanup_threshold = 300 /*secs */\n\
   gexec = no\n\
