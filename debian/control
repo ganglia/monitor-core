@@ -3,7 +3,7 @@ Section: net
 Priority: optional
 Maintainer: Stuart Teasdale <sdt@debian.org>
 Homepage: http://www.ganglia.info/
-Build-Depends: debhelper (>> 5.0.0), librrd2-dev, autoconf, autotools-dev, automake, libapr1-dev, libexpat1-dev, python-dev, libconfuse-dev, po-debconf, libxml2-dev, libdbi0-dev, libpcre3-dev
+Build-Depends: debhelper (>> 5.0.0), librrd2-dev, autoconf, autotools-dev, automake, libapr1-dev, libexpat1-dev, python-dev, libconfuse-dev, po-debconf, libxml2-dev, libdbi0-dev, libpcre3-dev, gperf
 Standards-Version: 3.8.4
 
 Package: ganglia-monitor
