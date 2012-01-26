@@ -22,8 +22,10 @@ endif
 
 config.status: configure
 	dh_testdir
+	# Just in case, make sure changelog exists
+	touch ChangeLog
 	# Add here commands to configure the package.
-	autoreconf
+	./bootstrap
 	chmod +x configure libmetrics/configure
 	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) \
 		--prefix=/usr --mandir=\$${prefix}/share/man \
@@ -91,7 +93,7 @@ install: build
 #Install webfrontend
 	      cp -a web/*.php web/*.css web/templates web/graph.d \
                  debian/ganglia-webfrontend/usr/share/ganglia-webfrontend
-	      cp web/private_clusters debian/apache.conf \
+	      cp debian/apache.conf \
 		 debian/ganglia-webfrontend/etc/ganglia-webfrontend
 
 # Build architecture-independent files here.
