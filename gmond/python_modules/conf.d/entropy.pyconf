@@ -1,0 +1,17 @@
+modules {
+  module {
+    name = "entropy"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 15
+  time_threshold = 50
+
+  metric {
+    name = "entropy_avail"
+    title = "Entropy Available"
+  }
+
+}
