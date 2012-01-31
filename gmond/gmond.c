@@ -692,6 +692,10 @@ setup_listen_channels_pollset( int reset )
         }
     }
 
+  /* network reset? Attempting to re-establish TCP sockets will fail as they are already open */
+  if (reset)
+    return;
+
   if((tcp_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_tcp_accept_channels + 1))) == NULL)
       {
         char apr_err[512];
