@@ -86,6 +86,7 @@ install: build
 	# Install the python modules
 	mkdir -p debian/ganglia-monitor-python/etc/ganglia/conf.d/
 	mkdir -p debian/ganglia-monitor-python/usr/lib/ganglia/python_modules/
+	cp debian/modpython.conf debian/ganglia-monitor-python/etc/ganglia/conf.d/
 	cp gmond/python_modules/*/*.pyconf* \
 		debian/ganglia-monitor-python/etc/ganglia/conf.d/
 	cp gmond/python_modules/*/*.py \
