@@ -55,6 +55,7 @@ dist-hook:
 	  --exclude="configure.lineno" --exclude="configure.status.lineno" \
 	  -f - $$subdir | (cd $(distdir) && tar -xf -)\
 	done;
+	tar -c --exclude ".git*" -f - web | (cd $(distdir) && tar -xf -)
 	touch $(distdir)/Makefile.am
 	find $(distdir) -exec touch -r $(distdir)/Makefile.am {} \;
 
