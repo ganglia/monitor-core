@@ -516,12 +516,6 @@ Ganglia_metadata_send_real( Ganglia_metric gmetric, Ganglia_udp_send_channels se
 }
 
 int
-Ganglia_value_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels )
-{
-  return Ganglia_value_send_real( gmetric, send_channels, NULL );
-}
-
-int
 Ganglia_value_send_real( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels, char *override_string )
 {
   int len, i;
@@ -581,6 +575,12 @@ Ganglia_value_send_real( Ganglia_metric gmetric, Ganglia_udp_send_channels send_
   len = xdr_getpos(&x); 
   /* Send the encoded data along...*/
   return Ganglia_udp_send_message( send_channels, gmetricmsg, len);
+}
+
+int
+Ganglia_value_send( Ganglia_metric gmetric, Ganglia_udp_send_channels send_channels )
+{
+  return Ganglia_value_send_real( gmetric, send_channels, NULL );
 }
 
 int

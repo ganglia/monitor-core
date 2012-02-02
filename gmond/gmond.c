@@ -588,12 +588,7 @@ setup_listen_channels_pollset( int reset )
   if(!reset)
     {
       if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
-        {
-          char apr_err[512];
-          apr_strerror(status, apr_err, 511);
-          err_msg("apr_pcalloc failed: %s", apr_err);
-          exit(1);
-        }
+        err_quit("unable to allocate UDP listening sockets");
     }
 
   /* Process all the udp_recv_channels */
@@ -692,13 +687,8 @@ setup_listen_channels_pollset( int reset )
         }
     }
 
-  if((tcp_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_tcp_accept_channels + 1))) == NULL)
-      {
-        char apr_err[512];
-        apr_strerror(status, apr_err, 511);
-        err_msg("apr_pcalloc failed: %s", apr_err);
-        exit(1);
-      }
+  if ((tcp_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_tcp_accept_channels + 1))) == NULL)
+    err_quit("Unable to allocate TCP listening sockets");
 
   /* Process all the tcp_accept_channels */ 
   for(i=0; i< num_tcp_accept_channels; i++)

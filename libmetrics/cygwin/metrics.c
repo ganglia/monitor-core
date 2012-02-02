@@ -717,9 +717,7 @@ g_val_t
 proc_run_func( void )
 {
    DWORD aProcesses[MAXPROCESSES], cbNeeded, cProcesses;
-   unsigned int i, running = 0;
-   HANDLE hProcess;
-   BOOL bResult;
+   unsigned int running = 0;
    g_val_t val;
 
    if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded)) {
@@ -729,6 +727,10 @@ proc_run_func( void )
    }
 #if (_WIN32_WINNT >= 0x0501)
    /* Only for XP or newer */
+   unsigned int i;
+   HANDLE hProcess;
+   BOOL bResult;
+
    for (i = 0; i < cProcesses; i++)
       if (aProcesses[i] != 0) {
          hProcess = OpenProcess(PROCESS_QUERY_INFORMATION,
@@ -880,7 +882,7 @@ find_disk_space(double *total, double *avail)
 
    mnttab = setmntent(MOUNTED, "r");
    while ((ent = getmntent(mnttab)) != NULL) {
-      if (islower(ent->mnt_fsname[0])) {
+      if (islower((int)ent->mnt_fsname[0])) {
          drive = ent->mnt_fsname[0] - 'a';
          if (drives[drive].total == 0.0) {
             statfs(ent->mnt_fsname, &fs);

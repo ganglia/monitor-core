@@ -634,7 +634,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
           */
          fillmetric(attr, metric, type);
 	 if (metric->dmax && metric->tn > metric->dmax)
-	 	   return;
+            return 0;
 
          if (do_summary && !xmldata->ds->dead && !xmldata->rval)
             {
