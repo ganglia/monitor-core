@@ -40,7 +40,7 @@ main( int argc, char *argv[] )
   gmond_config = Ganglia_gmond_config_create( args_info.conf_arg, !args_info.conf_given);
 
   /* deal with spoof overrides */
-  cfg_t *globals = (cfg_t*) cfg_getsec( gmond_config, "globals" );
+  cfg_t *globals = (cfg_t*) cfg_getsec( (cfg_t *)gmond_config, "globals" );
   char *override_hostname = cfg_getstr( globals, "override_hostname" );
   char *override_ip = cfg_getstr( globals, "override_ip" );
 
