@@ -9,7 +9,6 @@ GMETAD_SUBDIR =
 endif
 
 EXTRA_SUBDIRS = "gmetad-python contrib solaris"
-EXTRA_DIST_FILES = 
 INCLUDES = @APR_INCLUDES@
 
 AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-zip
@@ -21,7 +20,7 @@ SUBDIRS = $(GANGLIA_SUBDIRS)
 GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gstat gmetric include mans
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
-EXTRA_DIST = BUGS README.WIN README.AIX ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html ganglia-config.in $(EXTRA_DIST_FILES)
+EXTRA_DIST = BUGS README.WIN README.AIX ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html ganglia-config.in
 
 ganglia.sub: ganglia.pod
 	sed -e 's/GANGLIA_VERSION/@VERSION@/' < $(srcdir)/ganglia.pod > ganglia.sub
@@ -55,6 +54,7 @@ dist-hook:
 	  --exclude="configure.lineno" --exclude="configure.status.lineno" \
 	  -f - $$subdir | (cd $(distdir) && tar -xf -)\
 	done;
+	tar -c --exclude ".git*" -f - web | (cd $(distdir) && tar -xf -)
 	touch $(distdir)/Makefile.am
 	find $(distdir) -exec touch -r $(distdir)/Makefile.am {} \;
 
@@ -65,19 +65,18 @@ dist-hook:
 ganglia-config:	ganglia-config.in $(FIXCONFIG)
 	$(FIXCONFIG) ganglia-config.in
 
-install-exec-hook:	ganglia-config
+install-exec-hook: ganglia-config
 	mkdir -p $(DESTDIR)$(bindir) && \
 	  $(INSTALL_SCRIPT) ganglia-config $(DESTDIR)$(bindir)/ganglia-config
 
-contrib/ganglia_gmond.xml:	contrib/ganglia_gmond.xml.in $(FIXCONFIG)
+contrib/ganglia_gmond.xml: contrib/ganglia_gmond.xml.in $(FIXCONFIG)
 	$(FIXCONFIG) contrib/ganglia_gmond.xml.in
 
-solaris/pkginfo:	solaris/pkginfo.in $(FIXCONFIG)
+solaris/pkginfo: solaris/pkginfo.in $(FIXCONFIG)
 	$(FIXCONFIG) solaris/pkginfo.in
 
 # Notice that some files declared in this hook never get installed anywhere
 # We use the hook to force the files to be generated, but they remain
 # within the build tree for someone to inspect or manually copy to
 # the desired location if needed
-install-data-hook:	contrib/ganglia_gmond.xml solaris/pkginfo
-
+install-data-hook: contrib/ganglia_gmond.xml solaris/pkginfo

@@ -324,9 +324,25 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
    /* Build the path */
    strncpy(graphite_msg, gmetad_config.graphite_prefix, PATHSIZE);
 
+
+
+
    if (source) {
+		int sourcelen=strlen(source);		
+		char sourcecp[sourcelen+1];
+
+		/* find and replace space for _ in the hostname*/
+		for(i=0; i<=sourcelen; i++){
+	if ( source[i] == ' ') {
+	  sourcecp[i]='_';
+	}else{
+	  sourcecp[i]=source[i];
+	}
+      }
+		sourcecp[i+1]=0;
+          
       strncat(graphite_msg, ".", PATHSIZE-strlen(graphite_msg));
-      strncat(graphite_msg, source, PATHSIZE-strlen(graphite_msg));
+      strncat(graphite_msg, sourcecp, PATHSIZE-strlen(graphite_msg));
    }
 
 
