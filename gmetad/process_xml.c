@@ -568,7 +568,7 @@ startElement_HOSTS(void *data, const char *el, const char **attr)
       }
    return 0;
 }
-               
+
 
 static int
 startElement_METRIC(void *data, const char *el, const char **attr)
@@ -588,7 +588,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
    hash_t *summary;
    Metric_t *metric;
 
-   if (!xmldata->host_alive) return 0;
+   if (!xmldata->host_alive || gmetad_config.write_rrds != 1) return 0;
 
    /* Get name for hash key, and val/type for summaries. */
    for(i = 0; attr[i]; i+=2)
@@ -1066,8 +1066,8 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
    metric = (Metric_t*) val->data;
    type = getfield(metric->strings, metric->type);
 
-   /* Don't save to RRD if the datasource is dead */
-   if( xmldata->ds->dead )
+   /* Don't save to RRD if the datasource is dead or write_rrds is off */
+   if( xmldata->ds->dead || gmetad_config.write_rrds != 1)
       return 1;
 
    tt = in_type_list(type, strlen(type));
@@ -1089,9 +1089,9 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
 
    /* Save the data to a round robin database if this data source is 
     * alive. */
-   if (!xmldata->ds->dead && !xmldata->rval) 
+   if (!xmldata->ds->dead && !xmldata->rval)
      {
-   
+
        debug_msg("Writing Summary data for source %s, metric %s",
                  xmldata->sourcename, name);
 
