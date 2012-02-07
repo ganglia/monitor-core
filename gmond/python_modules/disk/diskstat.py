@@ -180,7 +180,7 @@ def update_stats():
 		get_delta(dev, 'read_time',  float(vals[6]), 0.001 )
 		get_delta(dev, 'write_time', float(vals[10]), 0.001 )
 
-		get_delta(dev, 'io_time', float(vals[12]), 0.001)
+		get_diff(dev, 'io_time', float(vals[12]), 0.001)
 		get_percent_time(dev, 'percent_io_time', float(stats[dev]['io_time']))
 		get_delta(dev, 'weighted_io_time', float(vals[13]), 0.001)
 
@@ -224,12 +224,12 @@ def get_percent_time(dev, key, val):
 	else:
 		stats[dev][key] = 0
 
-def get_diff(dev, key, val):
+def get_diff(dev, key, val, convert=1):
 	logging.debug(' get_diff for ' + dev + '_' + key)
 	global stats, last_val
 
 	if key in last_val[dev]:
-		stats[dev][key] = val - last_val[dev][key]
+		stats[dev][key] = (val - last_val[dev][key]) * float(convert)
 	else:
 		stats[dev][key] = 0
 
