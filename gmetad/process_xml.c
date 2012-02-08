@@ -588,7 +588,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
    hash_t *summary;
    Metric_t *metric;
 
-   if (!xmldata->host_alive || gmetad_config.write_rrds != 1) return 0;
+   if (!xmldata->host_alive ) return 0;
 
    /* Get name for hash key, and val/type for summaries. */
    for(i = 0; attr[i]; i+=2)
@@ -640,11 +640,12 @@ startElement_METRIC(void *data, const char *el, const char **attr)
             {
                   debug_msg("Updating host %s, metric %s", 
                                   xmldata->hostname, name);
-                  xmldata->rval = write_data_to_rrd(xmldata->sourcename,
+                  if ( gmetad_config.write_rrds == 1 )
+                     xmldata->rval = write_data_to_rrd(xmldata->sourcename,
                         xmldata->hostname, name, metricval, NULL,
                         xmldata->ds->step, xmldata->source.localtime, slope);
-						if (gmetad_config.carbon_server) // if the user has specified a carbon server, send the metric to carbon as well
-                  carbon_ret=write_data_to_carbon(xmldata->sourcename, xmldata->hostname, name, metricval,xmldata->source.localtime);
+		  if (gmetad_config.carbon_server) // if the user has specified a carbon server, send the metric to carbon as well
+                     carbon_ret=write_data_to_carbon(xmldata->sourcename, xmldata->hostname, name, metricval,xmldata->source.localtime);
             }
          metric->id = METRIC_NODE;
          metric->report_start = metric_report_start;
