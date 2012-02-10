@@ -559,6 +559,10 @@ setup_listen_channels_pollset( int reset )
   Ganglia_channel *channel;
   int pollset_opts = 0;
 
+  /* reset only if there are no udp_recv_channels */
+  if (reset && num_udp_recv_channels == 0)
+    return;
+
   /* check if gmond was really meant to be deaf */
   if (total_listen_channels == 0)
     {
