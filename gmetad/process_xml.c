@@ -1058,7 +1058,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
 {
    xmldata_t *xmldata = (xmldata_t *) arg;
    char *name, *type;
-   char sum[256];
+   char sum[512];
    char num[256];
    Metric_t *metric;
    struct type_tag *tt;
