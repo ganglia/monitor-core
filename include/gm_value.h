@@ -17,7 +17,7 @@ enum g_type_t {
 };
 typedef enum g_type_t g_type_t;
  
-#define MAX_G_STRING_SIZE 32
+#define MAX_G_STRING_SIZE 64
  
 typedef union {
     int8_t   int8;
