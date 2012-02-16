@@ -230,11 +230,20 @@ static DOTCONF_CB(cb_setuid)
 }
 
 static DOTCONF_CB(cb_scalable)
-{  
+{
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
    debug_msg("Setting scalable = %s", cmd->data.str);
    if (!strcmp(cmd->data.str, "off"))
       c->scalable_mode = 0;
+   return NULL;
+}
+
+static DOTCONF_CB(cb_write_rrds)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Setting write_rrds = %s", cmd->data.str);
+   if (!strcmp(cmd->data.str, "off"))
+       c->write_rrds = cmd->data.value;
    return NULL;
 }
 
@@ -299,6 +308,7 @@ static configoption_t gmetad_options[] =
       {"setuid", ARG_TOGGLE, cb_setuid, &gmetad_config, 0},
       {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
       {"scalable", ARG_STR, cb_scalable, &gmetad_config, 0},
+      {"write_rrds", ARG_STR, cb_write_rrds, &gmetad_config, 0},
       {"RRAs", ARG_LIST, cb_RRAs, &gmetad_config, 0},
       {"case_sensitive_hostnames", ARG_INT, cb_case_sensitive_hostnames, &gmetad_config, 0},
       {"carbon_server", ARG_STR, cb_carbon_server, &gmetad_config, 0},
@@ -322,6 +332,7 @@ set_defaults (gmetad_config_t *config)
    config->should_setuid = 1;
    config->setuid_username = "nobody";
    config->rrd_rootdir = "@varstatedir@/ganglia/rrds";
+   config->write_rrds = 1;
    config->scalable_mode = 1;
    config->all_trusted = 0;
    config->num_RRAs = 3;

@@ -568,7 +568,7 @@ startElement_HOSTS(void *data, const char *el, const char **attr)
       }
    return 0;
 }
-               
+
 
 static int
 startElement_METRIC(void *data, const char *el, const char **attr)
@@ -588,7 +588,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
    hash_t *summary;
    Metric_t *metric;
 
-   if (!xmldata->host_alive) return 0;
+   if (!xmldata->host_alive ) return 0;
 
    /* Get name for hash key, and val/type for summaries. */
    for(i = 0; attr[i]; i+=2)
@@ -634,17 +634,18 @@ startElement_METRIC(void *data, const char *el, const char **attr)
           */
          fillmetric(attr, metric, type);
 	 if (metric->dmax && metric->tn > metric->dmax)
-	 	   return;
+            return 0;
 
          if (do_summary && !xmldata->ds->dead && !xmldata->rval)
             {
                   debug_msg("Updating host %s, metric %s", 
                                   xmldata->hostname, name);
-                  xmldata->rval = write_data_to_rrd(xmldata->sourcename,
+                  if ( gmetad_config.write_rrds == 1 )
+                     xmldata->rval = write_data_to_rrd(xmldata->sourcename,
                         xmldata->hostname, name, metricval, NULL,
                         xmldata->ds->step, xmldata->source.localtime, slope);
-						if (gmetad_config.carbon_server) // if the user has specified a carbon server, send the metric to carbon as well
-                  carbon_ret=write_data_to_carbon(xmldata->sourcename, xmldata->hostname, name, metricval,xmldata->source.localtime);
+		  if (gmetad_config.carbon_server) // if the user has specified a carbon server, send the metric to carbon as well
+                     carbon_ret=write_data_to_carbon(xmldata->sourcename, xmldata->hostname, name, metricval,xmldata->source.localtime);
             }
          metric->id = METRIC_NODE;
          metric->report_start = metric_report_start;
@@ -1057,7 +1058,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
 {
    xmldata_t *xmldata = (xmldata_t *) arg;
    char *name, *type;
-   char sum[256];
+   char sum[512];
    char num[256];
    Metric_t *metric;
    struct type_tag *tt;
@@ -1066,8 +1067,8 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
    metric = (Metric_t*) val->data;
    type = getfield(metric->strings, metric->type);
 
-   /* Don't save to RRD if the datasource is dead */
-   if( xmldata->ds->dead )
+   /* Don't save to RRD if the datasource is dead or write_rrds is off */
+   if( xmldata->ds->dead || gmetad_config.write_rrds != 1)
       return 1;
 
    tt = in_type_list(type, strlen(type));
@@ -1089,9 +1090,9 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
 
    /* Save the data to a round robin database if this data source is 
     * alive. */
-   if (!xmldata->ds->dead && !xmldata->rval) 
+   if (!xmldata->ds->dead && !xmldata->rval)
      {
-   
+
        debug_msg("Writing Summary data for source %s, metric %s",
                  xmldata->sourcename, name);
 

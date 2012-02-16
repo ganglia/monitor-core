@@ -22,6 +22,7 @@ typedef struct
       int carbon_timeout;
       char *graphite_prefix;
       int scalable_mode;
+      int write_rrds;
       int all_trusted;
       int num_RRAs;
       char *RRAs[MAX_RRAS];

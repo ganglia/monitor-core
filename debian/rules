@@ -86,6 +86,7 @@ install: build
 	# Install the python modules
 	mkdir -p debian/ganglia-monitor-python/etc/ganglia/conf.d/
 	mkdir -p debian/ganglia-monitor-python/usr/lib/ganglia/python_modules/
+	cp debian/modpython.conf debian/ganglia-monitor-python/etc/ganglia/conf.d/
 	cp gmond/python_modules/*/*.pyconf* \
 		debian/ganglia-monitor-python/etc/ganglia/conf.d/
 	cp gmond/python_modules/*/*.py \
@@ -96,9 +97,7 @@ install: build
 	mkdir -p debian/ganglia-webfrontend/etc/apache2/conf.d/
 	cp -f web/debian/apache.conf \
 		 debian/ganglia-webfrontend/etc/ganglia-webfrontend
-	cp -f web/debian/conf.php \
-		 debian/ganglia-webfrontend/etc/ganglia-webfrontend
-	cp -f web/debian/conf_redirect.php \
+	cp -f web/debian/conf_debian.php \
 		 debian/ganglia-webfrontend/usr/share/ganglia-webfrontend/conf.php
 
 # Build architecture-independent files here.
