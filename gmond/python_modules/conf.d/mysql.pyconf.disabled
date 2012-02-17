@@ -1,4 +1,8 @@
 ###
+###
+### This module requires MySQL-python e.g. on Centos/RHEL
+###       * yum install MySQL-python
+###
 ### Note:
 ###   To setup database access:
 ###   GRANT SUPER, PROCESS ON *.* TO your_user@localhost \
