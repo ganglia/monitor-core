@@ -1,15 +1,28 @@
 #!/bin/bash
-#
-#	$Author$
-#
+SD=`dirname $0`
+pushd $SD > /dev/null
 
 TAG=$1
 
 if [ "$TAG" == "" ]; then
-	echo "syntax: $0 TAG FROM"
-	echo "	TAG : destination git tag / version"
+	echo "syntax: $0 TAG"
+	echo "	TAG : destination git tag for version or prerelease"
+	popd > /dev/null
 	exit
 fi
 
-git tag -m "Tag release ${TAG}" "${TAG}"
-
+if [[ "${TAG}" == *pre* ]]; then
+	git tag -m "Tag prerelease ${TAG}" "${TAG}"
+else
+	GM=`cat ../configure.in | egrep '^GANGLIA_MAJOR_VERSION=' | cut -d '=' -f 2`
+	GN=`cat ../configure.in | egrep '^GANGLIA_MINOR_VERSION=' | cut -d '=' -f 2`
+	GU=`cat ../configure.in | egrep '^GANGLIA_MICRO_VERSION=' | cut -d '=' -f 2`
+	if [ "$TAG" = "${GM}.${GN}.${GU}" ]; then
+		git tag -m "Tag release ${TAG}" "${TAG}"
+	else
+		echo "version mismatch"
+		popd > /dev/null
+		exit 1
+	fi
+fi
+popd > /dev/null
