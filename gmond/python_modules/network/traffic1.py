@@ -15,7 +15,7 @@ Debug = False
 
 def dprint(f, *v):
     if Debug:
-        print >>sys.stderr, "DEBUG: "+f % v
+        print >> sys.stderr, "DEBUG: "+f % v
 
 class UpdateTrafficThread(threading.Thread):
 
@@ -70,7 +70,7 @@ class UpdateTrafficThread(threading.Thread):
             dev = a[0].lstrip()
             if dev != self.target_device: continue
 
-            dprint("%s", ">>update_metric");
+            dprint("%s", ">>update_metric")
             self.stats = {}
             _stats = a[1].split()
             for name, index in self.stats_tab.iteritems():
@@ -98,7 +98,7 @@ class UpdateTrafficThread(threading.Thread):
         return val
 
 def metric_init(params):
-    global descriptors, Desc_Skel, _Worker_Thread, Debug
+    global Desc_Skel, _Worker_Thread, Debug
 
     print '[traffic1] Received the following parameters'
     print params
@@ -167,7 +167,7 @@ def metric_init(params):
 
 def create_desc(skel, prop):
     d = skel.copy()
-    for k,v in prop.iteritems():
+    for k, v in prop.iteritems():
         d[k] = v
     return d
 

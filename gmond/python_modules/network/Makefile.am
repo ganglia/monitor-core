@@ -1,2 +1,2 @@
-pys = multi_traffic.py tcpconn.py traffic1.py
+pys = multi_interface.py tcpconn.py traffic1.py
 EXTRA_DIST = $(pys)
