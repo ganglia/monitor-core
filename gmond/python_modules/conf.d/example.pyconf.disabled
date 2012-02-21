@@ -2,6 +2,7 @@ modules {
   module {
     name = "example"
     language = "python"
+    enabled = "no"
     param RandomMax {
         value = 600
     }
@@ -29,4 +30,3 @@ collection_group {
     name = "PyConstant_Number"
   }
 }
-
