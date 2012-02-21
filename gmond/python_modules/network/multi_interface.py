@@ -18,10 +18,10 @@ INTERFACES = []
 descriptors = []
 
 stats_tab = {
-    "rx_bytes"  : 0,
-    "rx_pkts"   : 1,
-    "rx_errs"   : 2,
-    "rx_drops"  : 3,
+    "rx_bytes" : 0,
+    "rx_pkts"  : 1,
+    "rx_errs"  : 2,
+    "rx_drops" : 3,
     "tx_bytes" : 8,
     "tx_pkts"  : 9,
     "tx_errs"  : 10,
@@ -33,21 +33,14 @@ net_stats_file = "/proc/net/dev"
 
 def create_desc(skel, prop):
     d = skel.copy()
-    for k,v in prop.iteritems():
+    for k, v in prop.iteritems():
         d[k] = v
     return d
 
 def metric_init(params):
-    global descriptors
-    global INTERFACES
-    
-#    INTERFACES = params.get('interfaces')
     watch_interfaces = params.get('interfaces')
     excluded_interfaces = params.get('excluded_interfaces')
-    get_interfaces(watch_interfaces,excluded_interfaces)
-
-#    print INTERFACES
-    time_max = 60
+    get_interfaces(watch_interfaces, excluded_interfaces)
 
     Desc_Skel = {
         'name'        : 'XXX',
@@ -60,7 +53,6 @@ def metric_init(params):
         'description' : 'XXX',
         'groups'      : 'network',
         }
-
 
     for dev in INTERFACES:
         descriptors.append(create_desc(Desc_Skel, {
@@ -83,7 +75,7 @@ def metric_init(params):
                     "units"       : "pkts/sec",
                     "description" : "receive packets dropped per sec",
                     }))
-    
+
         descriptors.append(create_desc(Desc_Skel, {
                     "name"        : "tx_bytes_" + dev,
                     "units"       : "bytes/sec",
@@ -108,28 +100,28 @@ def metric_init(params):
     return descriptors
 
 def get_interfaces(watch_interfaces, excluded_interfaces):
-	global INTERFACES
-        
-        # check if particular interfaces have been specifieid. Watch only those
-        if watch_interfaces != "":
-            INTERFACES = watch_interfaces.split(" ")
-            
-        else:
+    global INTERFACES
 
-	    if excluded_interfaces != "":
-		excluded_if_list = excluded_interfaces.split(" ")
-        
-            f = open(net_stats_file, "r")
-            for line in f:
-                # Find only lines with :
-                if re.search(":", line):
-                    a = line.split(":")
-                    dev_name = a[0].lstrip()
-		    if dev_name not in excluded_if_list:
-                        INTERFACES.append(dev_name)
+    # check if particular interfaces have been specifieid. Watch only those
+    if watch_interfaces != "":
+        INTERFACES = watch_interfaces.split(" ")
 
-	return 0
+    else:
 
+        if excluded_interfaces != "":
+            excluded_if_list = excluded_interfaces.split(" ")
+
+        f = open(net_stats_file, "r")
+        for line in f:
+            # Find only lines with :
+            if re.search(":", line):
+                a = line.split(":")
+                dev_name = a[0].lstrip()
+                if dev_name not in excluded_if_list:
+                    INTERFACES.append(dev_name)
+        f.close()
+
+    return 0
 
 def get_metrics():
     """Return all metrics"""
@@ -138,19 +130,20 @@ def get_metrics():
 
     if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
-	try:
-	    file = open(net_stats_file, 'r')
-    
-	except IOError:
-	    return 0
+        try:
+            f = open(net_stats_file, 'r')
+
+        except IOError:
+            return 0
 
         # convert to dict
         metrics = {}
-        for line in file:
+        for line in f:
             if re.search(":", line):
                 a = line.split(":")
                 dev_name = a[0].lstrip()
                 metrics[dev_name] = re.split("\s+", a[1].lstrip())
+        f.close()
 
         # update cache
         LAST_METRICS = dict(METRICS)
@@ -160,7 +153,7 @@ def get_metrics():
         }
 
     return [METRICS, LAST_METRICS]
-    
+
 def get_delta(name):
     """Return change over time for the requested metric"""
 
@@ -176,15 +169,14 @@ def get_delta(name):
     index = stats_tab[name]
 
     try:
-      delta = (float(curr_metrics['data'][iface][index]) - float(last_metrics['data'][iface][index])) /(curr_metrics['time'] - last_metrics['time'])
-      if delta < 0:
-	print name + " is less 0"
-	delta = 0
+        delta = (float(curr_metrics['data'][iface][index]) - float(last_metrics['data'][iface][index])) /(curr_metrics['time'] - last_metrics['time'])
+        if delta < 0:
+            print name + " is less 0"
+            delta = 0
     except KeyError:
-      delta = 0.0      
+        delta = 0.0
 
     return delta
-
 
 if __name__ == '__main__':
     try:
