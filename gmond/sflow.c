@@ -12,6 +12,7 @@
 #include <string.h>
 #include <confuse.h>
 
+#define SFLOW_MEMCACHE_2200 1
 #include "sflow.h"
 
 /* the Ganglia host table */
