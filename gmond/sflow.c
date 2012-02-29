@@ -179,8 +179,8 @@ submit_sflow_gmetric(Ganglia_host *hostdata, char *metric_name, char *metric_tit
   gfull->metric.name = metric_name;
   gfull->metric.units = SFLOWGMetricTable[tag].units;
   gfull->metric.slope = SFLOWGMetricTable[tag].slope;
-  gfull->metric.tmax = 60; /* "(secs) poll if it changes faster than this" */
-  gfull->metric.dmax = 0; /* "(secs) how long before stale?" */
+  gfull->metric.tmax = 60; /* (secs) we expect to get new data at least this often */
+  gfull->metric.dmax = 600; /* (secs) OK to delete metric if not updated for this long */
 
   /* extra metadata */
   group = SFLOWGMetricTable[tag].group;
@@ -319,6 +319,7 @@ submit_sflow_string(Ganglia_host *hostdata, char *metric_prefix, EnumSFLOWGMetri
 #define SFLOW_CTR_DELTA(ds,field) (field - ds->counterState.field)
 #define SFLOW_CTR_RATE(ds, field, mS) ((mS) ? ((float)(SFLOW_CTR_DELTA(ds, field)) * (float)1000.0 / (float)mS) : 0)
 #define SFLOW_CTR_MS_PC(ds, field, mS) ((mS) ? ((float)(SFLOW_CTR_DELTA(ds, field)) * (float)100.0 / (float)mS) : 0)
+#define SFLOW_CTR_DIVIDE(ds, num, denom) (SFLOW_CTR_DELTA(ds, denom) ? (float)(SFLOW_CTR_DELTA(ds, num)) / (float)(SFLOW_CTR_DELTA(ds, denom)) : 0)
 
   /* metrics may be marked as "unsupported" by the sender,  so check for those reserved values */
 #define SFLOW_OK_FLOAT(field) (field != (float)-1)
@@ -470,10 +471,10 @@ process_struct_DSK(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
     if(sflowCFG.submit_all_physical) {
       submit_sflow_float(hostdata, metric_prefix, SFLOW_M_reads, SFLOW_CTR_RATE(dataSource, reads, ctr_ival_mS), SFLOW_OK_COUNTER32(reads));
       submit_sflow_float(hostdata, metric_prefix, SFLOW_M_bytes_read, SFLOW_CTR_RATE(dataSource, bytes_read, ctr_ival_mS), SFLOW_OK_COUNTER64(bytes_read));
-      submit_sflow_float(hostdata, metric_prefix, SFLOW_M_read_time, SFLOW_CTR_MS_PC(dataSource, read_time, ctr_ival_mS), SFLOW_OK_COUNTER32(read_time));
+      submit_sflow_float(hostdata, metric_prefix, SFLOW_M_read_time, SFLOW_CTR_DIVIDE(dataSource, read_time, reads), SFLOW_OK_COUNTER32(read_time));
       submit_sflow_float(hostdata, metric_prefix, SFLOW_M_writes, SFLOW_CTR_RATE(dataSource, writes, ctr_ival_mS), SFLOW_OK_COUNTER32(writes));
       submit_sflow_float(hostdata, metric_prefix, SFLOW_M_bytes_written, SFLOW_CTR_RATE(dataSource, bytes_written, ctr_ival_mS), SFLOW_OK_COUNTER64(bytes_written));
-      submit_sflow_float(hostdata, metric_prefix, SFLOW_M_write_time, SFLOW_CTR_MS_PC(dataSource, write_time, ctr_ival_mS), SFLOW_OK_COUNTER32(write_time));
+      submit_sflow_float(hostdata, metric_prefix, SFLOW_M_write_time, SFLOW_CTR_DIVIDE(dataSource, write_time, writes), SFLOW_OK_COUNTER32(write_time));
     }
   }
 
@@ -979,8 +980,8 @@ process_struct_JVM(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
     debug_msg("process_struct_JVM - accumulate counters");
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_jvm_thread_started, SFLOW_CTR_RATE(dataSource, jvm_thread_started, ctr_ival_mS), SFLOW_OK_COUNTER32(jvm_thread_started));
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_jvm_gc_count, SFLOW_CTR_RATE(dataSource, jvm_gc_count, ctr_ival_mS), SFLOW_OK_COUNTER32(jvm_gc_count));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_jvm_gc_ms, SFLOW_CTR_RATE(dataSource, jvm_gc_ms, ctr_ival_mS), SFLOW_OK_COUNTER32(jvm_gc_ms));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_jvm_comp_ms, SFLOW_CTR_RATE(dataSource, jvm_comp_ms, ctr_ival_mS), SFLOW_OK_COUNTER32(jvm_comp_ms));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_jvm_gc_cpu, SFLOW_CTR_RATE(dataSource, jvm_gc_ms, ctr_ival_mS), SFLOW_OK_COUNTER32(jvm_gc_ms));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_jvm_comp_cpu, SFLOW_CTR_RATE(dataSource, jvm_comp_ms, ctr_ival_mS), SFLOW_OK_COUNTER32(jvm_comp_ms));
   }
 
 
