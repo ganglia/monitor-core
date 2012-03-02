@@ -2,7 +2,7 @@
 # Copyright (c) 1995-2000 SuSE GmbH Nuernberg, Germany.
 #
 # Author: Kurt Garloff <feedback@suse.de>
-#         Oliver Mössinger <olivpass@web.de>
+#         Oliver Mï¿½ssinger <olivpass@web.de>
 #
 # init.d/gmond
 #
@@ -20,14 +20,6 @@
 # Default-Stop:   0 1 2 6
 # Description:    Start gmond-
 ### END INIT INFO
-
-# Determine the base and follow a runlevel link name.
-base=${0##*/}
-link=${base#*[SK][0-9][0-9]}
-
-# Force execution if not called by a runlevel directory.
-test $link = $base && START_GMOND=yes
-test "$START_GMOND" = yes || exit 0
 
 GMOND_BIN=/usr/sbin/gmond
 test -x $GMOND_BIN || exit 5
