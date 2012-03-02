@@ -25,14 +25,6 @@
 # Description:    Start gmetad-
 ### END INIT INFO
 
-# Determine the base and follow a runlevel link name.
-base=${0##*/}
-link=${base#*[SK][0-9][0-9]}
-
-# Force execution if not called by a runlevel directory.
-test $link = $base && START_GMETAD=yes
-test "$START_GMETAD" = yes || exit 0
-
 GMETAD_BIN=/usr/sbin/gmetad
 test -x $GMETAD_BIN || exit 5
 

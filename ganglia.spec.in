@@ -144,9 +144,16 @@ via DSO at daemon start time instead of via gmetric
 Summary: Ganglia static libraries and header files http://ganglia.sourceforge.net/
 Group: Development/Libraries
 # revisit this list. it might be libtool bloat
-Requires: expat-devel, apr-devel > 1
+# MKN: Adjust requirements for SLES (20120229)
 %if 0%{?suse_version}
-Requires: libconfuse-devel, libexpat-devel, libapr1-devel, libganglia
+Requires: libconfuse-devel, libapr1-devel, libganglia
+%if 0%{?suse_version} > 1020
+Requires: libexpat-devel
+%else
+Requires: expat
+%endif
+%else
+Requires: expat-devel, apr-devel > 1
 %endif
 
 %description devel
