@@ -190,9 +190,10 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
 {
    Source_t *source = (Source_t*) val->data;
    int rc;
+   llist_entry *le;
 
-   /* We skip dead sources. */
-   if (source->ds->dead)
+   /* We skip dead sources and metrics not to be summarized. */
+   if (source->ds->dead || (llist_search(&(gmetad_config.unsummarized_metrics), (void *)key->data, my_strncmp, &le) == 0) )
       return 0;
 
    /* Need to be sure the source has a complete sum for its metrics. */
@@ -221,6 +222,7 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
    Metric_t *metric;
    int rc;
    struct type_tag *tt;
+   llist_entry *le;
 
    name = (char*) key->data;
    metric = (Metric_t*) val->data;
@@ -228,8 +230,8 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
 
    /* Summarize all numeric metrics */
    tt = in_type_list(type, strlen(type));
-   /* Don't write a summary for an unknown or STRING type. */
-   if (!tt || (tt->type == STRING)) 
+   /* Don't write a summary for an unknown or STRING type or metrics not to be summarized */
+   if (!tt || (tt->type == STRING) || (llist_search(&(gmetad_config.unsummarized_metrics), (void *)key->data, my_strncmp, &le) == 0) ) 
        return 0;
 
    /* We log all our sums in double which does not suffer from

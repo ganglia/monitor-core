@@ -1062,6 +1062,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
    char num[256];
    Metric_t *metric;
    struct type_tag *tt;
+   llist_entry *le;
 
    name = (char*) key->data;
    metric = (Metric_t*) val->data;
@@ -1072,7 +1073,8 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
       return 1;
 
    tt = in_type_list(type, strlen(type));
-   if (!tt) return 0;
+   if (!tt || (llist_search(&(gmetad_config.unsummarized_metrics), (void *)name, my_strncmp, &le) == 0) )
+      return 0;
 
    switch (tt->type)
       {
