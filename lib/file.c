@@ -14,6 +14,7 @@
 
 #include "ganglia_priv.h"
 
+#define SLURP_FAILURE -1
 /**
  * @fn int slurpfile ( char * filename, char **buffer, int buflen )
  * Reads an entire file into a buffer
@@ -35,7 +36,7 @@ slurpfile (char * filename, char **buffer, int buflen)
    if (fd < 0)
       {
          err_ret("slurpfile() open() error on file %s", filename);
-         return SYNAPSE_FAILURE;
+         return SLURP_FAILURE;
       }
    if (*buffer == NULL)
       {
@@ -54,7 +55,7 @@ read:
             goto read;
          err_ret("slurpfile() read() error on file %s", filename);
          close(fd);
-         return SYNAPSE_FAILURE;
+         return SLURP_FAILURE;
       }
    else
       sl += read_len;
@@ -102,7 +103,7 @@ update_file (timely_file *tf)
     if(timediff(&now,&tf->last_read) > tf->thresh) {
         bp = tf->buffer;
         rval = slurpfile(tf->name, &bp, tf->buffersize);
-        if(rval == SYNAPSE_FAILURE) {
+        if(rval == SLURP_FAILURE) {
             err_msg("update_file() got an error from slurpfile() reading %s",
                     tf->name);
         } else {
