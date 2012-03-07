@@ -25,7 +25,7 @@
 #include <psapi.h>
 
 /* From old ganglia 2.5.x... */
-#include "file.h"
+#include "gm_file.h"
 #include "libmetrics.h"
 /* End old ganglia 2.5.x headers */
 #undef min

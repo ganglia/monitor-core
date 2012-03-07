@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <ctype.h>
-#include "file.h"
+#include "gm_file.h"
 
 #include "ganglia_priv.h"
 

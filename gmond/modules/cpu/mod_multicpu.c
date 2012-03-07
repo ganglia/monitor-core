@@ -37,7 +37,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "file.h"
+#include "gm_file.h"
 #include "libmetrics.h"
 
 #include <apr_tables.h>
