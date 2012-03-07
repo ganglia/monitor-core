@@ -14,7 +14,6 @@
 
 #include "ganglia_priv.h"
 
-#define SLURP_FAILURE -1
 /**
  * @fn int slurpfile ( char * filename, char **buffer, int buflen )
  * Reads an entire file into a buffer

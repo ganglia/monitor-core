@@ -142,8 +142,9 @@ metric_init(void)
    if (proc_cpuinfo == NULL)
       proc_cpuinfo = bp;
 
-   if ( rval.int32 == SYNAPSE_FAILURE ) {
+   if ( rval.int32 == SLURP_FAILURE ) {
          err_msg("metric_init() got an error from slurpfile() /proc/cpuinfo");
+         rval.int32 = SYNAPSE_FAILURE;
          return rval;
    }
 
