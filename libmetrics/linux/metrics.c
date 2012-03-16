@@ -15,7 +15,7 @@
 #include <sys/time.h>
 
 /* From old ganglia 2.5.x... */
-#include "file.h"
+#include "gm_file.h"
 #include "interface.h"
 #include "libmetrics.h"
 /* End old ganglia 2.5.x headers */
@@ -303,18 +303,20 @@ metric_init(void)
    if (proc_cpuinfo == NULL)
       proc_cpuinfo = dummy;
 
-   if ( rval.int32 == SYNAPSE_FAILURE )
+   if ( rval.int32 == SLURP_FAILURE )
       {
          err_msg("metric_init() got an error from slurpfile() /proc/cpuinfo");
+         rval.int32 = SYNAPSE_FAILURE;
          return rval;
       }
 
    dummy = proc_sys_kernel_osrelease;
    rval.int32 = slurpfile("/proc/sys/kernel/osrelease", &dummy,
                           MAX_G_STRING_SIZE);
-   if ( rval.int32 == SYNAPSE_FAILURE )
+   if ( rval.int32 == SLURP_FAILURE )
       {
          err_msg("metric_init() got an error from slurpfile()");
+         rval.int32 = SYNAPSE_FAILURE;
          return rval;
       }
 

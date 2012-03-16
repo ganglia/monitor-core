@@ -16,6 +16,8 @@ typedef struct {
   size_t buffersize;
 } timely_file;
 
+#define SLURP_FAILURE -1
+
 int slurpfile (char *filename, char **buffer, int buflen);
 float timediff (const struct timeval *thistime,
                 const struct timeval *lasttime);

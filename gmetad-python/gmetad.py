@@ -175,10 +175,6 @@ if __name__ == '__main__':
         ignore_fds.append(fileHandler.stream.fileno())
         logging.getLogger().addHandler(fileHandler)
 
-    # Switch to non-priviledged user if running as root
-    if not os.getuid():
-        setuid()
-
     # Determine if the service should be daemonized based on the debug level.
     if 5 > int(gmetadConfig[GmetadConfig.DEBUG_LEVEL]):
         daemonize(ignore_fds)
@@ -197,7 +193,11 @@ if __name__ == '__main__':
         except Exception, e:
             logging.error('Unable to write PID %d to %s (%s)' % (os.getpid(), gmetadConfig[GmetadConfig.PIDFILE], e))
             sys.exit()
-         
+
+    # Switch to non-priviledged user if running as root
+    if not os.getuid():
+        setuid()          
+
     # Initialize the data store with the notifier and summery threads and plugins
     dataStore = DataStore()
     

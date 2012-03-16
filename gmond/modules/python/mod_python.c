@@ -41,8 +41,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "file.h"
-
 #include <apr_tables.h>
 #include <apr_strings.h>
 #include <apr_lib.h>
