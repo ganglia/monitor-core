@@ -56,5 +56,4 @@ libmetrics/**/.libs
 libmetrics/**/*.la
 libmetrics/**/*.lo
 libmetrics/**/*.o
-libmetrics/INSTALL
 libtool
