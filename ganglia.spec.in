@@ -409,6 +409,7 @@ fi
 %defattr(-,root,root,-)
 %{_includedir}/ganglia.h
 %{_includedir}/ganglia_gexec.h
+%{_includedir}/gm_file.h
 %{_includedir}/gm_metric.h
 %{_includedir}/gm_mmn.h
 %{_includedir}/gm_msg.h
