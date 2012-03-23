@@ -1,8 +1,6 @@
 # This is an example of a Ganglia Meta Daemon configuration file
 #                http://ganglia.sourceforge.net/
 #
-# $Id: gmetad.conf.in 1308 2008-05-03 23:22:28Z carenas $
-#
 #-------------------------------------------------------------------------------
 # Setting the debug_level to 1 will keep daemon in the forground and
 # show only error messages. Setting this value higher than 1 will make 
