@@ -1,5 +1,19 @@
 #!/bin/sh
+
+# This can be changed whenever it is decided to use a new
+# autotools
+#
+# Official release tarballs should only be prepared using the
+# autotools version agreed on the Ganglia mailing list
+#
+SUPPORTED="Debian 6.0 (squeeze) amd64"
+
 echo "Bootstrapping libmetrics"
+echo "WARNING:"
+echo "WARNING: you should only do this on $SUPPORTED"
+echo "WARNING: as any other versions of autotools may produce"
+echo "WARNING: errors or silently do something unexpected"
+echo "WARNING:"
 cd libmetrics && ./bootstrap || exit 1
 cd ..
 

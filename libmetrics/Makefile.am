@@ -1,6 +1,8 @@
 SUBDIRS = @OS@ tests
 DIST_SUBDIRS = aix cygwin darwin dragonfly freebsd hpux irix linux mingw netbsd openbsd osf solaris tests
 
+EXTRA_DIST = bootstrap
+
 AM_CFLAGS = -I../lib -I../include
 
 noinst_LTLIBRARIES    = libmetrics.la

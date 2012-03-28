@@ -20,7 +20,11 @@ SUBDIRS = $(GANGLIA_SUBDIRS)
 GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gstat gmetric include mans
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
-EXTRA_DIST = BUGS README.WIN README.AIX ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html ganglia-config.in
+EXTRA_DIST = BUGS README.WIN README.AIX README.GIT ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html ganglia-config.in \
+	bootstrap \
+	web \
+	WiX Makefile.WiX \
+	scripts
 
 ganglia.sub: ganglia.pod
 	sed -e 's/GANGLIA_VERSION/@VERSION@/' < $(srcdir)/ganglia.pod > ganglia.sub
@@ -41,6 +45,7 @@ dist-local: README ganglia.html
 # We go through and make sure all the files have
 # the same timestamp with the last command here...
 dist-hook:
+	rm -rf $(distdir)/web/.git*
 	for subdir in $(EXTRA_SUBDIRS); do \
 	  tar -c --exclude=".libs" --exclude "core.*" \
 	  --exclude="*.o"  --exclude="*.lo" \

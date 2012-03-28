@@ -3,7 +3,7 @@ include $(top_srcdir)/ganglia.inc
 
 SUBDIRS = modules python_modules
 
-EXTRA_DIST = gmond.aix.init gmond.solaris.init.in gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod
+EXTRA_DIST = gmond.aix.init gmond.solaris.init.in gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod cmdline.sh
 if STATIC_BUILD
 GCFLAGS = -D_LARGEFILE64_SOURCE
 if BUILD_STATUS
