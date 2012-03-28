@@ -77,10 +77,10 @@ int llist_remove(llist_entry **llist, llist_entry *e)
 }
 
 /*
- * since llist_entry only takes string functions with two args
+ * since llist_search only takes string functions with two args
  * make a new strncmp by default uses len = strlen(s1)
  */
-int my_strncmp(const char *s1, const char *s2)
+int llist_strncmp(const char *s1, const char *s2)
 {
    int len, rv;
    len = strlen(s1);

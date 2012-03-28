@@ -1073,7 +1073,10 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
       return 1;
 
    tt = in_type_list(type, strlen(type));
-   if (!tt || (llist_search(&(gmetad_config.unsummarized_metrics), (void *)name, my_strncmp, &le) == 0) )
+   if (!tt) return 0;
+
+   /* Don't save to RRD if this is a metric not to be summarized */
+   if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)name, llist_strncmp, &le) == 0)
       return 0;
 
    switch (tt->type)
