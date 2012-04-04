@@ -21,7 +21,6 @@ GANGLIA_SUBDIRS_DIST = lib libmetrics tests gmetad gmond gstat gmetric include m
 DIST_SUBDIRS = $(GANGLIA_SUBDIRS_DIST) 
 
 EXTRA_DIST = BUGS README.WIN README.AIX README.GIT ganglia.spec.aix ganglia.spec ganglia.pod ganglia.html ganglia-config.in \
-	bootstrap \
 	web \
 	WiX Makefile.WiX \
 	scripts
