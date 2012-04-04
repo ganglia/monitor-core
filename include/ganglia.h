@@ -20,7 +20,8 @@ enum ganglia_slope {
    GANGLIA_SLOPE_POSITIVE,
    GANGLIA_SLOPE_NEGATIVE,
    GANGLIA_SLOPE_BOTH,
-   GANGLIA_SLOPE_UNSPECIFIED
+   GANGLIA_SLOPE_UNSPECIFIED,
+   GANGLIA_SLOPE_DERIVATIVE
 };
 typedef enum ganglia_slope ganglia_slope_t;
 

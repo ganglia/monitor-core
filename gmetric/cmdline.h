@@ -54,9 +54,9 @@ struct gengetopt_args_info
   char * units_arg;	/**< @brief Unit of measure for the value e.g. Kilobytes, Celcius (default='').  */
   char * units_orig;	/**< @brief Unit of measure for the value e.g. Kilobytes, Celcius original value given at command line.  */
   const char *units_help; /**< @brief Unit of measure for the value e.g. Kilobytes, Celcius help description.  */
-  char * slope_arg;	/**< @brief Either zero|positive|negative|both (default='both').  */
-  char * slope_orig;	/**< @brief Either zero|positive|negative|both original value given at command line.  */
-  const char *slope_help; /**< @brief Either zero|positive|negative|both help description.  */
+  char * slope_arg;	/**< @brief Either zero|positive|negative|both|derivative (default='both').  */
+  char * slope_orig;	/**< @brief Either zero|positive|negative|both|derivative original value given at command line.  */
+  const char *slope_help; /**< @brief Either zero|positive|negative|both|derivative help description.  */
   int tmax_arg;	/**< @brief The maximum time in seconds between gmetric calls (default='60').  */
   char * tmax_orig;	/**< @brief The maximum time in seconds between gmetric calls original value given at command line.  */
   const char *tmax_help; /**< @brief The maximum time in seconds between gmetric calls help description.  */
