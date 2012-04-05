@@ -549,7 +549,33 @@ get_sock_family( char *family )
 }
 
 static void
-setup_listen_channels_pollset( int reset )
+reset_mcast_channels( void )
+{
+  int i;
+  int num_udp_recv_channels   = cfg_size( config_file, "udp_recv_channel");
+
+  for(i = 0; i< num_udp_recv_channels; i++)
+    {
+      cfg_t *udp_recv_channel;
+      char *mcast_join, *mcast_if;
+      int port;
+      apr_socket_t *socket = NULL;
+
+      udp_recv_channel = cfg_getnsec( config_file, "udp_recv_channel", i);
+      mcast_join     = cfg_getstr( udp_recv_channel, "mcast_join" );
+      mcast_if       = cfg_getstr( udp_recv_channel, "mcast_if" );
+      port           = cfg_getint( udp_recv_channel, "port");
+
+      if ( mcast_join )
+        {
+          socket = udp_recv_sockets[i];
+          join_mcast(global_context, socket, mcast_join, port, mcast_if);
+        }
+    }
+}
+
+static void
+setup_listen_channels_pollset( void )
 {
   apr_status_t status;
   int i;
@@ -559,10 +585,6 @@ setup_listen_channels_pollset( int reset )
   Ganglia_channel *channel;
   int pollset_opts = 0;
 
-  /* reset only if there are no udp_recv_channels */
-  if (reset && num_udp_recv_channels == 0)
-    return;
-
   /* check if gmond was really meant to be deaf */
   if (total_listen_channels == 0)
     {
@@ -571,29 +593,23 @@ setup_listen_channels_pollset( int reset )
     }
 
   /* Create my incoming pollset */
-  if (!reset)
-    {
 #ifdef LINUX
-      struct utsname _name;
-      if(uname(&_name) >= 0) { 
-        if(strcmp(_name.release, "2.6") >= 0)
-          pollset_opts = APR_POLLSET_THREADSAFE;
-      }
+  struct utsname _name;
+  if(uname(&_name) >= 0) {
+    if(strcmp(_name.release, "2.6") >= 0)
+      pollset_opts = APR_POLLSET_THREADSAFE;
+  }
 #endif
-      if((status = apr_pollset_create(&listen_channels, total_listen_channels, global_context, pollset_opts)) != APR_SUCCESS)
-        {
-          char apr_err[512];
-          apr_strerror(status, apr_err, 511);
-          err_msg("apr_pollset_create failed: %s", apr_err);
-          exit(1);
-        }
+  if((status = apr_pollset_create(&listen_channels, total_listen_channels, global_context, pollset_opts)) != APR_SUCCESS)
+    {
+      char apr_err[512];
+      apr_strerror(status, apr_err, 511);
+      err_msg("apr_pollset_create failed: %s", apr_err);
+      exit(1);
     }
 
-  if(!reset)
-    {
-      if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
-        err_quit("unable to allocate UDP listening sockets");
-    }
+  if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
+    err_quit("unable to allocate UDP listening sockets");
 
   /* Process all the udp_recv_channels */
   for(i = 0; i< num_udp_recv_channels; i++)
@@ -601,7 +617,7 @@ setup_listen_channels_pollset( int reset )
       cfg_t *udp_recv_channel;
       char *mcast_join, *mcast_if, *bindaddr, *family;
       int port;
-      static apr_socket_t *socket = NULL;
+      apr_socket_t *socket = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
       int32_t sock_family = APR_INET;
@@ -618,6 +634,7 @@ setup_listen_channels_pollset( int reset )
                 mcast_if? mcast_if:"NULL", port,
                 bindaddr? bindaddr: "NULL");
 
+
       /* Create a sub-pool for this channel */
       apr_pool_create(&pool, global_context);
 
@@ -626,11 +643,7 @@ setup_listen_channels_pollset( int reset )
       if( mcast_join )
         {
           /* Listen on the specified multicast channel */
-          if (reset) { /* network reset? rejoin existing socket */
-              join_mcast(pool, socket, mcast_join, port, mcast_if);
-              return;
-          } else
-              socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
+          socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
 
           if(!socket)
             {
@@ -641,10 +654,6 @@ setup_listen_channels_pollset( int reset )
         }
       else
         {
-          /* Unicast listener needs no reset */
-          if (reset)
-              return;
-
           /* Create a UDP server */
           socket = create_udp_server( pool, sock_family, port, bindaddr );
           if(!socket)
@@ -2954,7 +2963,7 @@ main ( int argc, char *argv[] )
 
   if(!deaf)
     {
-      setup_listen_channels_pollset(0);
+      setup_listen_channels_pollset();
     }
 
   /* even if mute, a send channel may be needed to send a request for metadata */
@@ -3001,7 +3010,11 @@ main ( int argc, char *argv[] )
         {
           /* if we went deaf, re-subscribe to the multicast channel */
           if ((now - udp_last_heard) > 60 * APR_USEC_PER_SEC)
-              setup_listen_channels_pollset(1);
+            {
+              /* reset the timer */
+              udp_last_heard = now;
+              reset_mcast_channels();
+            }
 
           /* cleanup the data if the cleanup threshold has been met */
           if( (now - last_cleanup) > apr_time_make(cleanup_threshold,0))

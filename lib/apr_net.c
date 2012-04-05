@@ -334,14 +334,21 @@ mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_cha
 apr_status_t
 join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_port_t port, char *ifname )
 {
+  apr_pool_t *pool = NULL;
   apr_status_t status;
   int rval;
   apr_sockaddr_t *sa;
   apr_os_sock_t s;
 
-  status = apr_sockaddr_info_get(&sa, mcast_channel , APR_UNSPEC, port, 0, context);
+  if(apr_pool_create(&pool, context) != APR_SUCCESS)
+    {
+      return status;
+    }
+
+  status = apr_sockaddr_info_get(&sa, mcast_channel , APR_UNSPEC, port, 0, pool);
   if(status != APR_SUCCESS)
     {
+      apr_pool_destroy(pool);
       return status;
     }
 
@@ -365,6 +372,7 @@ join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
             strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
             if(ioctl(s, SIOCGIFADDR, ifreq) == -1)
               {
+                apr_pool_destroy(pool);
                 return APR_EGENERAL;
               }
           }
@@ -382,6 +390,7 @@ join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
                 mreq, sizeof mreq);
         if(rval<0)
           {
+            apr_pool_destroy(pool);
             return APR_EGENERAL;
           }
         break;
@@ -403,17 +412,22 @@ join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
           }
         
         if (ioctl(s, SIOCGIFADDR, ifreq) == -1)
+          {
+            apr_pool_destroy(pool);
             return -1;
+          }
         
         rval = setsockopt(s, IPPROTO_IPV6, IPV6_JOIN_GROUP, mreq, sizeof mreq);
         break;
       }
 #endif
     default:
+        apr_pool_destroy(pool);
         /* Set errno to EPROTONOSUPPORT */
         return -1;
     }
 
+  apr_pool_destroy(pool);
   return APR_SUCCESS;
 }
 
