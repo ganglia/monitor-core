@@ -1,7 +1,6 @@
 /**
  * @file update_pidfile.c Functions for standalone daemons
  */
-/* $Id: daemon_init.c 1986 2009-04-03 13:36:14Z hawson $ */
 #define _XOPEN_SOURCE 500 /* for getpgid */
 #include <sys/types.h>
 #include <sys/stat.h>

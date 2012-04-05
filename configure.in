@@ -41,7 +41,7 @@ AC_CONFIG_AUX_DIR(build)
 # to 0 (zero) 
 GANGLIA_MAJOR_VERSION=3
 GANGLIA_MINOR_VERSION=3
-GANGLIA_MICRO_VERSION=2
+GANGLIA_MICRO_VERSION=5
 
 # REL is used for various packaging systems:
 # RHEL:
@@ -101,6 +101,9 @@ AC_DEFINE_UNQUOTED(GANGLIA_MICRO_VERSION, $GANGLIA_MICRO_VERSION, GANGLIA_MICRO_
 
 AC_DEFINE_UNQUOTED(REL, $REL, REL)
 AC_DEFINE_UNQUOTED(GANGLIA_VERSION_FULL, "${VERSION}-${REL}", GANGLIA_VERSION_FULL)
+
+GWEB_VERSION=$GANGLIA_VERSION
+AC_SUBST(GWEB_VERSION)
 
 ########################
 AC_CANONICAL_HOST
@@ -803,12 +806,18 @@ AC_OUTPUT(Makefile
           gmond/modules/status/Makefile
           gmond/modules/system/Makefile
           gmond/python_modules/Makefile
+          gmond/python_modules/apache_status/Makefile
           gmond/python_modules/db/Makefile
           gmond/python_modules/disk/Makefile
           gmond/python_modules/example/Makefile
           gmond/python_modules/memcached/Makefile
+          gmond/python_modules/memory/Makefile
+          gmond/python_modules/nfs/Makefile
           gmond/python_modules/network/Makefile
           gmond/python_modules/process/Makefile
+          gmond/python_modules/ssl/Makefile
+          gmond/python_modules/varnish/Makefile
+          gmond/python_modules/vm_stats/Makefile
           gmond/python_modules/xen/Makefile
           gmetad/conf.c
           gmetad-python/setup.py
@@ -818,6 +827,8 @@ AC_OUTPUT(Makefile
           gmetric/Makefile
           include/Makefile
           mans/Makefile
+          web/version.php
+          web/conf_default.php
           )
 
 echo ""

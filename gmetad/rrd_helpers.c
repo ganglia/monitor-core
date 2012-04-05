@@ -1,4 +1,3 @@
-/* $Id: rrd_helpers.c 2200 2010-01-08 17:17:00Z d_pocock $ */
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

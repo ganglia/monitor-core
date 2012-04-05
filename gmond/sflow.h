@@ -159,6 +159,8 @@ typedef struct _SFlowCounterState {
 
   /* VM CPU */
   uint32_t vcpu_mS;
+  /* JVM CPU */
+  uint32_t jvm_vcpu_mS;
 
   /* VM Disk */
   uint32_t vreads;
