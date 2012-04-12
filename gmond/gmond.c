@@ -3001,7 +3001,12 @@ main ( int argc, char *argv[] )
         {
           /* if we went deaf, re-subscribe to the multicast channel */
           if ((now - udp_last_heard) > 60 * APR_USEC_PER_SEC)
+            {
+              /* FIXME: maybe this should be done 
               setup_listen_channels_pollset(1);
+              /* reset the timer */
+              udp_last_heard = now;
+            }
 
           /* cleanup the data if the cleanup threshold has been met */
           if( (now - last_cleanup) > apr_time_make(cleanup_threshold,0))
