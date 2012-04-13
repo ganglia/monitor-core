@@ -340,7 +340,7 @@ join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
   apr_sockaddr_t *sa;
   apr_os_sock_t s;
 
-  if(apr_pool_create(&pool, context) != APR_SUCCESS)
+  if((status = apr_pool_create(&pool, context)) != APR_SUCCESS)
     {
       return status;
     }
