@@ -225,8 +225,8 @@ limits of memory and file descriptors.  If B<gmond> is configured B<deaf>
 this attribute will be ignored.
 
 The B<udp_recv_channel> section has following attributes:
-B<mcast_join>, B<bind>, B<port>, B<mcast_if>, B<family>.  The 
-B<udp_recv_channel> can also have an B<acl> definition (see
+B<mcast_join>, B<bind>, B<port>, B<mcast_if>, B<family> and B<retry_bind>.
+The B<udp_recv_channel> can also have an B<acl> definition (see
 ACCESS CONTROL LISTS below).
 
 For example, the 2.5.x gmond ran with a single udp receive channel...
@@ -284,6 +284,20 @@ port for sFlow):
 Note: sFlow is unicast protocol, so don't include B<mcast_join> join.
 Note: To use some other port for sFlow, set it here and then specify the port
 in an B<sflow> section (see below).
+
+B<gmond> will fail to run if it can't bind to all defined
+B<udp_recv_channel>s.  Sometimes, on machines configured by DHCP,
+for example, the B<gmond> daemon starts before a network address is
+assigned to the interface.  Consequently, the bind fails and the 
+B<gmond> daemon does not run.  To assist in this situation, the
+boolean parameter B<retry_bind> can be set to the value B<true>
+and then the daemon will not abort on failure, it will enter a
+loop and repeat the bind attempt every 60 seconds:
+
+  udp_recv_channel {
+    port = 6343
+    retry_bind = true
+  }
 
 =head2 tcp_accept_channel
 

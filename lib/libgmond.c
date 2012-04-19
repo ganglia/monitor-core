@@ -103,6 +103,7 @@ static cfg_opt_t udp_recv_channel_opts[] = {
   CFG_STR("mcast_if", NULL, CFGF_NONE),
   CFG_SEC("acl", acl_opts, CFGF_NONE), 
   CFG_STR("family", "inet4", CFGF_NONE),
+  CFG_BOOL("retry_bind", cfg_true, CFGF_NONE),
   CFG_END()
 };
 
