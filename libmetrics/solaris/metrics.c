@@ -491,6 +491,9 @@ determine_cpu_percentages ( void )
 
       debug_msg( "getting kstat:  km ='%s', ki ='%d',ks='%s'", km_name, ki, ks_name);
       ks = kstat_lookup(kc, km_name, ki, ks_name);
+      if(ks == NULL)
+        continue;   /* could be a CPU in state P_FAILED, see bug 321
+         http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=321 */
 
       if (kstat_read(kc, ks,&cpuKstats) == -1) {
         perror("kstat_read");
