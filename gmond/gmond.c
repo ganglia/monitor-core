@@ -56,6 +56,10 @@
 /* Specifies a single value metric callback */
 #define CB_NOINDEX -1
 
+/* If a bind fails, and retry_bind is true, this is the interval to sleep
+   before retry.  Specified in seconds */
+#define RETRY_BIND_DELAY 60
+
 /* When this gmond was started */
 apr_time_t started;
 /* My name */
@@ -616,7 +620,7 @@ setup_listen_channels_pollset( void )
     {
       cfg_t *udp_recv_channel;
       char *mcast_join, *mcast_if, *bindaddr, *family;
-      int port;
+      int port, retry_bind;
       apr_socket_t *socket = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
@@ -628,6 +632,7 @@ setup_listen_channels_pollset( void )
       port           = cfg_getint( udp_recv_channel, "port");
       bindaddr       = cfg_getstr( udp_recv_channel, "bind");
       family         = cfg_getstr( udp_recv_channel, "family");
+      retry_bind     = cfg_getbool( udp_recv_channel, "retry_bind");
 
       debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s",
                 mcast_join? mcast_join:"NULL", 
@@ -645,22 +650,36 @@ setup_listen_channels_pollset( void )
           /* Listen on the specified multicast channel */
           socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
 
-          if(!socket)
+          while(!socket)
             {
-              err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Exiting.\n",
+              if(retry_bind == cfg_false)
+                {
+                  err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Try setting retry_bind.  Exiting.\n",
                   mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
-              exit(1);
+                  exit(1);
+                }
+              err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'.  Will try again...\n",
+                  mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
+              apr_sleep(APR_USEC_PER_SEC * RETRY_BIND_DELAY);
+              socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
             }
         }
       else
         {
           /* Create a UDP server */
           socket = create_udp_server( pool, sock_family, port, bindaddr );
-          if(!socket)
+          while(!socket)
             {
-              err_msg("Error creating UDP server on port %d bind=%s. Exiting.\n",
+              if(retry_bind == cfg_false)
+                {
+                  err_msg("Error creating UDP server on port %d bind=%s.  Try setting retry_bind.  Exiting.\n",
+                    port, bindaddr? bindaddr: "unspecified");
+                  exit(1);
+                }
+              err_msg("Error creating UDP server on port %d bind=%s.  Will try again...\n",
                   port, bindaddr? bindaddr: "unspecified");
-              exit(1);
+              apr_sleep(APR_USEC_PER_SEC * RETRY_BIND_DELAY);
+              socket = create_udp_server( pool, sock_family, port, bindaddr );
             }
         }
 
