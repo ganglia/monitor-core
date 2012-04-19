@@ -56,6 +56,10 @@ get_ifi_info(int family, int doaliases)
 	struct ifreq		*ifr, ifrcopy;
 	struct sockaddr_in	*sinptr;
         struct ifreq            mtu;
+#ifdef SOLARIS
+	int _c_virt = 0;
+#endif /* SOLARIS */
+	int _all_virt = 0;
 
 	sockfd = Socket(AF_INET, SOCK_DGRAM, 0);
 	if (sockfd == -1) {
@@ -85,6 +89,44 @@ get_ifi_info(int family, int doaliases)
 	lastname[0] = 0;
 /* end get_ifi_info1 */
 
+#ifdef SOLARIS
+	/* On a Solaris zone/container (non-global zone), all
+	   the interfaces are virtual interfaces.  This code attempts
+	   to detect such cases and handle them differently.
+	   Without this, Ganglia refuses to start in a Solaris 10 zone.
+	   http://bugzilla.ganglia.info/cgi-bin/bugzilla/show_bug.cgi?id=100
+
+           This code ONLY attempts to change the way NICs are evaluated
+	   if and only if:
+	    a) it is Solaris
+            b) ALL interfaces appear to be virtual (with a colon in the names)
+	*/
+	for (ptr = buf; ptr < buf + ifc.ifc_len; ) {
+		ifr = (struct ifreq *) ptr;
+#ifdef  HAVE_SOCKADDR_SA_LEN
+                len = max(sizeof(struct sockaddr), ifr->ifr_addr.sa_len);
+#else
+                switch (ifr->ifr_addr.sa_family) {
+#ifdef  IPV6
+                case AF_INET6:
+                        len = sizeof(struct sockaddr_in6);
+                        break;
+#endif /* IPV6 */
+                case AF_INET:
+                default:
+                        len = sizeof(struct sockaddr);
+                        break;
+                }
+#endif  /* HAVE_SOCKADDR_SA_LEN */
+                ptr += sizeof(ifr->ifr_name) + len;     /* for next one in buffer */
+		if ( (cptr = strchr(ifr->ifr_name, ':')) != NULL)
+			_c_virt ++;
+	}
+	if(_c_virt == ifc.ifc_len)
+		_all_virt = 1;
+#endif /* SOLARIS */
+		
+
 /* include get_ifi_info2 */
 	for (ptr = buf; ptr < buf + ifc.ifc_len; ) {
 		ifr = (struct ifreq *) ptr;
@@ -110,7 +152,8 @@ get_ifi_info(int family, int doaliases)
 			continue;	/* ignore if not desired address family */
 
 		myflags = 0;
-		if ( (cptr = strchr(ifr->ifr_name, ':')) != NULL)
+		if ( (cptr = strchr(ifr->ifr_name, ':')) != NULL &&
+			(_all_virt == 0))
 			*cptr = 0;		/* replace colon will null */
 		if (strncmp(lastname, ifr->ifr_name, IFNAMSIZ) == 0) {
 			if (doaliases == 0)
