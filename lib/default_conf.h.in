@@ -63,7 +63,7 @@ udp_recv_channel {\n\
   mcast_join = 239.2.11.71\n\
   port = 8649\n\
   bind = 239.2.11.71\n\
-  retry_bind = true\n\
+  retry_bind = false\n\
 }\n\
 \n\
 /* You can specify as many tcp_accept_channels as you like to share\n\
