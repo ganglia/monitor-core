@@ -625,6 +625,8 @@ setup_listen_channels_pollset( void )
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
       int32_t sock_family = APR_INET;
+      apr_int32_t rx_buf_sz;
+      socklen_t _optlen;
 
       udp_recv_channel = cfg_getnsec( config_file, "udp_recv_channel", i);
       mcast_join     = cfg_getstr( udp_recv_channel, "mcast_join" );
@@ -682,6 +684,26 @@ setup_listen_channels_pollset( void )
               socket = create_udp_server( pool, sock_family, port, bindaddr );
             }
         }
+
+      /* Find out about the RX socket buffer 
+         This is logged to help people troubleshoot
+         Some users have observed messages about errors when sending 
+         or receiving metric packets, and a small buffer size 
+         could be an issue */
+      if(apr_socket_opt_get(socket, APR_SO_RCVBUF, &rx_buf_sz) == APR_SUCCESS)
+        {
+          debug_msg("socket created, APR_SO_RCVBUF = %d\n", rx_buf_sz);
+        }
+      else
+        err_msg("apr_socket_opt_get APR_SO_RCVBUF failed\n");
+      _optlen = sizeof(rx_buf_sz);
+      if(getsockopt(get_apr_os_socket(socket), SOL_SOCKET, SO_RCVBUF,
+                      &rx_buf_sz, &_optlen) == 0)
+        {
+          debug_msg("socket created, SO_RCVBUF = %d\n", rx_buf_sz);
+        }
+      else
+        err_msg("getsockopt SO_RCVBUF failed\n");
 
       /* Build the socket poll file descriptor structure */
       socket_pollfd.desc_type   = APR_POLL_SOCKET;
