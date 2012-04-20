@@ -90,6 +90,10 @@ RRD_create( char *rrd, int summary, unsigned int step,
      data_source_type = "COUNTER";
      break;
 
+   case GANGLIA_SLOPE_DERIVATIVE:
+     data_source_type = "DERIVE";
+     break;
+
    case GANGLIA_SLOPE_ZERO:
    case GANGLIA_SLOPE_NEGATIVE:
    case GANGLIA_SLOPE_BOTH:

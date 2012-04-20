@@ -704,6 +704,10 @@ ganglia_slope_t cstr_to_slope(const char* str)
         return GANGLIA_SLOPE_BOTH;
     }
     
+    if (!strcmp(str, "derivative")) {
+        return GANGLIA_SLOPE_DERIVATIVE;
+    }
+    
     /*
      * well, it might just be _wrong_ too
      * but we'll handle that situation another time
@@ -727,6 +731,8 @@ const char* slope_to_cstr(unsigned int slope)
         return "negative";
     case GANGLIA_SLOPE_BOTH:
         return "both";
+    case GANGLIA_SLOPE_DERIVATIVE:
+        return "derivative";
     case GANGLIA_SLOPE_UNSPECIFIED:
         return "unspecified";
     }
