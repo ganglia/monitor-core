@@ -261,6 +261,12 @@ create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port,
 
 /*XXX This should really be replaced by the APR mcast functions */
 
+int
+get_apr_os_socket(apr_socket_t *socket)
+{
+  return socket->socketdes;
+}
+
 /*
  *  Configure from which interface multicast traffic should be sent.
  */
@@ -287,7 +293,7 @@ mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_cha
           if(ifname)
             {
               strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
-              if(ioctl(sock->socketdes, SIOCGIFADDR, ifreq) == -1)
+              if(ioctl(get_apr_os_socket(sock), SIOCGIFADDR, ifreq) == -1)
                    return APR_EGENERAL;
             }
           else
@@ -296,7 +302,7 @@ mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_cha
               ((struct sockaddr_in *)&ifreq->ifr_addr)->sin_addr.s_addr = htonl(INADDR_ANY);
             }
 
-          rval = setsockopt(sock->socketdes, IPPROTO_IP, IP_MULTICAST_IF,
+          rval = setsockopt(get_apr_os_socket(sock), IPPROTO_IP, IP_MULTICAST_IF,
                             &((struct sockaddr_in *)&ifreq->ifr_addr)->sin_addr,
                             sizeof( struct in_addr));
 
@@ -317,7 +323,7 @@ mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_cha
               if_index = if_nametoindex( ifname);
             }
  
-          rval = setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+          rval = setsockopt(get_apr_os_socket(sock), IPPROTO_IPV6, IPV6_MULTICAST_IF,
                            &if_index, sizeof(if_index));
  
           break;
