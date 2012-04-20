@@ -827,8 +827,6 @@ AC_OUTPUT(Makefile
           gmetric/Makefile
           include/Makefile
           mans/Makefile
-          web/version.php
-          web/conf_default.php
           )
 
 echo ""
