@@ -202,6 +202,12 @@ create_net_server(apr_pool_t *context, int32_t ofamily, int type, apr_port_t por
       apr_socket_close(sock);
       return NULL;
     }
+  stat = apr_socket_opt_set(sock, APR_SO_RCVBUF, 1024000);
+  if (stat != APR_SUCCESS)
+    {
+      apr_socket_close(sock);
+      return NULL;
+    }
 
   if(!localsa)
     {
