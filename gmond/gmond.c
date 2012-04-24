@@ -620,7 +620,7 @@ setup_listen_channels_pollset( void )
     {
       cfg_t *udp_recv_channel;
       char *mcast_join, *mcast_if, *bindaddr, *family;
-      int port, retry_bind;
+      int port, retry_bind, buffer;
       apr_socket_t *socket = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
@@ -635,11 +635,12 @@ setup_listen_channels_pollset( void )
       bindaddr       = cfg_getstr( udp_recv_channel, "bind");
       family         = cfg_getstr( udp_recv_channel, "family");
       retry_bind     = cfg_getbool( udp_recv_channel, "retry_bind");
+      buffer         = cfg_getint( udp_recv_channel, "buffer");
 
-      debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s",
+      debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s buffer=%d",
                 mcast_join? mcast_join:"NULL", 
                 mcast_if? mcast_if:"NULL", port,
-                bindaddr? bindaddr: "NULL");
+                bindaddr? bindaddr: "NULL", buffer? buffer:"NULL");
 
 
       /* Create a sub-pool for this channel */
@@ -682,6 +683,21 @@ setup_listen_channels_pollset( void )
                   port, bindaddr? bindaddr: "unspecified");
               apr_sleep(APR_USEC_PER_SEC * RETRY_BIND_DELAY);
               socket = create_udp_server( pool, sock_family, port, bindaddr );
+            }
+        }
+
+      if(buffer!=NULL)
+        {
+          debug_msg("setting UDP socket receive buffer to: %d\n", buffer);
+          if(apr_socket_opt_set(socket, APR_SO_RCVBUF, (apr_int32_t) buffer) == APR_SUCCESS)
+            {
+              debug_msg("APR reports success setting APR_SO_RCVBUF to: %d\n", (apr_int32_t)buffer );
+            }
+          else
+            {
+              err_msg("Error setting UDP receive buffer for port %d bind=%s to size: %d. Check Operating System limits or change buffer size. Exiting.\n",
+                port, bindaddr? bindaddr: "unspecified");
+              exit(1);
             }
         }
 
