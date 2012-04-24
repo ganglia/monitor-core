@@ -640,7 +640,7 @@ setup_listen_channels_pollset( void )
       debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s buffer=%d",
                 mcast_join? mcast_join:"NULL", 
                 mcast_if? mcast_if:"NULL", port,
-                bindaddr? bindaddr: "NULL", buffer? buffer:"NULL");
+                bindaddr? bindaddr: "NULL", buffer);
 
 
       /* Create a sub-pool for this channel */
@@ -686,7 +686,7 @@ setup_listen_channels_pollset( void )
             }
         }
 
-      if(buffer!=NULL)
+      if(buffer)
         {
           debug_msg("setting UDP socket receive buffer to: %d\n", buffer);
           if(apr_socket_opt_set(socket, APR_SO_RCVBUF, (apr_int32_t) buffer) == APR_SUCCESS)
