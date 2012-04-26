@@ -225,7 +225,8 @@ limits of memory and file descriptors.  If B<gmond> is configured B<deaf>
 this attribute will be ignored.
 
 The B<udp_recv_channel> section has following attributes:
-B<mcast_join>, B<bind>, B<port>, B<mcast_if>, B<family> and B<retry_bind>.
+B<mcast_join>, B<bind>, B<port>, B<mcast_if>, B<family>, B<retry_bind>
+and B<buffer>.
 The B<udp_recv_channel> can also have an B<acl> definition (see
 ACCESS CONTROL LISTS below).
 
@@ -298,6 +299,21 @@ loop and repeat the bind attempt every 60 seconds:
     port = 6343
     retry_bind = true
   }
+
+If you have a large system with lots of metrics, you might experience
+UDP drops. This happens when B<gmond> is not able to process the UDP
+fast enough from the network. In this case you might consider changing
+your setup into a more distributed setup using aggregator B<gmond> hosts.
+Alternatively you can choose to create a bigger receive B<buffer>:
+
+  udp_recv_channel {
+    port = 6343
+    buffer = 10485760
+  }
+B<buffer> is specified in bytes, i.e.: 10485760 will allow 10MB UDP 
+to be buffered in memory.
+
+Note: increasing buffer size will increase memory usage by B<gmond>
 
 =head2 tcp_accept_channel
 
