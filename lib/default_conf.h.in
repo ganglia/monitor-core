@@ -64,7 +64,6 @@ udp_recv_channel {\n\
   port = 8649\n\
   bind = 239.2.11.71\n\
   retry_bind = true\n\
-  buffer = 10485760 /* in bytes = 10MB */\n\
 }\n\
 \n\
 /* You can specify as many tcp_accept_channels as you like to share\n\
