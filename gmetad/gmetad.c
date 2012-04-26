@@ -192,7 +192,7 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    int rc;
    llist_entry *le;
 
-   /* We skip dead sourcesd. */
+   /* We skip dead sources. */
    if (source->ds->dead)
       return 0;
 
