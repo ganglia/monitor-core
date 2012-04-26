@@ -688,15 +688,49 @@ setup_listen_channels_pollset( void )
 
       if(buffer)
         {
-          debug_msg("setting UDP socket receive buffer to: %d\n", buffer);
+          debug_msg("setting UDP socket receive buffer to: %d\n", (apr_int32_t) buffer);
           if(apr_socket_opt_set(socket, APR_SO_RCVBUF, (apr_int32_t) buffer) == APR_SUCCESS)
             {
               debug_msg("APR reports success setting APR_SO_RCVBUF to: %d\n", (apr_int32_t)buffer );
+
+              /* RB: Let's check if it actually worked to be sure */
+              _optlen = sizeof(rx_buf_sz);
+              if(getsockopt(get_apr_os_socket(socket), SOL_SOCKET, SO_RCVBUF,
+                              &rx_buf_sz, &_optlen) == 0)
+                {
+                  debug_msg("socket created, SO_RCVBUF = %d\n", rx_buf_sz);
+
+                  if(buffer)
+                    {
+                      /* RB: getsockopt() returns double SO_RCVBUF since kernel reserves overhead space */
+                      if(rx_buf_sz!=(buffer*2))
+                        {
+                          err_msg("Error setting UDP receive buffer for port %d bind=%s to size: %d.\n",
+                            port, bindaddr? bindaddr: "unspecified", (apr_int32_t) buffer);
+                          err_msg("Reported buffer size by OS: %d : does not match config setting.\n");
+                          err_msg("NOTE: only supported on systems that have Apache Portable Runtime library version 0.9.4 or higher.\n");
+                          err_msg("Check Operating System (kernel) limits, change or disable buffer size. Exiting.\n");
+                          exit(1);
+                        }
+                      else
+                        { /* RB: Eureka */
+                          debug_msg("Actual receive buffer size reported by OS matches config setting. Success.");
+                        }
+                    }
+                }
+              else
+                {
+                  err_msg("Unable to verify UDP receive buffer for port %d bind=%s to size: %d. Check Operating System (limits) or change buffer size. Exiting.\n",
+                           port, bindaddr? bindaddr: "unspecified", buffer);
+                  exit(1);
+                }
             }
           else
             {
               err_msg("Error setting UDP receive buffer for port %d bind=%s to size: %d. Check Operating System limits or change buffer size. Exiting.\n",
-                port, bindaddr? bindaddr: "unspecified");
+                port, bindaddr? bindaddr: "unspecified", (apr_int32_t) buffer);
+              err_msg("This is currently only supported on systems that have Apache Portable Runtime library version 0.9.4 or higher.\n");
+              err_msg("Check Operating System (kernel) limits, change or disable buffer size. Exiting.\n");
               exit(1);
             }
         }
@@ -706,12 +740,7 @@ setup_listen_channels_pollset( void )
          Some users have observed messages about errors when sending 
          or receiving metric packets, and a small buffer size 
          could be an issue */
-      if(apr_socket_opt_get(socket, APR_SO_RCVBUF, &rx_buf_sz) == APR_SUCCESS)
-        {
-          debug_msg("socket created, APR_SO_RCVBUF = %d\n", rx_buf_sz);
-        }
-      else
-        err_msg("apr_socket_opt_get APR_SO_RCVBUF failed\n");
+      /* RB: Just log this for debugging purposes now */
       _optlen = sizeof(rx_buf_sz);
       if(getsockopt(get_apr_os_socket(socket), SOL_SOCKET, SO_RCVBUF,
                       &rx_buf_sz, &_optlen) == 0)
@@ -719,7 +748,9 @@ setup_listen_channels_pollset( void )
           debug_msg("socket created, SO_RCVBUF = %d\n", rx_buf_sz);
         }
       else
-        err_msg("getsockopt SO_RCVBUF failed\n");
+        {
+          debug_msg("getsockopt SO_RCVBUF failed\n");
+        }
 
       /* Build the socket poll file descriptor structure */
       socket_pollfd.desc_type   = APR_POLL_SOCKET;
