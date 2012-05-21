@@ -1,0 +1,35 @@
+modules {
+  module {
+    name = "cpu_stats"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 45
+  metric {
+    name = "procs_blocked"
+    title = "Processes blocked"
+    value_threshold = 0.0
+  }
+
+  metric {
+    name = "procs_created"
+    title = "Processes/Threads created"
+    value_threshold = 0.0
+  }
+
+  metric {
+      name_match = "softirq_(.+)"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name_match = "cpu_(.+)"
+      value_threshold = 1.0
+  }
+
+
+
+}
