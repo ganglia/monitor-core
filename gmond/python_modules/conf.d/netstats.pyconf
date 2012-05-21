@@ -48,5 +48,30 @@ collection_group {
       title = "UDP packets out"
       value_threshold = 1.0
   }
+  metric {
+      name = "udp_inerrors"
+      title = "UDP packet receive errors"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name = "udp_rcvbuferrors"
+      title = "UDP Receive buffer errors"
+      value_threshold = 1.0
+  }
+
+
+
+  metric {
+      name = "tcpext_listendrops"
+      title = "SYNs sent to LISTENing sockets ignored"
+      value_threshold = 1.0
+  }
+
+  metric {
+      name = "tcp_attemptfails"
+      title = "TCP Failed connection attempts"
+      value_threshold = 1.0
+  }
 
 }
