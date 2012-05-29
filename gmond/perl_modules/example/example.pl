@@ -11,7 +11,7 @@ use strict;
 our @descriptors;
 our $Random_Max = 50;
 our $Constant_Value = 50;
-use vars qw(@descriptors $Random_Maxi $Constant_Value);
+use vars qw(@descriptors $Random_Max $Constant_Value);
 
 sub Random_Numbers {
     my $i = int(rand($Random_Max));
