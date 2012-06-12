@@ -54,6 +54,7 @@ void libmetrics_init( void );
  g_val_t cpu_aidle_func(void);
  g_val_t cpu_intr_func(void);
  g_val_t cpu_sintr_func(void);
+ g_val_t cpu_steal_func(void);
  g_val_t bytes_in_func(void);
  g_val_t bytes_out_func(void);
  g_val_t pkts_in_func(void);

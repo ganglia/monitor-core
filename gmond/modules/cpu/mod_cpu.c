@@ -56,6 +56,8 @@ static g_val_t cpu_metric_handler ( int metric_index )
         return cpu_intr_func();
     case 9:
         return cpu_sintr_func();
+    case 10:
+        return cpu_steal_func();
     }
 
     /* default case */
@@ -75,6 +77,7 @@ static Ganglia_25metric cpu_metric_info[] =
     {0, "cpu_wio",      90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "Percentage of time that the CPU or CPUs were idle during which the system had an outstanding disk I/O request"},
     {0, "cpu_intr",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_intr"},
     {0, "cpu_sintr",    90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_sintr"},
+    {0, "cpu_steal",    90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_steal"},
     {0, NULL}
 
 };
