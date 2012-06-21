@@ -9,16 +9,10 @@ modules {
 }
 
 collection_group {
-    collect_every = 40
+    collect_every = 60
     time_threshold = 180
-
     metric {
-        name = "disk_free_absolute_rootfs"
-        title = "Disk Space Available On /"
-    }
-    metric {
-        name = "disk_free_percent_rootfs"
-        title = "Disk Space Percent Available On /"
+       name_match = "disk_free_(.+)"
     }
 
 }

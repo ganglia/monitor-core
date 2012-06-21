@@ -28,6 +28,8 @@
 import re
 import os
 
+# Minimum disk size
+MIN_DISK_SIZE=1
 
 NAME_PREFIX = 'disk_free_'
 PARAMS = {
@@ -39,7 +41,7 @@ def get_value(name):
     """Return a value for the requested metric"""
 
     # parse unit type and path from name
-    name_parser = re.match("^%s([a-z]+)_(\w+)$" % NAME_PREFIX, name)
+    name_parser = re.match("^%s(absolute|percent)_(.*)$" % NAME_PREFIX, name)
     unit_type = name_parser.group(1)
     if name_parser.group(2) == 'rootfs':
         path = '/'
@@ -66,7 +68,7 @@ def get_value(name):
 def metric_init(lparams):
     """Initialize metric descriptors"""
 
-    global PARAMS
+    global PARAMS, MIN_DISK_SIZE
 
     # set parameters
     for key in lparams:
@@ -81,7 +83,8 @@ def metric_init(lparams):
     # parse mounts and create descriptors
     descriptors = []
     for line in f:
-        if line.startswith('/'):
+        # We only want local file systems
+        if line.startswith('/') or line.startswith('tmpfs'):
             mount_info = line.split()
 
             # create key from path
@@ -89,23 +92,28 @@ def metric_init(lparams):
                 path_key = 'rootfs'
             else:
                 path_key = mount_info[1][1:].replace('/', '_')
+                
+            # Calculate the size of the disk. We'll use it exclude small disks
+            disk = os.statvfs(mount_info[1])            
+            disk_size = (disk.f_blocks * disk.f_frsize) / float(2**30)
 
-            for unit_type in ['absolute', 'percent']:
-                if unit_type == 'percent': 
-			units = '%'
-		else:
-			units = 'GB'
-                descriptors.append({
-                    'name': NAME_PREFIX + unit_type + '_' + path_key,
-                    'call_back': get_value,
-                    'time_max': 60,
-                    'value_type': 'float',
-                    'units': units,
-                    'slope': 'both',
-                    'format': '%f',
-                    'description': "Disk space available (%s) on %s" % (units, mount_info[1]),
-                    'groups': 'disk'
-                })
+            if disk_size > MIN_DISK_SIZE and mount_info[1] != "/dev":
+	      for unit_type in ['absolute', 'percent']:
+		  if unit_type == 'percent': 
+			  units = '%'
+		  else:
+			  units = 'GB'
+		  descriptors.append({
+		      'name': NAME_PREFIX + unit_type + '_' + path_key,
+		      'call_back': get_value,
+		      'time_max': 60,
+		      'value_type': 'float',
+		      'units': units,
+		      'slope': 'both',
+		      'format': '%f',
+		      'description': "Disk space available (%s) on %s" % (units, mount_info[1]),
+		      'groups': 'disk'
+		  })
 
     return descriptors
 
