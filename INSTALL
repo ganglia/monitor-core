@@ -57,3 +57,25 @@ for more details in some of the flags available refer to the README and the
 ouput of :
 
   ./configure --help
+
+Web interface
+=============
+
+As of version 3.4.0, the web interface is a separate distribution tarball
+and maintained in a separate source code repository.  Please download
+from http://ganglia.info
+
+Users of the legacy web interface, which was distributed with ganglia < 3.3.0,
+should be able to seamlessly migrate to the new interface, with no
+effort required to migrate historic data (apart from issues with
+case sensitive filenames, the fixes for this issue are not directly
+related to the change of web interface, but it is likely to impact
+people transitioning from a legacy Ganglia system).
+
+At the time of writing, the Ganglia web interface (3.4.0) works with all
+versions of gmond/gmetad >= 3.0.0
+
+Future versions of the Ganglia web interface may require a particular
+version of gmond or gmetad: please check the installation documentation
+within the web tarball for exact details.
+

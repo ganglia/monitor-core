@@ -1,4 +1,3 @@
-/* $Id: rrd_helpers.c 2200 2010-01-08 17:17:00Z d_pocock $ */
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -89,6 +88,10 @@ RRD_create( char *rrd, int summary, unsigned int step,
    switch( slope) {
    case GANGLIA_SLOPE_POSITIVE:
      data_source_type = "COUNTER";
+     break;
+
+   case GANGLIA_SLOPE_DERIVATIVE:
+     data_source_type = "DERIVE";
      break;
 
    case GANGLIA_SLOPE_ZERO:

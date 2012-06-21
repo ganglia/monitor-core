@@ -1,4 +1,3 @@
-/* $Id: process_xml.c 2626 2011-07-07 15:44:35Z rufustfirefly $ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1175,7 +1174,7 @@ end (void *data, const char *el)
       {
          case GRID_TAG:
             rc = endElement_GRID(data, el);
-	    break;
+	    /* No break. */
 
          case CLUSTER_TAG:
             rc = endElement_CLUSTER(data, el);

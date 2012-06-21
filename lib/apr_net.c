@@ -261,6 +261,12 @@ create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port,
 
 /*XXX This should really be replaced by the APR mcast functions */
 
+int
+get_apr_os_socket(apr_socket_t *socket)
+{
+  return socket->socketdes;
+}
+
 /*
  *  Configure from which interface multicast traffic should be sent.
  */
@@ -287,7 +293,7 @@ mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_cha
           if(ifname)
             {
               strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
-              if(ioctl(sock->socketdes, SIOCGIFADDR, ifreq) == -1)
+              if(ioctl(get_apr_os_socket(sock), SIOCGIFADDR, ifreq) == -1)
                    return APR_EGENERAL;
             }
           else
@@ -296,7 +302,7 @@ mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_cha
               ((struct sockaddr_in *)&ifreq->ifr_addr)->sin_addr.s_addr = htonl(INADDR_ANY);
             }
 
-          rval = setsockopt(sock->socketdes, IPPROTO_IP, IP_MULTICAST_IF,
+          rval = setsockopt(get_apr_os_socket(sock), IPPROTO_IP, IP_MULTICAST_IF,
                             &((struct sockaddr_in *)&ifreq->ifr_addr)->sin_addr,
                             sizeof( struct in_addr));
 
@@ -317,7 +323,7 @@ mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_cha
               if_index = if_nametoindex( ifname);
             }
  
-          rval = setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+          rval = setsockopt(get_apr_os_socket(sock), IPPROTO_IPV6, IPV6_MULTICAST_IF,
                            &if_index, sizeof(if_index));
  
           break;
@@ -334,14 +340,21 @@ mcast_emit_on_if( apr_pool_t *context, apr_socket_t *sock, const char *mcast_cha
 apr_status_t
 join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_port_t port, char *ifname )
 {
+  apr_pool_t *pool = NULL;
   apr_status_t status;
   int rval;
   apr_sockaddr_t *sa;
   apr_os_sock_t s;
 
-  status = apr_sockaddr_info_get(&sa, mcast_channel , APR_UNSPEC, port, 0, context);
+  if((status = apr_pool_create(&pool, context)) != APR_SUCCESS)
+    {
+      return status;
+    }
+
+  status = apr_sockaddr_info_get(&sa, mcast_channel , APR_UNSPEC, port, 0, pool);
   if(status != APR_SUCCESS)
     {
+      apr_pool_destroy(pool);
       return status;
     }
 
@@ -365,6 +378,7 @@ join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
             strncpy(ifreq->ifr_name, ifname, IFNAMSIZ);
             if(ioctl(s, SIOCGIFADDR, ifreq) == -1)
               {
+                apr_pool_destroy(pool);
                 return APR_EGENERAL;
               }
           }
@@ -382,6 +396,7 @@ join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
                 mreq, sizeof mreq);
         if(rval<0)
           {
+            apr_pool_destroy(pool);
             return APR_EGENERAL;
           }
         break;
@@ -403,17 +418,22 @@ join_mcast( apr_pool_t *context, apr_socket_t *sock, char *mcast_channel, apr_po
           }
         
         if (ioctl(s, SIOCGIFADDR, ifreq) == -1)
+          {
+            apr_pool_destroy(pool);
             return -1;
+          }
         
         rval = setsockopt(s, IPPROTO_IPV6, IPV6_JOIN_GROUP, mreq, sizeof mreq);
         break;
       }
 #endif
     default:
+        apr_pool_destroy(pool);
         /* Set errno to EPROTONOSUPPORT */
         return -1;
     }
 
+  apr_pool_destroy(pool);
   return APR_SUCCESS;
 }
 

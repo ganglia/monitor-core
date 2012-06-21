@@ -1,0 +1,30 @@
+This document is Work In Progress until mod_perl is fully implemented and tested.
+For now, please refer to the README in gmond/modules/python for basic setup/configuration
+instructions as the Perl DSO implementation is very close to the Python one.
+
+Quickstart
+- Build Ganglia with mod_perl support (it will be automatically built if /usr/bin/perl
+  is found)
+- Copy Perl metric modules to /usr/lib/ganglia/perl_modules
+  (eg. gmond/perl_modules/example/example.pl)
+- Copy Perl metric module configurations to /etc/ganglia/conf.d
+  (eg. gmond/perl_modules/conf.d/example.plconf)
+- Start gmond
+
+Major differences between Python and Perl DSO:
+- Instead of a .py suffix, Perl modules are identified by .pl suffix
+- Similarly, instead of .pyconf suffix, Perl module configurations are identified by
+  .plconf suffix
+- In Python DSO, the callback is an actual function, for Perl DSO, it is simply
+  the name of the callback function
+- Perl does not seem to differentiate between double and float
+- In order to load Perl global variables into C, the entire script needs to be loaded
+  and interperted.  Since Perl cannot do if __name__ == '__main__', debugging code
+  that prints to stdout will also be executed when the module is loaded by gmond.
+  The current workaround is simply pipe all stdout of the script to /dev/null
+
+Known Issues:
+- Currently you cannot load more than one Perl metric module at a time.  Loading
+  multiple modules with different callback function names may lead to gmond crashing
+  since it cannot find the correct handler function (issue with namespace perhaps)
+- perl_metric_cleanup() function has not yet been fully implemented

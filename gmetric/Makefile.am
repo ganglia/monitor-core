@@ -28,3 +28,6 @@ gmetric_LDADD   =  $(top_builddir)/lib/libganglia.la \
 gmetric_LDFLAGS = $(GLDFLAGS)
 
 CLEANFILES = cmdline.c
+
+EXTRA_DIST = cmdline.sh
+

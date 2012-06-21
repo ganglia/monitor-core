@@ -56,6 +56,10 @@
 /* Specifies a single value metric callback */
 #define CB_NOINDEX -1
 
+/* If a bind fails, and retry_bind is true, this is the interval to sleep
+   before retry.  Specified in seconds */
+#define RETRY_BIND_DELAY 60
+
 /* When this gmond was started */
 apr_time_t started;
 /* My name */
@@ -549,7 +553,33 @@ get_sock_family( char *family )
 }
 
 static void
-setup_listen_channels_pollset( int reset )
+reset_mcast_channels( void )
+{
+  int i;
+  int num_udp_recv_channels   = cfg_size( config_file, "udp_recv_channel");
+
+  for(i = 0; i< num_udp_recv_channels; i++)
+    {
+      cfg_t *udp_recv_channel;
+      char *mcast_join, *mcast_if;
+      int port;
+      apr_socket_t *socket = NULL;
+
+      udp_recv_channel = cfg_getnsec( config_file, "udp_recv_channel", i);
+      mcast_join     = cfg_getstr( udp_recv_channel, "mcast_join" );
+      mcast_if       = cfg_getstr( udp_recv_channel, "mcast_if" );
+      port           = cfg_getint( udp_recv_channel, "port");
+
+      if ( mcast_join )
+        {
+          socket = udp_recv_sockets[i];
+          join_mcast(global_context, socket, mcast_join, port, mcast_if);
+        }
+    }
+}
+
+static void
+setup_listen_channels_pollset( void )
 {
   apr_status_t status;
   int i;
@@ -559,10 +589,6 @@ setup_listen_channels_pollset( int reset )
   Ganglia_channel *channel;
   int pollset_opts = 0;
 
-  /* reset only if there are no udp_recv_channels */
-  if (reset && num_udp_recv_channels == 0)
-    return;
-
   /* check if gmond was really meant to be deaf */
   if (total_listen_channels == 0)
     {
@@ -571,40 +597,36 @@ setup_listen_channels_pollset( int reset )
     }
 
   /* Create my incoming pollset */
-  if (!reset)
-    {
 #ifdef LINUX
-      struct utsname _name;
-      if(uname(&_name) >= 0) { 
-        if(strcmp(_name.release, "2.6") >= 0)
-          pollset_opts = APR_POLLSET_THREADSAFE;
-      }
+  struct utsname _name;
+  if(uname(&_name) >= 0) {
+    if(strcmp(_name.release, "2.6") >= 0)
+      pollset_opts = APR_POLLSET_THREADSAFE;
+  }
 #endif
-      if((status = apr_pollset_create(&listen_channels, total_listen_channels, global_context, pollset_opts)) != APR_SUCCESS)
-        {
-          char apr_err[512];
-          apr_strerror(status, apr_err, 511);
-          err_msg("apr_pollset_create failed: %s", apr_err);
-          exit(1);
-        }
+  if((status = apr_pollset_create(&listen_channels, total_listen_channels, global_context, pollset_opts)) != APR_SUCCESS)
+    {
+      char apr_err[512];
+      apr_strerror(status, apr_err, 511);
+      err_msg("apr_pollset_create failed: %s", apr_err);
+      exit(1);
     }
 
-  if(!reset)
-    {
-      if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
-        err_quit("unable to allocate UDP listening sockets");
-    }
+  if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
+    err_quit("unable to allocate UDP listening sockets");
 
   /* Process all the udp_recv_channels */
   for(i = 0; i< num_udp_recv_channels; i++)
     {
       cfg_t *udp_recv_channel;
       char *mcast_join, *mcast_if, *bindaddr, *family;
-      int port;
-      static apr_socket_t *socket = NULL;
+      int port, retry_bind, buffer;
+      apr_socket_t *socket = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
       int32_t sock_family = APR_INET;
+      apr_int32_t rx_buf_sz;
+      socklen_t _optlen;
 
       udp_recv_channel = cfg_getnsec( config_file, "udp_recv_channel", i);
       mcast_join     = cfg_getstr( udp_recv_channel, "mcast_join" );
@@ -612,11 +634,14 @@ setup_listen_channels_pollset( int reset )
       port           = cfg_getint( udp_recv_channel, "port");
       bindaddr       = cfg_getstr( udp_recv_channel, "bind");
       family         = cfg_getstr( udp_recv_channel, "family");
+      retry_bind     = cfg_getbool( udp_recv_channel, "retry_bind");
+      buffer         = cfg_getint( udp_recv_channel, "buffer");
 
-      debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s",
+      debug_msg("udp_recv_channel mcast_join=%s mcast_if=%s port=%d bind=%s buffer=%d",
                 mcast_join? mcast_join:"NULL", 
                 mcast_if? mcast_if:"NULL", port,
-                bindaddr? bindaddr: "NULL");
+                bindaddr? bindaddr: "NULL", buffer);
+
 
       /* Create a sub-pool for this channel */
       apr_pool_create(&pool, global_context);
@@ -626,33 +651,105 @@ setup_listen_channels_pollset( int reset )
       if( mcast_join )
         {
           /* Listen on the specified multicast channel */
-          if (reset) { /* network reset? rejoin existing socket */
-              join_mcast(pool, socket, mcast_join, port, mcast_if);
-              return;
-          } else
-              socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
+          socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
 
-          if(!socket)
+          while(!socket)
             {
-              err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Exiting.\n",
+              if(retry_bind == cfg_false)
+                {
+                  err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Try setting retry_bind.  Exiting.\n",
                   mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
-              exit(1);
+                  exit(1);
+                }
+              err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'.  Will try again...\n",
+                  mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
+              apr_sleep(APR_USEC_PER_SEC * RETRY_BIND_DELAY);
+              socket = create_mcast_server(pool, sock_family, mcast_join, port, bindaddr, mcast_if );
             }
         }
       else
         {
-          /* Unicast listener needs no reset */
-          if (reset)
-              return;
-
           /* Create a UDP server */
           socket = create_udp_server( pool, sock_family, port, bindaddr );
-          if(!socket)
+          while(!socket)
             {
-              err_msg("Error creating UDP server on port %d bind=%s. Exiting.\n",
+              if(retry_bind == cfg_false)
+                {
+                  err_msg("Error creating UDP server on port %d bind=%s.  Try setting retry_bind.  Exiting.\n",
+                    port, bindaddr? bindaddr: "unspecified");
+                  exit(1);
+                }
+              err_msg("Error creating UDP server on port %d bind=%s.  Will try again...\n",
                   port, bindaddr? bindaddr: "unspecified");
+              apr_sleep(APR_USEC_PER_SEC * RETRY_BIND_DELAY);
+              socket = create_udp_server( pool, sock_family, port, bindaddr );
+            }
+        }
+
+      if(buffer)
+        {
+          debug_msg("setting UDP socket receive buffer to: %d\n", (apr_int32_t) buffer);
+          if(apr_socket_opt_set(socket, APR_SO_RCVBUF, (apr_int32_t) buffer) == APR_SUCCESS)
+            {
+              debug_msg("APR reports success setting APR_SO_RCVBUF to: %d\n", (apr_int32_t)buffer );
+
+              /* RB: Let's check if it actually worked to be sure */
+              _optlen = sizeof(rx_buf_sz);
+              if(getsockopt(get_apr_os_socket(socket), SOL_SOCKET, SO_RCVBUF,
+                              &rx_buf_sz, &_optlen) == 0)
+                {
+                  debug_msg("socket created, SO_RCVBUF = %d\n", rx_buf_sz);
+
+                  if(buffer)
+                    {
+                      /* RB: getsockopt() returns double SO_RCVBUF since kernel reserves overhead space */
+                      if(rx_buf_sz!=(buffer*2))
+                        {
+                          err_msg("Error setting UDP receive buffer for port %d bind=%s to size: %d.\n",
+                            port, bindaddr? bindaddr: "unspecified", (apr_int32_t) buffer);
+                          err_msg("Reported buffer size by OS: %d : does not match config setting.\n");
+                          err_msg("NOTE: only supported on systems that have Apache Portable Runtime library version 0.9.4 or higher.\n");
+                          err_msg("Check Operating System (kernel) limits, change or disable buffer size. Exiting.\n");
+                          exit(1);
+                        }
+                      else
+                        { /* RB: Eureka */
+                          debug_msg("Actual receive buffer size reported by OS matches config setting. Success.");
+                        }
+                    }
+                }
+              else
+                {
+                  err_msg("Unable to verify UDP receive buffer for port %d bind=%s to size: %d. Check Operating System (limits) or change buffer size. Exiting.\n",
+                           port, bindaddr? bindaddr: "unspecified", buffer);
+                  exit(1);
+                }
+            }
+          else
+            {
+              err_msg("Error setting UDP receive buffer for port %d bind=%s to size: %d. Check Operating System limits or change buffer size. Exiting.\n",
+                port, bindaddr? bindaddr: "unspecified", (apr_int32_t) buffer);
+              err_msg("This is currently only supported on systems that have Apache Portable Runtime library version 0.9.4 or higher.\n");
+              err_msg("Check Operating System (kernel) limits, change or disable buffer size. Exiting.\n");
               exit(1);
             }
+        }
+
+      /* Find out about the RX socket buffer 
+         This is logged to help people troubleshoot
+         Some users have observed messages about errors when sending 
+         or receiving metric packets, and a small buffer size 
+         could be an issue */
+      /* RB: Just log this for debugging purposes now */
+      _optlen = sizeof(rx_buf_sz);
+      if(getsockopt(get_apr_os_socket(socket), SOL_SOCKET, SO_RCVBUF,
+                      &rx_buf_sz, &_optlen) == 0)
+        {
+          debug_msg("socket created, SO_RCVBUF = %d\n", rx_buf_sz);
+        }
+      else
+        {
+          debug_msg("getsockopt SO_RCVBUF failed\n");
         }
 
       /* Build the socket poll file descriptor structure */
@@ -2954,7 +3051,7 @@ main ( int argc, char *argv[] )
 
   if(!deaf)
     {
-      setup_listen_channels_pollset(0);
+      setup_listen_channels_pollset();
     }
 
   /* even if mute, a send channel may be needed to send a request for metadata */
@@ -3001,7 +3098,13 @@ main ( int argc, char *argv[] )
         {
           /* if we went deaf, re-subscribe to the multicast channel */
           if ((now - udp_last_heard) > 60 * APR_USEC_PER_SEC)
-              setup_listen_channels_pollset(1);
+            {
+              /* FIXME: maybe this should be done for the affected
+                        channel only? */
+              reset_mcast_channels();
+              /* reset the timer */
+              udp_last_heard = now;
+            }
 
           /* cleanup the data if the cleanup threshold has been met */
           if( (now - last_cleanup) > apr_time_make(cleanup_threshold,0))

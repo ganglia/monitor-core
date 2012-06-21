@@ -40,8 +40,8 @@ AC_CONFIG_AUX_DIR(build)
 # GANGLIA_MINOR_VERSION and GANGLIA_MICRO_VERSION
 # to 0 (zero) 
 GANGLIA_MAJOR_VERSION=3
-GANGLIA_MINOR_VERSION=3
-GANGLIA_MICRO_VERSION=2
+GANGLIA_MINOR_VERSION=5
+GANGLIA_MICRO_VERSION=0
 
 # REL is used for various packaging systems:
 # RHEL:
@@ -101,6 +101,9 @@ AC_DEFINE_UNQUOTED(GANGLIA_MICRO_VERSION, $GANGLIA_MICRO_VERSION, GANGLIA_MICRO_
 
 AC_DEFINE_UNQUOTED(REL, $REL, REL)
 AC_DEFINE_UNQUOTED(GANGLIA_VERSION_FULL, "${VERSION}-${REL}", GANGLIA_VERSION_FULL)
+
+GWEB_VERSION=$GANGLIA_VERSION
+AC_SUBST(GWEB_VERSION)
 
 ########################
 AC_CANONICAL_HOST
@@ -163,6 +166,14 @@ AM_CONDITIONAL(BUILD_GMETAD, test x"$gmetad" = xyes)
 AC_ARG_WITH( python,
 [  --with-python=PATH      Specify prefix for python or full path to interpreter],
 [if test x"$withval" != xno; then enable_python="yes"; PYTHON_BIN="$withval"; fi])
+
+AC_ARG_WITH( perl,
+[  --with-perl=PATH        Specify prefix for perl or full path to interpreter],
+[if test x"$withval" != xno; then enable_perl="yes"; PERL_BIN="$withval"; fi])
+
+AC_ARG_WITH( php,
+[  --with-php=PATH         Specify prefix for php or full path to php-config],
+[if test x"$withval" != xno; then enable_php="yes"; PHP_BIN="$withval"; fi])
 
 AC_ARG_WITH( librrd,
 [  --with-librrd=DIR       Specify location for librrd],
@@ -234,6 +245,14 @@ AC_ARG_ENABLE(memcheck,
 AC_ARG_ENABLE( python,
 [  --disable-python        exclude mod_python and support for metric modules written in python],
 [ if test x"$enableval" != xyes; then enable_python="no"; fi ], [ enable_python="yes" ] )
+
+AC_ARG_ENABLE( perl,
+[  --disable-perl          exclude mod_perl and support for metric modules written in perl],
+[ if test x"$enableval" != xyes; then enable_perl="no"; fi ], [ enable_perl="yes" ] )
+
+AC_ARG_ENABLE( php,
+[  --enable-php            include mod_php and support for metric modules written in php],
+[ if test x"$enableval" != xno; then enable_php="yes"; fi ], [ enable_php="no" ] )
 
 AC_ARG_ENABLE( status,
 [  --enable-status         compile and install modgstatus to enable gmond status metric module support],
@@ -333,6 +352,117 @@ fi
 AC_MSG_CHECKING(Python support)
 AC_MSG_RESULT($enable_python)
 AM_CONDITIONAL(BUILD_PYTHON, test x"$enable_python" = xyes)
+
+if test x"$enable_perl" = xyes; then
+  echo
+  echo Checking for perl
+
+  # check for Perl executable
+  if test -z "$PERL_BIN"; then
+    AC_PATH_PROG(PERL_BIN, perl)
+  else
+    if test -d "$PERL_BIN"; then
+      PERL_BIN="$PERL_BIN/bin/perl"
+    fi
+  fi
+
+  if test -n "$PERL_BIN" && test -x "$PERL_BIN"; then
+    # Check if perl has ExtUtils::Embed module installed
+    AC_MSG_CHECKING(for existence of ExtUtils::Embed module)
+    `$PERL_BIN -MExtUtils::Embed -e '' >/dev/null 2>&1`
+    if test $? -eq 0; then
+      AC_MSG_RESULT(yes)
+      PERL_INCLUDES=`$PERL_BIN -MExtUtils::Embed -e perl_inc`
+      AC_SUBST(PERL_INCLUDES)
+      PERL_CFLAGS=`$PERL_BIN -MExtUtils::Embed -e ccopts`
+      AC_SUBST(PERL_CFLAGS)
+      #CFLAGS="$CFLAGS $PERL_CFLAGS"
+      PERL_LDFLAGS=`$PERL_BIN -MExtUtils::Embed -e ldopts`
+      AC_SUBST(PERL_LDFLAGS)
+    else
+      AC_MSG_RESULT(no)
+      AC_MSG_ERROR(Module not found, please install or specify --disable-perl to disable mod_perl support)
+      exit
+    fi
+  else
+    enable_perl="no"
+  fi
+fi
+
+AC_MSG_CHECKING(Perl support)
+AC_MSG_RESULT($enable_perl)
+AM_CONDITIONAL(BUILD_PERL, test x"$enable_perl" = xyes)
+
+if test x"$enable_php" = xyes; then
+  echo
+  echo "Checking for php"
+
+  # check for php-config executable
+  if test -e "$PHP_BIN"; then
+    AC_MSG_CHECKING([for php-config])
+    if test -d "$PHP_BIN"; then
+        if test -x "$PHP_BIN/bin/php-config"; then
+            PHP_CONFIG_BIN="$PHP_BIN/bin/php-config"
+        elif test -x "$PHP_BIN/php-config"; then
+            PHP_CONFIG_BIN="$PHP_BIN/php-config"
+        fi
+    elif test -x "$PHP_BIN"; then
+      PHP_CONFIG_BIN=$PHP_BIN
+    fi
+    if test -z "$PHP_CONFIG_BIN"; then
+        AC_MSG_RESULT([not found using $PHP_BIN])
+    else
+        AC_MSG_RESULT([$PHP_CONFIG_BIN])
+    fi
+  fi
+  if test -z "$PHP_CONFIG_BIN"; then
+    AC_PATH_PROG([PHP_CONFIG_BIN], [php-config])
+  fi
+
+  if test -n "$PHP_CONFIG_BIN"; then
+    # find out php version
+    PHP_FULL_VERSION=`$PHP_CONFIG_BIN --version`
+    AC_CACHE_CHECK([PHP version >= 5.3], [php_cv_version_5],
+        [AX_COMPARE_VERSION([$PHP_FULL_VERSION], [ge], [5.3],
+            [php_cv_version_5="yes"],
+            [php_cv_version_5="no"])])
+    if test "$php_cv_version_5" = "yes"; then
+        PHP_VERSION=5
+    else
+        AC_MSG_ERROR([PHP version >= 5.3 required])
+    fi
+    AC_SUBST(PHP_VERSION)
+
+    AC_MSG_CHECKING(PHP Include dir)
+    PHP_INCLUDE_DIR=`$PHP_CONFIG_BIN --include-dir`
+    AC_MSG_RESULT($PHP_INCLUDE_DIR)
+    
+    if test -f "$PHP_INCLUDE_DIR/sapi/embed/php_embed.h"; then
+        PHP_INCLUDES=`$PHP_CONFIG_BIN --includes`
+        CPPFLAGS+=$PHP_INCLUDES
+        LDFLAGS+=" -L`$PHP_CONFIG_BIN --prefix`/lib"
+    else 
+        PHP_INCLUDES=""
+    fi
+    AC_CHECK_HEADER([sapi/embed/php_embed.h], [],
+        [
+            AC_MSG_ERROR([your system is missing the PHP SAPI headers.])
+            enable_php="no"
+        ],
+[#ifdef _PHP_EMBED_H_
+# include <sapi/embed/php_embed.h>
+#endif
+])
+    AC_SUBST(PHP_INCLUDES)
+  else
+    AC_MSG_ERROR("php-config not found")
+    enable_php="no"
+  fi
+fi
+
+AC_MSG_CHECKING(PHP support)
+AC_MSG_RESULT($enable_php)
+AM_CONDITIONAL(BUILD_PHP, test x"$enable_php" = xyes)
 
 LIB_SUFFIX=lib
 case $host in
@@ -799,16 +929,28 @@ AC_OUTPUT(Makefile
           gmond/modules/disk/Makefile
           gmond/modules/memory/Makefile
           gmond/modules/network/Makefile
+          gmond/modules/perl/Makefile
+          gmond/modules/php/Makefile
           gmond/modules/python/Makefile
           gmond/modules/status/Makefile
           gmond/modules/system/Makefile
+          gmond/perl_modules/Makefile
+          gmond/perl_modules/example/Makefile
+          gmond/php_modules/Makefile
+          gmond/php_modules/example/Makefile
           gmond/python_modules/Makefile
+          gmond/python_modules/apache_status/Makefile
           gmond/python_modules/db/Makefile
           gmond/python_modules/disk/Makefile
           gmond/python_modules/example/Makefile
           gmond/python_modules/memcached/Makefile
+          gmond/python_modules/memory/Makefile
+          gmond/python_modules/nfs/Makefile
           gmond/python_modules/network/Makefile
           gmond/python_modules/process/Makefile
+          gmond/python_modules/ssl/Makefile
+          gmond/python_modules/varnish/Makefile
+          gmond/python_modules/vm_stats/Makefile
           gmond/python_modules/xen/Makefile
           gmetad/conf.c
           gmetad-python/setup.py

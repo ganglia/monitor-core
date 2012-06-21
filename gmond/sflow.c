@@ -566,6 +566,21 @@ process_struct_VCPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *host
   SFLOW_CTR_LATCH(dataSource, vcpu_mS);
 }
 
+// VCPU structure can also be send by a JVM agent - but we want to map it into different Ganglia metrics
+static void
+process_struct_JVM_VCPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostdata, char *metric_prefix, apr_time_t ctr_ival_mS)
+{
+  uint32_t jvm_vstate, jvm_vcpu_mS, jvm_vcpus;
+  jvm_vstate =  SFLOWXDR_next(x);
+  jvm_vcpu_mS = SFLOWXDR_next(x);
+  jvm_vcpus = SFLOWXDR_next(x);
+  // only take the vcpu_mS
+  if(x->counterDeltas) {
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_jvm_vcpu_util, SFLOW_CTR_MS_PC(dataSource, jvm_vcpu_mS, ctr_ival_mS), SFLOW_OK_COUNTER32(jvm_vcpu_mS));
+  }
+  SFLOW_CTR_LATCH(dataSource, jvm_vcpu_mS);
+}
+
 static void
 process_struct_VMEM(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostdata, char *metric_prefix, apr_time_t ctr_ival_mS)
 {
@@ -576,6 +591,20 @@ process_struct_VMEM(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *host
   submit_sflow_float(hostdata, metric_prefix, SFLOW_M_vmem_total, SFLOW_MEM_KB(memory_max), SFLOW_OK_GAUGE64(memory_max));
   if(memory_max > 0) {
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_vmem_util, (float)memory * (float)100.0 / (float)memory_max, SFLOW_OK_GAUGE64(memory));
+  }
+}
+
+// VMEM structure can also be send by a JVM agent - but we want to map it into different Ganglia metrics
+static void
+process_struct_JVM_VMEM(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostdata, char *metric_prefix, apr_time_t ctr_ival_mS)
+{
+  uint64_t memory, memory_max;
+  SFLOWXDR_next_int64(x,&memory);
+  SFLOWXDR_next_int64(x,&memory_max);
+
+  submit_sflow_float(hostdata, metric_prefix, SFLOW_M_jvm_vmem_total, SFLOW_MEM_KB(memory_max), SFLOW_OK_GAUGE64(memory_max));
+  if(memory_max > 0) {
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_jvm_vmem_util, (float)memory * (float)100.0 / (float)memory_max, SFLOW_OK_GAUGE64(memory));
   }
 }
 
@@ -1185,9 +1214,9 @@ processCounterSample(SFlowXDR *x, char **errorMsg)
   
   /* always send a heartbeat */
   submit_sflow_uint32(hostdata, NULL, SFLOW_M_heartbeat, (apr_time_as_msec(x->now) - x->uptime_mS) / 1000, TRUE);
-  
+
+  /* choose the metric prefix in case we decide to use it below */
   if(x->offset.HID) {
-    /* sumbit the system fields that we already extracted above */
     if(x->offset.foundPH) {
       /* phyiscal host - no metric prefix, and hostname is already in the hostdata */
       hid_mprefix = NULL;
@@ -1200,34 +1229,41 @@ processCounterSample(SFlowXDR *x, char **errorMsg)
 	hid_mprefix = dataSource->hostname;
       }
     }
-    if(dataSource->osrelease && dataSource->osrelease[0] != '\0') {
-      submit_sflow_string(hostdata, hid_mprefix, SFLOW_M_os_release, dataSource->osrelease, TRUE);
-    }
-    if(dataSource->uuidstr && dataSource->uuidstr[0] != '\0') {
-      submit_sflow_string(hostdata, hid_mprefix, SFLOW_M_uuid, dataSource->uuidstr, TRUE);
-    }
-    if(machine_type <= SFLOW_MAX_MACHINE_TYPE) {
-      submit_sflow_string(hostdata, hid_mprefix, SFLOW_M_machine_type, SFLOWMachineTypes[machine_type], TRUE);
-    }
-    if(os_name <= SFLOW_MAX_OS_NAME) {
-      submit_sflow_string(hostdata, hid_mprefix, SFLOW_M_os_name, SFLOWOSNames[os_name], TRUE);
-    }
   }
   
   /* from here on it gets easier because we know by the structure id whether it pertains to the physical
-   * host or whether we should consider using the metric-prefix.  These ones are physical so we set the
-   * metric_prefix arg to NULL...
+   * host or whether we should consider using the metric-prefix. Start with the phyiscal host metrics...
    */
 
-  if((SFLOWXDR_setc(x, x->offset.CPU))) process_struct_CPU(x, dataSource, hostdata, NULL, ctr_ival_mS);
-  if((SFLOWXDR_setc(x, x->offset.MEM))) process_struct_MEM(x, dataSource, hostdata, NULL, ctr_ival_mS);
-  if((SFLOWXDR_setc(x, x->offset.DSK))) process_struct_DSK(x, dataSource, hostdata, NULL, ctr_ival_mS);
-  if((SFLOWXDR_setc(x, x->offset.NIO))) process_struct_NIO(x, dataSource, hostdata, NULL, ctr_ival_mS);
-  if((SFLOWXDR_setc(x, x->offset.VNODE))) process_struct_VNODE(x, dataSource, hostdata, NULL, ctr_ival_mS);
+  if(x->offset.foundPH) {
+    if(x->offset.HID) {
+      /* sumbit the system fields that we already extracted above */
+      if(dataSource->osrelease && dataSource->osrelease[0] != '\0') {
+	submit_sflow_string(hostdata, hid_mprefix, SFLOW_M_os_release, dataSource->osrelease, TRUE);
+      }
+      if(dataSource->uuidstr && dataSource->uuidstr[0] != '\0') {
+	submit_sflow_string(hostdata, hid_mprefix, SFLOW_M_uuid, dataSource->uuidstr, TRUE);
+      }
+      if(machine_type <= SFLOW_MAX_MACHINE_TYPE) {
+	submit_sflow_string(hostdata, hid_mprefix, SFLOW_M_machine_type, SFLOWMachineTypes[machine_type], TRUE);
+      }
+      if(os_name <= SFLOW_MAX_OS_NAME) {
+	submit_sflow_string(hostdata, hid_mprefix, SFLOW_M_os_name, SFLOWOSNames[os_name], TRUE);
+      }
+    }
+    if((SFLOWXDR_setc(x, x->offset.CPU))) process_struct_CPU(x, dataSource, hostdata, NULL, ctr_ival_mS);
+    if((SFLOWXDR_setc(x, x->offset.MEM))) process_struct_MEM(x, dataSource, hostdata, NULL, ctr_ival_mS);
+    if((SFLOWXDR_setc(x, x->offset.DSK))) process_struct_DSK(x, dataSource, hostdata, NULL, ctr_ival_mS);
+    if((SFLOWXDR_setc(x, x->offset.NIO))) process_struct_NIO(x, dataSource, hostdata, NULL, ctr_ival_mS);
+    if((SFLOWXDR_setc(x, x->offset.VNODE))) process_struct_VNODE(x, dataSource, hostdata, NULL, ctr_ival_mS);
+  }
 
   /* now we go virtual... */
-
-  if(sflowCFG.submit_all_virtual) {
+  /* however be careful how we treat the virtual counter blocks that may come from a JVM.  Although a JVM
+   * is technically a virtual machine too,  we want to report JVM-specific metrics for these, so they are
+   * processed separately below. */
+  if(sflowCFG.submit_all_virtual
+     && !x->offset.JVM) {
     if((SFLOWXDR_setc(x, x->offset.VCPU))) process_struct_VCPU(x, dataSource, hostdata, hid_mprefix, ctr_ival_mS);
     if((SFLOWXDR_setc(x, x->offset.VMEM))) process_struct_VMEM(x, dataSource, hostdata, hid_mprefix, ctr_ival_mS);
     if((SFLOWXDR_setc(x, x->offset.VDSK))) process_struct_VDSK(x, dataSource, hostdata, hid_mprefix, ctr_ival_mS);
@@ -1253,8 +1289,14 @@ processCounterSample(SFlowXDR *x, char **errorMsg)
 
   if(sflowCFG.submit_jvm) {
     if((SFLOWXDR_setc(x, x->offset.JVM))) {
+      /* The JVM datasource may have sent a HostID structure. In which case the "osrelease" field will be the Java version */
+      if(dataSource->osrelease && dataSource->osrelease[0] != '\0') {
+	submit_sflow_string(hostdata, sflowCFG.multiple_jvm ? hid_mprefix : NULL, SFLOW_M_jvm_release, dataSource->osrelease, TRUE);
+      }
       /* we can use the hid_mprefix here too, since the java agent typically fills in a virtual hostname */
       process_struct_JVM(x, dataSource, hostdata, sflowCFG.multiple_jvm ? hid_mprefix : NULL, ctr_ival_mS);
+      if((SFLOWXDR_setc(x, x->offset.VCPU))) process_struct_JVM_VCPU(x, dataSource, hostdata, sflowCFG.multiple_jvm ? hid_mprefix : NULL, ctr_ival_mS);
+      if((SFLOWXDR_setc(x, x->offset.VMEM))) process_struct_JVM_VMEM(x, dataSource, hostdata, sflowCFG.multiple_jvm ? hid_mprefix : NULL, ctr_ival_mS);
     }
   }
 

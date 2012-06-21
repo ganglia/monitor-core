@@ -1,0 +1,27 @@
+/*
+  param php_modules_path
+           path to the directory where mod_php
+           should look for php metric modules
+           
+  param php_ini_path
+           path to the php.ini used by the php engine
+
+  the "phpconf" files in the include directory below
+  will be scanned for configurations for those modules
+*/
+modules {
+  module {
+    name = "php_module"
+    path = "modphp.so"
+    param php_modules_path {
+        value = "@moduledir@/php_modules"
+    }
+    /*
+    param php_ini_path {
+        value = "/etc/php.ini"
+    }
+    */
+  }
+}
+
+include ("@sysconfdir@/conf.d/*.phpconf")

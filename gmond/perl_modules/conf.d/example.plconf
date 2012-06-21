@@ -1,0 +1,27 @@
+modules {
+  module {
+    name = "example"
+    language = "perl"
+    param RandomMax {
+        value = 600
+    }
+    param ConstantValue {
+        value = 112
+    }
+  }
+}
+
+#/* Collection groups for the
+#    example perl module */
+collection_group {
+  collect_every = 10
+  time_threshold = 50
+  metric {
+    name = "PlRandom_Numbers"
+    value_threshold = 1.0
+  }
+  metric {
+    name = "PlConstant_Number"
+    value_threshold = 1.0
+  }
+}
