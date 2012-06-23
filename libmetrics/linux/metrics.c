@@ -1252,7 +1252,7 @@ float find_disk_space(double *total_size, double *total_free)
 {
    FILE *mounts;
    char procline[1024];
-   char mount[1024], device[1024], type[1024], mode[1024];
+   char *mount, *device, *type, *mode, *other;
    /* We report in GB = 1e9 bytes. */
    double reported_units = 1e9;
    /* Track the most full disk partition, report with a percentage. */
@@ -1266,8 +1266,18 @@ float find_disk_space(double *total_size, double *total_free)
       return max;
    }
    while ( fgets(procline, sizeof(procline), mounts) ) {
-      rc=sscanf(procline, "%s %s %s %s ", device, mount, type, mode);
-      if (!rc) continue;
+     device = procline;
+     mount = index(procline, ' ');
+     if (mount == NULL) continue;
+     *mount++ = '\0';
+     type = index(mount, ' ');
+     if (type == NULL) continue;
+     *type++ = '\0';
+     mode = index(type, ' ');
+     if (mode == NULL) continue;
+     *mode++ = '\0';
+     other = index(mode, ' ');
+     if (other != NULL) *other = '\0';
       if (!strncmp(mode, "ro", 2)) continue;
       if (remote_mount(device, type)) continue;
       if (strncmp(device, "/dev/", 5) != 0 &&
