@@ -286,6 +286,22 @@ static DOTCONF_CB(cb_graphite_prefix)
    return NULL;
 }
 
+static DOTCONF_CB(cb_unsummarized_metrics)
+{
+   int i;
+   llist_entry *le;
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+
+   for (i = 0; i < cmd->arg_count; i++)
+      {
+         le = (llist_entry *)malloc(sizeof(llist_entry));
+         le->val = strdup(cmd->data.list[i]);
+         llist_add(&(c->unsummarized_metrics), le);
+         debug_msg("Adding %s to unsummarized_metrics", le->val);
+      }
+   return NULL;
+}
+
 static FUNC_ERRORHANDLER(errorhandler)
 {
    err_quit("gmetad config file error: %s\n", msg);
@@ -315,6 +331,7 @@ static configoption_t gmetad_options[] =
       {"carbon_port", ARG_INT, cb_carbon_port, &gmetad_config, 0},
       {"carbon_timeout", ARG_INT, cb_carbon_timeout, &gmetad_config, 0},
       {"graphite_prefix", ARG_STR, cb_graphite_prefix, &gmetad_config, 0},
+      {"unsummarized_metrics", ARG_LIST, cb_unsummarized_metrics, &gmetad_config, 0},
       LAST_OPTION
    };
 
@@ -340,6 +357,7 @@ set_defaults (gmetad_config_t *config)
    config->RRAs[1] = "RRA:AVERAGE:0.5:4:20160";
    config->RRAs[2] = "RRA:AVERAGE:0.5:40:52704";
    config->case_sensitive_hostnames = 1;
+   config->unsummarized_metrics = NULL;
 }
 
 int

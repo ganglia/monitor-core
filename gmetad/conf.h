@@ -13,6 +13,7 @@ typedef struct
       int server_threads;
       int umask;
       llist_entry *trusted_hosts;
+      llist_entry *unsummarized_metrics;
       int debug_level;
       int should_setuid;
       char *setuid_username;

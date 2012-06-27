@@ -1061,6 +1061,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
    char num[256];
    Metric_t *metric;
    struct type_tag *tt;
+   llist_entry *le;
 
    name = (char*) key->data;
    metric = (Metric_t*) val->data;
@@ -1072,6 +1073,10 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
 
    tt = in_type_list(type, strlen(type));
    if (!tt) return 0;
+
+   /* Don't save to RRD if this is a metric not to be summarized */
+   if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)name, llist_strncmp, &le) == 0)
+      return 0;
 
    switch (tt->type)
       {
