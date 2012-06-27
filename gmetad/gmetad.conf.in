@@ -128,6 +128,11 @@ data_source "my cluster" localhost
 # rrd_rootdir "/some/other/place"
 #
 #-------------------------------------------------------------------------------
+# List of metric prefixes this gmetad will not summarize at cluster or grid level.
+# default: There is no default value
+# unsummarized_metrics diskstat CPU
+#
+#-------------------------------------------------------------------------------
 # In earlier versions of gmetad, hostnames were handled in a case
 # sensitive manner
 # If your hostname directories have been renamed to lower case,

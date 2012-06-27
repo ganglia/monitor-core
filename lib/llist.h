@@ -29,6 +29,7 @@ typedef struct _llist_entry {
 } llist_entry;
 
 void llist_add(llist_entry **llist, llist_entry *e);
+int llist_strncmp(const char *s1, const char *s2);
 int llist_remove(llist_entry **llist, llist_entry *e);
 int llist_search(llist_entry **llist, void *val, 
                  int (*compare_function)(const char *,const char *), 
