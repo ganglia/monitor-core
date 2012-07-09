@@ -1030,13 +1030,13 @@ process_struct_JVM(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
   submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_nhmem_used, (double)jvm_nhmem_used, SFLOW_OK_GAUGE64(jvm_nhmem_used));
   submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_nhmem_committed, (double)jvm_nhmem_committed, SFLOW_OK_GAUGE64(jvm_nhmem_committed));
   submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_nhmem_max, (double)jvm_nhmem_max, SFLOW_OK_GAUGE64(jvm_nhmem_max));
-  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_cls_loaded, (double)jvm_cls_loaded, SFLOW_OK_GAUGE64(jvm_cls_loaded));
-  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_cls_total, (double)jvm_cls_total, SFLOW_OK_GAUGE64(jvm_cls_total));
-  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_cls_unloaded, (double)jvm_cls_unloaded, SFLOW_OK_GAUGE64(jvm_cls_unloaded));
-  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_thread_live, (double)jvm_thread_live, SFLOW_OK_GAUGE64(jvm_thread_live));
-  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_thread_daemon, (double)jvm_thread_daemon, SFLOW_OK_GAUGE64(jvm_thread_daemon));
-  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_fds_open, (double)jvm_fds_open, SFLOW_OK_GAUGE64(jvm_fds_open));
-  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_fds_max, (double)jvm_fds_max, SFLOW_OK_GAUGE64(jvm_fds_max));
+  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_cls_loaded, (double)jvm_cls_loaded, SFLOW_OK_GAUGE32(jvm_cls_loaded));
+  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_cls_total, (double)jvm_cls_total, SFLOW_OK_GAUGE32(jvm_cls_total));
+  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_cls_unloaded, (double)jvm_cls_unloaded, SFLOW_OK_GAUGE32(jvm_cls_unloaded));
+  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_thread_live, (double)jvm_thread_live, SFLOW_OK_GAUGE32(jvm_thread_live));
+  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_thread_daemon, (double)jvm_thread_daemon, SFLOW_OK_GAUGE32(jvm_thread_daemon));
+  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_fds_open, (double)jvm_fds_open, SFLOW_OK_GAUGE32(jvm_fds_open));
+  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_fds_max, (double)jvm_fds_max, SFLOW_OK_GAUGE32(jvm_fds_max));
 }
 
 
@@ -1166,7 +1166,7 @@ processCounterSample(SFlowXDR *x, char **errorMsg)
      * as a metric prefix if required.  (I think there may be an apr call to
      * do this in one go?)
      */
-    snprintf(mprefix, SFLOW_MAX_METRIC_PREFIX_LEN, "%u", dataSource->dsIndex);
+    snprintf(mprefix, SFLOW_MAX_METRIC_PREFIX_LEN, "%u", (unsigned int)dataSource->dsIndex);
     mprefix_len = strlen(mprefix);
     dataSource->metric_prefix = apr_pcalloc(hostdata->pool, mprefix_len);
     memcpy(dataSource->metric_prefix, mprefix, mprefix_len);
@@ -1345,10 +1345,26 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
   }
 
   /* turn the agent ip into a string */
-  if(my_inet_ntop(x->agentAddr.type == SFLOW_ADDRTYPE_IP6 ? AF_INET6 : AF_INET,
-		  &x->agentAddr.a,
-		  x->agentipstr,
-		  SFLOW_MAX_HOSTNAME_LEN) == NULL) {
+  if(x->agentAddr.type == SFLOW_ADDRTYPE_IP6) {
+#if defined(HAVE_INET_NTOP) && defined(AF_INET6)
+    my_inet_ntop(AF_INET6, &x->agentAddr.a, x->agentipstr, SFLOW_MAX_HOSTNAME_LEN);
+#else
+    /* Probably on Cygwin, or some other platform that does not support IPv6.
+     just print it out myself - all we need is a unique string so don't worry
+     about compact formatting. */
+    snprintf(x->agentipstr, SFLOW_MAX_HOSTNAME_LEN, "%04x:%04x:%04x:%04x",
+	     x->agentAddr.a.ip6[0],
+	     x->agentAddr.a.ip6[1],
+	     x->agentAddr.a.ip6[2],
+	     x->agentAddr.a.ip6[3]);
+#endif
+  }
+  else {
+    my_inet_ntop(AF_INET, &x->agentAddr.a, x->agentipstr, SFLOW_MAX_HOSTNAME_LEN);
+  }
+    
+  /* make sure we got something sensible */
+  if(x->agentipstr == NULL || x->agentipstr[0] == '\0') {
     *errorMsg =  "sFlow agent address format error";
     return FALSE;
   }
