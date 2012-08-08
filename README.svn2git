@@ -1,0 +1,13 @@
+
+
+Detecting all the legacy usernames from Sourceforge SVN:
+
+  svn log -q \
+   https://ganglia.svn.sourceforge.net/svnroot/ganglia | \
+    awk -F '|' '/^r/ {sub("^ ", "", $2); sub(" $", "", $2); print $2" = "$2" <"$2">"}' | \
+    sort -u > authors.txt
+
+*** authors.txt must be modified by hand to include real names and
+    email addresses
+
+
