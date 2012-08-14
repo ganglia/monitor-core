@@ -1242,7 +1242,7 @@ float find_disk_space(double *total_size, double *total_free)
       return max;
    }
    while ( fgets(procline, sizeof(procline), mounts) ) {
-      rc=sscanf(procline, "%s %s %s %s ", device, mount, type, mode);
+      rc=sscanf(procline, "%127s %127s %31s %127s ", device, mount, type, mode);
       if (!rc) continue;
       if (!strncmp(mode, "ro", 2)) continue;
       if (remote_mount(device, type)) continue;
