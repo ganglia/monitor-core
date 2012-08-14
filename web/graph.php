@@ -122,7 +122,7 @@ if (!$graph) {
 
 $graph_file = "$graphdir/$graph.php";
 
-if ( is_readable($graph_file) ) {
+if ( is_readable($graph_file) and realpath($graphdir) === dirname(realpath($graph_file)) ) {
     include_once($graph_file);
 
     $graph_function = "graph_${graph}";
