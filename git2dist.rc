@@ -30,7 +30,7 @@ DIST_CONFIGURE_ARGS="--sysconfdir=/etc/ganglia"
 TEST_CONFIGURE_ARGS="--sysconfdir=/etc/ganglia"
 
 TEST_BINARY_IN_SRC="gmond"
-TEST_BINARY_IN_TREE="usr/local/sbin"
+TEST_BINARY_IN_TREE="usr/sbin"
 TEST_BINARY="gmond"
 TEST_BINARY_ARGS="-t"
 
