@@ -14,7 +14,7 @@ GIT_REPO=git@github.com:${GITHUB_PROJECT}/${GITHUB_SUBPROJECT}.git
 
 # the branch in the repository where the releases are prepared,
 # usually a release branch, possibly master for a small project
-RELEASE_BRANCH=release/3.1
+RELEASE_BRANCH=release/3.1.8
 
 # Should submodules be initialized?
 GIT_SUBMODULE_INIT=0
