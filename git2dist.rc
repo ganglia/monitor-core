@@ -25,9 +25,9 @@ BOOTSTRAP_SCRIPT=bootstrap
 # Any arguments to pass to configure for running make dist?
 # may be necessary to ensure that optional modules are included in the dist
 # for some large packages
-DIST_CONFIGURE_ARGS=""
+DIST_CONFIGURE_ARGS="--sysconfdir=/etc/ganglia"
 # Any arguments to pass to configure for the tarball torture test phase?
-TEST_CONFIGURE_ARGS=""
+TEST_CONFIGURE_ARGS="--sysconfdir=/etc/ganglia"
 
 TEST_BINARY_IN_SRC="gmond"
 TEST_BINARY_IN_TREE="usr/local/sbin"
