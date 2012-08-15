@@ -41,7 +41,7 @@ CHANGE_LOG_GEN_FLAGS = -i --alternate-strip-prefix="/trunk/monitor-core/" --brea
 
 ChangeLog:
 	touch ChangeLog
-	$(CHANGE_LOG_GEN_BIN) $(CHANGE_LOG_GEN_FLAGS)
+#	$(CHANGE_LOG_GEN_BIN) $(CHANGE_LOG_GEN_FLAGS)
 
 CLEANFILES = ganglia.sub pod2htm*
 
