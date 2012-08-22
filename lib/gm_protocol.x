@@ -42,9 +42,19 @@ struct Ganglia_metric_id {
   bool spoof;
 };
 
+struct Ganglia_uuid {
+  unsigned char uuid[16];
+};
+
 struct Ganglia_metadatadef {
   struct Ganglia_metric_id metric_id;
   struct Ganglia_metadata_message metric;
+};
+
+struct Ganglia_metadatadef_with_uuid {
+  struct Ganglia_metric_id metric_id;
+  struct Ganglia_metadata_message metric;
+  Ganglia_uuid uuid;
 };
 
 struct Ganglia_metadatareq {
@@ -93,6 +103,55 @@ struct Ganglia_gmetric_double {
   double d;
 };
 
+struct Ganglia_gmetric_ushort_with_uuid {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  unsigned short us;
+  Ganglia_uuid uuid;
+};
+
+struct Ganglia_gmetric_short_with_uuid {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  short ss;
+  Ganglia_uuid uuid;
+};
+
+struct Ganglia_gmetric_int_with_uuid {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  int si;
+  Ganglia_uuid uuid;
+};
+
+struct Ganglia_gmetric_uint_with_uuid {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  unsigned int ui;
+  Ganglia_uuid uuid;
+};
+
+struct Ganglia_gmetric_string_with_uuid {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  string str<>;
+  Ganglia_uuid uuid;
+};
+
+struct Ganglia_gmetric_float_with_uuid {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  float f;
+  Ganglia_uuid uuid;
+};
+
+struct Ganglia_gmetric_double_with_uuid {
+  struct Ganglia_metric_id metric_id;
+  string fmt<>;
+  double d;
+  Ganglia_uuid uuid;
+};
+
 /* Start the refactored XDR packet ids at 128 to 
 ** avoid confusing the new packets with the older ones.
 ** this is to avoid trying to decode older XDR packets
@@ -108,12 +167,22 @@ enum Ganglia_msg_formats {
    gmetric_string,
    gmetric_float,
    gmetric_double,
-   gmetadata_request
+   gmetadata_request,
+   gmetadata_full_with_uuid = 192,
+   gmetric_ushort_with_uuid,
+   gmetric_short_with_uuid,
+   gmetric_int_with_uuid,
+   gmetric_uint_with_uuid,
+   gmetric_string_with_uuid,
+   gmetric_float_with_uuid,
+   gmetric_double_with_uuid
 };
 
 union Ganglia_metadata_msg switch (Ganglia_msg_formats id) {
   case gmetadata_full:
     Ganglia_metadatadef gfull;
+  case gmetadata_full_with_uuid:
+    Ganglia_metadatadef_with_uuid gfull_u;
   case gmetadata_request:
     Ganglia_metadatareq grequest;
 
@@ -136,6 +205,21 @@ union Ganglia_value_msg switch (Ganglia_msg_formats id) {
     Ganglia_gmetric_float gf;
   case gmetric_double:
     Ganglia_gmetric_double gd;
+
+  case gmetric_ushort_with_uuid:
+    Ganglia_gmetric_ushort_with_uuid gu_short_u;
+  case gmetric_short_with_uuid:
+    Ganglia_gmetric_short_with_uuid gs_short_u;
+  case gmetric_int_with_uuid:
+    Ganglia_gmetric_int_with_uuid gs_int_u;
+  case gmetric_uint_with_uuid:
+    Ganglia_gmetric_uint_with_uuid gu_int_u;
+  case gmetric_string_with_uuid:
+    Ganglia_gmetric_string_with_uuid gstr_u;
+  case gmetric_float_with_uuid:
+    Ganglia_gmetric_float_with_uuid gf_u;
+  case gmetric_double_with_uuid:
+    Ganglia_gmetric_double_with_uuid gd_u;
 
   default:
     void;

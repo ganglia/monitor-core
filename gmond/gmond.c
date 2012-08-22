@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <syslog.h>
 #include <math.h>
+#include <uuid/uuid.h>
 #ifdef SOLARIS
 #define fabsf(f) ((float)fabs(f))
 #endif
@@ -918,10 +919,10 @@ get_metric_names (Ganglia_metric_id *metric_id, char **metricName, char **realNa
 }
 
 Ganglia_host *
-Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
+Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id, char *uu)
 {
   apr_status_t status;
-  Ganglia_host *hostdata;
+  Ganglia_host *hostdata = NULL;
   apr_pool_t *pool;
   char *hostname = NULL;
   char *remoteip = remIP;
@@ -934,7 +935,7 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
 
   /* split out the spoofed host name and ip address so that it can
    * be used to get the spoofed host. */
-  if(metric_id && metric_id->spoof)
+  if((hostdata == NULL) && metric_id && metric_id->spoof)
     {
       char *spoofName;
       char *spoofIP;
@@ -964,9 +965,19 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
       remoteip = spoofIP;
     }
 
-  hostdata =  (Ganglia_host *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
+  if(uu != NULL && uu[0] != 0)
+    {
+      hostdata =  (Ganglia_host *)apr_hash_get( hosts, uu, APR_HASH_KEY_STRING );
+    }
+  else
+    hostdata =  (Ganglia_host *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
   if(!hostdata)
     {
+      /* Use UUID instead of hostname if present */
+      if( uu && uu[0] != 0)
+        {
+          hostname = uu;
+        }
       /* Lookup the hostname or use the proxy information if available */
       if( !hostname )
         {
@@ -1031,7 +1042,10 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
         }
 
       /* Save this host data to the "hosts" hash */
-      apr_hash_set( hosts, hostdata->ip, APR_HASH_KEY_STRING, hostdata); 
+      if( uu && uu[0] != 0 )
+          apr_hash_set( hosts, uu, APR_HASH_KEY_STRING, hostdata);
+      else
+          apr_hash_set( hosts, hostdata->ip, APR_HASH_KEY_STRING, hostdata); 
     }
   else
     {
@@ -1372,8 +1386,11 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   Ganglia_value_msg vmsg;
   Ganglia_host *hostdata = NULL;
   apr_pool_t *p = NULL;
-  Ganglia_msg_formats id;
+  Ganglia_msg_formats _id, id;
   bool_t ret;
+
+  unsigned char* uu = NULL;
+  char uuid_s[37];
 
   socket         = desc->desc.s;
   /* We could also use the apr_socket_data_get/set() functions
@@ -1438,18 +1455,20 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   memset( &vmsg, 0, sizeof(Ganglia_value_msg));
 
   /* Figure out what kind of message it we got */
-  xdr_Ganglia_msg_formats(&x, &id);
+  xdr_Ganglia_msg_formats(&x, &_id);
+  id = _id & 0xbf;
   xdr_setpos (&x, 0);
 
   /* Read the gangliaMessage from the stream */
   /* Save the message from this particular host */
+  uuid_s[0] = 0;
   switch (id) 
     {
     case gmetadata_request:
       ganglia_scoreboard_inc(PKTS_RECVD_REQUEST);
       ret = xdr_Ganglia_metadata_msg(&x, &fmsg);
       if (ret)
-          hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.grequest.metric_id));
+          hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.grequest.metric_id), NULL);
       sanitize_metric_name(fmsg.Ganglia_metadata_msg_u.grequest.metric_id.name);
       if(!ret || !hostdata)
         {
@@ -1466,7 +1485,15 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       ganglia_scoreboard_inc(PKTS_RECVD_METADATA);
       ret = xdr_Ganglia_metadata_msg(&x, &fmsg);
       if (ret)
-          hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.gfull.metric_id));
+        {
+          if(id != _id)
+            {
+              uu = fmsg.Ganglia_metadata_msg_u.gfull_u.uuid.uuid;
+              uuid_unparse(uu, uuid_s);
+              fmsg.id = id;
+            }
+          hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.gfull.metric_id), uuid_s);
+        }
       sanitize_metric_name(fmsg.Ganglia_metadata_msg_u.gfull.metric_id.name);
       if(!ret || !hostdata)
         {
@@ -1475,7 +1502,9 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
           xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&fmsg);
           break;
         }
-      debug_msg("Processing a metric metadata message from %s", hostdata->hostname);
+      debug_msg("Processing a metric metadata message from %s %s",
+        (id != _id) ? "UUID" : "host",
+        hostdata->hostname);
       Ganglia_metadata_save( hostdata, &fmsg );
       xdr_free((xdrproc_t)xdr_Ganglia_metadata_msg, (char *)&fmsg);
       break;
@@ -1489,7 +1518,35 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       ganglia_scoreboard_inc(PKTS_RECVD_VALUE);
       ret = xdr_Ganglia_value_msg(&x, &vmsg);
       if (ret)
-          hostdata = Ganglia_host_get(remoteip, remotesa, &(vmsg.Ganglia_value_msg_u.gstr.metric_id));
+        {
+          if(id != _id)
+            {
+              switch(id)
+                {
+                case gmetric_ushort:
+                  uu = vmsg.Ganglia_value_msg_u.gu_short_u.uuid.uuid; break;
+                case gmetric_short:
+                  uu = vmsg.Ganglia_value_msg_u.gs_short_u.uuid.uuid; break;
+                case gmetric_int:
+                  uu = vmsg.Ganglia_value_msg_u.gs_int_u.uuid.uuid; break;
+                case gmetric_uint:
+                  uu = vmsg.Ganglia_value_msg_u.gu_int_u.uuid.uuid; break;
+                case gmetric_string:
+                  uu = vmsg.Ganglia_value_msg_u.gstr_u.uuid.uuid; break;
+                case gmetric_float:
+                  uu = vmsg.Ganglia_value_msg_u.gf_u.uuid.uuid; break;
+                case gmetric_double:
+                  uu = vmsg.Ganglia_value_msg_u.gd_u.uuid.uuid; break;
+                default:
+                  err_msg("unpexected message type %d, can't get source UUID", id);
+                  break;
+              }
+            if(uu != NULL)
+                uuid_unparse(uu, uuid_s);
+            vmsg.id = id;
+          }
+          hostdata = Ganglia_host_get(remoteip, remotesa, &(vmsg.Ganglia_value_msg_u.gstr.metric_id), uuid_s);
+        }
       sanitize_metric_name(vmsg.Ganglia_value_msg_u.gstr.metric_id.name);
       if(!ret || !hostdata)
         {
@@ -1498,7 +1555,9 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
           xdr_free((xdrproc_t)xdr_Ganglia_value_msg, (char *)&vmsg);
           break;
         }
-      debug_msg("Processing a metric value message from %s", hostdata->hostname);
+      debug_msg("Processing a metric value message from %s %s",
+        (id != _id) ? "UUID" : "host",
+        hostdata->hostname);
       Ganglia_value_save(hostdata, &vmsg);
       Ganglia_update_vidals(hostdata, &vmsg);
       Ganglia_metadata_check(hostdata, &vmsg);

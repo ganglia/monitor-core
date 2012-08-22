@@ -64,7 +64,7 @@ struct Ganglia_host {
 };
 typedef struct Ganglia_host Ganglia_host;
 
-Ganglia_host *Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id);
+Ganglia_host *Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id, char *uu);
 
 void Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message );
 void Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message );

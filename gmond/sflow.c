@@ -1104,7 +1104,7 @@ processCounterSample(SFlowXDR *x, char **errorMsg)
       snprintf(spoofstr,SFLOW_MAX_SPOOFHOST_LEN, "%s:%s", x->agentipstr, hostname);
       vmsg.Ganglia_value_msg_u.gstr.metric_id.host = spoofstr;
       vmsg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
-      hostdata = Ganglia_host_get(x->agentipstr, x->remotesa, &(vmsg.Ganglia_value_msg_u.gstr.metric_id)); 
+      hostdata = Ganglia_host_get(x->agentipstr, x->remotesa, &(vmsg.Ganglia_value_msg_u.gstr.metric_id), NULL); 
       if(!hostdata) {
 	err_msg("sFlow: Ganglia_host_get(%s) failed\n", x->agentipstr);
 	return FALSE;
