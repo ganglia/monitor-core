@@ -58,6 +58,8 @@ struct Ganglia_host {
   apr_time_t first_heard_from;
   /* Last heard from */
   apr_time_t last_heard_from;
+  /* Thread mutex */
+  apr_thread_mutex_t *mutex;
 #ifdef SFLOW
   struct _SFlowAgent *sflow;
 #endif
