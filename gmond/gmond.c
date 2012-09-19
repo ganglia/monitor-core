@@ -1023,6 +1023,14 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
       /* Set the timestamps */
       hostdata->first_heard_from = hostdata->last_heard_from = apr_time_now();
 
+      /* Create the hostdata mutex */
+      if (apr_thread_mutex_create(&hostdata->mutex, APR_THREAD_MUTEX_DEFAULT, pool) != APR_SUCCESS)
+        {
+          if (buff) free(buff);
+          apr_pool_destroy(pool);
+          return NULL;
+        }
+
       /* Create a hash for the metric data */
       hostdata->metrics = apr_hash_make( pool );
       if(!hostdata->metrics)
@@ -1237,7 +1245,9 @@ Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
         metric->last_heard_from = apr_time_now();
     
         /* Save the full metric */
+        apr_thread_mutex_lock(host->mutex);
         apr_hash_set(host->metrics, metric->name, APR_HASH_KEY_STRING, metric);
+        apr_thread_mutex_unlock(host->mutex);
         debug_msg("saving metadata for metric: %s host: %s", metric->name, host->hostname);
       }
 }
@@ -1362,7 +1372,9 @@ Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
       metric->last_heard_from = apr_time_now();
 
       /* Save the last update metric */
+      apr_thread_mutex_lock(host->mutex);
       apr_hash_set(host->gmetrics, metric->name, APR_HASH_KEY_STRING, metric);
+      apr_thread_mutex_unlock(host->mutex);
     }
 }
 
@@ -1855,6 +1867,7 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
         }
 
       /* Send the metric info for this particular host */
+      apr_thread_mutex_lock(((Ganglia_host *)val)->mutex);
       for(metric_hi = apr_hash_first(client_context, ((Ganglia_host *)val)->metrics);
           metric_hi; metric_hi = apr_hash_next(metric_hi))
         {
@@ -1869,6 +1882,7 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
               goto close_accept_socket;
             }
         }
+      apr_thread_mutex_unlock(((Ganglia_host *)val)->mutex);
 
       /* Close the host tag */
       status = print_host_end(client);
@@ -2957,8 +2971,10 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
                   /* this is a stale gmetric */
                   debug_msg("deleting old metric '%s' from host '%s'", metric->name, host->hostname);
                   /* remove the metric from the metric and values hash */
+                  apr_thread_mutex_lock(host->mutex);
                   apr_hash_set( host->metrics, metric->name, APR_HASH_KEY_STRING, NULL);
                   apr_hash_set( host->gmetrics, metric->name, APR_HASH_KEY_STRING, NULL);
+                  apr_thread_mutex_unlock(host->mutex);
                   /* destroy any memory that was allocated for this gmetric */
                   apr_pool_destroy( metric->pool );
                 }
@@ -3142,7 +3158,7 @@ main ( int argc, char *argv[] )
   /* Create the host hash table */
   hosts = apr_hash_make( global_context );
 
-  /* Create the mutex */
+  /* Create the hosts mutex */
   if (apr_thread_mutex_create(&hosts_mutex, APR_THREAD_MUTEX_DEFAULT, global_context) != APR_SUCCESS)
     {
       err_msg("Failed to create thread mutex. Exiting.\n");
