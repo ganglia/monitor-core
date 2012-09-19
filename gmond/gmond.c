@@ -157,6 +157,7 @@ apr_socket_t **udp_recv_sockets = NULL;
 
 /* The hash to hold the hosts (key = host IP) */
 apr_hash_t *hosts = NULL;
+apr_thread_mutex_t *hosts_mutex = NULL;
 /* The "hosts" hash contains values of type "hostdata" */
 
 #ifdef SFLOW
@@ -1041,7 +1042,9 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
         }
 
       /* Save this host data to the "hosts" hash */
+      apr_thread_mutex_lock(hosts_mutex);
       apr_hash_set( hosts, hostdata->ip, APR_HASH_KEY_STRING, hostdata); 
+      apr_thread_mutex_unlock(hosts_mutex);
     }
   else
     {
@@ -1839,6 +1842,7 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
     goto close_accept_socket;
 
   /* Walk the host hash */
+  apr_thread_mutex_lock(hosts_mutex);
   for(hi = apr_hash_first(client_context, hosts);
       hi;
       hi = apr_hash_next(hi))
@@ -1873,6 +1877,7 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
           goto close_accept_socket;
         }
     }
+  apr_thread_mutex_unlock(hosts_mutex);
 
   /* Close the CLUSTER and GANGLIA_XML tags */
   print_xml_footer(client);
@@ -1940,7 +1945,9 @@ poll_tcp_listen_channels( apr_interval_time_t timeout, apr_time_t now)
       switch( channel->type )
         {
         case TCP_ACCEPT_CHANNEL:
+          debug_msg("[tcp] Request for XML data received.");
           process_tcp_accept_channel(descs+i, now);
+          debug_msg("[tcp] Request for XML data completed.");
           break;
         default:
           continue;
@@ -2921,7 +2928,9 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
           /* this host is older than dmax... delete it */
           debug_msg("deleting old host '%s' from host hash'", host->hostname);
           /* remove it from the hash */
+          apr_thread_mutex_lock(hosts_mutex);
           apr_hash_set( hosts, host->ip, APR_HASH_KEY_STRING, NULL);
+          apr_thread_mutex_unlock(hosts_mutex);
           /* free all its memory */
           apr_pool_destroy( host->pool);
         } 
@@ -3001,7 +3010,7 @@ static void* APR_THREAD_FUNC tcp_listener(apr_thread_t *thd, void *data)
   apr_time_t now;
   apr_interval_time_t wait = 1000;
 
-  debug_msg("Starting TCP listener thread...");
+  debug_msg("[tcp] Starting TCP listener thread...");
   for(;!done;)
     {
       if(!deaf)
@@ -3133,15 +3142,23 @@ main ( int argc, char *argv[] )
   /* Create the host hash table */
   hosts = apr_hash_make( global_context );
 
+  /* Create the mutex */
+  if (apr_thread_mutex_create(&hosts_mutex, APR_THREAD_MUTEX_DEFAULT, global_context) != APR_SUCCESS)
+    {
+      err_msg("Failed to create thread mutex. Exiting.\n");
+      exit(1);
+    }
+
   /* Initialize time variables */
   udp_last_heard = last_cleanup = next_collection = now = apr_time_now();
 
   /* Create TCP listener thread */
   apr_thread_t *thread;
   if (apr_thread_create(&thread, NULL, tcp_listener, NULL, global_context) != APR_SUCCESS)
-  {
-    debug_msg("Thread create error");
-  }
+    {
+      err_msg("Failed to create TCP listener thread. Exiting.\n");
+      exit(1);
+    }
 
   /* Loop */
   for(;!done;)
