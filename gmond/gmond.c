@@ -1863,7 +1863,12 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
       status = print_host_start(client, (Ganglia_host *)val);
       if(status != APR_SUCCESS)
         {
-          goto close_accept_socket;
+          /* Release the mutex and close down the accepted socket */
+          apr_thread_mutex_unlock(hosts_mutex);
+          apr_socket_shutdown(client, APR_SHUTDOWN_READ);
+          apr_socket_close(client);
+          apr_pool_destroy(client_context);
+          return;
         }
 
       /* Send the metric info for this particular host */
@@ -1879,7 +1884,13 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
           /* Print each of the metrics for a host ... */
           if(print_host_metric(client, metric, mval, now) != APR_SUCCESS)
             {
-              goto close_accept_socket;
+              /* Release the mutex and close down the accepted socket */
+              apr_thread_mutex_unlock(((Ganglia_host *)val)->mutex);
+              apr_thread_mutex_unlock(hosts_mutex);
+              apr_socket_shutdown(client, APR_SHUTDOWN_READ);
+              apr_socket_close(client);
+              apr_pool_destroy(client_context);
+              return;
             }
         }
       apr_thread_mutex_unlock(((Ganglia_host *)val)->mutex);
@@ -1888,7 +1899,12 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
       status = print_host_end(client);
       if(status != APR_SUCCESS)
         {
-          goto close_accept_socket;
+          /* Release the mutex and close down the accepted socket */
+          apr_thread_mutex_unlock(hosts_mutex);
+          apr_socket_shutdown(client, APR_SHUTDOWN_READ);
+          apr_socket_close(client);
+          apr_pool_destroy(client_context);
+          return;
         }
     }
   apr_thread_mutex_unlock(hosts_mutex);
