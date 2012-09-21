@@ -74,7 +74,7 @@ mapped_info_t;
 
 typedef struct
 {
-    char mname[128];
+    char mname[251];
     int tmax;
     char vtype[32];
     char units[64];
