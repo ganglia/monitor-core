@@ -871,7 +871,7 @@ setup_listen_channels_pollset( void )
     }
 }
 
-void sanitize_metric_name(char *metric_name)
+void sanitize_metric_name(char *metric_name, int is_spoof_msg)
 {
     if (metric_name == NULL) return;
     if (strlen(metric_name) < 1) return;
@@ -884,6 +884,7 @@ void sanitize_metric_name(char *metric_name)
             && (*p != '_')
             && (*p != '-')
             && (*p != '.')
+            && (*p == ':' && !is_spoof_msg)
             && (*p != '\0')
            ) {
             *p = '_';
@@ -1168,7 +1169,7 @@ void
 Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
 {
     /* Search for the Ganglia_metadata in the Ganglia_host */
-    sanitize_metric_name(message->Ganglia_metadata_msg_u.gfull.metric_id.name);
+    sanitize_metric_name(message->Ganglia_metadata_msg_u.gfull.metric_id.name, message->Ganglia_metadata_msg_u.gfull.metric_id.spoof);
     Ganglia_metadata *metric = 
         (Ganglia_metadata *)apr_hash_get(host->metrics, 
                                          message->Ganglia_metadata_msg_u.gfull.metric_id.name,
@@ -1475,7 +1476,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       ret = xdr_Ganglia_metadata_msg(&x, &fmsg);
       if (ret)
           hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.grequest.metric_id));
-      sanitize_metric_name(fmsg.Ganglia_metadata_msg_u.grequest.metric_id.name);
+      sanitize_metric_name(fmsg.Ganglia_metadata_msg_u.grequest.metric_id.name, fmsg.Ganglia_metadata_msg_u.grequest.metric_id.spoof);
       if(!ret || !hostdata)
         {
           ganglia_scoreboard_inc(PKTS_RECVD_FAILED);
@@ -1492,7 +1493,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       ret = xdr_Ganglia_metadata_msg(&x, &fmsg);
       if (ret)
           hostdata = Ganglia_host_get(remoteip, remotesa, &(fmsg.Ganglia_metadata_msg_u.gfull.metric_id));
-      sanitize_metric_name(fmsg.Ganglia_metadata_msg_u.gfull.metric_id.name);
+      sanitize_metric_name(fmsg.Ganglia_metadata_msg_u.gfull.metric_id.name, fmsg.Ganglia_metadata_msg_u.gfull.metric_id.spoof);
       if(!ret || !hostdata)
         {
           ganglia_scoreboard_inc(PKTS_RECVD_FAILED);
@@ -1515,7 +1516,7 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
       ret = xdr_Ganglia_value_msg(&x, &vmsg);
       if (ret)
           hostdata = Ganglia_host_get(remoteip, remotesa, &(vmsg.Ganglia_value_msg_u.gstr.metric_id));
-      sanitize_metric_name(vmsg.Ganglia_value_msg_u.gstr.metric_id.name);
+      sanitize_metric_name(vmsg.Ganglia_value_msg_u.gstr.metric_id.name, vmsg.Ganglia_value_msg_u.gstr.metric_id.spoof);
       if(!ret || !hostdata)
         {
           ganglia_scoreboard_inc(PKTS_RECVD_FAILED);
