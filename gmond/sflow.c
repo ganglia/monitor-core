@@ -321,7 +321,7 @@ submit_sflow_string(Ganglia_host *hostdata, char *metric_prefix, EnumSFLOWGMetri
 #define SFLOW_CTR_MS_PC(ds, field, mS) ((mS) ? ((float)(SFLOW_CTR_DELTA(ds, field)) * (float)100.0 / (float)mS) : 0)
 #define SFLOW_CTR_DIVIDE(ds, num, denom) (SFLOW_CTR_DELTA(ds, denom) ? (float)(SFLOW_CTR_DELTA(ds, num)) / (float)(SFLOW_CTR_DELTA(ds, denom)) : 0)
 
-#define SFLOW_GAUGE_DIVIDE(num, denom) ((denom) ? ((double)(num) / (double)(denom)) : (double)0)
+/* #define SFLOW_GAUGE_DIVIDE(num, denom) ((denom) ? ((double)(num) / (double)(denom)) : (double)0) */
 
   /* metrics may be marked as "unsupported" by the sender,  so check for those reserved values */
 #define SFLOW_OK_FLOAT(field) (field != (float)-1)
@@ -1087,10 +1087,10 @@ process_struct_NVML_GPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *
   nvml_gpu_fan_speed = SFLOWXDR_next(x);
     
   if(x->counterDeltas) {
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_time, SFLOW_CTR_RATE(dataSource, nvml_gpu_time, ctr_ival_mS), SFLOW_OK_COUNTER32(nvml_gpu_time));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_rw_time, SFLOW_CTR_RATE(dataSource, nvml_gpu_rw_time, ctr_ival_mS), SFLOW_OK_COUNTER32(nvml_gpu_rw_time));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_time, SFLOW_CTR_MS_PC(dataSource, nvml_gpu_time, ctr_ival_mS), SFLOW_OK_COUNTER32(nvml_gpu_time));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_rw_time, SFLOW_CTR_MS_PC(dataSource, nvml_gpu_rw_time, ctr_ival_mS), SFLOW_OK_COUNTER32(nvml_gpu_rw_time));
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_ecc_errors, SFLOW_CTR_RATE(dataSource, nvml_gpu_ecc_errors, ctr_ival_mS), SFLOW_OK_COUNTER32(nvml_gpu_ecc_errors));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_energy, SFLOW_CTR_RATE(dataSource, nvml_gpu_energy, ctr_ival_mS), SFLOW_OK_COUNTER32(nvml_gpu_energy));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_energy, SFLOW_CTR_RATE(dataSource, nvml_gpu_energy, ctr_ival_mS) / (float)1000.0, SFLOW_OK_COUNTER32(nvml_gpu_energy));
   }
 
   SFLOW_CTR_LATCH(dataSource, nvml_gpu_time);
@@ -1101,7 +1101,7 @@ process_struct_NVML_GPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_nvml_gpu_count, nvml_gpu_count, SFLOW_OK_GAUGE32(nvml_gpu_count));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_nvml_gpu_processes, nvml_gpu_processes, SFLOW_OK_GAUGE32(nvml_gpu_processes));
   submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_mem_total, SFLOW_MEM_KB(nvml_gpu_mem_total), SFLOW_OK_GAUGE64(nvml_gpu_mem_total));
-  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_nvml_gpu_mem_free, SFLOW_GAUGE_DIVIDE(nvml_gpu_mem_free, nvml_gpu_mem_total), SFLOW_OK_GAUGE64(nvml_gpu_mem_free));
+  submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_mem_free, SFLOW_MEM_KB(nvml_gpu_mem_free), SFLOW_OK_GAUGE64(nvml_gpu_mem_free));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_nvml_gpu_temperature, nvml_gpu_temperature, SFLOW_OK_GAUGE32(nvml_gpu_temperature));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_nvml_gpu_fan_speed, nvml_gpu_fan_speed, SFLOW_OK_GAUGE32(nvml_gpu_fan_speed));
 }
