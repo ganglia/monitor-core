@@ -321,6 +321,8 @@ submit_sflow_string(Ganglia_host *hostdata, char *metric_prefix, EnumSFLOWGMetri
 #define SFLOW_CTR_MS_PC(ds, field, mS) ((mS) ? ((float)(SFLOW_CTR_DELTA(ds, field)) * (float)100.0 / (float)mS) : 0)
 #define SFLOW_CTR_DIVIDE(ds, num, denom) (SFLOW_CTR_DELTA(ds, denom) ? (float)(SFLOW_CTR_DELTA(ds, num)) / (float)(SFLOW_CTR_DELTA(ds, denom)) : 0)
 
+/* #define SFLOW_GAUGE_DIVIDE(num, denom) ((denom) ? ((double)(num) / (double)(denom)) : (double)0) */
+
   /* metrics may be marked as "unsupported" by the sender,  so check for those reserved values */
 #define SFLOW_OK_FLOAT(field) (field != (float)-1)
 #define SFLOW_OK_GAUGE32(field) (field != (uint32_t)-1)
@@ -785,7 +787,7 @@ process_struct_MEMCACHE_2200(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_h
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_boottime, (apr_time_as_msec(x->now) / 1000) - mc_uptime, SFLOW_OK_GAUGE32(mc_uptime));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_curr_conns, mc_curr_conns, SFLOW_OK_GAUGE32(mc_curr_conns));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_curr_items, mc_curr_items, SFLOW_OK_GAUGE32(mc_curr_items));
-  submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_limit_maxbytes, mc_limit_maxbytes, SFLOW_OK_GAUGE32(mc_limit_maxbytes));
+  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_mc_limit_maxbytes, (double)mc_limit_maxbytes, SFLOW_OK_GAUGE32(mc_limit_maxbytes));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_threads, mc_threads, SFLOW_OK_GAUGE32(mc_threads));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_conn_structs, mc_conn_structs, SFLOW_OK_GAUGE32(mc_conn_structs));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_accepting_conns, mc_accepting_conns, SFLOW_OK_GAUGE32(mc_accepting_conns));
@@ -927,20 +929,20 @@ process_struct_HTTP(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *host
     
   if(x->counterDeltas) {
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_meth_option, SFLOW_CTR_RATE(dataSource, http_meth_option, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_option));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_meth_get, SFLOW_CTR_RATE(dataSource, http_meth_get, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_get));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_meth_head, SFLOW_CTR_RATE(dataSource, http_meth_head, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_head));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_meth_post, SFLOW_CTR_RATE(dataSource, http_meth_post, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_post));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_meth_put, SFLOW_CTR_RATE(dataSource, http_meth_put, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_put));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_meth_delete, SFLOW_CTR_RATE(dataSource, http_meth_delete, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_delete));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_meth_trace, SFLOW_CTR_RATE(dataSource, http_meth_trace, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_trace));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_meth_connect, SFLOW_CTR_RATE(dataSource, http_meth_connect, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_connect));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_meth_other, SFLOW_CTR_RATE(dataSource, http_meth_other, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_other));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_status_1XX, SFLOW_CTR_RATE(dataSource, http_status_1XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_1XX));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_status_2XX, SFLOW_CTR_RATE(dataSource, http_status_2XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_2XX));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_status_3XX, SFLOW_CTR_RATE(dataSource, http_status_3XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_3XX));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_status_4XX, SFLOW_CTR_RATE(dataSource, http_status_4XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_4XX));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_status_5XX, SFLOW_CTR_RATE(dataSource, http_status_5XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_5XX));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_status_other, SFLOW_CTR_RATE(dataSource, http_status_other, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_other));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_meth_get, SFLOW_CTR_RATE(dataSource, http_meth_get, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_get));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_meth_head, SFLOW_CTR_RATE(dataSource, http_meth_head, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_head));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_meth_post, SFLOW_CTR_RATE(dataSource, http_meth_post, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_post));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_meth_put, SFLOW_CTR_RATE(dataSource, http_meth_put, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_put));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_meth_delete, SFLOW_CTR_RATE(dataSource, http_meth_delete, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_delete));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_meth_trace, SFLOW_CTR_RATE(dataSource, http_meth_trace, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_trace));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_meth_connect, SFLOW_CTR_RATE(dataSource, http_meth_connect, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_connect));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_meth_other, SFLOW_CTR_RATE(dataSource, http_meth_other, ctr_ival_mS), SFLOW_OK_COUNTER32(http_meth_other));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_status_1XX, SFLOW_CTR_RATE(dataSource, http_status_1XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_1XX));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_status_2XX, SFLOW_CTR_RATE(dataSource, http_status_2XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_2XX));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_status_3XX, SFLOW_CTR_RATE(dataSource, http_status_3XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_3XX));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_status_4XX, SFLOW_CTR_RATE(dataSource, http_status_4XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_4XX));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_status_5XX, SFLOW_CTR_RATE(dataSource, http_status_5XX, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_5XX));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_status_other, SFLOW_CTR_RATE(dataSource, http_status_other, ctr_ival_mS), SFLOW_OK_COUNTER32(http_status_other));
   }
 
   SFLOW_CTR_LATCH(dataSource, http_meth_option);
@@ -960,6 +962,32 @@ process_struct_HTTP(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *host
   SFLOW_CTR_LATCH(dataSource, http_status_other);
 }
 
+
+static void
+process_struct_HTTP_WORKERS(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostdata, char *metric_prefix, apr_time_t ctr_ival_mS)
+{
+  uint32_t http_workers_active, http_workers_idle, http_workers_max, http_workers_req_delayed, http_workers_req_dropped;
+
+  debug_msg("process_struct_HTTP_WORKERS");
+
+  http_workers_active = SFLOWXDR_next(x);
+  http_workers_idle = SFLOWXDR_next(x);
+  http_workers_max = SFLOWXDR_next(x);
+  http_workers_req_delayed = SFLOWXDR_next(x);
+  http_workers_req_dropped = SFLOWXDR_next(x);
+    
+  if(x->counterDeltas) {
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_workers_req_delayed, SFLOW_CTR_RATE(dataSource, http_workers_req_delayed, ctr_ival_mS), SFLOW_OK_COUNTER32(http_workers_req_delayed));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_http_workers_req_dropped, SFLOW_CTR_RATE(dataSource, http_workers_req_dropped, ctr_ival_mS), SFLOW_OK_COUNTER32(http_workers_req_dropped));
+  }
+
+  SFLOW_CTR_LATCH(dataSource, http_workers_req_delayed);
+  SFLOW_CTR_LATCH(dataSource, http_workers_req_dropped);
+
+  submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_http_workers_active, http_workers_active, SFLOW_OK_GAUGE32(http_workers_active));
+  submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_http_workers_idle, http_workers_idle, SFLOW_OK_GAUGE32(http_workers_idle));
+  submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_http_workers_max, http_workers_max, SFLOW_OK_GAUGE32(http_workers_max));
+}
 
 static void
 process_struct_JVM(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostdata, char *metric_prefix, apr_time_t ctr_ival_mS)
@@ -1037,6 +1065,45 @@ process_struct_JVM(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
   submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_thread_daemon, (double)jvm_thread_daemon, SFLOW_OK_GAUGE32(jvm_thread_daemon));
   submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_fds_open, (double)jvm_fds_open, SFLOW_OK_GAUGE32(jvm_fds_open));
   submit_sflow_double(hostdata, metric_prefix, SFLOW_M_jvm_fds_max, (double)jvm_fds_max, SFLOW_OK_GAUGE32(jvm_fds_max));
+}
+
+static void
+process_struct_NVML_GPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostdata, char *metric_prefix, apr_time_t ctr_ival_mS)
+{
+  uint32_t nvml_gpu_count, nvml_gpu_processes, nvml_gpu_time, nvml_gpu_rw_time, nvml_gpu_ecc_errors, nvml_gpu_energy, nvml_gpu_temperature, nvml_gpu_fan_speed;
+  uint64_t nvml_gpu_mem_total, nvml_gpu_mem_free;
+
+  debug_msg("process_struct_NVML_GPU");
+
+  nvml_gpu_count = SFLOWXDR_next(x);
+  nvml_gpu_processes = SFLOWXDR_next(x);
+  nvml_gpu_time = SFLOWXDR_next(x);
+  nvml_gpu_rw_time = SFLOWXDR_next(x);
+  SFLOWXDR_next_int64(x, &nvml_gpu_mem_total);
+  SFLOWXDR_next_int64(x, &nvml_gpu_mem_free);
+  nvml_gpu_ecc_errors = SFLOWXDR_next(x);
+  nvml_gpu_energy = SFLOWXDR_next(x);
+  nvml_gpu_temperature = SFLOWXDR_next(x);
+  nvml_gpu_fan_speed = SFLOWXDR_next(x);
+    
+  if(x->counterDeltas) {
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_time, SFLOW_CTR_MS_PC(dataSource, nvml_gpu_time, ctr_ival_mS), SFLOW_OK_COUNTER32(nvml_gpu_time));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_rw_time, SFLOW_CTR_MS_PC(dataSource, nvml_gpu_rw_time, ctr_ival_mS), SFLOW_OK_COUNTER32(nvml_gpu_rw_time));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_ecc_errors, SFLOW_CTR_RATE(dataSource, nvml_gpu_ecc_errors, ctr_ival_mS), SFLOW_OK_COUNTER32(nvml_gpu_ecc_errors));
+    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_energy, SFLOW_CTR_RATE(dataSource, nvml_gpu_energy, ctr_ival_mS) / (float)1000.0, SFLOW_OK_COUNTER32(nvml_gpu_energy));
+  }
+
+  SFLOW_CTR_LATCH(dataSource, nvml_gpu_time);
+  SFLOW_CTR_LATCH(dataSource, nvml_gpu_rw_time);
+  SFLOW_CTR_LATCH(dataSource, nvml_gpu_ecc_errors);
+  SFLOW_CTR_LATCH(dataSource, nvml_gpu_energy);
+
+  submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_nvml_gpu_count, nvml_gpu_count, SFLOW_OK_GAUGE32(nvml_gpu_count));
+  submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_nvml_gpu_processes, nvml_gpu_processes, SFLOW_OK_GAUGE32(nvml_gpu_processes));
+  submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_mem_total, SFLOW_MEM_KB(nvml_gpu_mem_total), SFLOW_OK_GAUGE64(nvml_gpu_mem_total));
+  submit_sflow_float(hostdata, metric_prefix, SFLOW_M_nvml_gpu_mem_free, SFLOW_MEM_KB(nvml_gpu_mem_free), SFLOW_OK_GAUGE64(nvml_gpu_mem_free));
+  submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_nvml_gpu_temperature, nvml_gpu_temperature, SFLOW_OK_GAUGE32(nvml_gpu_temperature));
+  submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_nvml_gpu_fan_speed, nvml_gpu_fan_speed, SFLOW_OK_GAUGE32(nvml_gpu_fan_speed));
 }
 
 
@@ -1256,6 +1323,7 @@ processCounterSample(SFlowXDR *x, char **errorMsg)
     if((SFLOWXDR_setc(x, x->offset.DSK))) process_struct_DSK(x, dataSource, hostdata, NULL, ctr_ival_mS);
     if((SFLOWXDR_setc(x, x->offset.NIO))) process_struct_NIO(x, dataSource, hostdata, NULL, ctr_ival_mS);
     if((SFLOWXDR_setc(x, x->offset.VNODE))) process_struct_VNODE(x, dataSource, hostdata, NULL, ctr_ival_mS);
+    if((SFLOWXDR_setc(x, x->offset.NVML_GPU))) process_struct_NVML_GPU(x, dataSource, hostdata, NULL, ctr_ival_mS);
   }
 
   /* now we go virtual... */
@@ -1284,6 +1352,12 @@ processCounterSample(SFlowXDR *x, char **errorMsg)
   if(sflowCFG.submit_http) {
     if((SFLOWXDR_setc(x, x->offset.HTTP))) {
       process_struct_HTTP(x, dataSource, hostdata, sflowCFG.multiple_http ? dataSource->metric_prefix : NULL, ctr_ival_mS);
+      /* detect workers structure appearing with HTTP counters and treat specially as HTTP_WORKERS.  For example,  this way
+       * the workers structure that mod_sflow sends will appear here and the metrics will be http metrics with the same prefix
+       */
+      if((SFLOWXDR_setc(x, x->offset.WORKERS))) {
+	process_struct_HTTP_WORKERS(x, dataSource, hostdata, sflowCFG.multiple_http ? dataSource->metric_prefix : NULL, ctr_ival_mS);
+      }
     }
   }
 
@@ -1433,7 +1507,8 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
 	  case SFLOW_COUNTERBLOCK_MEMCACHE: x->offset.MEMCACHE = SFLOWXDR_mark(x,0); break;
 	  case SFLOW_COUNTERBLOCK_HTTP: x->offset.HTTP = SFLOWXDR_mark(x,0); break;
 	  case SFLOW_COUNTERBLOCK_JVM: x->offset.JVM = SFLOWXDR_mark(x,0); break;
-
+	  case SFLOW_COUNTERBLOCK_NVML_GPU: x->offset.NVML_GPU = SFLOWXDR_mark(x, 0); break;
+	  case SFLOW_COUNTERBLOCK_WORKERS: x->offset.WORKERS = SFLOWXDR_mark(x, 0); break;
 	  }
 	  SFLOWXDR_skip(x,ceQuads);
 	  
