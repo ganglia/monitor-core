@@ -42,6 +42,9 @@ extern "C" {
 #define SFLOW_COUNTERBLOCK_MEMCACHE 2204
 #define SFLOW_COUNTERBLOCK_HTTP 2201
 #define SFLOW_COUNTERBLOCK_JVM 2106
+#define SFLOW_COUNTERBLOCK_NVML_GPU ((5703 << 12) + 1)  /* enterprise 5703 == Nvidia */
+#define SFLOW_COUNTERBLOCK_WORKERS 2206
+
 #define SFLOW_MAX_HOSTNAME_LEN 64
 #define SFLOW_MAX_FQDN_LEN 256
 #define SFLOW_MAX_IPSTR_LEN 64
@@ -104,6 +107,8 @@ typedef struct _SFlowXDR {
     uint32_t MEMCACHE;
     uint32_t HTTP;
     uint32_t JVM;
+    uint32_t NVML_GPU;
+    uint32_t WORKERS;
   } offset;
 } SFlowXDR;
 
@@ -225,12 +230,21 @@ typedef struct _SFlowCounterState {
   uint32_t http_status_4XX;
   uint32_t http_status_5XX;
   uint32_t http_status_other;
+  /* HTTP workers */
+  uint32_t http_workers_req_delayed;
+  uint32_t http_workers_req_dropped;
 
   /* Java JVM */
   uint32_t jvm_thread_started;
   uint32_t jvm_gc_count;
   uint32_t jvm_gc_ms;
   uint32_t jvm_comp_ms;
+
+  /* NVML GPU */
+  uint32_t nvml_gpu_time;
+  uint32_t nvml_gpu_rw_time;
+  uint32_t nvml_gpu_ecc_errors;
+  uint32_t nvml_gpu_energy;
 
 } SFlowCounterState;
 
