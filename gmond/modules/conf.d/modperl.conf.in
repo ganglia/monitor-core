@@ -8,7 +8,7 @@
 modules {
   module {
     name = "perl_module"
-    path = "mod_perl.so"
+    path = "modperl.so"
     params = "@moduledir@/perl_modules"
   }
 }
