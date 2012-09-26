@@ -1222,9 +1222,9 @@ int remote_mount(const char *device, const char *type)
 float device_space(char *mount, char *device, double *total_size, double *total_free)
 {
    struct statvfs svfs;
-   uint32_t blocksize;
-   uint32_t free;
-   uint32_t size;
+   double blocksize;
+   double free;
+   double size;
    /* The percent used: used/total * 100 */
    float pct=0.0;
 
@@ -1240,8 +1240,8 @@ float device_space(char *mount, char *device, double *total_size, double *total_
    size  = svfs.f_blocks;
    blocksize = svfs.f_bsize;
    /* Keep running sum of total used, free local disk space. */
-   *total_size += size * (double) blocksize;
-   *total_free += free * (double) blocksize;
+   *total_size += size * blocksize;
+   *total_free += free * blocksize;
    /* The percentage of space used on this partition. */
    pct = size ? ((size - free) / (float) size) * 100 : 0.0;
    return pct;
