@@ -2987,6 +2987,7 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
                 {
                   /* this is a stale gmetric */
                   debug_msg("deleting old metric '%s' from host '%s'", metric->name, host->hostname);
+#if 0
                   /* remove the metric from the metric and values hash */
                   apr_thread_mutex_lock(host->mutex);
                   apr_hash_set( host->metrics, metric->name, APR_HASH_KEY_STRING, NULL);
@@ -2994,6 +2995,7 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
                   apr_thread_mutex_unlock(host->mutex);
                   /* destroy any memory that was allocated for this gmetric */
                   apr_pool_destroy( metric->pool );
+#endif
                 }
             }
         }
