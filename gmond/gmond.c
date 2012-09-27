@@ -2749,7 +2749,7 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
             name = cb->msg.Ganglia_value_msg_u.gstr.metric_id.name;
             if (override_hostname != NULL)
               {
-#if 1
+#if 0
                 char* tmpstr = malloc( strlen(( override_ip != NULL ? override_ip : override_hostname )) + strlen( override_hostname ) + 1 );
                 strcpy (tmpstr, (char *)( override_ip != NULL ? override_ip : override_hostname ) );
                 strcat (tmpstr, ":");
@@ -2757,7 +2757,7 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
 
                 cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = tmpstr;
 #endif
-#if 0
+#if 1
                 cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrcat(gm_pool, (char *)( override_ip != NULL ? override_ip : override_hostname ), ":", (char *) override_hostname, NULL);
 #endif
                 cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
