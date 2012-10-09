@@ -215,7 +215,7 @@ class DataStore:
                 # If the last reported time is the same as the current reported time, then
                 #  the host has not been updated.  Therefore calculate the time offset from
                 #  the current time.
-                if hostNode.lastReportedTime == reportedTime:
+                if metricNode.lastReportedTime == reportedTime:
                     tn = summaryTime - reportedTime
                     if tn < 0: tn = 0
                     metricNode.setAttr('tn', str(tn))
