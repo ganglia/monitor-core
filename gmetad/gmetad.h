@@ -128,8 +128,9 @@ metric_val_t;
 typedef struct
    {
       int fd;
+      unsigned int valid:1;
+      unsigned int http:1;
       struct sockaddr_in addr;
-      int valid;
       filter_type_t filter;
       struct timeval now;
    }
