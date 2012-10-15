@@ -27,7 +27,7 @@ extern char* getfield(char *buf, short int index);
 extern struct type_tag* in_type_list (char *, unsigned int);
 
 
-static inline int
+static inline int CHECK_FMT(2, 3)
 xml_print( client_t *client, const char *fmt, ... )
 {
    int rval, len;
@@ -150,7 +150,8 @@ metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
       "SOURCE=\"%s\">\n",
       name, getfield(metric->strings, metric->valstr),
       getfield(metric->strings, metric->type),
-      getfield(metric->strings, metric->units), tn,
+      getfield(metric->strings, metric->units),
+      (unsigned int) tn,
       metric->tmax, metric->dmax, getfield(metric->strings, metric->slope),
       getfield(metric->strings, metric->source));
 
@@ -191,9 +192,10 @@ host_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
    /* Note the hash key is the host's IP address. */
    rc = xml_print(client, "<HOST NAME=\"%s\" IP=\"%s\" REPORTED=\"%u\" "
       "TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" LOCATION=\"%s\" GMOND_STARTED=\"%u\" TAGS=\"%s\">\n",
-      name, getfield(host->strings, host->ip), host->reported, tn,
+      name, getfield(host->strings, host->ip), host->reported,
+      (unsigned int) tn,
       host->tmax, host->dmax, getfield(host->strings, host->location),
-		  host->started, getfield(host->strings, host->tags));
+      host->started, getfield(host->strings, host->tags));
 
    return rc;
 }
@@ -256,7 +258,8 @@ root_report_start(client_t *client)
       VERSION);
 
    rc = xml_print(client, "<GRID NAME=\"%s\" AUTHORITY=\"%s\" LOCALTIME=\"%u\">\n",
-       gmetad_config.gridname, getfield(root.strings, root.authority_ptr), time(0));
+       gmetad_config.gridname, getfield(root.strings, root.authority_ptr),
+       (unsigned int) time(0));
 
    return rc;
 }
@@ -576,8 +579,8 @@ server_thread (void *arg)
          if ( client.fd < 0 )
             {
                err_ret("server_thread() error");
-               debug_msg("server_thread() %d clientfd = %d errno=%d\n",
-                        pthread_self(), client.fd, errno);
+               debug_msg("server_thread() %lx clientfd = %d errno=%d\n",
+                        (unsigned long) pthread_self(), client.fd, errno);
                continue;
             }
 
@@ -624,8 +627,8 @@ server_thread (void *arg)
 
          if(root_report_start(&client))
             {
-               err_msg("server_thread() %d unable to write root preamble (DTD, etc)",
-                         pthread_self() );
+               err_msg("server_thread() %lx unable to write root preamble (DTD, etc)",
+                       (unsigned long) pthread_self() );
                close(client.fd);
                continue;
             }
@@ -636,14 +639,16 @@ server_thread (void *arg)
 
          if (process_path(&client, request, &rootdatum, NULL))
             {
-               err_msg("server_thread() %d unable to write XML tree info", pthread_self() );
+               err_msg("server_thread() %lx unable to write XML tree info",
+                       (unsigned long) pthread_self() );
                close(client.fd);
                continue;
             }
 
          if(root_report_end(&client))
             {
-               err_msg("server_thread() %d unable to write root epilog", pthread_self() );
+               err_msg("server_thread() %lx unable to write root epilog",
+                       (unsigned long) pthread_self() );
             }
 
          close(client.fd);

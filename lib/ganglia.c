@@ -313,8 +313,8 @@ gexec_cluster (gexec_cluster_t *cluster, char *ip, unsigned short port)
            {
               gexec_errno = 7;
               err_msg ("gexec_cluster() XML_ParseBuffer() error at line %d:\n%s\n",
-              XML_GetCurrentLineNumber (xml_parser),
-              XML_ErrorString (XML_GetErrorCode (xml_parser)));
+                 (int) XML_GetCurrentLineNumber (xml_parser),
+                 XML_ErrorString (XML_GetErrorCode (xml_parser)));
               goto error;
            }
 
