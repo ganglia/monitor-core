@@ -251,6 +251,17 @@ root_report_start(client_t *client)
 {
    int rc;
 
+   if (client->http)
+      {
+         rc = xml_print(client, "HTTP/1.0 200 OK\r\n"
+                                "Server: gmetad/" GANGLIA_VERSION_FULL "\r\n"
+                                "Content-Type: application/xml\r\n"
+                                "Connection: close\r\n"
+                                "\r\n");
+         if (rc)
+            return rc;
+      }
+
    rc = xml_print(client, DTD);
    if (rc) return 1;
 
@@ -448,10 +459,15 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
                
                datum_free(found);
             }
+         else if (!client->http)
+            {
+               /* report this element */
+               rc = process_path(client, 0, myroot, NULL);
+            }
          else
             {
                /* element not found */
-               rc = process_path(client, 0, myroot, NULL);
+               rc = 0;
             }
          free(element);
       }
@@ -477,9 +493,23 @@ process_request (client_t *client, char *path)
    int rc, pathlen;
 
    pathlen = strlen(path);
-   if (!pathlen) return 1;
+   if (!pathlen)
+       return 1;
 
-   if (*path != '/') return 1;
+   if (pathlen >= 12 && memcmp(path, "GET ", 4) == 0)
+      {
+         /* looks like a http request, validate it and update path_p */
+         char *http_p = path + pathlen - 9;
+         if (memcmp(http_p, " HTTP/1.0", 9) && memcmp(http_p, " HTTP/1.1", 9))
+            return 1;
+         *http_p = 0;
+         pathlen = strlen(path + 4);
+         memmove(path, path + 4, pathlen + 1);
+         client->http = 1;
+      }
+
+   if (*path != '/')
+       return 1;
 
    /* Check for illegal characters in element */
    if (strcspn(path, ">!@#$%`;|\"\\'<") < pathlen)
@@ -600,8 +630,9 @@ server_thread (void *arg)
                close( client.fd );
                continue;
             }
-         
+
          client.filter=0;
+         client.http=0;
          gettimeofday(&client.now, NULL);
 
          if (interactive)
