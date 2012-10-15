@@ -42,6 +42,7 @@ btool
 **/*.a
 **/*.la
 **/*.lo
+*~
 scripts/fixconfig
 stamp-h1
 lib/default_conf.h
