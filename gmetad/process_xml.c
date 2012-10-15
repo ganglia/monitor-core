@@ -765,7 +765,7 @@ startElement_EXTRA_ELEMENT (void *data, const char *el, const char **attr)
     */  
     if (metric.ednameslen >= MAX_EXTRA_ELEMENTS) 
     {
-        debug_msg("Can not add more extra elements for [%s].  Capacity of %d reached[%s].",
+        debug_msg("Can not add more extra elements for [%s].  Capacity of %d reached.",
                   name, MAX_EXTRA_ELEMENTS);
         return 0;
     }
@@ -1225,7 +1225,7 @@ process_xml(data_source_list_t *d, char *buf)
       {
          err_msg ("Process XML (%s): XML_ParseBuffer() error at line %d:\n%s\n",
                          d->name,
-                         XML_GetCurrentLineNumber (xml_parser),
+                         (int) XML_GetCurrentLineNumber (xml_parser),
                          XML_ErrorString (XML_GetErrorCode (xml_parser)));
          xmldata.rval = 1;
       }

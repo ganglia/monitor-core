@@ -103,7 +103,7 @@ hash_create (size_t size)
    size_t i;
    hash_t *hash;
 
-   debug_msg("hash_create size = %d", size);
+   debug_msg("hash_create size = %zd", size);
 
    hash = (hash_t *) malloc ( sizeof(hash_t) );
    if( hash == NULL )
@@ -114,7 +114,7 @@ hash_create (size_t size)
 
    hash->size = hash_prime(size);
 
-   debug_msg("hash->size is %d", hash->size);
+   debug_msg("hash->size is %zd", hash->size);
 
    hash->node = (node_t * *) malloc (sizeof (node_t *) * hash->size);
    if (hash->node == NULL)

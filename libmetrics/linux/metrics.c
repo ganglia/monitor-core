@@ -122,7 +122,7 @@ static net_dev_stats *hash_lookup(char *devname, size_t nlen)
   stats = (net_dev_stats *)malloc(sizeof(net_dev_stats));
   if ( stats == NULL )
   {
-    err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup(%s,%d)", name, nlen);
+    err_msg("unable to allocate memory for /proc/net/dev/stats in hash_lookup(%s,%zd)", name, nlen);
     free(name);
     return NULL;
   }
@@ -1257,7 +1257,6 @@ float find_disk_space(double *total_size, double *total_free)
    double reported_units = 1e9;
    /* Track the most full disk partition, report with a percentage. */
    float thispct, max=0.0;
-   int rc;
 
    /* Read all currently mounted filesystems. */
    mounts=fopen(MOUNTS,"r");
