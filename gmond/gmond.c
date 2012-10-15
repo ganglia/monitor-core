@@ -718,7 +718,8 @@ setup_listen_channels_pollset( void )
                         {
                           err_msg("Error setting UDP receive buffer for port %d bind=%s to size: %d.\n",
                             port, bindaddr? bindaddr: "unspecified", (apr_int32_t) buffer);
-                          err_msg("Reported buffer size by OS: %d : does not match config setting.\n");
+                          err_msg("Reported buffer size by OS: %d : does not match config setting %d.\n",
+                            (int) (rx_buf_sz/2), (int) buffer);
                           err_msg("NOTE: only supported on systems that have Apache Portable Runtime library version 0.9.4 or higher.\n");
                           err_msg("Check Operating System (kernel) limits, change or disable buffer size. Exiting.\n");
                           exit(1);
