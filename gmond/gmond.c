@@ -2799,6 +2799,7 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
                 debug_msg("\tsending metadata for metric: %s", cb->name);
 
                 ganglia_scoreboard_inc(PKTS_SENT_METADATA);
+                ganglia_scoreboard_inc(PKTS_SENT_ALL);
                 if (override_hostname != NULL)
                   {
                     errors = Ganglia_metadata_send_real(gmetric, udp_send_channels, cb->msg.Ganglia_value_msg_u.gstr.metric_id.host);
@@ -3015,6 +3016,7 @@ void initialize_scoreboard()
     ganglia_scoreboard_add(PKTS_RECVD_VALUE, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_RECVD_REQUEST, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_SENT_ALL, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_SENT_FAILED, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_SENT_METADATA, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_SENT_VALUE, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_SENT_REQUEST, GSB_READ_RESET);
