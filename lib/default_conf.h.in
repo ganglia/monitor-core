@@ -74,6 +74,25 @@ tcp_accept_channel {\n\
 \n\
 "
 
+#define DISCOVERY_CONFIGURATION "\
+/* Dynamic discovery for cloud environments */\n\
+#cloud {\n\
+# access_key = ACCESS_KEY_ID\n\
+# secret_key = SECRET_ACCESS_KEY\n\
+#}\n\
+\n\
+#discovery {\n\
+# type = ec2 /* only ec2 API supported in this version */\n\
+# endpoint = https:\/\/ec2.amazonaws.com/ /* only required if in us-east-1 */\n\
+# tags = { } /* list of key:value tags eg. stage:prod */\n\
+# groups = { } /* list of security groups */\n\
+# availability_zones = { } /* eg. eu-west-1a */\n\
+# host_type = private_ip /* private_ip, public_ip, private_dns, public_dns */\n\
+# discover_every = 90\n\
+#}\n\
+\n\
+"
+
 #define SFLOW_CONFIGURATION "\
 /* Channel to receive sFlow datagrams */\n\
 #udp_recv_channel {\n\

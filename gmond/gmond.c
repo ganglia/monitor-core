@@ -60,6 +60,9 @@
    before retry.  Specified in seconds */
 #define RETRY_BIND_DELAY 60
 
+/* Don't trigger a cloud discovery until the gmond has been up for a while */
+#define REDISCOVER_DELAY 15
+
 /* When this gmond was started */
 apr_time_t started;
 /* My name */
@@ -106,6 +109,15 @@ int cleanup_threshold = 300;
 int send_metadata_interval = 0;
 /* The directory where DSO modules are located */
 char *module_dir = NULL;
+
+/* Discovery type ie. 'ec2' = use AWS EC2 API */
+char *discovery_type = NULL;
+/* The number of seconds between cloud re-discovery */
+int discover_every = 300;
+/* last time we ran a discovery */
+apr_time_t last_discovery;
+/* Boolean. Trigger a re-discovery of cluster peers */
+int force_discovery = 0;
 
 /* The array for outgoing UDP message channels */
 Ganglia_udp_send_channels udp_send_channels = NULL;
@@ -382,6 +394,26 @@ process_deaf_mute_mode( void )
       err_msg("Configured to run both deaf and mute. Nothing to do. Exiting.\n");
       exit(1);
     }
+}
+
+static void
+process_discovery_mode( void )
+{
+  cfg_t *tmp = cfg_getsec( config_file, "discovery");
+  discovery_type = cfg_getstr( tmp, "type");
+
+  if (!discovery_type)
+    return;
+
+  if(apr_strnatcmp(discovery_type, "ec2") != 0)
+    {
+      err_msg("Unknown cloud discovery type '%s'. Exiting.\n", discovery_type);
+      exit(1);
+    }
+  debug_msg("[discovery.%s] Using dynamic discovery to build list of nodes", discovery_type);
+
+  discover_every = cfg_getint( tmp, "discover_every");
+  debug_msg("[discovery.%s] List of nodes will be refreshed every %d seconds", discovery_type, discover_every);
 }
 
 static void
@@ -1055,6 +1087,13 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
       apr_thread_mutex_lock(hosts_mutex);
       apr_hash_set( hosts, hostdata->ip, APR_HASH_KEY_STRING, hostdata); 
       apr_thread_mutex_unlock(hosts_mutex);
+
+      /* Trigger a re-discovery if necessary */
+      if (discovery_type)
+        {
+          debug_msg("[discovery.%s] Metrics received from new host '%s' will trigger a dynamic re-discovery", discovery_type, hostname);
+          force_discovery = 1;
+        }
     }
   else
     {
@@ -3155,6 +3194,7 @@ main ( int argc, char *argv[] )
   setuid_if_necessary(); 
 
   process_deaf_mute_mode();
+  process_discovery_mode();
   process_allow_extra_data_mode();
 
   if(!deaf)
@@ -3163,8 +3203,17 @@ main ( int argc, char *argv[] )
     }
 
   /* even if mute, a send channel may be needed to send a request for metadata */
-  udp_send_channels = Ganglia_udp_send_channels_create((Ganglia_pool)global_context, 
-                                                       (Ganglia_gmond_config)config_file);
+  if(discovery_type)
+    {
+      udp_send_channels = Ganglia_udp_send_channels_discover((Ganglia_pool)global_context,
+                                                           (Ganglia_gmond_config)config_file);
+      last_discovery = apr_time_now();
+
+    } else {
+      udp_send_channels = Ganglia_udp_send_channels_create((Ganglia_pool)global_context,
+                                                           (Ganglia_gmond_config)config_file);
+    }
+
   if(!udp_send_channels)
     {
       /* if there are no send channels defined, we are equivalent to mute */
@@ -3212,8 +3261,36 @@ main ( int argc, char *argv[] )
           apr_sleep( wait );
         }
 
-      /* only continue if it's time to process our collection groups */
       now = apr_time_now();
+
+      /* Re-run node discovery if new host detected or time for refresh */
+      if(discovery_type)
+        {
+          if((force_discovery && ((now - started) > REDISCOVER_DELAY * APR_USEC_PER_SEC))
+             || ((now - last_discovery) > discover_every * APR_USEC_PER_SEC))
+            {
+              /* close existing UDP sockets */
+              debug_msg("[discovery.%s] Close existing UDP send channels", discovery_type);
+              int i;
+              if(udp_send_channels != NULL)
+                {
+                  apr_array_header_t *chnls=(apr_array_header_t*)udp_send_channels;
+                  for(i=0; i < chnls->nelts; i++)
+                    {
+                      apr_socket_t *s = ((apr_socket_t **)(chnls->elts))[i];
+                      apr_socket_close(s);
+                    }
+                }
+              /* Rediscover list of cluster peers */
+              debug_msg("[discovery.%s] Refreshing node list...", discovery_type);
+              udp_send_channels = Ganglia_udp_send_channels_discover((Ganglia_pool)global_context,
+                                                         (Ganglia_gmond_config)config_file);
+              last_discovery = now;
+              force_discovery = 0;
+            }
+        }
+
+      /* only continue if it's time to process our collection groups */
       if(now < next_collection)
           continue;
 
