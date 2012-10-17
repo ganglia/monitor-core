@@ -3015,6 +3015,7 @@ void initialize_scoreboard()
     ganglia_scoreboard_add(PKTS_RECVD_VALUE, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_RECVD_REQUEST, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_SENT_ALL, GSB_READ_RESET);
+    ganglia_scoreboard_add(PKTS_SENT_FAILED, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_SENT_METADATA, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_SENT_VALUE, GSB_READ_RESET);
     ganglia_scoreboard_add(PKTS_SENT_REQUEST, GSB_READ_RESET);
