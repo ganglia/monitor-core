@@ -83,7 +83,7 @@ tcp_accept_channel {\n\
 \n\
 #discovery {\n\
 # type = ec2 /* only ec2 API supported in this version */\n\
-# endpoint = https:\/\/ec2.amazonaws.com/ /* only required if in us-east-1 */\n\
+# endpoint = https://ec2.amazonaws.com /* only required if in us-east-1 */\n\
 # tags = { } /* list of key:value tags eg. stage:prod */\n\
 # groups = { } /* list of security groups */\n\
 # availability_zones = { } /* eg. eu-west-1a */\n\

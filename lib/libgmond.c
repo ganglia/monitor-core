@@ -561,7 +561,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
       /* always cleanup */
       curl_easy_cleanup (curl_handle);
-      debug_msg ("[discovery.%s] HTTP response code %d, %lu bytes retrieved",
+      debug_msg ("[discovery.%s] HTTP response code %ld, %lu bytes retrieved",
 		 discovery_type, http_code, (long) chunk.size);
     }
 
@@ -574,7 +574,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   // debug_msg("[discovery.%s] API response %s", discovery_type, response);
 
   /* Parse XML response */
-
   apr_xml_doc *doc;
   apr_xml_parser *parser = apr_xml_parser_create (context);
 
@@ -596,7 +595,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   const apr_xml_elem *elem;
   char instance_id[20];
   char *cloud_conf = "";
-  char *port_str[7];
+  char port_str[7];
 
   /* Create my UDP send array */
   send_channels = apr_array_make (context, 10, sizeof (apr_socket_t *));	/* init array size of 10 is not max */
@@ -653,13 +652,11 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 			  *(apr_socket_t **) apr_array_push (send_channels) =
 			    socket;
 
-			  apr_snprintf (port_str, sizeof (port_str), "%d",
-					port);
+			  apr_snprintf (port_str, sizeof (port_str), "%d", port);
 			  cloud_conf =
 			    apr_pstrcat (context, cloud_conf,
 					 "udp_send_channel {\n  bind_hostname = yes\n  host = ",
-					 ec2host, "\n  port = ", port_str,
-					 "\n}\n\n", NULL);
+					 ec2host, "\n  port = ", port_str, "\n}\n\n", NULL);
 			}
 
 		      if (apr_strnatcmp (elem5->name, "groupSet") == 0)
@@ -672,8 +669,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 			      for (elem7 = elem6->first_child; elem7;
 				   elem7 = elem7->next)
 				{
-				  if (apr_strnatcmp (elem7->name, "groupName")
-				      == 0
+				  if (apr_strnatcmp (elem7->name, "groupName") == 0
 				      && elem7->first_cdata.first != NULL)
 				    debug_msg
 				      ("[discovery.%s] %s security group %s",
