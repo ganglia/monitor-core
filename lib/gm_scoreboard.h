@@ -21,6 +21,7 @@ typedef enum ganglia_scoreboard_types ganglia_scoreboard_types;
 #define PKTS_RECVD_VALUE "gmond_pkts_recvd_value"
 #define PKTS_RECVD_REQUEST "gmond_pkts_recvd_request"
 #define PKTS_SENT_ALL "gmond_pkts_sent_all"
+#define PKTS_SENT_FAILED "gmond_pkts_sent_failed"
 #define PKTS_SENT_METADATA "gmond_pkts_sent_metadata"
 #define PKTS_SENT_VALUE "gmond_pkts_sent_value"
 #define PKTS_SENT_REQUEST "gmond_pkts_sent_request"
