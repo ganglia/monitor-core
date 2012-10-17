@@ -2799,6 +2799,7 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
                 debug_msg("\tsending metadata for metric: %s", cb->name);
 
                 ganglia_scoreboard_inc(PKTS_SENT_METADATA);
+                ganglia_scoreboard_inc(PKTS_SENT_ALL);
                 if (override_hostname != NULL)
                   {
                     errors = Ganglia_metadata_send_real(gmetric, udp_send_channels, cb->msg.Ganglia_value_msg_u.gstr.metric_id.host);
