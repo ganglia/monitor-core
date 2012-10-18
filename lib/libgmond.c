@@ -407,7 +407,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   int filter_num = 1;
   char num_str[3];
 
-  char *groups = NULL, *tags = NULL, *zones = NULL;
+  char *groups = "", *tags = "", *zones = "";
 
   cfg_t *discovery;
   discovery = cfg_getsec (cfg, "discovery");
@@ -428,7 +428,8 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 		     groups, NULL);
       filter_num++;
     }
-  groups[strlen (groups) - 1] = '\0';
+  if(strlen(groups))
+    groups[strlen (groups) - 1] = '\0';
 
   char *key, *value, *last, *tag;
   for (i = 0; i < cfg_size (discovery, "tags"); i++)
@@ -445,7 +446,8 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 		     NULL);
       filter_num++;
     }
-  tags[strlen (tags) - 1] = '\0';
+  if(strlen(tags))
+    tags[strlen (tags) - 1] = '\0';
 
   for (i = 0; i < cfg_size (discovery, "availability_zones"); i++)
     {
@@ -461,7 +463,8 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 		     zones, NULL);
       filter_num++;
     }
-  zones[strlen (zones) - 1] = '\0';
+  if(strlen(zones))
+    zones[strlen (zones) - 1] = '\0';
 
   debug_msg
     ("[discovery.%s] using host_type [%s], tags [%s], groups [%s], availability_zones [%s]",
