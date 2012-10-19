@@ -30,6 +30,8 @@
 #include <curl/curl.h>
 #include <openssl/hmac.h>
 
+#define GMOND_CLOUD_CONF "var/lib/ganglia/gmond-cloud.conf"
+
 static char myhost[APRMAXHOSTLEN+1];
 
 /***** IMPORTANT ************
@@ -695,10 +697,21 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
     }
 
   /* Write out discovered UDP send channels to file for gmetric */
-  FILE *file;
-  file = fopen ("/var/lib/ganglia/gmond-cloud.conf", "w");
-  fprintf (file, "%s", cloud_conf);
-  fclose (file);
+  apr_file_t *file;
+  const char *fname = GMOND_CLOUD_CONF;
+
+  if(apr_file_open(&file, fname, APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_GREAD, context) != APR_SUCCESS)
+    {
+      err_msg ("[discovery.%s] Failed to open cloud configuration file %s", discovery_type, GMOND_CLOUD_CONF);
+    }
+  else
+    {
+      if(apr_file_printf(file, "%s", cloud_conf) == 0)
+        {
+          err_msg ("[discovery.%s] Failed to write cloud configuration to file %s", discovery_type, GMOND_CLOUD_CONF);
+        }
+      apr_file_close(file);
+    }
 
   return (Ganglia_udp_send_channels) send_channels;
 }
