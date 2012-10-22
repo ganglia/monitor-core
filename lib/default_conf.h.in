@@ -89,6 +89,7 @@ tcp_accept_channel {\n\
 # availability_zones = { } /* eg. eu-west-1a */\n\
 # host_type = private_ip /* private_ip, public_ip, private_dns, public_dns */\n\
 # discover_every = 90\n\
+# port = 8649\n\
 #}\n\
 \n\
 "
