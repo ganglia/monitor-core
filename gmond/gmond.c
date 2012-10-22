@@ -1471,6 +1471,8 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
    * want to malloc memory evertime we call this */
   apr_sockaddr_ip_buffer_get(remoteip, 256, remotesa);
 
+  debug_msg("Received %" APR_SIZE_T_FMT " bytes from %s:%d", len, remoteip, remotesa->port);
+
   /* Check the ACL */
   if(Ganglia_acl_action( channel->acl, remotesa) != GANGLIA_ACCESS_ALLOW)
     {
