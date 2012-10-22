@@ -30,7 +30,7 @@
 #include <curl/curl.h>
 #include <openssl/hmac.h>
 
-#define GMOND_CLOUD_CONF "var/lib/ganglia/gmond-cloud.conf"
+#define GMOND_CLOUD_CONF "/var/lib/ganglia/gmond-cloud.conf"
 
 static char myhost[APRMAXHOSTLEN+1];
 
