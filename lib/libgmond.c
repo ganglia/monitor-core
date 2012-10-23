@@ -692,6 +692,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   apr_hash_t *open_sockets= NULL;
   open_sockets = apr_hash_make( context );
 
+   apr_array_header_t *tmp_send_channels = NULL;
+   tmp_send_channels = apr_array_make (context, 10, sizeof (apr_socket_t *));	/* init array size of 10 is not max */
+
     if(discovered_udp_send_channels != NULL)
       {
       debug_msg("[discovery.%s] Close UDP send channels no longer needed", discovery_type);
@@ -710,13 +713,11 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
               apr_socket_close(s);
              } else { 
               debug_msg("UDP socket opened to %s <--- DO NOT DELETE", remoteip);
+              *(apr_socket_t **) apr_array_push (tmp_send_channels) = s;
+              apr_hash_set(open_sockets, apr_pstrdup(context, remoteip), APR_HASH_KEY_STRING, "OK");
           }
-           apr_hash_set(open_sockets, apr_pstrdup(context, remoteip), APR_HASH_KEY_STRING, "OK");
         }
     }
-
-  /* Create my UDP send array */
-  // apr_array_header_t *tmp_send_channels = NULL;
 
     debug_msg("[discovery.%s] Only open new UDP send channels", discovery_type);
 
@@ -749,7 +750,8 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
                               exit (1);
                             }
 
-                          *(apr_socket_t **) apr_array_push (discovered_udp_send_channels) = socket;
+                         //  *(apr_socket_t **) apr_array_push (discovered_udp_send_channels) = socket;
+                          *(apr_socket_t **) apr_array_push (tmp_send_channels) = socket;
 
 
         } else {
@@ -777,6 +779,26 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
         }
       apr_file_close(file);
     }
+
+  discovered_udp_send_channels = apr_array_copy(context, tmp_send_channels);
+
+  send_channels = (apr_array_header_t*)discovered_udp_send_channels;
+
+  if (send_channels) {
+      for(i=0; i < send_channels->nelts; i++)
+         {
+         apr_sockaddr_t *remotesa = NULL;
+         char remoteip[256];
+
+          apr_socket_t *s = ((apr_socket_t **)(send_channels->elts))[i];
+          apr_socket_addr_get(&remotesa, APR_REMOTE, s);
+          apr_sockaddr_ip_buffer_get(remoteip, 256, remotesa);
+          debug_msg("discovered send channels now = %s", remoteip);
+        }
+  } else {
+     debug_msg("No discovered channels yet");
+  }
+
 
   return (Ganglia_udp_send_channels) discovered_udp_send_channels;
 }
