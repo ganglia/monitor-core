@@ -3200,7 +3200,7 @@ main ( int argc, char *argv[] )
   if(discovery_type)
     {
       udp_send_channels = Ganglia_udp_send_channels_discover((Ganglia_pool)global_context,
-                                                           (Ganglia_gmond_config)config_file, udp_send_channels);
+                                                           (Ganglia_gmond_config)config_file);
       last_discovery = apr_time_now();
 
     } else {
@@ -3266,7 +3266,7 @@ main ( int argc, char *argv[] )
               /* Rediscover list of cluster peers */
               debug_msg("[discovery.%s] Refreshing node list...", discovery_type);
               udp_send_channels = Ganglia_udp_send_channels_discover((Ganglia_pool)global_context,
-                                                         (Ganglia_gmond_config)config_file, udp_send_channels);
+                                                         (Ganglia_gmond_config)config_file);
               last_discovery = now;
               force_discovery = 0;
             }
