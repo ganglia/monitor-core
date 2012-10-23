@@ -5,7 +5,7 @@
 
 /* Never changes */
 #ifndef BUFFSIZE
-#define BUFFSIZE 4096
+#define BUFFSIZE 65536
 #endif
 
 typedef struct {
