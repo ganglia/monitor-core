@@ -648,14 +648,10 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config,
 			  apr_pool_create (&pool, context);
 
 			  /* Create a UDP socket */
-			  socket =
-			    create_udp_client (pool, instance, port, NULL,
-					       NULL, 0);
+			  socket = create_udp_client (pool, instance, port, NULL, NULL, 0);
 			  if (!socket)
 			    {
-			      err_msg
-				("Unable to create UDP client for %s:%d. Exiting.\n",
-				 instance, port);
+			      err_msg ("Unable to create UDP client for %s:%d. Exiting.\n", instance, port);
 			      exit (1);
 			    }
 
@@ -702,6 +698,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config,
       return (Ganglia_udp_send_channels) udp_send_channels;
     }
 
+  apr_hash_t *open_sockets= NULL;
+  open_sockets = apr_hash_make( context );
+
     if(udp_send_channels != NULL)
       {
       debug_msg("[discovery.%s] Close UDP send channels no longer needed", discovery_type);
@@ -717,12 +716,30 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config,
           debug_msg("UDP socket opened to %s", remoteip);
           if (!apr_hash_get(instances, remoteip, APR_HASH_KEY_STRING)) {
               debug_msg("UDP socket opened to %s <--- not needed anymore", remoteip);
-             // apr_socket_close(s);
+              apr_socket_close(s);
              } else { 
               debug_msg("UDP socket opened to %s <--- DO NOT DELETE", remoteip);
           }
+           apr_hash_set(open_sockets, remoteip, APR_HASH_KEY_STRING, "OK");
         }
     }
+
+    debug_msg("[discovery.%s] Only open new UDP send channels", discovery_type);
+    apr_hash_index_t *hi;
+    for (hi = apr_hash_first(context, instances); hi; hi = apr_hash_next(hi)) {
+        const char *ikey;
+        const void *key;
+
+        apr_hash_this(hi, &key, NULL, NULL);
+        ikey = key;
+
+        if(!apr_hash_get(open_sockets, ikey, APR_HASH_KEY_STRING)) {
+           debug_msg("UDP socket not opened to %s yet <--- OPEN IT!", ikey);
+        } else {
+           debug_msg("UDP socket already opened to %s <--- DO *NOT* OPEN IT!", ikey);
+        }
+    }
+
 
   /* Write out discovered UDP send channels to file for gmetric */
   apr_file_t *file;
