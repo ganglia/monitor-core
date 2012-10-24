@@ -90,9 +90,9 @@ static cfg_opt_t discovery_opts[] = {
   CFG_STR("endpoint", "https://ec2.amazonaws.com", CFGF_NONE),
   CFG_STR_LIST("tags", NULL, CFGF_NONE),
   CFG_STR_LIST("groups", NULL, CFGF_NONE),
+  CFG_STR_LIST("availability_zones", NULL, CFGF_NONE),
   CFG_STR("host_type", "private_ip", CFGF_NONE),
   CFG_INT("port", -1, CFGF_NONE ),
-  CFG_STR_LIST("availability_zones", NULL, CFGF_NONE),
   CFG_INT("discover_every", 90, CFGF_NONE),
   CFG_END()
 };
@@ -459,8 +459,8 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   for (i = 0; i < cfg_size (discovery, "tags"); i++)
     {
       tag = apr_pstrdup (context, cfg_getnstr (discovery, "tags", i));
-      key = apr_strtok (tag, ":", &last);
-      value = apr_strtok (NULL, ":", &last);
+      key = apr_strtok (tag, "= ", &last);
+      value = apr_strtok (NULL, "= ", &last);
       apr_snprintf (num_str, 3, "%d", filter_num);
       filters =
 	apr_pstrcat (context, filters, "&Filter.", num_str, ".Name=tag%3A",
