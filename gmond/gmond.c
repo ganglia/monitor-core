@@ -3263,18 +3263,6 @@ main ( int argc, char *argv[] )
           if((force_discovery && ((now - started) > REDISCOVER_DELAY * APR_USEC_PER_SEC))
              || ((now - last_discovery) > discover_every * APR_USEC_PER_SEC))
             {
-              /* close existing UDP sockets */
-              debug_msg("[discovery.%s] Close existing UDP send channels", discovery_type);
-              int i;
-              if(udp_send_channels != NULL)
-                {
-                  apr_array_header_t *chnls=(apr_array_header_t*)udp_send_channels;
-                  for(i=0; i < chnls->nelts; i++)
-                    {
-                      apr_socket_t *s = ((apr_socket_t **)(chnls->elts))[i];
-                      apr_socket_close(s);
-                    }
-                }
               /* Rediscover list of cluster peers */
               debug_msg("[discovery.%s] Refreshing node list...", discovery_type);
               udp_send_channels = Ganglia_udp_send_channels_discover((Ganglia_pool)global_context,
