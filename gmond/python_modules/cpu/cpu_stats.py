@@ -3,6 +3,7 @@ import traceback
 import os
 import re
 import time
+import copy
 
 METRICS = {
     'time' : 0,
@@ -23,7 +24,7 @@ softirq_pos = {
   'rcu' : 10
 }
 
-LAST_METRICS = dict(METRICS)
+LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
 
@@ -53,7 +54,7 @@ def get_metrics():
             metrics[parts[0]] = list(parts[1:])
 
         # update cache
-        LAST_METRICS = dict(METRICS)
+        LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
             'time': time.time(),
             'data': metrics

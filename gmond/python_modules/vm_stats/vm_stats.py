@@ -1,8 +1,7 @@
 import sys
-#import traceback
-#import os
 import re
 import time
+import copy
 
 PARAMS = {}
 
@@ -12,7 +11,7 @@ METRICS = {
     'time' : 0,
     'data' : {}
 }
-LAST_METRICS = dict(METRICS)
+LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
 ###############################################################################
@@ -47,7 +46,7 @@ def get_metrics():
             metrics[parts[0]] = parts[1]
 
         # update cache
-        LAST_METRICS = dict(METRICS)
+        LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
             'time': time.time(),
             'data': metrics
