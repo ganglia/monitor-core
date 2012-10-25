@@ -161,12 +161,17 @@ if __name__ == '__main__':
     else:
         logging.basicConfig()
         logging.getLogger().setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
-    syslogHandler = logging.handlers.SysLogHandler('/dev/log')
-    syslogHandler.setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
-    syslogHandler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)-8s - GMETAD - %(message)s',
-            datefmt='%a, %d %b %Y %H:%M:%S'))
-    ignore_fds.append(syslogHandler.socket.fileno())
-    logging.getLogger().addHandler(syslogHandler)
+
+    try :
+        syslogHandler = logging.handlers.SysLogHandler('/dev/log')
+        syslogHandler.setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
+        syslogHandler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)-8s - GMETAD - %(message)s',
+                datefmt='%a, %d %b %Y %H:%M:%S'))
+        ignore_fds.append(syslogHandler.socket.fileno())
+        logging.getLogger().addHandler(syslogHandler)
+    except Exception, obj :
+        print ("WARNING: /dev/log syslog handler: " + str(obj))
+
     if gmetadConfig[GmetadConfig.LOGFILE] is not None:
         fileHandler = logging.FileHandler(gmetadConfig[GmetadConfig.LOGFILE],'a')
         fileHandler.setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
