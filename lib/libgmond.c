@@ -427,7 +427,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   char *discovery_host_type = NULL;
   int discover_every = 0;
 
-  char *filters = "";
+  char *filters = "&Filter.1.Name=instance-state-name&Filter.1.Value=running";
   int filter_num = 1;
   char num_str[3];
 
@@ -443,23 +443,24 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   char *key, *value, *last, *tag;
   for (i = 0; i < cfg_size (discovery, "tags"); i++)
     {
+      filter_num++;
       tag = apr_pstrdup (context, cfg_getnstr (discovery, "tags", i));
       key = apr_strtok (tag, "= ", &last);
       value = apr_strtok (NULL, "= ", &last);
       apr_snprintf (num_str, 3, "%d", filter_num);
       filters =
-	apr_pstrcat (context, filters, "&Filter.", num_str, ".Name=tag%3A",
+	apr_pstrcat (context, filters, "&Filter.", num_str, ".Name=tag:",
 		     key, "&Filter.", num_str, ".Value=", value, NULL);
       tags =
 	apr_pstrcat (context, cfg_getnstr (discovery, "tags", i), ",", tags,
 		     NULL);
-      filter_num++;
     }
   if(strlen(tags))
     tags[strlen (tags) - 1] = '\0';
 
   for (i = 0; i < cfg_size (discovery, "groups"); i++)
     {
+      filter_num++;
       apr_snprintf (num_str, 3, "%d", filter_num);
       filters =
 	apr_pstrcat (context, filters, "&Filter.", num_str,
@@ -468,13 +469,13 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
       groups =
 	apr_pstrcat (context, cfg_getnstr (discovery, "groups", i), ",",
 		     groups, NULL);
-      filter_num++;
     }
   if(strlen(groups))
     groups[strlen (groups) - 1] = '\0';
 
   for (i = 0; i < cfg_size (discovery, "availability_zones"); i++)
     {
+      filter_num++;
       apr_snprintf (num_str, 3, "%d", filter_num);
       filters =
 	apr_pstrcat (context, filters, "&Filter.", num_str,
@@ -485,7 +486,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 	apr_pstrcat (context,
 		     cfg_getnstr (discovery, "availability_zones", i), ",",
 		     zones, NULL);
-      filter_num++;
     }
   if(strlen(zones))
     zones[strlen (zones) - 1] = '\0';
@@ -500,8 +500,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   apr_size_t len;
   apr_time_exp_t t;
   apr_time_exp_lt (&t, apr_time_now ());
-  apr_strftime (timestamp, &len, sizeof (timestamp),
-		"%Y-%m-%dT%H%%3A%M%%3A%SZ", &t);
+  apr_strftime (timestamp, &len, sizeof (timestamp), "%Y-%m-%dT%H:%M:%SZ", &t);
 
   char *endpoint;
   endpoint = cfg_getstr (discovery, "endpoint");
@@ -556,12 +555,13 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   curl_handle = curl_easy_init ();
   if (curl_handle)
     {
-      char *urlencoded_hash = curl_easy_escape (curl_handle, encbuf, 0);
-
       char *request;
       request =
 	apr_pstrcat (context, endpoint, "?", query_string, "&Signature=",
-		     urlencoded_hash, NULL);
+		     encbuf, NULL);
+
+      char *urlencoded_request = curl_easy_escape (curl_handle, request, 0);
+
       debug_msg ("[discovery.%s] API request %s", discovery_type, request);
 
       curl_easy_setopt (curl_handle, CURLOPT_URL, request);
@@ -686,7 +686,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 	 discovery_type, discover_every);
       return (Ganglia_udp_send_channels) discovered_udp_send_channels;
     } else {
-       debug_msg("Found %d matching instances", apr_hash_count (instances) );
+       debug_msg("[discovery.%s] Found %d matching instances", discovery_type, apr_hash_count (instances) );
     }
 
   apr_hash_t *open_sockets= NULL;
