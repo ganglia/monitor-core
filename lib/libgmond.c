@@ -430,7 +430,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
   char *filters = "&Filter.1.Name=instance-state-name&Filter.1.Value=running";
   int filter_num = 1;
-  char num_str[3];
 
   char *groups = "", *tags = "", *zones = "";
 
@@ -439,6 +438,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   discovery_type = cfg_getstr (discovery, "type");
   discovery_host_type = cfg_getstr (discovery, "host_type");
   discover_every = cfg_getint (discovery, "discover_every");
+
+  int port;
+  port = cfg_getint (discovery, "port");
 
   CURLcode res;
   CURL *curl_handle;
@@ -453,7 +455,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
   if (curl_handle)
     {
-
       /* Construct filter using security groups, tags and availability zones */
       char *key, *value, *last, *tag;
       for (i = 0; i < cfg_size (discovery, "tags"); i++)
@@ -462,10 +463,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 	  tag = apr_pstrdup (context, cfg_getnstr (discovery, "tags", i));
 	  key = apr_strtok (tag, "= ", &last);
 	  value = apr_strtok (NULL, "= ", &last);
-	  apr_snprintf (num_str, 3, "%d", filter_num);
 	  filters =
-	    apr_pstrcat (context, filters, "&Filter.", num_str, ".Name=tag%3A",
-			 curl_easy_escape (curl_handle, key, 0), "&Filter.", num_str, ".Value=", curl_easy_escape (curl_handle, value, 0), NULL);
+	    apr_pstrcat (context, filters, "&Filter.", apr_itoa(context, filter_num), ".Name=tag%3A",
+			 curl_easy_escape (curl_handle, key, 0), "&Filter.", apr_itoa(context, filter_num), ".Value=", curl_easy_escape (curl_handle, value, 0), NULL);
 	  tags = apr_pstrcat (context, cfg_getnstr (discovery, "tags", i), ",", tags, NULL);
 	}
       if (strlen (tags))
@@ -474,10 +474,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
       for (i = 0; i < cfg_size (discovery, "groups"); i++)
 	{
 	  filter_num++;
-	  apr_snprintf (num_str, 3, "%d", filter_num);
 	  filters =
-	    apr_pstrcat (context, filters, "&Filter.", num_str,
-			 ".Name=group-name", "&Filter.", num_str, ".Value=", curl_easy_escape (curl_handle, cfg_getnstr (discovery, "groups", i), 0), NULL);
+	    apr_pstrcat (context, filters, "&Filter.", apr_itoa(context, filter_num),
+			 ".Name=group-name", "&Filter.", apr_itoa(context, filter_num), ".Value=", curl_easy_escape (curl_handle, cfg_getnstr (discovery, "groups", i), 0), NULL);
 	  groups = apr_pstrcat (context, cfg_getnstr (discovery, "groups", i), ",", groups, NULL);
 	}
       if (strlen (groups))
@@ -486,10 +485,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
       for (i = 0; i < cfg_size (discovery, "availability_zones"); i++)
 	{
 	  filter_num++;
-	  apr_snprintf (num_str, 3, "%d", filter_num);
 	  filters =
-	    apr_pstrcat (context, filters, "&Filter.", num_str,
-			 ".Name=availability-zone", "&Filter.", num_str, ".Value=", curl_easy_escape (curl_handle,
+	    apr_pstrcat (context, filters, "&Filter.", apr_itoa(context, filter_num),
+			 ".Name=availability-zone", "&Filter.", apr_itoa(context, filter_num), ".Value=", curl_easy_escape (curl_handle,
 												      cfg_getnstr (discovery, "availability_zones", i), 0),
 			 NULL);
 	  zones = apr_pstrcat (context, cfg_getnstr (discovery, "availability_zones", i), ",", zones, NULL);
@@ -602,7 +600,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   root = doc->root;
   const apr_xml_elem *elem;
   char *cloud_conf = "";
-  char port_str[7];
   char *instance_id = NULL;
   char *ec2host = NULL;
 
@@ -670,11 +667,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
   if (discovered_udp_send_channels != NULL)
     {
-      debug_msg ("[discovery.%s] Close UDP send channels no longer needed", discovery_type);
       apr_array_header_t *chnls = (apr_array_header_t *) discovered_udp_send_channels;
       for (i = 0; i < chnls->nelts; i++)
 	{
-	  debug_msg ("here");
 	  apr_sockaddr_t *remotesa = NULL;
 	  char remoteip[256];
 
@@ -683,12 +678,12 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 	  apr_sockaddr_ip_buffer_get (remoteip, 256, remotesa);
 	  if (!apr_hash_get (instances, remoteip, APR_HASH_KEY_STRING))
 	    {
-	      debug_msg ("UDP socket opened to %s <--- not needed anymore", remoteip);
+	      debug_msg ("[discovery.%s] close UDP socket opened to %s:%d", discovery_type, remoteip, port);
 	      apr_socket_close (s);
 	    }
 	  else
 	    {
-	      debug_msg ("UDP socket opened to %s <--- DO NOT DELETE", remoteip);
+              /* keep track of opened sockets */
 	      *(apr_socket_t **) apr_array_push (tmp_send_channels) = s;
 	      apr_hash_set (open_sockets, apr_pstrdup (context, remoteip), APR_HASH_KEY_STRING, "OK");
 	    }
@@ -708,11 +703,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
       apr_hash_this (hi, &k, NULL, &v);
       hkey = k;
 
-      int port;
-      port = cfg_getint (discovery, "port");
-
-      debug_msg ("** This hash %s => %s", hkey, v);
-
       if (!apr_hash_get (open_sockets, hkey, APR_HASH_KEY_STRING))
 	{
 	  debug_msg ("UDP socket not opened to %s yet <--- OPEN IT!", hkey);
@@ -730,17 +720,14 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
 	  //  *(apr_socket_t **) apr_array_push (discovered_udp_send_channels) = socket;
 	  *(apr_socket_t **) apr_array_push (tmp_send_channels) = socket;
-
-
 	}
       else
 	{
 	  debug_msg ("UDP socket already opened to %s <--- DO *NOT* OPEN IT!", hkey);
 	}
 
-      apr_snprintf (port_str, sizeof (port_str), "%d", port);
       debug_msg ("[discovery.%s] adding %s, udp send channel %s %s:%d", discovery_type, v, ec2type (discovery_host_type), hkey, port);
-      cloud_conf = apr_pstrcat (context, cloud_conf, "udp_send_channel {\n  bind_hostname = yes\n  host = ", hkey, "\n  port = ", port_str, "\n}\n\n", NULL);
+      cloud_conf = apr_pstrcat (context, cloud_conf, "udp_send_channel {\n  bind_hostname = yes\n  host = ", hkey, "\n  port = ", apr_itoa(context, port), "\n}\n\n", NULL);
     }
 
   /* Write out discovered UDP send channels to file for gmetric */
@@ -781,7 +768,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
     {
       debug_msg ("No discovered channels yet");
     }
-
 
   return (Ganglia_udp_send_channels) discovered_udp_send_channels;
 }
