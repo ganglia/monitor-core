@@ -499,7 +499,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 		 zones);
 
       /* Query EC2 API using curl */
-
       char timestamp[30];
       apr_size_t len;
       apr_time_exp_t t;
@@ -526,7 +525,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
       char *signature_string;
       signature_string = apr_pstrcat (context, "GET\n", request_uri, "\n", "/\n", query_string, NULL);
-      // debug_msg("[discovery.%s] signature = %s", discovery_type, signature_string);
 
       char hash[EVP_MAX_MD_SIZE];
       unsigned int hlen;
@@ -539,7 +537,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
       elen = apr_base64_encode_len (hlen);
       encbuf = apr_palloc (context, elen);
       apr_base64_encode (encbuf, hash, hlen);
-      debug_msg ("[discovery.%s] base64 encoded hash %s", discovery_type, encbuf);
 
       char *urlencoded_hash = curl_easy_escape (curl_handle, encbuf, 0);
 
@@ -678,7 +675,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 	  apr_sockaddr_ip_buffer_get (remoteip, 256, remotesa);
 	  if (!apr_hash_get (instances, remoteip, APR_HASH_KEY_STRING))
 	    {
-	      debug_msg ("[discovery.%s] close UDP socket opened to %s:%d", discovery_type, remoteip, port);
+              debug_msg ("[discovery.%s] removing udp send channel %s %s:%d", discovery_type, discovery_host_type, remoteip, port);
 	      apr_socket_close (s);
 	    }
 	  else
@@ -689,8 +686,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 	    }
 	}
     }
-
-  debug_msg ("[discovery.%s] Only open new UDP send channels", discovery_type);
 
   apr_hash_index_t *hi;
   const void *k;
@@ -705,10 +700,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
       if (!apr_hash_get (open_sockets, hkey, APR_HASH_KEY_STRING))
 	{
-	  debug_msg ("UDP socket not opened to %s yet <--- OPEN IT!", hkey);
+          debug_msg ("[discovery.%s] adding %s, udp send channel %s %s:%d", discovery_type, v, discovery_host_type, hkey, port);
 	  apr_socket_t *socket = NULL;
 	  apr_pool_t *pool = NULL;
-
 	  apr_pool_create (&pool, context);
 
 	  socket = create_udp_client (pool, hkey, port, NULL, NULL, 0);
@@ -718,15 +712,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 	      exit (1);
 	    }
 
-	  //  *(apr_socket_t **) apr_array_push (discovered_udp_send_channels) = socket;
 	  *(apr_socket_t **) apr_array_push (tmp_send_channels) = socket;
 	}
-      else
-	{
-	  debug_msg ("UDP socket already opened to %s <--- DO *NOT* OPEN IT!", hkey);
-	}
 
-      debug_msg ("[discovery.%s] adding %s, udp send channel %s %s:%d", discovery_type, v, ec2type (discovery_host_type), hkey, port);
       cloud_conf = apr_pstrcat (context, cloud_conf, "udp_send_channel {\n  bind_hostname = yes\n  host = ", hkey, "\n  port = ", apr_itoa(context, port), "\n}\n\n", NULL);
     }
 
@@ -748,26 +736,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
     }
 
   discovered_udp_send_channels = apr_array_copy (context, tmp_send_channels);
-
-  send_channels = (apr_array_header_t *) discovered_udp_send_channels;
-
-  if (send_channels)
-    {
-      for (i = 0; i < send_channels->nelts; i++)
-	{
-	  apr_sockaddr_t *remotesa = NULL;
-	  char remoteip[256];
-
-	  apr_socket_t *s = ((apr_socket_t **) (send_channels->elts))[i];
-	  apr_socket_addr_get (&remotesa, APR_REMOTE, s);
-	  apr_sockaddr_ip_buffer_get (remoteip, 256, remotesa);
-	  debug_msg ("discovered send channels now = %s", remoteip);
-	}
-    }
-  else
-    {
-      debug_msg ("No discovered channels yet");
-    }
 
   return (Ganglia_udp_send_channels) discovered_udp_send_channels;
 }
