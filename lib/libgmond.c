@@ -445,6 +445,11 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   curl_global_init (CURL_GLOBAL_DEFAULT);
 
   curl_handle = curl_easy_init ();
+
+  struct MemoryStruct chunk;
+  chunk.memory = malloc (1);	/* will be grown as needed by the realloc above */
+  chunk.size = 0;		/* no data at this point */
+
   if (curl_handle)
     {
 
@@ -458,8 +463,8 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
       value = apr_strtok (NULL, "= ", &last);
       apr_snprintf (num_str, 3, "%d", filter_num);
       filters =
-	apr_pstrcat (context, filters, "&Filter.", num_str, ".Name=tag:",
-		     key, "&Filter.", num_str, ".Value=", value, NULL);
+	apr_pstrcat (context, filters, "&Filter.", num_str, ".Name=tag%3A",
+		     curl_easy_escape (curl_handle, key, 0), "&Filter.", num_str, ".Value=", curl_easy_escape (curl_handle, value, 0), NULL);
       tags =
 	apr_pstrcat (context, cfg_getnstr (discovery, "tags", i), ",", tags,
 		     NULL);
@@ -474,7 +479,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
       filters =
 	apr_pstrcat (context, filters, "&Filter.", num_str,
 		     ".Name=group-name", "&Filter.", num_str, ".Value=",
-		     cfg_getnstr (discovery, "groups", i), NULL);
+		     curl_easy_escape (curl_handle, cfg_getnstr (discovery, "groups", i), 0), NULL);
       groups =
 	apr_pstrcat (context, cfg_getnstr (discovery, "groups", i), ",",
 		     groups, NULL);
@@ -489,8 +494,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
       filters =
 	apr_pstrcat (context, filters, "&Filter.", num_str,
 		     ".Name=availability-zone", "&Filter.", num_str,
-		     ".Value=", cfg_getnstr (discovery, "availability_zones",
-					     i), NULL);
+		     ".Value=", curl_easy_escape (curl_handle, cfg_getnstr (discovery, "availability_zones", i), 0), NULL);
       zones =
 	apr_pstrcat (context,
 		     cfg_getnstr (discovery, "availability_zones", i), ",",
@@ -509,7 +513,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   apr_size_t len;
   apr_time_exp_t t;
   apr_time_exp_lt (&t, apr_time_now ());
-  apr_strftime (timestamp, &len, sizeof (timestamp), "%Y-%m-%dT%H:%M:%SZ", &t);
+  apr_strftime (timestamp, &len, sizeof (timestamp), "%Y-%m-%dT%H%%3A%M%%3A%SZ", &t);
 
   char *endpoint;
   endpoint = cfg_getstr (discovery, "endpoint");
@@ -551,10 +555,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   encbuf = apr_palloc (context, elen);
   apr_base64_encode (encbuf, hash, hlen);
   debug_msg ("[discovery.%s] base64 encoded hash %s", discovery_type, encbuf);
-
-  struct MemoryStruct chunk;
-  chunk.memory = malloc (1);	/* will be grown as needed by the realloc above */
-  chunk.size = 0;		/* no data at this point */
 
       char *urlencoded_hash = curl_easy_escape (curl_handle, encbuf, 0);
 
