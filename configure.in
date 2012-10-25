@@ -425,12 +425,7 @@ if test x"$enable_php" = xyes; then
   fi
 
   if test -n "$PHP_CONFIG_BIN"; then
-    # find out php version
-    PHP_FULL_VERSION=`$PHP_CONFIG_BIN --version`
-    AC_CACHE_CHECK([PHP version >= 5.3], [php_cv_version_5],
-        [AX_COMPARE_VERSION([$PHP_FULL_VERSION], [ge], [5.3],
-            [php_cv_version_5="yes"],
-            [php_cv_version_5="no"])])
+    php_cv_version_5="yes"
     if test "$php_cv_version_5" = "yes"; then
         PHP_VERSION=5
     else
