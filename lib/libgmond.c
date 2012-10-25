@@ -439,6 +439,15 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   discovery_host_type = cfg_getstr (discovery, "host_type");
   discover_every = cfg_getint (discovery, "discover_every");
 
+  CURLcode res;
+  CURL *curl_handle;
+
+  curl_global_init (CURL_GLOBAL_DEFAULT);
+
+  curl_handle = curl_easy_init ();
+  if (curl_handle)
+    {
+
   /* Construct filter using security groups, tags and availability zones */
   char *key, *value, *last, *tag;
   for (i = 0; i < cfg_size (discovery, "tags"); i++)
@@ -543,26 +552,18 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   apr_base64_encode (encbuf, hash, hlen);
   debug_msg ("[discovery.%s] base64 encoded hash %s", discovery_type, encbuf);
 
-  CURLcode res;
-  CURL *curl_handle;
-
   struct MemoryStruct chunk;
   chunk.memory = malloc (1);	/* will be grown as needed by the realloc above */
   chunk.size = 0;		/* no data at this point */
 
-  curl_global_init (CURL_GLOBAL_DEFAULT);
+      char *urlencoded_hash = curl_easy_escape (curl_handle, encbuf, 0);
 
-  curl_handle = curl_easy_init ();
-  if (curl_handle)
-    {
       char *request;
       request =
 	apr_pstrcat (context, endpoint, "?", query_string, "&Signature=",
-		     encbuf, NULL);
+		     urlencoded_hash, NULL);
 
-      char *urlencoded_request = curl_easy_escape (curl_handle, request, 0);
-
-      debug_msg ("[discovery.%s] API request %s", discovery_type, request);
+      debug_msg ("[discovery.%s] URL-encoded API request %s", discovery_type, request);
 
       curl_easy_setopt (curl_handle, CURLOPT_URL, request);
 
