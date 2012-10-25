@@ -440,21 +440,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   discover_every = cfg_getint (discovery, "discover_every");
 
   /* Construct filter using security groups, tags and availability zones */
-  for (i = 0; i < cfg_size (discovery, "groups"); i++)
-    {
-      apr_snprintf (num_str, 3, "%d", filter_num);
-      filters =
-	apr_pstrcat (context, filters, "&Filter.", num_str,
-		     ".Name=group-name", "&Filter.", num_str, ".Value=",
-		     cfg_getnstr (discovery, "groups", i), NULL);
-      groups =
-	apr_pstrcat (context, cfg_getnstr (discovery, "groups", i), ",",
-		     groups, NULL);
-      filter_num++;
-    }
-  if(strlen(groups))
-    groups[strlen (groups) - 1] = '\0';
-
   char *key, *value, *last, *tag;
   for (i = 0; i < cfg_size (discovery, "tags"); i++)
     {
@@ -472,6 +457,21 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
     }
   if(strlen(tags))
     tags[strlen (tags) - 1] = '\0';
+
+  for (i = 0; i < cfg_size (discovery, "groups"); i++)
+    {
+      apr_snprintf (num_str, 3, "%d", filter_num);
+      filters =
+	apr_pstrcat (context, filters, "&Filter.", num_str,
+		     ".Name=group-name", "&Filter.", num_str, ".Value=",
+		     cfg_getnstr (discovery, "groups", i), NULL);
+      groups =
+	apr_pstrcat (context, cfg_getnstr (discovery, "groups", i), ",",
+		     groups, NULL);
+      filter_num++;
+    }
+  if(strlen(groups))
+    groups[strlen (groups) - 1] = '\0';
 
   for (i = 0; i < cfg_size (discovery, "availability_zones"); i++)
     {
