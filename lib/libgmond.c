@@ -90,9 +90,9 @@ static cfg_opt_t discovery_opts[] = {
   CFG_STR("endpoint", "https://ec2.amazonaws.com", CFGF_NONE),
   CFG_STR_LIST("tags", NULL, CFGF_NONE),
   CFG_STR_LIST("groups", NULL, CFGF_NONE),
+  CFG_STR_LIST("availability_zones", NULL, CFGF_NONE),
   CFG_STR("host_type", "private_ip", CFGF_NONE),
   CFG_INT("port", -1, CFGF_NONE ),
-  CFG_STR_LIST("availability_zones", NULL, CFGF_NONE),
   CFG_INT("discover_every", 90, CFGF_NONE),
   CFG_END()
 };
@@ -331,10 +331,10 @@ Ganglia_gmond_config_create(char *path, int fallback_to_default)
   return (Ganglia_gmond_config)config;
 }
 
-struct
-MemoryStruct {
-    char *memory;
-    size_t size;
+struct MemoryStruct
+{
+  char *memory;
+  size_t size;
 };
 
 static size_t
@@ -385,25 +385,28 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   cfg_t *cfg = (cfg_t *) config;
   apr_pool_t *context = (apr_pool_t *) p;
   if (discovered_udp_send_channels == NULL)
-      discovered_udp_send_channels = apr_array_make (context, 10, sizeof (apr_socket_t *));	/* init array size of 10 is not max */
+    discovered_udp_send_channels = apr_array_make (context, 10, sizeof (apr_socket_t *));	/* init array size of 10 is not max */
 
-  apr_array_header_t *send_channels = (apr_array_header_t*)discovered_udp_send_channels;
+  apr_array_header_t *send_channels = (apr_array_header_t *) discovered_udp_send_channels;
   int i;
 
-  if (send_channels) {
-      for(i=0; i < send_channels->nelts; i++)
-         {
-         apr_sockaddr_t *remotesa = NULL;
-         char remoteip[256];
+  if (send_channels)
+    {
+      for (i = 0; i < send_channels->nelts; i++)
+	{
+	  apr_sockaddr_t *remotesa = NULL;
+	  char remoteip[256];
 
-          apr_socket_t *s = ((apr_socket_t **)(send_channels->elts))[i];
-          apr_socket_addr_get(&remotesa, APR_REMOTE, s);
-          apr_sockaddr_ip_buffer_get(remoteip, 256, remotesa);
-          debug_msg("discovered send channels now = %s", remoteip);
-        }
-  } else {
-     debug_msg("No discovered channels yet");
-  }
+	  apr_socket_t *s = ((apr_socket_t **) (send_channels->elts))[i];
+	  apr_socket_addr_get (&remotesa, APR_REMOTE, s);
+	  apr_sockaddr_ip_buffer_get (remoteip, 256, remotesa);
+	  debug_msg ("discovered send channels now = %s", remoteip);
+	}
+    }
+  else
+    {
+      debug_msg ("No discovered channels yet");
+    }
 
 
   char *cloud_access_key = NULL;
@@ -416,20 +419,20 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
   if (cloud_access_key == NULL || cloud_secret_key == NULL)
     {
-      err_msg
-	("[discovery.cloud] Must supply both the AWS access key id and the AWS secret key for EC2 discovery.\n");
+      err_msg ("[discovery.cloud] Must supply both the AWS access key id and the AWS secret key for EC2 discovery.\n");
       exit (1);
     }
-  debug_msg ("[discovery.cloud] access key=%s, secret key=***********",
-	     cloud_access_key);
+
+  char *last_four;
+  last_four = cloud_secret_key + strlen(cloud_secret_key) - 4;
+  debug_msg ("[discovery.cloud] access key=%s, secret key=************************************%s", cloud_access_key, last_four);
 
   char *discovery_type = NULL;
   char *discovery_host_type = NULL;
   int discover_every = 0;
 
-  char *filters = "";
+  char *filters = "&Filter.1.Name=instance-state-name&Filter.1.Value=running";
   int filter_num = 1;
-  char num_str[3];
 
   char *groups = "", *tags = "", *zones = "";
 
@@ -439,136 +442,116 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   discovery_host_type = cfg_getstr (discovery, "host_type");
   discover_every = cfg_getint (discovery, "discover_every");
 
-  /* Construct filter using security groups, tags and availability zones */
-  for (i = 0; i < cfg_size (discovery, "groups"); i++)
-    {
-      apr_snprintf (num_str, 3, "%d", filter_num);
-      filters =
-	apr_pstrcat (context, filters, "&Filter.", num_str,
-		     ".Name=group-name", "&Filter.", num_str, ".Value=",
-		     cfg_getnstr (discovery, "groups", i), NULL);
-      groups =
-	apr_pstrcat (context, cfg_getnstr (discovery, "groups", i), ",",
-		     groups, NULL);
-      filter_num++;
-    }
-  if(strlen(groups))
-    groups[strlen (groups) - 1] = '\0';
-
-  char *key, *value, *last, *tag;
-  for (i = 0; i < cfg_size (discovery, "tags"); i++)
-    {
-      tag = apr_pstrdup (context, cfg_getnstr (discovery, "tags", i));
-      key = apr_strtok (tag, ":", &last);
-      value = apr_strtok (NULL, ":", &last);
-      apr_snprintf (num_str, 3, "%d", filter_num);
-      filters =
-	apr_pstrcat (context, filters, "&Filter.", num_str, ".Name=tag%3A",
-		     key, "&Filter.", num_str, ".Value=", value, NULL);
-      tags =
-	apr_pstrcat (context, cfg_getnstr (discovery, "tags", i), ",", tags,
-		     NULL);
-      filter_num++;
-    }
-  if(strlen(tags))
-    tags[strlen (tags) - 1] = '\0';
-
-  for (i = 0; i < cfg_size (discovery, "availability_zones"); i++)
-    {
-      apr_snprintf (num_str, 3, "%d", filter_num);
-      filters =
-	apr_pstrcat (context, filters, "&Filter.", num_str,
-		     ".Name=availability-zone", "&Filter.", num_str,
-		     ".Value=", cfg_getnstr (discovery, "availability_zones",
-					     i), NULL);
-      zones =
-	apr_pstrcat (context,
-		     cfg_getnstr (discovery, "availability_zones", i), ",",
-		     zones, NULL);
-      filter_num++;
-    }
-  if(strlen(zones))
-    zones[strlen (zones) - 1] = '\0';
-
-  debug_msg
-    ("[discovery.%s] using host_type [%s], tags [%s], groups [%s], availability_zones [%s]",
-     discovery_type, discovery_host_type, tags, groups, zones);
-
-  /* Query EC2 API using curl */
-
-  char timestamp[30];
-  apr_size_t len;
-  apr_time_exp_t t;
-  apr_time_exp_lt (&t, apr_time_now ());
-  apr_strftime (timestamp, &len, sizeof (timestamp),
-		"%Y-%m-%dT%H%%3A%M%%3A%SZ", &t);
-
-  char *endpoint;
-  endpoint = cfg_getstr (discovery, "endpoint");
-
-  char *request_uri;
-  request_uri = endpoint;
-  if (strncasecmp (request_uri, "http://", 7) == 0)
-    request_uri += 7;
-  else if (strncasecmp (request_uri, "https://", 8) == 0)
-    request_uri += 8;
-
-  debug_msg ("[discovery.%s] using endpoint %s -> %s", discovery_type,
-	     endpoint, request_uri);
-
-  char *query_string;
-  query_string =
-    apr_pstrcat (context, "AWSAccessKeyId=", cloud_access_key,
-		 "&Action=DescribeInstances",
-		 (filters ? filters : ""), "&SignatureMethod=HmacSHA256",
-		 "&SignatureVersion=2", "&Timestamp=", timestamp,
-		 "&Version=2012-08-15", NULL);
-
-  char *signature_string;
-  signature_string =
-    apr_pstrcat (context, "GET\n", request_uri, "\n", "/\n", query_string,
-		 NULL);
-  // debug_msg("[discovery.%s] signature = %s", discovery_type, signature_string);
-
-  char hash[EVP_MAX_MD_SIZE];
-  unsigned int hlen;
-  HMAC (EVP_sha256 (), cloud_secret_key, strlen (cloud_secret_key),
-	(unsigned char *) signature_string, strlen (signature_string),
-	(unsigned char *) hash, &hlen);
-
-  /* base64 encode the signature string */
-  int elen;
-  char *encbuf;
-  elen = apr_base64_encode_len (hlen);
-  encbuf = apr_palloc (context, elen);
-  apr_base64_encode (encbuf, hash, hlen);
-  debug_msg ("[discovery.%s] base64 encoded hash %s", discovery_type, encbuf);
+  int port;
+  port = cfg_getint (discovery, "port");
 
   CURLcode res;
   CURL *curl_handle;
+
+  curl_global_init (CURL_GLOBAL_DEFAULT);
+
+  curl_handle = curl_easy_init ();
 
   struct MemoryStruct chunk;
   chunk.memory = malloc (1);	/* will be grown as needed by the realloc above */
   chunk.size = 0;		/* no data at this point */
 
-  curl_global_init (CURL_GLOBAL_DEFAULT);
-
-  curl_handle = curl_easy_init ();
   if (curl_handle)
     {
+      /* Construct filter using security groups, tags and availability zones */
+      char *key, *value, *last, *tag;
+      for (i = 0; i < cfg_size (discovery, "tags"); i++)
+	{
+	  filter_num++;
+	  tag = apr_pstrdup (context, cfg_getnstr (discovery, "tags", i));
+	  key = apr_strtok (tag, "= ", &last);
+	  value = apr_strtok (NULL, "= ", &last);
+	  filters =
+	    apr_pstrcat (context, filters, "&Filter.", apr_itoa(context, filter_num), ".Name=tag%3A",
+			 curl_easy_escape (curl_handle, key, 0), "&Filter.", apr_itoa(context, filter_num), ".Value=", curl_easy_escape (curl_handle, value, 0), NULL);
+	  tags = apr_pstrcat (context, cfg_getnstr (discovery, "tags", i), ",", tags, NULL);
+	}
+      if (strlen (tags))
+	tags[strlen (tags) - 1] = '\0';
+
+      for (i = 0; i < cfg_size (discovery, "groups"); i++)
+	{
+	  filter_num++;
+	  filters =
+	    apr_pstrcat (context, filters, "&Filter.", apr_itoa(context, filter_num),
+			 ".Name=group-name", "&Filter.", apr_itoa(context, filter_num), ".Value=", curl_easy_escape (curl_handle, cfg_getnstr (discovery, "groups", i), 0), NULL);
+	  groups = apr_pstrcat (context, cfg_getnstr (discovery, "groups", i), ",", groups, NULL);
+	}
+      if (strlen (groups))
+	groups[strlen (groups) - 1] = '\0';
+
+      for (i = 0; i < cfg_size (discovery, "availability_zones"); i++)
+	{
+	  filter_num++;
+	  filters =
+	    apr_pstrcat (context, filters, "&Filter.", apr_itoa(context, filter_num),
+			 ".Name=availability-zone", "&Filter.", apr_itoa(context, filter_num), ".Value=", curl_easy_escape (curl_handle,
+												      cfg_getnstr (discovery, "availability_zones", i), 0),
+			 NULL);
+	  zones = apr_pstrcat (context, cfg_getnstr (discovery, "availability_zones", i), ",", zones, NULL);
+	}
+      if (strlen (zones))
+	zones[strlen (zones) - 1] = '\0';
+
+      debug_msg ("[discovery.%s] using host_type [%s], tags [%s], groups [%s], availability_zones [%s]", discovery_type, discovery_host_type, tags, groups,
+		 zones);
+
+      /* Query EC2 API using curl */
+      char timestamp[30];
+      apr_size_t len;
+      apr_time_exp_t t;
+      apr_time_exp_lt (&t, apr_time_now ());
+      apr_strftime (timestamp, &len, sizeof (timestamp), "%Y-%m-%dT%H%%3A%M%%3A%SZ", &t);
+
+      char *endpoint;
+      endpoint = cfg_getstr (discovery, "endpoint");
+
+      char *request_uri;
+      request_uri = endpoint;
+      if (strncasecmp (request_uri, "http://", 7) == 0)
+	request_uri += 7;
+      else if (strncasecmp (request_uri, "https://", 8) == 0)
+	request_uri += 8;
+
+      debug_msg ("[discovery.%s] using endpoint %s -> %s", discovery_type, endpoint, request_uri);
+
+      char *query_string;
+      query_string =
+	apr_pstrcat (context, "AWSAccessKeyId=", cloud_access_key,
+		     "&Action=DescribeInstances",
+		     (filters ? filters : ""), "&SignatureMethod=HmacSHA256", "&SignatureVersion=2", "&Timestamp=", timestamp, "&Version=2012-08-15", NULL);
+
+      char *signature_string;
+      signature_string = apr_pstrcat (context, "GET\n", request_uri, "\n", "/\n", query_string, NULL);
+
+      char hash[EVP_MAX_MD_SIZE];
+      unsigned int hlen;
+      HMAC (EVP_sha256 (), cloud_secret_key, strlen (cloud_secret_key), (unsigned char *) signature_string, strlen (signature_string), (unsigned char *) hash,
+	    &hlen);
+
+      /* base64 encode the signature string */
+      int elen;
+      char *encbuf;
+      elen = apr_base64_encode_len (hlen);
+      encbuf = apr_palloc (context, elen);
+      apr_base64_encode (encbuf, hash, hlen);
+
       char *urlencoded_hash = curl_easy_escape (curl_handle, encbuf, 0);
 
       char *request;
-      request =
-	apr_pstrcat (context, endpoint, "?", query_string, "&Signature=",
-		     urlencoded_hash, NULL);
-      debug_msg ("[discovery.%s] API request %s", discovery_type, request);
+      request = apr_pstrcat (context, endpoint, "?", query_string, "&Signature=", urlencoded_hash, NULL);
+
+      debug_msg ("[discovery.%s] URL-encoded API request %s", discovery_type, request);
 
       curl_easy_setopt (curl_handle, CURLOPT_URL, request);
 
       /* send all data to this function  */
-      curl_easy_setopt (curl_handle, CURLOPT_WRITEFUNCTION,
-			WriteMemoryCallback);
+      curl_easy_setopt (curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
       /* we pass our 'chunk' struct to the callback function */
       curl_easy_setopt (curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
@@ -581,15 +564,13 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
       /* Check for errors */
       if (res != CURLE_OK)
 	{
-	  err_msg ("[discovery.%s] curl_easy_perform() failed: %s",
-		   discovery_type, curl_easy_strerror (res));
+	  err_msg ("[discovery.%s] curl_easy_perform() failed: %s", discovery_type, curl_easy_strerror (res));
 	  return (Ganglia_udp_send_channels) discovered_udp_send_channels;
 	}
 
       /* always cleanup */
       curl_easy_cleanup (curl_handle);
-      debug_msg ("[discovery.%s] HTTP response code %ld, %lu bytes retrieved",
-		 discovery_type, http_code, (long) chunk.size);
+      debug_msg ("[discovery.%s] HTTP response code %ld, %lu bytes retrieved", discovery_type, http_code, (long) chunk.size);
     }
 
   char *response = chunk.memory;
@@ -604,11 +585,9 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   apr_xml_doc *doc;
   apr_xml_parser *parser = apr_xml_parser_create (context);
 
-  if (apr_xml_parser_feed (parser, response, strlen (response)) !=
-      APR_SUCCESS)
+  if (apr_xml_parser_feed (parser, response, strlen (response)) != APR_SUCCESS)
     {
-      err_msg ("[discovery.%s] could not start the XML parser",
-	       discovery_type);
+      err_msg ("[discovery.%s] could not start the XML parser", discovery_type);
       return (Ganglia_udp_send_channels) discovered_udp_send_channels;
     }
   if (apr_xml_parser_done (parser, &doc) != APR_SUCCESS)
@@ -620,13 +599,11 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   apr_xml_elem *root;
   root = doc->root;
   const apr_xml_elem *elem;
-  char *cloud_conf = "";
-  char port_str[7];
-                         char *instance_id = NULL;
-			  char *ec2host = NULL;
+  char *instance_id = NULL;
+  char *ec2host = NULL;
 
   apr_hash_t *instances = NULL;
-  instances = apr_hash_make( context );
+  instances = apr_hash_make (context);
 
   for (elem = root->first_child; elem; elem = elem->next)
     {
@@ -642,34 +619,25 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 		  const apr_xml_elem *elem5;
 		  for (elem5 = elem4->first_child; elem5; elem5 = elem5->next)
 		    {
-		      if (apr_strnatcmp (elem5->name, "instanceId") == 0
-			  && elem5->first_cdata.first != NULL) 
-                        {
-			instance_id = apr_pstrdup (context, elem5->first_cdata.first->text);
-                        }
-		      if (apr_strnatcmp
-			  (elem5->name, ec2type (discovery_host_type)) == 0
-			  && elem5->first_cdata.first != NULL)
+		      if (apr_strnatcmp (elem5->name, "instanceId") == 0 && elem5->first_cdata.first != NULL)
 			{
-                          ec2host = apr_pstrdup(context, elem5->first_cdata.first->text);
-                          apr_hash_set(instances, ec2host, APR_HASH_KEY_STRING, instance_id);
+			  instance_id = apr_pstrdup (context, elem5->first_cdata.first->text);
+			}
+		      if (apr_strnatcmp (elem5->name, ec2type (discovery_host_type)) == 0 && elem5->first_cdata.first != NULL)
+			{
+			  ec2host = apr_pstrdup (context, elem5->first_cdata.first->text);
+			  apr_hash_set (instances, ec2host, APR_HASH_KEY_STRING, instance_id);
 			}
 		      if (apr_strnatcmp (elem5->name, "groupSet") == 0)
 			{
 			  const apr_xml_elem *elem6;
-			  for (elem6 = elem5->first_child; elem6;
-			       elem6 = elem6->next)
+			  for (elem6 = elem5->first_child; elem6; elem6 = elem6->next)
 			    {
 			      const apr_xml_elem *elem7;
-			      for (elem7 = elem6->first_child; elem7;
-				   elem7 = elem7->next)
+			      for (elem7 = elem6->first_child; elem7; elem7 = elem7->next)
 				{
-				  if (apr_strnatcmp (elem7->name, "groupName") == 0
-				      && elem7->first_cdata.first != NULL)
-				    debug_msg
-				      ("[discovery.%s] %s security group %s",
-				       discovery_type, instance_id,
-				       elem7->first_cdata.first->text);
+				  if (apr_strnatcmp (elem7->name, "groupName") == 0 && elem7->first_cdata.first != NULL)
+				    debug_msg ("[discovery.%s] %s security group %s", discovery_type, instance_id, elem7->first_cdata.first->text);
 				}
 			    }
 			}
@@ -681,124 +649,98 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
   if (apr_hash_count (instances) == 0)
     {
-      err_msg
-	("[discovery.%s] Did not discover any matching nodes. Leaving current send channels unchanged. Retry in %d seconds...",
-	 discovery_type, discover_every);
+      err_msg ("[discovery.%s] Did not discover any matching nodes. Leaving current send channels unchanged. Retry in %d seconds...", discovery_type,
+	       discover_every);
       return (Ganglia_udp_send_channels) discovered_udp_send_channels;
-    } else {
-       debug_msg("Found %d matching instances", apr_hash_count (instances) );
+    }
+  else
+    {
+      debug_msg ("[discovery.%s] Found %d matching instances", discovery_type, apr_hash_count (instances));
     }
 
-  apr_hash_t *open_sockets= NULL;
-  open_sockets = apr_hash_make( context );
+  apr_hash_t *open_sockets = NULL;
+  open_sockets = apr_hash_make (context);
 
-   apr_array_header_t *tmp_send_channels = NULL;
-   tmp_send_channels = apr_array_make (context, 10, sizeof (apr_socket_t *));	/* init array size of 10 is not max */
+  apr_array_header_t *tmp_send_channels = NULL;
+  tmp_send_channels = apr_array_make (context, 10, sizeof (apr_socket_t *));	/* init array size of 10 is not max */
 
-    if(discovered_udp_send_channels != NULL)
-      {
-      debug_msg("[discovery.%s] Close UDP send channels no longer needed", discovery_type);
-      apr_array_header_t *chnls=(apr_array_header_t*)discovered_udp_send_channels;
-      for(i=0; i < chnls->nelts; i++)
-         {
-         debug_msg("here");
-         apr_sockaddr_t *remotesa = NULL;
-         char remoteip[256];
+  if (discovered_udp_send_channels != NULL)
+    {
+      apr_array_header_t *chnls = (apr_array_header_t *) discovered_udp_send_channels;
+      for (i = 0; i < chnls->nelts; i++)
+	{
+	  apr_sockaddr_t *remotesa = NULL;
+	  char remoteip[256];
 
-          apr_socket_t *s = ((apr_socket_t **)(chnls->elts))[i];
-          apr_socket_addr_get(&remotesa, APR_REMOTE, s);
-          apr_sockaddr_ip_buffer_get(remoteip, 256, remotesa);
-          if (!apr_hash_get(instances, remoteip, APR_HASH_KEY_STRING)) {
-              debug_msg("UDP socket opened to %s <--- not needed anymore", remoteip);
-              apr_socket_close(s);
-             } else { 
-              debug_msg("UDP socket opened to %s <--- DO NOT DELETE", remoteip);
-              *(apr_socket_t **) apr_array_push (tmp_send_channels) = s;
-              apr_hash_set(open_sockets, apr_pstrdup(context, remoteip), APR_HASH_KEY_STRING, "OK");
-          }
-        }
+	  apr_socket_t *s = ((apr_socket_t **) (chnls->elts))[i];
+	  apr_socket_addr_get (&remotesa, APR_REMOTE, s);
+	  apr_sockaddr_ip_buffer_get (remoteip, 256, remotesa);
+	  if (!apr_hash_get (instances, remoteip, APR_HASH_KEY_STRING))
+	    {
+              debug_msg ("[discovery.%s] removing udp send channel %s %s:%d", discovery_type, discovery_host_type, remoteip, port);
+	      apr_socket_close (s);
+	    }
+	  else
+	    {
+              /* keep track of opened sockets */
+	      *(apr_socket_t **) apr_array_push (tmp_send_channels) = s;
+	      apr_hash_set (open_sockets, apr_pstrdup (context, remoteip), APR_HASH_KEY_STRING, "OK");
+	    }
+	}
     }
 
-    debug_msg("[discovery.%s] Only open new UDP send channels", discovery_type);
+  apr_hash_index_t *hi;
+  const void *k;
+  void *v;
+  char *hkey;
+  char *result;
+  char *cloud_conf = "# This file is generated by cloud-enabled version of Ganglia gmond\n\n";
 
-    apr_hash_index_t *hi;
-        const void *k;
-        void *v;
-        char *hkey;
-        char *result;
+  for (hi = apr_hash_first (context, instances); hi; hi = apr_hash_next (hi))
+    {
+      apr_hash_this (hi, &k, NULL, &v);
+      hkey = k;
 
-    for (hi = apr_hash_first(context, instances); hi; hi = apr_hash_next(hi)) {
-        apr_hash_this(hi, &k, NULL, &v);
-        hkey = k;
+      if (!apr_hash_get (open_sockets, hkey, APR_HASH_KEY_STRING))
+	{
+          debug_msg ("[discovery.%s] adding %s, udp send channel %s %s:%d", discovery_type, v, discovery_host_type, hkey, port);
+	  apr_socket_t *socket = NULL;
+	  apr_pool_t *pool = NULL;
+	  apr_pool_create (&pool, context);
 
-        int port;
-        port = cfg_getint (discovery, "port");
+	  socket = create_udp_client (pool, hkey, port, NULL, NULL, 0);
+	  if (!socket)
+	    {
+	      err_msg ("Unable to create UDP client for %s:%d. Exiting.\n", hkey, port);
+	      exit (1);
+	    }
 
-        debug_msg("** This hash %s => %s", hkey, v);
+	  *(apr_socket_t **) apr_array_push (tmp_send_channels) = socket;
+	}
 
-        if(!apr_hash_get(open_sockets, hkey, APR_HASH_KEY_STRING)) {
-           debug_msg("UDP socket not opened to %s yet <--- OPEN IT!", hkey);
-			  apr_socket_t *socket = NULL;
-			  apr_pool_t *pool = NULL;
-
-                          apr_pool_create (&pool, context);
-
-                          socket = create_udp_client (pool, hkey, port, NULL, NULL, 0);
-                          if (!socket)
-                            {
-                              err_msg ("Unable to create UDP client for %s:%d. Exiting.\n", hkey, port);
-                              exit (1);
-                            }
-
-                         //  *(apr_socket_t **) apr_array_push (discovered_udp_send_channels) = socket;
-                          *(apr_socket_t **) apr_array_push (tmp_send_channels) = socket;
-
-
-        } else {
-           debug_msg("UDP socket already opened to %s <--- DO *NOT* OPEN IT!", hkey);
-        }
-
-           apr_snprintf (port_str, sizeof (port_str), "%d", port);
-          debug_msg ("[discovery.%s] adding %s, udp send channel %s %s:%d", discovery_type, v, ec2type (discovery_host_type), hkey, port);
-	  cloud_conf = apr_pstrcat (context, cloud_conf, "udp_send_channel {\n  bind_hostname = yes\n  host = ", hkey, "\n  port = ", port_str, "\n}\n\n", NULL);
+      cloud_conf = apr_pstrcat (context, cloud_conf, "udp_send_channel {\n  bind_hostname = yes\n  host = ", hkey, "\n  port = ", apr_itoa(context, port), "\n}\n\n", NULL);
     }
 
   /* Write out discovered UDP send channels to file for gmetric */
   apr_file_t *file;
   const char *fname = GMOND_CLOUD_CONF;
 
-  if(apr_file_open(&file, fname, APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_GREAD, context) != APR_SUCCESS)
+  if (apr_file_open (&file, fname, APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_GREAD, context) != APR_SUCCESS)
     {
       err_msg ("[discovery.%s] Failed to open cloud configuration file %s", discovery_type, GMOND_CLOUD_CONF);
     }
   else
     {
-      if(apr_file_printf(file, "%s", cloud_conf) == 0)
-        {
-          err_msg ("[discovery.%s] Failed to write cloud configuration to file %s", discovery_type, GMOND_CLOUD_CONF);
-        }
-      apr_file_close(file);
+      apr_size_t bytes = strlen(cloud_conf);
+      if (apr_file_write (file, cloud_conf, &bytes) != APR_SUCCESS)
+	{
+	  err_msg ("[discovery.%s] Failed to write cloud configuration to file %s", discovery_type, GMOND_CLOUD_CONF);
+	}
+      apr_file_trunc (file, bytes);
+      apr_file_close (file);
     }
 
-  discovered_udp_send_channels = apr_array_copy(context, tmp_send_channels);
-
-  send_channels = (apr_array_header_t*)discovered_udp_send_channels;
-
-  if (send_channels) {
-      for(i=0; i < send_channels->nelts; i++)
-         {
-         apr_sockaddr_t *remotesa = NULL;
-         char remoteip[256];
-
-          apr_socket_t *s = ((apr_socket_t **)(send_channels->elts))[i];
-          apr_socket_addr_get(&remotesa, APR_REMOTE, s);
-          apr_sockaddr_ip_buffer_get(remoteip, 256, remotesa);
-          debug_msg("discovered send channels now = %s", remoteip);
-        }
-  } else {
-     debug_msg("No discovered channels yet");
-  }
-
+  discovered_udp_send_channels = apr_array_copy (context, tmp_send_channels);
 
   return (Ganglia_udp_send_channels) discovered_udp_send_channels;
 }
