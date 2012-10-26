@@ -35,6 +35,7 @@
 #include <apr_tables.h>
 #include <apr_dso.h>
 #include <apr_version.h>
+#include <curl/curl.h>
 
 #ifdef HAVE_LIBPCRE
 #if defined (HAVE_PCRE_PCRE_H)
