@@ -13,6 +13,7 @@
 #include "dtd.h"
 #include "gmetad.h"
 #include "my_inet_ntop.h"
+#include "server_priv.h"
 
 extern g_tcp_socket *server_socket;
 extern pthread_mutex_t  server_socket_mutex;
@@ -464,6 +465,14 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
                /* report this element */
                rc = process_path(client, 0, myroot, NULL);
             }
+         else if (!strcmp(element, "*"))
+            {
+               /* wildcard detected -> process every child */
+               struct request_context ctxt;
+               ctxt.path = q;
+               ctxt.client = client;
+               hash_foreach(node->children, process_path_adapter, (void*) &ctxt);
+            }
          else
             {
                /* element not found */
@@ -480,6 +489,14 @@ process_path (client_t *client, char *path, datum_t *myroot, datum_t *key)
       }
 
    return rc;
+}
+
+
+static int
+process_path_adapter (datum_t *key, datum_t *val, void *arg)
+{
+   struct request_context *ctxt = (struct request_context*) arg;
+   return process_path(ctxt->client, ctxt->path, val, key);
 }
 
 
