@@ -3191,6 +3191,8 @@ main ( int argc, char *argv[] )
   process_discovery_mode();
   process_allow_extra_data_mode();
 
+  curl_global_init (CURL_GLOBAL_DEFAULT);
+
   if(!deaf)
     {
       setup_listen_channels_pollset();
@@ -3311,5 +3313,6 @@ main ( int argc, char *argv[] )
   if(reload_required == 1)
     reload_ganglia_configuration();
 
+  curl_global_cleanup ();
   return 0;
 }

@@ -448,8 +448,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   CURLcode res;
   CURL *curl_handle;
 
-  curl_global_init (CURL_GLOBAL_DEFAULT);
-
   curl_handle = curl_easy_init ();
 
   struct MemoryStruct chunk;
@@ -558,15 +556,18 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
       res = curl_easy_perform (curl_handle);
 
-      long http_code = 0;
-      curl_easy_getinfo (curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
-
       /* Check for errors */
       if (res != CURLE_OK)
 	{
 	  err_msg ("[discovery.%s] curl_easy_perform() failed: %s", discovery_type, curl_easy_strerror (res));
+	  curl_easy_cleanup (curl_handle);
+	  if (chunk.memory)
+	    free (chunk.memory);
 	  return (Ganglia_udp_send_channels) discovered_udp_send_channels;
 	}
+
+      long http_code = 0;
+      curl_easy_getinfo (curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
 
       /* always cleanup */
       curl_easy_cleanup (curl_handle);
@@ -576,8 +577,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   char *response = chunk.memory;
   if (chunk.memory)
     free (chunk.memory);
-
-  curl_global_cleanup ();
 
   // debug_msg("[discovery.%s] API response %s", discovery_type, response);
 
