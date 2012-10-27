@@ -389,25 +389,6 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
   apr_array_header_t *send_channels = (apr_array_header_t *) discovered_udp_send_channels;
   int i;
 
-  if (send_channels)
-    {
-      for (i = 0; i < send_channels->nelts; i++)
-	{
-	  apr_sockaddr_t *remotesa = NULL;
-	  char remoteip[256];
-
-	  apr_socket_t *s = ((apr_socket_t **) (send_channels->elts))[i];
-	  apr_socket_addr_get (&remotesa, APR_REMOTE, s);
-	  apr_sockaddr_ip_buffer_get (remoteip, 256, remotesa);
-	  debug_msg ("discovered send channels now = %s", remoteip);
-	}
-    }
-  else
-    {
-      debug_msg ("No discovered channels yet");
-    }
-
-
   char *cloud_access_key = NULL;
   char *cloud_secret_key = NULL;
 
@@ -418,7 +399,7 @@ Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config)
 
   if (cloud_access_key == NULL || cloud_secret_key == NULL)
     {
-      err_msg ("[discovery.cloud] Must supply both the AWS access key id and the AWS secret key for EC2 discovery.\n");
+      err_msg ("[discovery.cloud] Must supply both the access key id and secret key for cloud discovery.\n");
       exit (1);
     }
 
