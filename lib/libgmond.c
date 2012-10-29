@@ -45,7 +45,7 @@ Any changes that you make to this file need to be reconciled in ./conf.pod
 in order for the documentation to be in order with the code 
 ****************************/
 
-// void build_default_gmond_configuration(Ganglia_pool p);
+void build_default_gmond_configuration(Ganglia_pool p);
 static int Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
                           const char **argv);
 

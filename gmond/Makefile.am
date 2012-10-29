@@ -50,7 +50,7 @@ if BUILD_SFLOW
 gmond_SOURCES += sflow.h sflow.c sflow_gmetric.h
 endif
 if BUILD_CLOUD
-gmond_SOURCES += cloud.h cloud.c
+gmond_SOURCES += cloud.h
 endif
 
 dist_man_MANS  = gmond.conf.5

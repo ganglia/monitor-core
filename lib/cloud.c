@@ -6,26 +6,18 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "ganglia_priv.h"
-#include "ganglia.h"
-#include "default_conf.h"
+#include "cloud.h"
 
 #include <confuse.h>
-#include <apr_pools.h>
 #include <apr_strings.h>
-#include <apr_tables.h>
-#include <apr_net.h>
-#include <apr_file_io.h>
 #include <apr_network_io.h>
+#include <apr_net.h>
+#include <apr_pools.h>
+#include <apr_file_io.h>
 #include <apr_lib.h>
 #include <apr_hash.h>
 #include <apr_base64.h>
 #include <apr_xml.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <fnmatch.h>
 #include <curl/curl.h>
 #include <openssl/hmac.h>
 
@@ -78,7 +70,7 @@ ec2type(const char *type)
     return ("dnsName");         /* dns-name */
 }
 
-Ganglia_udp_send_channels discovered_udp_send_channels = NULL;
+apr_array_header_t * discovered_udp_send_channels = NULL;
 
 Ganglia_udp_send_channels
 Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
@@ -90,14 +82,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
   if (discovered_udp_send_channels == NULL)
     discovered_udp_send_channels = apr_array_make(context, 10, sizeof(apr_socket_t *)); /* init array size of 10 is not max */
 
-  apr_array_header_t *send_channels = (apr_array_header_t *) discovered_udp_send_channels;
-
   int i;
-
   char *cloud_access_key = NULL;
-
   char *cloud_secret_key = NULL;
-
   cfg_t *cloud;
 
   cloud = cfg_getsec(cfg, "cloud");
@@ -116,19 +103,11 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
   debug_msg("[discovery.cloud] access key=%s, secret key=************************************%s", cloud_access_key, last_four);
 
   char *discovery_type = NULL;
-
   char *discovery_host_type = NULL;
-
   int discover_every = 0;
-
   char *filters = "&Filter.1.Name=instance-state-name&Filter.1.Value=running";
-
   int filter_num = 1;
-
-  char *groups = "",
-    *tags = "",
-    *zones = "";
-
+  char *groups = "", *tags = "", *zones = "";
   cfg_t *discovery;
 
   discovery = cfg_getsec(cfg, "discovery");
@@ -137,27 +116,21 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
   discover_every = cfg_getint(discovery, "discover_every");
 
   int port;
-
   port = cfg_getint(discovery, "port");
 
   CURLcode res;
-
   CURL *curl_handle;
 
   curl_handle = curl_easy_init();
 
   struct MemoryStruct chunk;
-
   chunk.memory = malloc(1);     /* will be grown as needed by the realloc above */
   chunk.size = 0;               /* no data at this point */
 
   if (curl_handle)
     {
       /* Construct filter using security groups, tags and availability zones */
-      char *key,
-       *value,
-       *last,
-       *tag;
+      char *key, *value, *last, *tag;
 
       for (i = 0; i < cfg_size(discovery, "tags"); i++)
         {
@@ -165,11 +138,12 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
           tag = apr_pstrdup(context, cfg_getnstr(discovery, "tags", i));
           key = apr_strtok(tag, "= ", &last);
           value = apr_strtok(NULL, "= ", &last);
-          filters =
-            apr_pstrcat(context, filters, "&Filter.",
-                        apr_itoa(context, filter_num),
-                        ".Name=tag%3A",
-                        curl_easy_escape(curl_handle, key, 0),
+          if (!value) {
+              err_msg("[discovery.%s] Parse error for discovery tags in '/etc/ganglia/gmond.conf' : '%s' has no tag value", discovery_type ,key);
+              exit(1);
+          }
+          filters = apr_pstrcat(context, filters, "&Filter.", apr_itoa(context, filter_num),
+                        ".Name=tag%3A", curl_easy_escape(curl_handle, key, 0),
                         "&Filter.", apr_itoa(context, filter_num), ".Value=", curl_easy_escape(curl_handle, value, 0), NULL);
           tags = apr_pstrcat(context, cfg_getnstr(discovery, "tags", i), ",", tags, NULL);
         }
@@ -426,14 +400,6 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
   apr_hash_index_t *hi;
 
-  const void *k;
-
-  void *v;
-
-  char *hkey;
-
-  char *result;
-
   cfg_t *globals = (cfg_t *) cfg_getsec((cfg_t *) cfg, "globals");
 
   char *override_hostname = cfg_getstr(globals, "override_hostname");
@@ -451,12 +417,18 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
   for (hi = apr_hash_first(context, instances); hi; hi = apr_hash_next(hi))
     {
+      const void *k;
+      void *v;
+      char *hkey;
+      char *val;
+
       apr_hash_this(hi, &k, NULL, &v);
-      hkey = k;
+      hkey = (char *) k;
+      val = v;
 
       if (!apr_hash_get(open_sockets, hkey, APR_HASH_KEY_STRING))
         {
-          debug_msg("[discovery.%s] adding %s, udp send channel %s %s:%d", discovery_type, v, discovery_host_type, hkey, port);
+          debug_msg("[discovery.%s] adding %s, udp send channel %s %s:%d", discovery_type, val, discovery_host_type, hkey, port);
           apr_socket_t *socket = NULL;
 
           apr_pool_t *pool = NULL;

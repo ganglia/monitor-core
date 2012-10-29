@@ -34,6 +34,9 @@ dotconf.c dotconf.h error_msg.c ganglia_priv.h \
 ganglia.c hash.c hash.h inetaddr.c llist.c llist.h \
 my_inet_ntop.c my_inet_ntop.h net.h rdwr.c rdwr.h readdir.c readdir.h tcp.c \
 scoreboard.c gm_scoreboard.h apr_net.c apr_net.h libgmond.c
+if BUILD_CLOUD
+libganglia_la_SOURCES += cloud.h cloud.c
+endif
 libganglia_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-release $(LT_RELEASE) \
