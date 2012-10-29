@@ -1,0 +1,2 @@
+Ganglia_udp_send_channels
+Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config);
