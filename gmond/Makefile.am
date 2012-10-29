@@ -32,6 +32,9 @@ endif
 if BUILD_SFLOW
 GCFLAGS += -DSFLOW
 endif
+if BUILD_CLOUD
+GCFLAGS += -DCLOUD
+endif
 
 INCLUDES = @APR_INCLUDES@
 AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/include/ -I$(top_builddir)/libmetrics $(GCFLAGS)
@@ -46,6 +49,10 @@ gmond_SOURCES = gmond.c cmdline.c.in cmdline.c cmdline.h dtd.h g25_config.c core
 if BUILD_SFLOW
 gmond_SOURCES += sflow.h sflow.c sflow_gmetric.h
 endif
+if BUILD_CLOUD
+gmond_SOURCES += cloud.h cloud.c
+endif
+
 dist_man_MANS  = gmond.conf.5
 
 gmond.conf.5: conf.pod gmond.conf.html
