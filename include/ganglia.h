@@ -46,8 +46,6 @@ Ganglia_gmond_config_create(char *path, int fallback_to_default);
 void Ganglia_gmond_config_destroy(Ganglia_gmond_config config);
 
 Ganglia_udp_send_channels
-Ganglia_udp_send_channels_discover (Ganglia_pool p, Ganglia_gmond_config config);
-Ganglia_udp_send_channels
 Ganglia_udp_send_channels_create(Ganglia_pool p, Ganglia_gmond_config config);
 void Ganglia_udp_send_channels_destroy(Ganglia_udp_send_channels channels);
 

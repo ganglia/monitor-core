@@ -212,7 +212,7 @@ static cfg_opt_t sflow_opts[] = {
 static cfg_opt_t gmond_opts[] = {
   CFG_SEC("cluster",   cluster_opts, CFGF_NONE),
   CFG_SEC("host",      host_opts, CFGF_NONE),
-  CFG_SEC("globals",   globals_opts, CFGF_NONE),
+  CFG_SEC("globals",	globals_opts, CFGF_NONE),
 #ifdef CLOUD
   CFG_SEC("cloud",     cloud_opts, CFGF_NONE),
   CFG_SEC("discovery", discovery_opts, CFGF_NONE),

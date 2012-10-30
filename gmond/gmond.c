@@ -119,7 +119,7 @@ char *module_dir = NULL;
 /* Discovery type ie. 'ec2' = use AWS EC2 API */
 char *discovery_type = NULL;
 /* The number of seconds between cloud re-discovery */
-int discover_every = 300;
+int discover_every = 90;
 /* last time we ran a discovery */
 apr_time_t last_discovery;
 /* Boolean. Trigger a re-discovery of cluster peers */
@@ -3204,7 +3204,9 @@ main ( int argc, char *argv[] )
 #endif
   process_allow_extra_data_mode();
 
+#ifdef CLOUD
   curl_global_init (CURL_GLOBAL_DEFAULT);
+#endif
 
   if(!deaf)
     {
@@ -3332,6 +3334,8 @@ main ( int argc, char *argv[] )
   if(reload_required == 1)
     reload_ganglia_configuration();
 
+#ifdef CLOUD
   curl_global_cleanup ();
+#endif
   return 0;
 }
