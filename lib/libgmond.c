@@ -23,16 +23,12 @@
 #include <apr_file_io.h>
 #include <apr_network_io.h>
 #include <apr_lib.h>
-#include <apr_hash.h>
-#include <apr_base64.h>
-#include <apr_xml.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
 #include <fnmatch.h>
 #include <curl/curl.h>
-#include <openssl/hmac.h>
 
 #ifdef CLOUD
 #define GMOND_CLOUD_CONF "/var/lib/ganglia/gmond-cloud.conf"
