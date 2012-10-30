@@ -49,9 +49,6 @@ gmond_SOURCES = gmond.c cmdline.c.in cmdline.c cmdline.h dtd.h g25_config.c core
 if BUILD_SFLOW
 gmond_SOURCES += sflow.h sflow.c sflow_gmetric.h
 endif
-if BUILD_CLOUD
-gmond_SOURCES += cloud.h
-endif
 
 dist_man_MANS  = gmond.conf.5
 
