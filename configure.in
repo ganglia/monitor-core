@@ -264,6 +264,7 @@ AC_ARG_ENABLE( status,
 [ enable_status="yes" 
   AC_DEFINE(GSTATUS, 1, GSTATUS)], 
 [ enable_status="no" ] )
+
 AM_CONDITIONAL(BUILD_STATUS, test x"$enable_status" = xyes)
 
 AC_ARG_ENABLE( sflow,
