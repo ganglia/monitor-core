@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sys/time.h>
 #include <gmetad.h>
@@ -27,7 +28,7 @@ data_thread ( void *arg )
    datum_t key;
    char *buf;
    /* This will grow as needed */
-   unsigned int buf_size = 1024, read_index;
+   unsigned int buf_size = 1024, read_index, read_available;
    struct pollfd struct_poll;
    apr_time_t start, end;
    apr_interval_time_t sleep_time, elapsed;
@@ -138,7 +139,15 @@ data_thread ( void *arg )
                                     }
                                  buf_size+=1024;
                               }
-                           SYS_CALL( bytes_read, read(sock->sockfd, buf+read_index, 1023));
+                           if(ioctl(sock->sockfd, FIONREAD, &read_available) == -1)
+                           {
+                                 err_msg("data_thread() unable to ioctl(FIONREAD) socket for [%s] data source", d->name);
+                                 d->last_good_index = -1;
+                                 d->dead = 1;
+                                 goto take_a_break;
+                           }
+                           read_available = read_available > 1023 ? 1023 : read_available;
+                           bytes_read = read(sock->sockfd, buf+read_index, read_available);
                            if (bytes_read < 0)
                               {
                                  err_msg("data_thread() unable to read() socket for [%s] data source", d->name);
