@@ -252,6 +252,7 @@ build_default_gmond_configuration(Ganglia_pool p)
 #endif
 }
 
+
 #if 0
 static void
 cleanup_configuration_file(void)
@@ -915,3 +916,4 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
 
     return 0;
 }
+
