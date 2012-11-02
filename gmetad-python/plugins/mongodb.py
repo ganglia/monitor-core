@@ -54,14 +54,13 @@ def find_object(ip, plugin):
     try :
         vm = True
         obj = msci.find_document(plugin.manage_collection["VM"], {"cloud_ip" : ip, "mgt_903_deprovisioning_request_completed" : { "$exists" : False}})
-        #obj = msci.find_document(plugin.manage_collection["VM"], {"cloud_ip" : ip})
         if obj is not None : 
-            obj = plugin.cloudbench.vmshow(obj["_id"])
+            obj = plugin.api.vmshow(obj["_id"])
         else :
             vm = False
             obj = msci.find_document(plugin.manage_collection["HOST"], {"cloud_ip" : ip})
             if obj is not None : 
-                obj = plugin.cloudbench.hostshow(obj["_id"])
+                obj = plugin.api.hostshow(obj["_id"])
             else :
                 vm = None
                 obj = None
@@ -104,15 +103,15 @@ class MongodbPlugin(GmetadPlugin) :
                 self.api = args
 
         path.insert(0, self.path)
-        from lib.operations.api_service_client import CloudBenchClient
+        from lib.operations.api_service_client import APIClient
 
-        self.cloudbench = CloudBenchClient(self.api)
-        self.cloudbench.monitoring_conn_check()
-        self.msci = self.cloudbench.msci
+        self.api = APIClient(self.api)
+        self.api.monitoring_conn_check()
+        self.msci = self.api.msci
 
         self.obj_cache = {}
-        self.expid = self.cloudbench.cldshow("time")["experiment_id"]
-        self.username = self.cloudbench.username
+        self.expid = self.api.cldshow("time")["experiment_id"]
+        self.username = self.api.username
         
         self.latest_collection = {"HOST" : "latest_runtime_os_HOST_" + self.username, \
                                   "VM" : "latest_runtime_os_VM_" + self.username}
@@ -122,7 +121,7 @@ class MongodbPlugin(GmetadPlugin) :
         self.manage_collection = {"HOST" : "management_HOST_" + self.username, \
                                 "VM" : "management_VM_" + self.username}
 
-        _msg = "CloudBench contacted successfully. The current experiment id is \""
+        _msg = "API contacted successfully. The current experiment id is \""
         _msg += self.expid + "\" and the current username is \"" + self.username
         _msg += "\"."
         logging.debug(_msg)
@@ -136,7 +135,7 @@ class MongodbPlugin(GmetadPlugin) :
         logging.debug("MongodbWriter stop called")        
         
     def notify(self, clusterNode):
-        from lib.operations.api_service_client import CloudBenchClient, makeTimestamp
+        from lib.operations.api_service_client import APIClient, makeTimestamp
 
         for hostNode in clusterNode:
             '''
