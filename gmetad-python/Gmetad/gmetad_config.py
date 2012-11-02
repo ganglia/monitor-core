@@ -65,6 +65,9 @@ class GmetadConfig:
     SERVER_THREADS = 'server_threads'
     VERSION = '@GANGLIA_VERSION@'
     PLUGINS_DIR = 'plugins_dir'
+    SYSLOG_ADDRESS = 'syslog_address'
+    SYSLOG_PORT = 'syslog_port'
+    SYSLOG_FACILITY = 'syslog_facility'
     
     _cfgDefaults = {
             DEBUG_LEVEL : 2,
@@ -81,7 +84,10 @@ class GmetadConfig:
             XML_PORT : 8651,
             INTERACTIVE_PORT : 8652,
             SERVER_THREADS : 4,
-            PLUGINS_DIR : '@libdir@/ganglia/python_modules/gmetad/plugins'
+            PLUGINS_DIR : '@libdir@/ganglia/python_modules/gmetad/plugins',
+            SYSLOG_ADDRESS: "127.0.0.1",
+            SYSLOG_PORT: 514,
+            SYSLOG_FACILITY: "23"
     }
     
     
@@ -270,6 +276,10 @@ def getConfig(args=sys.argv):
     dbgLevelDefault = GmetadConfig._cfgDefaults[GmetadConfig.DEBUG_LEVEL]
     iPortDefault = GmetadConfig._cfgDefaults[GmetadConfig.INTERACTIVE_PORT]
     xPortDefault = GmetadConfig._cfgDefaults[GmetadConfig.XML_PORT]
+    syslognDefault = GmetadConfig._cfgDefaults[GmetadConfig.SYSLOG_ADDRESS]
+    syslogpDefault = GmetadConfig._cfgDefaults[GmetadConfig.SYSLOG_PORT]
+    syslogfDefault = GmetadConfig._cfgDefaults[GmetadConfig.SYSLOG_FACILITY]
+    
     parser = optparse.OptionParser(version = GmetadConfig.VERSION)
     parser.add_option('-d', '--debug', action='store',
             help='Debug level. If five (5) or greater, daemon will stay in foreground.  Values are:\n\
@@ -295,9 +305,23 @@ def getConfig(args=sys.argv):
     parser.add_option('-x', '--xml_port', action='store',
             help='XML port to listen on (default=%d)' % xPortDefault,
             default='%d' % xPortDefault)
-            
+
+    parser.add_option("--syslogn", dest = "syslogn", metavar ="LNAME", \
+                      default = "127.0.0.1" , \
+                      help = "Set the syslog's ip/hostname" )
+
+    parser.add_option("--syslogp", dest = "syslogp", metavar ="LPORT", \
+                      default = 514, help = "Set the syslog's port" )
+
+    parser.add_option("--syslogf", dest = "syslogf", metavar ="LFACILITY", \
+                      default = 23, help = "Set the syslog's facility" )
+
+    parser.add_option("--cn", dest = "cn", metavar = "CN", \
+                      default = None, \
+                      help ="Set the Cloud name")
+
     options, arguments = parser.parse_args()
-    
+
     if not options.debug.isdigit():
         print 'Invalid numeric value for --debug: %s' % options.debug
         parser.print_help()
@@ -326,6 +350,11 @@ def getConfig(args=sys.argv):
         cfg[GmetadConfig.LOGFILE] = options.logfile
     if options.pid_file is not None:
         cfg[GmetadConfig.PIDFILE] = options.pid_file
-        
+    if syslognDefault != options.syslogn :
+        cfg[GmetadConfig.SYSLOG_ADDRESS] = options.syslogn
+    if syslogpDefault != options.syslogp :
+        cfg[GmetadConfig.SYSLOG_PORT] = options.syslogp
+    if syslogfDefault != options.syslogf :
+        cfg[GmetadConfig.SYSLOG_FACILITY] = options.syslogf        
+
     return cfg
-    

@@ -57,3 +57,6 @@ libmetrics/**/*.la
 libmetrics/**/*.lo
 libmetrics/**/*.o
 libtool
+*.pyc
+.project
+.pydevproject

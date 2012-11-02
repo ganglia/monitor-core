@@ -37,15 +37,15 @@ import sys
 import socket
 import os
 import asyncore
-import logging
-import logging.handlers
+from logging import getLogger, StreamHandler, Formatter, Filter, DEBUG, ERROR, \
+INFO, WARN, CRITICAL
+from logging.handlers import logging, SysLogHandler, RotatingFileHandler
 
 from Gmetad.gmetad_gmondReader import GmondReader
 from Gmetad.gmetad_xmlWriter import XmlWriter
 from Gmetad.gmetad_config import getConfig, GmetadConfig
 from Gmetad.gmetad_daemon import daemonize, setuid
 from Gmetad.gmetad_data import DataStore
-
 
 class GmetadListenSocket(asyncore.dispatcher):
     def __init__(self):
@@ -155,6 +155,26 @@ if __name__ == '__main__':
     
     # Initialize the application
     ignore_fds = [] # Remembers log file descriptors we create, so they aren't closed when we daemonize.
+
+    # HACK ALERT - A very crude "syslog facility selector"
+    _syslog_selector = {}
+    _syslog_selector["16"] = SysLogHandler.LOG_LOCAL0
+    _syslog_selector["17"] = SysLogHandler.LOG_LOCAL1
+    _syslog_selector["18"] = SysLogHandler.LOG_LOCAL2
+    _syslog_selector["19"] = SysLogHandler.LOG_LOCAL3
+    _syslog_selector["20"] = SysLogHandler.LOG_LOCAL4
+    _syslog_selector["21"] = SysLogHandler.LOG_LOCAL5
+    _syslog_selector["22"] = SysLogHandler.LOG_LOCAL6
+    _syslog_selector["23"] = SysLogHandler.LOG_LOCAL7
+    
+    _laddress = gmetadConfig[GmetadConfig.SYSLOG_ADDRESS]
+    _lport = gmetadConfig[GmetadConfig.SYSLOG_PORT]
+    _lfacility = int(gmetadConfig[GmetadConfig.SYSLOG_FACILITY])
+    _lverbosity = int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])
+    
+    if _lfacility > 23 or _lfacility < 16 :
+        _lfacility = 23
+
     if sys.version_info[:2] >= (2, 4):
         logging.basicConfig(level=getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])),
             format='%(levelname)-8s %(message)s')
@@ -162,15 +182,12 @@ if __name__ == '__main__':
         logging.basicConfig()
         logging.getLogger().setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
 
-    try :
-        syslogHandler = logging.handlers.SysLogHandler('/dev/log')
-        syslogHandler.setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
-        syslogHandler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)-8s - GMETAD - %(message)s',
-                datefmt='%a, %d %b %Y %H:%M:%S'))
-        ignore_fds.append(syslogHandler.socket.fileno())
-        logging.getLogger().addHandler(syslogHandler)
-    except Exception, obj :
-        print ("WARNING: /dev/log syslog handler: " + str(obj))
+    syslogHandler = logging.handlers.SysLogHandler(address = (_laddress, int(_lport)), facility=_syslog_selector[str(_lfacility)])
+    syslogHandler.setLevel(getLoggingLevel(int(gmetadConfig[GmetadConfig.DEBUG_LEVEL])))
+    syslogHandler.setFormatter(logging.Formatter(fmt='%(asctime)s %(levelname)-8s - GMETAD - %(message)s',
+            datefmt='%a, %d %b %Y %H:%M:%S'))
+    ignore_fds.append(syslogHandler.socket.fileno())
+    logging.getLogger().addHandler(syslogHandler)
 
     if gmetadConfig[GmetadConfig.LOGFILE] is not None:
         fileHandler = logging.FileHandler(gmetadConfig[GmetadConfig.LOGFILE],'a')
@@ -181,7 +198,7 @@ if __name__ == '__main__':
         logging.getLogger().addHandler(fileHandler)
 
     # Determine if the service should be daemonized based on the debug level.
-    if 5 > int(gmetadConfig[GmetadConfig.DEBUG_LEVEL]):
+    if 5 > _lverbosity:
         daemonize(ignore_fds)
         
     logging.info('Gmetad application started.')
