@@ -65,16 +65,26 @@ class MongodbPlugin(GmetadPlugin) :
                 self.api = args
 
         path.insert(0, self.path)
-        from lib.operations.api_service_client import APIClient
 
-        self.api = APIClient(self.api)
-        self.api.monitoring_conn_check()
-        self.msci = self.api.msci
+        #from lib.operations.api_service_client import APIClient
+        from lib.operations.api_service_client import CloudBenchClient
+
+#        self.api = APIClient(self.api)
+#        self.api.monitoring_conn_check()
+#        self.msci = self.api.msci
+
+        self.cloudbench = CloudBenchClient(self.api)
+        self.cloudbench.monitoring_conn_check()
+        self.msci = self.cloudbench.msci
 
         self.obj_cache = {}
-        self.expid = self.api.cldshow("time")["experiment_id"]
-        self.username = self.api.username
-        
+
+#        self.expid = self.api.cldshow("time")["experiment_id"]
+#        self.username = self.api.username
+
+        self.expid = self.cloudbench.cldshow("time")["experiment_id"]
+        self.username = self.cloudbench.username
+
         self.latest_collection = {"HOST" : "latest_runtime_os_HOST_" + self.username, \
                                   "VM" : "latest_runtime_os_VM_" + self.username}
         self.data_collection = {"HOST" : "runtime_os_HOST_" + self.username, \
@@ -131,15 +141,23 @@ class MongodbPlugin(GmetadPlugin) :
             return vm, obj
 
     def start(self):
-        '''Called by the engine during initialization to get the plugin going.'''
+        '''
+        Called by the engine during initialization to get the plugin going.
+        '''
         logging.debug("MongodbWriter start called")
 
     def stop(self):
-        '''Called by the engine during shutdown to allow the plugin to shutdown.'''
+        '''
+        Called by the engine during shutdown to allow the plugin to shutdown.
+        '''
         logging.debug("MongodbWriter stop called")        
 
-    def notify(self, clusterNode):
-        from lib.operations.api_service_client import APIClient, makeTimestamp
+    def notify(self, clusterNode) :
+        '''
+        TBD
+        '''
+#        from lib.operations.api_service_client import APIClient, makeTimestamp
+        from lib.operations.api_service_client import CloudBenchClient, makeTimestamp
 
         for hostNode in clusterNode:
 
