@@ -1,4 +1,6 @@
-/* indent -bad -bap -bc -ci2 -ip2 -l160 -npcs -nut cloud.c */
+/*
+ * indent -brf -bl -blf -npcs -l160 -ci2 -nut cloud.c
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +41,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   mem->memory = realloc(mem->memory, mem->size + realsize + 1);
   if (mem->memory == NULL)
     {
-      /* out of memory! */
+      // out of memory! 
       printf("not enough memory (realloc returned NULL)\n");
       exit(EXIT_FAILURE);
     }
@@ -70,7 +72,7 @@ ec2type(const char *type)
     return ("dnsName");         /* dns-name */
 }
 
-apr_array_header_t * discovered_udp_send_channels = NULL;
+apr_array_header_t *discovered_udp_send_channels = NULL;
 
 Ganglia_udp_send_channels
 Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
@@ -129,7 +131,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
   if (curl_handle)
     {
-      /* Construct filter using security groups, tags and availability zones */
+      /*
+       * Construct filter using security groups, tags and availability zones 
+       */
       char *key, *value, *last, *tag;
 
       for (i = 0; i < cfg_size(discovery, "tags"); i++)
@@ -138,13 +142,16 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
           tag = apr_pstrdup(context, cfg_getnstr(discovery, "tags", i));
           key = apr_strtok(tag, "= ", &last);
           value = apr_strtok(NULL, "= ", &last);
-          if (!value) {
-              err_msg("[discovery.%s] Parse error for discovery tags in '/etc/ganglia/gmond.conf' : '%s' has no tag value", discovery_type ,key);
+          if (!value)
+            {
+              err_msg("[discovery.%s] Parse error for discovery tags in '/etc/ganglia/gmond.conf' : '%s' has no tag value", discovery_type, key);
               exit(1);
-          }
-          filters = apr_pstrcat(context, filters, "&Filter.", apr_itoa(context, filter_num),
-                        ".Name=tag%3A", curl_easy_escape(curl_handle, key, 0),
-                        "&Filter.", apr_itoa(context, filter_num), ".Value=", curl_easy_escape(curl_handle, value, 0), NULL);
+            }
+          filters =
+            apr_pstrcat(context, filters, "&Filter.",
+                        apr_itoa(context, filter_num), ".Name=tag%3A",
+                        curl_easy_escape(curl_handle, key, 0), "&Filter.",
+                        apr_itoa(context, filter_num), ".Value=", curl_easy_escape(curl_handle, value, 0), NULL);
           tags = apr_pstrcat(context, cfg_getnstr(discovery, "tags", i), ",", tags, NULL);
         }
       if (strlen(tags))
@@ -179,7 +186,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       debug_msg
         ("[discovery.%s] using host_type [%s], tags [%s], groups [%s], availability_zones [%s]", discovery_type, discovery_host_type, tags, groups, zones);
 
-      /* Query EC2 API using curl */
+      /*
+       * Query EC2 API using curl 
+       */
       char timestamp[30];
 
       apr_size_t len;
@@ -221,7 +230,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       HMAC(EVP_sha256(), cloud_secret_key, strlen(cloud_secret_key),
            (unsigned char *) signature_string, strlen(signature_string), (unsigned char *) hash, &hlen);
 
-      /* base64 encode the signature string */
+      /*
+       * base64 encode the signature string 
+       */
       int elen;
 
       char *encbuf;
@@ -240,15 +251,21 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
       curl_easy_setopt(curl_handle, CURLOPT_URL, request);
 
-      /* send all data to this function  */
+      /*
+       * send all data to this function 
+       */
       curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
-      /* we pass our 'chunk' struct to the callback function */
+      /*
+       * we pass our 'chunk' struct to the callback function 
+       */
       curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 
       res = curl_easy_perform(curl_handle);
 
-      /* Check for errors */
+      /*
+       * Check for errors 
+       */
       if (res != CURLE_OK)
         {
           err_msg("[discovery.%s] curl_easy_perform() failed: %s", discovery_type, curl_easy_strerror(res));
@@ -262,7 +279,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
       curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
 
-      /* always cleanup */
+      /*
+       * always cleanup 
+       */
       curl_easy_cleanup(curl_handle);
       debug_msg("[discovery.%s] HTTP response code %ld, %lu bytes retrieved", discovery_type, http_code, (long) chunk.size);
     }
@@ -274,7 +293,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
   // debug_msg("[discovery.%s] API response %s", discovery_type, response);
 
-  /* Parse XML response */
+  /*
+   * Parse XML response 
+   */
   apr_xml_doc *doc;
 
   apr_xml_parser *parser = apr_xml_parser_create(context);
@@ -332,11 +353,11 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
                         }
                       if (apr_strnatcmp(elem5->name, "groupSet") == 0)
                         {
-                          const apr_xml_elem * elem6;
+                          const apr_xml_elem *elem6;
 
                           for (elem6 = elem5->first_child; elem6; elem6 = elem6->next)
                             {
-                              const apr_xml_elem * elem7;
+                              const apr_xml_elem *elem7;
 
                               for (elem7 = elem6->first_child; elem7; elem7 = elem7->next)
                                 {
@@ -391,7 +412,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
             }
           else
             {
-              /* keep track of opened sockets */
+              /*
+               * keep track of opened sockets 
+               */
               *(apr_socket_t **) apr_array_push(tmp_send_channels) = s;
               apr_hash_set(open_sockets, apr_pstrdup(context, remoteip), APR_HASH_KEY_STRING, "OK");
             }
@@ -449,7 +472,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
         apr_pstrcat(context, cloud_conf, "udp_send_channel {\n  bind_hostname = yes\n  host = ", hkey, "\n  port = ", apr_itoa(context, port), "\n}\n\n", NULL);
     }
 
-  /* Write out discovered UDP send channels to file for gmetric */
+  /*
+   * Write out discovered UDP send channels to file for gmetric 
+   */
   apr_file_t *file;
 
   const char *fname = GMOND_CLOUD_CONF;
