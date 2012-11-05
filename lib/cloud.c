@@ -51,25 +51,6 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   return realsize;
 }
 
-const char *
-ec2type(const char *type)
-{
-  if (!apr_strnatcasecmp(type, "private_ip"))
-    {
-      return ("privateIpAddress");      /* private-ip-adress */
-    }
-  else if (!apr_strnatcasecmp(type, "public_ip"))
-    {
-      return ("ipAddress");     /* ip-address */
-    }
-  else if (!apr_strnatcasecmp(type, "private_dns"))
-    {
-      return ("privateDnsName");        /* private-dns-name */
-    }
-  else
-    return ("dnsName");         /* dns-name */
-}
-
 Ganglia_udp_send_channels
 Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 {
@@ -251,7 +232,11 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
   apr_xml_elem *root = doc->root;
   char *instance_id = NULL;
   char *ec2host = NULL;
-
+  char const *ec2_host_type =
+            !apr_strnatcasecmp(discovery_host_type, "private_ip")  ? "privateIpAddress"
+          : !apr_strnatcasecmp(discovery_host_type, "public_ip")   ? "ipAddress"
+          : !apr_strnatcasecmp(discovery_host_type, "private_dns") ? "privateDnsName"
+                                                  /* public_dns */ : "dnsName";
   apr_hash_t *instances = apr_hash_make(context);
 
   for (const apr_xml_elem *elem = root->first_child; elem; elem = elem->next)
@@ -268,7 +253,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
                         {
                           instance_id = apr_pstrdup(context, elem5->first_cdata.first->text);
                         }
-                      if (apr_strnatcmp(elem5->name, ec2type(discovery_host_type)) == 0 && elem5->first_cdata.first != NULL)
+                      if (apr_strnatcmp(elem5->name, ec2_host_type) == 0 && elem5->first_cdata.first != NULL)
                         {
                           ec2host = apr_pstrdup(context, elem5->first_cdata.first->text);
                           apr_hash_set(instances, ec2host, APR_HASH_KEY_STRING, instance_id);
