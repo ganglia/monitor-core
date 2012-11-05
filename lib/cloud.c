@@ -101,11 +101,6 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
   int discover_every = cfg_getint(discovery, "discover_every");
   int port = cfg_getint(discovery, "port");
 
-  char *filters = "&Filter.1.Name=instance-state-name&Filter.1.Value=running";
-  int filter_num = 1;
-  char *groups = "", *tags = "", *zones = "";
-
-  CURLcode res;
   CURL *curl_handle = curl_easy_init();
 
   struct MemoryStruct chunk;
@@ -115,6 +110,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
   if (curl_handle)
     {
       /* Construct filter using tags, security groups and availability zones */
+      char *filters = "&Filter.1.Name=instance-state-name&Filter.1.Value=running";
+      int filter_num = 1;
+      char *groups = "", *tags = "", *zones = "";
       char *key, *value, *last, *tag;
 
       for (int i = 0; i < cfg_size(discovery, "tags"); i++)
@@ -169,21 +167,15 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
       /* Query EC2 API using curl */
       char timestamp[30];
-
       apr_size_t len;
-
       apr_time_exp_t t;
 
       apr_time_exp_lt(&t, apr_time_now());
       apr_strftime(timestamp, &len, sizeof(timestamp), "%Y-%m-%dT%H%%3A%M%%3A%SZ", &t);
 
-      char *endpoint;
+      char *endpoint = cfg_getstr(discovery, "endpoint");
+      char *request_uri = endpoint;
 
-      endpoint = cfg_getstr(discovery, "endpoint");
-
-      char *request_uri;
-
-      request_uri = endpoint;
       if (strncasecmp(request_uri, "http://", 7) == 0)
         request_uri += 7;
       else if (strncasecmp(request_uri, "https://", 8) == 0)
@@ -191,16 +183,12 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
       debug_msg("[discovery.%s] using endpoint %s -> %s", discovery_type, endpoint, request_uri);
 
-      char *query_string;
-
-      query_string =
+      char *query_string =
         apr_pstrcat(context, "AWSAccessKeyId=", cloud_access_key,
                     "&Action=DescribeInstances",
                     (filters ? filters : ""), "&SignatureMethod=HmacSHA256", "&SignatureVersion=2", "&Timestamp=", timestamp, "&Version=2012-08-15", NULL);
 
-      char *signature_string;
-
-      signature_string = apr_pstrcat(context, "GET\n", request_uri, "\n", "/\n", query_string, NULL);
+      char *signature_string = apr_pstrcat(context, "GET\n", request_uri, "\n", "/\n", query_string, NULL);
 
       char hash[EVP_MAX_MD_SIZE];
 
@@ -210,19 +198,12 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
            (unsigned char *) signature_string, strlen(signature_string), (unsigned char *) hash, &hlen);
 
       /* base64 encode the signature string */
-      int elen;
-
-      char *encbuf;
-
-      elen = apr_base64_encode_len(hlen);
-      encbuf = apr_palloc(context, elen);
+      int elen = apr_base64_encode_len(hlen);
+      char *encbuf = apr_palloc(context, elen);
       apr_base64_encode(encbuf, hash, hlen);
 
       char *urlencoded_hash = curl_easy_escape(curl_handle, encbuf, 0);
-
-      char *request;
-
-      request = apr_pstrcat(context, endpoint, "?", query_string, "&Signature=", urlencoded_hash, NULL);
+      char *request = apr_pstrcat(context, endpoint, "?", query_string, "&Signature=", urlencoded_hash, NULL);
 
       debug_msg("[discovery.%s] URL-encoded API request %s", discovery_type, request);
 
@@ -230,7 +211,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
       curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 
-      res = curl_easy_perform(curl_handle);
+      CURLcode res = curl_easy_perform(curl_handle);
 
       if (res != CURLE_OK)
         {
@@ -269,36 +250,21 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       return (Ganglia_udp_send_channels) discovered_udp_send_channels;
     }
 
-  apr_xml_elem *root;
-
-  root = doc->root;
-  const apr_xml_elem *elem;
-
+  apr_xml_elem *root = doc->root;
   char *instance_id = NULL;
-
   char *ec2host = NULL;
 
-  apr_hash_t *instances = NULL;
+  apr_hash_t *instances = apr_hash_make(context);
 
-  instances = apr_hash_make(context);
-
-  for (elem = root->first_child; elem; elem = elem->next)
+  for (const apr_xml_elem *elem = root->first_child; elem; elem = elem->next)
     {
-      const apr_xml_elem *elem2;
-
-      for (elem2 = elem->first_child; elem2; elem2 = elem2->next)
+      for (const apr_xml_elem *elem2 = elem->first_child; elem2; elem2 = elem2->next)
         {
-          const apr_xml_elem *elem3;
-
-          for (elem3 = elem2->first_child; elem3; elem3 = elem3->next)
+          for (const apr_xml_elem *elem3 = elem2->first_child; elem3; elem3 = elem3->next)
             {
-              const apr_xml_elem *elem4;
-
-              for (elem4 = elem3->first_child; elem4; elem4 = elem4->next)
+              for (const apr_xml_elem *elem4 = elem3->first_child; elem4; elem4 = elem4->next)
                 {
-                  const apr_xml_elem *elem5;
-
-                  for (elem5 = elem4->first_child; elem5; elem5 = elem5->next)
+                  for (const apr_xml_elem *elem5 = elem4->first_child; elem5; elem5 = elem5->next)
                     {
                       if (apr_strnatcmp(elem5->name, "instanceId") == 0 && elem5->first_cdata.first != NULL)
                         {
@@ -311,13 +277,9 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
                         }
                       if (apr_strnatcmp(elem5->name, "groupSet") == 0)
                         {
-                          const apr_xml_elem *elem6;
-
-                          for (elem6 = elem5->first_child; elem6; elem6 = elem6->next)
+                          for (const apr_xml_elem *elem6 = elem5->first_child; elem6; elem6 = elem6->next)
                             {
-                              const apr_xml_elem *elem7;
-
-                              for (elem7 = elem6->first_child; elem7; elem7 = elem7->next)
+                              for (const apr_xml_elem *elem7 = elem6->first_child; elem7; elem7 = elem7->next)
                                 {
                                   if (apr_strnatcmp(elem7->name, "groupName") == 0 && elem7->first_cdata.first != NULL)
                                     debug_msg("[discovery.%s] %s security group %s", discovery_type, instance_id, elem7->first_cdata.first->text);
@@ -341,13 +303,8 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       debug_msg("[discovery.%s] Found %d matching instances", discovery_type, apr_hash_count(instances));
     }
 
-  apr_hash_t *open_sockets = NULL;
-
-  open_sockets = apr_hash_make(context);
-
-  apr_array_header_t *tmp_send_channels = NULL;
-
-  tmp_send_channels = apr_array_make(context, 10, sizeof(apr_socket_t *));      /* init array size of 10 is not max */
+  apr_hash_t *open_sockets = apr_hash_make(context);
+  apr_array_header_t *tmp_send_channels = apr_array_make(context, 10, sizeof(apr_socket_t *));      /* init array size of 10 is not max */
 
   if (discovered_udp_send_channels != NULL)
     {
