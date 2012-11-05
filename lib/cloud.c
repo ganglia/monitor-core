@@ -71,26 +71,20 @@ ec2type(const char *type)
     return ("dnsName");         /* dns-name */
 }
 
-apr_array_header_t *discovered_udp_send_channels = NULL;
-
 Ganglia_udp_send_channels
 Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 {
+  apr_pool_t *context = (apr_pool_t *) p;
   cfg_t *cfg = (cfg_t *) config;
 
-  apr_pool_t *context = (apr_pool_t *) p;
+  static apr_array_header_t *discovered_udp_send_channels = NULL;
 
   if (discovered_udp_send_channels == NULL)
     discovered_udp_send_channels = apr_array_make(context, 10, sizeof(apr_socket_t *)); /* init array size of 10 is not max */
 
-  int i;
-  char *cloud_access_key = NULL;
-  char *cloud_secret_key = NULL;
-  cfg_t *cloud;
-
-  cloud = cfg_getsec(cfg, "cloud");
-  cloud_access_key = cfg_getstr(cloud, "access_key");
-  cloud_secret_key = cfg_getstr(cloud, "secret_key");
+  cfg_t *cloud = cfg_getsec(cfg, "cloud");
+  char *cloud_access_key = cfg_getstr(cloud, "access_key");
+  char *cloud_secret_key = cfg_getstr(cloud, "secret_key");
 
   if (cloud_access_key == NULL || cloud_secret_key == NULL)
     {
@@ -98,31 +92,21 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       exit(1);
     }
 
-  char *last_four;
-
-  last_four = cloud_secret_key + strlen(cloud_secret_key) - 4;
+  char *last_four = cloud_secret_key + strlen(cloud_secret_key) - 4;
   debug_msg("[discovery.cloud] access key=%s, secret key=************************************%s", cloud_access_key, last_four);
 
-  char *discovery_type = NULL;
-  char *discovery_host_type = NULL;
-  int discover_every = 0;
+  cfg_t *discovery = cfg_getsec(cfg, "discovery");
+  char *discovery_type = cfg_getstr(discovery, "type");
+  char *discovery_host_type = cfg_getstr(discovery, "host_type");
+  int discover_every = cfg_getint(discovery, "discover_every");
+  int port = cfg_getint(discovery, "port");
+
   char *filters = "&Filter.1.Name=instance-state-name&Filter.1.Value=running";
   int filter_num = 1;
   char *groups = "", *tags = "", *zones = "";
-  cfg_t *discovery;
-
-  discovery = cfg_getsec(cfg, "discovery");
-  discovery_type = cfg_getstr(discovery, "type");
-  discovery_host_type = cfg_getstr(discovery, "host_type");
-  discover_every = cfg_getint(discovery, "discover_every");
-
-  int port;
-  port = cfg_getint(discovery, "port");
 
   CURLcode res;
-  CURL *curl_handle;
-
-  curl_handle = curl_easy_init();
+  CURL *curl_handle = curl_easy_init();
 
   struct MemoryStruct chunk;
   chunk.memory = malloc(1);     /* will be grown as needed by the realloc above */
@@ -133,7 +117,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       /* Construct filter using tags, security groups and availability zones */
       char *key, *value, *last, *tag;
 
-      for (i = 0; i < cfg_size(discovery, "tags"); i++)
+      for (int i = 0; i < cfg_size(discovery, "tags"); i++)
         {
           filter_num++;
           tag = apr_pstrdup(context, cfg_getnstr(discovery, "tags", i));
@@ -154,7 +138,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       if (strlen(tags))
         tags[strlen(tags) - 1] = '\0';
 
-      for (i = 0; i < cfg_size(discovery, "groups"); i++)
+      for (int i = 0; i < cfg_size(discovery, "groups"); i++)
         {
           filter_num++;
           filters =
@@ -167,7 +151,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       if (strlen(groups))
         groups[strlen(groups) - 1] = '\0';
 
-      for (i = 0; i < cfg_size(discovery, "availability_zones"); i++)
+      for (int i = 0; i < cfg_size(discovery, "availability_zones"); i++)
         {
           filter_num++;
           filters =
@@ -369,7 +353,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
     {
       apr_array_header_t *chnls = (apr_array_header_t *) discovered_udp_send_channels;
 
-      for (i = 0; i < chnls->nelts; i++)
+      for (int i = 0; i < chnls->nelts; i++)
         {
           apr_sockaddr_t *remotesa = NULL;
 
