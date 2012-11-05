@@ -32,7 +32,7 @@ typedef struct memory_t
 } memory_t;
 
 static size_t
-WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+Curl_write_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   memory_t *mem = userp;
@@ -187,7 +187,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       debug_msg("[discovery.%s] URL-encoded API request %s", discovery_type, request);
 
       curl_easy_setopt(curl_handle, CURLOPT_URL, request);
-      curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+      curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, Curl_write_callback);
       curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 
       CURLcode res = curl_easy_perform(curl_handle);
