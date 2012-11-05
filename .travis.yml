@@ -1,4 +1,4 @@
 language: c
 script: "./bootstrap && ./configure --with-gmetad --without-php --with-perl=/usr --enable-status && make all"
 before_script:
-  - sudo apt-get install -y libapr1-dev libconfuse-dev libexpat1-dev libpcre3-dev libssl-dev librrd-dev libperl-dev libtool m4
+  - sudo apt-get install -y libapr1-dev libconfuse-dev libexpat1-dev libpcre3-dev libssl-dev librrd-dev libperl-dev libtool m4 gperf
