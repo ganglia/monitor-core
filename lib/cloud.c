@@ -25,17 +25,17 @@
 
 #define GMOND_CLOUD_CONF "/var/lib/ganglia/gmond-cloud.conf"
 
-struct MemoryStruct
+typedef struct memory_t
 {
   char *memory;
   size_t size;
-};
+} memory_t;
 
 static size_t
 WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
-  struct MemoryStruct *mem = userp;
+  memory_t *mem = userp;
 
   mem->memory = realloc(mem->memory, mem->size + realsize + 1);
   if (mem->memory == NULL)
@@ -83,7 +83,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
   CURL *curl_handle = curl_easy_init();
 
-  struct MemoryStruct chunk;
+  memory_t chunk;
   chunk.memory = malloc(1);     /* will be grown as needed by the realloc above */
   chunk.size = 0;               /* no data at this point */
 
