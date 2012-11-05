@@ -112,15 +112,15 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       /* Construct filter using tags, security groups and availability zones */
       char *filters = "&Filter.1.Name=instance-state-name&Filter.1.Value=running";
       int filter_num = 1;
-      char *groups = "", *tags = "", *zones = "";
-      char *key, *value, *last, *tag;
+      char *tags = "", *groups = "", *zones = "";
 
       for (int i = 0; i < cfg_size(discovery, "tags"); i++)
         {
           filter_num++;
-          tag = apr_pstrdup(context, cfg_getnstr(discovery, "tags", i));
-          key = apr_strtok(tag, "= ", &last);
-          value = apr_strtok(NULL, "= ", &last);
+          char *tag = apr_pstrdup(context, cfg_getnstr(discovery, "tags", i));
+          char *last;
+          char *key = apr_strtok(tag, "= ", &last);
+          char *value = apr_strtok(NULL, "= ", &last);
           if (!value)
             {
               err_msg("[discovery.%s] Parse error for discovery tags in '/etc/ganglia/gmond.conf' : '%s' has no tag value", discovery_type, key);
@@ -185,15 +185,14 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
       char *query_string =
         apr_pstrcat(context, "AWSAccessKeyId=", cloud_access_key,
-                    "&Action=DescribeInstances",
-                    (filters ? filters : ""), "&SignatureMethod=HmacSHA256", "&SignatureVersion=2", "&Timestamp=", timestamp, "&Version=2012-08-15", NULL);
+                    "&Action=DescribeInstances", filters,
+                    "&SignatureMethod=HmacSHA256", "&SignatureVersion=2",
+                    "&Timestamp=", timestamp, "&Version=2012-08-15", NULL);
 
       char *signature_string = apr_pstrcat(context, "GET\n", request_uri, "\n", "/\n", query_string, NULL);
 
       char hash[EVP_MAX_MD_SIZE];
-
       unsigned int hlen;
-
       HMAC(EVP_sha256(), cloud_secret_key, strlen(cloud_secret_key),
            (unsigned char *) signature_string, strlen(signature_string), (unsigned char *) hash, &hlen);
 
@@ -313,9 +312,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       for (int i = 0; i < chnls->nelts; i++)
         {
           apr_sockaddr_t *remotesa = NULL;
-
           char remoteip[256];
-
           apr_socket_t *s = ((apr_socket_t **) (chnls->elts))[i];
 
           apr_socket_addr_get(&remotesa, APR_REMOTE, s);
@@ -334,8 +331,6 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
         }
     }
 
-  apr_hash_index_t *hi;
-
   cfg_t *globals = (cfg_t *) cfg_getsec((cfg_t *) cfg, "globals");
   char *override_hostname = cfg_getstr(globals, "override_hostname");
   char *override_ip = cfg_getstr(globals, "override_ip");
@@ -348,7 +343,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
     cloud_conf = apr_pstrcat(context, cloud_conf, "  override_ip = ", override_ip, "\n", NULL);
   cloud_conf = apr_pstrcat(context, cloud_conf, "}\n\n", NULL);
 
-  for (hi = apr_hash_first(context, instances); hi; hi = apr_hash_next(hi))
+  for (apr_hash_index_t *hi = apr_hash_first(context, instances); hi; hi = apr_hash_next(hi))
     {
       const void *k;
       void *v;
@@ -384,7 +379,6 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
 
   /* Write out discovered UDP send channels to file for gmetric */
   apr_file_t *file;
-
   const char *fname = GMOND_CLOUD_CONF;
 
   if (apr_file_open(&file, fname, APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_GREAD, context) != APR_SUCCESS)
