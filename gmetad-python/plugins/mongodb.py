@@ -67,16 +67,17 @@ class MongodbPlugin(GmetadPlugin) :
                 self.cloud_name = args
 
         path.insert(0, self.path)
-        from lib.operations.api_service_client import APIClient
 
+        from lib.operations.api_service_client import APIClient
         self.api = APIClient(self.api)
         self.api.dashboard_conn_check(self.cloud_name)
         self.msci = self.api.msci
 
         self.obj_cache = {}
-        self.expid = self.api.cldshow("time")["experiment_id"]
+
+        self.expid = self.api.cldshow(self.cloud_name, "time")["experiment_id"]
         self.username = self.api.username
-        
+
         self.latest_collection = {"HOST" : "latest_runtime_os_HOST_" + self.username, \
                                   "VM" : "latest_runtime_os_VM_" + self.username}
         self.data_collection = {"HOST" : "runtime_os_HOST_" + self.username, \
@@ -107,14 +108,12 @@ class MongodbPlugin(GmetadPlugin) :
             #obj = msci.find_document(plugin.manage_collection["VM"], {"cloud_ip" : ip})
 
             if obj is not None : 
-                obj = plugin.cloudbench.vmshow(obj["_id"])
-                #obj = plugin.api.vmshow(obj["_id"])
+                obj = plugin.api.vmshow(plugin.cloud_name, obj["_id"])
             else :
                 vm = False
                 obj = msci.find_document(plugin.manage_collection["HOST"], {"cloud_ip" : ip})
                 if obj is not None : 
-                    obj = plugin.cloudbench.hostshow(obj["_id"])
-                    #obj = plugin.api.hostshow(obj["_id"])
+                    obj = plugin.api.hostshow(plugin.cloud_name, obj["_id"])
                 else :
                     vm = None
                     obj = None
@@ -133,14 +132,21 @@ class MongodbPlugin(GmetadPlugin) :
             return vm, obj
 
     def start(self):
-        '''Called by the engine during initialization to get the plugin going.'''
+        '''
+        Called by the engine during initialization to get the plugin going.
+        '''
         logging.debug("MongodbWriter start called")
 
     def stop(self):
-        '''Called by the engine during shutdown to allow the plugin to shutdown.'''
+        '''
+        Called by the engine during shutdown to allow the plugin to shutdown.
+        '''
         logging.debug("MongodbWriter stop called")        
 
-    def notify(self, clusterNode):
+    def notify(self, clusterNode) :
+        '''
+        TBD
+        '''
         from lib.operations.api_service_client import APIClient, makeTimestamp
 
         for hostNode in clusterNode:
