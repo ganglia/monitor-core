@@ -63,12 +63,14 @@ class MongodbPlugin(GmetadPlugin) :
                 self.path = args
             elif kw == "api" :
                 self.api = args
+            elif kw == "cloud_name" :
+                self.cloud_name = args
 
         path.insert(0, self.path)
         from lib.operations.api_service_client import APIClient
 
         self.api = APIClient(self.api)
-        self.api.monitoring_conn_check()
+        self.api.dashboard_conn_check(self.cloud_name)
         self.msci = self.api.msci
 
         self.obj_cache = {}
