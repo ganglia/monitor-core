@@ -2,6 +2,9 @@
 include $(top_srcdir)/ganglia.inc
 
 SUBDIRS = modules python_modules php_modules
+if BUILD_PERL
+SUBDIRS += perl_modules
+endif
 
 EXTRA_DIST = gmond.aix.init gmond.solaris.init.in gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod cmdline.sh
 if STATIC_BUILD
