@@ -243,11 +243,16 @@ push_data_to_carbon( char *graphite_msg)
   int port;
   int carbon_socket;
   struct sockaddr_in server;
-  int carbon_timeout = 500;
+  int carbon_timeout ;
   int nbytes;
   struct pollfd carbon_struct_poll;
   int poll_rval;
   int fl;
+
+  if (gmetad_config.carbon_timeout)
+      carbon_timeout=gmetad_config.carbon_timeout;
+  else
+      carbon_timeout = 500;
 
   if (gmetad_config.carbon_port)
      port=gmetad_config.carbon_port;
