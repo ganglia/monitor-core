@@ -2298,23 +2298,40 @@ setup_metric_info_impl(Ganglia_metric_callback *metric_cb, int group_once, const
             {
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrdup(global_context, spfhost_val);
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
-                spfhost_val = strchr(spfhost_val,':');
+
+                spfhost_val = strchr(spfhost_val, ':');
                 if(spfhost_val)
                     spfhost_val++;
                 else
                     spfhost_val = metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.host;
+
+                /* Prior metric name value */
+                char *p = strchr(metric_info->name, ':');
+                if (p)
+                {
+                    char *buf = malloc(p - metric_info->name + 1);
+                    memcpy(buf, metric_info->name, p - metric_info->name);
+                    buf[p - metric_info->name] = '\0';
+                    strcpy(metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name, buf);
+                    debug_msg("\tmetric name set to \'%s\' for SPOOF_HOST \'%s\'",
+                              metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name, spfhost_val);
+                    if (buf) free(buf);
+                }
             }
             else
               spfhost_val = myname;
+
             spfname_val = apr_table_get((apr_table_t *)metric_info->metadata, SPOOF_NAME);
             if (spfname_val) 
             {
-                char *spoofedname = apr_pstrcat(global_context, spfname_val, ":", name, NULL);
-                char *spoofedkey = apr_pstrcat(global_context, spfname_val, ":", name, ":", spfhost_val, NULL);
+                char *spoofedname = apr_pstrcat(global_context, spfname_val, NULL);
+                char *spoofedkey = apr_pstrcat(global_context, spfname_val, ":", spfhost_val, NULL);
 
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name = spoofedname;
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
-    
+                debug_msg("\tmetric name set to \'%s\' for SPOOF_NAME \'%s\'",
+                          metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name, spfname_val);
+
                 /* Reinsert the same metric_callback structure pointer under the spoofed name. 
                     This will put the same metric info in the hash table twice but under
                     the spoofed name. */
