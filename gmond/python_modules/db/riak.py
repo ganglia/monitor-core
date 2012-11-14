@@ -63,7 +63,7 @@ class UpdateMetricThread(threading.Thread):
     def update_metric(self):
         try:
             req = urllib2.Request(url = self.url)
-            res = urllib2.urlopen(req)
+            res = urllib2.urlopen(req, None, 2)
             stats = res.read()
             dprint("%s", stats)
             json_stats = json.loads(stats)

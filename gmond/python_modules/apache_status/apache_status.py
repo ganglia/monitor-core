@@ -68,7 +68,7 @@ def get_metrics():
             req = urllib2.Request(SERVER_STATUS_URL + "?auto")
             
             # Download the status file
-            res = urllib2.urlopen(req)
+            res = urllib2.urlopen(req, None, 2)
 
             for line in res:
                split_line = line.rstrip().split(": ")
@@ -93,7 +93,7 @@ def get_metrics():
                 req2 = urllib2.Request(SERVER_STATUS_URL)
                 
                 # Download the status file
-                res = urllib2.urlopen(req2)
+                res = urllib2.urlopen(req2, None, 2)
                 
                 for line in res:
                     regMatch = SSL_REGEX.match(line)
