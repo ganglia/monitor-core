@@ -68,7 +68,7 @@ class MongodbPlugin(GmetadPlugin) :
 
         path.insert(0, self.path)
 
-        from lib.operations.api_service_client import APIClient
+        from lib.api.api_service_client import APIClient
         self.api = APIClient(self.api)
         self.api.dashboard_conn_check(self.cloud_name)
         self.msci = self.api.msci
@@ -147,7 +147,7 @@ class MongodbPlugin(GmetadPlugin) :
         '''
         TBD
         '''
-        from lib.operations.api_service_client import APIClient, makeTimestamp
+        from lib.api.api_service_client import APIClient, makeTimestamp
 
         for hostNode in clusterNode:
 
