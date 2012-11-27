@@ -42,7 +42,7 @@ const char *gengetopt_args_info_help[] = {
   "  -s, --slope=STRING    Either zero|positive|negative|both  (default=`both')",
   "  -x, --tmax=INT        The maximum time in seconds between gmetric calls  \n                          (default=`60')",
   "  -d, --dmax=INT        The lifetime in seconds of this metric  (default=`0')",
-  "  -g, --group=STRING    Group of the metric",
+  "  -g, --group=STRING    Group(s) of the metric (comma-separated)",
   "  -C, --cluster=STRING  Cluster of the metric",
   "  -D, --desc=STRING     Description of the metric",
   "  -T, --title=STRING    Title of the metric",
