@@ -332,8 +332,8 @@ fi
 # Clean up the .conf.in files
 %__rm -f $RPM_BUILD_ROOT%{conf_dir}/conf.d/*.conf.in
 
-# Disable the diskusage module until it is configured properly
-%__mv $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf $RPM_BUILD_ROOT%{conf_dir}/conf.d/diskusage.pyconf.disabled
+# Disable the multicpu module until it is configured properly
+%__mv $RPM_BUILD_ROOT%{conf_dir}/conf.d/multicpu.conf $RPM_BUILD_ROOT%{conf_dir}/conf.d/multicpu.conf.disabled
 
 %__make DESTDIR=$RPM_BUILD_ROOT install
 %__make -C gmond gmond.conf.5
