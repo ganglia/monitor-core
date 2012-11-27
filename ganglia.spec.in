@@ -387,7 +387,7 @@ fi
 %config(noreplace) %{conf_dir}/conf.d/modgstatus.conf
 %dir %{_libdir}/ganglia/
 %{_libdir}/ganglia/modmulticpu.so*
-%{conf_dir}/conf.d/multicpu.conf
+%{conf_dir}/conf.d/multicpu.conf*
 %{_libdir}/ganglia/modcpu.so*
 %{_libdir}/ganglia/moddisk.so*
 %{_libdir}/ganglia/modgstatus.so
