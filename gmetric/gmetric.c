@@ -111,7 +111,12 @@ main( int argc, char *argv[] )
   if(args_info.cluster_given)
       Ganglia_metadata_add(gmetric, "CLUSTER", args_info.cluster_arg);
   if(args_info.group_given)
-      Ganglia_metadata_add(gmetric, "GROUP", args_info.group_arg);
+    {
+      char *last;
+      for (char *group = apr_strtok(args_info.group_arg, ", ", &last); group != NULL; group = apr_strtok(NULL, ", ", &last)) {
+        Ganglia_metadata_add(gmetric, "GROUP", group);
+      }
+    }
   if(args_info.desc_given)
       Ganglia_metadata_add(gmetric, "DESC", args_info.desc_arg);
   if(args_info.title_given)
