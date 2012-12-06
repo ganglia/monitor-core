@@ -83,8 +83,8 @@ class MongodbPlugin(GmetadPlugin) :
         self.data_collection = {"HOST" : "runtime_os_HOST_" + self.username, \
                                   "VM" : "runtime_os_VM_" + self.username}
 
-        self.manage_collection = {"HOST" : "management_HOST_" + self.username, \
-                                "VM" : "management_VM_" + self.username}
+        self.manage_collection = {"HOST" : "latest_management_HOST_" + self.username, \
+                                "VM" : "latest_management_VM_" + self.username}
 
         _msg = "API contacted successfully. The current experiment id is \""
         _msg += self.expid + "\" and the current username is \"" + self.username
