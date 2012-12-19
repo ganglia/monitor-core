@@ -398,16 +398,14 @@ main ( int argc, char *argv[] )
    server_socket = g_tcp_socket_server_new( c->xml_port );
    if (server_socket == NULL)
       {
-         perror("tcp_listen() on xml_port failed");
-         exit(1);
+         err_quit("tcp_listen() on xml_port failed");
       }
    debug_msg("xml listening on port %d", c->xml_port);
    
    interactive_socket = g_tcp_socket_server_new( c->interactive_port );
    if (interactive_socket == NULL)
       {
-         perror("tcp_listen() on interactive_port failed");
-         exit(1);
+         err_quit("tcp_listen() on interactive_port failed");
       }
    debug_msg("interactive xml listening on port %d", c->interactive_port);
 
