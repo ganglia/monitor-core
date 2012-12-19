@@ -44,9 +44,9 @@ RRD_update( char *rrd, const char *sum, const char *num, unsigned int process_ti
 
    /* If we are a host RRD, we "sum" over only one host. */
    if (num)
-      sprintf(val, "%d:%s:%s", process_time, sum, num);
+      sprintf(val, "%u:%s:%s", process_time, sum, num);
    else
-      sprintf(val, "%d:%s", process_time, sum);
+      sprintf(val, "%u:%s", process_time, sum);
 
    argv[0] = "dummy";
    argv[1] = rrd;
@@ -266,7 +266,7 @@ push_data_to_carbon( char *graphite_msg)
   carbon_socket = socket (PF_INET, SOCK_STREAM, 0);
   if (carbon_socket < 0)
     {
-      perror ("socket (client)");
+      err_msg("socket (client): %s", strerror(errno));
       close (carbon_socket);
       return EXIT_FAILURE;
     }
@@ -295,7 +295,7 @@ push_data_to_carbon( char *graphite_msg)
       debug_msg("carbon proxy:: %s is ready to receive",gmetad_config.carbon_server);
       nbytes = write (carbon_socket, graphite_msg, strlen(graphite_msg) + 1);
       if (nbytes < 0) {
-        perror ("write");
+        err_msg("write: %s", strerror(errno));
         close(carbon_socket);
         return EXIT_FAILURE;
       }
