@@ -1181,6 +1181,7 @@ Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
     if(metric)
       {
         apr_pool_clear(metric->pool);
+        metric->name = apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
       }
     else
       {
@@ -1202,7 +1203,7 @@ Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
         * based on the name of the gmetric sent...we need to strdup() the name
         * since the xdr_free below will blast the value later (along with the other
         * allocated structure elements).  This is only performed once at gmetric creation */
-        metric->name = apr_pstrdup(host->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
+        metric->name = apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
         debug_msg("***Allocating metadata packet for host--%s-- and metric --%s-- ****\n", host->hostname, metric->name);
     }
     
@@ -2979,7 +2980,7 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
                 {
                   /* this is a stale gmetric */
                   debug_msg("deleting old metric '%s' from host '%s'", metric->name, host->hostname);
-#if 0
+
                   /* remove the metric from the metric and values hash */
                   apr_thread_mutex_lock(host->mutex);
                   apr_hash_set( host->metrics, metric->name, APR_HASH_KEY_STRING, NULL);
@@ -2987,7 +2988,6 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
                   apr_thread_mutex_unlock(host->mutex);
                   /* destroy any memory that was allocated for this gmetric */
                   apr_pool_destroy( metric->pool );
-#endif
                 }
             }
         }
