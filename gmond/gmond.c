@@ -1203,10 +1203,10 @@ Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
     
     if(metric)
       {
-        metric->name = apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
         Ganglia_metadata_msg *fmessage = &(metric->message_u.f_message);
         u_int i,mlen = message->Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len;
         
+        metric->name = apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
         fmessage->id = message->id;
         fmessage->Ganglia_metadata_msg_u.gfull.metric_id.host = 
             apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.host);
@@ -1316,9 +1316,9 @@ Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
 
   if(metric)
     {
-      metric->name = apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.metric_id.name );
       Ganglia_value_msg *vmessage = &(metric->message_u.v_message);
 
+      metric->name = apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.metric_id.name );
       vmessage->id = message->id;
       vmessage->Ganglia_value_msg_u.gstr.metric_id.host = 
           apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.metric_id.host);
