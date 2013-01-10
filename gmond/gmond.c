@@ -1198,12 +1198,7 @@ Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
         if(status != APR_SUCCESS)
             return;
 
-        /* NOTE: In order for gmetric messages to be properly saved to the hash table
-        * based on the name of the gmetric sent...we need to strdup() the name
-        * since the xdr_free below will blast the value later (along with the other
-        * allocated structure elements).  This is only performed once at gmetric creation */
-        metric->name = apr_pstrdup(host->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
-        debug_msg("***Allocating metadata packet for host--%s-- and metric --%s-- ****\n", host->hostname, metric->name);
+        debug_msg("***Allocating metadata packet for host--%s-- and metric --%s-- ****\n", host->hostname, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
     }
     
     if(metric)
@@ -1211,6 +1206,7 @@ Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
         Ganglia_metadata_msg *fmessage = &(metric->message_u.f_message);
         u_int i,mlen = message->Ganglia_metadata_msg_u.gfull.metric.metadata.metadata_len;
         
+        metric->name = apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.name);
         fmessage->id = message->id;
         fmessage->Ganglia_metadata_msg_u.gfull.metric_id.host = 
             apr_pstrdup(metric->pool, message->Ganglia_metadata_msg_u.gfull.metric_id.host);
@@ -1314,12 +1310,7 @@ Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
       if(status != APR_SUCCESS)
           return;
 
-      /* NOTE: In order for gmetric messages to be properly saved to the hash table
-       * based on the name of the gmetric sent...we need to strdup() the name
-       * since the xdr_free below will blast the value later (along with the other
-       * allocated structure elements).  This is only performed once at gmetric creation */
-      metric->name = apr_pstrdup(host->pool, message->Ganglia_value_msg_u.gstr.metric_id.name );
-      debug_msg("***Allocating value packet for host--%s-- and metric --%s-- ****\n", message->Ganglia_value_msg_u.gstr.metric_id.host, metric->name);
+      debug_msg("***Allocating value packet for host--%s-- and metric --%s-- ****\n", message->Ganglia_value_msg_u.gstr.metric_id.host, message->Ganglia_value_msg_u.gstr.metric_id.name );
     }
 
 
@@ -1327,6 +1318,7 @@ Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
     {
       Ganglia_value_msg *vmessage = &(metric->message_u.v_message);
 
+      metric->name = apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.metric_id.name );
       vmessage->id = message->id;
       vmessage->Ganglia_value_msg_u.gstr.metric_id.host = 
           apr_pstrdup(metric->pool, message->Ganglia_value_msg_u.gstr.metric_id.host);
@@ -2979,7 +2971,7 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
                 {
                   /* this is a stale gmetric */
                   debug_msg("deleting old metric '%s' from host '%s'", metric->name, host->hostname);
-#if 0
+
                   /* remove the metric from the metric and values hash */
                   apr_thread_mutex_lock(host->mutex);
                   apr_hash_set( host->metrics, metric->name, APR_HASH_KEY_STRING, NULL);
@@ -2987,7 +2979,6 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
                   apr_thread_mutex_unlock(host->mutex);
                   /* destroy any memory that was allocated for this gmetric */
                   apr_pool_destroy( metric->pool );
-#endif
                 }
             }
         }
