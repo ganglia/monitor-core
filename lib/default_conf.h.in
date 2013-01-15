@@ -245,6 +245,11 @@ collection_group {\n\
     value_threshold = \"1.0\"\n\
     title = \"CPU wio\"\n\
   }\n\
+  metric {\n\
+    name = \"cpu_steal\"\n\
+    value_threshold = \"1.0\"\n\
+    title = \"CPU steal\"\n\
+  }\n\
   /* The next two metrics are optional if you want more detail...\n\
      ... since they are accounted for in cpu_system.\n\
   metric {\n\
