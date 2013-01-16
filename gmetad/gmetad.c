@@ -254,6 +254,8 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
 	 if (gmetad_config.write_rrds == 0)
 	     return 0;
 
+   debug_msg("Writing Root Summary data for metric %s", name);
+
    rc = write_data_to_rrd( NULL, NULL, name, sum, num, 15, 0, metric->slope);
    if (rc)
       {
