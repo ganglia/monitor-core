@@ -378,17 +378,20 @@ main ( int argc, char *argv[] )
          become_a_nobody(c->setuid_username);
       }
 
-   if( stat( c->rrd_rootdir, &struct_stat ) )
+   if( gmetad_config.write_rrds )
       {
-          err_sys("Please make sure that %s exists", c->rrd_rootdir);
-      }
-   if ( struct_stat.st_uid != gmetad_uid )
-      {
-          err_quit("Please make sure that %s is owned by %s", c->rrd_rootdir, gmetad_username);
-      }
-   if (! (struct_stat.st_mode & S_IWUSR) )
-      {
-          err_quit("Please make sure %s has WRITE permission for %s", gmetad_username, c->rrd_rootdir);
+         if( stat( c->rrd_rootdir, &struct_stat ) )
+            {
+                err_sys("Please make sure that %s exists", c->rrd_rootdir);
+            }
+         if ( struct_stat.st_uid != gmetad_uid )
+            {
+                err_quit("Please make sure that %s is owned by %s", c->rrd_rootdir, gmetad_username);
+            }
+         if (! (struct_stat.st_mode & S_IWUSR) )
+            {
+                err_quit("Please make sure %s has WRITE permission for %s", gmetad_username, c->rrd_rootdir);
+            }
       }
 
    if(debug_level)
