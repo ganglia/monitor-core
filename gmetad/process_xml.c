@@ -1114,15 +1114,43 @@ static int
 endElement_GRID(void *data, const char *el)
 {
    xmldata_t *xmldata = (xmldata_t *) data;
-   Source_t *source = &xmldata->source;
 
-   /*release the partial sum mutex */
-   pthread_mutex_unlock(source->sum_finished);
+   /* In non-scalable mode, we ignore GRIDs. */
+   if (!gmetad_config.scalable_mode)
+      return 0;
 
-   if (gmetad_config.scalable_mode)
+   xmldata->grid_depth--;
+   debug_msg("Found a </GRID>, depth is now %d", xmldata->grid_depth);
+
+   datum_t hashkey, hashval;
+   datum_t *rdatum;
+   hash_t *summary;
+   Source_t *source;
+
+   /* Only keep info on sources we are an authority on. */
+   if (authority_mode(xmldata))
       {
-         xmldata->grid_depth--;
-         debug_msg("Found a </GRID>, depth is now %d", xmldata->grid_depth);
+         source = &xmldata->source;
+         summary = xmldata->source.metric_summary;
+
+         /* Release the partial sum mutex */
+         pthread_mutex_unlock(source->sum_finished);
+
+         hashkey.data = (void*) xmldata->sourcename;
+         hashkey.size = strlen(xmldata->sourcename) + 1;
+
+         hashval.data = source;
+         /* Trim structure to the correct length. */
+         hashval.size = sizeof(*source) - GMETAD_FRAMESIZE + source->stringslen;
+
+         /* We insert here to get an accurate hosts up/down value. */
+         rdatum = hash_insert( &hashkey, &hashval, xmldata->root);
+         if (!rdatum) {
+               err_msg("Could not insert source %s", xmldata->sourcename);
+               return 1;
+         }
+         /* Write the metric summaries to the RRD. */
+         hash_foreach(summary, finish_processing_source, data);
       }
    return 0;
 }
@@ -1179,7 +1207,7 @@ end (void *data, const char *el)
       {
          case GRID_TAG:
             rc = endElement_GRID(data, el);
-	    /* No break. */
+            break;
 
          case CLUSTER_TAG:
             rc = endElement_CLUSTER(data, el);
