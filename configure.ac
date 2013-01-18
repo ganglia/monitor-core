@@ -570,6 +570,22 @@ else
 fi
 echo
 
+echo
+echo Checking for systemd
+AC_ARG_WITH([systemdsystemunitdir],
+  AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),
+  [], [with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)])
+if test "x$with_systemdsystemunitdir" != xno; then
+  AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
+else
+  AC_SUBST([systemdsystemunitdir], [/usr/lib/systemd/system])
+fi
+AM_CONDITIONAL(HAVE_SYSTEMD, [test -n "$with_systemdsystemunitdir" -a "x$with_systemdsystemunitdir" != xno ])
+
+
+echo
+
+
 AC_CHECK_LIB(rpc, xdr_string)
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, inet_addr)

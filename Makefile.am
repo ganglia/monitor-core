@@ -77,8 +77,11 @@ contrib/ganglia_gmond.xml: contrib/ganglia_gmond.xml.in $(FIXCONFIG)
 solaris/pkginfo: solaris/pkginfo.in $(FIXCONFIG)
 	$(FIXCONFIG) solaris/pkginfo.in
 
+gmetad-python/gmetad-python.service: gmetad-python/gmetad-python.service.in $(FIXCONFIG)
+	$(FIXCONFIG) gmetad-python/gmetad-python.service.in
+
 # Notice that some files declared in this hook never get installed anywhere
 # We use the hook to force the files to be generated, but they remain
 # within the build tree for someone to inspect or manually copy to
 # the desired location if needed
-install-data-hook: contrib/ganglia_gmond.xml solaris/pkginfo
+all: contrib/ganglia_gmond.xml solaris/pkginfo gmetad-python/gmetad-python.service
