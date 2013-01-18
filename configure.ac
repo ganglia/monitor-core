@@ -7,12 +7,12 @@ dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose, without fee, and without written agreement is
 dnl hereby granted, provided that the above copyright notice and the following
 dnl two paragraphs appear in all copies of this software.
-dnl 
+dnl
 dnl IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
 dnl DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
 dnl OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
 dnl CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-dnl 
+dnl
 dnl THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
 dnl INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 dnl AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
@@ -28,7 +28,7 @@ AC_CONFIG_AUX_DIR(build)
 
 ### BEGIN RELEASE VARIABLES ############################
 # On making a release...
-# If this release is just a minor bug fix release, increment 
+# If this release is just a minor bug fix release, increment
 # GANGLIA_MICRO_VERSION.
 #
 # If this release adds significant features or breaks backward compatibility,
@@ -36,9 +36,9 @@ AC_CONFIG_AUX_DIR(build)
 #
 # If this release is a complete restructuring of
 # the overall architecture of ganglia,
-# increment GANGLIA_MAJOR_VERSION and set 
+# increment GANGLIA_MAJOR_VERSION and set
 # GANGLIA_MINOR_VERSION and GANGLIA_MICRO_VERSION
-# to 0 (zero) 
+# to 0 (zero)
 GANGLIA_MAJOR_VERSION=3
 GANGLIA_MINOR_VERSION=6
 GANGLIA_MICRO_VERSION=0
@@ -48,7 +48,7 @@ GANGLIA_MICRO_VERSION=0
 # - it is the `Release:' parameter in the spec file
 # - appended after the version number, using a hyphen, e.g. X.X.X-REL
 # Solaris:
-# - it can be used as part of the VERSION= parameter in the 
+# - it can be used as part of the VERSION= parameter in the
 #   pkginfo file (man 4 pkginfo), e.g. VERSION=X.X.X,REV=@REL@
 #   appears to be consistent with the way Blastwave does things
 REL=1
@@ -125,13 +125,13 @@ dnl
 AC_PROG_CC
 AC_PROG_CC_STDC
 AC_PROG_LIBTOOL
-m4_ifdef([AC_PROG_SED],                                                        
-  [AC_PROG_SED],                                                               
-  [                                                                            
-    SED="sed"                                                                  
-    AC_SUBST([SED])                                                            
-  ]                                                                            
-) 
+m4_ifdef([AC_PROG_SED],
+  [AC_PROG_SED],
+  [
+    SED="sed"
+    AC_SUBST([SED])
+  ]
+)
 
 AC_ARG_ENABLE( static-build,
 [  --enable-static-build   Statically link libGanglia, APR, Expat and Confuse libraries (may disable some metric modules) ],
@@ -198,7 +198,7 @@ AC_ARG_WITH( libpcre,
 
 AC_ARG_WITH( moduledir,
 [  --with-moduledir=DIR    Base directory for dynamically loadable modules],
-  moduledir="$withval", 
+  moduledir="$withval",
   moduledir="$libdir/ganglia")
 
 AC_ARG_ENABLE(debug,
@@ -207,7 +207,7 @@ AC_ARG_ENABLE(debug,
 [ CFLAGS="$CFLAGS -ggdb -O0"
   AC_DEFINE(DEBUG, 1, DEBUG)])
 # Turn off optimizations when debugging.
-#[ CFLAGS="$CFLAGS -O2" 
+#[ CFLAGS="$CFLAGS -O2"
 #  AC_DEFINE(DEBUG, 0, DEBUG)])
 
 AC_ARG_ENABLE(gexec,
@@ -232,8 +232,8 @@ AC_DEFINE_UNQUOTED(NO_SETGID, $no_setgid, NO_SETGID)
 AC_DEFINE_UNQUOTED(SETGID_GROUP, "$setgid_group", SETGID_GROUP)
 AC_SUBST(setgid_group)
 
-AC_ARG_ENABLE(pedantic,   
-[  --enable-pedantic       turn on pedantic mode during compile],     
+AC_ARG_ENABLE(pedantic,
+[  --enable-pedantic       turn on pedantic mode during compile],
 [ CFLAGS="$CFLAGS --pedantic" ],)
 
 AC_ARG_ENABLE(memcheck,
@@ -256,8 +256,8 @@ AC_ARG_ENABLE( php,
 
 AC_ARG_ENABLE( status,
 [  --enable-status         compile and install modgstatus to enable gmond status metric module support],
-[ enable_status="yes" 
-  AC_DEFINE(GSTATUS, 1, GSTATUS)], 
+[ enable_status="yes"
+  AC_DEFINE(GSTATUS, 1, GSTATUS)],
 [ enable_status="no" ] )
 
 AM_CONDITIONAL(BUILD_STATUS, test x"$enable_status" = xyes)
@@ -335,7 +335,7 @@ if test x"$enable_python" = xyes; then
     PyEXEC_INSTALLDIR=`$PYTHON_BIN -c "import sys; print sys.exec_prefix"`
     if test -f "$PyEXEC_INSTALLDIR/include/python/Python.h"; then
       PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python"
-    else 
+    else
       if test -f "$PyEXEC_INSTALLDIR/include/python$PyVERSION/Python.h"; then
         PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python$PyVERSION"
       else
@@ -436,12 +436,12 @@ if test x"$enable_php" = xyes; then
     AC_MSG_CHECKING(PHP Include dir)
     PHP_INCLUDE_DIR=`$PHP_CONFIG_BIN --include-dir`
     AC_MSG_RESULT($PHP_INCLUDE_DIR)
-    
+
     if test -f "$PHP_INCLUDE_DIR/sapi/embed/php_embed.h"; then
         PHP_INCLUDES=`$PHP_CONFIG_BIN --includes`
         CPPFLAGS+=$PHP_INCLUDES
         LDFLAGS+=" -L`$PHP_CONFIG_BIN --prefix`/lib"
-    else 
+    else
         PHP_INCLUDES=""
     fi
     AC_CHECK_HEADER([sapi/embed/php_embed.h], [],
@@ -643,7 +643,7 @@ dnl AC_CHECK_SIZEOF(void *)
 
 dnl ##################################################################
 dnl Check for structure definitions.
-dnl   
+dnl
 
 dnl ##################################################################
 dnl Check the compiler characteristics
@@ -748,7 +748,7 @@ dnl
 		   fi
 		fi
 		;;
-*ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
+*ia64-*hpux*)	CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE"
 		LIBS="-lpthread $LIBS"
 		EXPORT_SYMBOLS="-Wl,-E"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
@@ -759,7 +759,7 @@ dnl
 		EXPORT_SYMBOLS="-Wl,-bexpfull"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		if test x"$ac_cv_lib_perfstat_perfstat_cpu_total" = xyes; then
-		   CFLAGS="$CFLAGS -DHAVE_PERFSTAT" 
+		   CFLAGS="$CFLAGS -DHAVE_PERFSTAT"
 		else
 		   echo "libperfstat not detected."
 		   echo "For AIX 5 you need to install bos.perf.libperfstat"
@@ -768,7 +768,7 @@ dnl
 		LIBS="-lm $LIBS"
 		EXPORT_SYMBOLS_DYNAMIC="-Wl,-bexpfull"
 		;;
-*hpux*)		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
+*hpux*)		CFLAGS="$CFLAGS -D_HPUX_SOURCE"
 		LIBS="-lpthread $LIBS"
 		EXPORT_SYMBOLS="-Wl,-E"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
@@ -778,8 +778,8 @@ dnl
 		CFLAGS="$CFLAGS -D_IRIX_SOURCE"
 		AC_DEFINE(IRIX,1,IRIX)
 		;;
-*osf*)		metric_source="osf.c"	
-		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
+*osf*)		metric_source="osf.c"
+		CFLAGS="$CFLAGS -D_SOCKADDR_LEN"
 		AC_DEFINE(OSF,1,OSF)
 		;;
 *darwin*) 	AC_DEFINE(DARWIN,1,DARWIN)
@@ -794,10 +794,10 @@ dnl
 		fi
 		if test x"$ac_cv_prog_gcc" != xyes; then
 		   LIBS="-lm $LIBS"
-		fi 
+		fi
 		AC_DEFINE(SOLARIS,1,SOLARIS)
 		;;
-*freebsd*)	CFLAGS="-pthread $CFLAGS -D_REENTRANT" 
+*freebsd*)	CFLAGS="-pthread $CFLAGS -D_REENTRANT"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		varstatedir="/var/db"
 		osreldate=`awk '/^\#define[[:space:]]*__FreeBSD_version/ { print $3 }' /usr/include/osreldate.h`
@@ -805,7 +805,7 @@ dnl
 		   CFLAGS="-pthread $CFLAGS -D_REENTRANT"
 		fi
 		AC_DEFINE(FREEBSD, 1, FREEBSD)
-		;; 
+		;;
 *dragonfly*)	CFLAGS="-pthread $CFLAGS -D_REENTRANT"
 		AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		varstatedir="/var/db"
@@ -814,7 +814,7 @@ dnl
 *netbsd*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		varstatedir="/var/db"
 		AC_DEFINE(NETBSD, 1, NETBSD)
-		;; 
+		;;
 *openbsd*)	AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_GEXEC)
 		varstatedir="/var/db"
 		AC_DEFINE(OPENBSD, 1, OPENBSD)
@@ -849,7 +849,7 @@ AC_DEFINE_UNQUOTED(GANGLIA_MODULE_DIR, "$moduledir", GANGLIA_MODULE_DIR)
 AC_SUBST(moduledir)
 
 dnl This is for gmetad-python, where @gsysconfdir@ needs to be
-dnl substituted into setup.py during the ./configure step as there is no 
+dnl substituted into setup.py during the ./configure step as there is no
 dnl make install step
 dnl
 if test x"$sysconfdir" = x"\${prefix}/etc"; then
@@ -865,14 +865,14 @@ AC_SUBST(gsysconfdir)
 
 AC_CONFIG_FILES([scripts/fixconfig], [chmod +x scripts/fixconfig])
 
-AC_OUTPUT(Makefile 
-          tests/Makefile 
-          ganglia.spec 
-          gmetad/Makefile 
+AC_OUTPUT(Makefile
+          tests/Makefile
+          ganglia.spec
+          gmetad/Makefile
           lib/default_conf.h
-          lib/Makefile 
-          gmond/Makefile 
-          gstat/Makefile 
+          lib/Makefile
+          gmond/Makefile
+          gstat/Makefile
           gmond/modules/Makefile
           gmond/modules/example/Makefile
           gmond/modules/cpu/Makefile

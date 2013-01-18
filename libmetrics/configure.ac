@@ -90,7 +90,7 @@ dnl
                 AC_DEFINE(STAT_STATVFS, 1, STAT_STATVFS)
 		;;
 *ia64-*hpux*)	OS="hpux"
-		CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE" 
+		CFLAGS="$CFLAGS -D_PSTAT64 -D_HPUX_SOURCE"
 		AC_DEFINE(IA64, 1, IA64)
 		AC_DEFINE(HPUX, 1, HPUX)
 		;;
@@ -106,7 +106,7 @@ dnl
 		AC_DEFINE(AIX, 1, AIX)
                 ;;
 *hpux*)		OS="hpux"
-		CFLAGS="$CFLAGS -D_HPUX_SOURCE" 
+		CFLAGS="$CFLAGS -D_HPUX_SOURCE"
 		AC_DEFINE(HPUX, 1, HPUX)
 		;;
 *irix*)		OS="irix"
@@ -114,7 +114,7 @@ dnl
 		AC_DEFINE(IRIX, 1, IRIX)
 		;;
 *osf*)		OS="osf"
-		CFLAGS="$CFLAGS -D_SOCKADDR_LEN" 
+		CFLAGS="$CFLAGS -D_SOCKADDR_LEN"
 		AC_DEFINE(OSF, 1, OSF)
 		;;
 *darwin*)	OS="darwin"
@@ -126,13 +126,13 @@ dnl
 		;;
 *freebsd*)	OS="freebsd"
 		AC_DEFINE(FREEBSD, 1, FREEBSD)
-		;; 
+		;;
 *dragonfly*)	OS="dragonfly"
 		AC_DEFINE(DRAGONFLYBSD, 1, DRAGONFLYBSD)
 		;;
 *netbsd*)	OS="netbsd"
 		AC_DEFINE(NETBSD, 1, NETBSD)
-		;; 
+		;;
 *openbsd*)	OS="openbsd"
 		AC_DEFINE(OPENBSD, 1, OPENBSD)
 		;;
