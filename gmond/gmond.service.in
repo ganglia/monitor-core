@@ -1,0 +1,10 @@
+[Unit]
+Description=Ganglia Monitor Daemon
+After=network.target
+
+[Service]
+ExecStart=@sbindir@/gmond -f
+User=nobody
+
+[Install]
+WantedBy=multi-user.target

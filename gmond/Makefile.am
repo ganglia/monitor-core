@@ -71,6 +71,9 @@ gmond_LDFLAGS = $(GLDFLAGS)
 gmond.solaris.init:	gmond.solaris.init.in $(FIXCONFIG)
 	$(FIXCONFIG) gmond.solaris.init.in
 
+gmond.service:	gmond.service.in $(FIXCONFIG)
+	$(FIXCONFIG) gmond.service.in
+
 # we declare the hook so that gmond.solaris.init will be created within the
 # build tree during the install phase
 # however, the action to install it is commented out, as it is likely
@@ -80,3 +83,8 @@ install-exec-hook:	gmond.solaris.init
 #	$(INSTALL_SCRIPT) gmond.solaris.init
 
 CLEANFILES = cmdline.c	
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA = \
+        gmond.service
+endif

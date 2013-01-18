@@ -1,0 +1,10 @@
+[Unit]
+Description=Ganglia Meta Daemon in Python
+After=network.target
+
+[Service]
+ExecStart=@bindir@/gmetad.py -f
+User=ganglia
+
+[Install]
+WantedBy=multi-user.target

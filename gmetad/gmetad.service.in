@@ -1,0 +1,10 @@
+[Unit]
+Description=Ganglia Meta Daemon
+After=network.target
+
+[Service]
+ExecStart=@sbindir@/gmetad -f
+User=ganglia
+
+[Install]
+WantedBy=multi-user.target

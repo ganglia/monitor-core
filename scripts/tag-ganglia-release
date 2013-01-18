@@ -14,9 +14,9 @@ fi
 if [[ "${TAG}" == *pre* ]]; then
 	git tag -m "Tag prerelease ${TAG}" "${TAG}"
 else
-	GM=`cat ../configure.in | egrep '^GANGLIA_MAJOR_VERSION=' | cut -d '=' -f 2`
-	GN=`cat ../configure.in | egrep '^GANGLIA_MINOR_VERSION=' | cut -d '=' -f 2`
-	GU=`cat ../configure.in | egrep '^GANGLIA_MICRO_VERSION=' | cut -d '=' -f 2`
+	GM=`cat ../configure.ac | egrep '^GANGLIA_MAJOR_VERSION=' | cut -d '=' -f 2`
+	GN=`cat ../configure.ac | egrep '^GANGLIA_MINOR_VERSION=' | cut -d '=' -f 2`
+	GU=`cat ../configure.ac | egrep '^GANGLIA_MICRO_VERSION=' | cut -d '=' -f 2`
 	if [ "$TAG" = "${GM}.${GN}.${GU}" ]; then
 		git tag -m "Tag release ${TAG}" "${TAG}"
 	else

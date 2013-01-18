@@ -16,7 +16,7 @@ Summary: Ganglia Distributed Monitoring System
 Name: @PACKAGE@
 Version: @VERSION@
 URL: http://ganglia.info/
-# The Release macro value is set in configure.in, please update it there.
+# The Release macro value is set in configure.ac, please update it there.
 Release: @REL@
 License: BSD
 Vendor: Ganglia Development Team <ganglia-developers@lists.sourceforge.net>
