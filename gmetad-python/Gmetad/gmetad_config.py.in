@@ -49,6 +49,7 @@ class GmetadConfig:
     _isInitialized = False
     
     DEBUG_LEVEL = 'debug_level'
+    DAEMONIZE = 'daemonize',
     LOGFILE = 'logfile'
     PIDFILE = 'pidfile'
     DATA_SOURCE = 'data_source'
@@ -68,6 +69,7 @@ class GmetadConfig:
     
     _cfgDefaults = {
             DEBUG_LEVEL : 2,
+            DAEMONIZE : None,
             LOGFILE : None,
             PIDFILE : None,
             DATA_SOURCE : [],
@@ -95,6 +97,7 @@ class GmetadConfig:
             
             self.kwHandlers = {
                 GmetadConfig.DEBUG_LEVEL : self.parseDbgLevel,
+                GmetadConfig.DAEMONIZE : self.parseDaemonize,
                 GmetadConfig.LOGFILE : self.parseLogfile,
                 GmetadConfig.DATA_SOURCE : self.parseDataSource,
                 GmetadConfig.SCALABLE : self.parseScalable,
@@ -180,7 +183,14 @@ class GmetadConfig:
             if args is None:
                 continue
             self.sections[secID].append( [kw,args])
-        
+
+
+    def _parseBool(self, arg):
+        v = arg.strip().lower()
+        if v == 'off' or v == 'false' or v == 'no':
+            return False
+        else:
+            return True
 
     def resetToDefaults(self):
         self.cfg = GmetadConfig._cfgDefaults
@@ -189,6 +199,9 @@ class GmetadConfig:
         v = level.strip()
         if v.isdigit():
             self.cfg[GmetadConfig.DEBUG_LEVEL] = v
+
+    def parseDaemonize(self, arg):
+        self.cfg[GmetadConfig.DAEMONIZE] = self._parseBool(arg)
             
     def parseLogfile(self, logfile):
         self.cfg[GmetadConfig.LOGFILE] = logfile.strip().strip('"')
@@ -206,11 +219,7 @@ class GmetadConfig:
         self.cfg[GmetadConfig.DATA_SOURCE].append(GmetadDataSource(name, hosts, interval))
         
     def parseScalable(self, arg):
-        v = arg.strip().lower()
-        if v == 'off' or v == 'false' or v == 'no':
-            self.cfg[GmetadConfig.SCALABLE] = False
-        else:
-            self.cfg[GmetadConfig.SCALABLE] = True
+        self.cfg[GmetadConfig.SCALABLE] = self._parseBool(arg)
             
     def parseGridname(self, arg):
         self.cfg[GmetadConfig.GRIDNAME] = arg.strip().strip('"')
@@ -280,6 +289,10 @@ def getConfig(args=sys.argv):
             4 - INFO\n\
             5 - DEBUG',
             default='%d' % dbgLevelDefault)
+    parser.add_option('-f', '--foreground', action='store_false',
+            dest="daemonize",
+            help='Run in foreground (don\'t daemonize)',
+            default=None)
     parser.add_option('-p', '--pid_file', action='store',
             help='Write process-id to file',
             default=None)
@@ -318,6 +331,10 @@ def getConfig(args=sys.argv):
     # Update configuration if non-default values were provided.
     if int(dbgLevelDefault) != int(options.debug):
         cfg[GmetadConfig.DEBUG_LEVEL] = options.debug
+    if options.daemonize is not None:
+        cfg[GmetadConfig.DAEMONIZE] = options.daemonize
+    if cfg[GmetadConfig.DAEMONIZE] is None:
+        cfg[GmetadConfig.DAEMONIZE] = int(cfg[GmetadConfig.DEBUG_LEVEL]) < 5
     if int(iPortDefault) != int(options.interactive_port):
         cfg[GmetadConfig.INTERACTIVE_PORT] = options.interactive_port
     if int(xPortDefault) != int(options.xml_port):
