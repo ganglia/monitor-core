@@ -40,8 +40,16 @@ type_hash.c: type_hash.gperf
 gmetad.conf:	gmetad.conf.in $(FIXCONFIG)
 	$(FIXCONFIG) gmetad.conf.in
 
+gmetad.service:	gmetad.service.in $(FIXCONFIG)
+	$(FIXCONFIG) gmetad.service.in
+
 install-data-hook:	gmetad.conf
 	mkdir -p $(DESTDIR)$(sysconfdir) && \
 	  $(INSTALL_DATA) gmetad.conf $(DESTDIR)$(sysconfdir)/gmetad.conf
 
 CLEANFILES = cmdline.c
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA = \
+        gmetad.service
+endif

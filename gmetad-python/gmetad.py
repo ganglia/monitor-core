@@ -176,7 +176,7 @@ if __name__ == '__main__':
         logging.getLogger().addHandler(fileHandler)
 
     # Determine if the service should be daemonized based on the debug level.
-    if 5 > int(gmetadConfig[GmetadConfig.DEBUG_LEVEL]):
+    if gmetadConfig[GmetadConfig.DAEMONIZE]:
         daemonize(ignore_fds)
         
     logging.info('Gmetad application started.')

@@ -26,5 +26,7 @@ plug in any type of gmetad-level analysis.''',
       packages=['Gmetad'],
       scripts=['gmetad.py'],
       data_files=[('@gsysconfdir@', ['gmetad-python.conf']),
-                  ('@libdir@/ganglia/python_modules/gmetad', glob('plugins/*.py'))] 
+                  ('@libdir@/ganglia/python_modules/gmetad', glob('plugins/*.py')),
+                  ('@systemdsystemunitdir@', ['gmetad-python.service']),
+                  ]
      )
