@@ -12,6 +12,7 @@ EXTRA_SUBDIRS = "gmetad-python contrib solaris"
 INCLUDES = @APR_INCLUDES@
 
 AUTOMAKE_OPTIONS = dist-bzip2 dist-tarZ dist-zip
+ACLOCAL_AMFLAGS = -I m4
 
 GANGLIA_SUBDIRS = lib libmetrics tests $(GMETAD_SUBDIR) gmond gstat gmetric include mans
 SUBDIRS = $(GANGLIA_SUBDIRS)

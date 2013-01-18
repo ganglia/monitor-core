@@ -471,6 +471,8 @@ x86_64*linux*)
   ;;
 esac
 
+PKG_PROG_PKG_CONFIG
+
 echo
 echo Checking for apr
 if test x"$libaprpath" != x && test x"$libaprpath" != xyes; then
@@ -487,33 +489,18 @@ if test x"$libaprpath" != x && test x"$libaprpath" != xyes; then
     echo "Added -L$libaprpath/${LIB_SUFFIX} to LDFLAGS"
     AC_CHECK_LIB(apr-1, apr_socket_send)
   fi
-else
-  AC_PATH_PROG(APR_CONFIG, apr-1-config)
-  if test -z "$APR_CONFIG"; then
-    AC_MSG_ERROR(apr-1-config binary not found in path)
-  fi
-  AC_PATH_PROG(PKG_CONFIG, pkg-config)
-  if test -z "$PKG_CONFIG"; then
-    AC_MSG_ERROR(pkg-config binary not found in path)
-  else
-    APR_INCLUDES=`pkg-config apr-1 --cflags`
-  fi
-  APR_INCLUDES="$APR_INCLUDES `$APR_CONFIG --includes`"
-  AC_SUBST(APR_INCLUDES)
-  APR_LIBPATH=`$APR_CONFIG --link-ld`
-  APR_LIBPATH=`expr "x$APR_LIBPATH" : '.*-L\(.*\) '`
-  if test x"$APR_LIBPATH" != x; then
-    LDFLAGS="$LDFLAGS -L$APR_LIBPATH"
-  fi
-  AC_CHECK_LIB(apr-1, apr_socket_send,,,[`$APR_CONFIG --libs`])
-fi
 
-if test x"$ac_cv_lib_apr_1_apr_socket_send" = xyes; then
-  echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
-  echo "Found a suitable libapr1 library"
+  if test x"$ac_cv_lib_apr_1_apr_socket_send" = xyes; then
+    echo "The ganglia utilities use the Apache Portable Runtime functions (http://www.apache.org/)"
+    echo "Found a suitable libapr1 library"
+  else
+    echo "libapr not found"
+    exit 1;
+  fi
 else
-  echo "libapr not found"
-  exit 1;
+  PKG_CHECK_MODULES([APR],[apr-1])
+  LDFLAGS="$LIBS $APR_LIBS"
+  APR_INCLUDES="$APR_CFLAGS"
 fi
 
 echo
