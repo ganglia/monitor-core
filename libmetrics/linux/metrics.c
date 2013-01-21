@@ -25,6 +25,9 @@
 
 #define JT unsigned long long
 
+/* sanity check and range limit */
+static double sanityCheck( int line, char *file, const char *func, double v, double diff, double dt, JT a, JT b, JT c, JT d );
+
 /* /proc/net/dev hash table stuff */
 typedef struct net_dev_stats net_dev_stats;
 struct net_dev_stats {
@@ -632,6 +635,18 @@ total_jiffies_func ( void )
           wio_jiffies + irq_jiffies + sirq_jiffies + steal_jiffies;
 }
 
+double sanityCheck( int line, char *file, const char *func, double v, double diff, double dt, JT a, JT b, JT c, JT d )
+{
+   if ( v > 100.0 ) {
+      err_msg( "file %s, line %d, fn %s: val > 100: %g ~ %g / %g = (%llu - %llu) / (%llu - %llu)\n", file, line, func, v, diff, dt, a, b, c, d );
+      return 100.0;
+   }
+   else if ( v < 0.0 ) {
+      err_msg( "file %s, line %d, fn %s: val < 0: %g ~ %g / %g = (%llu - %llu) / (%llu - %llu)\n", file, line, func, v, diff, dt, a, b, c, d );
+      return 0.0;
+   }
+   return v;
+}
 
 g_val_t
 cpu_user_func ( void )
@@ -657,6 +672,8 @@ cpu_user_func ( void )
        val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
+
+     val.f = sanityCheck( __LINE__, __FILE__, __FUNCTION__, val.f, (double)diff, (double)(total_jiffies - last_total_jiffies), user_jiffies, last_user_jiffies, total_jiffies, last_total_jiffies );
 
      last_user_jiffies  = user_jiffies;
      last_total_jiffies = total_jiffies;
@@ -690,6 +707,8 @@ cpu_nice_func ( void )
        val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
+
+     val.f = sanityCheck( __LINE__, __FILE__, __FUNCTION__, val.f, (double)diff, (double)(total_jiffies - last_total_jiffies), nice_jiffies, last_nice_jiffies, total_jiffies, last_total_jiffies );
 
      last_nice_jiffies  = nice_jiffies;
      last_total_jiffies = total_jiffies;
@@ -733,6 +752,8 @@ cpu_system_func ( void )
      else
        val.f = 0.0;
 
+     val.f = sanityCheck( __LINE__, __FILE__, __FUNCTION__, val.f, (double)diff, (double)(total_jiffies - last_total_jiffies), system_jiffies, last_system_jiffies, total_jiffies, last_total_jiffies );
+
      last_system_jiffies  = system_jiffies;
      last_total_jiffies = total_jiffies;
 
@@ -768,6 +789,8 @@ cpu_idle_func ( void )
      else
        val.f = 0.0;
 
+     val.f = sanityCheck( __LINE__, __FILE__, __FUNCTION__, val.f, (double)diff, (double)(total_jiffies - last_total_jiffies), idle_jiffies, last_idle_jiffies, total_jiffies, last_total_jiffies );
+
      last_idle_jiffies  = idle_jiffies;
      last_total_jiffies = total_jiffies;
 
@@ -793,6 +816,8 @@ cpu_aidle_func ( void )
    total_jiffies = total_jiffies_func();
 
    val.f = ((double)(idle_jiffies/total_jiffies)) * 100.0;
+
+   val.f = sanityCheck( __LINE__, __FILE__, __FUNCTION__, val.f, (double)idle_jiffies, (double)total_jiffies, idle_jiffies, total_jiffies, 0, 0 );
    return val;
 }
 
@@ -829,6 +854,8 @@ cpu_wio_func ( void )
        val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
+
+     val.f = sanityCheck( __LINE__, __FILE__, __FUNCTION__, val.f, (double)diff, (double)(total_jiffies - last_total_jiffies), wio_jiffies, last_wio_jiffies, total_jiffies, last_total_jiffies );
 
      last_wio_jiffies  = wio_jiffies;
      last_total_jiffies = total_jiffies;
@@ -873,6 +900,8 @@ cpu_intr_func ( void )
      else
        val.f = 0.0;
 
+     val.f = sanityCheck( __LINE__, __FILE__, __FUNCTION__, val.f, (double)diff, (double)(total_jiffies - last_total_jiffies), intr_jiffies, last_intr_jiffies, total_jiffies, last_total_jiffies );
+
      last_intr_jiffies  = intr_jiffies;
      last_total_jiffies = total_jiffies;
 
@@ -916,6 +945,8 @@ cpu_sintr_func ( void )
        val.f = ((double)diff/(double)(total_jiffies - last_total_jiffies)) * 100.0;
      else
        val.f = 0.0;
+
+     val.f = sanityCheck( __LINE__, __FILE__, __FUNCTION__, val.f, (double)diff, (double)(total_jiffies - last_total_jiffies), sintr_jiffies, last_sintr_jiffies, total_jiffies, last_total_jiffies );
 
      last_sintr_jiffies  = sintr_jiffies;
      last_total_jiffies = total_jiffies;
