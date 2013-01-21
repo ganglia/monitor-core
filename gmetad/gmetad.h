@@ -14,6 +14,11 @@
 #include "daemon_init.h"
 #include "my_inet_ntop.h"
 
+#ifdef WITH_MEMCACHED
+#include <libmemcached-1.0/memcached.h>
+#include <libmemcachedutil-1.0/pool.h>
+#endif /* WITH_MEMCACHED */
+
 /* For metric_hash */
 typedef enum {
    INT,
@@ -240,5 +245,9 @@ Metric_t;
        RC = SYSCALL;         \
    } while (RC < 0 && errno == EINTR);
 #endif
+
+#ifdef WITH_MEMCACHED
+memcached_pool_st* memcached_connection_pool;
+#endif /* WITH_MEMCACHED */
 
 #endif
