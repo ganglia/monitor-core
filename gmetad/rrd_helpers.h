@@ -13,7 +13,7 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
 #ifdef WITH_MEMCACHED
 int
 write_data_to_memcached ( const char *source, const char *host, const char *metric, 
-                    const char *sum, unsigned int process_time);
+                    const char *sum, unsigned int process_time, unsigned int expiry );
 #endif /* WITH_MEMCACHED */
 
 int

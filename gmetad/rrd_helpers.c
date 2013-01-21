@@ -321,10 +321,17 @@ push_data_to_carbon( char *graphite_msg)
 #ifdef WITH_MEMCACHED
 int
 write_data_to_memcached ( const char *source, const char *host, const char *metric, 
-                    const char *sum, unsigned int process_time )
+                    const char *sum, unsigned int process_time, unsigned int expiry )
 {
+   time_t expiry_time;
    char s_path[256];
    sprintf(s_path, "%s/%s", host, metric);
+
+   if (expiry != 0) {
+      expiry_time = time(NULL) + expiry;
+   } else {
+      expiry_time = (time_t) 0;
+   }
 
    memcached_return_t rc;
    memcached_st *memc = memcached_pool_pop(memcached_connection_pool, false, &rc);
@@ -332,7 +339,7 @@ write_data_to_memcached ( const char *source, const char *host, const char *metr
       debug_msg("Unable to retrieve a memcached connection from the pool");
       return EXIT_FAILURE;
    }
-   rc = memcached_set(memc, s_path, strlen(s_path), sum, strlen(sum), (time_t)0, (uint32_t)0);
+   rc = memcached_set(memc, s_path, strlen(s_path), sum, strlen(sum), expiry_time, (uint32_t)0);
    if (rc != MEMCACHED_SUCCESS) {
       debug_msg("Unable to push %s value %s to the memcached server(s)", s_path, sum);
       memcached_pool_push(memcached_connection_pool, memc);
