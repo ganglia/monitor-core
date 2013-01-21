@@ -16,7 +16,7 @@
 
 #ifdef WITH_MEMCACHED
 #include <libmemcached-1.0/memcached.h>
-#include <libmemcachedutil-1.0/pool.h>
+#include <libmemcachedutil-1.0/util.h>
 #endif /* WITH_MEMCACHED */
 
 /* For metric_hash */

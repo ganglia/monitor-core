@@ -1,5 +1,10 @@
 #include "ganglia.h"
 
+#ifdef WITH_MEMCACHED
+#include <libmemcached-1.0/memcached.h>
+#include <libmemcachedutil-1.0/util.h>
+#endif /* WITH_MEMCACHED */
+
 int
 write_data_to_rrd ( const char *source, const char *host, const char *metric, 
                     const char *sum, const char *num, unsigned int step,

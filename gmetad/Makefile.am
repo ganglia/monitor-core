@@ -24,7 +24,7 @@ gmetad_SOURCES =  gmetad.c cmdline.c.in cmdline.c cmdline.h gmetad.h data_thread
    xml_hash.c cleanup.c rrd_helpers.h daemon_init.c daemon_init.h \
 	 server_priv.h
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
-                 $(GLDADD)
+                 $(GLDADD) $(DEPS_LIBS)
 
 gmetad_LDFLAGS = $(GLDFLAGS)
 
