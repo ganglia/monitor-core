@@ -333,7 +333,7 @@ write_data_to_memcached ( const char *cluster, const char *host, const char *met
    sprintf(s_path, "%s/%s/%s", cluster, host, metric);
 
    if (expiry != 0) {
-      expiry_time = time(NULL) + expiry;
+      expiry_time = expiry;
    } else {
       expiry_time = (time_t) 0;
    }
