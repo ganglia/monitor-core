@@ -16,6 +16,11 @@
 #include <netdb.h>
 #include <sys/poll.h>
 
+#ifdef WITH_MEMCACHED
+#include <libmemcached-1.0/memcached.h>
+#include <libmemcachedutil-1.0/util.h>
+#endif /* WITH_MEMCACHED */
+
 #include "rrd_helpers.h"
 
 #define PATHSIZE 4096
@@ -312,6 +317,40 @@ push_data_to_carbon( char *graphite_msg)
   close (carbon_socket);
   return EXIT_SUCCESS;
 }
+
+#ifdef WITH_MEMCACHED
+int
+write_data_to_memcached ( const char *source, const char *host, const char *metric, 
+                    const char *sum, unsigned int process_time, unsigned int expiry )
+{
+   time_t expiry_time;
+   char s_path[256];
+   sprintf(s_path, "%s/%s/%s", source, host, metric);
+
+   if (expiry != 0) {
+      expiry_time = time(NULL) + expiry;
+   } else {
+      expiry_time = (time_t) 0;
+   }
+
+   memcached_return_t rc;
+   memcached_st *memc = memcached_pool_pop(memcached_connection_pool, false, &rc);
+   if (rc != MEMCACHED_SUCCESS) {
+      debug_msg("Unable to retrieve a memcached connection from the pool");
+      return EXIT_FAILURE;
+   }
+   rc = memcached_set(memc, s_path, strlen(s_path), sum, strlen(sum), expiry_time, (uint32_t)0);
+   if (rc != MEMCACHED_SUCCESS) {
+      debug_msg("Unable to push %s value %s to the memcached server(s) - %s", s_path, sum, memcached_strerror(memc, rc));
+      memcached_pool_push(memcached_connection_pool, memc);
+      return EXIT_FAILURE;
+   } else {
+      debug_msg("Pushed %s value %s to the memcached server(s)", s_path, sum);
+      memcached_pool_push(memcached_connection_pool, memc);
+      return EXIT_SUCCESS;
+   }
+}
+#endif /* WITH_MEMCACHED */
 
 int
 write_data_to_carbon ( const char *source, const char *host, const char *metric, 

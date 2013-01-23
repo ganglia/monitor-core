@@ -163,4 +163,9 @@ case_sensitive_hostnames 0
 # default: 500
 # carbon_timeout 500
 #
+# Memcached configuration (if it has been compiled in)
+# Format documentation at http://docs.libmemcached.org/libmemcached_configuration.html
+# default: ""
+# memcached_parameters "--SERVER=127.0.0.1"
+#
 

@@ -645,6 +645,12 @@ startElement_METRIC(void *data, const char *el, const char **attr)
                         xmldata->ds->step, xmldata->source.localtime, slope);
 		  if (gmetad_config.carbon_server) // if the user has specified a carbon server, send the metric to carbon as well
                      carbon_ret=write_data_to_carbon(xmldata->sourcename, xmldata->hostname, name, metricval,xmldata->source.localtime);
+#ifdef WITH_MEMCACHED
+		  if (gmetad_config.memcached_parameters) {
+                     int mc_ret=write_data_to_memcached(xmldata->sourcename, xmldata->hostname, name, metricval, xmldata->source.localtime, metric->dmax);
+		  }
+
+#endif /* WITH_MEMCACHED */
             }
          metric->id = METRIC_NODE;
          metric->report_start = metric_report_start;
