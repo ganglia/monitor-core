@@ -504,6 +504,19 @@ else
 fi
 
 echo
+echo Checking for libmemcached
+AC_ARG_WITH( memcached,
+[  --with-memcached        enable memcached metrics publishing],
+if test x"$withval" = xyes; then memcache="yes"; fi)
+
+if test x"$memcache" == xyes; then
+  PKG_CHECK_MODULES(DEPS, libmemcached >= 0.8.0)
+  AC_SUBST(DEPS_CFLAGS)
+  AC_SUBST(DEPS_LIBS)
+  CFLAGS="$CFLAGS -DWITH_MEMCACHED"
+fi
+
+echo
 echo Checking for confuse
 if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes; then
   CFLAGS="$CFLAGS -I$libconfusepath/include"

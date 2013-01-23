@@ -21,6 +21,7 @@ typedef struct
       char *carbon_server;
       int carbon_port;
       int carbon_timeout;
+      char *memcached_parameters;
       char *graphite_prefix;
       int scalable_mode;
       int write_rrds;

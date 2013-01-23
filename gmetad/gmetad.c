@@ -400,6 +400,13 @@ main ( int argc, char *argv[] )
          hash_foreach( sources, print_sources, NULL);
       }
 
+#ifdef WITH_MEMCACHED
+   if (c->memcached_parameters != NULL)
+      {
+         memcached_connection_pool = memcached_pool(c->memcached_parameters, strlen(c->memcached_parameters));
+      }
+#endif /* WITH_MEMCACHED */
+
    server_socket = g_tcp_socket_server_new( c->xml_port );
    if (server_socket == NULL)
       {
