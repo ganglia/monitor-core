@@ -319,13 +319,18 @@ push_data_to_carbon( char *graphite_msg)
 }
 
 #ifdef WITH_MEMCACHED
+#define MEMCACHED_MAX_KEY_LENGTH 256
 int
-write_data_to_memcached ( const char *source, const char *host, const char *metric, 
+write_data_to_memcached ( const char *cluster, const char *host, const char *metric, 
                     const char *sum, unsigned int process_time, unsigned int expiry )
 {
    time_t expiry_time;
-   char s_path[256];
-   sprintf(s_path, "%s/%s/%s", source, host, metric);
+   char s_path[MEMCACHED_MAX_KEY_LENGTH];
+   if (strlen(cluster) + strlen(host) + strlen(metric) + 2 > MEMCACHED_MAX_KEY_LENGTH) {
+      debug_msg("Cluster + host + metric + 2 > %d", MEMCACHED_MAX_KEY_LENGTH);
+      return EXIT_FAILURE;
+   }
+   sprintf(s_path, "%s/%s/%s", cluster, host, metric);
 
    if (expiry != 0) {
       expiry_time = time(NULL) + expiry;
