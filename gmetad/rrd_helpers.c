@@ -325,7 +325,7 @@ write_data_to_memcached ( const char *source, const char *host, const char *metr
 {
    time_t expiry_time;
    char s_path[256];
-   sprintf(s_path, "%s/%s", host, metric);
+   sprintf(s_path, "%s/%s/%s", source, host, metric);
 
    if (expiry != 0) {
       expiry_time = time(NULL) + expiry;
@@ -341,10 +341,11 @@ write_data_to_memcached ( const char *source, const char *host, const char *metr
    }
    rc = memcached_set(memc, s_path, strlen(s_path), sum, strlen(sum), expiry_time, (uint32_t)0);
    if (rc != MEMCACHED_SUCCESS) {
-      debug_msg("Unable to push %s value %s to the memcached server(s)", s_path, sum);
+      debug_msg("Unable to push %s value %s to the memcached server(s) - %s", s_path, sum, memcached_strerror(memc, rc));
       memcached_pool_push(memcached_connection_pool, memc);
       return EXIT_FAILURE;
    } else {
+      debug_msg("Pushed %s value %s to the memcached server(s)", s_path, sum);
       memcached_pool_push(memcached_connection_pool, memc);
       return EXIT_SUCCESS;
    }
