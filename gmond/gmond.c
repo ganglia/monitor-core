@@ -22,6 +22,7 @@
 #ifdef LINUX
 #include <sys/utsname.h>
 #endif
+#include <zlib.h>
 
 #include <apr.h>
 #include <apr_strings.h>
@@ -59,6 +60,9 @@
 /* If a bind fails, and retry_bind is true, this is the interval to sleep
    before retry.  Specified in seconds */
 #define RETRY_BIND_DELAY 60
+
+/* The key in the apr_socket_t struct where our gzipped data is stored */
+#define GZIP_KEY "gzip"
 
 /* When this gmond was started */
 apr_time_t started;
@@ -226,7 +230,7 @@ extern char **environ;
 
 /* apr_socket_send can't assure all characters in buf been sent. */
 static apr_status_t
-socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
+socket_send_raw(apr_socket_t *sock, const char *buf, apr_size_t *len)
 {
   apr_size_t total = *len;
   apr_size_t thisTime = total;
@@ -244,6 +248,52 @@ socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
         }
       else
           break;
+    }
+  return ret;
+}
+
+/* wrap socket_send_raw with gzip deflate if enabled. */
+static apr_status_t
+socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
+{
+  char outputbuffer[2048];
+  const int outputlen = sizeof(outputbuffer);
+  apr_size_t wlen;
+  apr_status_t ret;
+  z_stream *strm;
+  int z_ret;
+
+  ret = apr_socket_data_get((void**)&strm, GZIP_KEY, sock);
+  if (ret != APR_SUCCESS)
+    {
+      ret = socket_send_raw( sock, buf, len );
+    }
+  else
+    {
+      strm->next_in = (Bytef *)buf;
+      strm->avail_in = *len;
+
+      while( strm->avail_in )
+	{
+	  strm->next_out = (Bytef *)outputbuffer;
+	  strm->avail_out = outputlen;
+
+	  z_ret = deflate( strm, 0 );
+	  if (z_ret != Z_OK)
+	    {
+	      return APR_ENOMEM;
+	    }
+
+	  wlen = outputlen - strm->avail_out;
+	  if( wlen )
+	    {
+	      ret = socket_send_raw( sock, outputbuffer, &wlen );
+	      if(ret != APR_SUCCESS)
+		{
+		  return ret;
+		}
+	    }
+	}
     }
   return ret;
 }
@@ -1533,6 +1583,86 @@ process_udp_recv_channel(const apr_pollfd_t *desc, apr_time_t now)
   return;
 }
 
+static z_stream *
+zstream_new()
+{
+  int err;
+
+  z_stream *strm = malloc(sizeof(z_stream));
+  if (strm == 0)
+    {
+      return NULL;
+    }
+
+  strm->next_in   = 0;
+  strm->avail_in  = 0;
+  strm->next_out  = 0;
+  strm->avail_out = 0;
+  strm->zalloc    = 0;
+  strm->zfree     = 0;
+  strm->opaque    = 0;
+
+  /* Yes, 15 + 16 are 2 special magic values documented in zlib.h */
+  err = deflateInit2(strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY);
+  if (err != Z_OK)
+    {
+      free( strm );
+      return NULL;
+    }
+
+  return strm;
+}
+
+static apr_status_t
+socket_flush( apr_socket_t *client )
+{
+  char outputbuffer[2048];
+  const int outputlen = sizeof(outputbuffer);
+  int ret;
+  int status;
+  apr_size_t wlen;
+  z_stream *strm;
+
+  if (!args_info.gzip_output_flag)
+    {
+      return APR_SUCCESS;
+    }
+
+  if (APR_SUCCESS == apr_socket_data_get((void**)&strm, GZIP_KEY, client))
+    {
+      while( 1 )
+	{
+	  strm->next_out  = (Bytef *)outputbuffer;
+	  strm->avail_out = outputlen;
+
+	  ret = deflate( strm, Z_FINISH );
+	  if (ret != Z_OK && ret != Z_STREAM_END)
+	    {
+	      return APR_ENOMEM;
+	    }
+
+	  wlen = outputlen - strm->avail_out;
+	  status = socket_send_raw( client, outputbuffer, &wlen );
+	  if(status != APR_SUCCESS)
+	    return status;
+
+	  if(ret == Z_STREAM_END)
+	    return APR_SUCCESS;
+	}
+    }
+  return APR_SUCCESS;
+}
+
+static void
+zstream_destroy( z_stream *strm )
+{
+  if (strm)
+    {
+      deflateEnd(strm);
+      free (strm);
+    }
+}
+
 static apr_status_t
 print_xml_header( apr_socket_t *client )
 {
@@ -1842,6 +1972,23 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
   if(Ganglia_acl_action( channel->acl, remotesa ) != GANGLIA_ACCESS_ALLOW)
     goto close_accept_socket;
 
+  if (args_info.gzip_output_flag)
+    {
+      z_stream *strm = zstream_new();
+      if (strm == NULL)
+	{
+	  debug_msg("failed to allocate gzip stream");
+	  goto close_accept_socket;
+	}
+      apr_status_t r = apr_socket_data_set(client, strm, GZIP_KEY, &zstream_destroy);
+      if (r != APR_SUCCESS)
+	{
+	  debug_msg("failed to set socket user data");
+	  zstream_destroy(strm);
+	  goto close_accept_socket;
+	}
+    }
+
   /* Print the DTD, GANGLIA_XML and CLUSTER tags */
   status = print_xml_header(client);
   if(status != APR_SUCCESS)
@@ -1905,6 +2052,13 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
 
   /* Close the CLUSTER and GANGLIA_XML tags */
   print_xml_footer(client);
+
+  status = socket_flush( client );
+  if (status != APR_SUCCESS)
+    {
+      debug_msg("failed to finish compressing stream; returned '%d'",status);
+      goto close_accept_socket;
+    }
 
   /* Close down the accepted socket */
 close_accept_socket:

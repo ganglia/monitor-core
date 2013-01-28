@@ -36,6 +36,7 @@ import xml.sax
 import socket
 import time
 import logging
+import zlib
 
 from gmetad_config import GmetadConfig, getConfig
 from gmetad_random import getRandomInterval
@@ -135,6 +136,12 @@ class GmondReader(threading.Thread):
                         break
                     xmlbuf += buf
                 sock.close()
+
+                # These are the gzip header magic numbers, per RFC 1952 section 2.3.1
+                if xmlbuf[0:2] == '\x1f\x8b':
+                    # 32 is a magic number in zlib.h for autodetecting the zlib or gzip header
+                    xmlbuf = zlib.decompress(xmlbuf, zlib.MAX_WBITS + 32)
+
                 # Create an XML parser and parse the buffer
                 gch = GmondContentHandler()
                 xml.sax.parseString(xmlbuf, gch)
