@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <gmetad.h>
 #include <string.h>
+#include <zlib.h>
 
 #include <apr_time.h>
 
@@ -189,6 +190,97 @@ data_thread ( void *arg )
                         }
                   }
             }
+
+         /* These are the gzip header magic numbers, per RFC 1952 section 2.3.1 */
+         if(read_index > 2 && (unsigned char)buf[0] == 0x1f && (unsigned char)buf[1] == 0x8b)
+	   {
+	     /* Uncompress the buffer */
+	     int ret;
+	     z_stream strm;
+	     char * uncompressed;
+	     unsigned int write_index = 0;
+
+	     if( get_debug_msg_level() > 1 )
+	       {
+		 err_msg("GZIP compressed data for [%s] data source, %d bytes", d->name, read_index);
+	       }
+
+	     uncompressed = malloc(buf_size);
+	     if( !uncompressed )
+	       {
+		 err_quit("data_thread() unable to malloc enough room for [%s] GZIP", d->name);
+	       }
+
+	     strm.zalloc = NULL;
+	     strm.zfree = NULL;
+	     strm.opaque = NULL;
+	     strm.next_in  = (Bytef *)buf;
+	     strm.avail_in = read_index;
+
+	     /* Initialize the stream, 15 and 16 are magic numbers (gzip and max window size) */
+	     ret = inflateInit2(&strm, 15 + 16);
+	     if( ret != Z_OK )
+	       {
+		 err_msg("InflateInitError! for [%s] data source, failed to call inflateInit", d->name);
+		 d->dead = 1;
+
+		 free(buf);
+		 buf = uncompressed;
+		 goto take_a_break;
+	       }
+
+	     while (1)
+	       {
+		 /* Create more buffer space if needed */
+		 if ( (write_index + 2048) > buf_size)
+		   {
+		     buf_size += 2048;
+		     uncompressed = realloc(uncompressed, buf_size);
+		     if(!uncompressed)
+		       {
+			 err_quit("data_thread() unable to realloc enough room for [%s] GZIP", d->name) ;
+		       }
+		   }
+
+		 /* Do the inflate */
+		 strm.next_out  = (Bytef *)(uncompressed + write_index);
+		 strm.avail_out = buf_size - write_index - 1;
+
+		 ret = inflate(&strm, Z_FINISH);
+		 write_index = strm.total_out;
+
+		 if (ret == Z_OK || ret == Z_BUF_ERROR)
+		   {
+		     /* These are normal - just continue on */
+		     continue;
+		   }
+		 else if( ret == Z_STREAM_END )
+		   {
+		     /* We have finished, set things up for the XML parser */
+		     free (buf);
+		     buf = uncompressed;
+		     read_index = write_index;
+		     if(get_debug_msg_level() > 1)
+		       {
+			 err_msg("Uncompressed to %d bytes", read_index);
+		       }
+		     break;
+		   }
+		 else
+		   {
+		     /* Oh dear, something bad */
+		     inflateEnd(&strm);
+
+		     err_msg("InflateError! for [%s] data source, failed to call inflate (%s)", d->name, zError(ret));
+		     d->dead = 1;
+
+		     free(buf);
+		     buf = uncompressed;
+		     goto take_a_break;
+		   }
+	       }
+	     inflateEnd(&strm);
+	   }
 
          buf[read_index] = '\0';
 

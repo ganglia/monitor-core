@@ -15,6 +15,7 @@ option "metrics" m "Print the list of metrics this gmond supports" flag off
 option "bandwidth" b "Calculate minimum bandwidth use for configuration" flag off
 option "convert" r "Convert a 2.5.x configuration file to the new 3.x format" string no
 option "pid-file" p "Write process-id to file" string no
+option "gzip-output" z "Compress output with gzip before sending" flag off
 
 #Usage (a little tutorial)
 #
