@@ -212,6 +212,18 @@ def metric_init(params):
                 "description": "Number of open connections",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_delete_hits",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of keys that have been deleted and found present ",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_delete_misses",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of items that have been deleted and not found",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_evictions",
                 "units"      : "items",
                 "slope"      : "both",
