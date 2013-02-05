@@ -52,7 +52,10 @@ class UpdateMetricThread(threading.Thread):
         self.shuttingdown = True
         if not self.running:
             return
-        self.join()
+        try:
+            self.join()
+        except:
+            pass
 
     def run(self):
         self.running = True
@@ -209,6 +212,30 @@ def metric_init(params):
                 "description": "Number of open connections",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_decr_hits",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of keys that have been decremented and found present ",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_decr_misses",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of items that have been decremented and not found",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_delete_hits",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of keys that have been deleted and found present ",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_delete_misses",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of items that have been deleted and not found",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_evictions",
                 "units"      : "items",
                 "slope"      : "both",
@@ -237,6 +264,18 @@ def metric_init(params):
                 "units"      : "items",
                 "slope"      : "both",
                 "description": "Misses per second",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_incr_hits",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of keys that have been incremented and found present ",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_incr_misses",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of items that have been incremented and not found",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_cmd_get_rate",
