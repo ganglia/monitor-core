@@ -52,7 +52,10 @@ class UpdateMetricThread(threading.Thread):
         self.shuttingdown = True
         if not self.running:
             return
-        self.join()
+        try:
+            self.join()
+        except:
+            pass
 
     def run(self):
         self.running = True
