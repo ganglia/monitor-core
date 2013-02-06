@@ -28,14 +28,27 @@
 /* sanity check and range limit */
 static double sanityCheck( int line, char *file, const char *func, double v, double diff, double dt, JT a, JT b, JT c, JT d );
 
+/* Use unsigned long long for stats on systems with strtoull */
+#if HAVE_STRTOULL
+typedef unsigned long long stat_t;
+#define STAT_MAX ULLONG_MAX
+#define PRI_STAT "llu"
+#define strtostat(nptr, endptr, base) strtoull(nptr, endptr, base)
+#else
+typedef unsigned long stat_t;
+#define STAT_MAX ULONG_MAX
+#define PRI_STAT "lu"
+#define strtostat(nptr, endptr, base) strtoul(nptr, endptr, base)
+#endif
+
 /* /proc/net/dev hash table stuff */
 typedef struct net_dev_stats net_dev_stats;
 struct net_dev_stats {
   char *name;
-  unsigned long rpi;
-  unsigned long rpo;
-  unsigned long rbi;
-  unsigned long rbo;
+  stat_t rpi;
+  stat_t rpo;
+  stat_t rbi;
+  stat_t rbo;
   net_dev_stats *next;
 };
 #define NHASH 101
@@ -151,8 +164,8 @@ void update_ifdata ( char *caller )
    char *p;
    int i;
    static struct timeval stamp={0,0};
-   unsigned long rbi=0, rbo=0, rpi=0, rpo=0;
-   unsigned long l_bytes_in=0, l_bytes_out=0, l_pkts_in=0, l_pkts_out=0;
+   stat_t rbi=0, rbo=0, rpi=0, rpo=0;
+   stat_t l_bytes_in=0, l_bytes_out=0, l_pkts_in=0, l_pkts_out=0;
    double l_bin, l_bout, l_pin, l_pout;
    net_dev_stats *ns;
    float t;
@@ -195,43 +208,43 @@ void update_ifdata ( char *caller )
                     if ( !ns ) return;
 
                     /* receive */
-                    rbi = strtoul(p, &p ,10);
+                    rbi = strtostat(p, &p ,10);
                     if ( rbi >= ns->rbi ) {
                        l_bytes_in += rbi - ns->rbi;
                     } else {
-                       debug_msg("update_ifdata(%s) - Overflow in rbi: %lu -> %lu",caller,ns->rbi,rbi);
-                       l_bytes_in += ULONG_MAX - ns->rbi + rbi;
+                       debug_msg("update_ifdata(%s) - Overflow in rbi: %"PRI_STAT" -> %"PRI_STAT,caller,ns->rbi,rbi);
+                       l_bytes_in += STAT_MAX - ns->rbi + rbi;
                     }
                     ns->rbi = rbi;
 
-                    rpi = strtoul(p, &p ,10);
+                    rpi = strtostat(p, &p ,10);
                     if ( rpi >= ns->rpi ) {
                        l_pkts_in += rpi - ns->rpi;
                     } else {
-                       debug_msg("updata_ifdata(%s) - Overflow in rpi: %lu -> %lu",caller,ns->rpi,rpi);
-                       l_pkts_in += ULONG_MAX - ns->rpi + rpi;
+                       debug_msg("updata_ifdata(%s) - Overflow in rpi: %"PRI_STAT" -> %"PRI_STAT,caller,ns->rpi,rpi);
+                       l_pkts_in += STAT_MAX - ns->rpi + rpi;
                     }
                     ns->rpi = rpi;
 
                     /* skip unneeded metrics */
-                    for (i = 0; i < 6; i++) rbo = strtoul(p, &p, 10);
+                    for (i = 0; i < 6; i++) rbo = strtostat(p, &p, 10);
 
                     /* transmit */
-                    rbo = strtoul(p, &p ,10);
+                    rbo = strtostat(p, &p ,10);
                     if ( rbo >= ns->rbo ) {
                        l_bytes_out += rbo - ns->rbo;
                     } else {
-                       debug_msg("update_ifdata(%s) - Overflow in rbo: %lu -> %lu",caller,ns->rbo,rbo);
-                       l_bytes_out += ULONG_MAX - ns->rbo + rbo;
+                       debug_msg("update_ifdata(%s) - Overflow in rbo: %"PRI_STAT" -> %"PRI_STAT,caller,ns->rbo,rbo);
+                       l_bytes_out += STAT_MAX - ns->rbo + rbo;
                     }
                     ns->rbo = rbo;
 
-                    rpo = strtoul(p, &p ,10);
+                    rpo = strtostat(p, &p ,10);
                     if ( rpo >= ns->rpo ) {
                        l_pkts_out += rpo - ns->rpo;
                     } else {
-                       debug_msg("update_ifdata(%s) - Overflow in rpo: %lu -> %lu",caller,ns->rpo,rpo);
-                       l_pkts_out += ULONG_MAX - ns->rpo + rpo;
+                       debug_msg("update_ifdata(%s) - Overflow in rpo: %"PRI_STAT" -> %"PRI_STAT,caller,ns->rpo,rpo);
+                       l_pkts_out += STAT_MAX - ns->rpo + rpo;
                     }
                     ns->rpo = rpo;
                   }
