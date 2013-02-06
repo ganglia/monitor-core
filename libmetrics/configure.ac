@@ -72,7 +72,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_STAT
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([getmntinfo getpagesize gettimeofday memset pstat_getdynamic strchr strdup strndup strpbrk strstr strtol sysinfo uname vsnprintf strlcat])
+AC_CHECK_FUNCS([getmntinfo getpagesize gettimeofday memset pstat_getdynamic strchr strdup strndup strpbrk strstr strtol strtoull sysinfo uname vsnprintf strlcat])
 
 if test x"$ac_cv_c_compiler_gnu" = xyes; then
    CFLAGS="$CFLAGS -Wall"
