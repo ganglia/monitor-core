@@ -20,6 +20,14 @@
 #include "libmetrics.h"
 /* End old ganglia 2.5.x headers */
 
+/* Needed for VLAN testing */
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <linux/if_vlan.h>
+#include <linux/sockios.h>
+
+
 #define OSNAME "Linux"
 #define OSNAME_LEN strlen(OSNAME)
 
@@ -154,6 +162,37 @@ static net_dev_stats *hash_lookup(char *devname, size_t nlen)
   return stats;
 }
 
+
+/*
+** Helper functions for vlan interface testing
+*/
+static int is_vlan_iface(char *if_name)
+{
+   int fd,rc;
+   struct vlan_ioctl_args vlan_args;
+
+   fd = socket(PF_INET, SOCK_DGRAM, 0);
+
+   // fail if can't open the socket
+   if ( fd < 0 ) {
+      return 0;
+   };
+
+   vlan_args.cmd = GET_VLAN_VID_CMD;
+   strncpy(vlan_args.device1, if_name, sizeof(vlan_args.device1));
+   rc = ioctl(fd,SIOCGIFVLAN,&vlan_args);
+
+   close(fd);
+   if (rc < 0) {
+      return 0; // false
+   } else {
+      return 1; // vlan iface indeed
+   }
+
+};
+
+
+
 /*
  * FIXME: this routine should be rewritten to do per-interface statistics
  */
@@ -185,6 +224,9 @@ void update_ifdata ( char *caller )
               char *src;
               size_t n = 0;
 
+              char if_name[IFNAMSIZ];
+              int vlan = 0; // vlan flag
+
               while (p != 0x00 && isblank(*p))
                  p++;
 
@@ -196,10 +238,17 @@ void update_ifdata ( char *caller )
                  }
 
               p = index(p, ':');
-
+              /* l.flis: check whether iface is vlan */
+              if (p && n < IFNAMSIZ) {
+                  strncpy(if_name,src,IFNAMSIZ);
+                  if_name[n] = '\0';
+                  vlan = is_vlan_iface(if_name);
+              };
+                 
               /* Ignore 'lo' and 'bond*' interfaces (but sanely) */
+              /* l.flis: skip vlan interfaces to avoid double counting*/
               if (p && strncmp (src, "lo", 2) &&
-                  strncmp (src, "bond", 4))
+                  strncmp (src, "bond", 4) && !vlan)
                  {
                     p++;
                     /* Check for data from the last read for this */
