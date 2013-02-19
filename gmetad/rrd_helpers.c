@@ -374,7 +374,9 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 	sprintf(s_process_time, "%u", process_time);
 
    /* Build the path */
-   strncpy(graphite_msg, gmetad_config.graphite_prefix, PATHSIZE);
+   if (gmetad_config.graphite_prefix != NULL && strlen(gmetad_config.graphite_prefix) > 1) {
+     strncpy(graphite_msg, gmetad_config.graphite_prefix, PATHSIZE);
+   }
 
 
 
@@ -393,8 +395,12 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
       }
 		sourcecp[i+1]=0;
           
-      strncat(graphite_msg, ".", PATHSIZE-strlen(graphite_msg));
-      strncat(graphite_msg, sourcecp, PATHSIZE-strlen(graphite_msg));
+      if (gmetad_config.graphite_prefix != NULL && strlen(gmetad_config.graphite_prefix) > 1) {
+         strncat(graphite_msg, ".", PATHSIZE-strlen(graphite_msg));
+         strncat(graphite_msg, sourcecp, PATHSIZE-strlen(graphite_msg));
+      } else {
+         strncpy(graphite_msg, sourcecp, PATHSIZE);
+      }
    }
 
 
