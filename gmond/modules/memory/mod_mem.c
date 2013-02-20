@@ -47,6 +47,10 @@ static g_val_t mem_metric_handler ( int metric_index )
         return swap_free_func();
     case 6:
         return swap_total_func();
+#ifdef LINUX
+    case 7:
+        return mem_sreclaimable_func();
+#endif
 #if HPUX
     case 7:
         return mem_arm_func();
@@ -73,6 +77,9 @@ static Ganglia_25metric mem_metric_info[] =
     {0, "mem_cached",  180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.0f", UDP_HEADER_SIZE+8, "Amount of cached memory"},
     {0, "swap_free",   180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.0f", UDP_HEADER_SIZE+8, "Amount of available swap memory"},
     {0, "swap_total", 1200, GANGLIA_VALUE_FLOAT, "KB", "zero", "%.0f", UDP_HEADER_SIZE+8, "Total amount of swap space displayed in KBs"},
+#ifdef LINUX
+    {0, "mem_sreclaimable", 180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.0f", UDP_HEADER_SIZE+8, "Amount of reclaimable slab memory"},
+#endif
 #if HPUX
     {0, "mem_arm",     180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.0f", UDP_HEADER_SIZE+8, "mem_arm"},
     {0, "mem_rm",      180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.0f", UDP_HEADER_SIZE+8, "mem_rm"},
