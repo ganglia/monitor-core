@@ -1190,6 +1190,23 @@ mem_buffers_func ( void )
 }
 
 g_val_t
+mem_sreclaimable_func ( void )
+{
+   char *p;
+   g_val_t val;
+
+   p = strstr( update_file(&proc_meminfo), "SReclaimable:" );
+   if(p) {
+     p = skip_token(p);
+     val.f = atof( p );
+   } else {
+     val.f = 0;
+   }
+
+   return val;
+}
+
+g_val_t
 mem_cached_func ( void )
 {
    char *p;
