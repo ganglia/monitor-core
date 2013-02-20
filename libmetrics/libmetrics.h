@@ -76,6 +76,10 @@ void libmetrics_init( void );
  g_val_t heartbeat_func(void);
  g_val_t location_func(void);
 
+#ifdef LINUX
+ g_val_t mem_sreclaimable_func (void);
+#endif
+
 /* the following are additional internal metrics added by swagner
  * what for the monitoring of buffer/linear read/writes on Solaris boxen.
  * these are only valid on the solaris version of gmond v2.3.1b1,
