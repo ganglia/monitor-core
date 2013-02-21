@@ -607,6 +607,7 @@ is only partially complete).
   mem_cached    Amount of cached memory                  l,f
   mem_free      Amount of available memory               l,f
   mem_shared    Amount of shared memory                  l,f
+  mem_sreclaimable    Amount of slab reclaimable memory  l (kernel >= 2.6.19)
   mem_total     Amount of available memory               l,f
   mtu           Network maximum transmission unit        l,f
   os_name       Operating system name                    l,f
