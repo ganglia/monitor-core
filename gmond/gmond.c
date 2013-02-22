@@ -264,7 +264,7 @@ socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
   int z_ret;
 
   ret = apr_socket_data_get((void**)&strm, GZIP_KEY, sock);
-  if (ret != APR_SUCCESS)
+  if (ret != APR_SUCCESS || strm == NULL)
     {
       ret = socket_send_raw( sock, buf, len );
     }
