@@ -203,30 +203,31 @@ startElement_GRID(void *data, const char *el, const char **attr)
                                      name);
                      return 1;
                   }
+
+               source->metric_summary_pending = hash_create(DEFAULT_METRICSIZE);
+               if (!source->metric_summary_pending)
+                  {
+                     err_msg("Could not create pending summary hash for cluster %s",
+                                     name);
+                     return 1;
+                  }
+
                source->ds = xmldata->ds;
 
                /* Initialize the partial sum lock */
                source->sum_finished = (pthread_mutex_t *) 
                        malloc(sizeof(pthread_mutex_t));
                pthread_mutex_init(source->sum_finished, NULL);
-
-               /* Grab the "partial sum" mutex until we are finished
-                * summarizing. */
-               pthread_mutex_lock(source->sum_finished);
             }
          else
             {  /* Found Cluster. Put into our Source buffer in xmldata. */
                memcpy(source, hash_datum->data, hash_datum->size);
                datum_free(hash_datum);
 
-               /* Grab the "partial sum" mutex until we are finished
-                * summarizing. Needs to be done asap.*/
-               pthread_mutex_lock(source->sum_finished);
-
                source->hosts_up = 0;
                source->hosts_down = 0;
 
-               hash_foreach(source->metric_summary, zero_out_summary, NULL);
+               hash_foreach(source->metric_summary_pending, zero_out_summary, NULL);
             }
 
          /* Edge has the same invariant as in fillmetric(). */
@@ -322,28 +323,30 @@ startElement_CLUSTER(void *data, const char *el, const char **attr)
                err_msg("Could not create summary hash for cluster %s", name);
                return 1;
             }
+
+         source->metric_summary_pending = hash_create(DEFAULT_METRICSIZE);
+         if (!source->metric_summary_pending)
+            {
+               err_msg("Could not create pending summary hash for cluster %s", name);
+               return 1;
+            }
+
          source->ds = xmldata->ds;
          
          /* Initialize the partial sum lock */
          source->sum_finished = (pthread_mutex_t *) 
                  malloc(sizeof(pthread_mutex_t));
          pthread_mutex_init(source->sum_finished, NULL);
-
-         /* Grab the "partial sum" mutex until we are finished summarizing. */
-         pthread_mutex_lock(source->sum_finished);
       }
    else
       {
          memcpy(source, hash_datum->data, hash_datum->size);
          datum_free(hash_datum);
 
-         /* We need this lock before zeroing metric sums. */
-         pthread_mutex_lock(source->sum_finished);
-
          source->hosts_up = 0;
          source->hosts_down = 0;
 
-         hash_foreach(source->metric_summary, zero_out_summary, NULL);
+         hash_foreach(source->metric_summary_pending, zero_out_summary, NULL);
       }
 
    /* Edge has the same invariant as in fillmetric(). */
@@ -680,7 +683,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
    /* Always update summary for numeric metrics. */
    if (do_summary)
       {
-         summary = xmldata->source.metric_summary;
+         summary = xmldata->source.metric_summary_pending;
          hash_datum = hash_lookup(&hashkey, summary);
          if (!hash_datum)
             {
@@ -920,7 +923,7 @@ startElement_METRICS(void *data, const char *el, const char **attr)
             }
       }
 
-   summary = xmldata->source.metric_summary;
+   summary = xmldata->source.metric_summary_pending;
    hash_datum = hash_lookup(&hashkey, summary);
    if (!hash_datum)
       {
@@ -1137,9 +1140,14 @@ endElement_GRID(void *data, const char *el)
    if (authority_mode(xmldata))
       {
          source = &xmldata->source;
-         summary = xmldata->source.metric_summary;
 
-         /* Release the partial sum mutex */
+         /* Swap the metric_summary and metric_summary_pending over */
+         pthread_mutex_lock(source->sum_finished);
+         {
+             summary = xmldata->source.metric_summary_pending;
+             xmldata->source.metric_summary_pending = xmldata->source.metric_summary;
+             xmldata->source.metric_summary = summary;
+         }
          pthread_mutex_unlock(source->sum_finished);
 
          hashkey.data = (void*) xmldata->sourcename;
@@ -1175,9 +1183,14 @@ endElement_CLUSTER(void *data, const char *el)
    if (authority_mode(xmldata))
       {
          source = &xmldata->source;
-         summary = xmldata->source.metric_summary;
 
-         /* Release the partial sum mutex */
+         /* Swap the metric_summary and metric_summary_pending over */
+         pthread_mutex_lock(source->sum_finished);
+         {
+             summary = xmldata->source.metric_summary_pending;
+             xmldata->source.metric_summary_pending = xmldata->source.metric_summary;
+             xmldata->source.metric_summary = summary;
+         }
          pthread_mutex_unlock(source->sum_finished);
 
          hashkey.data = (void*) xmldata->sourcename;
