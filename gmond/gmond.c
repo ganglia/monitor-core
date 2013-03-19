@@ -3181,22 +3181,14 @@ void sig_handler(int i)
 static void* APR_THREAD_FUNC tcp_listener(apr_thread_t *thd, void *data)
 {
   apr_time_t now;
-  apr_interval_time_t wait = 1000;
+  apr_interval_time_t wait = 100 * 1000; // 100ms
 
   debug_msg("[tcp] Starting TCP listener thread...");
   for(;!done;)
     {
-      if(!deaf)
-        {
-          now = apr_time_now();
-          /* Pull in incoming data */
-          poll_tcp_listen_channels(wait, now);
-        }
-      else
-        {
-          apr_sleep( wait );
-        }
-
+      now = apr_time_now();
+      /* Pull in incoming data */
+      poll_tcp_listen_channels(wait, now);
     }
     apr_thread_exit(thd, APR_SUCCESS);
 
@@ -3326,11 +3318,14 @@ main ( int argc, char *argv[] )
   udp_last_heard = last_cleanup = next_collection = now = apr_time_now();
 
   /* Create TCP listener thread */
-  apr_thread_t *thread;
-  if (apr_thread_create(&thread, NULL, tcp_listener, NULL, global_context) != APR_SUCCESS)
+  if(!deaf)
     {
-      err_msg("Failed to create TCP listener thread. Exiting.\n");
-      exit(1);
+      apr_thread_t *thread;
+      if (apr_thread_create(&thread, NULL, tcp_listener, NULL, global_context) != APR_SUCCESS)
+        {
+          err_msg("Failed to create TCP listener thread. Exiting.\n");
+          exit(1);
+        }
     }
 
   /* Loop */
