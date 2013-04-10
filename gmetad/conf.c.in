@@ -278,14 +278,6 @@ static DOTCONF_CB(cb_carbon_timeout)
    return NULL;
 }
 
-static DOTCONF_CB(cb_memcached_parameters)
-{
-   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
-   debug_msg("Enabling memcached parameters to %s", cmd->data.str);
-   c->memcached_parameters = strdup (cmd->data.str);
-   return NULL;
-}
-
 static DOTCONF_CB(cb_graphite_prefix)
 {
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
@@ -294,6 +286,13 @@ static DOTCONF_CB(cb_graphite_prefix)
    return NULL;
 }
 
+static DOTCONF_CB(cb_graphite_path)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Enabling Graphite proxy to %s", cmd->data.str);
+   c->graphite_path = strdup (cmd->data.str);
+   return NULL;
+}
 static DOTCONF_CB(cb_unsummarized_metrics)
 {
    int i;
@@ -338,8 +337,8 @@ static configoption_t gmetad_options[] =
       {"carbon_server", ARG_STR, cb_carbon_server, &gmetad_config, 0},
       {"carbon_port", ARG_INT, cb_carbon_port, &gmetad_config, 0},
       {"carbon_timeout", ARG_INT, cb_carbon_timeout, &gmetad_config, 0},
-      {"memcached_parameters", ARG_STR, cb_memcached_parameters, &gmetad_config, 0},
       {"graphite_prefix", ARG_STR, cb_graphite_prefix, &gmetad_config, 0},
+      {"graphite_path", ARG_STR, cb_graphite_path, &gmetad_config, 0},
       {"unsummarized_metrics", ARG_LIST, cb_unsummarized_metrics, &gmetad_config, 0},
       LAST_OPTION
    };
