@@ -22,7 +22,7 @@ cmdline.c: cmdline.c.in $(FIXCONFIG)
 gmetad_SOURCES =  gmetad.c cmdline.c.in cmdline.c cmdline.h gmetad.h data_thread.c \
    server.c process_xml.c rrd_helpers.c conf.c conf.h type_hash.c \
    xml_hash.c cleanup.c rrd_helpers.h daemon_init.c daemon_init.h \
-	 server_priv.h
+	 server_priv.h export_helpers.h export_helpers.h
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
                  $(GLDADD) $(DEPS_LIBS)
 
