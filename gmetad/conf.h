@@ -23,6 +23,7 @@ typedef struct
       int carbon_timeout;
       char *memcached_parameters;
       char *graphite_prefix;
+      char *graphite_path;
       int scalable_mode;
       int write_rrds;
       int all_trusted;

@@ -294,6 +294,14 @@ static DOTCONF_CB(cb_graphite_prefix)
    return NULL;
 }
 
+static DOTCONF_CB(cb_graphite_path)
+{
+	gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+	debug_msg("Setting Graphite path to %s", cmd->data.str);
+	c->graphite_path = strdup (cmd->data.str);
+	return NULL;
+} 
+
 static DOTCONF_CB(cb_unsummarized_metrics)
 {
    int i;
@@ -340,6 +348,7 @@ static configoption_t gmetad_options[] =
       {"carbon_timeout", ARG_INT, cb_carbon_timeout, &gmetad_config, 0},
       {"memcached_parameters", ARG_STR, cb_memcached_parameters, &gmetad_config, 0},
       {"graphite_prefix", ARG_STR, cb_graphite_prefix, &gmetad_config, 0},
+      {"graphite_path", ARG_STR, cb_graphite_path, &gmetad_config, 0},
       {"unsummarized_metrics", ARG_LIST, cb_unsummarized_metrics, &gmetad_config, 0},
       LAST_OPTION
    };

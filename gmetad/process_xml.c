@@ -6,6 +6,7 @@
 #include <ganglia.h>
 #include "gmetad.h"
 #include "rrd_helpers.h"
+#include "export_helpers.h"
 
 extern int zero_out_summary(datum_t *key, datum_t *val, void *arg);
 extern char* getfield(char *buf, short int index);

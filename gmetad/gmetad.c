@@ -16,6 +16,7 @@
 #include "update_pidfile.h"
 
 #include "rrd_helpers.h"
+#include "export_helpers.h"
 
 #define METADATA_SLEEP_RANDOMIZE 5.0
 #define METADATA_MINIMUM_SLEEP 1
