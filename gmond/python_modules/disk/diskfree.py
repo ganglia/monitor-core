@@ -35,6 +35,7 @@ NAME_PREFIX = 'disk_free_'
 PARAMS = {
     'mounts' : '/proc/mounts'
 }
+PATHS = {}
 
 
 def get_value(name):
@@ -45,6 +46,8 @@ def get_value(name):
     unit_type = name_parser.group(1)
     if name_parser.group(2) == 'rootfs':
         path = '/'
+    elif name_parser.group(2) in PATHS:
+        path = '/' + PATHS[name_parser.group(2)]
     else:
         path = '/' + name_parser.group(2).replace('_', '/')
 
@@ -68,7 +71,7 @@ def get_value(name):
 def metric_init(lparams):
     """Initialize metric descriptors"""
 
-    global PARAMS, MIN_DISK_SIZE
+    global PARAMS, MIN_DISK_SIZE, PATHS
 
     # set parameters
     for key in lparams:
@@ -98,22 +101,23 @@ def metric_init(lparams):
             disk_size = (disk.f_blocks * disk.f_frsize) / float(2**30)
 
             if disk_size > MIN_DISK_SIZE and mount_info[1] != "/dev":
-	      for unit_type in ['absolute', 'percent']:
-		  if unit_type == 'percent': 
-			  units = '%'
-		  else:
-			  units = 'GB'
-		  descriptors.append({
-		      'name': NAME_PREFIX + unit_type + '_' + path_key,
-		      'call_back': get_value,
-		      'time_max': 60,
-		      'value_type': 'float',
-		      'units': units,
-		      'slope': 'both',
-		      'format': '%f',
-		      'description': "Disk space available (%s) on %s" % (units, mount_info[1]),
-		      'groups': 'disk'
-		  })
+                PATHS[path_key] = mount_info[1]
+                for unit_type in ['absolute', 'percent']:
+                    if unit_type == 'percent': 
+                        units = '%'
+                    else:
+                        units = 'GB'
+                    descriptors.append({
+                        'name': NAME_PREFIX + unit_type + '_' + path_key,
+                        'call_back': get_value,
+                        'time_max': 60,
+                        'value_type': 'float',
+                        'units': units,
+                        'slope': 'both',
+                        'format': '%f',
+                        'description': "Disk space available (%s) on %s" % (units, mount_info[1]),
+                        'groups': 'disk'
+                    })
 
     return descriptors
 
