@@ -150,9 +150,12 @@ case_sensitive_hostnames 0
 # default: unspecified
 # carbon_server "my.graphite.box"
 #
-# The port on which Graphite is listening
+# The port and protocol on which Graphite is listening
 # default: 2003
 # carbon_port 2003
+#
+# default: tcp
+# carbon_protocol udp
 #
 # **Deprecated in favor of graphite_path** A prefix to prepend to the 
 # metric names exported by gmetad. Graphite uses dot-

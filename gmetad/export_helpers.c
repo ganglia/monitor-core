@@ -15,6 +15,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/poll.h>
+#include <arpa/inet.h>
 
 #ifdef WITH_MEMCACHED
 #include <libmemcached-1.0/memcached.h>
@@ -26,6 +27,38 @@
 #define PATHSIZE 4096
 extern gmetad_config_t gmetad_config;
 
+g_udp_socket *carbon_udp_socket;
+pthread_mutex_t  carbon_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+g_udp_socket*
+init_carbon_udp_socket (const char *hostname, uint16_t port)
+{
+   int sockfd;
+   g_udp_socket* s;
+   struct sockaddr_in *sa_in;
+   struct hostent *hostinfo;
+
+   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+   if (sockfd < 0)
+      {
+         err_msg("create socket (client): %s", strerror(errno));
+         return NULL;
+      }
+
+   s = malloc( sizeof( g_udp_socket ) );
+   memset( s, 0, sizeof( g_udp_socket ));
+   s->sockfd = sockfd;
+   s->ref_count = 1;
+
+   /* Set up address and port for connection */
+   sa_in = (struct sockaddr_in*) &s->sa;
+   sa_in->sin_family = AF_INET;
+   sa_in->sin_port = htons (port);
+   hostinfo = gethostbyname (hostname);
+   sa_in->sin_addr = *(struct in_addr *) hostinfo->h_addr;
+
+   return s;
+}
 
 void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port)
 {
@@ -45,77 +78,97 @@ void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t por
 static int
 push_data_to_carbon( char *graphite_msg)
 {
-  int port;
-  int carbon_socket;
-  struct sockaddr_in server;
-  int carbon_timeout ;
-  int nbytes;
-  struct pollfd carbon_struct_poll;
-  int poll_rval;
-  int fl;
 
-  if (gmetad_config.carbon_timeout)
-      carbon_timeout=gmetad_config.carbon_timeout;
-  else
-      carbon_timeout = 500;
-
-  if (gmetad_config.carbon_port)
-     port=gmetad_config.carbon_port;
-  else
-     port=2003;
-
-
-  debug_msg("Carbon Proxy:: sending \'%s\' to %s", graphite_msg, gmetad_config.carbon_server);
-
-      /* Create a socket. */
-  carbon_socket = socket (PF_INET, SOCK_STREAM, 0);
-  if (carbon_socket < 0)
+  if (!strcmp(gmetad_config.carbon_protocol, "tcp"))
     {
-      err_msg("socket (client): %s", strerror(errno));
-      close (carbon_socket);
-      return EXIT_FAILURE;
-    }
 
-  /* Set the socket to not block */
-  fl = fcntl(carbon_socket,F_GETFL,0);
-  fcntl(carbon_socket,F_SETFL,fl | O_NONBLOCK);
+      int port;
+      int carbon_socket;
+      struct sockaddr_in server;
+      int carbon_timeout ;
+      int nbytes;
+      struct pollfd carbon_struct_poll;
+      int poll_rval;
+      int fl;
 
-  /* Connect to the server. */
-  init_sockaddr (&server, gmetad_config.carbon_server, port);
-  connect (carbon_socket, (struct sockaddr *) &server, sizeof (server));
+      if (gmetad_config.carbon_timeout)
+          carbon_timeout=gmetad_config.carbon_timeout;
+      else
+          carbon_timeout = 500;
 
-  /* Start Poll */
-   carbon_struct_poll.fd=carbon_socket;
-   carbon_struct_poll.events = POLLOUT;
-   poll_rval = poll( &carbon_struct_poll, 1, carbon_timeout ); // default timeout .5s
+      if (gmetad_config.carbon_port)
+         port=gmetad_config.carbon_port;
+      else
+         port=2003;
 
-  /* Send data to the server when the socket becomes ready */
-  if( poll_rval < 0 ) {
-    debug_msg("carbon proxy:: poll() error");
-  } else if ( poll_rval == 0 ) {
-    debug_msg("carbon proxy:: Timeout connecting to %s",gmetad_config.carbon_server);
-  } else {
-    if( carbon_struct_poll.revents & POLLOUT ) {
-      /* Ready to send data to the server. */
-      debug_msg("carbon proxy:: %s is ready to receive",gmetad_config.carbon_server);
-      nbytes = write (carbon_socket, graphite_msg, strlen(graphite_msg) + 1);
-      if (nbytes < 0) {
-        err_msg("write: %s", strerror(errno));
-        close(carbon_socket);
-        return EXIT_FAILURE;
+      debug_msg("Carbon Proxy:: sending \'%s\' to %s", graphite_msg, gmetad_config.carbon_server);
+
+          /* Create a socket. */
+      carbon_socket = socket (PF_INET, SOCK_STREAM, 0);
+      if (carbon_socket < 0)
+        {
+          err_msg("socket (client): %s", strerror(errno));
+          close (carbon_socket);
+          return EXIT_FAILURE;
+        }
+
+      /* Set the socket to not block */
+      fl = fcntl(carbon_socket,F_GETFL,0);
+      fcntl(carbon_socket,F_SETFL,fl | O_NONBLOCK);
+
+      /* Connect to the server. */
+      init_sockaddr (&server, gmetad_config.carbon_server, port);
+      connect (carbon_socket, (struct sockaddr *) &server, sizeof (server));
+
+      /* Start Poll */
+       carbon_struct_poll.fd=carbon_socket;
+       carbon_struct_poll.events = POLLOUT;
+       poll_rval = poll( &carbon_struct_poll, 1, carbon_timeout ); // default timeout .5s
+
+      /* Send data to the server when the socket becomes ready */
+      if( poll_rval < 0 ) {
+        debug_msg("carbon proxy:: poll() error");
+      } else if ( poll_rval == 0 ) {
+        debug_msg("carbon proxy:: Timeout connecting to %s",gmetad_config.carbon_server);
+      } else {
+        if( carbon_struct_poll.revents & POLLOUT ) {
+          /* Ready to send data to the server. */
+          debug_msg("carbon proxy:: %s is ready to receive",gmetad_config.carbon_server);
+          nbytes = write (carbon_socket, graphite_msg, strlen(graphite_msg) + 1);
+          if (nbytes < 0) {
+            err_msg("write: %s", strerror(errno));
+            close(carbon_socket);
+            return EXIT_FAILURE;
+          }
+        } else if ( carbon_struct_poll.revents & POLLHUP ) {
+          debug_msg("carbon proxy:: Recvd an RST from %s during transmission",gmetad_config.carbon_server);
+         close(carbon_socket);
+         return EXIT_FAILURE;
+        } else if ( carbon_struct_poll.revents & POLLERR ) {
+          debug_msg("carbon proxy:: Recvd an POLLERR from %s during transmission",gmetad_config.carbon_server);
+          close(carbon_socket);
+          return EXIT_FAILURE;
+        }
       }
-    } else if ( carbon_struct_poll.revents & POLLHUP ) {
-      debug_msg("carbon proxy:: Recvd an RST from %s during transmission",gmetad_config.carbon_server);
-     close(carbon_socket);
-     return EXIT_FAILURE;
-    } else if ( carbon_struct_poll.revents & POLLERR ) {
-      debug_msg("carbon proxy:: Recvd an POLLERR from %s during transmission",gmetad_config.carbon_server);
-      close(carbon_socket);
-      return EXIT_FAILURE;
-    }
+      close (carbon_socket);
+      return EXIT_SUCCESS;
+
+  } else {
+
+      int nbytes;
+
+      pthread_mutex_lock( &carbon_mutex );
+      nbytes = sendto (carbon_udp_socket->sockfd, graphite_msg, strlen(graphite_msg), 0,
+                         (struct sockaddr_in*)&carbon_udp_socket->sa, sizeof (struct sockaddr_in));
+      pthread_mutex_unlock( &carbon_mutex );
+
+      if (nbytes != strlen(graphite_msg))
+      {
+             err_msg("sendto socket (client): %s", strerror(errno));
+             return EXIT_FAILURE;
+      }
+      return EXIT_SUCCESS;
   }
-  close (carbon_socket);
-  return EXIT_SUCCESS;
 }
 
 #ifdef WITH_MEMCACHED
