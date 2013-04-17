@@ -751,7 +751,6 @@ process_struct_MEMCACHE_2200(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_h
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_mc_bytes_read, SFLOW_CTR_RATE(dataSource, mc_bytes_read, ctr_ival_mS), SFLOW_OK_COUNTER64(mc_bytes_read));
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_mc_bytes_written, SFLOW_CTR_RATE(dataSource, mc_bytes_written, ctr_ival_mS), SFLOW_OK_COUNTER64(mc_bytes_written));
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_mc_conn_yields, SFLOW_CTR_RATE(dataSource, mc_conn_yields, ctr_ival_mS), SFLOW_OK_COUNTER32(mc_conn_yields));
-    submit_sflow_float(hostdata, metric_prefix, SFLOW_M_mc_bytes, SFLOW_CTR_RATE(dataSource, mc_bytes, ctr_ival_mS), SFLOW_OK_COUNTER64(mc_bytes));
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_mc_total_items, SFLOW_CTR_RATE(dataSource, mc_total_items, ctr_ival_mS), SFLOW_OK_COUNTER32(mc_total_items));
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_mc_evictions, SFLOW_CTR_RATE(dataSource, mc_evictions, ctr_ival_mS), SFLOW_OK_COUNTER32(mc_evictions));
   }
@@ -779,7 +778,6 @@ process_struct_MEMCACHE_2200(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_h
   SFLOW_CTR_LATCH(dataSource, mc_bytes_read);
   SFLOW_CTR_LATCH(dataSource, mc_bytes_written);
   SFLOW_CTR_LATCH(dataSource, mc_conn_yields);
-  SFLOW_CTR_LATCH(dataSource, mc_bytes);
   SFLOW_CTR_LATCH(dataSource, mc_total_items);
   SFLOW_CTR_LATCH(dataSource, mc_evictions);
 
@@ -792,6 +790,7 @@ process_struct_MEMCACHE_2200(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_h
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_conn_structs, mc_conn_structs, SFLOW_OK_GAUGE32(mc_conn_structs));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_accepting_conns, mc_accepting_conns, SFLOW_OK_GAUGE32(mc_accepting_conns));
   submit_sflow_uint32(hostdata, metric_prefix, SFLOW_M_mc_listen_disabled_num, mc_listen_disabled_num, SFLOW_OK_GAUGE32(mc_listen_disabled_num));
+  submit_sflow_double(hostdata, metric_prefix, SFLOW_M_mc_bytes, (double)mc_bytes, SFLOW_OK_GAUGE64(mc_bytes));
 }
 #endif /* SFLOW_MEMCACHE_2200 */
 
