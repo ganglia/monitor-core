@@ -20,6 +20,7 @@ typedef struct
       char *rrd_rootdir;
       char *carbon_server;
       int carbon_port;
+      char *carbon_protocol;
       int carbon_timeout;
       char *memcached_parameters;
       char *graphite_prefix;

@@ -19,6 +19,8 @@ write_data_to_memcached ( const char *cluster, const char *host, const char *met
                     const char *sum, unsigned int process_time, unsigned int expiry );
 #endif /* WITH_MEMCACHED */
 
+g_udp_socket*
+init_carbon_udp_socket (const char *hostname, uint16_t port);
 int
 write_data_to_carbon ( const char *source, const char *host, const char *metric, 
                     const char *sum, unsigned int process_time);

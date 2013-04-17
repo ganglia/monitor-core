@@ -39,6 +39,8 @@ extern int parse_config_file ( char *config_file );
 extern int number_of_datasources ( char *config_file );
 extern struct type_tag* in_type_list (char *, unsigned int);
 
+extern g_udp_socket *carbon_udp_socket;
+
 struct gengetopt_args_info args_info;
 
 extern gmetad_config_t gmetad_config;
@@ -379,7 +381,7 @@ main ( int argc, char *argv[] )
          become_a_nobody(c->setuid_username);
       }
 
-   if( gmetad_config.write_rrds )
+   if( c->write_rrds )
       {
          if( stat( c->rrd_rootdir, &struct_stat ) )
             {
@@ -421,6 +423,19 @@ main ( int argc, char *argv[] )
          err_quit("tcp_listen() on interactive_port failed");
       }
    debug_msg("interactive xml listening on port %d", c->interactive_port);
+
+    /* Forward metrics to Graphite using carbon protocol */
+    if (c->carbon_server != NULL)
+      {
+         if (!strcmp(c->carbon_protocol, "udp"))
+            {
+               carbon_udp_socket = init_carbon_udp_socket (c->carbon_server, c->carbon_port);
+
+               if (carbon_udp_socket == NULL)
+                  err_quit("carbon %s socket failed for %s:%d", c->carbon_protocol, c->carbon_server, c->carbon_port);
+            }
+         debug_msg("carbon forwarding ready to send via %s to %s:%d", c->carbon_protocol, c->carbon_server, c->carbon_port);
+      }
 
    /* initialize summary mutex */
    root.sum_finished = (pthread_mutex_t *) 
