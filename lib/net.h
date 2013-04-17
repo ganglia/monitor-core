@@ -42,6 +42,7 @@ typedef struct
 
 /* No difference between mcast and tcp sockets for now */
 typedef g_mcast_socket g_tcp_socket;
+typedef g_mcast_socket g_udp_socket;
 
 /************** INETADDR  ****************/
 
