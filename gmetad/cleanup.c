@@ -129,6 +129,7 @@ cleanup_source ( datum_t *key, datum_t *val, void *arg )
 #if 0
    unsigned int born;
 #endif
+   hash_t *metric_summary;
 
    /* Currently we never delete a source. */
    
@@ -136,12 +137,13 @@ cleanup_source ( datum_t *key, datum_t *val, void *arg )
    cleanup.tv = tv;
    cleanup.key = 0;
    cleanup.hashval = 0;
-   while (hash_walkfrom(source->metric_summary, cleanup.hashval, 
+   metric_summary = source->metric_summary; /* Just look at the current one */
+   while (hash_walkfrom(metric_summary, cleanup.hashval, 
                            cleanup_metric, (void*) &cleanup)) {
 
       if (cleanup.key) {
-         cleanup.hashval = hashval(cleanup.key, source->metric_summary);
-         rv=hash_delete(cleanup.key, source->metric_summary);
+         cleanup.hashval = hashval(cleanup.key, metric_summary);
+         rv=hash_delete(cleanup.key, metric_summary);
          if (rv) datum_free(rv);
          cleanup.key=0;
       }
