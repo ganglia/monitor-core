@@ -43,7 +43,6 @@ const char *gengetopt_args_info_help[] = {
   "  -b, --bandwidth        Calculate minimum bandwidth use for configuration  \n                           (default=off)",
   "  -r, --convert=STRING   Convert a 2.5.x configuration file to the new 3.x \n                           format",
   "  -p, --pid-file=STRING  Write process-id to file",
-  "  -z, --gzip-output      Compress output with gzip before sending  \n                           (default=off)",
     0
 };
 
@@ -80,7 +79,6 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->bandwidth_given = 0 ;
   args_info->convert_given = 0 ;
   args_info->pid_file_given = 0 ;
-  args_info->gzip_output_given = 0 ;
 }
 
 static
@@ -101,7 +99,6 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->convert_orig = NULL;
   args_info->pid_file_arg = NULL;
   args_info->pid_file_orig = NULL;
-  args_info->gzip_output_flag = 0;
   
 }
 
@@ -121,7 +118,6 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->bandwidth_help = gengetopt_args_info_help[8] ;
   args_info->convert_help = gengetopt_args_info_help[9] ;
   args_info->pid_file_help = gengetopt_args_info_help[10] ;
-  args_info->gzip_output_help = gengetopt_args_info_help[11] ;
   
 }
 
@@ -263,8 +259,6 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "convert", args_info->convert_orig, 0);
   if (args_info->pid_file_given)
     write_into_file(outfile, "pid-file", args_info->pid_file_orig, 0);
-  if (args_info->gzip_output_given)
-    write_into_file(outfile, "gzip-output", 0, 0 );
   
 
   i = EXIT_SUCCESS;
@@ -530,7 +524,6 @@ cmdline_parser_internal (
         { "bandwidth",	0, NULL, 'b' },
         { "convert",	1, NULL, 'r' },
         { "pid-file",	1, NULL, 'p' },
-        { "gzip-output",	0, NULL, 'z' },
         { 0,  0, 0, 0 }
       };
 
@@ -649,16 +642,6 @@ cmdline_parser_internal (
               additional_error))
             goto failure;
         
-          break;
-        case 'z':	/* Compress output with gzip before sending.  */
-
-
-          if (update_arg((void *)&(args_info->gzip_output_flag), 0, &(args_info->gzip_output_given),
-              &(local_args_info.gzip_output_given), optarg, 0, 0, ARG_FLAG,
-              check_ambiguity, override, 1, 0, "gzip-output", 'z',
-              additional_error))
-            goto failure;
-
           break;
 
         case 0:	/* Long option with no short option */
