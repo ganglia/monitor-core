@@ -115,6 +115,7 @@ static cfg_opt_t tcp_accept_channel_opts[] = {
   CFG_SEC("acl", acl_opts, CFGF_NONE),
   CFG_INT("timeout", -1, CFGF_NONE),
   CFG_STR("family", "inet4", CFGF_NONE),
+  CFG_BOOL("gzip_output", 0, CFGF_NONE),
   CFG_END()
 };
 

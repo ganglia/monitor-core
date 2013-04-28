@@ -244,7 +244,7 @@ create_udp_server(apr_pool_t *context, int32_t family, apr_port_t port,
 
 apr_socket_t *
 create_tcp_server(apr_pool_t *context, int32_t family, apr_port_t port, 
-                  char *bind_addr, char *interface, int blocking)
+                  char *bind_addr, char *interface, int blocking, int32_t gzip_output)
 {
   apr_socket_t *sock = create_net_server(context, family, SOCK_STREAM, port,
                                          bind_addr, blocking);

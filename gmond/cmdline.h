@@ -62,8 +62,6 @@ struct gengetopt_args_info
   char * pid_file_arg;	/**< @brief Write process-id to file.  */
   char * pid_file_orig;	/**< @brief Write process-id to file original value given at command line.  */
   const char *pid_file_help; /**< @brief Write process-id to file help description.  */
-  unsigned int gzip_output_flag;	/**< @brief Compress output with gzip before sending (default=off).  */
-  const char *gzip_output_help; /**< @brief Compress output with gzip before sending help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
