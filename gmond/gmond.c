@@ -147,6 +147,7 @@ struct Ganglia_channel {
   Ganglia_channel_types type;
   Ganglia_acl *acl;
   int timeout;
+  int gzip_output;
 };
 typedef struct Ganglia_channel Ganglia_channel;
 
@@ -858,7 +859,7 @@ setup_listen_channels_pollset( void )
     {
       cfg_t *tcp_accept_channel = cfg_getnsec( config_file, "tcp_accept_channel", i);
       char *bindaddr, *interface, *family;
-      int port, timeout;
+      int port, timeout, gzip_output;
       apr_socket_t *socket = NULL;
       apr_pollfd_t socket_pollfd;
       apr_pool_t *pool = NULL;
@@ -869,9 +870,10 @@ setup_listen_channels_pollset( void )
       interface      = cfg_getstr( tcp_accept_channel, "interface"); 
       timeout        = cfg_getint( tcp_accept_channel, "timeout");
       family         = cfg_getstr( tcp_accept_channel, "family");
+      gzip_output     = cfg_getbool( tcp_accept_channel, "gzip_output");
 
-      debug_msg("tcp_accept_channel bind=%s port=%d",
-                bindaddr? bindaddr: "NULL", port);
+      debug_msg("tcp_accept_channel bind=%s port=%d gzip_output=%d",
+                bindaddr? bindaddr: "NULL", port, gzip_output);
 
       /* Create a subpool context */
       apr_pool_create(&pool, global_context);
@@ -880,7 +882,7 @@ setup_listen_channels_pollset( void )
 
       /* Create the socket for the channel, blocking w/timeout */
       socket = create_tcp_server(pool, sock_family, port, bindaddr, 
-                                 interface, 1);
+                                 interface, 1, gzip_output);
       if(!socket)
         {
           err_msg("Unable to create tcp_accept_channel. Exiting.\n");
@@ -906,6 +908,9 @@ setup_listen_channels_pollset( void )
       /* Save the timeout for this socket */
       channel->timeout = timeout;
 
+      // Does channel support gzip
+      channel->gzip_output = gzip_output;
+      
       /* Save the ACL information */
       channel->acl = Ganglia_acl_create( tcp_accept_channel, pool ); 
 
@@ -1614,7 +1619,7 @@ zstream_new()
 }
 
 static apr_status_t
-socket_flush( apr_socket_t *client )
+socket_flush( apr_socket_t *client, int gzip_output )
 {
   char outputbuffer[2048];
   const int outputlen = sizeof(outputbuffer);
@@ -1623,7 +1628,7 @@ socket_flush( apr_socket_t *client )
   apr_size_t wlen;
   z_stream *strm;
 
-  if (!args_info.gzip_output_flag)
+  if ( !gzip_output )
     {
       return APR_SUCCESS;
     }
@@ -1972,7 +1977,7 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
   if(Ganglia_acl_action( channel->acl, remotesa ) != GANGLIA_ACCESS_ALLOW)
     goto close_accept_socket;
 
-  if (args_info.gzip_output_flag)
+  if ( channel->gzip_output )
     {
       z_stream *strm = zstream_new();
       if (strm == NULL)
@@ -2053,7 +2058,7 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
   /* Close the CLUSTER and GANGLIA_XML tags */
   print_xml_footer(client);
 
-  status = socket_flush( client );
+  status = socket_flush( client, channel->gzip_output );
   if (status != APR_SUCCESS)
     {
       debug_msg("failed to finish compressing stream; returned '%d'",status);

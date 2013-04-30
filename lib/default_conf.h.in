@@ -25,7 +25,13 @@ globals {\n\
   host_tmax = 20 /*secs */\n\
   cleanup_threshold = 300 /*secs */\n\
   gexec = no\n\
+  # By default gmond will use reverse DNS resolution when displaying your hostname\n\
+  # Uncommeting following value will override that value.\n\
+  # override_hostname = \"mywebserver.domain.com\"\n\
+  # If you are not using multicast this value should be set to something other than 0.\n\
+  # Otherwise if you restart aggregator gmond you will get empty graphs. 60 seconds is reasonable\n\
   send_metadata_interval = 0 /*secs */\n\
+\n\
 }\n\
 \n\
 /*\n\
@@ -64,12 +70,17 @@ udp_recv_channel {\n\
   port = 8649\n\
   bind = 239.2.11.71\n\
   retry_bind = true\n\
+  # Size of the UDP buffer. If you are handling lots of metrics you really\n\
+  # should bump it up to e.g. 10MB or even higher.\n\ 
+  # buffer = 10485760\n\
 }\n\
 \n\
 /* You can specify as many tcp_accept_channels as you like to share\n\
    an xml description of the state of the cluster */\n\
 tcp_accept_channel {\n\
   port = 8649\n\
+  # If you want to gzip XML output\n\
+  gzip_output = no\n\
 }\n\
 \n\
 "
