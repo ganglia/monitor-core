@@ -228,15 +228,21 @@ class DataStore:
                     # dictionary. If one doesn't exist, add it in the exception.
                     summaryNode = clusterNode.summaryData['summary'][str(metricNode)]
                     currSum = summaryNode.getAttr('sum')
-                    summaryNode.incAttr('sum',  float(metricNode.getAttr('val')))
+                    try :
+                        summaryNode.incAttr('sum',  float(metricNode.getAttr('val')))
+                    except ValueError, msg:
+                        print str(msg) + " sum: " + metricNode.getAttr('val')
                 except KeyError:
                     # Since summary metrics use a different tag, create the new 
                     #  summary node with correct tag.
                     summaryNode = metricNode.summaryCopy(tag='METRICS')
                     # Initialize the first summary value and change the data type
                     # to double for all metric summaries
-                    summaryNode.setAttr('sum', float(metricNode.getAttr('val')))
-                    summaryNode.setAttr('type', 'double')
+                    try :
+                        summaryNode.setAttr('sum', float(metricNode.getAttr('val')))
+                        summaryNode.setAttr('type', 'double')
+                    except ValueError, msg:
+                        print str(msg) + " sum: " + metricNode.getAttr('val')
                     # Add the summary node to the summary dictionary
                     clusterNode.summaryData['summary'][str(summaryNode)] = summaryNode
                 summaryNode.incAttr('num', 1)

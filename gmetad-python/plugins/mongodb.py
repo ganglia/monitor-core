@@ -195,7 +195,12 @@ class MongodbPlugin(GmetadPlugin) :
                 try :
                     self.msci.add_document(self.data_collection[obj_type], _data)
                     _data["_id"] = obj["uuid"]
-                    self.msci.update_document(self.latest_collection[obj_type], _data)
+                    old = self.msci.find_document(self.latest_collection[obj_type], {"_id" : obj["uuid"]})
+                    if old is not None :
+                        old.update(_data);
+                    else :
+                        old = _data
+                    self.msci.update_document(self.latest_collection[obj_type], old)
 
                 except Exception, e :
                     _status = 23
