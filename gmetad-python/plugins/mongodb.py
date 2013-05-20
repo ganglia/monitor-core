@@ -102,10 +102,14 @@ class MongodbPlugin(GmetadPlugin) :
             plugin.obj_cache = {}
             plugin.last_refresh = str(time())
         if ip in plugin.obj_cache :
-        #    logging.debug("Cache hit for ip " + ip)
+            (exists, unused_obj) = plugin.obj_cache[ip]
+            if exists :
+                logging.debug("Cache hit for ip " + ip)
+            #else :
+            #    logging.debug("Expired hit for ip " + ip)
             return plugin.obj_cache[ip]
 
-        #logging.debug("Cache miss for ip " + ip)
+        logging.debug("Cache miss for ip " + ip)
 
         try :
             vm = True
