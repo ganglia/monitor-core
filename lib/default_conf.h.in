@@ -160,13 +160,10 @@ collection_group {\n\
   }\n\
 }\n\
 \n\
-/* This collection group will send general info about this host every\n\
-   1200 secs.\n\
-   This information doesn't change between reboots and is only collected\n\
-   once. */\n\
+/* This collection group will send general info about this host*/\n\
 collection_group {\n\
-  collect_once = yes\n\
-  time_threshold = 1200\n\
+  collect_every = 60\n\
+  time_threshold = 60\n\
   metric {\n\
     name = \"cpu_num\"\n\
     title = \"CPU Count\"\n\
@@ -179,7 +176,6 @@ collection_group {\n\
     name = \"mem_total\"\n\
     title = \"Memory Total\"\n\
   }\n\
-  /* Should this be here? Swap can be added/removed between reboots. */\n\
   metric {\n\
     name = \"swap_total\"\n\
     title = \"Swap Space Total\"\n\
