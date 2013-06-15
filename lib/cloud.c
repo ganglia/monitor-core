@@ -150,7 +150,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       apr_size_t len;
       apr_time_exp_t t;
 
-      apr_time_exp_lt(&t, apr_time_now());
+      apr_time_exp_gmt(&t, apr_time_now());
       apr_strftime(timestamp, &len, sizeof(timestamp), "%Y-%m-%dT%H%%3A%M%%3A%SZ", &t);
 
       char *endpoint = cfg_getstr(discovery, "endpoint");
