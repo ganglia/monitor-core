@@ -3,4 +3,4 @@ script: "./bootstrap && ./configure --with-gmetad --without-php --with-perl=/usr
 before_script:
   - echo 'yes' | sudo add-apt-repository ppa:ondrej/php5
   - sudo apt-get update
-  - sudo apt-get install -y libapr1-dev libconfuse-dev libexpat1-dev libpcre3-dev libssl-dev librrd-dev libperl-dev libmemcached-dev libtool m4 gperf zlib1g-dev
+  - sudo apt-get install -y libapr1-dev libaprutil1-dev libconfuse-dev libexpat1-dev libpcre3-dev libssl-dev librrd-dev libperl-dev libmemcached-dev libtool m4 gperf zlib1g-dev
