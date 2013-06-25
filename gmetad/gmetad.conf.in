@@ -133,6 +133,11 @@ data_source "my cluster" localhost
 # unsummarized_metrics diskstat CPU
 #
 #-------------------------------------------------------------------------------
+# Prevent gmetad from generating summaries for sFlow VM metrics
+# default: off
+# unsummarized_sflow_vm_metrics on
+#
+#-------------------------------------------------------------------------------
 # In earlier versions of gmetad, hostnames were handled in a case
 # sensitive manner
 # If your hostname directories have been renamed to lower case,
