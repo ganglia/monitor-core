@@ -1072,6 +1072,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
    Metric_t *metric;
    struct type_tag *tt;
    llist_entry *le;
+   char *p;
 
    name = (char*) key->data;
    metric = (Metric_t*) val->data;
@@ -1087,6 +1088,10 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
    /* Don't save to RRD if this is a metric not to be summarized */
    if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)name, llist_strncmp, &le) == 0)
       return 0;
+
+   /* Don't save to RRD if this metrics appears to be an sFlow VM metrics */
+   if (gmetad_config.unsummarized_sflow_vm_metrics && (p = strchr(name, '.')) != NULL && *(p+1) == 'v')
+       return 0;
 
    switch (tt->type)
       {
