@@ -281,7 +281,12 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
          if ( host[i] == '.') {
            hostcp[i]='_';
          }else{
-           hostcp[i]=host[i];
+           if (gmetad_config.case_sensitive_hostnames == 0) {
+             hostcp[i] = tolower(host[i]);
+           }
+           else {
+             hostcp[i] = host[i];
+           }
          }
       }
 		hostcp[i+1]=0;
