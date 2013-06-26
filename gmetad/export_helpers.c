@@ -244,6 +244,8 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 	char hostcp[hostlen+1]; 
 	int sourcelen=strlen(source);		
 	char sourcecp[sourcelen+1];
+    int metriclen=strlen(metric);
+    char metriccp[metriclen+1];
 	char s_process_time[15];
    char graphite_msg[ PATHSIZE + 1 ];
    int i;
@@ -291,6 +293,17 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
       }
    }
 
+   if (metric) {
+     for(i=0; i <= metriclen; i++) {
+       if (metric[i] == ' ') {
+         metriccp[i] = '_';
+       }
+       else {
+         metriccp[i] = metric[i];
+       }
+     }
+   }
+
 	/*if graphite_path is set, then process it*/
    if (gmetad_config.graphite_path != NULL && strlen(gmetad_config.graphite_path) > 1) {
 		graphite_path_macro patrn[4]; //macros we need to replace in graphite_path
@@ -303,7 +316,7 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 		patrn[1].torepl="%h";
 		patrn[1].replwith=hostcp;
 		patrn[2].torepl="%m";
-		patrn[2].replwith=metric;
+		patrn[2].replwith=metriccp;
 		patrn[3].torepl='\0'; //explicitly cap the array
 
 		graphite_path_ptr=path_macro_replace(graphite_path_cp, patrn); 
