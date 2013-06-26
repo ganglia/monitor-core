@@ -326,6 +326,14 @@ static DOTCONF_CB(cb_unsummarized_metrics)
    return NULL;
 }
 
+static DOTCONF_CB(cb_unsummarized_sflow_vm_metrics)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Setting unsummarized_sflow_vm_metrics = %ld", cmd->data.value);
+   c->unsummarized_sflow_vm_metrics = cmd->data.value;
+   return NULL;
+}
+
 static FUNC_ERRORHANDLER(errorhandler)
 {
    err_quit("gmetad config file error: %s\n", msg);
@@ -359,6 +367,7 @@ static configoption_t gmetad_options[] =
       {"graphite_prefix", ARG_STR, cb_graphite_prefix, &gmetad_config, 0},
       {"graphite_path", ARG_STR, cb_graphite_path, &gmetad_config, 0},
       {"unsummarized_metrics", ARG_LIST, cb_unsummarized_metrics, &gmetad_config, 0},
+      {"unsummarized_sflow_vm_metrics", ARG_TOGGLE, cb_unsummarized_sflow_vm_metrics, &gmetad_config, 0},
       LAST_OPTION
    };
 
@@ -388,6 +397,7 @@ set_defaults (gmetad_config_t *config)
    config->carbon_protocol = "tcp";
    config->carbon_timeout = 500;
    config->unsummarized_metrics = NULL;
+   config->unsummarized_sflow_vm_metrics = 0;
 }
 
 int

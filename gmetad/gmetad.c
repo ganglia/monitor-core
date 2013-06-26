@@ -230,6 +230,7 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
    int rc;
    struct type_tag *tt;
    llist_entry *le;
+   char *p;
 
    name = (char*) key->data;
    metric = (Metric_t*) val->data;
@@ -244,6 +245,10 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
    /* Don't write a summary for metrics not to be summarized */
    if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)key->data, llist_strncmp, &le) == 0)
        return 0;
+
+   /* Don't write a summary for metris that appears to be sFlow VM metrics */
+   if (gmetad_config.unsummarized_sflow_vm_metrics && (p = strchr(name, '.')) != NULL && *(p+1) == 'v')
+     return 0;
 
    /* We log all our sums in double which does not suffer from
       wraparound errors: for example memory KB exceeding 4TB. -twitham */
