@@ -207,10 +207,13 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       debug_msg("[discovery.%s] HTTP response code %ld, %lu bytes retrieved", discovery_type, http_code, (long) chunk.size);
     }
 
-  char *response = chunk.memory;
+  if (!chunk.memory)
+    {
+      err_msg("[discovery.%s] No response from API endpoint", discovery_type);
+      return (Ganglia_udp_send_channels) discovered_udp_send_channels;
+    }
 
-  if (chunk.memory)
-    free(chunk.memory);
+  char *response = chunk.memory;
 
   /* debug_msg("[discovery.%s] API response %s", discovery_type, response); */
 
@@ -221,6 +224,7 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
   if (apr_xml_parser_feed(parser, response, strlen(response)) != APR_SUCCESS)
     {
       err_msg("[discovery.%s] could not start the XML parser", discovery_type);
+      free(chunk.memory);
       return (Ganglia_udp_send_channels) discovered_udp_send_channels;
     }
   if (apr_xml_parser_done(parser, &doc) != APR_SUCCESS)
@@ -228,6 +232,8 @@ Ganglia_udp_send_channels_discover(Ganglia_pool p, Ganglia_gmond_config config)
       err_msg("[discovery.%s] could not parse XML", discovery_type);
       return (Ganglia_udp_send_channels) discovered_udp_send_channels;
     }
+
+  free(chunk.memory);
 
   apr_xml_elem *root = doc->root;
   char *instance_id = NULL;
