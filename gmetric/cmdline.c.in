@@ -39,7 +39,7 @@ const char *gengetopt_args_info_help[] = {
   "  -v, --value=STRING    Value of the metric",
   "  -t, --type=STRING     Either \n                          string|int8|uint8|int16|uint16|int32|uint32|float|double",
   "  -u, --units=STRING    Unit of measure for the value e.g. Kilobytes, Celcius  \n                          (default=`')",
-  "  -s, --slope=STRING    Either zero|positive|negative|both  (default=`both')",
+  "  -s, --slope=STRING    Either zero|positive|negative|both|derivative  (default=`both')",
   "  -x, --tmax=INT        The maximum time in seconds between gmetric calls  \n                          (default=`60')",
   "  -d, --dmax=INT        The lifetime in seconds of this metric  (default=`0')",
   "  -g, --group=STRING    Group(s) of the metric (comma-separated)",
