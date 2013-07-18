@@ -127,6 +127,9 @@ main( int argc, char *argv[] )
   if(rval)
     {
       fprintf(stderr,"There was an error sending to %d of the send channels.\n", rval);
+      Ganglia_metric_destroy(gmetric);
+      Ganglia_pool_destroy(global_context);
+      exit(1);
     }
 
   /* cleanup */
