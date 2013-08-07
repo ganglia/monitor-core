@@ -1,5 +1,8 @@
 language: c
-script: "./bootstrap && ./configure --with-gmetad --without-php --with-perl=/usr --enable-status --with-memcached && make all"
+script:
+  - ./bootstrap
+  - ./configure --with-gmetad --without-php --with-perl=/usr --enable-status --with-memcached
+  - make all
 before_script:
   - echo 'yes' | sudo add-apt-repository ppa:ondrej/php5
   - sudo apt-get update
