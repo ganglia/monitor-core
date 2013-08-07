@@ -41,6 +41,7 @@ THE SOFTWARE.
 import sys
 import time
 import MySQLdb
+import math
 
 from DBUtil import parse_innodb_status
 
@@ -65,11 +66,13 @@ MAX_UPDATE_TIME = 15
 def update_stats(get_innodb=True, get_master=True, get_slave=True):
 	logging.debug('updating stats')
 	global last_update
+	global last_update_interval
 	global mysql_stats, mysql_stats_last
 
 	cur_time = time.time()
+	last_update_interval = cur_time - last_update
 
-	if cur_time - last_update < MAX_UPDATE_TIME:
+	if last_update_interval < MAX_UPDATE_TIME:
 		logging.debug(' wait ' + str(int(MAX_UPDATE_TIME - (cur_time - last_update))) + ' seconds')
 		return True
 	else:
@@ -240,6 +243,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 			mysql_stats_last[key] = global_status[key]
 
 	mysql_stats['open_files_used'] = int(global_status['open_files']) / int(variables['open_files_limit'])
+	mysql_stats['queries_per_second'] = int(math.ceil(mysql_stats['questions'] / last_update_interval))
 
 	innodb_delta = (
 		'data_fsyncs',
@@ -542,6 +546,11 @@ def metric_init(params):
 			'description': 'The number of statements that clients have sent to the server',
 			'units': 'stmts',
 		}, 
+
+		queries_per_second = {
+			'description': 'The number of statements per second that clients have sent to the server',
+			'units': 'stmts/s',
+		},
 
 		# If this value is not 0, you should carefully check the indexes of your tables.
 		select_full_join = {
