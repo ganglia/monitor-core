@@ -1,0 +1,46 @@
+Using Ganglia on OpenBSD
+~~~~~~~~~~~~~~~~~~~~
+
+This version has been tested on the following OpenBSD releases:
+- OpenBSD 5.3
+
+
+Installation
+~~~~~~~~~~~~
+
+1. install several prerequisite packages:
+    pkg_add libfuse automake-1.9 autoconf-2.69 apr pcre
+    (if you wish to run gmetad, install rrdtool)
+
+1.a set env varialbes:
+    export AUTOMAKE_VERSION=1.9
+    export AUTOCONF_VERSION=2.69
+
+2. run bootstrap script in the root folder of this repository,
+   note any problems:
+   ./bootstrap
+
+3. If that completes OK, run configure:
+   ./configure --with-libconfuse=/usr/local
+
+4. compile:
+   make && make install
+
+5. configuring:
+    mkdir -p /usr/local/etc/ganglia/conf.d
+    gmond -t > /usr/local/etc/ganglia/gmond.conf
+
+5.a manually edit that gmond.conf file and in modules {} section
+    put absolute path for all mod.*.so strings, that is in vim:
+    %s/mod.*.so/\/usr\/local\/lib\/ganglia\/&/g
+
+5.b create an init script from sshd:
+    cp /etc/rc.d/{sshd,gmond}
+    edit it, and replace:
+     - daemon with /usr/local/sbin/gmond
+     - daemon_args="-c /usr/local/etc/ganglia/gmond.conf -p /var/run/gmond.pid"
+
+5. running:
+    /etc/rc.d/gmond start|stop
+
+6. setting it to run at boot time: refer to OpenBSD documentation.
