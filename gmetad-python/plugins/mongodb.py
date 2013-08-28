@@ -97,19 +97,22 @@ class MongodbPlugin(GmetadPlugin) :
         TBD
         '''
         
+        verbose = False
         msci = plugin.msci
         if plugin.api.should_refresh(plugin.cloud_name, plugin.last_refresh) :
             plugin.obj_cache = {}
             plugin.last_refresh = str(time())
         if ip in plugin.obj_cache :
             (exists, unused_obj) = plugin.obj_cache[ip]
-            if exists :
-                logging.debug("Cache hit for ip " + ip)
-            #else :
-            #    logging.debug("Expired hit for ip " + ip)
+            if verbose : 
+                if exists :
+                    logging.debug("Cache hit for ip " + ip)
+                else :
+                    logging.debug("Expired hit for ip " + ip)
             return plugin.obj_cache[ip]
 
-        logging.debug("Cache miss for ip " + ip)
+        if verbose : 
+            logging.debug("Cache miss for ip " + ip)
 
         try :
             vm = True
@@ -168,8 +171,18 @@ class MongodbPlugin(GmetadPlugin) :
             '''
 
             # Cache object attributes using an ordered dictionary
+            path.insert(0, self.path)
+    
+            from lib.api.api_service_client import * 
 
-            vm, obj = self.find_object(hostNode.getAttr('ip'), self)
+            try :
+                vm, obj = self.find_object(hostNode.getAttr('ip'), self)
+            except APIException, obj :
+                logging.error("Problem with API connectivity: " + str(obj))
+                continue
+            except Exception, obj2 :
+                logging.error("Problem with API object lookup: " + str(obj2))
+                continue
 
             if vm is None : # error during lookup
                 continue
