@@ -92,7 +92,7 @@ class MongodbPlugin(GmetadPlugin) :
         _msg += "\"."
         logging.debug(_msg)
 
-    def find_object(self, ip, plugin) :
+    def find_object(self, ip, plugin, name) :
         '''
         TBD
         '''
@@ -125,7 +125,7 @@ class MongodbPlugin(GmetadPlugin) :
                 obj = plugin.api.vmshow(plugin.cloud_name, obj["_id"])
             else :
                 vm = False
-                obj = msci.find_document(plugin.manage_collection["HOST"], {"cloud_ip" : ip})
+                obj = msci.find_document(plugin.manage_collection["HOST"], { "$or" : [{"cloud_ip" : ip}, {"cloud_hostname" : name}] })
                 if obj is not None : 
                     obj = plugin.api.hostshow(plugin.cloud_name, obj["_id"])
                 else :
@@ -176,7 +176,7 @@ class MongodbPlugin(GmetadPlugin) :
             from lib.api.api_service_client import * 
 
             try :
-                vm, obj = self.find_object(hostNode.getAttr('ip'), self)
+                vm, obj = self.find_object(hostNode.getAttr('ip'), self, hostNode.getAttr('name'))
             except APIException, obj :
                 logging.error("Problem with API connectivity: " + str(obj))
                 continue
