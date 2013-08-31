@@ -116,7 +116,8 @@ class MongodbPlugin(GmetadPlugin) :
 
         try :
             vm = True
-            obj = msci.find_document(plugin.manage_collection["VM"], {"cloud_ip" : ip, 
+            obj = msci.find_document(plugin.manage_collection["VM"], 
+                    { "$or" : [{"cloud_ip" : ip}, {"cloud_hostname" : name}], 
                         "mgt_901_deprovisioning_request_originated" : { "$exists" : False},
                         "mgt_903_deprovisioning_request_completed" : { "$exists" : False} })
             #obj = msci.find_document(plugin.manage_collection["VM"], {"cloud_ip" : ip})
