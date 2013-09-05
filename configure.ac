@@ -117,8 +117,6 @@ dnl AC_CYGWIN
 
 nl='
 '
-ganglia_popdir=`pwd`
-
 dnl ##################################################################
 dnl Checks for programs.
 dnl
@@ -141,8 +139,11 @@ AC_SUBST(modpathstart)
 AM_CONDITIONAL(STATIC_BUILD, test x"$enable_static_build" = xyes)
 
 echo $ac_n "${nl}Configuring libmetrics ...${nl}"
-cd libmetrics && ./configure --cache-file=$ganglia_popdir/config.cache
-cd $ganglia_popdir
+# This uses our command line and environment to run a nested
+# configure script in libmetrics
+# Using AC_CONFIG_SUBDIRS rather than just calling the configure script
+# directly is important to support cross-compiling.
+AC_CONFIG_SUBDIRS([libmetrics])
 
 modpathstart=""
 if test x"$enable_static_build" = xyes; then
