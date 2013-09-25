@@ -74,6 +74,7 @@ class MongodbPlugin(GmetadPlugin) :
         self.msci = self.api.msci
 
         self.obj_cache = {}
+        self.last_refresh = str(time())
 
         self.expid = self.api.cldshow(self.cloud_name, "time")["experiment_id"]
         self.username = self.api.username
@@ -91,27 +92,41 @@ class MongodbPlugin(GmetadPlugin) :
         _msg += "\"."
         logging.debug(_msg)
 
-    def find_object(self, ip, plugin) :
+    def find_object(self, ip, plugin, name) :
         '''
         TBD
         '''
+        
+        verbose = False
         msci = plugin.msci
+        if plugin.api.should_refresh(plugin.cloud_name, plugin.last_refresh) :
+            plugin.obj_cache = {}
+            plugin.last_refresh = str(time())
         if ip in plugin.obj_cache :
-        #    logging.debug("Cache hit for ip " + ip)
+            (exists, unused_obj) = plugin.obj_cache[ip]
+            if verbose : 
+                if exists :
+                    logging.debug("Cache hit for ip " + ip)
+                else :
+                    logging.debug("Expired hit for ip " + ip)
             return plugin.obj_cache[ip]
 
-        #logging.debug("Cache miss for ip " + ip)
+        if verbose : 
+            logging.debug("Cache miss for ip " + ip)
 
         try :
             vm = True
-            obj = msci.find_document(plugin.manage_collection["VM"], {"cloud_ip" : ip, "mgt_903_deprovisioning_request_completed" : { "$exists" : False}})
+            obj = msci.find_document(plugin.manage_collection["VM"], 
+                    { "$or" : [{"cloud_ip" : ip}, {"cloud_hostname" : name}], 
+                        "mgt_901_deprovisioning_request_originated" : { "$exists" : False},
+                        "mgt_903_deprovisioning_request_completed" : { "$exists" : False} })
             #obj = msci.find_document(plugin.manage_collection["VM"], {"cloud_ip" : ip})
 
             if obj is not None : 
                 obj = plugin.api.vmshow(plugin.cloud_name, obj["_id"])
             else :
                 vm = False
-                obj = msci.find_document(plugin.manage_collection["HOST"], {"cloud_ip" : ip})
+                obj = msci.find_document(plugin.manage_collection["HOST"], { "$or" : [{"cloud_ip" : ip}, {"cloud_hostname" : name}] })
                 if obj is not None : 
                     obj = plugin.api.hostshow(plugin.cloud_name, obj["_id"])
                 else :
@@ -157,8 +172,18 @@ class MongodbPlugin(GmetadPlugin) :
             '''
 
             # Cache object attributes using an ordered dictionary
+            path.insert(0, self.path)
+    
+            from lib.api.api_service_client import * 
 
-            vm, obj = self.find_object(hostNode.getAttr('ip'), self)
+            try :
+                vm, obj = self.find_object(hostNode.getAttr('ip'), self, hostNode.getAttr('name'))
+            except APIException, obj :
+                logging.error("Problem with API connectivity: " + str(obj))
+                continue
+            except Exception, obj2 :
+                logging.error("Problem with API object lookup: " + str(obj2))
+                continue
 
             if vm is None : # error during lookup
                 continue
@@ -193,9 +218,17 @@ class MongodbPlugin(GmetadPlugin) :
                 _data["latest_update"] = _now
 
                 try :
+                    if obj_type == "VM" :
+                        pass
+                    name = obj["name"]
                     self.msci.add_document(self.data_collection[obj_type], _data)
-                    _data["_id"] = obj["uuid"]
-                    self.msci.update_document(self.latest_collection[obj_type], _data)
+                    old = self.msci.find_document(self.latest_collection[obj_type], {"_id" : obj["uuid"]})
+                    if old is not None :
+                        old.update(_data);
+                    else :
+                        old = _data
+                    old["_id"] = obj["uuid"]
+                    self.msci.update_document(self.latest_collection[obj_type], old)
 
                 except Exception, e :
                     _status = 23
