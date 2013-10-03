@@ -92,6 +92,10 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
             break;
       }
 
+   char buf[16 * 1024];
+   char *b = buf;
+   #define xml_print(client, ...) 0; b += snprintf(b, sizeof(buf) - (b - buf), __VA_ARGS__);
+
    rc = xml_print(client, "<METRICS NAME=\"%s\" SUM=\"%s\" NUM=\"%u\" "
       "TYPE=\"%s\" UNITS=\"%s\" SLOPE=\"%s\" SOURCE=\"%s\">\n",
       name, sum, metric->num,
@@ -111,6 +115,8 @@ metric_summary(datum_t *key, datum_t *val, void *arg)
 
    rc = xml_print(client, "</EXTRA_DATA>\n");
    rc=xml_print(client, "</METRICS>\n");
+   #undef xml_print
+   rc = xml_print(client, "%s", buf);
    return rc;
 }
 
@@ -146,6 +152,10 @@ metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
    if (metric->dmax && metric->dmax < tn)
      return 0;
 
+   char buf[16 * 1024];
+   char *b = buf;
+   #define xml_print(client, ...) 0; b += snprintf(b, sizeof(buf) - (b - buf), __VA_ARGS__);
+
    rc=xml_print(client, "<METRIC NAME=\"%s\" VAL=\"%s\" TYPE=\"%s\" "
       "UNITS=\"%s\" TN=\"%u\" TMAX=\"%u\" DMAX=\"%u\" SLOPE=\"%s\" "
       "SOURCE=\"%s\">\n",
@@ -168,6 +178,8 @@ metric_report_start(Generic_t *self, datum_t *key, client_t *client, void *arg)
    rc = xml_print(client, "</EXTRA_DATA>\n");
    rc=xml_print(client, "</METRIC>\n");
 
+   #undef xml_print
+   rc = xml_print(client, "%s", buf);
    return rc;
 }
 
