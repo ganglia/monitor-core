@@ -109,6 +109,8 @@ def get_tcploss_percentage(name):
 	pct = 0
     except KeyError:
       pct = 0.0
+    except ZeroDivisionError:
+      pct = 0.0
 
     return pct
 
@@ -123,6 +125,8 @@ def get_retrans_percentage(name):
 	print name + " is less 0"
 	pct = 0
     except KeyError:
+      pct = 0.0
+    except ZeroDivisionError:
       pct = 0.0
 
     return pct
