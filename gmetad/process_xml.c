@@ -524,6 +524,23 @@ startElement_HOST(void *data, const char *el, const char **attr)
       }
    host->stringslen = edge;
 
+#ifdef WITH_RIEMANN
+
+        /* Forward heartbeat metric to Riemann */
+        if (gmetad_config.riemann_server) {
+
+            debug_msg("[riemann] Sending host %s, metric heartbeat", xmldata->hostname);
+
+            int rm_ret = 0;
+            rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename,
+                                           xmldata->hostname, getfield(host->strings, host->ip), "heartbeat", value, NULL,
+                                           xmldata->source.localtime, getfield(host->strings, host->tags), tmax * 4);
+
+            if (rm_ret)
+                err_msg("[riemann] Could not send heartbeat metric to Riemann");
+        }
+#endif /* WITH_RIEMANN */
+
    /* Trim structure to the correct length. */
    hashval.size = sizeof(*host) - GMETAD_FRAMESIZE + host->stringslen;
    hashval.data = host;
@@ -638,6 +655,29 @@ startElement_METRIC(void *data, const char *el, const char **attr)
          fillmetric(attr, metric, type);
 	 if (metric->dmax && metric->tn > metric->dmax)
             return 0;
+
+#ifdef WITH_RIEMANN
+         /* Forward all metrics, including strings, to Riemann */
+        if (gmetad_config.riemann_server) {
+
+            Host_t *host = (Host_t*) host;
+            host = &(xmldata->host);
+            int rm_ret = 0;
+
+            debug_msg("[riemann] Sending host %s, metric %s", xmldata->hostname, name);
+
+            if (do_summary)
+               rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename,
+                                              xmldata->hostname, getfield(host->strings, host->ip), name, metricval, NULL,  /* int or float => metric */
+                                              xmldata->source.localtime, getfield(host->strings, host->tags), metric->tmax);
+            else
+               rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename,
+                                              xmldata->hostname, getfield(host->strings, host->ip), name, NULL, metricval,       /* string => state */
+                                              xmldata->source.localtime, getfield(host->strings, host->tags), metric->tmax);
+            if (rm_ret)
+                err_msg("[riemann] Could not send %s metric to Riemann", name);
+        }
+#endif /* WITH_RIEMANN */
 
          if (do_summary && !xmldata->ds->dead && !xmldata->rval)
             {

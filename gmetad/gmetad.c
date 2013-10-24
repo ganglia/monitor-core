@@ -442,6 +442,27 @@ main ( int argc, char *argv[] )
          debug_msg("carbon forwarding ready to send via %s to %s:%d", c->carbon_protocol, c->carbon_server, c->carbon_port);
       }
 
+i#ifdef WITH_RIEMANN
+    if (c->riemann_server !=NULL)
+      {
+        if (riemann_client_init(&riemann_cli))
+           err_quit("[riemann] failed to initialise protobuf client: %s", strerror(errno));
+
+        int error = 0;
+        if (!strcmp(c->riemann_protocol, "tcp"))
+          {
+            error = riemann_client_connect(&riemann_cli, RIEMANN_TCP, c->riemann_server, c->riemann_port);
+          } else {
+            error = riemann_client_connect(&riemann_cli, RIEMANN_UDP, c->riemann_server, c->riemann_port);
+          }
+        if (error)
+          err_quit("[riemann] failed to connect to riemann server %s:%d: %s", c->riemann_server, c->riemann_port, strerror(errno));
+        else
+          debug_msg("[riemann] ready to forward metrics via %s to riemann server %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port, strerror(errno));
+
+      }
+#endif /* WITH_RIEMANN */
+
    /* initialize summary mutex */
    root.sum_finished = (pthread_mutex_t *) 
                           malloc(sizeof(pthread_mutex_t));

@@ -190,3 +190,22 @@ case_sensitive_hostnames 0
 # memcached_parameters "--SERVER=127.0.0.1"
 #
 
+#-------------------------------------------------------------------------------
+# Riemann configuration (if enabled during build)
+# Metrics can be forwarded to Riemann metric processing for thresholding and alerting
+#
+# The hostname or IP address of the Riemann server
+# default: unspecified
+# riemann_server "my.riemann.box"
+#
+# The port and protocol on which Riemann is listening
+# default: 5555
+# riemann_port 5555
+#
+# default: udp
+# riemann_protocol tcp
+#
+# List of arbitrary key-value pairs to be used as event attributes
+# default: undefined
+# riemann_attributes "key=val[,...]"
+# riemann_attributes "environment=PROD,location=london"

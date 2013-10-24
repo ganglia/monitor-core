@@ -30,6 +30,10 @@ extern gmetad_config_t gmetad_config;
 g_udp_socket *carbon_udp_socket;
 pthread_mutex_t  carbon_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+#ifdef WITH_RIEMANN
+pthread_mutex_t  riemann_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif /* WITH_RIEMANN */
+
 g_udp_socket*
 init_carbon_udp_socket (const char *hostname, uint16_t port)
 {
@@ -359,3 +363,150 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 	graphite_msg[strlen(graphite_msg)+1] = 0;
    return push_data_to_carbon( graphite_msg );
 }
+
+#ifdef WITH_RIEMANN
+
+int
+tokenize (const char *str, char *delim, char **tokens)
+{
+  char *p;
+  int i = 0;
+
+  char *t = malloc(strlen(str));
+  strcpy(t, str);
+
+  p = strtok (t, delim);
+  while (p != NULL) {
+    printf ("> %s\n", p);
+    tokens[i] = malloc (strlen (p) + 1);
+    if (tokens[i])
+      strcpy (tokens[i], p);
+    i++;
+    p = strtok (NULL, delim);
+  }
+  free(t);
+  return i++;
+}
+
+
+int
+send_data_to_riemann (const char *grid, const char *cluster, const char *host, const char *ip, const char *metric, const char *value,
+                      const char *state, unsigned int localtime, const char *tags_str, unsigned int ttl)
+{
+
+  Event evt = EVENT__INIT;
+
+  evt.host = host;
+  evt.service = metric;
+
+   if (value) {
+      evt.has_metric_d = 1;
+      evt.metric_d = (double) strtod(value, (char**) NULL);
+   }
+   if (state)
+      evt.state = state;
+   if (localtime)
+      evt.time = localtime;
+
+  // evt.description = "this is the description";
+
+  int n_tags;
+  char *tags[64] = { NULL };
+
+  evt.n_tags = tokenize (tags_str, ",", tags);
+  evt.tags = tags;
+
+  char attributes[512];
+  sprintf(attr_str, "grid=%s,cluster=%s,ip=%s,%s", grid, cluster, ip,
+        gmetad_config.riemann_attributes ? gmetad_config.riemann_attributes : "");
+
+  int n_attrs;
+  char *buffer[64] = { NULL };
+
+  n_attrs = tokenize (attr_str, ",", buffer);
+
+  Attribute **attrs;
+  attrs = malloc (sizeof (Attribute *) * n_attrs);
+
+  int i;
+  for (i = 0; i < n_attrs; i++) {
+
+    printf ("buffer[%d] = %s\n", i, buffer[i]);
+    char *a[32] = { NULL };
+    tokenize (buffer[i], "=", a);
+    printf ("attributes[%d] -> a[0] = %s a[1] = %s\n", i, a[0], a[1]);
+
+    attrs[i] = malloc (sizeof (Attribute));
+    attribute__init (attrs[i]);
+    attrs[i]->key = strdup(a[0]);
+    attrs[i]->value = strdup(a[1]);
+  }
+  evt.attributes = attrs;
+  evt.n_attributes = n_attrs;
+  printf ("n_attrs = %d\n", n_attrs);
+
+  evt.ttl = 86400;
+
+  Msg riemann_msg = MSG__INIT;
+  void *buf;
+  unsigned len;
+
+  riemann_msg.n_events = 1;
+  riemann_msg.events = malloc(sizeof (Event) * riemann_msg.n_events);
+  riemann_msg.events[0] = &evt;
+
+  len = msg__get_packed_size(&riemann_msg);
+  buf = malloc(len);
+  msg__pack(&riemann_msg, buf);
+
+  fprintf (stderr, "Writing %d serialized bytes\n", len);       // See the length of message
+
+   pthread_mutex_lock( &riemann_mutex );
+
+  int sockfd, n;
+  struct sockaddr_in servaddr;
+
+  sockfd = socket (AF_INET, SOCK_DGRAM, 0);
+
+  bzero (&servaddr, sizeof (servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = inet_addr ("127.0.0.1");
+  servaddr.sin_port = htons (5555);
+
+  sendto (sockfd, buf, strlen (buf), 0, (struct sockaddr *) &servaddr, sizeof (servaddr));
+/*
+  for (i = 0; i < n_attrs; i++)
+      free(attrs[i]);
+  free(attrs);
+  for (i = 0; i < n_tags; i++)
+      free(tags[i]);
+  free(evt.tags);
+  free(riemann_msg.events);
+*/
+
+  free(attrs);
+  free(riemann_msg.events);
+  free(buf);
+
+   int error;
+   char logmsg[BUFSIZ];
+   sprintf(log_msg, "[riemann] %s host=%s,service=%s,state=%s,metric_f=%s,metric_d=%s,metric_sint64=%s,ttl=%s,tags=%s,attributes=%s",
+               localtime,
+                host,
+                metric,
+                state,
+                value,
+                value,
+                value,
+                ttl,
+                tags_str,
+                attr_str);
+   debug_msg(buffer);
+
+   pthread_mutex_unlock( &riemann_mutex );
+
+   return EXIT_SUCCESS;
+
+}
+#endif /* WITH_RIEMANN */
+
