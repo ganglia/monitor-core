@@ -529,6 +529,9 @@ startElement_HOST(void *data, const char *el, const char **attr)
         /* Forward heartbeat metric to Riemann */
         if (gmetad_config.riemann_server) {
 
+            char value[12];
+            sprintf(value, "%d", reported);
+
             debug_msg("[riemann] Sending host %s, metric heartbeat", xmldata->hostname);
 
             int rm_ret = 0;
@@ -693,9 +696,9 @@ startElement_METRIC(void *data, const char *el, const char **attr)
 		  if (gmetad_config.memcached_parameters) {
                      int mc_ret=write_data_to_memcached(xmldata->sourcename, xmldata->hostname, name, metricval, xmldata->source.localtime, metric->dmax);
 		  }
-
 #endif /* WITH_MEMCACHED */
             }
+
          metric->id = METRIC_NODE;
          metric->report_start = metric_report_start;
          metric->report_end = metric_report_end;

@@ -528,8 +528,13 @@ if test x"$riemann" == xyes; then
   if test "$PROTOC_C" = :; then
     AC_MSG_ERROR([This package needs 'protoc-c' tool. Try installing the 'protobuf-c-compiler' package.])
   fi
-  AC_CONFIG_COMMANDS([riemann_pb-c.c], [protoc-c --c_out=./gmetad riemann.proto])
+  AC_CONFIG_COMMANDS([riemann_pb-c.c], [protoc-c -Igmetad/ --c_out=./gmetad gmetad/riemann.proto])
   AC_CHECK_LIB([protobuf-c], [protobuf_c_message_pack])
+  if test x"$ac_cv_lib_protobuf_c_protobuf_c_message_pack" = xno; then
+    echo "libprotobuf-c not found"  # package: libprotobuf-c0-dev
+    exit 1
+  fi
+  LDFLAGS="$LDFLAGS -lprotobuf-c"
   CFLAGS="$CFLAGS -DWITH_RIEMANN"
 fi
 
