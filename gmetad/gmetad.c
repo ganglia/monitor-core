@@ -41,6 +41,10 @@ extern struct type_tag* in_type_list (char *, unsigned int);
 
 extern g_udp_socket *carbon_udp_socket;
 
+#ifdef WITH_RIEMANN
+extern g_udp_socket *riemann_udp_socket;
+#endif /* WITH_RIEMANN */
+
 struct gengetopt_args_info args_info;
 
 extern gmetad_config_t gmetad_config;
@@ -442,24 +446,17 @@ main ( int argc, char *argv[] )
          debug_msg("carbon forwarding ready to send via %s to %s:%d", c->carbon_protocol, c->carbon_server, c->carbon_port);
       }
 
-i#ifdef WITH_RIEMANN
+#ifdef WITH_RIEMANN
     if (c->riemann_server !=NULL)
       {
-        if (riemann_client_init(&riemann_cli))
-           err_quit("[riemann] failed to initialise protobuf client: %s", strerror(errno));
+         if (!strcmp(c->riemann_protocol, "udp"))
+            {
+               riemann_udp_socket = init_riemann_udp_socket (c->riemann_server, c->riemann_port);
 
-        int error = 0;
-        if (!strcmp(c->riemann_protocol, "tcp"))
-          {
-            error = riemann_client_connect(&riemann_cli, RIEMANN_TCP, c->riemann_server, c->riemann_port);
-          } else {
-            error = riemann_client_connect(&riemann_cli, RIEMANN_UDP, c->riemann_server, c->riemann_port);
-          }
-        if (error)
-          err_quit("[riemann] failed to connect to riemann server %s:%d: %s", c->riemann_server, c->riemann_port, strerror(errno));
-        else
-          debug_msg("[riemann] ready to forward metrics via %s to riemann server %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port, strerror(errno));
-
+               if (riemann_udp_socket == NULL)
+                  err_quit("[riemann] %s socket failed for %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
+            }
+         debug_msg("[riemann] ready to forward metrics via %s to %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
       }
 #endif /* WITH_RIEMANN */
 

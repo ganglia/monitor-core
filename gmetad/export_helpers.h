@@ -25,16 +25,19 @@ int
 write_data_to_carbon ( const char *source, const char *host, const char *metric, 
                     const char *sum, unsigned int process_time);
 #ifdef WITH_RIEMANN
+g_udp_socket*
+init_riemann_udp_socket (const char *hostname, uint16_t port);
+
 int
-send_data_to_riemann (const char *grid,          /* grid        => grid */
-                      const char *cluster,       /* cluster     => cluster */
-                      const char *host,          /* host        => host */
-                      const char *ip,            /* ip          => ip */
-                      const char *metric,        /* metric      => service */
-                      const char *value,         /* value       => metric */
-                      const char *state,         /* string      => state */
-                      unsigned int localtime,    /* localtime   => time */
-                      const char *tags,          /* tags        => tags */
-                      unsigned int ttl           /* dmax        => ttl */
+send_data_to_riemann (const char *grid,          /* grid      => grid */
+                      const char *cluster,       /* cluster   => cluster */
+                      const char *host,          /* host      => host */
+                      const char *ip,            /* ip        => ip */
+                      const char *metric,        /* metric    => service */
+                      const char *value,         /* value     => metric */
+                      const char *state,         /* string    => state */
+                      unsigned int localtime,    /* localtime => time */
+                      const char *tags,          /* tags      => tags */
+                      unsigned int ttl           /* dmax      => ttl */
                       );
 #endif /* WITH_RIEMANN */

@@ -30,10 +30,6 @@ extern gmetad_config_t gmetad_config;
 g_udp_socket *carbon_udp_socket;
 pthread_mutex_t  carbon_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-#ifdef WITH_RIEMANN
-pthread_mutex_t  riemann_mutex = PTHREAD_MUTEX_INITIALIZER;
-#endif /* WITH_RIEMANN */
-
 g_udp_socket*
 init_carbon_udp_socket (const char *hostname, uint16_t port)
 {
@@ -63,6 +59,40 @@ init_carbon_udp_socket (const char *hostname, uint16_t port)
 
    return s;
 }
+
+#ifdef WITH_RIEMANN
+g_udp_socket *riemann_udp_socket;
+pthread_mutex_t  riemann_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+init_riemann_udp_socket (const char *hostname, uint16_t port)
+{
+   int sockfd;
+   g_udp_socket* s;
+   struct sockaddr_in *sa_in;
+   struct hostent *hostinfo;
+
+   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+   if (sockfd < 0)
+      {
+         err_msg("create socket (client): %s", strerror(errno));
+         return NULL;
+      }
+
+   s = malloc( sizeof( g_udp_socket ) );
+   memset( s, 0, sizeof( g_udp_socket ));
+   s->sockfd = sockfd;
+   s->ref_count = 1;
+
+   /* Set up address and port for connection */
+   sa_in = (struct sockaddr_in*) &s->sa;
+   sa_in->sin_family = AF_INET;
+   sa_in->sin_port = htons (port);
+   hostinfo = gethostbyname (hostname);
+   sa_in->sin_addr = *(struct in_addr *) hostinfo->h_addr;
+
+   return s;
+}
+#endif /* WITH_RIEMANN */
 
 void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port)
 {
@@ -460,24 +490,17 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   msg__pack(&riemann_msg, buf);
 
   fprintf (stderr, "Writing %d serialized bytes\n", len);       // See the length of message
-
   pthread_mutex_lock( &riemann_mutex );
-
-  /**** start ***/
-  int sockfd, n;
-  struct sockaddr_in servaddr;
-
-  sockfd = socket (AF_INET, SOCK_DGRAM, 0);
-
-  bzero (&servaddr, sizeof (servaddr));
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = inet_addr ("127.0.0.1");
-  servaddr.sin_port = htons (5555);
-
-  sendto (sockfd, buf, len, 0, (struct sockaddr *) &servaddr, sizeof (servaddr));
-  /**** end ***/
-
+  int nbytes;
+  nbytes = sendto (riemann_udp_socket->sockfd, buf, len, 0,
+                         (struct sockaddr_in*)&riemann_udp_socket->sa, sizeof (struct sockaddr_in));
   pthread_mutex_unlock( &riemann_mutex );
+
+  if (nbytes != strlen(graphite_msg))
+  {
+         err_msg("sendto socket (client): %s", strerror(errno));
+         return EXIT_FAILURE;
+  }
 
   for (i = 0; i < evt.n_tags; i++) {
      printf("tag %d %s\n", i, tags[i]);
