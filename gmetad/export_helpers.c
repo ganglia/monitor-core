@@ -22,6 +22,10 @@
 #include <libmemcachedutil-1.0/util.h>
 #endif /* WITH_MEMCACHED */
 
+#ifdef WITH_RIEMANN
+#include "riemann.pb-c.h"
+#endif /* WITH_RIEMANN */
+
 #include "export_helpers.h"
 
 #define PATHSIZE 4096
