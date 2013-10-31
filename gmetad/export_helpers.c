@@ -367,15 +367,12 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 #ifdef WITH_RIEMANN
 
 int
-tokenize (const char *str, char *delim, char **tokens)
+tokenize (char *str, char *delim, char **tokens)
 {
   char *p;
   int i = 0;
 
-  char *t = malloc(strlen(str));
-  strcpy(t, str);
-
-  p = strtok (t, delim);
+  p = strtok (str, delim);
   while (p != NULL) {
     printf ("> %s\n", p);
     tokens[i] = malloc (strlen (p) + 1);
@@ -384,7 +381,6 @@ tokenize (const char *str, char *delim, char **tokens)
     i++;
     p = strtok (NULL, delim);
   }
-  free(t);
   return i++;
 }
 
@@ -408,7 +404,7 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
    if (localtime)
       evt.time = localtime;
 
-  // evt.description = "this is the description";
+  // evt.description = "<< not used >>";
 
   int n_tags;
   char *tags[64] = { NULL };
@@ -416,8 +412,9 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   evt.n_tags = tokenize (tags_str, ",", tags);
   evt.tags = tags;
 
-  char attributes[512];
-  sprintf(attr_str, "grid=%s,cluster=%s,ip=%s,%s", grid, cluster, ip,
+  char attr_str[512];
+  sprintf(attr_str, "grid=%s,cluster=%s,ip=%s%s%s", grid, cluster, ip,
+        gmetad_config.riemann_attributes ? ",", "",
         gmetad_config.riemann_attributes ? gmetad_config.riemann_attributes : "");
 
   int n_attrs;
@@ -432,20 +429,23 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   for (i = 0; i < n_attrs; i++) {
 
     printf ("buffer[%d] = %s\n", i, buffer[i]);
-    char *a[32] = { NULL };
-    tokenize (buffer[i], "=", a);
-    printf ("attributes[%d] -> a[0] = %s a[1] = %s\n", i, a[0], a[1]);
+    char *pair[1] = { NULL };
+    tokenize (buffer[i], "=", pair);
+    printf ("attributes[%d] -> key = %s value = %s\n", i, pair[0], pair[1]);
 
     attrs[i] = malloc (sizeof (Attribute));
     attribute__init (attrs[i]);
-    attrs[i]->key = strdup(a[0]);
-    attrs[i]->value = strdup(a[1]);
+    attrs[i]->key = pair[0];
+    attrs[i]->value = pair[1];
+    free(pair[0]);
+    free(pair[1]);
+    free(buffer[i]);
   }
   evt.attributes = attrs;
   evt.n_attributes = n_attrs;
   printf ("n_attrs = %d\n", n_attrs);
 
-  evt.ttl = 86400;
+  evt.ttl = ttl;
 
   Msg riemann_msg = MSG__INIT;
   void *buf;
@@ -461,8 +461,9 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
 
   fprintf (stderr, "Writing %d serialized bytes\n", len);       // See the length of message
 
-   pthread_mutex_lock( &riemann_mutex );
+  pthread_mutex_lock( &riemann_mutex );
 
+  /**** start ***/
   int sockfd, n;
   struct sockaddr_in servaddr;
 
@@ -473,17 +474,20 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   servaddr.sin_addr.s_addr = inet_addr ("127.0.0.1");
   servaddr.sin_port = htons (5555);
 
-  sendto (sockfd, buf, strlen (buf), 0, (struct sockaddr *) &servaddr, sizeof (servaddr));
-/*
-  for (i = 0; i < n_attrs; i++)
-      free(attrs[i]);
-  free(attrs);
-  for (i = 0; i < n_tags; i++)
-      free(tags[i]);
-  free(evt.tags);
-  free(riemann_msg.events);
-*/
+  sendto (sockfd, buf, len, 0, (struct sockaddr *) &servaddr, sizeof (servaddr));
+  /**** end ***/
 
+  pthread_mutex_unlock( &riemann_mutex );
+
+  for (i = 0; i < evt.n_tags; i++) {
+     printf("tag %d %s\n", i, tags[i]);
+     free(tags[i]);
+  }
+  for (i = 0; i < evt.n_attributes; i++) {
+      attrs[i]->key = NULL;
+      attrs[i]->value = NULL;
+      free(attrs[i]);
+  }
   free(attrs);
   free(riemann_msg.events);
   free(buf);
@@ -502,8 +506,6 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
                 tags_str,
                 attr_str);
    debug_msg(buffer);
-
-   pthread_mutex_unlock( &riemann_mutex );
 
    return EXIT_SUCCESS;
 
