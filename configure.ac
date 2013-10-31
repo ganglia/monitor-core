@@ -518,9 +518,9 @@ if test x"$memcache" == xyes; then
 fi
 
 echo
-echo Checking for Riemann
+echo Checking for Protocol Buffers
 AC_ARG_WITH( riemann,
-[ --with-riemann          enable riemann metric forwarding],
+[  --with-riemann          enable riemann metric forwarding],
 if test x"$withval" = xyes; then riemann="yes"; fi)
 
 if test x"$riemann" == xyes; then
@@ -530,6 +530,7 @@ if test x"$riemann" == xyes; then
   fi
   AC_CONFIG_COMMANDS([riemann_pb-c.c], [protoc-c --c_out=./gmetad riemann.proto])
   AC_CHECK_LIB([protobuf-c], [protobuf_c_message_pack])
+  CFLAGS="$CFLAGS -DWITH_RIEMANN"
 fi
 
 echo
