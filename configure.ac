@@ -537,6 +537,7 @@ if test x"$riemann" == xyes; then
   LDFLAGS="$LDFLAGS -lprotobuf-c"
   CFLAGS="$CFLAGS -DWITH_RIEMANN"
 fi
+AM_CONDITIONAL(BUILD_RIEMANN, test x"$riemann" = xyes)
 
 echo
 echo Checking for confuse
