@@ -419,13 +419,16 @@ tokenize (char *str, char *delim, char **tokens)
   return i++;
 }
 
-
 int
-send_data_to_riemann (const char *grid, const char *cluster, const char *host, const char *ip, const char *metric, const char *value,
+send_data_to_riemann (const char *grid, const char *cluster, const char *host, const char *ip,
+                      const char *metric, const char *value, const char *type, const char *units,
                       const char *state, unsigned int localtime, const char *tags_str, unsigned int ttl)
 {
   int i;
   char *buffer = NULL;
+
+  debug_msg("[riemann] grid=%s, cluster=%s, host=%s, ip=%s, metric=%s, value=%s %s, type=%s, state=%s, localtime=%u, tags=%s, ttl=%u",
+            grid, cluster, host, ip, metric, value, units, type, state, localtime, tags_str, ttl);
 
   Event evt = EVENT__INIT;
 
@@ -433,15 +436,23 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   evt.service = (char *)metric;
 
    if (value) {
-      evt.has_metric_d = 1;
-      evt.metric_d = (double) strtod(value, (char**) NULL);
+       if (!strcmp(type, "int")) {
+           evt.has_metric_sint64 = 1;
+           evt.metric_sint64 = atoll(value);
+       } else if (!strcmp(type, "float")) {
+           evt.has_metric_d = 1;
+           evt.metric_d = (double) strtod(value, (char**) NULL);
+       } else {
+           evt.state = (char *)value;
+       }
    }
+  evt.description = (char *)units;
+
    if (state)
       evt.state = (char *)state;
+
    if (localtime)
       evt.time = localtime;
-
-  // evt.description = "<< not used >>";
 
   char *tags[64] = { NULL };
   buffer = strdup(tags_str);
@@ -467,10 +478,8 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
 
   for (i = 0; i < n_attrs; i++) {
 
-    printf ("kv[%d] = %s\n", i, kv[i]);
     char *pair[1] = { NULL };
     tokenize (kv[i], "=", pair);
-    printf ("attributes[%d] -> key = %s value = %s\n", i, pair[0], pair[1]);
 
     attrs[i] = malloc (sizeof (Attribute));
     attribute__init (attrs[i]);
@@ -495,7 +504,7 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   buf = malloc(len);
   msg__pack(&riemann_msg, buf);
 
-  fprintf (stderr, "Writing %d serialized bytes\n", len);
+  debug_msg("[riemann] Writing %d serialized bytes", len);
 
   pthread_mutex_lock( &riemann_mutex );
   int nbytes;
@@ -510,7 +519,6 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   }
 
   for (i = 0; i < evt.n_attributes; i++) {
-     printf("attributes %d %s=%s\n", i, attrs[i]->key, attrs[i]->value);
      free(attrs[i]->key);
      free(attrs[i]->value);
      free(attrs[i]);
@@ -518,7 +526,6 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   }
   free(attrs);
   for (i = 0; i < evt.n_tags; i++) {
-     printf("tag %d %s\n", i, tags[i]);
      free(tags[i]);
   }
   free(riemann_msg.events);
