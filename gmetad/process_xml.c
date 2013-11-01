@@ -532,8 +532,6 @@ startElement_HOST(void *data, const char *el, const char **attr)
             char value[12];
             sprintf(value, "%d", reported);
 
-            debug_msg("[riemann] Sending host %s, metric heartbeat", xmldata->hostname);
-
             int rm_ret = 0;
             rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename,
                                            xmldata->hostname, getfield(host->strings, host->ip), "heartbeat", value, "int", "seconds", NULL,
@@ -670,8 +668,6 @@ startElement_METRIC(void *data, const char *el, const char **attr)
             Host_t *host = (Host_t*) host;
             host = &(xmldata->host);
             int rm_ret = 0;
-
-            debug_msg("[riemann] Sending host %s, metric %s", xmldata->hostname, name);
 
             if (tt->type == INT || tt->type == UINT) {
                rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,

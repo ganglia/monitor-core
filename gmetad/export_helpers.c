@@ -409,7 +409,6 @@ tokenize (char *str, char *delim, char **tokens)
 
   p = strtok (str, delim);
   while (p != NULL) {
-    printf ("> %s\n", p);
     tokens[i] = malloc (strlen (p) + 1);
     if (tokens[i])
       strcpy (tokens[i], p);
@@ -438,7 +437,7 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
    if (value) {
        if (!strcmp(type, "int")) {
            evt.has_metric_sint64 = 1;
-           evt.metric_sint64 = atoll(value);
+           evt.metric_sint64 = strtol(value, (char **) NULL , 10 );
        } else if (!strcmp(type, "float")) {
            evt.has_metric_d = 1;
            evt.metric_d = (double) strtod(value, (char**) NULL);
@@ -504,7 +503,8 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   buf = malloc(len);
   msg__pack(&riemann_msg, buf);
 
-  debug_msg("[riemann] Writing %d serialized bytes", len);
+  debug_msg("[riemann] %zu host=%s, service=%s, state=%s, metric_f=%f, metric_d=%lf, metric_sint64=%" PRId64 ", description=%s, ttl=%f, tags(%zu), attributes(%zu)",
+            evt.time, evt.host, evt.service, evt.state, evt.metric_f, evt.metric_d, evt.metric_sint64, evt.description, evt.ttl, evt.n_tags, evt.n_attributes);
 
   pthread_mutex_lock( &riemann_mutex );
   int nbytes;
@@ -516,6 +516,8 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   {
          err_msg("[riemann] sendto socket (client): %s", strerror(errno));
          return EXIT_FAILURE;
+  } else {
+      debug_msg("[riemann] Sent %d serialized bytes", len);
   }
 
   for (i = 0; i < evt.n_attributes; i++) {
