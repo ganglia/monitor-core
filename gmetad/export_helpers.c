@@ -460,6 +460,7 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   buffer = strdup(attr_str);
 
   n_attrs = tokenize (buffer, ",", kv);
+  free(buffer);
 
   Attribute **attrs;
   attrs = malloc (sizeof (Attribute *) * n_attrs);
@@ -512,8 +513,10 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
      printf("attributes %d %s=%s\n", i, attrs[i]->key, attrs[i]->value);
      free(attrs[i]->key);
      free(attrs[i]->value);
+     free(attrs[i]);
      free(kv[i]);
   }
+  free(attrs);
   for (i = 0; i < evt.n_tags; i++) {
      printf("tag %d %s\n", i, tags[i]);
      free(tags[i]);
