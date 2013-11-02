@@ -423,6 +423,8 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
                       const char *metric, const char *value, const char *type, const char *units,
                       const char *state, unsigned int localtime, const char *tags_str, unsigned int ttl)
 {
+  pthread_mutex_lock( &riemann_mutex );
+
   int i;
   char *buffer = NULL;
 
@@ -506,11 +508,9 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   debug_msg("[riemann] %zu host=%s, service=%s, state=%s, metric_f=%f, metric_d=%lf, metric_sint64=%" PRId64 ", description=%s, ttl=%f, tags(%zu), attributes(%zu)",
             evt.time, evt.host, evt.service, evt.state, evt.metric_f, evt.metric_d, evt.metric_sint64, evt.description, evt.ttl, evt.n_tags, evt.n_attributes);
 
-  pthread_mutex_lock( &riemann_mutex );
   int nbytes;
   nbytes = sendto (riemann_udp_socket->sockfd, buf, len, 0,
                          (struct sockaddr_in*)&riemann_udp_socket->sa, sizeof (struct sockaddr_in));
-  pthread_mutex_unlock( &riemann_mutex );
 
   if (nbytes != len)
   {
@@ -532,6 +532,8 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   }
   free(riemann_msg.events);
   free(buf);
+
+  pthread_mutex_unlock( &riemann_mutex );
 
   return EXIT_SUCCESS;
 
