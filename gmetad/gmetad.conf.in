@@ -208,7 +208,8 @@ case_sensitive_hostnames 0
 # |  units            |  description*  |
 # |  value(string)    |  state*        |
 # |  reported         |  time*         |
-# |  tags             |  tags*         |
+# |  tags(comma-sep)  |  tags*         |
+# |  location         |  location      |
 # |  tmax             |  ttl*          |
 # +-------------------+----------------+
 #

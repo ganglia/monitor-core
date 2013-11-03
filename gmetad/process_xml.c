@@ -533,9 +533,10 @@ startElement_HOST(void *data, const char *el, const char **attr)
             sprintf(value, "%d", reported);
 
             int rm_ret = 0;
-            rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename,
-                                           xmldata->hostname, getfield(host->strings, host->ip), "heartbeat", value, "int", "seconds", NULL,
-                                           xmldata->source.localtime, getfield(host->strings, host->tags), tmax * 4);
+            rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
+                                           getfield(host->strings, host->ip), "heartbeat", value, "int",
+                                           "seconds", NULL, xmldata->source.localtime, getfield(host->strings, host->tags),
+                                           getfield(host->strings, host->location), tmax * 4);
 
             if (rm_ret)
                 err_msg("[riemann] Could not send heartbeat metric to Riemann");
@@ -671,16 +672,19 @@ startElement_METRIC(void *data, const char *el, const char **attr)
 
             if (tt->type == INT || tt->type == UINT) {
                rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
-                                              getfield(host->strings, host->ip), name, metricval, "int", units, NULL,  /* int or uint => metric_sint64 */
-                                              xmldata->source.localtime, getfield(host->strings, host->tags), metric->tmax);
+                                              getfield(host->strings, host->ip), name, metricval, "int",
+                                              units, NULL, xmldata->source.localtime, getfield(host->strings, host->tags),
+                                              getfield(host->strings, host->location), metric->tmax);
             } else if (tt->type == FLOAT) {
                rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
-                                              getfield(host->strings, host->ip), name, metricval, "float", units, NULL, /* float => metric_d */
-                                              xmldata->source.localtime, getfield(host->strings, host->tags), metric->tmax);
+                                              getfield(host->strings, host->ip), name, metricval, "float",
+                                              units, NULL, xmldata->source.localtime, getfield(host->strings, host->tags),
+                                              getfield(host->strings, host->location), metric->tmax);
             } else {
                rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
-                                              getfield(host->strings, host->ip), name, metricval, "string", units, NULL,  /* string => state */
-                                              xmldata->source.localtime, getfield(host->strings, host->tags), metric->tmax);
+                                              getfield(host->strings, host->ip), name, metricval, "string",
+                                              units, NULL, xmldata->source.localtime, getfield(host->strings, host->tags),
+                                              getfield(host->strings, host->location), metric->tmax);
             }
             if (rm_ret)
                 err_msg("[riemann] Could not send %s metric to Riemann", name);

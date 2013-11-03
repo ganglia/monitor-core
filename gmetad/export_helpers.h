@@ -40,6 +40,7 @@ send_data_to_riemann (const char *grid,          /* grid      =>  grid */
                       const char *state,         /* not used  =>  state (overrides metric value if also supplied) */
                       unsigned int localtime,    /* localtime =>  time */
                       const char *tags,          /* tags      =>  tags */
+                      const char *location,      /* location  =>  location */
                       unsigned int ttl           /* tmax      =>  ttl */
                       );
 #endif /* WITH_RIEMANN */

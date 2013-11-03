@@ -421,15 +421,16 @@ tokenize (char *str, char *delim, char **tokens)
 int
 send_data_to_riemann (const char *grid, const char *cluster, const char *host, const char *ip,
                       const char *metric, const char *value, const char *type, const char *units,
-                      const char *state, unsigned int localtime, const char *tags_str, unsigned int ttl)
+                      const char *state, unsigned int localtime, const char *tags_str,
+                      const char *location, unsigned int ttl)
 {
   pthread_mutex_lock( &riemann_mutex );
 
   int i;
   char *buffer = NULL;
 
-  debug_msg("[riemann] grid=%s, cluster=%s, host=%s, ip=%s, metric=%s, value=%s %s, type=%s, state=%s, localtime=%u, tags=%s, ttl=%u",
-            grid, cluster, host, ip, metric, value, units, type, state, localtime, tags_str, ttl);
+  debug_msg("[riemann] grid=%s, cluster=%s, host=%s, ip=%s, metric=%s, value=%s %s, type=%s, state=%s, localtime=%u, tags=%s, location=%s, ttl=%u",
+            grid, cluster, host, ip, metric, value, units, type, state, localtime, tags_str, location, ttl);
 
   Event evt = EVENT__INIT;
 
@@ -458,12 +459,12 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   char *tags[64] = { NULL };
   buffer = strdup(tags_str);
 
-  evt.n_tags = tokenize (buffer, ",", tags);
+  evt.n_tags = tokenize (buffer, ",", tags);  /* assume tags are comma-separated */
   evt.tags = tags;
   free(buffer);
 
   char attr_str[512];
-  sprintf(attr_str, "grid=%s,cluster=%s,ip=%s%s%s", grid, cluster, ip,
+  sprintf(attr_str, "grid=%s,cluster=%s,ip=%s,location=%s%s%s", grid, cluster, ip, location,
         gmetad_config.riemann_attributes ? "," : "",
         gmetad_config.riemann_attributes ? gmetad_config.riemann_attributes : "");
 
