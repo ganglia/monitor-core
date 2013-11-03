@@ -455,6 +455,8 @@ main ( int argc, char *argv[] )
 
                if (riemann_udp_socket == NULL)
                   err_quit("[riemann] %s socket failed for %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
+            } else {
+               err_quit("[riemann] TCP transport not supported yet.");
             }
          debug_msg("[riemann] ready to forward metrics via %s to %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
       }

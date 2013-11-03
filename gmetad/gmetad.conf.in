@@ -192,7 +192,27 @@ case_sensitive_hostnames 0
 
 #-------------------------------------------------------------------------------
 # Riemann configuration (if enabled during build)
-# Metrics can be forwarded to Riemann metric processing for thresholding and alerting
+# Metrics can be forwarded to a Riemann event stream processor for real-time
+# thresholding and alerting. See http://riemann.io/
+#
+# +-------------------+----------------+
+# |  Ganglia          |  Riemann       |
+# |-------------------|----------------|
+# |  grid             |  grid          |
+# |  cluster          |  cluster       |
+# |  host             |  host*         |
+# |  ip               |  ip            |
+# |  metric           |  service*      |
+# |  value(int,float) |  metric*       |
+# |  type             |  (internal)    |
+# |  units            |  description*  |
+# |  value(string)    |  state*        |
+# |  reported         |  time*         |
+# |  tags             |  tags*         |
+# |  tmax             |  ttl*          |
+# +-------------------+----------------+
+#
+# Note: attributes with a star (*) are standard Riemann fields
 #
 # The hostname or IP address of the Riemann server
 # default: unspecified
@@ -202,10 +222,13 @@ case_sensitive_hostnames 0
 # default: 5555
 # riemann_port 5555
 #
-# default: udp
-# riemann_protocol tcp
+# default: udp   (tcp transport is not supported, yet)
+# riemann_protocol udp
 #
-# List of arbitrary key-value pairs to be used as event attributes
+# List of arbitrary key-value pairs to be used as event attributes in
+# addition to those listed above.
+#
 # default: undefined
 # riemann_attributes "key=val[,...]"
-# riemann_attributes "environment=PROD,location=london"
+# riemann_attributes "customer=Acme Corp,environment=PROD"
+
