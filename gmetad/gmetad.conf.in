@@ -190,3 +190,46 @@ case_sensitive_hostnames 0
 # memcached_parameters "--SERVER=127.0.0.1"
 #
 
+#-------------------------------------------------------------------------------
+# Riemann configuration (if enabled during build)
+# Metrics can be forwarded to a Riemann event stream processor for real-time
+# thresholding and alerting. See http://riemann.io/
+#
+# +-------------------+----------------+
+# |  Ganglia          |  Riemann       |
+# |-------------------|----------------|
+# |  grid             |  grid          |
+# |  cluster          |  cluster       |
+# |  host             |  host*         |
+# |  ip               |  ip            |
+# |  metric           |  service*      |
+# |  value(int,float) |  metric*       |
+# |  type             |  (internal)    |
+# |  units            |  description*  |
+# |  value(string)    |  state*        |
+# |  reported         |  time*         |
+# |  tags(comma-sep)  |  tags*         |
+# |  location         |  location      |
+# |  tmax             |  ttl*          |
+# +-------------------+----------------+
+#
+# Note: attributes with a star (*) are standard Riemann fields
+#
+# The hostname or IP address of the Riemann server
+# default: unspecified
+# riemann_server "my.riemann.box"
+#
+# The port and protocol on which Riemann is listening
+# default: 5555
+# riemann_port 5555
+#
+# default: udp   (tcp transport is not supported, yet)
+# riemann_protocol udp
+#
+# List of arbitrary key-value pairs to be used as event attributes in
+# addition to those listed above.
+#
+# default: undefined
+# riemann_attributes "key=val[,...]"
+# riemann_attributes "customer=Acme Corp,environment=PROD"
+

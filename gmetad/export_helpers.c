@@ -22,6 +22,10 @@
 #include <libmemcachedutil-1.0/util.h>
 #endif /* WITH_MEMCACHED */
 
+#ifdef WITH_RIEMANN
+#include "riemann.pb-c.h"
+#endif /* WITH_RIEMANN */
+
 #include "export_helpers.h"
 
 #define PATHSIZE 4096
@@ -59,6 +63,41 @@ init_carbon_udp_socket (const char *hostname, uint16_t port)
 
    return s;
 }
+
+#ifdef WITH_RIEMANN
+g_udp_socket *riemann_udp_socket;
+pthread_mutex_t  riemann_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+g_udp_socket*
+init_riemann_udp_socket (const char *hostname, uint16_t port)
+{
+   int sockfd;
+   g_udp_socket* s;
+   struct sockaddr_in *sa_in;
+   struct hostent *hostinfo;
+
+   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+   if (sockfd < 0)
+      {
+         err_msg("create socket (client): %s", strerror(errno));
+         return NULL;
+      }
+
+   s = malloc( sizeof( g_udp_socket ) );
+   memset( s, 0, sizeof( g_udp_socket ));
+   s->sockfd = sockfd;
+   s->ref_count = 1;
+
+   /* Set up address and port for connection */
+   sa_in = (struct sockaddr_in*) &s->sa;
+   sa_in->sin_family = AF_INET;
+   sa_in->sin_port = htons (port);
+   hostinfo = gethostbyname (hostname);
+   sa_in->sin_addr = *(struct in_addr *) hostinfo->h_addr;
+
+   return s;
+}
+#endif /* WITH_RIEMANN */
 
 void init_sockaddr (struct sockaddr_in *name, const char *hostname, uint16_t port)
 {
@@ -359,3 +398,146 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 	graphite_msg[strlen(graphite_msg)+1] = 0;
    return push_data_to_carbon( graphite_msg );
 }
+
+#ifdef WITH_RIEMANN
+
+int
+tokenize (char *str, char *delim, char **tokens)
+{
+  char *p;
+  int i = 0;
+
+  p = strtok (str, delim);
+  while (p != NULL) {
+    tokens[i] = malloc (strlen (p) + 1);
+    if (tokens[i])
+      strcpy (tokens[i], p);
+    i++;
+    p = strtok (NULL, delim);
+  }
+  return i++;
+}
+
+int
+send_data_to_riemann (const char *grid, const char *cluster, const char *host, const char *ip,
+                      const char *metric, const char *value, const char *type, const char *units,
+                      const char *state, unsigned int localtime, const char *tags_str,
+                      const char *location, unsigned int ttl)
+{
+  pthread_mutex_lock( &riemann_mutex );
+
+  int i;
+  char *buffer = NULL;
+
+  debug_msg("[riemann] grid=%s, cluster=%s, host=%s, ip=%s, metric=%s, value=%s %s, type=%s, state=%s, localtime=%u, tags=%s, location=%s, ttl=%u",
+            grid, cluster, host, ip, metric, value, units, type, state, localtime, tags_str, location, ttl);
+
+  Event evt = EVENT__INIT;
+
+  evt.host = (char *)host;
+  evt.service = (char *)metric;
+
+   if (value) {
+       if (!strcmp(type, "int")) {
+           evt.has_metric_sint64 = 1;
+           evt.metric_sint64 = strtol(value, (char **) NULL , 10 );
+       } else if (!strcmp(type, "float")) {
+           evt.has_metric_d = 1;
+           evt.metric_d = (double) strtod(value, (char**) NULL);
+       } else {
+           evt.state = (char *)value;
+       }
+   }
+  evt.description = (char *)units;
+
+   if (state)
+      evt.state = (char *)state;
+
+   if (localtime)
+      evt.time = localtime;
+
+  char *tags[64] = { NULL };
+  buffer = strdup(tags_str);
+
+  evt.n_tags = tokenize (buffer, ",", tags);  /* assume tags are comma-separated */
+  evt.tags = tags;
+  free(buffer);
+
+  char attr_str[512];
+  sprintf(attr_str, "grid=%s,cluster=%s,ip=%s,location=%s%s%s", grid, cluster, ip, location,
+        gmetad_config.riemann_attributes ? "," : "",
+        gmetad_config.riemann_attributes ? gmetad_config.riemann_attributes : "");
+
+  int n_attrs;
+  char *kv[64] = { NULL };
+  buffer = strdup(attr_str);
+
+  n_attrs = tokenize (buffer, ",", kv);
+  free(buffer);
+
+  Attribute **attrs;
+  attrs = malloc (sizeof (Attribute *) * n_attrs);
+
+  for (i = 0; i < n_attrs; i++) {
+
+    char *pair[1] = { NULL };
+    tokenize (kv[i], "=", pair);
+
+    attrs[i] = malloc (sizeof (Attribute));
+    attribute__init (attrs[i]);
+    attrs[i]->key = pair[0];
+    attrs[i]->value = pair[1];
+  }
+  evt.n_attributes = n_attrs;
+  evt.attributes = attrs;
+
+  evt.has_ttl = 1;
+  evt.ttl = ttl;
+
+  Msg riemann_msg = MSG__INIT;
+  void *buf;
+  unsigned len;
+
+  riemann_msg.n_events = 1;
+  riemann_msg.events = malloc(sizeof (Event) * riemann_msg.n_events);
+  riemann_msg.events[0] = &evt;
+
+  len = msg__get_packed_size(&riemann_msg);
+  buf = malloc(len);
+  msg__pack(&riemann_msg, buf);
+
+  debug_msg("[riemann] %zu host=%s, service=%s, state=%s, metric_f=%f, metric_d=%lf, metric_sint64=%" PRId64 ", description=%s, ttl=%f, tags(%zu), attributes(%zu)",
+            evt.time, evt.host, evt.service, evt.state, evt.metric_f, evt.metric_d, evt.metric_sint64, evt.description, evt.ttl, evt.n_tags, evt.n_attributes);
+
+  int nbytes;
+  nbytes = sendto (riemann_udp_socket->sockfd, buf, len, 0,
+                         (struct sockaddr_in*)&riemann_udp_socket->sa, sizeof (struct sockaddr_in));
+
+  if (nbytes != len)
+  {
+         err_msg("[riemann] sendto socket (client): %s", strerror(errno));
+         return EXIT_FAILURE;
+  } else {
+      debug_msg("[riemann] Sent %d serialized bytes", len);
+  }
+
+  for (i = 0; i < evt.n_attributes; i++) {
+     free(attrs[i]->key);
+     free(attrs[i]->value);
+     free(attrs[i]);
+     free(kv[i]);
+  }
+  free(attrs);
+  for (i = 0; i < evt.n_tags; i++) {
+     free(tags[i]);
+  }
+  free(riemann_msg.events);
+  free(buf);
+
+  pthread_mutex_unlock( &riemann_mutex );
+
+  return EXIT_SUCCESS;
+
+}
+#endif /* WITH_RIEMANN */
+

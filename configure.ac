@@ -518,6 +518,28 @@ if test x"$memcache" == xyes; then
 fi
 
 echo
+echo Checking for Protocol Buffers
+AC_ARG_WITH( riemann,
+[  --with-riemann          enable riemann metric forwarding],
+if test x"$withval" = xyes; then riemann="yes"; fi)
+
+if test x"$riemann" == xyes; then
+  AC_CHECK_PROGS([PROTOC_C], [protoc-c], [:])
+  if test "$PROTOC_C" = :; then
+    AC_MSG_ERROR([This package needs 'protoc-c' tool. Try installing the 'protobuf-c-compiler' package.])
+  fi
+  AC_CONFIG_COMMANDS([riemann_pb-c.c], [protoc-c -Igmetad/ --c_out=./gmetad gmetad/riemann.proto])
+  AC_CHECK_LIB([protobuf-c], [protobuf_c_message_pack])
+  if test x"$ac_cv_lib_protobuf_c_protobuf_c_message_pack" = xno; then
+    echo "libprotobuf-c not found"  # package: libprotobuf-c0-dev
+    exit 1
+  fi
+  LDFLAGS="$LDFLAGS -lprotobuf-c"
+  CFLAGS="$CFLAGS -DWITH_RIEMANN"
+fi
+AM_CONDITIONAL(BUILD_RIEMANN, test x"$riemann" = xyes)
+
+echo
 echo Checking for confuse
 if test x"$libconfusepath" != x && test x"$libconfusepath" != xyes; then
   CFLAGS="$CFLAGS -I$libconfusepath/include"
