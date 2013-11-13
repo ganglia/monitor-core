@@ -43,6 +43,12 @@ extern g_udp_socket *carbon_udp_socket;
 
 #ifdef WITH_RIEMANN
 extern g_udp_socket *riemann_udp_socket;
+extern g_tcp_socket *riemann_tcp_socket;
+
+extern void *circuit_breaker_thread(void *arg);
+extern int riemann_circuit_breaker;
+extern apr_time_t riemann_reset_timeout;
+extern int riemann_failures;
 #endif /* WITH_RIEMANN */
 
 struct gengetopt_args_info args_info;
@@ -474,10 +480,19 @@ main ( int argc, char *argv[] )
 
                if (riemann_udp_socket == NULL)
                   err_quit("[riemann] %s socket failed for %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
+            } else if (!strcmp(c->riemann_protocol, "tcp")) {
+                riemann_tcp_socket = init_riemann_tcp_socket (c->riemann_server, c->riemann_port);
+                if (riemann_tcp_socket == NULL) {
+                   riemann_circuit_breaker = RIEMANN_CB_OPEN;
+                   riemann_reset_timeout = apr_time_now () + RIEMANN_RETRY_TIMEOUT * APR_USEC_PER_SEC;
+                } else {
+                   riemann_circuit_breaker = RIEMANN_CB_CLOSED;
+                   riemann_failures = 0;
+                }
             } else {
-               err_quit("[riemann] TCP transport not supported yet.");
+                err_quit("ERROR: Riemann protocol must be 'udp' or 'tcp'");
             }
-         debug_msg("[riemann] ready to forward metrics via %s to %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
+         debug_msg("[riemann] Ganglia configured to forward metrics via %s to %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
       }
 #endif /* WITH_RIEMANN */
 
@@ -503,8 +518,16 @@ main ( int argc, char *argv[] )
    pthread_create(&pid, &attr, cleanup_thread, (void *) NULL);
    debug_msg("cleanup thread has been started");
 
+#ifdef WITH_RIEMANN
+   if (!strcmp(c->riemann_protocol, "tcp")) {
+      /* A thread to re-poll riemann TCP port if circuit breaker tripped */
+      pthread_create(&pid, &attr, circuit_breaker_thread, (void *) NULL);
+      debug_msg ("[riemann] circuit breaker thread has been started");
+   }
+#endif /* WITH_RIEMANN */
+
     /* Meta data */
-   last_metadata = 0;
+   last_metadata = apr_time_now();
    for(;;)
       {
          /* Do at a random interval, between 
