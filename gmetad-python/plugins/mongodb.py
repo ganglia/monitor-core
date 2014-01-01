@@ -97,9 +97,11 @@ class MongodbPlugin(GmetadPlugin) :
         TBD
         '''
         
-        verbose = False
+        verbose = False 
         msci = plugin.msci
         if plugin.api.should_refresh(plugin.cloud_name, plugin.last_refresh) :
+            if verbose :
+                logging.debug("Should refresh returned true!")
             plugin.obj_cache = {}
             plugin.last_refresh = str(time())
         if ip in plugin.obj_cache :
@@ -120,7 +122,6 @@ class MongodbPlugin(GmetadPlugin) :
                     { "$or" : [{"cloud_ip" : ip}, {"cloud_hostname" : name}], 
                         "mgt_901_deprovisioning_request_originated" : { "$exists" : False},
                         "mgt_903_deprovisioning_request_completed" : { "$exists" : False} })
-            #obj = msci.find_document(plugin.manage_collection["VM"], {"cloud_ip" : ip})
 
             if obj is not None : 
                 obj = plugin.api.vmshow(plugin.cloud_name, obj["_id"])
@@ -142,7 +143,8 @@ class MongodbPlugin(GmetadPlugin) :
             logging.debug("Can't get VM or HOST object for ip: " + ip)
 
         finally :
-            plugin.obj_cache[ip] = (vm, obj)
+            if vm and obj :
+                plugin.obj_cache[ip] = (vm, obj)
 
             return vm, obj
 
@@ -186,17 +188,20 @@ class MongodbPlugin(GmetadPlugin) :
                 continue
 
             if vm is None : # error during lookup
+#                print "VM " + str(hostNode.getAttr('ip')) + " " + hostNode.getAttr('name') + " not found. not going through data..."
                 continue
 
             _data = {"uuid" : obj["uuid"], "expid" : self.expid}
             obj_type = "VM" if vm else "HOST"
             empty = True 
 
+#            reported = ""
             for metricNode in hostNode:
                 '''
                 Available metricNode keys:
                 name, val, tmax, tn, source, units, dmax, type, slope
                 '''
+#                reported += " " + metricNode.getAttr('name')
                 # Don't evaluate metrics that aren't numeric values.
                 if metricNode.getAttr('type') in ['string', 'timestamp']:
                     continue
@@ -211,6 +216,21 @@ class MongodbPlugin(GmetadPlugin) :
 
                 empty = False
 
+#            print "looped NAMES: " + reported
+
+            '''
+            def print_list(d, name) :
+                list = ""
+                qemu_list = ""
+                for key in d :
+                    if key.count("qemu") :
+                        qemu_list += " " + key
+                    else :
+                        list += " " + key
+                print name + " QEMU   : " + qemu_list
+                print name + " REGULAR: " + list
+            '''
+
             if not empty :
                 _now = int(time())
                 _data["time_h"] = makeTimestamp(_now)
@@ -221,12 +241,15 @@ class MongodbPlugin(GmetadPlugin) :
                     if obj_type == "VM" :
                         pass
                     name = obj["name"]
+              #      print_list(_data, "data")
                     self.msci.add_document(self.data_collection[obj_type], _data)
                     old = self.msci.find_document(self.latest_collection[obj_type], {"_id" : obj["uuid"]})
                     if old is not None :
+              #          print_list(old, "old latest")
                         old.update(_data);
                     else :
                         old = _data
+              #      print_list(old, "final latest")
                     old["_id"] = obj["uuid"]
                     self.msci.update_document(self.latest_collection[obj_type], old)
 
