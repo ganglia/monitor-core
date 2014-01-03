@@ -24,7 +24,7 @@ node_t;
 
 typedef struct
 {
-   ck_rwlock_t lock;
+   ck_rwlock_t *lock;
    size_t size;
    node_t *node;
    int flags;
