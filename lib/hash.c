@@ -116,7 +116,7 @@ hash_create (size_t size)
 
    debug_msg("hash->size is %zd", hash->size);
 
-   hash->node = (node_t * *) malloc (sizeof (node_t *) * hash->size);
+   hash->node = malloc (sizeof (node_t) * hash->size);
    if (hash->node == NULL)
       {
          debug_msg("hash->node malloc error. freeing hash.");
@@ -126,26 +126,10 @@ hash_create (size_t size)
 
    for (i = 0; i < hash->size; i++)
       {
-         hash->node[i] = malloc( sizeof(node_t) );
-         if ( hash->node[i] == NULL )
-            break;
-         /* Initialize */
-         hash->node[i]->bucket = NULL;
-         pthread_rdwr_init_np( &(hash->node[i]->rwlock) );
+         hash->node[i].bucket = NULL;
+         pthread_rdwr_init_np( &(hash->node[i].rwlock) );
       }
 
-   /* Was there an error initializing the hash nodes? */
-   if ( i != hash->size )
-      {
-         debug_msg("hash->node[i] malloc error");
-         /* Rewind */
-         for (hash->size = i; hash->size >= 0; hash->size--)
-            {
-               free(hash->node[hash->size]);
-            }
-         free(hash);
-         return NULL; 
-      }
    return hash;
 }
 
@@ -158,13 +142,12 @@ hash_destroy (hash_t * hash)
 
    for( i=0; i< hash->size; i++)
      {
-        for(bucket = hash->node[i]->bucket; bucket!= NULL; bucket = next)
+        for(bucket = hash->node[i].bucket; bucket!= NULL; bucket = next)
            {
               next = bucket->next;
               val  = hash_delete( bucket->key, hash);
               datum_free(val);
            }
-        free(hash->node[i]);
      }
         
    free( hash->node );
@@ -232,7 +215,7 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
 
   WRITE_LOCK(hash, i);
 
-  bucket = hash->node[i]->bucket;
+  bucket = hash->node[i].bucket;
 
   if ( bucket == NULL )
      {
@@ -262,7 +245,7 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
               WRITE_UNLOCK(hash, i);
               return NULL;
            }
-        hash->node[i]->bucket = bucket;
+        hash->node[i].bucket = bucket;
         WRITE_UNLOCK(hash, i);
         return bucket->val;
      }
@@ -270,7 +253,7 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
   /* This node in the hash is already in use.  
      Collision or new data for existing key. */
 
-   for (bucket = hash->node[i]->bucket; bucket != NULL; bucket = bucket->next)
+   for (bucket = hash->node[i].bucket; bucket != NULL; bucket = bucket->next)
       {
          if( bucket->key->size != key->size )
             continue;
@@ -320,8 +303,8 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
         return NULL;
      }  
 
-  bucket->next = hash->node[i]->bucket;
-  hash->node[i]->bucket = bucket;
+  bucket->next = hash->node[i].bucket;
+  hash->node[i].bucket = bucket;
   WRITE_UNLOCK(hash, i);
   return bucket->val;
 }
@@ -337,7 +320,7 @@ hash_lookup (datum_t *key, hash_t * hash)
 
   READ_LOCK(hash, i);
 
-  bucket = hash->node[i]->bucket;
+  bucket = hash->node[i].bucket;
 
   if ( bucket == NULL )
      {
@@ -373,13 +356,13 @@ hash_delete (datum_t *key, hash_t * hash)
 
   WRITE_LOCK(hash,i);
 
-  if ( hash->node[i]->bucket == NULL )
+  if ( hash->node[i].bucket == NULL )
      {
         WRITE_UNLOCK(hash,i);
         return NULL;
      }
 
-  for (last = NULL,  bucket = hash->node[i]->bucket;
+  for (last = NULL,  bucket = hash->node[i].bucket;
        bucket != NULL; last = bucket, bucket = bucket->next)
     {
       if (bucket->key->size == key->size 
@@ -398,7 +381,7 @@ hash_delete (datum_t *key, hash_t * hash)
           else
             {
               val = bucket->val;
-              hash->node[i]->bucket = bucket->next;
+              hash->node[i].bucket = bucket->next;
               datum_free (bucket->key);
               free (bucket);
               WRITE_UNLOCK(hash,i);
@@ -426,7 +409,7 @@ hash_walkfrom (hash_t * hash, size_t from,
   for (i = from; i < hash->size && !stop; i++)
     {
        READ_LOCK(hash, i);
-       for (bucket = hash->node[i]->bucket; bucket != NULL; bucket = bucket->next)
+       for (bucket = hash->node[i].bucket; bucket != NULL; bucket = bucket->next)
          {
            stop = func(bucket->key, bucket->val, arg);
            if (stop) break;
@@ -446,7 +429,7 @@ hash_foreach (hash_t * hash, int (*func)(datum_t *, datum_t *, void *), void *ar
   for (i = 0; i < hash->size && !stop; i++)
     {
        READ_LOCK(hash, i);
-       for (bucket = hash->node[i]->bucket; bucket != NULL; bucket = bucket->next)
+       for (bucket = hash->node[i].bucket; bucket != NULL; bucket = bucket->next)
          {
            stop = func(bucket->key, bucket->val, arg);
            if (stop) break;

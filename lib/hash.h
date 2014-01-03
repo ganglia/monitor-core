@@ -5,13 +5,13 @@
 #include "rdwr.h"
 
 #define READ_LOCK(__hash, __nodeval) \
-pthread_rdwr_rlock_np( &(__hash->node[__nodeval]->rwlock))
+pthread_rdwr_rlock_np( &(__hash->node[__nodeval].rwlock))
 #define READ_UNLOCK(__hash, __nodeval) \
-pthread_rdwr_runlock_np( &(__hash->node[__nodeval]->rwlock))
+pthread_rdwr_runlock_np( &(__hash->node[__nodeval].rwlock))
 #define WRITE_LOCK(__hash, __nodeval) \
-pthread_rdwr_wlock_np( &(__hash->node[__nodeval]->rwlock))
+pthread_rdwr_wlock_np( &(__hash->node[__nodeval].rwlock))
 #define WRITE_UNLOCK(__hash, __nodeval) \
-pthread_rdwr_wunlock_np( &(__hash->node[__nodeval]->rwlock))
+pthread_rdwr_wunlock_np( &(__hash->node[__nodeval].rwlock))
 
 #define HASH_FLAG_IGNORE_CASE 1
 
@@ -40,7 +40,7 @@ node_t;
 typedef struct
 {
   size_t size;
-  node_t **node;
+  node_t *node;
   int flags;
 }
 hash_t;
