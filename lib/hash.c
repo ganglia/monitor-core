@@ -111,8 +111,11 @@ hash_destroy (hash_t * hash)
         for(bucket = &hash->node[i]; bucket!= NULL; bucket = next)
            {
               next = bucket->next;
-              val  = hash_delete( bucket->key, hash);
-              datum_free(val);
+              if (bucket->key)
+                {
+                  val  = hash_delete( bucket->key, hash);
+                  datum_free(val);
+                }
            }
      }
         
@@ -382,6 +385,7 @@ hash_walkfrom (hash_t * hash, size_t from,
     {
        for (bucket = &hash->node[i]; bucket != NULL && bucket->key != NULL; bucket = bucket->next)
          {
+           if (bucket->key == NULL) continue;
            stop = func(bucket->key, bucket->val, arg);
            if (stop) break;
          }
@@ -402,6 +406,7 @@ hash_foreach (hash_t * hash, int (*func)(datum_t *, datum_t *, void *), void *ar
     {
        for (bucket = &hash->node[i]; bucket != NULL && bucket->key != NULL; bucket = bucket->next)
          {
+           if (bucket->key == NULL) continue;
            stop = func(bucket->key, bucket->val, arg);
            if (stop) break;
          }
