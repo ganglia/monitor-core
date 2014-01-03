@@ -67,16 +67,16 @@ reconnect:
                err_sys("Unable to create rrdcached socket");
             }
 
-         r = 1;
-         if (ioctl(c, FIONBIO, &r))
-            {
-               err_sys("Unable to set socket non-blocking");
-            }
-
          if (connect(c, &gmetad_config.rrdcached_address,
                   sizeof (gmetad_config.rrdcached_address)) == -1)
             {
                err_sys("Unable to connect to rrdcached at %s", gmetad_config.rrdcached_addrstr);
+            }
+
+         r = 1;
+         if (ioctl(c, FIONBIO, &r))
+            {
+               err_sys("Unable to set socket non-blocking");
             }
 
          *conn = c;
@@ -95,7 +95,7 @@ reconnect:
          r = write(c, cmd + off, l - off);
          off += r;
       }
-   while (r == -1 && (errno == EAGAIN || errno == EWOULDBLOCK));
+   while ((off < l) || (r == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)));
 
    if (r == -1)
       {
@@ -109,10 +109,11 @@ reconnect:
 
    free(cmd);
 
-   pfd[1].fd = c;
-   pfd[1].events = POLLIN;
-   pfd[1].revents = 0;
+   pfd[0].fd = c;
+   pfd[0].events = POLLIN;
+   pfd[0].revents = 0;
    off = 0;
+   to = 0;
    l = -1;
 
    while (1)
@@ -121,18 +122,20 @@ reconnect:
          
          if (r == 0)
             {
-               to += r;
+               to += 250;
                if (to >= 5000)
                   {
                      err_msg("Timed out reading from rrdcached");
                      break;
                   }
+               continue;
             }
          else if (r == -1)
             {
                if (errno == EAGAIN)
                   {
-                     pfd[1].revents = 0;
+                     pfd[0].events = POLLIN;
+                     pfd[0].revents = 0;
                      continue;
                   }
 
@@ -140,7 +143,7 @@ reconnect:
             }
          else
             {
-               if (pfd[1].revents & POLLERR || pfd[1].revents & POLLHUP)
+               if (pfd[0].revents & POLLERR || pfd[0].revents & POLLHUP)
                   {
                      /* Hack to avoid looping on a flappy socket */
                      to += 5000;
