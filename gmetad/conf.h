@@ -15,6 +15,7 @@ typedef struct
       llist_entry *trusted_hosts;
       int unsummarized_sflow_vm_metrics;
       llist_entry *unsummarized_metrics;
+      llist_entry *summarized_metrics;
       int debug_level;
       int should_setuid;
       char *setuid_username;
