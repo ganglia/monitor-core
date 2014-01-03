@@ -404,7 +404,7 @@ static DOTCONF_CB(cb_rrdcached_address)
       }
 
    c->rrdcached_address.sin_family = AF_INET;
-   c->rrdcached_address.sin_port = port;
+   c->rrdcached_address.sin_port = htons(port);
    c->rrdcached_addrstr = strdup(cmd->data.str);
    free(f);
 
