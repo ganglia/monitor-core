@@ -203,15 +203,34 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    if (source->ds->dead)
       return 0;
 
-   /* We skip metrics not to be summarized. */
-   if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)key->data, llist_strncmp, &le) == 0)
-      return 0;
-
    /* Need to be sure the source has a complete sum for its metrics. */
    pthread_mutex_lock(source->sum_finished);
 
-   /* We know that all these metrics are numeric. */
-   rc = hash_foreach(source->metric_summary, sum_metrics, arg);
+   if (gmetad_config.summarized_metrics != NULL) {
+      for (le = gmetad_config.summarized_metrics; le != NULL; le = le->next) {
+         datum_t skey, *r;
+         
+         skey.data = le->val;
+         skey.size = strlen(le->val) + 1;
+
+         r = hash_lookup(&skey, source->metric_summary);
+
+         if (r != NULL) {
+            sum_metrics(&skey, r, NULL);
+            datum_free(r);
+         }
+      }
+
+      rc = 0;
+   } else {
+      /* We skip metrics not to be summarized. */
+      if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)key->data, llist_strncmp, &le) == 0)
+         return 0;
+
+
+      /* We know that all these metrics are numeric. */
+      rc = hash_foreach(source->metric_summary, sum_metrics, arg);
+   }
 
    /* Update the top level root source */
    root.hosts_up += source->hosts_up;

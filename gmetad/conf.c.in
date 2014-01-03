@@ -366,6 +366,22 @@ static DOTCONF_CB(cb_unsummarized_sflow_vm_metrics)
    return NULL;
 }
 
+static DOTCONF_CB(cb_summarized_metrics)
+{
+   int i;
+   llist_entry *le;
+   gmetad_config_t *c = cmd->option->info;
+
+   for (i = 0; i < cmd->arg_count; i++)
+      {
+         le = malloc(sizeof(*le));
+         le->val = strdup(cmd->data.list[i]);
+         llist_add(&(c->summarized_metrics), le);
+         debug_msg("Adding %s to summarized_metrics", (const char *)le->val);
+      }
+   return NULL;
+}
+
 static FUNC_ERRORHANDLER(errorhandler)
 {
    err_quit("gmetad config file error: %s\n", msg);
@@ -404,6 +420,7 @@ static configoption_t gmetad_options[] =
       {"riemann_attributes", ARG_STR, cb_riemann_attributes, &gmetad_config, 0},
       {"unsummarized_metrics", ARG_LIST, cb_unsummarized_metrics, &gmetad_config, 0},
       {"unsummarized_sflow_vm_metrics", ARG_TOGGLE, cb_unsummarized_sflow_vm_metrics, &gmetad_config, 0},
+      {"summarized_metrics", ARG_LIST, cb_summarized_metrics, &gmetad_config, 0},
       LAST_OPTION
    };
 
@@ -437,6 +454,7 @@ set_defaults (gmetad_config_t *config)
    config->riemann_attributes = NULL;
    config->unsummarized_metrics = NULL;
    config->unsummarized_sflow_vm_metrics = 0;
+   config->summarized_metrics = NULL;
 }
 
 int
