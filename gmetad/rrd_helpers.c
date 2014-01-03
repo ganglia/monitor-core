@@ -41,8 +41,9 @@ my_mkdir ( const char *dir )
 static int
 RRD_update_cached( char *rrd, const char *sum, const char *num, unsigned int process_time )
 {
-   int *conn, c, r, off, l;
-   char *cmd;
+   int *conn, c, r, off, l, to;
+   char *cmd, *str, buf[1024];
+   struct pollfd pfd[1];
 
 #ifdef HAVE___THREAD
    conn = &rrdcached_conn;
@@ -66,6 +67,11 @@ reconnect:
                err_sys("Unable to create rrdcached socket");
             }
 
+         r = 1;
+         if (ioctl(c, FIONBIO, &r))
+            {
+               err_sys("Unable to set socket non-blocking");
+            }
 
          if (connect(c, &gmetad_config.rrdcached_address,
                   sizeof (gmetad_config.rrdcached_address)) == -1)
@@ -95,9 +101,85 @@ reconnect:
       {
          if (errno == ECONNRESET || errno == EPIPE)
             {
+               free(cmd);
                goto reconnect;
             }
          err_sys("Error writing command %s to rrdcached\n", cmd);
+      }
+
+   free(cmd);
+
+   pfd[1].fd = c;
+   pfd[1].events = POLLIN;
+   pfd[1].revents = 0;
+   off = 0;
+   l = -1;
+
+   while (1)
+      {
+         int r = poll(pfd, 1, 250);
+         
+         if (r == 0)
+            {
+               to += r;
+               if (to >= 5000)
+                  {
+                     err_msg("Timed out reading from rrdcached");
+                     break;
+                  }
+            }
+         else if (r == -1)
+            {
+               if (errno == EAGAIN)
+                  {
+                     pfd[1].revents = 0;
+                     continue;
+                  }
+
+               break;
+            }
+         else
+            {
+               if (pfd[1].revents & POLLERR || pfd[1].revents & POLLHUP)
+                  {
+                     /* Hack to avoid looping on a flappy socket */
+                     to += 5000;
+                     goto reconnect;
+                  }
+
+               r = read(c, buf, sizeof(buf));
+               if (r == 0)
+                  {
+                     to += 5000;
+                     goto reconnect;
+                  }
+               else if (r == -1)
+                  {
+                     err_msg("Error reading from rrdcached");
+                     break;
+                  }
+
+               if (l == -1)
+                  {
+                     /*
+                      * First character output is number of lines to follow.
+                      * Search for that many lines in our buffer.
+                      */
+                     l = buf[0] - 29;
+                  }
+
+               str = buf;
+               while (l > 0 && (str = memchr(str, '\n', strlen(str))) != NULL)
+                  {
+                     l--;
+                  }
+
+               /* We've read all the data. */
+               if (l == 0)
+                  {
+                     break;
+                  }
+            }
       }
 
    return 0;
