@@ -31,8 +31,16 @@ update_pidfile (char *pidfile)
       if (fscanf(file, "%ld", &p) == 1 && (pid = p) &&
           (getpgid (pid) > -1))
         {
-          err_msg("daemon already running: %s pid %ld\n", pidfile, p);
-          exit (1);
+	  if (pid != getpid())
+	    {
+              err_msg("daemon already running: %s pid %ld\n", pidfile, p);
+              exit (1);
+	    }
+	  else
+	    {
+	      /* We have the same PID so were probably HUP'd */
+	      return;
+	    }
         }
       fclose (file);
     }
