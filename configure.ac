@@ -769,6 +769,12 @@ if test x"$enable_memcheck" = xyes; then
    LDFLAGS="$LDFLAGS -lmpatrol -lbfd -liberty "
 fi
 
+AC_MSG_CHECKING([for __thread specifier])
+AC_TRY_COMPILE([static __thread int a;],[int b = a;],
+	       [AC_DEFINE(HAVE___THREAD, 1, HAVE___THREAD)
+	        AC_MSG_RESULT([exists, using native TLS])],
+	       [AC_MSG_RESULT([not found, defaulting to pthreads for TLS])])
+
 dnl Some system-specific stuff ...
 dnl Some operating systems require additional flags in order to get all
 dnl the definitions that we're looking for in some system headers.

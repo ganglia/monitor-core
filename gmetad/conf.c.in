@@ -382,6 +382,35 @@ static DOTCONF_CB(cb_summarized_metrics)
    return NULL;
 }
 
+static DOTCONF_CB(cb_rrdcached_address)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   char *ip, *tmp, *f;
+   long port;
+
+   f = tmp = strdup(cmd->data.str);
+   if ((ip = strsep(&tmp, ":")) == NULL ||
+       inet_pton(AF_INET, ip, &c->rrdcached_address.sin_addr) != 1)
+      {
+         err_quit("Expected IPv4 address in form a.b.c.d:port for "
+                  "rrdcached_address, got %s\n", cmd->data.str);
+      }
+   port = strtol(tmp, NULL, 10);
+   if ((port == 0 && errno == EINVAL) ||
+       ((port == LONG_MIN || port == LONG_MAX) && errno == ERANGE) ||
+       port < 0 || port > 65535)
+      {
+         err_quit("Expected IPv4 port within range; got %s\n", tmp);
+      }
+
+   c->rrdcached_address.sin_family = AF_INET;
+   c->rrdcached_address.sin_port = htons(port);
+   c->rrdcached_addrstr = strdup(cmd->data.str);
+   free(f);
+
+   return NULL;
+}
+
 static FUNC_ERRORHANDLER(errorhandler)
 {
    err_quit("gmetad config file error: %s\n", msg);
@@ -401,6 +430,7 @@ static configoption_t gmetad_options[] =
       {"server_threads", ARG_INT, cb_server_threads, &gmetad_config, 0},
       {"umask", ARG_INT, cb_umask, &gmetad_config, 0},
       {"rrd_rootdir", ARG_STR, cb_rrd_rootdir, &gmetad_config, 0},
+      {"rrdcached_address", ARG_STR, cb_rrdcached_address, &gmetad_config, 0},
       {"setuid", ARG_TOGGLE, cb_setuid, &gmetad_config, 0},
       {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
       {"scalable", ARG_STR, cb_scalable, &gmetad_config, 0},
@@ -438,6 +468,8 @@ set_defaults (gmetad_config_t *config)
    config->should_setuid = 1;
    config->setuid_username = "nobody";
    config->rrd_rootdir = "@varstatedir@/ganglia/rrds";
+   config->rrdcached_addrstr = NULL;
+   memset(&config->rrdcached_address, 0, sizeof (config->rrdcached_address));
    config->write_rrds = 1;
    config->scalable_mode = 1;
    config->all_trusted = 0;

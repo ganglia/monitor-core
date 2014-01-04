@@ -23,16 +23,169 @@ extern gmetad_config_t gmetad_config;
 
 pthread_mutex_t rrd_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+#ifdef HAVE___THREAD
+static __thread int rrdcached_conn = 0;
+#else
+static pthread_key_t rrdcached_conn_key;
+#endif
+
 static inline void
 my_mkdir ( const char *dir )
 {
-   pthread_mutex_lock( &rrd_mutex );
    if ( mkdir ( dir, 0755 ) < 0 && errno != EEXIST)
       {
-         pthread_mutex_unlock(&rrd_mutex);
          err_sys("Unable to mkdir(%s)",dir);
       }
-   pthread_mutex_unlock( &rrd_mutex );
+}
+
+static int
+RRD_update_cached( char *rrd, const char *sum, const char *num, unsigned int process_time )
+{
+   int *conn, c, r, off, l, to;
+   char *cmd, *str, buf[1024];
+   struct pollfd pfd[1];
+
+#ifdef HAVE___THREAD
+   conn = &rrdcached_conn;
+#else
+   conn = pthread_getspecific(&rrdcached_conn_key);
+   if (conn == NULL)
+      {
+         conn = calloc(1, sizeof (*conn));
+         pthread_setspecific(&rrdcached_conn_key, conn);
+         *conn = 0;
+      }
+#endif
+
+   c = *conn;
+   if (c == 0)
+      {
+reconnect:
+         c = socket(PF_INET, SOCK_STREAM, 0);
+         if (c == -1)
+            {
+               err_sys("Unable to create rrdcached socket");
+            }
+
+         if (connect(c, &gmetad_config.rrdcached_address,
+                  sizeof (gmetad_config.rrdcached_address)) == -1)
+            {
+               err_sys("Unable to connect to rrdcached at %s", gmetad_config.rrdcached_addrstr);
+            }
+
+         r = 1;
+         if (ioctl(c, FIONBIO, &r))
+            {
+               err_sys("Unable to set socket non-blocking");
+            }
+
+         *conn = c;
+      }
+
+   cmd = calloc(1, strlen(rrd) + 128);
+   if (num)
+         sprintf(cmd, "UPDATE %s %u:%s:%s\n", rrd, process_time, sum, num);
+   else
+         sprintf(cmd, "UPDATE %s %u:%s\n", rrd, process_time, sum);
+
+   l = strlen(cmd);
+   off = 0;
+   do
+      {
+         r = write(c, cmd + off, l - off);
+         off += r;
+      }
+   while ((off < l) || (r == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)));
+
+   if (r == -1)
+      {
+         if (errno == ECONNRESET || errno == EPIPE)
+            {
+               free(cmd);
+               goto reconnect;
+            }
+         err_sys("Error writing command %s to rrdcached\n", cmd);
+      }
+
+   free(cmd);
+
+   pfd[0].fd = c;
+   pfd[0].events = POLLIN;
+   pfd[0].revents = 0;
+   off = 0;
+   to = 0;
+   l = -1;
+
+   while (1)
+      {
+         int r = poll(pfd, 1, 250);
+         
+         if (r == 0)
+            {
+               to += 250;
+               if (to >= 5000)
+                  {
+                     err_msg("Timed out reading from rrdcached");
+                     break;
+                  }
+               continue;
+            }
+         else if (r == -1)
+            {
+               if (errno == EAGAIN)
+                  {
+                     pfd[0].events = POLLIN;
+                     pfd[0].revents = 0;
+                     continue;
+                  }
+
+               break;
+            }
+         else
+            {
+               if (pfd[0].revents & POLLERR || pfd[0].revents & POLLHUP)
+                  {
+                     /* Hack to avoid looping on a flappy socket */
+                     to += 5000;
+                     goto reconnect;
+                  }
+
+               r = read(c, buf, sizeof(buf));
+               if (r == 0)
+                  {
+                     to += 5000;
+                     goto reconnect;
+                  }
+               else if (r == -1)
+                  {
+                     err_msg("Error reading from rrdcached");
+                     break;
+                  }
+
+               if (l == -1)
+                  {
+                     /*
+                      * First character output is number of lines to follow.
+                      * Search for that many lines in our buffer.
+                      */
+                     l = buf[0] - 29;
+                  }
+
+               str = buf;
+               while (l > 0 && (str = memchr(str, '\n', strlen(str))) != NULL)
+                  {
+                     l--;
+                  }
+
+               /* We've read all the data. */
+               if (l == 0)
+                  {
+                     break;
+                  }
+            }
+      }
+
+   return 0;
 }
 
 static int
@@ -170,13 +323,21 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
    else
       summary=0;
 
+   /* XXX: cache the results of the stat once hash table is fixed. */
    if( stat(rrd, &st) )
       {
          rval = RRD_create( rrd, summary, step, process_time, slope);
          if( rval )
             return rval;
       }
-   return RRD_update( rrd, sum, num, process_time );
+   if (gmetad_config.rrdcached_addrstr != NULL)
+      {
+         return RRD_update_cached( rrd, sum, num, process_time );
+      }
+   else
+      {
+         return RRD_update( rrd, sum, num, process_time );
+      }
 }
 
 /* Assumes num argument will be NULL for a host RRD. */
