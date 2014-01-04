@@ -29,7 +29,7 @@ data_thread ( void *arg )
    datum_t key;
    char *buf;
    /* This will grow as needed */
-   unsigned int buf_size = 1024, read_index, read_available;
+   unsigned int buf_size = 1024*128, read_index, read_available;
    struct pollfd struct_poll;
    apr_time_t start, end;
    apr_interval_time_t sleep_time, elapsed;
@@ -130,16 +130,6 @@ data_thread ( void *arg )
                   {
                      if( struct_poll.revents & POLLIN )
                         {
-                           if( (read_index + 1024) > buf_size )
-                              {
-                                 /* We need to malloc more space for the data */
-                                 buf = realloc( buf, buf_size+1024 );
-                                 if(!buf)
-                                    {
-                                       err_quit("data_thread() unable to malloc enough room for [%s] XML", d->name);
-                                    }
-                                 buf_size+=1024;
-                              }
                            if(ioctl(sock->sockfd, FIONREAD, &read_available) == -1)
                            {
                                  err_msg("data_thread() unable to ioctl(FIONREAD) socket for [%s] data source", d->name);
@@ -147,7 +137,16 @@ data_thread ( void *arg )
                                  d->dead = 1;
                                  goto take_a_break;
                            }
-                           read_available = read_available > 1023 ? 1023 : read_available;
+                           if( (read_index + read_available) > buf_size )
+                              {
+                                 /* We need to malloc more space for the data */
+                                 buf = realloc( buf, (buf_size+read_available)*2 );
+                                 if(!buf)
+                                    {
+                                       err_quit("data_thread() unable to malloc enough room for [%s] XML", d->name);
+                                    }
+                                 buf_size=(buf_size+read_available)*2;
+                              }
                            bytes_read = read(sock->sockfd, buf+read_index, read_available);
                            if (bytes_read < 0)
                               {
@@ -205,7 +204,7 @@ data_thread ( void *arg )
 		 err_msg("GZIP compressed data for [%s] data source, %d bytes", d->name, read_index);
 	       }
 
-	     uncompressed = malloc(buf_size);
+	     uncompressed = malloc(buf_size * 2);
 	     if( !uncompressed )
 	       {
 		 err_quit("data_thread() unable to malloc enough room for [%s] GZIP", d->name);
@@ -232,9 +231,9 @@ data_thread ( void *arg )
 	     while (1)
 	       {
 		 /* Create more buffer space if needed */
-		 if ( (write_index + 2048) > buf_size)
+		 if ( (write_index * 2) > buf_size)
 		   {
-		     buf_size += 2048;
+		     buf_size *= 2;
 		     uncompressed = realloc(uncompressed, buf_size);
 		     if(!uncompressed)
 		       {
