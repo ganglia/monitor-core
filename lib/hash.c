@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include <ck_rwlock.h>
+
 #include "hash.h"
 #include "ganglia.h"
 
@@ -54,53 +57,9 @@ datum_free (datum_t *datum)
    free(datum);
 }
 
-static size_t
-hash_prime (size_t size)
-{
-   size_t i, num_primes;
-   /* http://www.mathematical.com/primes1to100k.html */
-   int primes[]={
-      2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,
-      101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,
-      211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,
-      307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,
-      401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,
-      503,509,521,523,541,547,557,563,569,571,577,587,593,599,
-      601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,
-      701,709,719,727,733,739,743,751,757,761,769,773,787,797,
-      809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,
-      907,911,919,929,937,941,947,953,967,971,977,983,991,997,
-      1009,1013,1019,1021,1031,1033,1039,1049,1051,1061,1063,1069,1087,1091,1093,1097,
-      1103,1109,1117,1123,1129,1151,1153,1163,1171,1181,1187,1193,
-      1201,1213,1217,1223,1229,1231,1237,1249,1259,1277,1279,1283,1289,1291,1297,
-      1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399,
-      1409,1423,1427,1429,1433,1439,1447,1451,1453,1459,1471,1481,1483,1487,1489,1493,1499,
-      1511,1523,1531,1543,1549,1553,1559,1567,1571,1579,1583,1597,
-      1601,1607,1609,1613,1619,1621,1627,1637,1657,1663,1667,1669,1693,1697,1699,
-      1709,1721,1723,1733,1741,1747,1753,1759,1777,1783,1787,1789,
-      1801,1811,1823,1831,1847,1861,1867,1871,1873,1877,1879,1889,
-      1901,1907,1193,1931,1933,1949,1951,1973,1979,1987,1993,1997,1999,
-      2003,2011,2017,2027,2029,2039,2053,2063,2069,2081,2083,2087,2089,2099,
-      2111,2113,2129,2131,2137,2141,2143,2153,2161,2179,
-      2203,2207,2213,2221,2237,2239,2243,2251,2267,2269,2273,2281,2287,2293,2297,
-      2309,2311,2333,2339,2341,2347,2351,2357,2371,2377,2381,2383,2389,2393,2399
-      };
-
-   num_primes = sizeof(primes)/sizeof(int);
-
-   for(i=0; i < num_primes ; i++)
-      {
-         if( primes[i] > size )
-            return primes[i];
-      }
-
-   return primes[num_primes-1];
-}
-
 hash_t *
 hash_create (size_t size)
 {
-   size_t i;
    hash_t *hash;
 
    debug_msg("hash_create size = %zd", size);
@@ -112,11 +71,22 @@ hash_create (size_t size)
          return NULL;
       } 
 
-   hash->size = hash_prime(size);
+   /*
+    * Rounds up size to nearest power of two. This allows us to avoid division
+    * from modulus math when calculating buckets.
+    */
+   size--;
+   size |= size >> 1;
+   size |= size >> 2;
+   size |= size >> 4;
+   size |= size >> 8;
+   size |= size >> 16;
+   size++;
+   hash->size = size;
 
    debug_msg("hash->size is %zd", hash->size);
 
-   hash->node = (node_t * *) malloc (sizeof (node_t *) * hash->size);
+   hash->node = calloc(hash->size, sizeof (*hash->node));
    if (hash->node == NULL)
       {
          debug_msg("hash->node malloc error. freeing hash.");
@@ -124,28 +94,19 @@ hash_create (size_t size)
          return NULL;
       }
 
-   for (i = 0; i < hash->size; i++)
+   hash->lock = calloc(hash->size, sizeof (*hash->lock));
+   if (hash->lock == NULL) 
       {
-         hash->node[i] = malloc( sizeof(node_t) );
-         if ( hash->node[i] == NULL )
-            break;
-         /* Initialize */
-         hash->node[i]->bucket = NULL;
-         pthread_rdwr_init_np( &(hash->node[i]->rwlock) );
-      }
-
-   /* Was there an error initializing the hash nodes? */
-   if ( i != hash->size )
-      {
-         debug_msg("hash->node[i] malloc error");
-         /* Rewind */
-         for (hash->size = i; hash->size >= 0; hash->size--)
-            {
-               free(hash->node[hash->size]);
-            }
+         debug_msg("hash->lock malloc error. freeing hash.");
          free(hash);
-         return NULL; 
+         return NULL;
       }
+   /*
+    * ck_rwlock_init just sets things to zero and does a memory fence. calloc 
+    * already set zero, so add mfence only.
+    */
+   ck_pr_fence_memory();
+
    return hash;
 }
 
@@ -153,18 +114,20 @@ void
 hash_destroy (hash_t * hash)
 {
    size_t i;
-   bucket_t *bucket, *next;
+   node_t *bucket, *next;
    datum_t *val;
 
    for( i=0; i< hash->size; i++)
      {
-        for(bucket = hash->node[i]->bucket; bucket!= NULL; bucket = next)
+        for(bucket = &hash->node[i]; bucket!= NULL; bucket = next)
            {
               next = bucket->next;
-              val  = hash_delete( bucket->key, hash);
-              datum_free(val);
+              if (bucket->key)
+                {
+                  val  = hash_delete( bucket->key, hash);
+                  datum_free(val);
+                }
            }
-        free(hash->node[i]);
      }
         
    free( hash->node );
@@ -183,75 +146,79 @@ hash_set_flags (hash_t *hash, int flags)
    hash->flags = flags;
 }
 
-size_t
+static uint64_t
+hash_key (const void *key, size_t len, uint64_t seed)
+{
+        const uint64_t m = 0xc6a4a7935bd1e995LLU;
+        const int r = 47;
+        uint64_t h = seed ^ (len * m);
+        const uint64_t *data = (const uint64_t *)key;
+        const uint64_t *end = data + (len/8);
+        const unsigned char *data2;
+
+        while(data != end) {
+                uint64_t k = *data++;
+
+                k *= m;
+                k ^= k >> r;
+                k *= m;
+
+                h ^= k;
+                h *= m;
+        }
+
+        data2 = (const unsigned char *)data;
+        switch(len & 7) {
+                case 7: h ^= ((uint64_t)(data2[6])) << 48;
+                case 6: h ^= ((uint64_t)(data2[5])) << 40;
+                case 5: h ^= ((uint64_t)(data2[4])) << 32;
+                case 4: h ^= ((uint64_t)(data2[3])) << 24;
+                case 3: h ^= ((uint64_t)(data2[2])) << 16;
+                case 2: h ^= ((uint64_t)(data2[1])) << 8;
+                case 1: h ^= ((uint64_t)(data2[0]));
+                        h *= m;
+        }
+
+        h ^= h >> r;
+        h *= m;
+        h ^= h >> r;
+
+        return (h);
+}
+
+inline size_t
 hashval ( datum_t *key, hash_t *hash )
 {
-   int i;
-   int hash_val;
  
-   /* We should handle these errors better later */
-   if ( hash == NULL || key == NULL || key->data == NULL || key->size <= 0 )
-      return 0;
-
-   if(hash->flags & HASH_FLAG_IGNORE_CASE)
-   {
-      hash_val = tolower(((unsigned char *)key->data)[0]);
-      for ( i = 0; i < key->size ; i++ )
-         hash_val = ( hash_val * 32 + tolower(((unsigned char *)key->data)[i])) % hash->size; 
-   }
-   else
-   {
-      hash_val = ((unsigned char *)key->data)[0];
-      for ( i = 0; i < key->size ; i++ )
-         hash_val = ( hash_val * 32 + ((unsigned char *)key->data)[i]) % hash->size;
-   }
-
-   return hash_val;
+   return hash_key(key->data, key->size, 0) & (hash->size - 1);
 }
 
 int
 hash_keycmp(hash_t *hash, datum_t *key1, datum_t *key2)
 {
-   if(hash->flags & HASH_FLAG_IGNORE_CASE)
-   {
-      return strncasecmp(key1->data, key2->data, key1->size);
-   }
-   else
-   {
-      return strncmp(key1->data, key2->data, key1->size);
-   }
+   return key1->size == key2->size && !strncmp(key1->data, key2->data, key1->size);
 }
 
 datum_t *
 hash_insert (datum_t *key, datum_t *val, hash_t *hash)
 {
   size_t i;
-  bucket_t *bucket;
+  node_t *bucket;
 
   i = hashval(key, hash);
 
-  WRITE_LOCK(hash, i);
+  ck_rwlock_write_lock(&hash->lock[i]);
 
-  bucket = hash->node[i]->bucket;
-
-  if ( bucket == NULL )
+  bucket = &hash->node[i];
+  if (bucket->key == NULL)
      {
         /* This bucket hasn't been used yet */
-
-        bucket = (bucket_t *)malloc( sizeof(bucket_t) );
-        if ( bucket == NULL )
-           {
-              WRITE_UNLOCK(hash, i);
-              return NULL;
-           }
- 
-        bucket->next = NULL;
         bucket->key  = datum_dup(key);
         if ( bucket->key == NULL )
            {
               free(bucket);
               bucket = NULL;
-              WRITE_UNLOCK(hash, i);
+              ck_rwlock_write_unlock(&hash->lock[i]);
               return NULL;
            } 
         bucket->val = datum_dup(val);
@@ -259,56 +226,53 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
            {
               free(bucket);
               bucket = NULL;
-              WRITE_UNLOCK(hash, i);
+              ck_rwlock_write_unlock(&hash->lock[i]);
               return NULL;
            }
-        hash->node[i]->bucket = bucket;
-        WRITE_UNLOCK(hash, i);
+        ck_rwlock_write_unlock(&hash->lock[i]);
         return bucket->val;
      }
 
   /* This node in the hash is already in use.  
      Collision or new data for existing key. */
 
-   for (bucket = hash->node[i]->bucket; bucket != NULL; bucket = bucket->next)
+  for (; bucket != NULL; bucket = bucket->next)
       {
-         if( bucket->key->size != key->size )
-            continue;
-
-         if(! hash_keycmp(hash, bucket->key, key) )
+         if(bucket->key && hash_keycmp(hash, bucket->key, key))
             {
                /* New data for an existing key */
 
                /* Make sure we have enough space */
-               if ( bucket->val->size != val->size )
+               if ( bucket->val->size < val->size )
                   {
                      /* Make sure we have enough room */
                      if(! (bucket->val->data = realloc(bucket->val->data, val->size)) )
                         {
-                           WRITE_UNLOCK(hash, i);
+                           ck_rwlock_write_unlock(&hash->lock[i]);
                            return NULL;
                         }
                      bucket->val->size = val->size;
                   }
 
+               memset( bucket->val->data, 0, val->size );
                memcpy( bucket->val->data, val->data, val->size );
-               WRITE_UNLOCK(hash, i);
+               ck_rwlock_write_unlock(&hash->lock[i]);
                return bucket->val;
             }
       }
                     
   /* It's a Hash collision... link it in the collided bucket */
-  bucket = (bucket_t *) malloc (sizeof (bucket_t));
+  bucket = calloc(1, sizeof(*bucket));
   if (bucket == NULL)
      {
-        WRITE_UNLOCK(hash, i);
+        ck_rwlock_write_unlock(&hash->lock[i]);
         return NULL;
      }
   bucket->key = datum_dup (key);
   if ( bucket->key == NULL )
      {
         free(bucket);
-        WRITE_UNLOCK(hash, i);
+        ck_rwlock_write_unlock(&hash->lock[i]);
         return NULL;
      }
   bucket->val = datum_dup (val);
@@ -316,13 +280,14 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
      {
         datum_free(bucket->key);
         free(bucket);
-        WRITE_UNLOCK(hash, i);
+        ck_rwlock_write_unlock(&hash->lock[i]);
         return NULL;
      }  
 
-  bucket->next = hash->node[i]->bucket;
-  hash->node[i]->bucket = bucket;
-  WRITE_UNLOCK(hash, i);
+  
+  bucket->next = hash->node[i].next;
+  hash->node[i].next = bucket;
+  ck_rwlock_write_unlock(&hash->lock[i]);
   return bucket->val;
 }
 
@@ -331,34 +296,31 @@ hash_lookup (datum_t *key, hash_t * hash)
 {
   size_t i;
   datum_t *val;
-  bucket_t *bucket;
+  node_t *bucket;
 
   i = hashval(key, hash);
 
-  READ_LOCK(hash, i);
+  ck_rwlock_read_lock(&hash->lock[i]);
 
-  bucket = hash->node[i]->bucket;
+  bucket = &hash->node[i];
 
   if ( bucket == NULL )
      {
-        READ_UNLOCK(hash, i);
+        ck_rwlock_read_unlock(&hash->lock[i]);
         return NULL;
      }
 
   for (; bucket != NULL; bucket = bucket->next)
     {
-      if ( key->size != bucket->key->size )
-         continue;
- 
-      if (! hash_keycmp( hash, key, bucket->key))
+      if (bucket->key && hash_keycmp(hash, key, bucket->key))
          {
             val =  datum_dup( bucket->val );
-            READ_UNLOCK(hash, i);
+            ck_rwlock_read_unlock(&hash->lock[i]);
             return val;
          }
     }
 
-  READ_UNLOCK(hash, i);
+  ck_rwlock_read_unlock(&hash->lock[i]);
   return NULL;
 }
 
@@ -366,48 +328,54 @@ datum_t *
 hash_delete (datum_t *key, hash_t * hash)
 {
   size_t i;
-  datum_t *val;
-  bucket_t *bucket, *last = NULL;
+  node_t *bucket, *last = NULL;
 
   i = hashval(key,hash);
 
-  WRITE_LOCK(hash,i);
+  ck_rwlock_write_lock(&hash->lock[i]);
 
-  if ( hash->node[i]->bucket == NULL )
+  bucket = &hash->node[i];
+  if (bucket->key == NULL )
      {
-        WRITE_UNLOCK(hash,i);
+        ck_rwlock_write_unlock(&hash->lock[i]);
         return NULL;
      }
 
-  for (last = NULL,  bucket = hash->node[i]->bucket;
-       bucket != NULL; last = bucket, bucket = bucket->next)
+  for (; bucket != NULL; last = bucket, bucket = bucket->next)
     {
-      if (bucket->key->size == key->size 
-          && !hash_keycmp(hash, key, bucket->key))
+      node_t tmp;
+      if (bucket == &hash->node[i]) 
         {
-          if (last != NULL)
-            {
-              val = bucket->val;
-              last->next = bucket->next;
-              datum_free(bucket->key);
-              free (bucket);
-              WRITE_UNLOCK(hash,i);
-              return val;
-            }
+          tmp.key = bucket->key;
+          tmp.val = bucket->val;
 
+          if (bucket->next)
+            {
+              bucket->key = bucket->next->key;
+              bucket->val = bucket->next->val;
+              bucket->next = bucket->next->next;
+            }
           else
             {
-              val = bucket->val;
-              hash->node[i]->bucket = bucket->next;
-              datum_free (bucket->key);
-              free (bucket);
-              WRITE_UNLOCK(hash,i);
-              return val;
+              memset(bucket, 0, sizeof(*bucket));
             }
+
+          datum_free(tmp.key);
+          ck_rwlock_write_unlock(&hash->lock[i]);
         }
+      else
+        {
+          last->next = bucket->next;
+          datum_free(bucket->key);
+          tmp.val = bucket->val;
+          free(bucket);
+          ck_rwlock_write_unlock(&hash->lock[i]);
+        }
+
+      return tmp.val;
     }
 
-  WRITE_UNLOCK(hash,i);
+  ck_rwlock_write_unlock(&hash->lock[i]);
   return NULL;
 }
 
@@ -421,19 +389,20 @@ hash_walkfrom (hash_t * hash, size_t from,
 {
   int stop=0;
   size_t i;
-  bucket_t *bucket;
+  node_t *bucket;
 
   for (i = from; i < hash->size && !stop; i++)
     {
-       READ_LOCK(hash, i);
-       for (bucket = hash->node[i]->bucket; bucket != NULL; bucket = bucket->next)
+       ck_rwlock_read_lock(&hash->lock[i]);
+       for (bucket = &hash->node[i]; bucket != NULL && bucket->key != NULL; bucket = bucket->next)
          {
+           if (bucket->key == NULL) continue;
            stop = func(bucket->key, bucket->val, arg);
            if (stop) break;
          }
-       READ_UNLOCK(hash, i);
+       ck_rwlock_read_unlock(&hash->lock[i]);
     }
-   return stop;
+  return stop;
 }
 
 int
@@ -441,17 +410,18 @@ hash_foreach (hash_t * hash, int (*func)(datum_t *, datum_t *, void *), void *ar
 {
   int stop=0;
   size_t i;
-  bucket_t *bucket;
+  node_t *bucket;
 
   for (i = 0; i < hash->size && !stop; i++)
     {
-       READ_LOCK(hash, i);
-       for (bucket = hash->node[i]->bucket; bucket != NULL; bucket = bucket->next)
+       ck_rwlock_read_lock(&hash->lock[i]);
+       for (bucket = &hash->node[i]; bucket != NULL && bucket->key != NULL; bucket = bucket->next)
          {
+           if (bucket->key == NULL) continue;
            stop = func(bucket->key, bucket->val, arg);
            if (stop) break;
          }
-       READ_UNLOCK(hash, i);
+       ck_rwlock_read_unlock(&hash->lock[i]);
     }
-   return stop;
+  return stop;
 }

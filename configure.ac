@@ -687,6 +687,10 @@ AC_CHECK_HEADER([rpc/xdr.h], [],
 #endif
 ])
 
+AC_CHECK_HEADER([ck_pr.h], [],
+   [AC_MSG_ERROR([your system is missing the concurrency kit headers (http://www.concurrencykit.org)])],
+[])
+
 dnl ##################################################################
 dnl Checks for typedefs.
 dnl
