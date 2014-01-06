@@ -7,3 +7,5 @@ before_script:
   - echo 'yes' | sudo add-apt-repository ppa:ondrej/php5
   - sudo apt-get update
   - sudo apt-get -o Dpkg::Options::="--force-overwrite" -y install libapr1-dev libaprutil1-dev libconfuse-dev libexpat1-dev libpcre3-dev libssl-dev librrd-dev libperl-dev libmemcached-dev libtool m4 gperf zlib1g-dev pkg-config
+  - wget -c http://concurrencykit.org.nyud.net/releases/ck-0.3.5.tar.gz; tar zxvf ck-0.3.5.tar.gz ; (cd ck-0.3.5/ ; ./configure && make all && sudo make install )
+
