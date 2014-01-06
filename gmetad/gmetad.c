@@ -41,6 +41,10 @@ extern struct type_tag* in_type_list (char *, unsigned int);
 
 extern g_udp_socket *carbon_udp_socket;
 
+#ifdef WITH_RIEMANN
+extern g_udp_socket *riemann_udp_socket;
+#endif /* WITH_RIEMANN */
+
 struct gengetopt_args_info args_info;
 
 extern gmetad_config_t gmetad_config;
@@ -199,15 +203,34 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    if (source->ds->dead)
       return 0;
 
-   /* We skip metrics not to be summarized. */
-   if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)key->data, llist_strncmp, &le) == 0)
-      return 0;
-
    /* Need to be sure the source has a complete sum for its metrics. */
    pthread_mutex_lock(source->sum_finished);
 
-   /* We know that all these metrics are numeric. */
-   rc = hash_foreach(source->metric_summary, sum_metrics, arg);
+   if (gmetad_config.summarized_metrics != NULL) {
+      for (le = gmetad_config.summarized_metrics; le != NULL; le = le->next) {
+         datum_t skey, *r;
+         
+         skey.data = le->val;
+         skey.size = strlen(le->val) + 1;
+
+         r = hash_lookup(&skey, source->metric_summary);
+
+         if (r != NULL) {
+            sum_metrics(&skey, r, NULL);
+            datum_free(r);
+         }
+      }
+
+      rc = 0;
+   } else {
+      /* We skip metrics not to be summarized. */
+      if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)key->data, llist_strncmp, &le) == 0)
+         return 0;
+
+
+      /* We know that all these metrics are numeric. */
+      rc = hash_foreach(source->metric_summary, sum_metrics, arg);
+   }
 
    /* Update the top level root source */
    root.hosts_up += source->hosts_up;
@@ -441,6 +464,22 @@ main ( int argc, char *argv[] )
             }
          debug_msg("carbon forwarding ready to send via %s to %s:%d", c->carbon_protocol, c->carbon_server, c->carbon_port);
       }
+
+#ifdef WITH_RIEMANN
+    if (c->riemann_server !=NULL)
+      {
+         if (!strcmp(c->riemann_protocol, "udp"))
+            {
+               riemann_udp_socket = init_riemann_udp_socket (c->riemann_server, c->riemann_port);
+
+               if (riemann_udp_socket == NULL)
+                  err_quit("[riemann] %s socket failed for %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
+            } else {
+               err_quit("[riemann] TCP transport not supported yet.");
+            }
+         debug_msg("[riemann] ready to forward metrics via %s to %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
+      }
+#endif /* WITH_RIEMANN */
 
    /* initialize summary mutex */
    root.sum_finished = (pthread_mutex_t *) 

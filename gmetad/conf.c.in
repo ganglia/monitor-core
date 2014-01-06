@@ -310,6 +310,38 @@ static DOTCONF_CB(cb_graphite_path)
 	return NULL;
 } 
 
+static DOTCONF_CB(cb_riemann_server)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Enabling Riemann forwarding to %s", cmd->data.str);
+   c->riemann_server = strdup (cmd->data.str);
+   return NULL;
+}
+
+static DOTCONF_CB(cb_riemann_port)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Setting Riemann port to %ld", cmd->data.value);
+   c->riemann_port = cmd->data.value;
+   return NULL;
+}
+
+static DOTCONF_CB(cb_riemann_protocol)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Setting Riemann protocol to %s", cmd->data.str);
+   c->riemann_protocol = strdup (cmd->data.str);
+   return NULL;
+}
+
+static DOTCONF_CB(cb_riemann_attributes)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Riemann key-value attributes %s", cmd->data.str);
+   c->riemann_attributes = strdup (cmd->data.str);
+   return NULL;
+}
+
 static DOTCONF_CB(cb_unsummarized_metrics)
 {
    int i;
@@ -334,6 +366,51 @@ static DOTCONF_CB(cb_unsummarized_sflow_vm_metrics)
    return NULL;
 }
 
+static DOTCONF_CB(cb_summarized_metrics)
+{
+   int i;
+   llist_entry *le;
+   gmetad_config_t *c = cmd->option->info;
+
+   for (i = 0; i < cmd->arg_count; i++)
+      {
+         le = malloc(sizeof(*le));
+         le->val = strdup(cmd->data.list[i]);
+         llist_add(&(c->summarized_metrics), le);
+         debug_msg("Adding %s to summarized_metrics", (const char *)le->val);
+      }
+   return NULL;
+}
+
+static DOTCONF_CB(cb_rrdcached_address)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   char *ip, *tmp, *f;
+   long port;
+
+   f = tmp = strdup(cmd->data.str);
+   if ((ip = strsep(&tmp, ":")) == NULL ||
+       inet_pton(AF_INET, ip, &c->rrdcached_address.sin_addr) != 1)
+      {
+         err_quit("Expected IPv4 address in form a.b.c.d:port for "
+                  "rrdcached_address, got %s\n", cmd->data.str);
+      }
+   port = strtol(tmp, NULL, 10);
+   if ((port == 0 && errno == EINVAL) ||
+       ((port == LONG_MIN || port == LONG_MAX) && errno == ERANGE) ||
+       port < 0 || port > 65535)
+      {
+         err_quit("Expected IPv4 port within range; got %s\n", tmp);
+      }
+
+   c->rrdcached_address.sin_family = AF_INET;
+   c->rrdcached_address.sin_port = htons(port);
+   c->rrdcached_addrstr = strdup(cmd->data.str);
+   free(f);
+
+   return NULL;
+}
+
 static FUNC_ERRORHANDLER(errorhandler)
 {
    err_quit("gmetad config file error: %s\n", msg);
@@ -353,6 +430,7 @@ static configoption_t gmetad_options[] =
       {"server_threads", ARG_INT, cb_server_threads, &gmetad_config, 0},
       {"umask", ARG_INT, cb_umask, &gmetad_config, 0},
       {"rrd_rootdir", ARG_STR, cb_rrd_rootdir, &gmetad_config, 0},
+      {"rrdcached_address", ARG_STR, cb_rrdcached_address, &gmetad_config, 0},
       {"setuid", ARG_TOGGLE, cb_setuid, &gmetad_config, 0},
       {"setuid_username", ARG_STR, cb_setuid_username, &gmetad_config, 0},
       {"scalable", ARG_STR, cb_scalable, &gmetad_config, 0},
@@ -366,8 +444,13 @@ static configoption_t gmetad_options[] =
       {"memcached_parameters", ARG_STR, cb_memcached_parameters, &gmetad_config, 0},
       {"graphite_prefix", ARG_STR, cb_graphite_prefix, &gmetad_config, 0},
       {"graphite_path", ARG_STR, cb_graphite_path, &gmetad_config, 0},
+      {"riemann_server", ARG_STR, cb_riemann_server, &gmetad_config, 0},
+      {"riemann_port", ARG_INT, cb_riemann_port, &gmetad_config, 0},
+      {"riemann_protocol", ARG_STR, cb_riemann_protocol, &gmetad_config, 0},
+      {"riemann_attributes", ARG_STR, cb_riemann_attributes, &gmetad_config, 0},
       {"unsummarized_metrics", ARG_LIST, cb_unsummarized_metrics, &gmetad_config, 0},
       {"unsummarized_sflow_vm_metrics", ARG_TOGGLE, cb_unsummarized_sflow_vm_metrics, &gmetad_config, 0},
+      {"summarized_metrics", ARG_LIST, cb_summarized_metrics, &gmetad_config, 0},
       LAST_OPTION
    };
 
@@ -385,6 +468,8 @@ set_defaults (gmetad_config_t *config)
    config->should_setuid = 1;
    config->setuid_username = "nobody";
    config->rrd_rootdir = "@varstatedir@/ganglia/rrds";
+   config->rrdcached_addrstr = NULL;
+   memset(&config->rrdcached_address, 0, sizeof (config->rrdcached_address));
    config->write_rrds = 1;
    config->scalable_mode = 1;
    config->all_trusted = 0;
@@ -396,8 +481,12 @@ set_defaults (gmetad_config_t *config)
    config->carbon_port = 2003;
    config->carbon_protocol = "tcp";
    config->carbon_timeout = 500;
+   config->riemann_port = 5555;
+   config->riemann_protocol = "udp";
+   config->riemann_attributes = NULL;
    config->unsummarized_metrics = NULL;
    config->unsummarized_sflow_vm_metrics = 0;
+   config->summarized_metrics = NULL;
 }
 
 int
