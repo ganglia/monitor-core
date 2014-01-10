@@ -27,7 +27,7 @@ Description: cluster monitoring toolkit - python modules
 Package: gmetad
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, adduser, libganglia1 (=${binary:Version})
-Suggests: ganglia-monitor, ganglia-webfrontend
+Suggests: ganglia-monitor
 Description: cluster monitoring toolkit - Ganglia Meta-Daemon
  Ganglia is a scalable, real-time cluster monitoring environment 
  that collects cluster statistics in an open and well-defined XML format.
@@ -55,14 +55,3 @@ Description: cluster monitoring toolkit - development libraries
  .
  This package contains development libraries.
 
-Package: ganglia-webfrontend
-Architecture: all
-Depends: ${misc:Depends}, apache | apache-ssl | apache-perl | apache2, php5 | php5-cgi | libapache2-mod-php5, rrdtool, debconf (>= 0.5), libgd2-noxpm | libgd2-xpm
-Recommends: gmetad, php5-gd
-Description: cluster monitoring toolkit - web front-end
- Ganglia is a scalable, real-time cluster monitoring environment
- that collects cluster statistics in an open and well-defined XML
- format.
- .
- This package contains the PHP-based web front-end, which displays
- information gathered by 'gmetad'.
