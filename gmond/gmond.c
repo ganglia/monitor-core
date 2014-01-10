@@ -1834,6 +1834,63 @@ host_metric_value( Ganglia_25metric *metric, Ganglia_value_msg *message )
   return "unknown";
 }
 
+static int
+xml_escape(char *dst, const char *src, size_t max_dst_len)
+{
+    unsigned int ch;
+    const char *s = src;
+    char *dst_start = dst;
+
+    max_dst_len -= 7; //6+1 is the max length of an entity
+
+    *dst = '\0';
+    while (*s)
+        {
+        if (dst - dst_start > max_dst_len)
+	  {
+            *dst='\0'; break;
+	  }
+        switch (*s)
+	    {
+            case '&':
+              strncat(dst, "&amp;", max_dst_len);
+              dst += 5;
+              break;
+            case '<':
+              strncat(dst, "&lt;", max_dst_len);
+              dst += 4;
+              break;
+            case '>':
+              strncat(dst, "&gt;", max_dst_len);
+	      dst += 4;
+	      break;
+            case '"':
+              strncat(dst, "&quot;", max_dst_len);
+              dst += 6;
+              break;
+            case '\'':
+              strncat(dst, "&apos;", max_dst_len);
+              dst += 6;
+              break;
+            default:
+              ch = (unsigned int)(*s);
+              if ((ch < 32) || (ch > 126)) {
+                  *dst ++ = '&';
+                  *dst ++ = '#';
+                  *dst ++ = (char)((ch / 10) + '0');
+                  *dst ++ = (char)((ch % 10) + '0');
+                  *dst ++ =';';
+                  *dst = '\0';
+              } else {
+                  *dst ++ = *s;
+                  *dst = '\0';
+              }
+	    }
+	  s++;
+        }
+    return (dst - dst_start);
+}
+
 static char *
 gmetric_value_to_str(Ganglia_value_msg *message)
 {
@@ -1846,7 +1903,8 @@ gmetric_value_to_str(Ganglia_value_msg *message)
   switch(message->id)
     {
     case gmetric_string:
-      return message->Ganglia_value_msg_u.gstr.str;
+      xml_escape(value, message->Ganglia_value_msg_u.gstr.str, 1024);
+      return value;
     case gmetric_ushort:
       apr_snprintf(value, 1024, message->Ganglia_value_msg_u.gu_short.fmt, message->Ganglia_value_msg_u.gu_short.us);
       return value;
