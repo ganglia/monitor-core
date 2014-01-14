@@ -11,10 +11,19 @@ modules {
       value = ""
     }
 
+    # If set to true interfaces that are indicated above will be summed
+    # to produce bytes_out, bytes_in, pkts_out and pkts_in values
+    # This may be useful in situations where you don't care about internal
+    # interfaces ie. if machine is dual homed and really care about
+    # traffic going only externally
+    param send_aggregate_bytes_packets {
+      value = False
+    }
+
     # Alternatively leave the interfaces list at value = "" then exclude
-    # specific interfaces e.g. dummy, lo etc. 
+    # specific interfaces by name or regular expression e.g. dummy, lo, eth[0-9]+ etc. 
     param excluded_interfaces {
-      value = "dummy0 eth0_rename tunl0 gre0"
+      value = "lo vnet[0-9]+"
     }
 
 
@@ -34,4 +43,26 @@ collection_group {
       value_threshold = 1.0
   }
 
+#  Uncomment only if param send_aggregate_bytes_packets set to True
+#  metric { 
+#    name = "bytes_out" 
+#    value_threshold = 4096 
+#    title = "Bytes Sent" 
+#  } 
+#  metric { 
+#    name = "bytes_in" 
+#    value_threshold = 4096 
+#    title = "Bytes Received" 
+#  } 
+#  metric { 
+#    name = "pkts_in" 
+#    value_threshold = 256 
+#    title = "Packets Received" 
+#  } 
+#  metric { 
+#    name = "pkts_out" 
+#    value_threshold = 256 
+#    title = "Packets Sent" 
+#  }  
+  
 }

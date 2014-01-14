@@ -6,8 +6,6 @@ import copy
 
 PARAMS = {}
 
-NAME_PREFIX = 'vm_'
-
 METRICS = {
     'time' : 0,
     'data' : {}
@@ -55,7 +53,7 @@ def metric_init(params):
         'call_back'   : get_delta,
         'time_max'    : 60,
         'value_type'  : 'float',
-        'format'      : '%.4f',
+        'format'      : '%.0f',
         'units'       : '/s',
         'slope'       : 'both', # zero|positive|negative|both
         'description' : 'XXX',
@@ -106,30 +104,108 @@ def metric_init(params):
                     "description" : "transmitted dropped packets per sec",
                     }))
 
+    if params['send_aggregate_bytes_packets']:
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name"        : "pkts_in",
+                    "units"       : "pkts/sec",
+                    "call_back"   : get_aggregates,
+                    "description" : "Packets Received",
+                    }))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name"        : "pkts_out",
+                    "units"       : "pkts/sec",
+                    "call_back"   : get_aggregates,
+                    "description" : "Packets Sent",
+                    }))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name"        : "bytes_in",
+                    "units"       : "bytes/sec",
+                    "call_back"   : get_aggregates,
+                    "description" : "Bytes Received",
+                    }))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name"        : "bytes_out",
+                    "units"       : "bytes/sec",
+                    "call_back"   : get_aggregates,
+                    "description" : "Bytes Sent",
+                    }))
+
     return descriptors
 
+def metric_cleanup():
+    '''Clean up the metric module.'''
+    pass
+    
+###################################################################################
+# Build a list of interfaces
+###################################################################################    
 def get_interfaces(watch_interfaces, excluded_interfaces):
-	global INTERFACES
+   global INTERFACES
+   if_excluded = 0
         
-        # check if particular interfaces have been specifieid. Watch only those
-        if watch_interfaces != "":
-            INTERFACES = watch_interfaces.split(" ")
-            
-        else:
+   # check if particular interfaces have been specifieid. Watch only those
+   if watch_interfaces != "":
+      INTERFACES = watch_interfaces.split(" ")      
+   else:
+      if excluded_interfaces != "":
+         excluded_if_list = excluded_interfaces.split(" ")
+      f = open(net_stats_file, "r")
+      for line in f:
+         # Find only lines with :
+         if re.search(":", line):
+            a = line.split(":")
+            dev_name = a[0].lstrip()
+                    
+            # Determine if interface is excluded by name or regex
+            for ex in excluded_if_list:
+               if re.match(ex,dev_name):
+                  if_excluded = 1
 
-	    if excluded_interfaces != "":
-		excluded_if_list = excluded_interfaces.split(" ")
-        
-            f = open(net_stats_file, "r")
-            for line in f:
-                # Find only lines with :
-                if re.search(":", line):
-                    a = line.split(":")
-                    dev_name = a[0].lstrip()
-		    if dev_name not in excluded_if_list:
-                        INTERFACES.append(dev_name)
+            if not if_excluded:
+               INTERFACES.append(dev_name)
+            if_excluded = 0
+   return 0
 
-	return 0
+
+###################################################################################
+# Returns aggregate values for pkts and bytes sent and received. It should be
+# used to override the default Ganglia mod_net module. It will generate bytes_in
+# bytes_out, pkts_in and pkts_out.
+###################################################################################
+def get_aggregates(name):
+
+    # get metrics
+    [curr_metrics, last_metrics] = get_metrics()
+    
+    # Determine the index of metric we need
+    if name == "bytes_in":
+      index = stats_tab["rx_bytes"]
+    elif name == "bytes_out":
+      index = stats_tab["tx_bytes"]
+    elif name == "pkts_out":
+      index = stats_tab["tx_pkts"]
+    elif name == "pkts_in":
+      index = stats_tab["rx_pkts"]
+    else:
+      return 0
+
+    sum = 0
+    
+    # Loop through the list of interfaces we care for
+    for iface in INTERFACES:
+      
+      try:
+	delta = (float(curr_metrics['data'][iface][index]) - float(last_metrics['data'][iface][index])) /(curr_metrics['time'] - last_metrics['time'])
+	if delta < 0:
+	  print name + " is less 0"
+	  delta = 0
+      except KeyError:
+	delta = 0.0      
+    
+      sum += delta
+
+    return sum
+
 
 
 def get_metrics():
@@ -192,6 +268,7 @@ if __name__ == '__main__':
         params = {
             "interfaces": "",
             "excluded_interfaces": "dummy",
+            "send_aggregate_bytes_packets": True,
             "debug"        : True,
             }
         metric_init(params)
