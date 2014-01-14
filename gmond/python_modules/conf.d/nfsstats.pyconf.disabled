@@ -9,6 +9,10 @@ collection_group {
   collect_every = 60
   time_threshold = 120
   metric {
+    name = "nfs_v3_total"
+    title = "NFS v3 total"
+  }
+  metric {
     name = "nfs_v3_getattr"
     title = "NFS v3 getattr"
   }
@@ -93,6 +97,10 @@ collection_group {
     title = "NFS v3 commit"
   }
   metric {
+    name = "nfsd_v3_total"
+    title = "NFSD v3 total"
+  }
+  metric {
     name = "nfsd_v3_getattr"
     title = "NFSD v3 getattr"
   }
@@ -175,5 +183,433 @@ collection_group {
   metric {
     name = "nfsd_v3_commit"
     title = "NFSD v3 commit"
+  }
+  metric {
+    name = "nfs_v4_total"
+    title = "NFS v4 total"
+  }
+  metric {
+    name = "nfs_v4_read"
+    title = "NFS v4 read"
+  }
+  metric {
+    name = "nfs_v4_write"
+    title = "NFS v4 write"
+  }
+  metric {
+    name = "nfs_v4_commit"
+    title = "NFS v4 commit"
+  }
+  metric {
+    name = "nfs_v4_open"
+    title = "NFS v4 open"
+  }
+  metric {
+    name = "nfs_v4_open_conf"
+    title = "NFS v4 open_conf"
+  }
+  metric {
+    name = "nfs_v4_open_noat"
+    title = "NFS v4 open_noat"
+  }
+  metric {
+    name = "nfs_v4_open_dgrd"
+    title = "NFS v4 open_dgrd"
+  }
+  metric {
+    name = "nfs_v4_close"
+    title = "NFS v4 close"
+  }
+  metric {
+    name = "nfs_v4_setattr"
+    title = "NFS v4 setattr"
+  }
+  metric {
+    name = "nfs_v4_renew"
+    title = "NFS v4 renew"
+  }
+  metric {
+    name = "nfs_v4_setclntid"
+    title = "NFS v4 setclntid"
+  }
+  metric {
+    name = "nfs_v4_confirm"
+    title = "NFS v4 confirm"
+  }
+  metric {
+    name = "nfs_v4_lock"
+    title = "NFS v4 lock"
+  }
+  metric {
+    name = "nfs_v4_lockt"
+    title = "NFS v4 lockt"
+  }
+  metric {
+    name = "nfs_v4_locku"
+    title = "NFS v4 locku"
+  }
+  metric {
+    name = "nfs_v4_access"
+    title = "NFS v4 access"
+  }
+  metric {
+    name = "nfs_v4_getattr"
+    title = "NFS v4 getattr"
+  }
+  metric {
+    name = "nfs_v4_lookup"
+    title = "NFS v4 lookup"
+  }
+  metric {
+    name = "nfs_v4_lookup_root"
+    title = "NFS v4 lookup_root"
+  }
+  metric {
+    name = "nfs_v4_remove"
+    title = "NFS v4 remove"
+  }
+  metric {
+    name = "nfs_v4_rename"
+    title = "NFS v4 rename"
+  }
+  metric {
+    name = "nfs_v4_link"
+    title = "NFS v4 link"
+  }
+  metric {
+    name = "nfs_v4_symlink"
+    title = "NFS v4 symlink"
+  }
+  metric {
+    name = "nfs_v4_create"
+    title = "NFS v4 create"
+  }
+  metric {
+    name = "nfs_v4_pathconf"
+    title = "NFS v4 pathconf"
+  }
+  metric {
+    name = "nfs_v4_statfs"
+    title = "NFS v4 statfs"
+  }
+  metric {
+    name = "nfs_v4_readlink"
+    title = "NFS v4 readlink"
+  }
+  metric {
+    name = "nfs_v4_readdir"
+    title = "NFS v4 readdir"
+  }
+  metric {
+    name = "nfs_v4_server_caps"
+    title = "NFS v4 server_caps"
+  }
+  metric {
+    name = "nfs_v4_delegreturn"
+    title = "NFS v4 delegreturn"
+  }
+  metric {
+    name = "nfs_v4_getacl"
+    title = "NFS v4 getacl"
+  }
+  metric {
+    name = "nfs_v4_setacl"
+    title = "NFS v4 setacl"
+  }
+  metric {
+    name = "nfs_v4_fs_locations"
+    title = "NFS v4 fs_locations"
+  }
+  metric {
+    name = "nfs_v4_rel_lkowner"
+    title = "NFS v4 rel_lkowner"
+  }
+  metric {
+    name = "nfs_v4_secinfo"
+    title = "NFS v4 secinfo"
+  }
+  metric {
+    name = "nfs_v4_exchange_id"
+    title = "NFS v4 exchange_id"
+  }
+  metric {
+    name = "nfs_v4_create_ses"
+    title = "NFS v4 create_ses"
+  }
+  metric {
+    name = "nfs_v4_destroy_ses"
+    title = "NFS v4 destroy_ses"
+  }
+  metric {
+    name = "nfs_v4_sequence"
+    title = "NFS v4 sequence"
+  }
+  metric {
+    name = "nfs_v4_get_lease_t"
+    title = "NFS v4 get_lease_t"
+  }
+  metric {
+    name = "nfs_v4_reclaim_comp"
+    title = "NFS v4 reclaim_comp"
+  }
+  metric {
+    name = "nfs_v4_layoutget"
+    title = "NFS v4 layoutget"
+  }
+  metric {
+    name = "nfs_v4_getdevinfo"
+    title = "NFS v4 getdevinfo"
+  }
+  metric {
+    name = "nfs_v4_layoutcommit"
+    title = "NFS v4 layoutcommit"
+  }
+  metric {
+    name = "nfs_v4_layoutreturn"
+    title = "NFS v4 layoutreturn"
+  }
+  metric {
+    name = "nfs_v4_getdevlist"
+    title = "NFS v4 getdevlist"
+  }
+  metric {
+    name = "nfsd_v4_total"
+    title = "NFSD v4 total"
+  }
+  metric {
+    name = "nfsd_v4_op0-unused"
+    title = "NFSD v4 op0-unused"
+  }
+  metric {
+    name = "nfsd_v4_op1-unused"
+    title = "NFSD v4 op1-unused"
+  }
+  metric {
+    name = "nfsd_v4_op2-future"
+    title = "NFSD v4 op2-future"
+  }
+  metric {
+    name = "nfsd_v4_access"
+    title = "NFSD v4 access"
+  }
+  metric {
+    name = "nfsd_v4_close"
+    title = "NFSD v4 close"
+  }
+  metric {
+    name = "nfsd_v4_commit"
+    title = "NFSD v4 commit"
+  }
+  metric {
+    name = "nfsd_v4_create"
+    title = "NFSD v4 create"
+  }
+  metric {
+    name = "nfsd_v4_delegpurge"
+    title = "NFSD v4 delegpurge"
+  }
+  metric {
+    name = "nfsd_v4_delegreturn"
+    title = "NFSD v4 delegreturn"
+  }
+  metric {
+    name = "nfsd_v4_getattr"
+    title = "NFSD v4 getattr"
+  }
+  metric {
+    name = "nfsd_v4_getfh"
+    title = "NFSD v4 getfh"
+  }
+  metric {
+    name = "nfsd_v4_link"
+    title = "NFSD v4 link"
+  }
+  metric {
+    name = "nfsd_v4_lock"
+    title = "NFSD v4 lock"
+  }
+  metric {
+    name = "nfsd_v4_lockt"
+    title = "NFSD v4 lockt"
+  }
+  metric {
+    name = "nfsd_v4_locku"
+    title = "NFSD v4 locku"
+  }
+  metric {
+    name = "nfsd_v4_lookup"
+    title = "NFSD v4 lookup"
+  }
+  metric {
+    name = "nfsd_v4_lookup_root"
+    title = "NFSD v4 lookup_root"
+  }
+  metric {
+    name = "nfsd_v4_nverify"
+    title = "NFSD v4 nverify"
+  }
+  metric {
+    name = "nfsd_v4_open"
+    title = "NFSD v4 open"
+  }
+  metric {
+    name = "nfsd_v4_openattr"
+    title = "NFSD v4 openattr"
+  }
+  metric {
+    name = "nfsd_v4_open_conf"
+    title = "NFSD v4 open_conf"
+  }
+  metric {
+    name = "nfsd_v4_open_dgrd"
+    title = "NFSD v4 open_dgrd"
+  }
+  metric {
+    name = "nfsd_v4_putfh"
+    title = "NFSD v4 putfh"
+  }
+  metric {
+    name = "nfsd_v4_putpubfh"
+    title = "NFSD v4 putpubfh"
+  }
+  metric {
+    name = "nfsd_v4_putrootfh"
+    title = "NFSD v4 putrootfh"
+  }
+  metric {
+    name = "nfsd_v4_read"
+    title = "NFSD v4 read"
+  }
+  metric {
+    name = "nfsd_v4_readdir"
+    title = "NFSD v4 readdir"
+  }
+  metric {
+    name = "nfsd_v4_readlink"
+    title = "NFSD v4 readlink"
+  }
+  metric {
+    name = "nfsd_v4_remove"
+    title = "NFSD v4 remove"
+  }
+  metric {
+    name = "nfsd_v4_rename"
+    title = "NFSD v4 rename"
+  }
+  metric {
+    name = "nfsd_v4_renew"
+    title = "NFSD v4 renew"
+  }
+  metric {
+    name = "nfsd_v4_restorefh"
+    title = "NFSD v4 restorefh"
+  }
+  metric {
+    name = "nfsd_v4_savefh"
+    title = "NFSD v4 savefh"
+  }
+  metric {
+    name = "nfsd_v4_secinfo"
+    title = "NFSD v4 secinfo"
+  }
+  metric {
+    name = "nfsd_v4_setattr"
+    title = "NFSD v4 setattr"
+  }
+  metric {
+    name = "nfsd_v4_setcltid"
+    title = "NFSD v4 setcltid"
+  }
+  metric {
+    name = "nfsd_v4_setcltidconf"
+    title = "NFSD v4 setcltidconf"
+  }
+  metric {
+    name = "nfsd_v4_verify"
+    title = "NFSD v4 verify"
+  }
+  metric {
+    name = "nfsd_v4_write"
+    title = "NFSD v4 write"
+  }
+  metric {
+    name = "nfsd_v4_rellockowner"
+    title = "NFSD v4 rellockowner"
+  }
+  metric {
+    name = "nfsd_v4_bc_ctl"
+    title = "NFSD v4 bc_ctl"
+  }
+  metric {
+    name = "nfsd_v4_bind_conn"
+    title = "NFSD v4 bind_conn"
+  }
+  metric {
+    name = "nfsd_v4_exchange_id"
+    title = "NFSD v4 exchange_id"
+  }
+  metric {
+    name = "nfsd_v4_create_ses"
+    title = "NFSD v4 create_ses"
+  }
+  metric {
+    name = "nfsd_v4_destroy_ses"
+    title = "NFSD v4 destroy_ses"
+  }
+  metric {
+    name = "nfsd_v4_free_stateid"
+    title = "NFSD v4 free_stateid"
+  }
+  metric {
+    name = "nfsd_v4_getdirdeleg"
+    title = "NFSD v4 getdirdeleg"
+  }
+  metric {
+    name = "nfsd_v4_getdevinfo"
+    title = "NFSD v4 getdevinfo"
+  }
+  metric {
+    name = "nfsd_v4_getdevlist"
+    title = "NFSD v4 getdevlist"
+  }
+  metric {
+    name = "nfsd_v4_layoutcommit"
+    title = "NFSD v4 layoutcommit"
+  }
+  metric {
+    name = "nfsd_v4_layoutget"
+    title = "NFSD v4 layoutget"
+  }
+  metric {
+    name = "nfsd_v4_layoutreturn"
+    title = "NFSD v4 layoutreturn"
+  }
+  metric {
+    name = "nfsd_v4_secinfononam"
+    title = "NFSD v4 secinfononam"
+  }
+  metric {
+    name = "nfsd_v4_sequence"
+    title = "NFSD v4 sequence"
+  }
+  metric {
+    name = "nfsd_v4_set_ssv"
+    title = "NFSD v4 set_ssv"
+  }
+  metric {
+    name = "nfsd_v4_test_stateid"
+    title = "NFSD v4 test_stateid"
+  }
+  metric {
+    name = "nfsd_v4_want_deleg"
+    title = "NFSD v4 want_deleg"
+  }
+  metric {
+    name = "nfsd_v4_destroy_clid"
+    title = "NFSD v4 destroy_clid"
+  }
+  metric {
+    name = "nfsd_v4_reclaim_comp"
+    title = "NFSD v4 reclaim_comp"
   }
 }

@@ -6,6 +6,26 @@ import re
 import time
 import syslog
 import sys
+import string
+
+def test_proc( p_file, p_string ):
+    global p_match
+    """
+    Check if <p_file> contains keyword <p_string> e.g. proc3, proc4
+    """
+
+    p_fd = open( p_file )
+
+    p_contents = p_fd.read()
+
+    p_fd.close()
+
+    p_match = re.search(".*" + p_string + "\s.*", p_contents, flags=re.MULTILINE)
+
+    if not p_match:
+        return False
+    else:
+        return True
 
 verboselevel = 0
 descriptors = [ ]
@@ -14,7 +34,7 @@ old_values = { }
 configtable = [
     {
         'group': 'nfs_client',
-        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfs").st_mode)' ],
+        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfs").st_mode)', 'test_proc("/proc/net/rpc/nfs", "proc3")' ],
         'prefix': 'nfs_v3_',
         #  The next 4 lines can be at the 'group' level or the 'name' level
         'file': '/proc/net/rpc/nfs',
@@ -22,6 +42,7 @@ configtable = [
         'units': 'calls/sec',
         'format': '%f',
         'names': {
+            'total':       { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){2}(\d+.*\d)\n" },
             'getattr':     { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){2}(\S*)" },
             'setattr':     { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){3}(\S*)" },
             'lookup':      { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){4}(\S*)" },
@@ -46,8 +67,67 @@ configtable = [
         }
     },
     {
+        'group': 'nfs_client_v4',
+        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfs").st_mode)', 'test_proc("/proc/net/rpc/nfs", "proc4")' ],
+        'prefix': 'nfs_v4_',
+        #  The next 4 lines can be at the 'group' level or the 'name' level
+        'file': '/proc/net/rpc/nfs',
+        'value_type': 'float',
+        'units': 'calls/sec',
+        'format': '%f',
+        'names': {
+            'total':        { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){2}(\d+.*\d)\n" },
+            'read':         { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){2}(\S*)" },
+            'write':        { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){3}(\S*)" },
+            'commit':       { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){4}(\S*)" },
+            'open':         { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){5}(\S*)" },
+            'open_conf':    { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){6}(\S*)" },
+            'open_noat':    { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){7}(\S*)" },
+            'open_dgrd':    { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){8}(\S*)" },
+            'close':        { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){9}(\S*)" },
+            'setattr':      { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){10}(\S*)" },
+            'renew':        { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){11}(\S*)" },
+            'setclntid':    { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){12}(\S*)" },
+            'confirm':      { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){13}(\S*)" },
+            'lock':         { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){14}(\S*)" },
+            'lockt':        { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){15}(\S*)" },
+            'locku':        { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){16}(\S*)" },
+            'access':       { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){17}(\S*)" },
+            'getattr':      { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){18}(\S*)" },
+            'lookup':       { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){19}(\S*)" },
+            'lookup_root':  { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){20}(\S*)" },
+            'remove':       { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){21}(\S*)" },
+            'rename':       { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){22}(\S*)" },
+            'link':         { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){23}(\S*)" },
+            'symlink':      { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){24}(\S*)" },
+            'create':       { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){25}(\S*)" },
+            'pathconf':     { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){26}(\S*)" },
+            'statfs':       { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){27}(\S*)" },
+            'readlink':     { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){28}(\S*)" },
+            'readdir':      { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){29}(\S*)" },
+            'server_caps':  { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){30}(\S*)" },
+            'delegreturn':  { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){31}(\S*)" },
+            'getacl':       { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){32}(\S*)" },
+            'setacl':       { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){33}(\S*)" },
+            'fs_locations': { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){34}(\S*)" },
+            'rel_lkowner':  { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){35}(\S*)" },
+            'secinfo':      { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){36}(\S*)" },
+            'exchange_id':  { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){37}(\S*)" },
+            'create_ses':   { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){38}(\S*)" },
+            'destroy_ses':  { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){39}(\S*)" },
+            'sequence':     { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){40}(\S*)" },
+            'get_lease_t':  { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){41}(\S*)" },
+            'reclaim_comp': { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){42}(\S*)" },
+            'layoutget':    { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){43}(\S*)" },
+            'getdevinfo':   { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){44}(\S*)" },
+            'layoutcommit': { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){45}(\S*)" },
+            'layoutreturn': { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){46}(\S*)" },
+            'getdevlist':   { 'description':'dummy description', 're':  ".*proc4 (?:\S*\s){47}(\S*)" }
+        }
+    },
+    {
         'group': 'nfs_server',
-        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfsd").st_mode)' ],
+        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfsd").st_mode)', 'test_proc("/proc/net/rpc/nfsd", "proc3")' ],
         'prefix': 'nfsd_v3_',
         #  The next 4 lines can be at the 'group' level or the 'name' level
         'file': '/proc/net/rpc/nfsd',
@@ -55,6 +135,7 @@ configtable = [
         'units': 'calls/sec',
         'format': '%f',
         'names': {
+            'total':       { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){2}(\d+.*\d)\n" },
             'getattr':     { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){2}(\S*)" },
             'setattr':     { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){3}(\S*)" },
             'lookup':      { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){4}(\S*)" },
@@ -76,6 +157,78 @@ configtable = [
             'fsinfo':      { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){20}(\S*)" },
             'pathconf':    { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){21}(\S*)" },
             'commit':      { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){22}(\S*)" }
+        },
+    },
+    {
+        'group': 'nfs_server_v4',
+        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfsd").st_mode)', 'test_proc("/proc/net/rpc/nfsd", "proc4ops")' ],
+        'prefix': 'nfsd_v4_',
+        #  The next 4 lines can be at the 'group' level or the 'name' level
+        'file': '/proc/net/rpc/nfsd',
+        'value_type': 'float',
+        'units': 'calls/sec',
+        'format': '%f',
+        'names': {
+            'total':         { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){2}(\d+.*\d)\n" },
+            'op0-unused':    { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){1}(\S*)" },
+            'op1-unused':    { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){2}(\S*)" },
+            'op2-future':    { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){3}(\S*)" },
+            'access':        { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){4}(\S*)" },
+            'close':         { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){5}(\S*)" },
+            'commit':        { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){6}(\S*)" },
+            'create':        { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){7}(\S*)" },
+            'delegpurge':    { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){8}(\S*)" },
+            'delegreturn':   { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){9}(\S*)" },
+            'getattr':       { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){10}(\S*)" },
+            'getfh':         { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){11}(\S*)" },
+            'link':          { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){12}(\S*)" },
+            'lock':          { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){13}(\S*)" },
+            'lockt':         { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){14}(\S*)" },
+            'locku':         { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){15}(\S*)" },
+            'lookup':        { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){16}(\S*)" },
+            'lookup_root':   { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){17}(\S*)" },
+            'nverify':       { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){18}(\S*)" },
+            'open':          { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){19}(\S*)" },
+            'openattr':      { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){20}(\S*)" },
+            'open_conf':     { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){21}(\S*)" },
+            'open_dgrd':     { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){22}(\S*)" },
+            'putfh':         { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){23}(\S*)" },
+            'putpubfh':      { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){24}(\S*)" },
+            'putrootfh':     { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){25}(\S*)" },
+            'read':          { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){26}(\S*)" },
+            'readdir':       { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){27}(\S*)" },
+            'readlink':      { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){28}(\S*)" },
+            'remove':        { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){29}(\S*)" },
+            'rename':        { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){30}(\S*)" },
+            'renew':         { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){31}(\S*)" },
+            'restorefh':     { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){32}(\S*)" },
+            'savefh':        { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){33}(\S*)" },
+            'secinfo':       { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){34}(\S*)" },
+            'setattr':       { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){35}(\S*)" },
+            'setcltid':      { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){36}(\S*)" },
+            'setcltidconf':  { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){37}(\S*)" },
+            'verify':        { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){38}(\S*)" },
+            'write':         { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){39}(\S*)" },
+            'rellockowner':  { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){40}(\S*)" },
+            'bc_ctl':        { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){41}(\S*)" },
+            'bind_conn':     { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){42}(\S*)" },
+            'exchange_id':   { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){43}(\S*)" },
+            'create_ses':    { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){44}(\S*)" },
+            'destroy_ses':   { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){45}(\S*)" },
+            'free_stateid':  { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){46}(\S*)" },
+            'getdirdeleg':   { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){47}(\S*)" },
+            'getdevinfo':    { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){48}(\S*)" },
+            'getdevlist':    { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){49}(\S*)" },
+            'layoutcommit':  { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){50}(\S*)" },
+            'layoutget':     { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){51}(\S*)" },
+            'layoutreturn':  { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){52}(\S*)" },
+            'secinfononam':  { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){53}(\S*)" },
+            'sequence':      { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){54}(\S*)" },
+            'set_ssv':       { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){55}(\S*)" },
+            'test_stateid':  { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){56}(\S*)" },
+            'want_deleg':    { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){57}(\S*)" },
+            'destroy_clid':  { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){58}(\S*)" },
+            'reclaim_comp':  { 'description':'dummy description', 're':  ".*proc4ops (?:\S*\s){59}(\S*)" }
         },
     }
 ]
@@ -102,8 +255,27 @@ def metric_init(params):
                break
         if not tests_passed:
             continue
+
+        # 2nd param defines number of params that will follow (differs between NFS versions)
+        max_plimit = re.split("\W+", p_match.group())[1]
+
+        # Parse our defined params list in order to ensure list will not exceed max_plimit
+        n = 0
+        names_keys = configtable[i]['names'].keys()
+        keys_to_remove = []
+        for _tmpkey in names_keys:
+            _tmplist = names_keys
+            param_pos = re.split("{(\d+)\}", configtable[i]['names'][_tmpkey].values()[0])[1]
+	    if int(param_pos) > int(max_plimit):
+                keys_to_remove.append(_tmpkey)
+            n += 1
+
+        if len(keys_to_remove) > 0:
+            for key in keys_to_remove:
+                names_keys.remove(key)
+
         #  For each name in the group ...
-        for name in configtable[i]['names'].keys():
+        for name in names_keys:
             #  ... set up dictionary ...
             if 'format' in configtable[i]['names'][name]:
 		format_str = configtable[i]['names'][name]['format']
@@ -178,10 +350,23 @@ def get_value(name):
             break
     contents = file(descriptors[i]['file']).read()
     m = re.search(descriptors[i]['re'], contents, flags=re.MULTILINE)
+
+    m_value = m.group(1)
+
+    #RB: multiple (space seperated) values: calculate sum
+    if string.count( m_value, ' ' ) > 0:
+        m_fields = string.split( m_value, ' ' )
+
+        sum_value = 0
+
+        for f in m_fields:
+            sum_value = sum_value + int(f)
+
+        m_value = sum_value
     
     #  Return time and value.
     ts = time.time()
-    return (ts, int(m.group(1)))
+    return (ts, int(m_value))
 
 def debug(level, text):
     global verboselevel
