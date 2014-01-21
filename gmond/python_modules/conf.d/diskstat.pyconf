@@ -5,8 +5,10 @@ modules {
     name = 'diskstat'
     language = 'python'
 
+    # Specify devices you want to monitor or if empty it will 
+    # pick all devices
     param devices {
-      value = 'sda'
+      value = ''
     }
 
     #param device-mapper {
