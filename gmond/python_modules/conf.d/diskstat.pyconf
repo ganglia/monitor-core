@@ -6,8 +6,12 @@ modules {
     language = 'python'
 
     param devices {
-      value = ''
+      value = 'sda'
     }
+
+    #param device-mapper {
+    #  value = 'true'
+    #}
   }
 }
 
