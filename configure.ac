@@ -500,7 +500,7 @@ if test x"$libaprpath" != x && test x"$libaprpath" != xyes; then
   fi
 else
   PKG_CHECK_MODULES([APR],[apr-1])
-  LDFLAGS="$LIBS $APR_LIBS"
+  LDFLAGS="$LDFLAGS $LIBS $APR_LIBS"
   APR_INCLUDES="$APR_CFLAGS"
 fi
 
