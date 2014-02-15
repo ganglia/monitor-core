@@ -12,7 +12,7 @@ GLDFLAGS =
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/include $(GCFLAGS)
+AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/include $(GCFLAGS) @CK_CFLAGS@ @PROTOBUF_CFLAGS@
 
 sbin_PROGRAMS = gmetad
 
@@ -28,7 +28,7 @@ if BUILD_RIEMANN
 endif
 
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
-                 $(GLDADD) $(DEPS_LIBS)
+                 $(GLDADD) $(DEPS_LIBS) @CK_LIBS@ @PROTOBUF_LIBS@
 
 gmetad_LDFLAGS = $(GLDFLAGS)
 

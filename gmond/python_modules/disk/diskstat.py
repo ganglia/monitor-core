@@ -6,6 +6,10 @@
 ###    more information on these values, look in the Linux kernel
 ###    documentation for "I/O statistics fields".
 ###
+###    By default, the script would monitor any entry listed under
+###    /proc/diskstats that is not containing a number. Override it by passing
+###    a list of devices in the 'devices' parameter.
+###
 ###    This script has the option of explicitly setting which devices
 ###    to check using the "devices" option in your configuration. If
 ###    you set this value, it will invalidate the MIN_DISK_SIZE and
@@ -40,6 +44,8 @@ import time
 import subprocess
 import traceback
 import logging
+import os
+import stat
 
 descriptors = []
 
@@ -56,19 +62,113 @@ BYTES_PER_SECTOR = 512
 
 # 5 GB
 MIN_DISK_SIZE = 5242880
-DEVICES = ''
+# Set to None to trigger disk discovery under /proc/diskstats
+# Pass a 'devices' parameter to explicitly list disks to monitor
+DEVICES = None
 IGNORE_DEV = 'dm-|loop|drbd'
 
 PARTITIONS_FILE = '/proc/partitions'
 DISKSTATS_FILE = '/proc/diskstats'
+DMDIR = '/dev/mapper'
+device_mapper = ''
 
 PARTITIONS = []
+dmnames = []
+dm2pair = {}
+pair2dm = {}
+devnames = []
+dev2pair = {}
+pair2dev = {}
+
+def build_dmblock_major_minor_tables():
+	"""Returns
+	1) a table of filenames that are all device mapper block special files
+	2) a dict mapping each device mapper name to (major,minor)
+	3) a dict mapping each (major,minor) pair to a table of devce mapper names"""
+
+	names = []
+	name2pair = {}
+	pair2name = {}
+	mapper_entries = []
+
+	mapper_entries = os.listdir(DMDIR)
+	for n in mapper_entries:
+		s = os.lstat(DMDIR + '/' + n)
+		if stat.S_ISBLK(s[stat.ST_MODE]):
+			names.append(n)
+			maj = str(os.major(s.st_rdev))
+			min = str(os.minor(s.st_rdev))
+			name2pair[n] = (maj, min)
+			pair2name[(maj, min)] = n
+
+	logging.debug('grabbed dmsetup device info')
+	logging.debug('dmsetup devices: ' + str(name2pair))
+
+	return (names, name2pair, pair2name)
+
+def build_block_major_minor_tables():
+	"""Returns
+	1) a table of filenames that are all block special files
+	2) a dict mapping each dev name to (major,minor)
+	3) a dict mapping each (major,minor) pair to a table of dev names"""
+	dnames = []
+	d2p = {}
+	p2d = {}
+
+	# Get values from diskstats file
+	p = subprocess.Popen("awk '{print $1,$2, $3}' " + DISKSTATS_FILE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	out, err = p.communicate()
+
+	logging.debug('grabbed diskstat device info')
+	logging.debug('diskstat devices: ' + str(out))
+
+	for n in out.split('\n'):
+		if n:
+			[maj, min, name] = n.split()
+			dnames.append(name)
+			d2p[name] = (maj, min)
+			p2d[(maj, min)] = name
+
+	return (dnames, d2p, p2d)
+
+def get_devname(dev):
+	"""Returns
+	device mapper name converted to dev name"""
+
+	(maj,min) = dm2pair[dev]
+	name = pair2dev[(maj,min)]
+	return name
+
+def list_dmnames():
+	"""Returns
+	string of device names associated with device mapper names"""
+
+	global dmnames
+	global dm2pair
+	global pair2dm
+	global devnames
+	global dev2pair
+	global pair2dev
+	devlist = ''
+
+	dmnames, dm2pair, pair2dm =  build_dmblock_major_minor_tables()
+	logging.debug('dmnames: ' + str(dmnames))
+
+	devnames, dev2pair, pair2dev =  build_block_major_minor_tables()
+	logging.debug('devnames: ' + str(dmnames))
+
+	for d in dmnames:
+		devlist = devlist + ' ' + str(d)
+
+	logging.debug('devlist: ' + str(devlist))
+
+	return devlist
 
 def get_partitions():
 	logging.debug('getting partitions')
 	global PARTITIONS
 
-	if DEVICES != '':
+	if DEVICES is not None:
 		# Explicit device list has been set
 		logging.debug(' DEVICES has already been set')
 		out = DEVICES
@@ -85,7 +185,7 @@ def get_partitions():
 			return p.returncode
 
 	for dev in out.split():
-		if DEVICES != '':
+		if DEVICES is not None:
 			# Explicit device list has been set
 			PARTITIONS.append(dev)
 		else:		
@@ -161,12 +261,21 @@ def update_stats():
 		if not dev in last_val:
 			last_val[dev] = {}
 
+		# Convert from dmname to devname for use by awk
+		if device_mapper == 'true':
+			olddev = dev
+			dev = get_devname(dev)
+
 		# Get values from diskstats file
 		p = subprocess.Popen("awk -v dev=" + dev + " '$3 == dev' " + DISKSTATS_FILE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		out, err = p.communicate()
 		
 		vals = out.split()
 		logging.debug('  vals: ' + str(vals))
+
+ 		# Reset back to orignal dev name
+		if device_mapper == 'true':
+			dev = olddev
 
 		get_diff(dev, 'reads',  int(vals[3]))
 		get_diff(dev, 'writes', int(vals[7]))
@@ -233,6 +342,12 @@ def get_diff(dev, key, val, convert=1):
 	else:
 		stats[dev][key] = 0
 
+        # If for some reason we have a negative diff we should assume counters reset
+        # and should set it back to 0
+	if stats[dev][key] < 0:
+	  stats[dev][key] = 0
+
+
 	last_val[dev][key] = val
 
 def get_stat(name):
@@ -267,10 +382,18 @@ def get_stat(name):
 		return 0
 
 def metric_init(params):
-	global descriptors
-	global MIN_DISK_SIZE, DEVICES
+	global descriptors, device_mapper
+	global MIN_DISK_SIZE, DEVICES, IGNORE_DEV
 
-	DEVICES = params.get('devices')
+	# Use params.get here to assure function via gmond
+	if params.get('device-mapper') == 'true':
+		devices = list_dmnames()
+		DEVICES = devices
+		IGNORE_DEV = 'loop|drbd'
+ 		device_mapper = 'true'
+		logging.debug('dm block devices: ' + str(devices))
+	else:
+		DEVICES = params.get('devices')
 
 	logging.debug('init: ' + str(params))
 
@@ -367,17 +490,23 @@ if __name__ == '__main__':
 
 	logging.debug('running from cmd line')
 	parser = OptionParser()
-	parser.add_option('-d', '--devices', dest='devices', default='', help='devices to explicitly check')
+	parser.add_option('-d', '--devices', dest='devices', default=None, help='devices to explicitly check')
 	parser.add_option('-b', '--gmetric-bin', dest='gmetric_bin', default='/usr/bin/gmetric', help='path to gmetric binary')
 	parser.add_option('-c', '--gmond-conf', dest='gmond_conf', default='/etc/ganglia/gmond.conf', help='path to gmond.conf')
 	parser.add_option('-g', '--gmetric', dest='gmetric', action='store_true', default=False, help='submit via gmetric')
+	parser.add_option('-m', '--device-mapper', dest='device_mapper', action='store_true', default=False, help='utilize all device mapper devices if set')
 	parser.add_option('-q', '--quiet', dest='quiet', action='store_true', default=False)
 
 	(options, args) = parser.parse_args()
 
-	metric_init({
-		'devices': options.devices,
-	})
+	if options.device_mapper:
+		metric_init({
+			'device-mapper': 'true',
+		})
+	else:
+		metric_init({
+			'devices': options.devices,
+		})
 
 	while True:
 		for d in descriptors:
