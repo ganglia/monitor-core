@@ -27,6 +27,7 @@
 #endif /* WITH_RIEMANN */
 
 #include "export_helpers.h"
+#include "gm_scoreboard.h"
 
 #define PATHSIZE 4096
 extern gmetad_config_t gmetad_config;
@@ -190,6 +191,8 @@ push_data_to_carbon( char *graphite_msg)
         }
       }
       close (carbon_socket);
+      ganglia_scoreboard_inc(METS_SENT_GRAPHITE);
+      ganglia_scoreboard_inc(METS_SENT_ALL);
       return EXIT_SUCCESS;
 
   } else {
@@ -206,6 +209,8 @@ push_data_to_carbon( char *graphite_msg)
              err_msg("sendto socket (client): %s", strerror(errno));
              return EXIT_FAILURE;
       }
+      ganglia_scoreboard_inc(METS_SENT_GRAPHITE);
+      ganglia_scoreboard_inc(METS_SENT_ALL);
       return EXIT_SUCCESS;
   }
 }
@@ -244,6 +249,8 @@ write_data_to_memcached ( const char *cluster, const char *host, const char *met
    } else {
       debug_msg("Pushed %s value %s to the memcached server(s)", s_path, sum);
       memcached_pool_push(memcached_connection_pool, memc);
+      ganglia_scoreboard_inc(METS_SENT_MEMCACHED);
+      ganglia_scoreboard_inc(METS_SENT_ALL);
       return EXIT_SUCCESS;
    }
 }
@@ -535,6 +542,9 @@ send_data_to_riemann (const char *grid, const char *cluster, const char *host, c
   free(buf);
 
   pthread_mutex_unlock( &riemann_mutex );
+
+  ganglia_scoreboard_inc(METS_SENT_RIEMANN);
+  ganglia_scoreboard_inc(METS_SENT_ALL);
 
   return EXIT_SUCCESS;
 

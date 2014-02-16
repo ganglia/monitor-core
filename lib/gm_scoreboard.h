@@ -13,7 +13,16 @@ enum ganglia_scoreboard_types {
 };
 typedef enum ganglia_scoreboard_types ganglia_scoreboard_types;
 
-/* predefined scoreboard elements */
+/* predefined gmetad scoreboard elements */
+#define METS_RECVD_ALL "gmetad_metrics_recvd_all"
+#define METS_SENT_ALL "gmetad_metrics_sent_all"
+#define METS_SENT_RRDTOOL "gmetad_metrics_sent_rrdtool"
+#define METS_SENT_RRDCACHED "gmetad_metrics_sent_rrdcached"
+#define METS_SENT_GRAPHITE "gmetad_metrics_sent_graphite"
+#define METS_SENT_MEMCACHED "gmetad_metrics_sent_memcached"
+#define METS_SENT_RIEMANN "gmetad_metrics_sent_riemann"
+
+/* predefined gmond scoreboard elements */
 #define PKTS_RECVD_ALL "gmond_pkts_recvd_all"
 #define PKTS_RECVD_FAILED "gmond_pkts_recvd_failed"
 #define PKTS_RECVD_IGNORED "gmond_pkts_recvd_ignored"

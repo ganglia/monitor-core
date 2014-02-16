@@ -17,6 +17,7 @@
 #include <sys/poll.h>
 
 #include "rrd_helpers.h"
+#include "gm_scoreboard.h"
 
 #define PATHSIZE 4096
 extern gmetad_config_t gmetad_config;
@@ -332,10 +333,14 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
       }
    if (gmetad_config.rrdcached_addrstr != NULL)
       {
+         ganglia_scoreboard_inc(METS_SENT_RRDCACHED);
+         ganglia_scoreboard_inc(METS_SENT_ALL);
          return RRD_update_cached( rrd, sum, num, process_time );
       }
    else
       {
+         ganglia_scoreboard_inc(METS_SENT_RRDTOOL);
+         ganglia_scoreboard_inc(METS_SENT_ALL);
          return RRD_update( rrd, sum, num, process_time );
       }
 }
