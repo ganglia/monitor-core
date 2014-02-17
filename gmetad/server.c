@@ -10,10 +10,14 @@
 #include <sys/time.h>
 #endif
 #include <string.h>
+#include <apr_time.h>
 #include "dtd.h"
 #include "gmetad.h"
 #include "my_inet_ntop.h"
 #include "server_priv.h"
+#include "gm_scoreboard.h"
+
+#define HOSTNAMESZ 64
 
 extern g_tcp_socket *server_socket;
 extern pthread_mutex_t  server_socket_mutex;
@@ -27,6 +31,9 @@ extern gmetad_config_t gmetad_config;
 extern char* getfield(char *buf, short int index);
 extern struct type_tag* in_type_list (char *, unsigned int);
 
+extern apr_time_t started;
+
+extern char hostname[HOSTNAMESZ];
 
 static inline int CHECK_FMT(2, 3)
 xml_print( client_t *client, const char *fmt, ... )
@@ -511,6 +518,81 @@ process_path_adapter (datum_t *key, datum_t *val, void *arg)
    return process_path(ctxt->client, ctxt->path, val, key);
 }
 
+static int
+status_report( client_t *client )
+{
+   int rval, len;
+   char buf[4096];
+
+   debug_msg("Stat request...");
+
+   if(! client->valid )
+      {
+         return 1;
+      }
+
+   apr_time_t now = apr_time_now();
+
+   snprintf (buf, sizeof (buf),
+       "HTTP/1.0 200 OK\r\n"
+       "Server: gmetad/" GANGLIA_VERSION_FULL "\r\n"
+       "Content-Type: application/json\r\n"
+       "Connection: close\r\n"
+       "\r\n"
+       "{"
+       "\"host\":\"%s\","
+       "\"gridname\":\"%s\","
+       "\"version\":\"%s\","
+       "\"boottime\":%lu,"
+       "\"uptime\":%lu,"
+       "\"uptimeMillis\":%lu,"
+       "\"metrics\":{"
+       "\"received\":{"
+       "\"all\":%d"
+       "},"
+       "\"sent\":{"
+       "\"all\":%d,"
+       "\"rrdtool\":%d,"
+       "\"rrdcached\":%d,"
+       "\"graphite\":%d,"
+       "\"memcached\":%d,"
+       "\"riemann\":%d"
+       "}}"
+       "}\r\n",
+       hostname,
+       gmetad_config.gridname,
+       GANGLIA_VERSION_FULL,
+       (long int)(started / APR_TIME_C(1000)), // ms
+       (long int)((now - started) / APR_USEC_PER_SEC), // ms
+       (long int)((now - started) / APR_TIME_C(1000)), // ms
+       ganglia_scoreboard_get("gmetad_metrics_recvd_all"),
+       ganglia_scoreboard_get("gmetad_metrics_sent_all"),
+       ganglia_scoreboard_get("gmetad_metrics_sent_rrdtool"),
+       ganglia_scoreboard_get("gmetad_metrics_sent_rrdcached"),
+       ganglia_scoreboard_get("gmetad_metrics_sent_graphite"),
+       ganglia_scoreboard_get("gmetad_metrics_sent_memcached"),
+       ganglia_scoreboard_get("gmetad_metrics_sent_riemann")
+   );
+
+   void *sbi = ganglia_scoreboard_iterator();
+   while (sbi) {
+      char *name = ganglia_scoreboard_next(&sbi);
+      int val = ganglia_scoreboard_get(name);
+      debug_msg("%s = %d", name, val);
+   }
+
+   len = strlen(buf);
+
+   SYS_CALL( rval, write( client->fd, buf, len));
+   if ( rval < 0 && rval != len )
+      {
+         client->valid = 0;
+         return 1;
+      }
+
+   return 0;
+}
+
 
 /* 'Cleans' the request and calls the appropriate handlers.
  * This function alters the path to prepare it for processpath().
@@ -539,6 +621,12 @@ process_request (client_t *client, char *path)
 
    if (*path != '/')
        return 1;
+
+   if (!strcmp(path, "/status"))
+      {
+         status_report(client);
+         return 2;
+      }
 
    /* Check for illegal characters in element */
    if (strcspn(path, ">!@#$%`;|\"\\'<") < pathlen)
@@ -609,6 +697,7 @@ readline(int fd, char *buf, int maxlen)
 void *
 server_thread (void *arg)
 {
+   int rc;
    int interactive = (arg != NULL);
    socklen_t len;
    int request_len;
@@ -675,9 +764,16 @@ server_thread (void *arg)
                   }
                debug_msg("server_thread() received request \"%s\" from %s", request, remote_ip);
 
-               if (process_request(&client, request))
+               rc = process_request(&client, request);
+               if (rc == 1)
                   {
                      err_msg("Got a malformed path request from %s", remote_ip);
+                     close(client.fd);
+                     continue;
+                  }
+               else if (rc == 2)
+                  {
+                     debug_msg("Got a STAT request from %s", remote_ip);
                      close(client.fd);
                      continue;
                   }
