@@ -14,12 +14,14 @@
 
 #include "daemon_init.h"
 #include "update_pidfile.h"
+#include "gm_scoreboard.h"
 
 #include "rrd_helpers.h"
 #include "export_helpers.h"
 
 #define METADATA_SLEEP_RANDOMIZE 5.0
 #define METADATA_MINIMUM_SLEEP 1
+#define HOSTNAMESZ 64
 
 /* Holds our data sources. */
 hash_t *sources;
@@ -58,6 +60,14 @@ static int debug_level;
 
 /* In cleanup.c */
 extern void *cleanup_thread(void *arg);
+
+/* The global context */
+apr_pool_t *global_context = NULL;
+
+/* When this gmetad was started */
+apr_time_t started;
+
+char hostname[HOSTNAMESZ];
 
 static int
 print_sources ( datum_t *key, datum_t *val, void *arg )
@@ -248,6 +258,18 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    return rc;
 }
 
+void initialize_scoreboard()
+{
+    ganglia_scoreboard_init(global_context);
+    ganglia_scoreboard_add(METS_RECVD_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_SENT_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_SENT_RRDTOOL, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_SENT_RRDCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_SENT_GRAPHITE, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_SENT_MEMCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_SENT_RIEMANN, GSB_COUNTER);
+
+}
 
 static int
 write_root_summary(datum_t *key, datum_t *val, void *arg)
@@ -301,11 +323,10 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
    return 0;
 }
 
-#define HOSTNAMESZ 64
-
 int
 main ( int argc, char *argv[] )
 {
+   int rc;
    struct stat struct_stat;
    pthread_t pid;
    pthread_attr_t attr;
@@ -314,15 +335,27 @@ main ( int argc, char *argv[] )
    mode_t rrd_umask;
    char * gmetad_username;
    struct passwd *pw;
-   char hostname[HOSTNAMESZ];
    gmetad_config_t *c = &gmetad_config;
    apr_interval_time_t sleep_time;
    apr_time_t last_metadata;
    double random_sleep_factor;
    unsigned int rand_seed;
 
+   rc = apr_initialize();
+   if (rc != APR_SUCCESS) {
+      return -1;
+   }
+
+   /* create a memory pool. */
+   apr_pool_create(&global_context, NULL);
+
    /* Ignore SIGPIPE */
    signal( SIGPIPE, SIG_IGN );
+
+   initialize_scoreboard();
+
+   /* Mark the time this gmetad started */
+   started = apr_time_now();
 
    if (cmdline_parser(argc, argv, &args_info) != 0)
       err_quit("command-line parser error");
@@ -560,5 +593,8 @@ main ( int argc, char *argv[] )
          last_metadata = apr_time_now();
       }
 
+   apr_pool_destroy(global_context);
+
+   apr_terminate();
    return 0;
 }

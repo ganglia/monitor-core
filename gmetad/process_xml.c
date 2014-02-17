@@ -5,6 +5,7 @@
 #include <expat.h>
 #include <ganglia.h>
 #include "gmetad.h"
+#include "gm_scoreboard.h"
 #include "rrd_helpers.h"
 #include "export_helpers.h"
 
@@ -801,6 +802,7 @@ startElement_METRIC(void *data, const char *el, const char **attr)
          rdatum = hash_insert(&hashkey, &hashval, summary);
          if (!rdatum) err_msg("Could not insert %s metric", name);
       }
+   ganglia_scoreboard_inc(METS_RECVD_ALL);
    return 0;
 }
 
