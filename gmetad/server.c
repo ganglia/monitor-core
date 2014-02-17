@@ -548,22 +548,22 @@ status_report( client_t *client )
        "\"uptimeMillis\":%lu,"
        "\"metrics\":{"
        "\"received\":{"
-       "\"all\":%d"
+       "\"all\":%u"
        "},"
        "\"sent\":{"
-       "\"all\":%d,"
-       "\"rrdtool\":%d,"
-       "\"rrdcached\":%d,"
-       "\"graphite\":%d,"
-       "\"memcached\":%d,"
-       "\"riemann\":%d"
+       "\"all\":%u,"
+       "\"rrdtool\":%u,"
+       "\"rrdcached\":%u,"
+       "\"graphite\":%u,"
+       "\"memcached\":%u,"
+       "\"riemann\":%u"
        "}}"
        "}\r\n",
        hostname,
        gmetad_config.gridname,
        GANGLIA_VERSION_FULL,
        (long int)(started / APR_TIME_C(1000)), // ms
-       (long int)((now - started) / APR_USEC_PER_SEC), // ms
+       (long int)((now - started) / APR_USEC_PER_SEC), // seconds
        (long int)((now - started) / APR_TIME_C(1000)), // ms
        ganglia_scoreboard_get("gmetad_metrics_recvd_all"),
        ganglia_scoreboard_get("gmetad_metrics_sent_all"),

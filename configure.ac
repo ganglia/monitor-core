@@ -524,7 +524,7 @@ AC_ARG_WITH( riemann,
 if test x"$withval" = xyes; then riemann="yes"; fi)
 
 if test x"$riemann" == xyes; then
-  PKG_CHECK_MODULES([PROTOBUF], [libprotobuf-c])
+  PKG_CHECK_MODULES([PROTOBUF_C], [libprotobuf-c])
   AC_CHECK_PROGS([PROTOC_C], [protoc-c], [:])
   if test "$PROTOC_C" = :; then
     AC_MSG_ERROR([This package needs 'protoc-c' tool. Try installing the 'protobuf-c-compiler' package.])

@@ -17,7 +17,7 @@
 struct gsb_element {
   ganglia_scoreboard_types type;
   char *name;
-  int val;
+  unsigned val;
 };
 typedef struct gsb_element gsb_element;
 
@@ -139,6 +139,22 @@ int ganglia_scoreboard_inc(char *name)
         gsb_element *element = get_scoreboard_element(name);
         if (element && (element->type != GSB_STATE)) {
             element->val++;
+            retval = element->val;
+        }
+    }
+    else {
+        err_msg(GSB_ERROR_MSG);
+    }
+    return retval;
+}
+
+int ganglia_scoreboard_incby(char *name, int val)
+{
+    int retval = 0;
+    if (gsb_scoreboard) {
+        gsb_element *element = get_scoreboard_element(name);
+        if (element && (element->type != GSB_STATE)) {
+            element->val += val;
             retval = element->val;
         }
     }

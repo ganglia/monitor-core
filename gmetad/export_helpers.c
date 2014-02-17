@@ -667,8 +667,8 @@ send_message_to_riemann (Msg *message)
          debug_msg("[riemann] Sent %lu events as 1 message in %lu serialized bytes", (unsigned long)message->n_events, (unsigned long)len);
       }
    }
-   ganglia_scoreboard_inc(METS_SENT_RIEMANN);
-   ganglia_scoreboard_inc(METS_SENT_ALL);
+   ganglia_scoreboard_incby(METS_SENT_RIEMANN, message->n_events);
+   ganglia_scoreboard_incby(METS_SENT_ALL, message->n_events);
    return EXIT_SUCCESS;
 }
 
