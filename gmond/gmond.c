@@ -3297,6 +3297,7 @@ main ( int argc, char *argv[] )
   apr_signal( SIGPIPE, SIG_IGN );
   apr_signal( SIGINT, sig_handler );
   apr_signal( SIGHUP, sig_handler );
+  apr_signal( SIGTERM, sig_handler );
 
   initialize_scoreboard();
 
