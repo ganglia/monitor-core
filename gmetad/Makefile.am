@@ -29,7 +29,7 @@ if BUILD_RIEMANN
 endif
 
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
-                 $(GLDADD) $(DEPS_LIBS) @CK_LIBS@ @PROTOBUF_C_LDFLAGS@
+                 $(GLDADD) $(DEPS_LIBS) @CK_LIBS@ @PROTOBUF_C_LIBS@
 
 gmetad_LDFLAGS = $(GLDFLAGS)
 
