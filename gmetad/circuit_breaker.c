@@ -31,23 +31,23 @@ circuit_breaker_thread(void *arg)
 
       if (riemann_circuit_breaker == RIEMANN_CB_OPEN && riemann_reset_timeout < apr_time_now ()) {
 
-         err_msg ("[riemann] Timeout period expired, retry TCP connection...");
+         debug_msg("[riemann] Timeout period expired, retry TCP connection...");
          pthread_mutex_lock( &riemann_cb_mutex );
          riemann_circuit_breaker = RIEMANN_CB_HALF_OPEN;
 
          riemann_tcp_socket = init_riemann_tcp_socket (gmetad_config.riemann_server, gmetad_config.riemann_port);
          if (riemann_tcp_socket == NULL) {
-            err_msg("[riemann] Failed to reconect to riemann server. Retry again in %d seconds.", RIEMANN_RETRY_TIMEOUT);
+            err_msg("[riemann] Failed to reconnect to riemann server. Retry again in %d seconds.", RIEMANN_RETRY_TIMEOUT);
             riemann_circuit_breaker = RIEMANN_CB_OPEN;
             riemann_reset_timeout = apr_time_now () + RIEMANN_RETRY_TIMEOUT * APR_USEC_PER_SEC;
          } else {
-            err_msg("[riemann] Successful reconnection to riemann server. Reset failure count to zero.");
+            debug_msg("[riemann] Successful reconnection to riemann server. Reset failure count to zero.");
             riemann_circuit_breaker = RIEMANN_CB_CLOSED;
             riemann_failures = 0;
          }
          pthread_mutex_unlock( &riemann_cb_mutex );
 
-         err_msg("[riemann] circuit breaker is now %s (%d)",
+         debug_msg("[riemann] circuit breaker is now %s (%d)",
             riemann_circuit_breaker == RIEMANN_CB_CLOSED ? "CLOSED" :
             riemann_circuit_breaker == RIEMANN_CB_OPEN ?   "OPEN"
                               /* RIEMANN_CB_HALF_OPEN */ : "HALF_OPEN",
@@ -68,18 +68,18 @@ circuit_breaker_thread(void *arg)
             if (errno == EAGAIN) {
                /* timeout */
             } else {
-               err_msg ("[riemann] recv(): %s", strerror(errno));
+               err_msg("[riemann] recv(): %s", strerror(errno));
                pthread_mutex_lock( &riemann_cb_mutex );
                riemann_failures++;
                pthread_mutex_unlock( &riemann_cb_mutex );
             }
          } else if (nbytes == 0) {
-            err_msg ("[riemann] server closed connection");
+            debug_msg("[riemann] server closed connection");
             pthread_mutex_lock( &riemann_cb_mutex );
             riemann_circuit_breaker = RIEMANN_CB_OPEN;
             pthread_mutex_unlock( &riemann_cb_mutex );
          } else if (nbytes != sizeof (header)) {
-            err_msg ("[riemann] response header length mismatch");
+            err_msg("[riemann] response header length mismatch");
             pthread_mutex_lock( &riemann_cb_mutex );
             riemann_failures++;
             pthread_mutex_unlock( &riemann_cb_mutex );
@@ -89,32 +89,32 @@ circuit_breaker_thread(void *arg)
             nbytes = recv (riemann_tcp_socket->sockfd, buf, len, 0);
 
             if (nbytes == -1) {
-               err_msg ("[riemann] recv(): %s", strerror(errno));
+               err_msg("[riemann] recv(): %s", strerror(errno));
                pthread_mutex_lock( &riemann_cb_mutex );
                riemann_circuit_breaker = RIEMANN_CB_OPEN;
                pthread_mutex_unlock( &riemann_cb_mutex );
             } else if (nbytes == 0) {
-               err_msg ("[riemann] server closed connection");
+               debug_msg("[riemann] server closed connection");
                pthread_mutex_lock( &riemann_cb_mutex );
                riemann_circuit_breaker = RIEMANN_CB_OPEN;
                pthread_mutex_unlock( &riemann_cb_mutex );
             } else if (nbytes != len) {
-               err_msg ("[riemann] response payload length mismatch");
+               err_msg("[riemann] response payload length mismatch");
                pthread_mutex_lock( &riemann_cb_mutex );
                riemann_circuit_breaker = RIEMANN_CB_OPEN;
                pthread_mutex_unlock( &riemann_cb_mutex );
             } else {
                response = msg__unpack (NULL, len, buf);
-               debug_msg ("[riemann] message response ok=%d", response->ok);
+               debug_msg("[riemann] message response ok=%d", response->ok);
                if (response->ok != 1) {
                   debug_msg("[riemann] server applying backpressure");
                   if (response->error)
-                     err_msg ("[riemann] reponse error: %s", response->error);
+                     err_msg("[riemann] reponse error: %s", response->error);
                   pthread_mutex_lock( &riemann_cb_mutex );
-                  riemann_failures++; /* FIXME - or OPEN? */
+                  riemann_failures++;
                   pthread_mutex_unlock( &riemann_cb_mutex );
                } else {
-                  debug_msg ("[riemann] Message received OK");
+                  debug_msg("[riemann] Message received OK");
                }
             }
             free (buf);
