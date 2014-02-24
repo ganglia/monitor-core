@@ -46,6 +46,7 @@ int ganglia_scoreboard_get(char *name);
 void ganglia_scoreboard_set(char *name, int val);
 void ganglia_scoreboard_reset(char *name);
 int ganglia_scoreboard_inc(char *name);
+int ganglia_scoreboard_incby(char *name, int val);
 void ganglia_scoreboard_dec(char *name);
 ganglia_scoreboard_types ganglia_scoreboard_type(char *name);
 #else
@@ -57,6 +58,7 @@ ganglia_scoreboard_types ganglia_scoreboard_type(char *name);
 #define ganglia_scoreboard_set(n,v) 
 #define ganglia_scoreboard_reset(n) 
 #define ganglia_scoreboard_inc(n)
+#define ganglia_scoreboard_incby(n,v)
 #define ganglia_scoreboard_dec(n) 
 #define ganglia_scoreboard_type(n) (GSB_UNKNOWN)
 #endif
