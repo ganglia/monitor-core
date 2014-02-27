@@ -25,6 +25,13 @@ libdir="@libdir@"
 sbindir="@sbindir@"
 sysconfdir="@sysconfdir@"
 includedir="@includedir@"
+runstatedir="@localstatedir@/run" # @runstatedir@ if autoconf >= 2.70
+if [ -d "@sysconfdir@/sysconfig" ]
+then
+  envdir="@sysconfdir@/sysconfig"
+else
+  envdir="@sysconfdir@/default"
+fi
 
 # Additional variables set by configure
 CFLAGS="`echo '@CFLAGS@' | $AWK '{ gsub(/,/, "\\\\,"); print }'`"
@@ -70,6 +77,8 @@ $SED -e "s,@prefix[@],$prefix,g" \
      -e "s,@libdir[@],$libdir,g" \
      -e "s,@sbindir[@],$sbindir,g" \
      -e "s,@sysconfdir[@],$sysconfdir,g" \
+     -e "s,@envdir[@],$envdir,g" \
+     -e "s,@runstatedir[@],$runstatedir,g" \
      -e "s,@includedir[@],$includedir,g" \
      -e "s,@CFLAGS[@],$CFLAGS,g" \
      -e "s,@LDFLAGS[@],$LDFLAGS,g" \

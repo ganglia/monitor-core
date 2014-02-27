@@ -11,6 +11,7 @@ Dependencies
 * python (http://www.python.org/)
 * PCRE (http://www.pcre.org/)
 * RRDtool (http://oss.oetiker.ch/rrdtool/)
+* CK (http://concurrencykit.org/)
 
 Basic Installation
 ==================

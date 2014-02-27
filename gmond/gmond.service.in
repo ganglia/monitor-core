@@ -3,8 +3,9 @@ Description=Ganglia Monitor Daemon
 After=network.target
 
 [Service]
-ExecStart=@sbindir@/gmond -f
-User=nobody
+Type=forking
+PIDFile=@runstatedir@/gmond.pid
+ExecStart=@sbindir@/gmond --pid-file=@runstatedir@/gmond.pid
 
 [Install]
 WantedBy=multi-user.target
