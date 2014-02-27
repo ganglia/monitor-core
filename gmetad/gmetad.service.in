@@ -3,8 +3,10 @@ Description=Ganglia Meta Daemon
 After=network.target
 
 [Service]
-ExecStart=@sbindir@/gmetad -f
-User=ganglia
+Type=forking
+PIDFile=@runstatedir@/gmetad.pid
+ExecStart=@sbindir@/gmetad --pid-file=@runstatedir@/gmetad.pid
+EnvironmentFile=-@envdir@/gmetad
 
 [Install]
 WantedBy=multi-user.target
