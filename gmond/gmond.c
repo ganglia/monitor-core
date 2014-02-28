@@ -264,38 +264,42 @@ socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
   z_stream *strm;
   int z_ret;
 
-  ret = apr_socket_data_get((void**)&strm, GZIP_KEY, sock);
-  if (ret != APR_SUCCESS || strm == NULL)
-    {
-      ret = socket_send_raw( sock, buf, len );
-    }
+  if (!args_info.gzip_output_flag)
+  {
+    ret = socket_send_raw( sock, buf, len );
+  }
   else
+  {
+    ret = apr_socket_data_get((void**)&strm, GZIP_KEY, sock);
+    if ( ret == APR_SUCCESS)
     {
       strm->next_in = (Bytef *)buf;
       strm->avail_in = *len;
 
       while( strm->avail_in )
-	{
-	  strm->next_out = (Bytef *)outputbuffer;
-	  strm->avail_out = outputlen;
+      {
+        strm->next_out = (Bytef *)outputbuffer;
+        strm->avail_out = outputlen;
 
-	  z_ret = deflate( strm, 0 );
-	  if (z_ret != Z_OK)
-	    {
-	      return APR_ENOMEM;
-	    }
+        z_ret = deflate( strm, 0 );
+        if (z_ret != Z_OK)
+        {
+          return APR_ENOMEM;
+        }
 
-	  wlen = outputlen - strm->avail_out;
-	  if( wlen )
-	    {
-	      ret = socket_send_raw( sock, outputbuffer, &wlen );
-	      if(ret != APR_SUCCESS)
-		{
-		  return ret;
-		}
-	    }
-	}
+        wlen = outputlen - strm->avail_out;
+        if( wlen )
+        {
+          ret = socket_send_raw( sock, outputbuffer, &wlen );
+          if(ret != APR_SUCCESS)
+          {
+            return ret;
+          }
+        }
+      }
     }
+  }
+
   return ret;
 }
 
@@ -3141,7 +3145,7 @@ print_metric_list( void )
 }
 
 static void
-cleanup_data( apr_pool_t *pool, apr_time_t now)
+cleanup_data( apr_pool_t *pool, apr_time_t now )
 {
   apr_hash_index_t *hi, *metric_hi;
 
@@ -3164,6 +3168,10 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
           apr_hash_set( hosts, host->ip, APR_HASH_KEY_STRING, NULL);
           apr_thread_mutex_unlock(hosts_mutex);
           /* free all its memory */
+          if(host->location)
+          {
+            free(host->location);
+          }
           apr_pool_destroy( host->pool);
         } 
       else
@@ -3186,6 +3194,9 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
               dmax = metric->message_u.f_message.Ganglia_metadata_msg_u.gfull.metric.dmax;
               if( dmax && (now - metric->last_heard_from) > (dmax * APR_USEC_PER_SEC) )
                 {
+                  Ganglia_metadata *value_metric = (Ganglia_metadata *)apr_hash_get( host->gmetrics,
+                                                                                     metric->name,
+                                                                                     APR_HASH_KEY_STRING);
                   /* this is a stale gmetric */
                   debug_msg("deleting old metric '%s' from host '%s'", metric->name, host->hostname);
 
@@ -3196,6 +3207,10 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
                   apr_thread_mutex_unlock(host->mutex);
                   /* destroy any memory that was allocated for this gmetric */
                   apr_pool_destroy( metric->pool );
+                  if (value_metric)
+                  {
+                    apr_pool_destroy( value_metric->pool );
+                  }
                 }
             }
         }
@@ -3337,6 +3352,7 @@ main ( int argc, char *argv[] )
   apr_signal( SIGPIPE, SIG_IGN );
   apr_signal( SIGINT, sig_handler );
   apr_signal( SIGHUP, sig_handler );
+  apr_signal( SIGTERM, sig_handler );
 
   initialize_scoreboard();
 
@@ -3443,6 +3459,8 @@ main ( int argc, char *argv[] )
           next_collection = now + 60 * APR_USEC_PER_SEC;
         }
     }
+
+  apr_pool_destroy(global_context);
 
   if(reload_required == 1)
     reload_ganglia_configuration();
