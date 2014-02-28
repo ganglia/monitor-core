@@ -19,6 +19,12 @@ extern struct type_tag* in_type_list (const char *, unsigned int);
 extern Source_t root;
 extern gmetad_config_t gmetad_config;
 
+#ifdef WITH_RIEMANN
+#include "riemann.pb-c.h"
+__thread Msg *riemann_msg = NULL;
+__thread int riemann_num_events;
+#endif /* WITH_RIEMANN */
+
 /* The report method functions (in server.c). */
 extern int metric_report_start(Generic_t *self, datum_t *key, 
                 client_t *client, void *arg);
@@ -524,21 +530,33 @@ startElement_HOST(void *data, const char *el, const char **attr)
 
 #ifdef WITH_RIEMANN
 
-        /* Forward heartbeat metric to Riemann */
-        if (gmetad_config.riemann_server) {
+   /* Forward heartbeat metric to Riemann */
+   if (gmetad_config.riemann_server) {
 
-            char value[12];
-            sprintf(value, "%d", reported);
+      if (!strcmp(gmetad_config.riemann_protocol, "tcp")) {
+         riemann_msg = malloc (sizeof (Msg));
+         msg__init (riemann_msg);
+      }
 
-            int rm_ret = 0;
-            rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
-                                           getfield(host->strings, host->ip), "heartbeat", value, "int",
-                                           "seconds", NULL, xmldata->source.localtime, getfield(host->strings, host->tags),
-                                           getfield(host->strings, host->location), tmax * 4);
+      char value[12];
+      sprintf(value, "%d", reported);
 
-            if (rm_ret)
-                err_msg("[riemann] Could not send heartbeat metric to Riemann");
-        }
+      Event *event = create_riemann_event (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
+                                    getfield(host->strings, host->ip), "heartbeat", value, "int",
+                                    "seconds", NULL, xmldata->source.localtime, getfield(host->strings, host->tags),
+                                    getfield(host->strings, host->location), tmax * 4);
+
+      if (event) {
+         if (!strcmp(gmetad_config.riemann_protocol, "udp")) {
+             send_event_to_riemann (event);
+         } else {
+             riemann_num_events++;
+             riemann_msg->events = malloc (sizeof (Event) * riemann_num_events);
+             riemann_msg->n_events = riemann_num_events;
+             riemann_msg->events[riemann_num_events - 1] = event;
+         }
+      }
+    }
 #endif /* WITH_RIEMANN */
 
    /* Trim structure to the correct length. */
@@ -666,26 +684,34 @@ startElement_METRIC(void *data, const char *el, const char **attr)
 
             Host_t *host = (Host_t*) host;
             host = &(xmldata->host);
-            int rm_ret = 0;
+            Event *event;
 
             if (tt->type == INT || tt->type == UINT) {
-               rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
+               event = create_riemann_event (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
                                               getfield(host->strings, host->ip), name, metricval, "int",
                                               units, NULL, xmldata->source.localtime, getfield(host->strings, host->tags),
                                               getfield(host->strings, host->location), metric->tmax);
             } else if (tt->type == FLOAT) {
-               rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
+               event = create_riemann_event (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
                                               getfield(host->strings, host->ip), name, metricval, "float",
                                               units, NULL, xmldata->source.localtime, getfield(host->strings, host->tags),
                                               getfield(host->strings, host->location), metric->tmax);
             } else {
-               rm_ret = send_data_to_riemann (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
+               event = create_riemann_event (gmetad_config.gridname, xmldata->sourcename, xmldata->hostname,
                                               getfield(host->strings, host->ip), name, metricval, "string",
                                               units, NULL, xmldata->source.localtime, getfield(host->strings, host->tags),
                                               getfield(host->strings, host->location), metric->tmax);
             }
-            if (rm_ret)
-                err_msg("[riemann] Could not send %s metric to Riemann", name);
+            if (event) {
+                if (!strcmp(gmetad_config.riemann_protocol, "udp")) {
+                    send_event_to_riemann (event);
+                } else {
+                    riemann_num_events++;
+                    riemann_msg->events = realloc (riemann_msg->events, sizeof (Event) * riemann_num_events);
+                    riemann_msg->n_events = riemann_num_events;
+                    riemann_msg->events[riemann_num_events - 1] = event;
+                }
+            }
         }
 #endif /* WITH_RIEMANN */
 
@@ -1259,6 +1285,18 @@ endElement_CLUSTER(void *data, const char *el)
    return 0;
 }
 
+#ifdef WITH_RIEMANN
+static int
+endElement_HOST(void *data, const char *el)
+{
+   if (!strcmp(gmetad_config.riemann_protocol, "tcp")) {
+      send_message_to_riemann(riemann_msg);
+      destroy_riemann_msg(riemann_msg);
+      riemann_num_events = 0;
+   }
+   return 0;
+}
+#endif /* WITH_RIEMANN */
 
 static void
 end (void *data, const char *el)
@@ -1278,6 +1316,12 @@ end (void *data, const char *el)
          case CLUSTER_TAG:
             rc = endElement_CLUSTER(data, el);
             break;
+
+#ifdef WITH_RIEMANN
+         case HOST_TAG:
+            rc = endElement_HOST(data, el);
+            break;
+#endif /* WITH_RIEMANN */
 
          default:
                break;

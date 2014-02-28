@@ -12,7 +12,7 @@ GLDFLAGS =
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/include $(GCFLAGS) @CK_CFLAGS@ @PROTOBUF_CFLAGS@
+AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/include $(GCFLAGS) @CK_CFLAGS@ @PROTOBUF_C_CFLAGS@
 
 sbin_PROGRAMS = gmetad
 
@@ -22,13 +22,14 @@ cmdline.c: cmdline.c.in $(FIXCONFIG)
 gmetad_SOURCES =  gmetad.c cmdline.c.in cmdline.c cmdline.h gmetad.h data_thread.c \
    server.c process_xml.c rrd_helpers.c export_helpers.c conf.c conf.h type_hash.c \
    xml_hash.c cleanup.c rrd_helpers.h export_helpers.h daemon_init.c daemon_init.h \
-	 server_priv.h gm_scoreboard.h
+   server_priv.h
+
 if BUILD_RIEMANN
-  gmetad_SOURCES += riemann.pb-c.h riemann.pb-c.c
+  gmetad_SOURCES += riemann.pb-c.h riemann.pb-c.c circuit_breaker.c
 endif
 
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
-                 $(GLDADD) $(DEPS_LIBS) @CK_LIBS@ @PROTOBUF_LIBS@
+                 $(GLDADD) $(DEPS_LIBS) @CK_LIBS@ @PROTOBUF_C_LIBS@
 
 gmetad_LDFLAGS = $(GLDFLAGS)
 

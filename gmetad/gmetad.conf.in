@@ -223,8 +223,8 @@ case_sensitive_hostnames 0
 # default: 5555
 # riemann_port 5555
 #
-# default: udp   (tcp transport is not supported, yet)
-# riemann_protocol udp
+# default: udp
+# riemann_protocol tcp
 #
 # List of arbitrary key-value pairs to be used as event attributes in
 # addition to those listed above.
