@@ -34,7 +34,7 @@ scoreboard.c gm_scoreboard.h apr_net.c apr_net.h libgmond.c
 libganglia_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-release $(LT_RELEASE) \
-	-export-dynamic 
+	-export-dynamic \
 	$(GLDFLAGS)
 
 libganglia_la_LIBADD = $(GLDADD) @CK_LIBS@
