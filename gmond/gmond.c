@@ -264,37 +264,39 @@ socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
   z_stream *strm;
   int z_ret;
 
-  if (!args_info.gzip_output_flag)
+  ret = apr_socket_data_get((void**)&strm, GZIP_KEY, sock);
+  if (ret != APR_SUCCESS)
+  {
+    return ret;
+  }
+
+  if (!strm)
   {
     ret = socket_send_raw( sock, buf, len );
   }
   else
   {
-    ret = apr_socket_data_get((void**)&strm, GZIP_KEY, sock);
-    if ( ret == APR_SUCCESS)
+    strm->next_in = (Bytef *)buf;
+    strm->avail_in = *len;
+
+    while( strm->avail_in )
     {
-      strm->next_in = (Bytef *)buf;
-      strm->avail_in = *len;
+      strm->next_out = (Bytef *)outputbuffer;
+      strm->avail_out = outputlen;
 
-      while( strm->avail_in )
+      z_ret = deflate( strm, 0 );
+      if (z_ret != Z_OK)
       {
-        strm->next_out = (Bytef *)outputbuffer;
-        strm->avail_out = outputlen;
+        return APR_ENOMEM;
+      }
 
-        z_ret = deflate( strm, 0 );
-        if (z_ret != Z_OK)
+      wlen = outputlen - strm->avail_out;
+      if( wlen )
+      {
+        ret = socket_send_raw( sock, outputbuffer, &wlen );
+        if(ret != APR_SUCCESS)
         {
-          return APR_ENOMEM;
-        }
-
-        wlen = outputlen - strm->avail_out;
-        if( wlen )
-        {
-          ret = socket_send_raw( sock, outputbuffer, &wlen );
-          if(ret != APR_SUCCESS)
-          {
-            return ret;
-          }
+          return ret;
         }
       }
     }
