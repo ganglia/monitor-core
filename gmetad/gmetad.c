@@ -240,9 +240,10 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
       rc = 0;
    } else {
       /* We skip metrics not to be summarized. */
-      if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)key->data, llist_strncmp, &le) == 0)
-         return 0;
-
+      if (llist_search(&(gmetad_config.unsummarized_metrics), (void *)key->data, llist_strncmp, &le) == 0) {
+         rc = 0;
+         goto out;
+      }
 
       /* We know that all these metrics are numeric. */
       rc = hash_foreach(source->metric_summary, sum_metrics, arg);
@@ -252,6 +253,7 @@ do_root_summary( datum_t *key, datum_t *val, void *arg )
    root.hosts_up += source->hosts_up;
    root.hosts_down += source->hosts_down;
 
+out:
    /* summary completed for source */
    pthread_mutex_unlock(source->sum_finished);
 
