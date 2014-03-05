@@ -187,7 +187,7 @@ case_sensitive_hostnames 0
 # Memcached configuration (if it has been compiled in)
 # Format documentation at http://docs.libmemcached.org/libmemcached_configuration.html
 # default: ""
-# memcached_parameters "--SERVER=127.0.0.1"
+# memcached_parameters "--SERVER=127.0.0.1 --POOL-MIN=10 --POOL-MAX=32"
 #
 
 #-------------------------------------------------------------------------------
