@@ -511,7 +511,7 @@ AC_ARG_WITH( memcached,
 if test x"$withval" = xyes; then memcache="yes"; fi)
 
 if test x"$memcache" == xyes; then
-  PKG_CHECK_MODULES(DEPS, libmemcached >= 0.8.0)
+  PKG_CHECK_MODULES(DEPS, libmemcached >= 1.0.2)
   AC_SUBST(DEPS_CFLAGS)
   AC_SUBST(DEPS_LIBS)
   CFLAGS="$CFLAGS -DWITH_MEMCACHED"
