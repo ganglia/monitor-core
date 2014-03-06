@@ -43,8 +43,6 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "file.h"
-
 #include <apr_tables.h>
 #include <apr_strings.h>
 #include <apr_lib.h>
