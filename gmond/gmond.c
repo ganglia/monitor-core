@@ -264,7 +264,7 @@ socket_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
   z_stream *strm;
   int z_ret;
 
-  if (!args_info.gzip_output_flag)
+  if (!args_info.gzip_output_given)
   {
     ret = socket_send_raw( sock, buf, len );
   }
