@@ -332,7 +332,7 @@ reload_ganglia_configuration(void)
 #else
   /* Exit and let Windows service manager restart the process, as
      neither Cygwin nor apr provide a perfect equivalent to execve */
-  exit(0);
+  exit(EXIT_SUCCESS);
 #endif
   err_msg("execve failed to reload %s: %s", gmond_bin, strerror(errno));
   exit(EXIT_FAILURE);
@@ -3299,7 +3299,7 @@ main ( int argc, char *argv[] )
     {
       fprintf(stdout, "%s", default_gmond_configuration);
       fflush( stdout );
-      exit(0);
+      exit(EXIT_SUCCESS);
     }
 
   process_configuration_file();
@@ -3322,7 +3322,7 @@ main ( int argc, char *argv[] )
       setup_metric_callbacks();
       print_metric_list();
       fflush( stdout );
-      exit(0);
+      exit(EXIT_SUCCESS);
     }
 
   if(args_info.bandwidth_flag)
@@ -3331,7 +3331,7 @@ main ( int argc, char *argv[] )
       setup_metric_callbacks();
       bytes_per_sec = setup_collection_groups();
       fprintf(stdout, "%f bytes/sec\n", bytes_per_sec);
-      exit(0);
+      exit(EXIT_SUCCESS);
     }
 
   daemonize_if_necessary( argv );
