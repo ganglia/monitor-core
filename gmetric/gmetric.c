@@ -26,14 +26,14 @@ main( int argc, char *argv[] )
 
   /* process the commandline options */
   if (cmdline_parser (argc, argv, &args_info) != 0)
-        exit(1);
+        exit(EXIT_FAILURE);
 
   /* create the global context */
   global_context = Ganglia_pool_create(NULL);
   if(!global_context)
     {
       fprintf(stderr,"Unable to create global context. Exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   
   /* parse the configuration file */
@@ -49,7 +49,7 @@ main( int argc, char *argv[] )
   if(!send_channels)
     {
       fprintf(stderr,"Unable to create ganglia send channels. Exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
   /* create the message */
@@ -57,7 +57,7 @@ main( int argc, char *argv[] )
   if(!gmetric)
     {
       fprintf(stderr,"Unable to allocate gmetric structure. Exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   apr_pool_t *gm_pool = (apr_pool_t*)gmetric->pool;
 
@@ -67,7 +67,7 @@ main( int argc, char *argv[] )
     if( ! (args_info.name_given && args_info.value_given && args_info.type_given))
       {
         fprintf(stderr,"Incorrect options supplied, exiting.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
       }
     rval = Ganglia_metric_set( gmetric, args_info.name_arg, args_info.value_arg,
              args_info.type_arg, args_info.units_arg, cstr_to_slope(args_info.slope_arg),
@@ -79,16 +79,16 @@ main( int argc, char *argv[] )
     {
     case 1:
       fprintf(stderr,"gmetric parameters invalid. exiting.\n");
-      exit(1); 
+      exit(EXIT_FAILURE);
     case 2:
       fprintf(stderr,"one of your parameters has an invalid character '\"'. exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     case 3:
       fprintf(stderr,"the type parameter \"%s\" is not a valid type. exiting.\n", args_info.type_arg);
-      exit(1);
+      exit(EXIT_FAILURE);
     case 4:
       fprintf(stderr,"the value parameter \"%s\" does not represent a number. exiting.\n", args_info.value_arg);
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
   /* TODO: Try to validate the spoof arg format.  A better validation could 
@@ -96,7 +96,7 @@ main( int argc, char *argv[] )
   if(args_info.spoof_given && !strchr(args_info.spoof_arg,':'))
     {
       fprintf(stderr,"Incorrect format for spoof argument. exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
   if(args_info.spoof_given)
@@ -129,7 +129,7 @@ main( int argc, char *argv[] )
       fprintf(stderr,"There was an error sending to %d of the send channels.\n", rval);
       Ganglia_metric_destroy(gmetric);
       Ganglia_pool_destroy(global_context);
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
   /* cleanup */
