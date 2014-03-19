@@ -18,7 +18,7 @@ conf_strdup (const char *s)
 static FUNC_ERRORHANDLER(errorhandler)
 {
    printf("gmond config file error: %s\n", msg);
-   exit(1);
+   exit(EXIT_FAILURE);
 }
 
 static DOTCONF_CB(cb_name)
@@ -122,7 +122,7 @@ static DOTCONF_CB(cb_trusted_hosts)
    if(!c->trusted_hosts)
      {
        fprintf(stderr,"Unable to create trusted_hosts array. Exiting.\n");
-       exit(1);
+       exit(EXIT_FAILURE);
      }
    
    for (i = 0; i < cmd->arg_count; i++)
