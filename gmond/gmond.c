@@ -332,10 +332,10 @@ reload_ganglia_configuration(void)
 #else
   /* Exit and let Windows service manager restart the process, as
      neither Cygwin nor apr provide a perfect equivalent to execve */
-  exit(0);
+  exit(EXIT_SUCCESS);
 #endif
   err_msg("execve failed to reload %s: %s", gmond_bin, strerror(errno));
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
 /* this is just a temporary function */
@@ -437,7 +437,7 @@ process_deaf_mute_mode( void )
   if(deaf && mute)
     {
       err_msg("Configured to run both deaf and mute. Nothing to do. Exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 }
 
@@ -482,7 +482,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
   if(!acl)
     {
       err_msg("Unable to allocate memory for ACL. Exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
   default_action = cfg_getstr( acl_config, "default");
@@ -497,7 +497,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
   else
     {
       err_msg("Invalid default ACL '%s'. Exiting.\n", default_action);
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
   /* Create an array to hold each of the access instructions */
@@ -505,7 +505,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
   if(!acl->access_array)
     {
       err_msg("Unable to malloc access array. Exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   for(i=0; i< num_access; i++)
     {
@@ -518,7 +518,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
           /* This shouldn't happen unless maybe acl is empty and
            * the safest thing to do it exit */
           err_msg("Unable to process ACLs. Exiting.\n");
-          exit(1);
+          exit(EXIT_FAILURE);
         }
 
       ip     = cfg_getstr( access_config, "ip");
@@ -527,7 +527,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
       if(!ip && !mask && !action)
         {
           err_msg("An access record requires an ip, mask and action. Exiting.\n");
-          exit(1);
+          exit(EXIT_FAILURE);
         }
 
       /* Process the action first */
@@ -542,7 +542,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
       else
         {
           err_msg("ACL access entry has action '%s'. Must be deny|allow. Exiting.\n", action);
-          exit(1);
+          exit(EXIT_FAILURE);
         }  
 
       /* Create the subnet */
@@ -551,7 +551,7 @@ Ganglia_acl_create ( cfg_t *channel, apr_pool_t *pool )
       if(status != APR_SUCCESS)
         {
           err_msg("ACL access entry has invalid ip('%s')/mask('%s'). Exiting.\n", ip, mask);
-          exit(1);
+          exit(EXIT_FAILURE);
         }
 
       /* Save this access entry to the acl */
@@ -603,12 +603,12 @@ get_sock_family( char *family )
       return APR_INET6;
 #else
       err_msg("IPv6 is not supported on this host. Exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
 #endif
     }
 
   err_msg("Unknown family '%s'. Try inet4|inet6. Exiting.\n", family);
-  exit(1);
+  exit(EXIT_FAILURE);
   /* shouldn't get here */
   return APR_UNSPEC;
 }
@@ -670,14 +670,14 @@ setup_listen_channels_pollset( void )
       char apr_err[512];
       apr_strerror(status, apr_err, 511);
       err_msg("apr_pollset_create failed: %s", apr_err);
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   if((status = apr_pollset_create(&tcp_listen_channels, num_tcp_accept_channels, global_context, pollset_opts)) != APR_SUCCESS)
     {
       char apr_err[512];
       apr_strerror(status, apr_err, 511);
       err_msg("apr_pollset_create failed: %s", apr_err);
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
   if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
@@ -727,7 +727,7 @@ setup_listen_channels_pollset( void )
                 {
                   err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'. Try setting retry_bind.  Exiting.\n",
                   mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
-                  exit(1);
+                  exit(EXIT_FAILURE);
                 }
               err_msg("Error creating multicast server mcast_join=%s port=%d mcast_if=%s family='%s'.  Will try again...\n",
                   mcast_join? mcast_join: "NULL", port, mcast_if? mcast_if:"NULL",family);
@@ -745,7 +745,7 @@ setup_listen_channels_pollset( void )
                 {
                   err_msg("Error creating UDP server on port %d bind=%s.  Try setting retry_bind.  Exiting.\n",
                     port, bindaddr? bindaddr: "unspecified");
-                  exit(1);
+                  exit(EXIT_FAILURE);
                 }
               err_msg("Error creating UDP server on port %d bind=%s.  Will try again...\n",
                   port, bindaddr? bindaddr: "unspecified");
@@ -779,7 +779,7 @@ setup_listen_channels_pollset( void )
                             (int) (rx_buf_sz/2), (int) buffer);
                           err_msg("NOTE: only supported on systems that have Apache Portable Runtime library version 0.9.4 or higher.\n");
                           err_msg("Check Operating System (kernel) limits, change or disable buffer size. Exiting.\n");
-                          exit(1);
+                          exit(EXIT_FAILURE);
                         }
                       else
                         { /* RB: Eureka */
@@ -791,7 +791,7 @@ setup_listen_channels_pollset( void )
                 {
                   err_msg("Unable to verify UDP receive buffer for port %d bind=%s to size: %d. Check Operating System (limits) or change buffer size. Exiting.\n",
                            port, bindaddr? bindaddr: "unspecified", buffer);
-                  exit(1);
+                  exit(EXIT_FAILURE);
                 }
             }
           else
@@ -800,7 +800,7 @@ setup_listen_channels_pollset( void )
                 port, bindaddr? bindaddr: "unspecified", (apr_int32_t) buffer);
               err_msg("This is currently only supported on systems that have Apache Portable Runtime library version 0.9.4 or higher.\n");
               err_msg("Check Operating System (kernel) limits, change or disable buffer size. Exiting.\n");
-              exit(1);
+              exit(EXIT_FAILURE);
             }
         }
 
@@ -832,7 +832,7 @@ setup_listen_channels_pollset( void )
       if(!channel)
         {
           err_msg("Unable to malloc memory for channel.  Exiting. \n");
-          exit(1);
+          exit(EXIT_FAILURE);
         }
 
       /* Mark this channel as a udp_recv_channel */
@@ -853,7 +853,7 @@ setup_listen_channels_pollset( void )
       if(status != APR_SUCCESS)
         {
           err_msg("Failed to add socket to pollset. Exiting.\n");
-          exit(1);
+          exit(EXIT_FAILURE);
         }
     }
 
@@ -892,7 +892,7 @@ setup_listen_channels_pollset( void )
       if(!socket)
         {
           err_msg("Unable to create tcp_accept_channel. Exiting.\n");
-          exit(1);
+          exit(EXIT_FAILURE);
         }
 
       tcp_sockets[i] = socket;
@@ -906,7 +906,7 @@ setup_listen_channels_pollset( void )
       if(!channel)
         {
           err_msg("Unable to malloc data for channel. Exiting.\n");
-          exit(1);
+          exit(EXIT_FAILURE);
         }
       
       channel->type = TCP_ACCEPT_CHANNEL;
@@ -928,7 +928,7 @@ setup_listen_channels_pollset( void )
       if(status != APR_SUCCESS)
          {
             err_msg("Failed to add socket to pollset. Exiting.\n");
-            exit(1);
+            exit(EXIT_FAILURE);
          }
     }
 }
@@ -1598,20 +1598,12 @@ static z_stream *
 zstream_new()
 {
   int err;
-
-  z_stream *strm = malloc(sizeof(z_stream));
+  
+  z_stream *strm = calloc(1, sizeof(z_stream));
   if (strm == 0)
     {
       return NULL;
     }
-
-  strm->next_in   = 0;
-  strm->avail_in  = 0;
-  strm->next_out  = 0;
-  strm->avail_out = 0;
-  strm->zalloc    = 0;
-  strm->zfree     = 0;
-  strm->opaque    = 0;
 
   /* Yes, 15 + 16 are 2 special magic values documented in zlib.h */
   err = deflateInit2(strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY);
@@ -2606,7 +2598,7 @@ setup_collection_groups( void )
       if(!group)
         {
           err_msg("Unable to malloc memory for collection group. Exiting.\n");
-          exit(1);
+          exit(EXIT_FAILURE);
         }
 
       group_conf  = cfg_getnsec( config_file, "collection_group", i);
@@ -2662,7 +2654,7 @@ setup_collection_groups( void )
               if(apr_pool_create(&p, global_context) != APR_SUCCESS)
                 {
                   err_msg("pool creation failed\n");
-                  exit(1);
+		  exit(EXIT_FAILURE);
                 }
 
               for(hi = apr_hash_first(p, metric_callbacks);
@@ -2700,7 +2692,7 @@ setup_collection_groups( void )
                           if((ptrs = apr_pcalloc(p, strlen(title_tmpl) * sizeof(struct iovec))) == NULL)
                             {
                               err_msg("apr_pcalloc failed\n");
-                              exit(1);
+			      exit(EXIT_FAILURE);
                             }
                           for (i = 0; title_tmpl[i] != 0; i++)
                             {
@@ -2721,7 +2713,7 @@ setup_collection_groups( void )
                                       if(index < 1 || index > PCRE_MAX_SUBPATTERNS)
                                         {
                                           err_msg("title [%s] contains invalid reference to subpattern\n", title_tmpl);
-                                          exit(1);
+					  exit(EXIT_FAILURE);
                                         }
                                       pos1 = pcre_ovector[index * 2];
                                       pos2 = pcre_ovector[index * 2 + 1];
@@ -3284,7 +3276,7 @@ main ( int argc, char *argv[] )
   gmond_argv = argv;
 
   if (cmdline_parser (argc, argv, &args_info) != 0)
-      exit(1) ;
+      exit(EXIT_FAILURE);
 
   if(args_info.convert_given)
     {
@@ -3307,7 +3299,7 @@ main ( int argc, char *argv[] )
     {
       fprintf(stdout, "%s", default_gmond_configuration);
       fflush( stdout );
-      exit(0);
+      exit(EXIT_SUCCESS);
     }
 
   process_configuration_file();
@@ -3330,7 +3322,7 @@ main ( int argc, char *argv[] )
       setup_metric_callbacks();
       print_metric_list();
       fflush( stdout );
-      exit(0);
+      exit(EXIT_SUCCESS);
     }
 
   if(args_info.bandwidth_flag)
@@ -3339,7 +3331,7 @@ main ( int argc, char *argv[] )
       setup_metric_callbacks();
       bytes_per_sec = setup_collection_groups();
       fprintf(stdout, "%f bytes/sec\n", bytes_per_sec);
-      exit(0);
+      exit(EXIT_SUCCESS);
     }
 
   daemonize_if_necessary( argv );
@@ -3392,7 +3384,7 @@ main ( int argc, char *argv[] )
   if (apr_thread_mutex_create(&hosts_mutex, APR_THREAD_MUTEX_DEFAULT, global_context) != APR_SUCCESS)
     {
       err_msg("Failed to create thread mutex. Exiting.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
   /* Initialize time variables */
@@ -3405,7 +3397,7 @@ main ( int argc, char *argv[] )
       if (apr_thread_create(&thread, NULL, tcp_listener, NULL, global_context) != APR_SUCCESS)
         {
           err_msg("Failed to create TCP listener thread. Exiting.\n");
-          exit(1);
+          exit(EXIT_FAILURE);
         }
     }
 
