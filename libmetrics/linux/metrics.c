@@ -318,7 +318,6 @@ void update_ifdata ( char *caller )
         l_pin = l_pkts_in / t;
         l_pout = l_pkts_out / t;
 
-#ifdef REMOVE_BOGUS_SPIKES
         /*
          * Check for "invalid" data, caused by HW error. Throw away dubious data points
          * FIXME: This should be done per-interface, with threshholds depending on actual link speed
@@ -329,7 +328,6 @@ void update_ifdata ( char *caller )
                    l_bin, l_bout, l_pin, l_pout, t);
            return;
         }
-#endif
 
         /*
          * Finally return Values
