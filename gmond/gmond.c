@@ -1598,20 +1598,12 @@ static z_stream *
 zstream_new()
 {
   int err;
-
-  z_stream *strm = malloc(sizeof(z_stream));
+  
+  z_stream *strm = calloc(1, sizeof(z_stream));
   if (strm == 0)
     {
       return NULL;
     }
-
-  strm->next_in   = 0;
-  strm->avail_in  = 0;
-  strm->next_out  = 0;
-  strm->avail_out = 0;
-  strm->zalloc    = 0;
-  strm->zfree     = 0;
-  strm->opaque    = 0;
 
   /* Yes, 15 + 16 are 2 special magic values documented in zlib.h */
   err = deflateInit2(strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY);
