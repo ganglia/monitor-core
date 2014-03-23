@@ -118,6 +118,9 @@ class UpdateMetricThread(threading.Thread):
             _Lock.acquire()
             val = self.metric[name]
             _Lock.release()
+        # Value should never be negative. If it is counters wrapper due to e.g. memcached restart
+        if val < 0:
+            val = 0
         return val
 
 def metric_init(params):
