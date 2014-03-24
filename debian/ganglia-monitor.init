@@ -28,6 +28,15 @@ case "$1" in
                 2>&1 > /dev/null
 	echo "$NAME."
 	;;
+  status)
+        if pidof -o %PPID gmond > /dev/null; then
+            echo "Running"
+            exit 0
+        else
+            echo "Not running"
+             exit 1
+        fi
+        ;;
   reload)
   ;;
   restart|force-reload)
@@ -37,7 +46,7 @@ case "$1" in
   *)
 	N=/etc/init.d/$NAME
 	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
-	echo "Usage: $N {start|stop|restart|force-reload}" >&2
+	echo "Usage: $N {start|stop|restart|status|force-reload}" >&2
 	exit 1
 	;;
 esac
