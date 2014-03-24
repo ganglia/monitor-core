@@ -294,6 +294,14 @@ static DOTCONF_CB(cb_memcached_parameters)
    return NULL;
 }
 
+static DOTCONF_CB(cb_memcached_include_cluster_in_key)
+{
+   gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
+   debug_msg("Setting memcached_include_cluster_in_key to %ld", cmd->data.value);
+   c->memcached_include_cluster_in_key = cmd->data.value;
+   return NULL;
+}
+
 static DOTCONF_CB(cb_graphite_prefix)
 {
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
@@ -442,6 +450,7 @@ static configoption_t gmetad_options[] =
       {"carbon_protocol", ARG_STR, cb_carbon_protocol, &gmetad_config, 0},
       {"carbon_timeout", ARG_INT, cb_carbon_timeout, &gmetad_config, 0},
       {"memcached_parameters", ARG_STR, cb_memcached_parameters, &gmetad_config, 0},
+      {"memcached_include_cluster_in_key", ARG_INT, cb_memcached_include_cluster_in_key, &gmetad_config, 0},
       {"graphite_prefix", ARG_STR, cb_graphite_prefix, &gmetad_config, 0},
       {"graphite_path", ARG_STR, cb_graphite_path, &gmetad_config, 0},
       {"riemann_server", ARG_STR, cb_riemann_server, &gmetad_config, 0},
@@ -481,6 +490,7 @@ set_defaults (gmetad_config_t *config)
    config->carbon_port = 2003;
    config->carbon_protocol = "tcp";
    config->carbon_timeout = 500;
+   config->memcached_include_cluster_in_key = 0;
    config->riemann_port = 5555;
    config->riemann_protocol = "udp";
    config->riemann_attributes = NULL;

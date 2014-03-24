@@ -29,6 +29,7 @@ typedef struct
       char *carbon_protocol;
       int carbon_timeout;
       char *memcached_parameters;
+      int memcached_include_cluster_in_key;
       char *graphite_prefix;
       char *graphite_path;
       int scalable_mode;

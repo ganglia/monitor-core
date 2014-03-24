@@ -290,12 +290,23 @@ write_data_to_memcached ( const char *cluster, const char *host, const char *met
 {
    time_t expiry_time;
    char s_path[MEMCACHED_MAX_KEY_LENGTH];
-   if (strlen(cluster) + strlen(host) + strlen(metric) + 3 > MEMCACHED_MAX_KEY_LENGTH) {
-      debug_msg("Cluster + host + metric + 3 > %d", MEMCACHED_MAX_KEY_LENGTH);
-      return EXIT_FAILURE;
+   
+   // Check whether we are including cluster in the memcached key
+   if ( gmetad_config.memcached_include_cluster_in_key ) {
+      if (strlen(cluster) + strlen(host) + strlen(metric) + 3 > MEMCACHED_MAX_KEY_LENGTH) {
+	  debug_msg("Cluster + host + metric + 3 > %d", MEMCACHED_MAX_KEY_LENGTH);
+	  return EXIT_FAILURE;
+      }
+      sprintf(s_path, "%s/%s/%s", cluster, host, metric);
+    } else {
+      if ( strlen(host) + strlen(metric) + 3 > MEMCACHED_MAX_KEY_LENGTH) {
+	  debug_msg("host + metric + 3 > %d", MEMCACHED_MAX_KEY_LENGTH);
+	  return EXIT_FAILURE;
+      }
+      sprintf(s_path, "%s/%s", host, metric);     
    }
-   sprintf(s_path, "%s/%s/%s", cluster, host, metric);
-
+    
+    
    if (expiry != 0) {
       expiry_time = expiry;
    } else {
