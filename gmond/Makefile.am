@@ -6,18 +6,30 @@ if BUILD_PERL
 SUBDIRS += perl_modules
 endif
 
-EXTRA_DIST = gmond.aix.init gmond.solaris.init.in gmond.init gmond.init.SuSE gmond.conf.5 gmond.conf.html conf.pod cmdline.sh gmond.service.in
+EXTRA_DIST = gmond.aix.init
+EXTRA_DIST += gmond.solaris.init.in
+EXTRA_DIST += gmond.init
+EXTRA_DIST += gmond.init.SuSE
+EXTRA_DIST += gmond.conf.5
+EXTRA_DIST += gmond.conf.html
+EXTRA_DIST += conf.pod
+EXTRA_DIST += cmdline.sh
+EXTRA_DIST += gmond.service.in
 if STATIC_BUILD
 GCFLAGS = -D_LARGEFILE64_SOURCE
 if BUILD_STATUS
 MOD_GSTATUS = modules/status/mod_gstatus.lo
 endif
-GLDADD = modules/disk/mod_disk.lo \
-         modules/cpu/mod_cpu.lo modules/cpu/mod_load.lo \
-         modules/memory/mod_mem.lo modules/network/mod_net.lo \
-         modules/system/mod_proc.lo modules/system/mod_sys.lo \
-         modules/cpu/mod_multicpu.lo \
-         $(MOD_GSTATUS) @STATIC_USER_MODULES@
+GLDADD = modules/disk/mod_disk.lo
+GLDADD += modules/cpu/mod_cpu.lo
+GLDADD += modules/cpu/mod_load.lo
+GLDADD += modules/memory/mod_mem.lo
+GLDADD += modules/network/mod_net.lo
+GLDADD += modules/system/mod_proc.lo
+GLDADD += modules/system/mod_sys.lo
+GLDADD += modules/cpu/mod_multicpu.lo
+GLDADD += $(MOD_GSTATUS)
+GLDADD += @STATIC_USER_MODULES@
 GLDFLAGS = -static @EXPORT_SYMBOLS@
 if BUILD_PYTHON
 GLDADD += modules/python/mod_python.lo
