@@ -2011,13 +2011,20 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
   channel        = desc->client_data;
 
   /* Create a context for the client connection */
-  apr_pool_create(&client_context, global_context);
+  status = apr_pool_create(&client_context, global_context);
+  if(status != APR_SUCCESS)
+    {
+      return;
+    }
 
   /* Accept the connection */
   status = apr_socket_accept(&client, server, client_context);
   if(status != APR_SUCCESS)
     {
-      goto close_accept_socket;
+      debug_msg("failed to accept");
+      /* Failed to accept, socket was not created
+       * Clear a prepared client context */
+      goto clear_client_context;
     }
 
   /* Set the timeout for writing to the client */
@@ -2125,6 +2132,7 @@ process_tcp_accept_channel(const apr_pollfd_t *desc, apr_time_t now)
 close_accept_socket:
   apr_socket_shutdown(client, APR_SHUTDOWN_READ);
   apr_socket_close(client);
+clear_client_context:
   apr_pool_destroy(client_context);
 }
 
