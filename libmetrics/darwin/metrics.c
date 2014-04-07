@@ -11,7 +11,10 @@
 
 #include <stdlib.h>
 #include "interface.h"
+#include <AvailabilityMacros.h>
+#ifndef MAC_OS_X_VERSION_10_5
 #include <kvm.h>
+#endif
 #include <sys/sysctl.h>
 
 #include <mach/mach_init.h>
@@ -436,6 +439,17 @@ cpu_wio_func ( void )
 */
 g_val_t 
 cpu_intr_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+cpu_steal_func ( void )
 {
    g_val_t val;
    val.f = 0.0;
