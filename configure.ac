@@ -172,10 +172,6 @@ AC_ARG_WITH( perl,
 [  --with-perl=PATH        Specify prefix for perl or full path to interpreter],
 [if test x"$withval" != xno; then enable_perl="yes"; PERL_BIN="$withval"; fi])
 
-AC_ARG_WITH( php,
-[  --with-php=PATH         Specify prefix for php or full path to php-config],
-[if test x"$withval" != xno; then enable_php="yes"; PHP_BIN="$withval"; fi])
-
 AC_ARG_WITH( librrd,
 [  --with-librrd=DIR       Specify location for librrd],
 [if test x"$withval" != xno; then librrd="yes"; librrdpath="$withval"; fi])
@@ -250,10 +246,6 @@ AC_ARG_ENABLE( python,
 AC_ARG_ENABLE( perl,
 [  --enable-perl           include mod_perl and support for metric modules written in perl],
 [ if test x"$enableval" != xno; then enable_perl="yes"; fi ], [ enable_perl="no" ] )
-
-AC_ARG_ENABLE( php,
-[  --enable-php            include mod_php and support for metric modules written in php],
-[ if test x"$enableval" != xno; then enable_php="yes"; fi ], [ enable_php="no" ] )
 
 AC_ARG_ENABLE( status,
 [  --enable-status         compile and install modgstatus to enable gmond status metric module support],
@@ -394,77 +386,6 @@ AC_MSG_CHECKING(Perl support)
 AC_MSG_RESULT($enable_perl)
 AM_CONDITIONAL(BUILD_PERL, test x"$enable_perl" = xyes)
 
-if test x"$enable_php" = xyes; then
-  echo
-  echo "Checking for php"
-
-  # check for php-config executable
-  if test -e "$PHP_BIN"; then
-    AC_MSG_CHECKING([for php-config])
-    if test -d "$PHP_BIN"; then
-        if test -x "$PHP_BIN/bin/php-config"; then
-            PHP_CONFIG_BIN="$PHP_BIN/bin/php-config"
-        elif test -x "$PHP_BIN/php-config"; then
-            PHP_CONFIG_BIN="$PHP_BIN/php-config"
-        fi
-    elif test -x "$PHP_BIN"; then
-      PHP_CONFIG_BIN=$PHP_BIN
-    fi
-    if test -z "$PHP_CONFIG_BIN"; then
-        AC_MSG_RESULT([not found using $PHP_BIN])
-    else
-        AC_MSG_RESULT([$PHP_CONFIG_BIN])
-    fi
-  fi
-  if test -z "$PHP_CONFIG_BIN"; then
-    AC_PATH_PROG([PHP_CONFIG_BIN], [php-config])
-  fi
-
-  if test -n "$PHP_CONFIG_BIN"; then
-    # find out php version
-    PHP_FULL_VERSION=`$PHP_CONFIG_BIN --version`
-    AC_CACHE_CHECK([PHP version >= 5.3], [php_cv_version_5],
-        [AX_COMPARE_VERSION([$PHP_FULL_VERSION], [ge], [5.3],
-            [php_cv_version_5="yes"],
-            [php_cv_version_5="no"])])
-    if test "$php_cv_version_5" = "yes"; then
-        PHP_VERSION=5
-    else
-        AC_MSG_ERROR([PHP version >= 5.3 required])
-    fi
-    AC_SUBST(PHP_VERSION)
-
-    AC_MSG_CHECKING(PHP Include dir)
-    PHP_INCLUDE_DIR=`$PHP_CONFIG_BIN --include-dir`
-    AC_MSG_RESULT($PHP_INCLUDE_DIR)
-
-    if test -f "$PHP_INCLUDE_DIR/sapi/embed/php_embed.h"; then
-        PHP_INCLUDES=`$PHP_CONFIG_BIN --includes`
-        CPPFLAGS+=$PHP_INCLUDES
-        LDFLAGS+=" -L`$PHP_CONFIG_BIN --prefix`/lib"
-    else
-        PHP_INCLUDES=""
-    fi
-    AC_CHECK_HEADER([sapi/embed/php_embed.h], [],
-        [
-            AC_MSG_ERROR([your system is missing the PHP SAPI headers.])
-            enable_php="no"
-        ],
-[#ifdef _PHP_EMBED_H_
-# include <sapi/embed/php_embed.h>
-#endif
-])
-    AC_SUBST(PHP_INCLUDES)
-  else
-    AC_MSG_ERROR("php-config not found")
-    enable_php="no"
-  fi
-fi
-
-AC_MSG_CHECKING(PHP support)
-AC_MSG_RESULT($enable_php)
-AM_CONDITIONAL(BUILD_PHP, test x"$enable_php" = xyes)
-
 LIB_SUFFIX=lib
 case $host in
 x86_64*linux*)
@@ -511,7 +432,7 @@ AC_ARG_WITH( memcached,
 if test x"$withval" = xyes; then memcache="yes"; fi)
 
 if test x"$memcache" == xyes; then
-  PKG_CHECK_MODULES(DEPS, libmemcached >= 0.8.0)
+  PKG_CHECK_MODULES(DEPS, libmemcached >= 1.0.2)
   AC_SUBST(DEPS_CFLAGS)
   AC_SUBST(DEPS_LIBS)
   CFLAGS="$CFLAGS -DWITH_MEMCACHED"
@@ -964,14 +885,11 @@ AC_OUTPUT(Makefile
           gmond/modules/memory/Makefile
           gmond/modules/network/Makefile
           gmond/modules/perl/Makefile
-          gmond/modules/php/Makefile
           gmond/modules/python/Makefile
           gmond/modules/status/Makefile
           gmond/modules/system/Makefile
           gmond/perl_modules/Makefile
           gmond/perl_modules/example/Makefile
-          gmond/php_modules/Makefile
-          gmond/php_modules/example/Makefile
           gmond/python_modules/Makefile
           gmond/python_modules/apache_status/Makefile
           gmond/python_modules/db/Makefile

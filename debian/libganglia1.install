@@ -1,2 +1,2 @@
-usr/lib*/libganglia*.so*
+usr/lib*/libganglia*.so.*
 usr/lib*/ganglia

@@ -33,12 +33,13 @@ int main(int argc, char *argv[])
    set_debug_msg_level(debug_level);
 
    if (cmdline_parser (argc, argv, &args_info) != 0)
-      exit(1) ;
+      exit(EXIT_FAILURE) ;
 
    rval = gexec_cluster(&cluster, args_info.gmond_ip_arg, args_info.gmond_port_arg );
    if ( rval != 0)
       {
          printf("Unable to get hostlist from %s %d!\n", args_info.gmond_ip_arg, args_info.gmond_port_arg);
+	 //This is a non standard exit
          exit(-1);
       }
 
@@ -64,7 +65,7 @@ int main(int argc, char *argv[])
                      printf("%s:%d\n", host->ip, host->cpu_num);
                   }
             }
-         exit(0);
+         exit(EXIT_SUCCESS);
       }
 
    if(! args_info.list_flag )
@@ -96,7 +97,7 @@ int main(int argc, char *argv[])
                printf("There are no hosts down at this time\n");
             }
          gexec_cluster_free(&cluster);
-         exit(0); 
+         exit(EXIT_SUCCESS); 
       }
 
    if( args_info.all_flag )
@@ -106,7 +107,7 @@ int main(int argc, char *argv[])
             {
                printf("There are no hosts up at this time\n"); 
                gexec_cluster_free(&cluster);
-               exit(0);
+               exit(EXIT_SUCCESS);
             }
       }
    else
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
             {
                printf("There are no hosts running gexec at this time\n");
                gexec_cluster_free(&cluster);
-               exit(0);
+               exit(EXIT_SUCCESS);
             }
       }
 

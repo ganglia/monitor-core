@@ -187,8 +187,13 @@ case_sensitive_hostnames 0
 # Memcached configuration (if it has been compiled in)
 # Format documentation at http://docs.libmemcached.org/libmemcached_configuration.html
 # default: ""
-# memcached_parameters "--SERVER=127.0.0.1"
+# memcached_parameters "--SERVER=127.0.0.1 --POOL-MIN=10 --POOL-MAX=32"
 #
+# Metrics will be stored in memcached as follows HOST/METRIC_NAME. If you
+# want to include cluster name e.g. CLUSTER/HOST/METRIC_NAME set below value
+# to 1
+# default: 0
+# memcached_include_cluster_in_key 0
 
 #-------------------------------------------------------------------------------
 # Riemann configuration (if enabled during build)
