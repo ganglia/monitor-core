@@ -455,9 +455,9 @@ startElement_HOST(void *data, const char *el, const char **attr)
    /* Convert name to lower case - host names can't be
     * case sensitive
     */
-   /*for(i = 0; name[i] != 0; i++)
+   for(i = 0; name[i] != 0; i++)
        xmldata->hostname[i] = tolower(name[i]);
-   xmldata->hostname[i] = 0; */
+   xmldata->hostname[i] = 0;
 
    hashkey.data = (void*) name;
    hashkey.size =  strlen(name) + 1;
