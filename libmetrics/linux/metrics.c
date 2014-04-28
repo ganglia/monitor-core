@@ -875,7 +875,7 @@ cpu_aidle_func ( void )
    idle_jiffies  = (JT) strtod( p , (char **)NULL );
    total_jiffies = total_jiffies_func();
 
-   val.f = ((double)(idle_jiffies/total_jiffies)) * 100.0;
+   val.f = ((double)idle_jiffies/(double)total_jiffies) * 100.0;
 
    val.f = sanityCheck( __LINE__, __FILE__, __FUNCTION__, val.f, (double)idle_jiffies, (double)total_jiffies, idle_jiffies, total_jiffies, 0, 0 );
    return val;
