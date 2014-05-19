@@ -1,0 +1,68 @@
+This is a journal that will contain the evolution of the project.
+
+This folder will contain Ganglia's internal monitoring daemon for the GSoC 2014
+project.
+
+At first this daemon will be coded outside of the existing project with a main,
+but then it'll be modified to fit into a thread that can be launched when it
+needs to be.
+
+
+The deadlines are as follow, and what was done will be filled in as the project
+gets into shape:
+
+
+May:
+
+19th - 25th: Reading code and browsing libraries.
+	- The daemon will be based on the existing libraries found in
+/monitor-core/libmetrics so that it can evolve with these libraries if they
+change. This will allow the same portability as the rest of Ganglia.
+
+
+26th - 1st: Defining which metrics should be sent/asked for and defining proper
+protocols and queries.
+	- The daemon will be based around a TCP server that receives and answers
+requests, the protocols and queries it will follow and answer will be defined
+in due time.
+
+
+
+June:
+
+2nd - 8th: Making use cases and coding a simple TCP server that accepts requests
+and, for the time being answers them by echoing the request followed random JSON
+data.
+
+
+9th - 15th: Looking for the correct way to get the stats and the libraries
+needed for them.
+
+
+15th - 29th: Adding these to the server's answers.
+
+
+30th - 6th: Checking for bugs and simplifying code.
+
+
+
+July:
+
+7th - 13th: Setting up a simple web page to show the data.
+
+
+14th - 20th: "Connecting" the web page to the server and showing stats in text
+form.
+
+
+21st - 27th: Text is replaced with graphics.
+
+
+28th - 3rd: Checking for bugs and simplifying code.
+
+
+
+Aug:
+
+4th - 18th: Padding and doing man pages, adding proper comments in the code,
+etc.
