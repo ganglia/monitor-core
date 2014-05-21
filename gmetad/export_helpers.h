@@ -29,9 +29,13 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 
 g_udp_socket*
 init_riemann_udp_socket (const char *hostname, uint16_t port);
+g_udp_socket*
+init_riemann_udp6_socket (const char *hostname, uint16_t port);
 
 g_tcp_socket*
 init_riemann_tcp_socket (const char *hostname, uint16_t port);
+g_tcp_socket*
+init_riemann_tcp6_socket (const char *hostname, uint16_t port);
 
 Event *                                          /* Ganglia   =>  Riemann */
 create_riemann_event (const char *grid,          /* grid      =>  grid */

@@ -22,6 +22,7 @@
  * Boston, MA  02111-1307, USA.
  */
 #include <unistd.h>
+#include <netdb.h>
 
 #include <gm_msg.h>
 #include "net.h"
@@ -76,6 +77,39 @@ g_tcp_socket_new (const g_inet_addr* addr)
       free (s);
       return NULL;
     }
+
+  return s;
+}
+
+g_tcp_socket*
+g_tcp6_socket_new (const g_inet6_addr* addr)
+{
+  g_tcp_socket* s;
+  struct sockaddr* tsa;
+  struct addrinfo *result, *rp;
+  int sfd;
+  
+  for (rp = addr->ai; rp != NULL; rp = rp->ai_next) {
+    sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+    if (sfd == -1)
+      continue;
+    if (connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1) {
+      tsa = rp->ai_addr;
+      break; //Success
+    }
+    close(sfd);
+  }
+  if (rp == NULL)
+    return NULL;
+  s = malloc(sizeof( g_tcp_socket ));
+  if (s == NULL) {
+    close(sfd);
+    return NULL;
+  }
+  memset( s, 0, sizeof( g_tcp_socket ));
+  s->sockfd = sfd;
+  s->ref_count = 1;
+  memcpy(&s->sa, tsa, sizeof(s->sa));
 
   return s;
 }

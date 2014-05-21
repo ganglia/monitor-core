@@ -109,7 +109,7 @@ typedef struct
       char *name;
       unsigned int step;
       unsigned int num_sources;
-      g_inet_addr **sources;
+      g_inet6_addr **sources;
       int dead;
       int last_good_index;
    }

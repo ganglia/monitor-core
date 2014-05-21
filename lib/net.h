@@ -35,6 +35,13 @@ typedef struct
 
 typedef struct
 {
+  char *name;
+  struct addrinfo *ai;
+  unsigned int ref_count;
+} g_inet6_addr;
+
+typedef struct
+{
   int sockfd;
   struct sockaddr sa;
   unsigned int ref_count;
@@ -51,6 +58,8 @@ const char *    g_inet_ntop( int af, void *src, char *dst, size_t cnt );
 int             g_gethostbyname(const char* hostname, struct sockaddr_in* sa, char** nicename);
 
 char*           g_gethostbyaddr(const char* addr, size_t length, int type);
+
+int             g_getaddrinfo(const char* hostname, const char* service, g_inet6_addr* ia, char** nicename);
 
 g_inet_addr*    g_inetaddr_new (const char* name, int port);
 
@@ -101,6 +110,8 @@ void            g_mcast_socket_unref(g_mcast_socket* s);
 g_tcp_socket*   g_tcp_socket_connect (const char* hostname, int port);
 
 g_tcp_socket*   g_tcp_socket_new (const g_inet_addr* addr);
+
+g_tcp_socket*   g_tcp6_socket_new (const g_inet6_addr* addr);
 
 void            g_tcp_socket_delete(g_tcp_socket* s);
 

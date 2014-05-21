@@ -77,12 +77,13 @@ static DOTCONF_CB(cb_data_source)
    unsigned int i;
    data_source_list_t *dslist;
    datum_t key, val, *find;
-   int port, rv=0;
+   int rv=0;
    unsigned long step;
    unsigned int source_index=0;
-   char *p, *str;
+   char *p, *str, *host, *port;
    char *endptr;
    struct sockaddr_in sa;
+   g_inet6_addr ia;
    gmetad_config_t *c = (gmetad_config_t*) cmd->option->info;
 
    source_index++;
@@ -114,7 +115,7 @@ static DOTCONF_CB(cb_data_source)
    debug_msg("Polling interval for %s is %u sec.", dslist->name, dslist->step);
    c->shortest_step = dslist->step;
 
-   dslist->sources = (g_inet_addr **) malloc( (cmd->arg_count-i) * sizeof(g_inet_addr *) );
+   dslist->sources = (g_inet6_addr **) malloc( (cmd->arg_count-i) * sizeof(g_inet6_addr *) );
    if (! dslist->sources )
       err_quit("Unable to malloc sources array");
 
@@ -125,31 +126,49 @@ static DOTCONF_CB(cb_data_source)
       {
          str = cmd->data.list[i];
 
-         p = strchr( str, ':' );
-         if( p )
-            {
-               /* Port is specified */
-               *p = '\0';
-               port = atoi ( p+1 );
+	p = strchr(str, '[');
+        if (p != NULL)
+            host = p + 1;
+        else
+            host = str;
+        p = strchr(str, ']');
+        if (p) {
+            *p = '\0';
+            if (*(p+1) == ':')
+                port = p+2;
+            else
+                port = "8649";
+        }
+        else {
+            p = strchr(host, ':');
+            if (p) {
+                if (p == strrchr(host, ':')) {
+                    *p = '\0';
+                    port = p+1;
+                }
+                else
+                    port = "8649";
             }
-         else
-            port = 8649;
+            else
+                port = "8649";
+        }
 
-         rv = g_gethostbyname( cmd->data.list[i], &sa, NULL);
-         if (!rv) {
+	
+
+        rv = g_getaddrinfo(host, port, &ia, NULL);
+        if (rv) {
             err_msg("Warning: we failed to resolve data source name %s", cmd->data.list[i]);
             continue;
-         }
-         str = (char*) malloc(GANGLIA_HOSTNAME_LEN);
-         my_inet_ntop(AF_INET, &sa.sin_addr, str, GANGLIA_HOSTNAME_LEN);
-
-         debug_msg("Trying to connect to %s:%d for [%s]", str, port, dslist->name);
-         dslist->sources[dslist->num_sources] = (g_inet_addr *) g_inetaddr_new ( str, port );
-         if(! dslist->sources[dslist->num_sources])
-               err_quit("Unable to create inetaddr [%s:%d] and save it to [%s]", str, port, dslist->name);
-         else
-               dslist->num_sources++;
-         free(str);
+        }
+        
+        debug_msg("Trying to connect to %s:%s for [%s]", host, port, dslist->name);
+        dslist->sources[dslist->num_sources] = (g_inet6_addr *)malloc(sizeof(g_inet6_addr));
+        if (dslist->sources[dslist->num_sources] == NULL)
+            err_quit("Unable to create inetaddr [%s:%s] and save it to [%s]", host, port, dslist->name);
+        else {
+            memcpy(dslist->sources[dslist->num_sources], &ia, sizeof(g_inet6_addr));
+            dslist->num_sources++;
+        }
       }
 
    key.data = cmd->data.list[0];

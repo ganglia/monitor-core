@@ -26,6 +26,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <netdb.h>
 
 #include "llist.h"
 #include "net.h"
@@ -67,6 +68,34 @@ g_gethostbyname(const char* hostname, struct sockaddr_in* sa, char** nicename)
   pthread_mutex_unlock(&gethostbyname_mutex);
 
   return rv;
+}
+
+int g_getaddrinfo(const char* hostname, const char* service, g_inet6_addr* ia, char** nicename)
+{
+  int rv = 0;
+  struct addrinfo hints;
+  struct addrinfo *result;
+  int s;
+  
+  memset(&hints, 0, sizeof(struct addrinfo));
+  hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = AI_PASSIVE;
+  hints.ai_protocol = 0;          /* Any protocol */
+  hints.ai_canonname = NULL;
+  hints.ai_addr = NULL;
+  hints.ai_next = NULL;
+  
+  s = getaddrinfo(hostname, service, &hints, &result);
+  if (s != 0) {
+    return s;
+  }
+  else {
+    ia->name = (char *)strdup(hostname);
+    ia->ai = result;
+    ia->ref_count = 1;
+  }
+  return s;
 }
 
 /* Need to free return value later */
