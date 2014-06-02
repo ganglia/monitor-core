@@ -599,78 +599,13 @@ process_path_adapter (datum_t *key, datum_t *val, void *arg)
    return process_path(ctxt->client, ctxt->path, val, key);
 }
 
-/* Get local metrics */
-#define BUFSIZE 1024
-static char *getMetrics(){
-  char *buf;
-  g_val_t val;
-  int i, offset;
-  offset = 0;
-  //This is to be tested
-  if((buf = calloc(BUFSIZE, sizeof(char)))<0){
-    //Something went wrong
-    //calloc sets buf to NULL or a pointer that wont make free() crash
-    return buf;
-  }
-  //end test
-  /* Initialize libmetrics */
-  metric_init();
-  /* Run through the metric list */
-  for (i = 0; metrics[i].func != NULL; i++){
-     offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, ",\"%s\":", metrics[i].name);
-    val = metrics[i].func();
-    
-#if 0
-    if (!val)
-    {
-      offset += snprintf (buf + offset, sizeof(buf), "NULL,");
-    }
-    else
-#endif
-    {
-      switch (metrics[i].type){
-      case g_string:
-          offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", val.str);
-          break;
-      case g_int8:
-        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int8);
-          break;
-      case g_uint8:
-        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (unsigned int) val.uint8);
-          break;
-      case g_int16:
-        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int16);
-          break;
-      case g_uint16:
-        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (unsigned int) val.uint16);
-          break;
-      case g_int32:
-        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int32);
-          break;
-      case g_uint32:
-        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u", (unsigned int)val.uint32);
-          break;
-      case g_float:
-        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f", val.f);
-          break;
-      case g_double:
-        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f", val.d);
-          break;
-      case g_timestamp:
-        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u", (unsigned)val.uint32);
-          break;
-      }
-      
-    }
-  }
-  return buf;
-}
-
+#define BUFSIZE 4096
 static int
 status_report( client_t *client )
 {
-   int rval, len;
-   char buf[4096], *metricsbuf;
+   int rval, len, i, offset;
+   char buf[BUFSIZE];
+   g_val_t val;
    
    debug_msg("Stat request...");
 
@@ -680,7 +615,7 @@ status_report( client_t *client )
       }
    apr_time_t now = apr_time_now();
 
-   snprintf (buf, sizeof (buf),
+   offset = snprintf (buf, BUFSIZE,
        "HTTP/1.0 200 OK\r\n"
        "Server: gmetad/" GANGLIA_VERSION_FULL "\r\n"
        "Content-Type: application/json\r\n"
@@ -718,10 +653,63 @@ status_report( client_t *client )
        ganglia_scoreboard_get("gmetad_metrics_sent_memcached"),
        ganglia_scoreboard_get("gmetad_metrics_sent_riemann")
    );
-   metricsbuf = getMetrics();
-   strncat(buf, metricsbuf, 4096);
-   strncat(buf, "}}}\r\n", 4096);
-   free(metricsbuf);
+
+   
+   /* Get local metrics */
+   
+   /* Initialize libmetrics */
+   metric_init();
+   /* Run through the metric list */
+   for (i = 0; metrics[i].func != NULL; i++){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, ",\"%s\":", metrics[i].name);
+      val = metrics[i].func();
+      
+      #if 0
+      if (!val)
+      {
+         offset += snprintf (buf + offset, sizeof(buf), "NULL,");
+      }
+      else
+         #endif
+      {
+         switch (metrics[i].type){
+            case g_string:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "\"%s\"", val.str);
+               break;
+            case g_int8:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int8);
+               break;
+            case g_uint8:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (unsigned int) val.uint8);
+               break;
+            case g_int16:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int16);
+               break;
+            case g_uint16:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (unsigned int) val.uint16);
+               break;
+            case g_int32:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int32);
+               break;
+            case g_uint32:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u", (unsigned int)val.uint32);
+               break;
+            case g_float:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f", val.f);
+               break;
+            case g_double:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f", val.d);
+               break;
+            case g_timestamp:
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u", (unsigned)val.uint32);
+               break;
+         }
+      }
+   }
+   snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "}}}\r\n");
+   
+   /* End local metrics */
+   
    void *sbi = ganglia_scoreboard_iterator();
    while (sbi) {
       char *name = ganglia_scoreboard_next(&sbi);
