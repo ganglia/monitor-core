@@ -617,7 +617,7 @@ static char *getMetrics(){
   metric_init();
   /* Run through the metric list */
   for (i = 0; metrics[i].func != NULL; i++){
-    offset += snprintf (buf + offset, BUFSIZE,",\"%s\":", metrics[i].name);
+     offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, ",\"%s\":", metrics[i].name);
     val = metrics[i].func();
     
 #if 0
@@ -630,34 +630,34 @@ static char *getMetrics(){
     {
       switch (metrics[i].type){
       case g_string:
-          offset += snprintf (buf + offset, BUFSIZE, "%s", val.str);
+          offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", val.str);
           break;
       case g_int8:
-        offset += snprintf (buf + offset, BUFSIZE, "%d", (int) val.int8);
+        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int8);
           break;
       case g_uint8:
-        offset += snprintf (buf + offset, BUFSIZE, "%d", (unsigned int) val.uint8);
+        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (unsigned int) val.uint8);
           break;
       case g_int16:
-        offset += snprintf (buf + offset, BUFSIZE, "%d", (int) val.int16);
+        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int16);
           break;
       case g_uint16:
-        offset += snprintf (buf + offset, BUFSIZE, "%d", (unsigned int) val.uint16);
+        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (unsigned int) val.uint16);
           break;
       case g_int32:
-        offset += snprintf (buf + offset, BUFSIZE, "%d", (int) val.int32);
+        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int32);
           break;
       case g_uint32:
-        offset += snprintf (buf + offset, BUFSIZE, "%u", (unsigned int)val.uint32);
+        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u", (unsigned int)val.uint32);
           break;
       case g_float:
-        offset += snprintf (buf + offset, BUFSIZE, "%f", val.f);
+        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f", val.f);
           break;
       case g_double:
-        offset += snprintf (buf + offset, BUFSIZE, "%f", val.d);
+        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f", val.d);
           break;
       case g_timestamp:
-        offset += snprintf (buf + offset, BUFSIZE, "%u", (unsigned)val.uint32);
+        offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u", (unsigned)val.uint32);
           break;
       }
       
