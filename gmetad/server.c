@@ -19,6 +19,87 @@
 
 #define HOSTNAMESZ 64
 
+/* Local metrics */
+#include "libmetrics.h"
+
+static const struct metricinfo
+{
+  const char *name;
+    g_val_t (*func) (void);
+  g_type_t type;
+} metrics[] =
+{
+  {
+  "cpu_num", cpu_num_func, g_uint16},
+  {
+  "cpu_speed", cpu_speed_func, g_uint32},
+  {
+  "mem_total", mem_total_func, g_float},
+  {
+  "swap_total", swap_total_func, g_float},
+  {
+  "boottime", boottime_func, g_timestamp},
+  {
+  "sys_clock", sys_clock_func, g_timestamp},
+  {
+  "machine_type", machine_type_func, g_string},
+  {
+  "os_name", os_name_func, g_string},
+  {
+  "os_release", os_release_func, g_string},
+  {
+  "cpu_user", cpu_user_func, g_float},
+  {
+  "cpu_nice", cpu_nice_func, g_float},
+  {
+  "cpu_system", cpu_system_func, g_float},
+  {
+  "cpu_idle", cpu_idle_func, g_float},
+  {
+  "cpu_wio", cpu_wio_func, g_float},
+  {
+  "cpu_aidle", cpu_aidle_func, g_float},
+  {
+  "load_one", load_one_func, g_float},
+  {
+  "load_five", load_five_func, g_float},
+  {
+  "load_fifteen", load_fifteen_func, g_float},
+  {
+  "proc_run", proc_run_func, g_uint32},
+  {
+  "proc_total", proc_total_func, g_uint32},
+  {
+  "mem_free", mem_free_func, g_float},
+  {
+  "mem_shared", mem_shared_func, g_float},
+  {
+  "mem_buffers", mem_buffers_func, g_float},
+  {
+  "mem_cached", mem_cached_func, g_float},
+  {
+  "swap_free", swap_free_func, g_float},
+  {
+  "mtu", mtu_func, g_uint32},
+  {
+  "bytes_out", bytes_out_func, g_float},
+  {
+  "bytes_in", bytes_in_func, g_float},
+  {
+  "pkts_in", pkts_in_func, g_float},
+  {
+  "pkts_out", pkts_out_func, g_float},
+  {
+  "disk_free", disk_free_func, g_double},
+  {
+  "disk_total", disk_total_func, g_double},
+  {
+  "part_max_used", part_max_used_func, g_float},
+  {
+  "", NULL}
+};
+/* End Local Metrics */
+
 extern g_tcp_socket *server_socket;
 extern pthread_mutex_t  server_socket_mutex;
 extern g_tcp_socket *interactive_socket;
@@ -518,19 +599,85 @@ process_path_adapter (datum_t *key, datum_t *val, void *arg)
    return process_path(ctxt->client, ctxt->path, val, key);
 }
 
+/* Get local metrics */
+#define BUFSIZE 1024
+static char *getMetrics(){
+  char *buf;
+  g_val_t val;
+  int i, offset;
+  offset = 0;
+  //This is to be tested
+  if((buf = calloc(BUFSIZE, sizeof(char)))<0){
+    //Something went wrong
+    //calloc sets buf to NULL or a pointer that wont make free() crash
+    return buf;
+  }
+  //end test
+  /* Initialize libmetrics */
+  metric_init();
+  /* Run through the metric list */
+  for (i = 0; metrics[i].func != NULL; i++){
+    offset += snprintf (buf + offset, BUFSIZE,",\"%s\":", metrics[i].name);
+    val = metrics[i].func();
+    
+#if 0
+    if (!val)
+    {
+      offset += snprintf (buf + offset, sizeof(buf), "NULL,");
+    }
+    else
+#endif
+    {
+      switch (metrics[i].type){
+      case g_string:
+          offset += snprintf (buf + offset, BUFSIZE, "%s", val.str);
+          break;
+      case g_int8:
+        offset += snprintf (buf + offset, BUFSIZE, "%d", (int) val.int8);
+          break;
+      case g_uint8:
+        offset += snprintf (buf + offset, BUFSIZE, "%d", (unsigned int) val.uint8);
+          break;
+      case g_int16:
+        offset += snprintf (buf + offset, BUFSIZE, "%d", (int) val.int16);
+          break;
+      case g_uint16:
+        offset += snprintf (buf + offset, BUFSIZE, "%d", (unsigned int) val.uint16);
+          break;
+      case g_int32:
+        offset += snprintf (buf + offset, BUFSIZE, "%d", (int) val.int32);
+          break;
+      case g_uint32:
+        offset += snprintf (buf + offset, BUFSIZE, "%u", (unsigned int)val.uint32);
+          break;
+      case g_float:
+        offset += snprintf (buf + offset, BUFSIZE, "%f", val.f);
+          break;
+      case g_double:
+        offset += snprintf (buf + offset, BUFSIZE, "%f", val.d);
+          break;
+      case g_timestamp:
+        offset += snprintf (buf + offset, BUFSIZE, "%u", (unsigned)val.uint32);
+          break;
+      }
+      
+    }
+  }
+  return buf;
+}
+
 static int
 status_report( client_t *client )
 {
    int rval, len;
-   char buf[4096];
-
+   char buf[4096], *metricsbuf;
+   
    debug_msg("Stat request...");
 
    if(! client->valid )
       {
          return 1;
       }
-
    apr_time_t now = apr_time_now();
 
    snprintf (buf, sizeof (buf),
@@ -556,9 +703,7 @@ status_report( client_t *client )
        "\"rrdcached\":%u,"
        "\"graphite\":%u,"
        "\"memcached\":%u,"
-       "\"riemann\":%u"
-       "}}"
-       "}\r\n",
+       "\"riemann\":%u",
        hostname,
        gmetad_config.gridname,
        GANGLIA_VERSION_FULL,
@@ -573,7 +718,10 @@ status_report( client_t *client )
        ganglia_scoreboard_get("gmetad_metrics_sent_memcached"),
        ganglia_scoreboard_get("gmetad_metrics_sent_riemann")
    );
-
+   metricsbuf = getMetrics();
+   strncat(buf, metricsbuf, 4096);
+   strncat(buf, "}}}\r\n", 4096);
+   free(metricsbuf);
    void *sbi = ganglia_scoreboard_iterator();
    while (sbi) {
       char *name = ganglia_scoreboard_next(&sbi);
