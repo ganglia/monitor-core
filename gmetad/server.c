@@ -628,12 +628,8 @@ status_report( client_t *client )
        "\"boottime\":%lu,"
        "\"uptime\":%lu,"
        "\"uptimeMillis\":%lu,"
-       "\"metrics\":{"
-       "\"received\":{"
-       "\"all\":%u"
-       "},"
-       "\"sent\":{"
-       "\"all\":%u,"
+       "\"allMetricsReceived\":%u,"
+       "\"allMetricsSent\":%u,"
        "\"rrdtool\":%u,"
        "\"rrdcached\":%u,"
        "\"graphite\":%u,"
@@ -706,7 +702,7 @@ status_report( client_t *client )
          }
       }
    }
-   snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "}}}\r\n");
+   snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "}\r\n");
    
    /* End local metrics */
    
