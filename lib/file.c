@@ -61,18 +61,21 @@ read:
 
    if (read_len == buflen)
       {
-         if (dynamic) {
+//         if (dynamic) {
             dynamic += buflen;
             db = realloc(*buffer, dynamic);
             *buffer = db;
             db = *buffer + dynamic - buflen;
             goto read;
-         } else {
-            --read_len;
-            err_msg("slurpfile() read() buffer overflow on file %s", filename);
-         }
+//         } else {
+//            --read_len;
+//            err_msg("slurpfile() read() buffer overflow on file %s", filename);
+//         }
       }
    db[read_len] = '\0';
+
+// En +
+   *buffer = db;
 
    close(fd);
    return sl;
@@ -107,11 +110,11 @@ update_file (timely_file *tf)
                     tf->name);
         } else {
             tf->last_read = now;
-            if (tf->buffer == NULL) {
+//            if (tf->buffer == NULL) {
                tf->buffer = bp;
                if (rval > tf->buffersize)
                   tf->buffersize = ((rval/tf->buffersize) + 1) * tf->buffersize;
-            }
+//            }
         }
     }
     return tf->buffer;
