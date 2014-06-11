@@ -326,7 +326,7 @@ set_defaults (gmetad_config_t *config)
    config->xml_port = 8651;
    config->interactive_port = 8652;
    config->server_threads = 4;
-   config->umask = 0;
+   config->umask = 0022;
    config->trusted_hosts = NULL;
    config->debug_level = 0;
    config->should_setuid = 1;
