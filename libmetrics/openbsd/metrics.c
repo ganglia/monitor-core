@@ -443,7 +443,7 @@ proc_total_func ( void )
    char err_buf[_POSIX2_LINE_MAX];
 
    kd = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, err_buf);
-   kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cnt);
+   kp = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cnt);
 
    val.uint32 = cnt;
    
@@ -463,7 +463,7 @@ proc_run_func( void )
    char err_buf[_POSIX2_LINE_MAX];
 
    kd = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, err_buf);
-   kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cnt);
+   kp = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cnt);
    for (i = 0; i < cnt; i++)
       if (((kp + i) -> p_stat == SRUN) || ((kp + i) -> p_stat == SONPROC))
          count ++;
