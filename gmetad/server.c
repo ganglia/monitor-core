@@ -640,8 +640,7 @@ status_report( client_t *client , char *callback)
        "\"graphite\":%u,"
        "\"memcached\":%u,"
        "\"riemann\":%u"
-       "},"
-       "\"WorkingOnThis\":{",
+       "},",
        callback != NULL ? callback : "",
        hostname,
        gmetad_config.gridname,
@@ -663,55 +662,166 @@ status_report( client_t *client , char *callback)
    
    /* Initialize libmetrics */
    metric_init();
+   char coreBuf[512], cpuBuf[512], diskBuf[512], loadBuf[512], memoryBuf[512], networkBuf[512], processBuf[512], systemBuf[512], otherBuf[512];
+   int coreOffset, cpuOffset, diskOffset, loadOffset, memoryOffset, networkOffset, processOffset, systemOffset, otherOffset;
+   coreOffset = 0; cpuOffset = 0; diskOffset = 0; loadOffset = 0; memoryOffset = 0; networkOffset = 0; processOffset = 0; systemOffset = 0, otherOffset = 0;
    /* Run through the metric list */
-   for (i = 0; metrics[i].func != NULL; i++){
-      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "\"%s\":", metrics[i].name);
+
+   coreOffset = snprintf (coreBuf, 512, "\"core\":{");
+   cpuOffset = snprintf (cpuBuf, 512, "\"cpu\":{");
+   diskOffset = snprintf (diskBuf, 512, "\"disk\":{");
+   loadOffset = snprintf (loadBuf, 512, "\"load\":{");
+   memoryOffset = snprintf (memoryBuf, 512, "\"memory\":{");
+   networkOffset = snprintf (networkBuf, 512, "\"network\":{");
+   processOffset = snprintf (processBuf, 512, "\"process\":{");
+   systemOffset = snprintf (systemBuf, 512, "\"system\":{");
+   otherOffset = snprintf (otherBuf, 512, "\"other\":{");
+
+/*
+ "\"%s\",", val.str);
+ "%d,", (int) val.int8);
+ "%d,", (unsigned int) val.uint8);
+ "%d,", (int) val.int16);
+ "%d,", (unsigned int) val.uint16);
+ "%d,", (int) val.int32);
+ "%u,", (unsigned int)val.uint32);
+ "%f,", val.f);
+ "%f,", val.d);
+ "%u,", (unsigned)val.uint32);
+ */
+
+
+//missing: steal, gexec, 
+   for(i = 0; metrics[i].func != NULL; i++){
       val = metrics[i].func();
-      
-      #if 0
-      if (!val)
-      {
-         offset += snprintf (buf + offset, sizeof(buf), "NULL,");
-      }
-      else
-         #endif
-      {
+      if(strcmp(metrics[i].name, "gexec") == 0){
+         coreOffset += snprintf (coreBuf + coreOffset, 512 > coreOffset ? 512 - coreOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
+      }else if(strcmp(metrics[i].name, "cpu_steal") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%d,", metrics[i].name, (unsigned int) val.uint16);
+      }else if(strcmp(metrics[i].name, "cpu_idle") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_user") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_nice") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_aidle") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_system") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_wio") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_num") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%d,", metrics[i].name, (unsigned int) val.uint16);
+      }else if(strcmp(metrics[i].name, "cpu_speed") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
+      }else if(strcmp(metrics[i].name, "disk_free") == 0){
+         diskOffset += snprintf (diskBuf + diskOffset, 512 > diskOffset ? 512 - diskOffset : 0, "\"%s\":%f,", metrics[i].name, val.d);
+      }else if(strcmp(metrics[i].name, "part_max_used") == 0){
+         diskOffset += snprintf (diskBuf + diskOffset, 512 > diskOffset ? 512 - diskOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "disk_total") == 0){
+         diskOffset += snprintf (diskBuf + diskOffset, 512 > diskOffset ? 512 - diskOffset : 0, "\"%s\":%f,", metrics[i].name, val.d);
+      }else if(strcmp(metrics[i].name, "load_one") == 0){
+         loadOffset += snprintf (loadBuf + loadOffset, 512 > loadOffset ? 512 - loadOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "load_five") == 0){
+         loadOffset += snprintf (loadBuf + loadOffset, 512 > loadOffset ? 512 - loadOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "load_fifteen") == 0){
+         loadOffset += snprintf (loadBuf + loadOffset, 512 > loadOffset ? 512 - loadOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_total") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_cached") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "swap_total") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_free") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_buffers") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_shared") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "swap_free") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "pkts_in") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "bytes_in") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "bytes_out") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "pkts_out") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "proc_run") == 0){
+         processOffset += snprintf (processBuf + processOffset, 512 > processOffset ? 512 - processOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
+      }else if(strcmp(metrics[i].name, "proc_total") == 0){
+         processOffset += snprintf (processBuf + processOffset, 512 > processOffset ? 512 - processOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
+      }else if(strcmp(metrics[i].name, "os_release") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
+      }else if(strcmp(metrics[i].name, "os_name") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
+      }else if(strcmp(metrics[i].name, "cpu_system") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "machine_type") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
+      }else if(strcmp(metrics[i].name, "boottime") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned) val.uint32);
+      }else if(strcmp(metrics[i].name, "sys_clock") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned) val.uint32);
+      }else{
          switch (metrics[i].type){
             case g_string:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "\"%s\",", val.str);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
                break;
             case g_int8:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (int) val.int8);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (int) val.int8);
                break;
             case g_uint8:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (unsigned int) val.uint8);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (unsigned int) val.uint8);
                break;
             case g_int16:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (int) val.int16);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (int) val.int16);
                break;
             case g_uint16:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (unsigned int) val.uint16);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (unsigned int) val.uint16);
                break;
             case g_int32:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (int) val.int32);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (int) val.int32);
                break;
             case g_uint32:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u,", (unsigned int)val.uint32);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
                break;
             case g_float:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f,", val.f);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
                break;
             case g_double:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f,", val.d);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%f,", metrics[i].name, val.d);
                break;
             case g_timestamp:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u,", (unsigned)val.uint32);
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned) val.uint32);
                break;
          }
       }
    }
+   /* replace trailing "," with "}" */
+   coreOffset = snprintf (coreBuf + (coreOffset - 1), 512 > coreOffset ? 512 - coreOffset : 0, "},");
+   cpuOffset = snprintf (cpuBuf + (cpuOffset - 1), 512 > cpuOffset ? 512 - cpuOffset : 0, "},");
+   diskOffset = snprintf (diskBuf + (diskOffset - 1), 512 > diskOffset ? 512 - diskOffset : 0, "},");
+   loadOffset = snprintf (loadBuf + (loadOffset - 1), 512 > loadOffset ? 512 - loadOffset : 0, "},");
+   memoryOffset = snprintf (memoryBuf + (memoryOffset - 1), 512 > memoryOffset ? 512 - memoryOffset : 0, "},");
+   networkOffset = snprintf (networkBuf + (networkOffset - 1), 512 > networkOffset ? 512 - networkOffset : 0, "},");
+   processOffset = snprintf (processBuf + (processOffset - 1), 512 > processOffset ? 512 - processOffset : 0, "},");
+   systemOffset = snprintf (systemBuf + (systemOffset - 1), 512 > systemOffset ? 512 - systemOffset : 0, "},");
+   otherOffset = snprintf (otherBuf + (otherOffset - 1), 512 > otherOffset ? 512 - otherOffset : 0, "},");
+   
+   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", coreBuf);
+   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", cpuBuf);
+   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", diskBuf);
+   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", loadBuf);
+   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", memoryBuf);
+   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", networkBuf);
+   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", processBuf);
+   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", systemBuf);
+   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", otherBuf);
+
    /* Remove trailing , */
-   snprintf (buf + (offset - 1), BUFSIZE > offset - 1 ? BUFSIZE - (offset + 1) : 0,  callback != NULL ? "}}})\r\n" : "}}}\r\n");
+   snprintf (buf + (offset - 1), BUFSIZE > offset - 1 ? BUFSIZE - (offset + 1) : 0,  callback != NULL ? "}})\r\n" : "}}\r\n");
    
    /* End local metrics */
    
