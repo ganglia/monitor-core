@@ -601,7 +601,7 @@ process_path_adapter (datum_t *key, datum_t *val, void *arg)
 
 #define BUFSIZE 4096
 static int
-status_report( client_t *client )
+status_report( client_t *client , char *callback)
 {
    int rval, len, i, offset;
    char buf[BUFSIZE];
@@ -620,6 +620,8 @@ status_report( client_t *client )
        "Server: gmetad/" GANGLIA_VERSION_FULL "\r\n"
        "Content-Type: application/json\r\n"
        "Connection: close\r\n"
+       "\r\n"
+       "%s"
        "{"
        "\"host\":\"%s\","
        "\"gridname\":\"%s\","
@@ -627,13 +629,20 @@ status_report( client_t *client )
        "\"boottime\":%lu,"
        "\"uptime\":%lu,"
        "\"uptimeMillis\":%lu,"
-       "\"allMetricsReceived\":%u,"
-       "\"allMetricsSent\":%u,"
+       "\"metrics\":{"
+       "\"received\":{"
+       "\"all\":%u"
+       "},"
+       "\"sent\":{"
+       "\"all\":%u,"
        "\"rrdtool\":%u,"
        "\"rrdcached\":%u,"
        "\"graphite\":%u,"
        "\"memcached\":%u,"
-       "\"riemann\":%u",
+       "\"riemann\":%u"
+       "},"
+       "\"WorkingOnThis\":{",
+       callback != NULL ? callback : "",
        hostname,
        gmetad_config.gridname,
        GANGLIA_VERSION_FULL,
@@ -656,7 +665,7 @@ status_report( client_t *client )
    metric_init();
    /* Run through the metric list */
    for (i = 0; metrics[i].func != NULL; i++){
-      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, ",\"%s\":", metrics[i].name);
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "\"%s\":", metrics[i].name);
       val = metrics[i].func();
       
       #if 0
@@ -669,39 +678,40 @@ status_report( client_t *client )
       {
          switch (metrics[i].type){
             case g_string:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "\"%s\"", val.str);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "\"%s\",", val.str);
                break;
             case g_int8:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int8);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (int) val.int8);
                break;
             case g_uint8:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (unsigned int) val.uint8);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (unsigned int) val.uint8);
                break;
             case g_int16:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int16);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (int) val.int16);
                break;
             case g_uint16:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (unsigned int) val.uint16);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (unsigned int) val.uint16);
                break;
             case g_int32:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d", (int) val.int32);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%d,", (int) val.int32);
                break;
             case g_uint32:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u", (unsigned int)val.uint32);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u,", (unsigned int)val.uint32);
                break;
             case g_float:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f", val.f);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f,", val.f);
                break;
             case g_double:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f", val.d);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%f,", val.d);
                break;
             case g_timestamp:
-               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u", (unsigned)val.uint32);
+               offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%u,", (unsigned)val.uint32);
                break;
          }
       }
    }
-   snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "}\r\n");
+   /* Remove trailing , */
+   snprintf (buf + (offset - 1), BUFSIZE > offset - 1 ? BUFSIZE - (offset + 1) : 0,  callback != NULL ? "}}})\r\n" : "}}}\r\n");
    
    /* End local metrics */
    
@@ -722,6 +732,15 @@ status_report( client_t *client )
       }
 
    return 0;
+}
+
+static char* getCallback(char* path){
+   if(strstr(path, "?callback=") != NULL){
+      printf("C %s\n",strstr(path, "?callback=") + 10);
+      return strstr(path, "?callback=") + 10;
+   }else{
+      return NULL;
+   }
 }
 
 
@@ -753,9 +772,9 @@ process_request (client_t *client, char *path)
    if (*path != '/')
        return 1;
 
-   if (!strcmp(path, "/status"))
+   if (strncasecmp(path, "/status", 7) == 0)
       {
-         status_report(client);
+         status_report(client, getCallback(path));
          return 2;
       }
 
