@@ -620,7 +620,6 @@ status_report( client_t *client )
        "Server: gmetad/" GANGLIA_VERSION_FULL "\r\n"
        "Content-Type: application/json\r\n"
        "Connection: close\r\n"
-       "\r\n"
        "{"
        "\"host\":\"%s\","
        "\"gridname\":\"%s\","
