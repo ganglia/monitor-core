@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <sys/swap.h>
 #include <uvm/uvm_param.h>
+#include <sys/procs.h>
 
 #include <sys/socket.h>
 #include <net/if.h>
