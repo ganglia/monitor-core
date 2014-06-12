@@ -677,21 +677,7 @@ status_report( client_t *client , char *callback)
    systemOffset = snprintf (systemBuf, 512, "\"system\":{");
    otherOffset = snprintf (otherBuf, 512, "\"other\":{");
 
-/*
- "\"%s\",", val.str);
- "%d,", (int) val.int8);
- "%d,", (unsigned int) val.uint8);
- "%d,", (int) val.int16);
- "%d,", (unsigned int) val.uint16);
- "%d,", (int) val.int32);
- "%u,", (unsigned int)val.uint32);
- "%f,", val.f);
- "%f,", val.d);
- "%u,", (unsigned)val.uint32);
- */
-
-
-//missing: steal, gexec, 
+//missing: steal, gexec.
    for(i = 0; metrics[i].func != NULL; i++){
       val = metrics[i].func();
       if(strcmp(metrics[i].name, "gexec") == 0){
@@ -748,6 +734,8 @@ status_report( client_t *client , char *callback)
          networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
       }else if(strcmp(metrics[i].name, "pkts_out") == 0){
          networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mtu") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
       }else if(strcmp(metrics[i].name, "proc_run") == 0){
          processOffset += snprintf (processBuf + processOffset, 512 > processOffset ? 512 - processOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
       }else if(strcmp(metrics[i].name, "proc_total") == 0){
@@ -799,27 +787,44 @@ status_report( client_t *client , char *callback)
          }
       }
    }
-   /* replace trailing "," with "}" */
-   coreOffset = snprintf (coreBuf + (coreOffset - 1), 512 > coreOffset ? 512 - coreOffset : 0, "},");
-   cpuOffset = snprintf (cpuBuf + (cpuOffset - 1), 512 > cpuOffset ? 512 - cpuOffset : 0, "},");
-   diskOffset = snprintf (diskBuf + (diskOffset - 1), 512 > diskOffset ? 512 - diskOffset : 0, "},");
-   loadOffset = snprintf (loadBuf + (loadOffset - 1), 512 > loadOffset ? 512 - loadOffset : 0, "},");
-   memoryOffset = snprintf (memoryBuf + (memoryOffset - 1), 512 > memoryOffset ? 512 - memoryOffset : 0, "},");
-   networkOffset = snprintf (networkBuf + (networkOffset - 1), 512 > networkOffset ? 512 - networkOffset : 0, "},");
-   processOffset = snprintf (processBuf + (processOffset - 1), 512 > processOffset ? 512 - processOffset : 0, "},");
-   systemOffset = snprintf (systemBuf + (systemOffset - 1), 512 > systemOffset ? 512 - systemOffset : 0, "},");
-   otherOffset = snprintf (otherBuf + (otherOffset - 1), 512 > otherOffset ? 512 - otherOffset : 0, "},");
+   /* replace trailing "," with "}" and add a ","*/
+   coreOffset += snprintf (coreBuf + (coreOffset - 1), 512 > coreOffset ? 512 - coreOffset : 0, "},") - 1;
+   cpuOffset += snprintf (cpuBuf + (cpuOffset - 1), 512 > cpuOffset ? 512 - cpuOffset : 0, "},") - 1;
+   diskOffset += snprintf (diskBuf + (diskOffset - 1), 512 > diskOffset ? 512 - diskOffset : 0, "},") - 1;
+   loadOffset += snprintf (loadBuf + (loadOffset - 1), 512 > loadOffset ? 512 - loadOffset : 0, "},") - 1;
+   memoryOffset += snprintf (memoryBuf + (memoryOffset - 1), 512 > memoryOffset ? 512 - memoryOffset : 0, "},") - 1;
+   networkOffset += snprintf (networkBuf + (networkOffset - 1), 512 > networkOffset ? 512 - networkOffset : 0, "},") - 1;
+   processOffset += snprintf (processBuf + (processOffset - 1), 512 > processOffset ? 512 - processOffset : 0, "},") - 1;
+   systemOffset += snprintf (systemBuf + (systemOffset - 1), 512 > systemOffset ? 512 - systemOffset : 0, "},") - 1;
+   otherOffset += snprintf (otherBuf + (otherOffset - 1), 512 > otherOffset ? 512 - otherOffset : 0, "},") - 1;
    
-   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", coreBuf);
-   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", cpuBuf);
-   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", diskBuf);
-   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", loadBuf);
-   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", memoryBuf);
-   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", networkBuf);
-   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", processBuf);
-   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", systemBuf);
-   offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", otherBuf);
-
+   if(coreOffset != 9){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", coreBuf);
+   }
+   if(cpuOffset != 8){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", cpuBuf);
+   }
+   if(diskOffset != 9){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", diskBuf);
+   }
+   if(loadOffset != 9){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", loadBuf);
+   }
+   if(memoryOffset != 11){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", memoryBuf);
+   }
+   if(networkOffset != 12){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", networkBuf);
+   }
+   if(processOffset != 12){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", processBuf);
+   }
+   if(systemOffset != 11){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", systemBuf);
+   }
+   if(otherOffset != 10){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", otherBuf);
+   }
    /* Remove trailing , */
    snprintf (buf + (offset - 1), BUFSIZE > offset - 1 ? BUFSIZE - (offset + 1) : 0,  callback != NULL ? "}})\r\n" : "}}\r\n");
    
