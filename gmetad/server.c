@@ -622,6 +622,7 @@ status_report( client_t *client , char *callback)
        "Connection: close\r\n"
        "\r\n"
        "%s"
+       "%s"
        "{"
        "\"host\":\"%s\","
        "\"gridname\":\"%s\","
@@ -642,6 +643,7 @@ status_report( client_t *client , char *callback)
        "\"riemann\":%u"
        "},",
        callback != NULL ? callback : "",
+       callback != NULL ? "(" : "",
        hostname,
        gmetad_config.gridname,
        GANGLIA_VERSION_FULL,
@@ -851,8 +853,7 @@ status_report( client_t *client , char *callback)
 
 static char* getCallback(char* path){
    if(strstr(path, "?callback=") != NULL){
-      printf("C %s\n",strstr(path, "?callback=") + 10);
-      return strstr(path, "?callback=") + 10;
+      return strtok(strstr(path, "?callback=") + 10, "&");
    }else{
       return NULL;
    }
