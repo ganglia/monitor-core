@@ -48,6 +48,8 @@ static const struct metricinfo
   {
   "os_release", os_release_func, g_string},
   {
+  "mtu", mtu_func, g_uint32},
+  {
   "cpu_user", cpu_user_func, g_float},
   {
   "cpu_nice", cpu_nice_func, g_float},
@@ -59,6 +61,12 @@ static const struct metricinfo
   "cpu_wio", cpu_wio_func, g_float},
   {
   "cpu_aidle", cpu_aidle_func, g_float},
+  {
+  "cpu_intr", cpu_intr_func, g_float},
+  {
+  "cpu_sintr", cpu_sintr_func, g_float},
+  {
+  "cpu_steal", cpu_steal_func, g_uint16},
   {
   "load_one", load_one_func, g_float},
   {
@@ -80,8 +88,6 @@ static const struct metricinfo
   {
   "swap_free", swap_free_func, g_float},
   {
-  "mtu", mtu_func, g_uint32},
-  {
   "bytes_out", bytes_out_func, g_float},
   {
   "bytes_in", bytes_in_func, g_float},
@@ -96,6 +102,46 @@ static const struct metricinfo
   {
   "part_max_used", part_max_used_func, g_float},
   {
+  /*
+  "gexec", gexec_func, g_string},//not implemented
+  {
+  "heartbeat", heartbeat_func, },//not implemented, type unknown
+  {
+  "location", location_func, },//not implemented, type unknown
+  {
+   */
+  #ifdef LINUX
+  "mem_sreclaimable", mem_sreclaimable_func, g_float},
+  {
+  #endif
+  #ifdef SOLARIS
+  "bread_sec", bread_sec_func, g_float},
+  {
+  "bwrite_sec", bwrite_sec_func, g_float},
+  {
+  "lread_sec", lread_sec_func, g_float},
+  {
+  "lwrite_sec", lwrite_sec_func, g_float},
+  {
+  "phread_sec", phread_sec_func, g_float},
+  {
+  "phwrite_sec", phwrite_sec_func, g_float},
+  {
+  "rchache", rcache_func, g_float},
+  {
+  "wcache", wcache_func, g_float},
+  {
+  #endif
+  #ifdef HPUX
+  "mem_rm", mem_rm_func, g_float},
+  {
+  "mem_arm", mem_arm_func, g_float},
+  {
+  "mem_vm",mem_vm _func, g_float},
+  {
+  "mem_avm", mem_avm_func, g_float},
+  {
+  #endif
   "", NULL}
 };
 /* End Local Metrics */
@@ -659,15 +705,11 @@ status_report( client_t *client , char *callback)
        ganglia_scoreboard_get("gmetad_metrics_sent_riemann")
    );
 
-   
    /* Get local metrics */
-   
-   /* Initialize libmetrics */
    metric_init();
    char coreBuf[512], cpuBuf[512], diskBuf[512], loadBuf[512], memoryBuf[512], networkBuf[512], processBuf[512], systemBuf[512], otherBuf[512];
    int coreOffset, cpuOffset, diskOffset, loadOffset, memoryOffset, networkOffset, processOffset, systemOffset, otherOffset;
    coreOffset = 0; cpuOffset = 0; diskOffset = 0; loadOffset = 0; memoryOffset = 0; networkOffset = 0; processOffset = 0; systemOffset = 0, otherOffset = 0;
-   /* Run through the metric list */
 
    coreOffset = snprintf (coreBuf, 512, "\"core\":{");
    cpuOffset = snprintf (cpuBuf, 512, "\"cpu\":{");
@@ -679,13 +721,25 @@ status_report( client_t *client , char *callback)
    systemOffset = snprintf (systemBuf, 512, "\"system\":{");
    otherOffset = snprintf (otherBuf, 512, "\"other\":{");
 
-//missing: steal, gexec.
+   /* Run through the metric list */
    for(i = 0; metrics[i].func != NULL; i++){
       val = metrics[i].func();
-      if(strcmp(metrics[i].name, "gexec") == 0){
+      if(strcmp(metrics[i].name, "gexec") == 0){//not implemented
          coreOffset += snprintf (coreBuf + coreOffset, 512 > coreOffset ? 512 - coreOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
-      }else if(strcmp(metrics[i].name, "cpu_steal") == 0){
+      }
+      /*
+      else if(strcmp(metrics[i].name, "heartbeat") == 0){//not implemented, type unknown
+         coreOffset += snprintf (coreBuf + coreOffset, 512 > coreOffset ? 512 - coreOffset : 0, "\"%s\":\"%\",", metrics[i].name, );
+      }else if(strcmp(metrics[i].name, "location") == 0){//not implemented type unknown
+         coreOffset += snprintf (coreBuf + coreOffset, 512 > coreOffset ? 512 - coreOffset : 0, "\"%s\":\"%\",", metrics[i].name, );
+      }
+      */
+      else if(strcmp(metrics[i].name, "cpu_steal") == 0){
          cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%d,", metrics[i].name, (unsigned int) val.uint16);
+      }else if(strcmp(metrics[i].name, "cpu_intr") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_sintr") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
       }else if(strcmp(metrics[i].name, "cpu_idle") == 0){
          cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
       }else if(strcmp(metrics[i].name, "cpu_user") == 0){
@@ -754,7 +808,43 @@ status_report( client_t *client , char *callback)
          systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned) val.uint32);
       }else if(strcmp(metrics[i].name, "sys_clock") == 0){
          systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned) val.uint32);
-      }else{
+      }
+#ifdef LINUX
+      else if(strcmp(metrics[i].name, "mem_sreclaimable") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }
+#endif
+#ifdef SOLARIS
+      else if(strcmp(metrics[i].name, "bread_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "bwrite_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "lread_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "lwrite_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "phread_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "phwrite_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "rcache") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "wcache") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }
+#endif
+#ifdef HPUX
+      else if(strcmp(metrics[i].name, "mem_rm") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_arm") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_vm") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_avm") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }
+#endif
+      else{
          switch (metrics[i].type){
             case g_string:
                otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
@@ -800,6 +890,7 @@ status_report( client_t *client , char *callback)
    systemOffset += snprintf (systemBuf + (systemOffset - 1), 512 > systemOffset ? 512 - systemOffset : 0, "},") - 1;
    otherOffset += snprintf (otherBuf + (otherOffset - 1), 512 > otherOffset ? 512 - otherOffset : 0, "},") - 1;
    
+   /* if something was written in buffer */
    if(coreOffset != 9){
       offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", coreBuf);
    }
