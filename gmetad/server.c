@@ -694,7 +694,7 @@ status_report( client_t *client , char *callback)
        hostname,
        gmetad_config.gridname,
        GANGLIA_VERSION_FULL,
-       (long int)(now / APR_TIME_C(1000)), // ms
+       now, // ms
        (long int)(started / APR_TIME_C(1000)), // ms
        (long int)((now - started) / APR_USEC_PER_SEC), // seconds
        (long int)((now - started) / APR_TIME_C(1000)), // ms
