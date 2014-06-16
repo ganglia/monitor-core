@@ -673,7 +673,7 @@ status_report( client_t *client , char *callback)
        "\"host\":\"%s\","
        "\"gridname\":\"%s\","
        "\"version\":\"%s\","
-       "\"localtime\":%lu,"
+       "\"stattime\":%lu,"
        "\"boottime\":%lu,"
        "\"uptime\":%lu,"
        "\"uptimeMillis\":%lu,"
