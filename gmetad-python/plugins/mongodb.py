@@ -212,24 +212,11 @@ class MongodbPlugin(GmetadPlugin) :
                 if attrs["units"].strip() == "" :
                     attrs["units"] = "N/A"
 
-                _data[attrs["name"]] = attrs 
+                #The pymongo client does not allow keys whose names contains "."
+                # to be written back in Mongo
+                _data[attrs["name"].replace('.','-')] = attrs 
 
                 empty = False
-
-#            print "looped NAMES: " + reported
-
-            '''
-            def print_list(d, name) :
-                list = ""
-                qemu_list = ""
-                for key in d :
-                    if key.count("qemu") :
-                        qemu_list += " " + key
-                    else :
-                        list += " " + key
-                print name + " QEMU   : " + qemu_list
-                print name + " REGULAR: " + list
-            '''
 
             if not empty :
                 _now = int(time())
