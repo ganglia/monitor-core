@@ -29,9 +29,8 @@ if BUILD_RIEMANN
 endif
 
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
-		 $(top_builddir)/libmetrics/libmetrics.la \
-		 $(GLDADD) $(DEPS_LIBS) @CK_LIBS@ @PROTOBUF_C_LIBS@ 
-                 
+                 $(top_builddir)/libmetrics/libmetrics.la \
+                 $(GLDADD) $(DEPS_LIBS) @CK_LIBS@ @PROTOBUF_C_LIBS@
 
 gmetad_LDFLAGS = $(GLDFLAGS)
 
