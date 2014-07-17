@@ -27,6 +27,18 @@ typedef enum ganglia_scoreboard_types ganglia_scoreboard_types;
 #define INTER_POLLS_DUR_ALL "gmetad_internal_polls_dur_all"
 #define INTER_POLLS_TIM_ALL "gmetad_internal_polls_tim_all"
 
+#define INTER_POLLS_NBR_DATA "gmetad_internal_polls_nbr_data"
+#define INTER_POLLS_DUR_DATA "gmetad_internal_polls_dur_data"
+#define INTER_POLLS_TIM_DATA "gmetad_internal_polls_tim_data"
+
+#define INTER_POLLS_NBR_CARBON "gmetad_internal_polls_nbr_carbon"
+#define INTER_POLLS_DUR_CARBON "gmetad_internal_polls_dur_carbon"
+#define INTER_POLLS_TIM_CARBON "gmetad_internal_polls_tim_carbon"
+
+#define INTER_POLLS_NBR_RRD "gmetad_internal_polls_nbr_rrd"
+#define INTER_POLLS_DUR_RRD "gmetad_internal_polls_dur_rrd"
+#define INTER_POLLS_TIM_RRD "gmetad_internal_polls_tim_rrd"
+
 #define INTER_EXPORTS_NBR_ALL "gmetad_internal_exports_nbr_all"
 #define INTER_EXPORTS_NBR_RRDTOOLS "gmetad_internal_exports_nbr_rrdtools"
 #define INTER_EXPORTS_NBR_RRDCACHED "gmetad_internal_exports_nbr_rrdcached"

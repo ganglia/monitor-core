@@ -270,7 +270,51 @@ void initialize_scoreboard()
     ganglia_scoreboard_add(METS_SENT_GRAPHITE, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_MEMCACHED, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_RIEMANN, GSB_COUNTER);
+    
+    ganglia_scoreboard_add(INTER_POLLS_NBR_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_DUR_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_TIM_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_NBR_DATA, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_DUR_DATA, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_TIM_DATA, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_NBR_CARBON, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_DUR_CARBON, GSB_COUNTER);
+    //ganglia_scoreboard_add(INTER_POLLS_TIM_CARBON, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_NBR_RRD, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_DUR_RRD, GSB_COUNTER);
+    //ganglia_scoreboard_add(INTER_POLLS_TIM_RRD, GSB_COUNTER);
 
+    /*
+     * 
+     * #define INTER_EXPORTS_NBR_ALL "gmetad_internal_exports_nbr_all"
+     * #define INTER_EXPORTS_NBR_RRDTOOLS "gmetad_internal_exports_nbr_rrdtools"
+     * #define INTER_EXPORTS_NBR_RRDCACHED "gmetad_internal_exports_nbr_rrdcached"
+     * #define INTER_EXPORTS_NBR_GRAPHITE "gmetad_internal_exports_nbr_graphite"
+     * #define INTER_EXPORTS_NBR_MEMCACHED "gmetad_internal_exports_nbr_memcached"
+     * #define INTER_EXPORTS_NBR_RIEMANN "gmetad_internal_exports_nbr_riemann"
+     * 
+     * #define INTER_EXPORTS_TIME_EXP_ALL "gmetad_internal_exports_nbr_exp_time_all"
+     * #define INTER_EXPORTS_TIME_EXP_RRDTOOLS "gmetad_internal_exports_nbr_exp_time_rrdtools"
+     * #define INTER_EXPORTS_TIME_EXP_RRDCACHED "gmetad_internal_exports_nbr_exp_time_rrdcached"
+     * #define INTER_EXPORTS_TIME_EXP_GRAPHITE "gmetad_internal_exports_nbr_exp_time_graphite"
+     * #define INTER_EXPORTS_TIME_EXP_MEMCACHED "gmetad_internal_exports_nbr_exp_time_memcached"
+     * #define INTER_EXPORTS_TIME_EXP_RIEMANN "gmetad_internal_exports_nbr_exp_time_riemann"
+     * 
+     * #define INTER_EXPORTS_LAST_EXP_ALL "gmetad_internal_exports_nbr_last_exp_all"
+     * #define INTER_EXPORTS_LAST_EXP_RRDTOOLS "gmetad_internal_exports_nbr_last_exp_rrdtools"
+     * #define INTER_EXPORTS_LAST_EXP_RRDCACHED "gmetad_internal_exports_nbr_last_exp_rrdcached"
+     * #define INTER_EXPORTS_LAST_EXP_GRAPHITE "gmetad_internal_exports_nbr_last_exp_graphite"
+     * #define INTER_EXPORTS_LAST_EXP_MEMCACHED "gmetad_internal_exports_nbr_last_exp_memcached"
+     * #define INTER_EXPORTS_LAST_EXP_RIEMANN "gmetad_internal_exports_nbr_last_exp_riemann"
+     * 
+     * #define INTER_REQUESTS_NBR_ALL "gmetad_internal_requests_nbr_all"
+     * #define INTER_REQUESTS_SERV_ALL "gmetad_internal_requests_serv_all"
+     * 
+     * #define INTER_PROCESSING_SUM_ALL "gmetad_internal_processing_sum_all"
+     * #define INTER_PROCESSING_TIME_SUM_ALL "gmetad_internal_processing_time_sum_all"
+     * #define INTER_PROCESSING_LAST_SUM_ALL "gmetad_internal_processing_last_sum_all"
+     * 
+    */
 }
 
 static int

@@ -15,6 +15,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/poll.h>
+#include <apr_time.h>
 
 #include "rrd_helpers.h"
 #include "gm_scoreboard.h"
@@ -119,7 +120,13 @@ reconnect:
 
    while (1)
       {
+         ganglia_scoreboard_inc(INTER_POLLS_NBR_ALL);
+         ganglia_scoreboard_inc(INTER_POLLS_NBR_RRD);
+         apr_time_t now = apr_time_now();
          int r = poll(pfd, 1, 250);
+         apr_time_t afternow = apr_time_now();
+         ganglia_scoreboard_incby(INTER_POLLS_DUR_ALL, afternow - now);
+         ganglia_scoreboard_incby(INTER_POLLS_DUR_RRD, afternow - now);
          
          if (r == 0)
             {

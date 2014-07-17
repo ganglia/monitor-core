@@ -230,9 +230,15 @@ push_data_to_carbon( char *graphite_msg)
       /* Start Poll */
        carbon_struct_poll.fd=carbon_socket;
        carbon_struct_poll.events = POLLOUT;
-       poll_rval = poll( &carbon_struct_poll, 1, carbon_timeout ); // default timeout .5s
 
-      /* Send data to the server when the socket becomes ready */
+       ganglia_scoreboard_inc(INTER_POLLS_NBR_ALL);
+       ganglia_scoreboard_inc(INTER_POLLS_NBR_CARBON);
+       apr_time_t now = apr_time_now();
+       poll_rval = poll( &carbon_struct_poll, 1, carbon_timeout ); // default timeout .5s
+       apr_time_t afternow = apr_time_now();
+       ganglia_scoreboard_incby(INTER_POLLS_DUR_ALL, afternow - now);
+       ganglia_scoreboard_incby(INTER_POLLS_DUR_CARBON, afternow - now);
+       /* Send data to the server when the socket becomes ready */
       if( poll_rval < 0 ) {
         debug_msg("carbon proxy:: poll() error");
       } else if ( poll_rval == 0 ) {
