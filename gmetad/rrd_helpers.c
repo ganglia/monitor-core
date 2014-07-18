@@ -43,6 +43,8 @@ my_mkdir ( const char *dir )
 static int
 RRD_update_cached( char *rrd, const char *sum, const char *num, unsigned int process_time )
 {
+   //HERE
+   apr_time_t now, start = apr_time_now();
    int *conn, c, r, off, l, to;
    char *cmd, *str, buf[1024];
    struct pollfd pfd[1];
@@ -192,7 +194,10 @@ reconnect:
                   }
             }
       }
-
+      
+    ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_ALL, apr_time_now() - start);
+    ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_RRDCACHED, apr_time_now() - start);
+    printf("TIME TAKEN RRDCACHED: %lu\n", apr_time_now() - start);
    return 0;
 }
 
@@ -358,9 +363,11 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
                     const char *sum, const char *num, unsigned int step,
                     unsigned int process_time, ganglia_slope_t slope)
 {
+   apr_time_t start = apr_time_now();
    char rrd[ PATHSIZE + 1 ];
    char *summary_dir = "__SummaryInfo__";
    int i;
+   int ret;
 
    /* Build the path to our desired RRD file. Assume the rootdir exists. */
    strncpy(rrd, gmetad_config.rrd_rootdir, PATHSIZE);
@@ -392,5 +399,9 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
    strncat(rrd, metric, PATHSIZE-strlen(rrd));
    strncat(rrd, ".rrd", PATHSIZE-strlen(rrd));
 
-   return push_data_to_rrd( rrd, sum, num, step, process_time, slope);
+   ret = push_data_to_rrd( rrd, sum, num, step, process_time, slope);
+   ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_ALL, apr_time_now() - start);
+   ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_RRDTOOLS, apr_time_now() - start);
+   printf("TIME TAKEN RRDTOOLS: %lu\n", apr_time_now() - start);
+   return ret;
 }

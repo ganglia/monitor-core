@@ -188,7 +188,7 @@ push_data_to_carbon( char *graphite_msg)
 
   if (!strcmp(gmetad_config.carbon_protocol, "tcp"))
     {
-
+      apr_time_t now;
       int port;
       int carbon_socket;
       struct sockaddr_in server;
@@ -233,7 +233,7 @@ push_data_to_carbon( char *graphite_msg)
 
        ganglia_scoreboard_inc(INTER_POLLS_NBR_ALL);
        ganglia_scoreboard_inc(INTER_POLLS_NBR_CARBON);
-       apr_time_t now = apr_time_now();
+       now = apr_time_now();
        poll_rval = poll( &carbon_struct_poll, 1, carbon_timeout ); // default timeout .5s
        apr_time_t afternow = apr_time_now();
        ganglia_scoreboard_incby(INTER_POLLS_DUR_ALL, afternow - now);
@@ -294,6 +294,7 @@ int
 write_data_to_memcached ( const char *cluster, const char *host, const char *metric, 
                     const char *sum, unsigned int process_time, unsigned int expiry )
 {
+   apr_time_t start = apr_time_now();
    time_t expiry_time;
    char s_path[MEMCACHED_MAX_KEY_LENGTH];
    if (strlen(cluster) + strlen(host) + strlen(metric) + 3 > MEMCACHED_MAX_KEY_LENGTH) {
@@ -324,6 +325,9 @@ write_data_to_memcached ( const char *cluster, const char *host, const char *met
       memcached_pool_push(memcached_connection_pool, memc);
       ganglia_scoreboard_inc(METS_SENT_MEMCACHED);
       ganglia_scoreboard_inc(METS_SENT_ALL);
+      ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_ALL, apr_time_now() - start);
+      ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_MEMCACHED, apr_time_now() - start);
+      printf("TIME TAKEN MEMCACHED: %lu\n", apr_time_now() - start);
       return EXIT_SUCCESS;
    }
 }
@@ -358,20 +362,21 @@ int
 write_data_to_carbon ( const char *source, const char *host, const char *metric, 
                     const char *sum, unsigned int process_time )
 {
-
-	int hostlen=strlen(host);
-	char hostcp[hostlen+1]; 
-	int sourcelen=strlen(source);		
-	char sourcecp[sourcelen+1];
+    apr_time_t start = apr_time_now();
+    int hostlen=strlen(host);
+    char hostcp[hostlen+1]; 
+    int sourcelen=strlen(source);
+    char sourcecp[sourcelen+1];
     int metriclen=strlen(metric);
     char metriccp[metriclen+1];
-	char s_process_time[15];
-   char graphite_msg[ PATHSIZE + 1 ];
-   int i;
-                                                                                                                                                                                               
-	/*  if process_time is undefined, we set it to the current time */
-	if (!process_time) process_time = time(0);
-	sprintf(s_process_time, "%u", process_time);
+    char s_process_time[15];
+    char graphite_msg[ PATHSIZE + 1 ];
+    int i;
+    int ret;
+
+    /*  if process_time is undefined, we set it to the current time */
+    if (!process_time) process_time = time(0);
+    sprintf(s_process_time, "%u", process_time);
 
    /* prepend everything with graphite_prefix if it's set */
    if (gmetad_config.graphite_prefix != NULL && strlen(gmetad_config.graphite_prefix) > 1) {
@@ -380,17 +385,16 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 
 	/*prep the source name*/
    if (source) {
-
-		/* find and replace space for _ in the sourcename*/
-		for(i=0; i<=sourcelen; i++){
-			if ( source[i] == ' ') {
-	  			sourcecp[i]='_';
-			}else{
-	  			sourcecp[i]=source[i];
-			}
+      /* find and replace space for _ in the sourcename*/
+      for(i=0; i<=sourcelen; i++){
+         if ( source[i] == ' ') {
+            sourcecp[i]='_';
+         }else{
+            sourcecp[i]=source[i];
+         }
       }
-		sourcecp[i+1]=0;
-      }
+      sourcecp[i+1]=0;
+   }
 
 
    /* prep the host name*/
@@ -476,7 +480,12 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
   	strncat(graphite_msg, "\n", PATHSIZE-strlen(graphite_msg));
 
 	graphite_msg[strlen(graphite_msg)+1] = 0;
-   return push_data_to_carbon( graphite_msg );
+        
+        ret = push_data_to_carbon( graphite_msg );
+        ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_ALL, apr_time_now() - start);
+        ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_GRAPHITE, apr_time_now() - start);
+        printf("TIME TAKEN GRAPHITE: %lu\n", apr_time_now() - start);
+   return ret;
 }
 
 #ifdef WITH_RIEMANN
@@ -591,6 +600,7 @@ create_riemann_event (const char *grid, const char *cluster, const char *host, c
 int
 send_event_to_riemann (Event *event)
 {
+   apr_time_t start = apr_time_now();
    size_t len, nbytes;
    void *buf;
    int errsv;
@@ -625,12 +635,16 @@ send_event_to_riemann (Event *event)
    }
    ganglia_scoreboard_inc(METS_SENT_RIEMANN);
    ganglia_scoreboard_inc(METS_SENT_ALL);
+   ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_ALL, apr_time_now() - start);
+   ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_RIEMANN, apr_time_now() - start);
+   printf("TIME TAKEN RIEMANN: %lu\n", apr_time_now() - start);
    return EXIT_SUCCESS;
 }
 
 int
 send_message_to_riemann (Msg *message)
 {
+   apr_time_t start = apr_time_now();
    debug_msg("[riemann] send_message_to_riemann()");
 
    if (riemann_circuit_breaker == RIEMANN_CB_CLOSED) {
@@ -675,6 +689,9 @@ send_message_to_riemann (Msg *message)
    }
    ganglia_scoreboard_incby(METS_SENT_RIEMANN, message->n_events);
    ganglia_scoreboard_incby(METS_SENT_ALL, message->n_events);
+   ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_ALL, apr_time_now() - start);
+   ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_RIEMANN, apr_time_now() - start);
+   printf("TIME TAKEN RIEMANN: %lu\n", apr_time_now() - start);
    return EXIT_SUCCESS;
 }
 
