@@ -15,6 +15,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/poll.h>
+#include <apr_time.h>
 
 #include "rrd_helpers.h"
 #include "gm_scoreboard.h"
@@ -42,6 +43,8 @@ my_mkdir ( const char *dir )
 static int
 RRD_update_cached( char *rrd, const char *sum, const char *num, unsigned int process_time )
 {
+   //HERE
+   apr_time_t now, start = apr_time_now();
    int *conn, c, r, off, l, to;
    char *cmd, *str, buf[1024];
    struct pollfd pfd[1];
@@ -119,7 +122,13 @@ reconnect:
 
    while (1)
       {
+         ganglia_scoreboard_inc(INTER_POLLS_NBR_ALL);
+         ganglia_scoreboard_inc(INTER_POLLS_NBR_RRD);
+         apr_time_t now = apr_time_now();
          int r = poll(pfd, 1, 250);
+         apr_time_t afternow = apr_time_now();
+         ganglia_scoreboard_incby(INTER_POLLS_DUR_ALL, afternow - now);
+         ganglia_scoreboard_incby(INTER_POLLS_DUR_RRD, afternow - now);
          
          if (r == 0)
             {
@@ -185,7 +194,10 @@ reconnect:
                   }
             }
       }
-
+      
+    ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_ALL, apr_time_now() - start);
+    ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_RRDCACHED, apr_time_now() - start);
+    printf("TIME TAKEN RRDCACHED: %lu\n", apr_time_now() - start);
    return 0;
 }
 
@@ -351,9 +363,11 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
                     const char *sum, const char *num, unsigned int step,
                     unsigned int process_time, ganglia_slope_t slope)
 {
+   apr_time_t start = apr_time_now();
    char rrd[ PATHSIZE + 1 ];
    char *summary_dir = "__SummaryInfo__";
    int i;
+   int ret;
 
    /* Build the path to our desired RRD file. Assume the rootdir exists. */
    strncpy(rrd, gmetad_config.rrd_rootdir, PATHSIZE);
@@ -385,5 +399,9 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
    strncat(rrd, metric, PATHSIZE-strlen(rrd));
    strncat(rrd, ".rrd", PATHSIZE-strlen(rrd));
 
-   return push_data_to_rrd( rrd, sum, num, step, process_time, slope);
+   ret = push_data_to_rrd( rrd, sum, num, step, process_time, slope);
+   ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_ALL, apr_time_now() - start);
+   ganglia_scoreboard_incby(INTER_EXPORTS_TIME_EXP_RRDTOOLS, apr_time_now() - start);
+   printf("TIME TAKEN RRDTOOLS: %lu\n", apr_time_now() - start);
+   return ret;
 }

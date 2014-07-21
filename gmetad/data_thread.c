@@ -10,6 +10,7 @@
 
 #include <apr_time.h>
 
+#include "gm_scoreboard.h"
 /* Deliberately vary the sleep interval by this percentage: */
 #define SLEEP_RANDOMIZE 5.0
 
@@ -35,6 +36,7 @@ data_thread ( void *arg )
    apr_interval_time_t sleep_time, elapsed;
    double random_factor;
    unsigned int rand_seed;
+   unsigned long last_poll = 0;
 
    rand_seed = apr_time_now() * (int)pthread_self();
    for(i = 0; d->name[i] != 0; rand_seed = rand_seed * d->name[i++]);
@@ -102,8 +104,17 @@ data_thread ( void *arg )
          read_index = 0;
          for(;;)
             {
+               ganglia_scoreboard_inc(INTER_POLLS_NBR_ALL);
+               ganglia_scoreboard_inc(INTER_POLLS_NBR_DATA);
+               apr_time_t now = apr_time_now();
                /* Timeout set to 10 seconds */
                rval = poll( &struct_poll, 1, 10000);
+               apr_time_t afternow = apr_time_now();
+               ganglia_scoreboard_incby(INTER_POLLS_DUR_ALL, afternow - now);
+               ganglia_scoreboard_incby(INTER_POLLS_DUR_DATA, afternow - now);
+               ganglia_scoreboard_set(INTER_POLLS_TIM_ALL, (last_poll != 0 ? now - last_poll : 0));
+               ganglia_scoreboard_set(INTER_POLLS_TIM_DATA, (last_poll != 0 ? now - last_poll : 0));
+               last_poll = now;
                if( rval < 0 )
                   {
                      /* Error */

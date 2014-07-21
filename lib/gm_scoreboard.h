@@ -22,6 +22,77 @@ typedef enum ganglia_scoreboard_types ganglia_scoreboard_types;
 #define METS_SENT_MEMCACHED "gmetad_metrics_sent_memcached"
 #define METS_SENT_RIEMANN "gmetad_metrics_sent_riemann"
 
+/* predefined gmetad scoreboard internal elements */
+#define INTER_POLLS_NBR_ALL "gmetad_internal_polls_nbr_all"
+#define INTER_POLLS_DUR_ALL "gmetad_internal_polls_dur_all"
+#define INTER_POLLS_TIM_ALL "gmetad_internal_polls_tim_all"
+
+#define INTER_POLLS_NBR_DATA "gmetad_internal_polls_nbr_data"
+#define INTER_POLLS_DUR_DATA "gmetad_internal_polls_dur_data"
+#define INTER_POLLS_TIM_DATA "gmetad_internal_polls_tim_data"
+
+#define INTER_POLLS_NBR_CARBON "gmetad_internal_polls_nbr_carbon"
+#define INTER_POLLS_DUR_CARBON "gmetad_internal_polls_dur_carbon"
+#define INTER_POLLS_TIM_CARBON "gmetad_internal_polls_tim_carbon"
+
+#define INTER_POLLS_NBR_RRD "gmetad_internal_polls_nbr_rrd"
+#define INTER_POLLS_DUR_RRD "gmetad_internal_polls_dur_rrd"
+#define INTER_POLLS_TIM_RRD "gmetad_internal_polls_tim_rrd"
+
+#define INTER_EXPORTS_NBR_ALL "gmetad_internal_exports_nbr_all"
+#define INTER_EXPORTS_NBR_RRDTOOLS "gmetad_internal_exports_nbr_rrdtools"
+#define INTER_EXPORTS_NBR_RRDCACHED "gmetad_internal_exports_nbr_rrdcached"
+#define INTER_EXPORTS_NBR_GRAPHITE "gmetad_internal_exports_nbr_graphite"
+#define INTER_EXPORTS_NBR_MEMCACHED "gmetad_internal_exports_nbr_memcached"
+#define INTER_EXPORTS_NBR_RIEMANN "gmetad_internal_exports_nbr_riemann"
+
+#define INTER_EXPORTS_TIME_EXP_ALL "gmetad_internal_exports_nbr_exp_time_all"
+#define INTER_EXPORTS_TIME_EXP_RRDTOOLS "gmetad_internal_exports_nbr_exp_time_rrdtools"
+#define INTER_EXPORTS_TIME_EXP_RRDCACHED "gmetad_internal_exports_nbr_exp_time_rrdcached"
+#define INTER_EXPORTS_TIME_EXP_GRAPHITE "gmetad_internal_exports_nbr_exp_time_graphite"
+#define INTER_EXPORTS_TIME_EXP_MEMCACHED "gmetad_internal_exports_nbr_exp_time_memcached"
+#define INTER_EXPORTS_TIME_EXP_RIEMANN "gmetad_internal_exports_nbr_exp_time_riemann"
+
+#define INTER_EXPORTS_LAST_EXP_ALL "gmetad_internal_exports_nbr_last_exp_all"
+#define INTER_EXPORTS_LAST_EXP_RRDTOOLS "gmetad_internal_exports_nbr_last_exp_rrdtools"
+#define INTER_EXPORTS_LAST_EXP_RRDCACHED "gmetad_internal_exports_nbr_last_exp_rrdcached"
+#define INTER_EXPORTS_LAST_EXP_GRAPHITE "gmetad_internal_exports_nbr_last_exp_graphite"
+#define INTER_EXPORTS_LAST_EXP_MEMCACHED "gmetad_internal_exports_nbr_last_exp_memcached"
+#define INTER_EXPORTS_LAST_EXP_RIEMANN "gmetad_internal_exports_nbr_last_exp_riemann"
+
+#define INTER_IMPORTS_NBR_ALL "gmetad_internal_imports_nbr_all"
+#define INTER_IMPORTS_NBR_RRDTOOLS "gmetad_internal_imports_nbr_rrdtools"
+#define INTER_IMPORTS_NBR_RRDCACHED "gmetad_internal_imports_nbr_rrdcached"
+#define INTER_IMPORTS_NBR_GRAPHITE "gmetad_internal_imports_nbr_graphite"
+#define INTER_IMPORTS_NBR_MEMCACHED "gmetad_internal_imports_nbr_memcached"
+#define INTER_IMPORTS_NBR_RIEMANN "gmetad_internal_imports_nbr_riemann"
+
+#define INTER_IMPORTS_TIME_EXP_ALL "gmetad_internal_imports_nbr_exp_time_all"
+#define INTER_IMPORTS_TIME_EXP_RRDTOOLS "gmetad_internal_imports_nbr_exp_time_rrdtools"
+#define INTER_IMPORTS_TIME_EXP_RRDCACHED "gmetad_internal_imports_nbr_exp_time_rrdcached"
+#define INTER_IMPORTS_TIME_EXP_GRAPHITE "gmetad_internal_imports_nbr_exp_time_graphite"
+#define INTER_IMPORTS_TIME_EXP_MEMCACHED "gmetad_internal_imports_nbr_exp_time_memcached"
+#define INTER_IMPORTS_TIME_EXP_RIEMANN "gmetad_internal_imports_nbr_exp_time_riemann"
+
+#define INTER_IMPORTS_LAST_EXP_ALL "gmetad_internal_imports_nbr_last_exp_all"
+#define INTER_IMPORTS_LAST_EXP_RRDTOOLS "gmetad_internal_imports_nbr_last_exp_rrdtools"
+#define INTER_IMPORTS_LAST_EXP_RRDCACHED "gmetad_internal_imports_nbr_last_exp_rrdcached"
+#define INTER_IMPORTS_LAST_EXP_GRAPHITE "gmetad_internal_imports_nbr_last_exp_graphite"
+#define INTER_IMPORTS_LAST_EXP_MEMCACHED "gmetad_internal_imports_nbr_last_exp_memcached"
+#define INTER_IMPORTS_LAST_EXP_RIEMANN "gmetad_internal_imports_nbr_last_exp_riemann"
+
+#define INTER_REQUESTS_NBR_ALL "gmetad_internal_requests_nbr_all"
+#define INTER_REQUESTS_SERV_ALL "gmetad_internal_requests_serv_all"
+
+#define INTER_PROCESSING_SUM_ALL "gmetad_internal_processing_sum_all"
+#define INTER_PROCESSING_TIME_SUM_ALL "gmetad_internal_processing_time_sum_all"
+#define INTER_PROCESSING_LAST_SUM_ALL "gmetad_internal_processing_last_sum_all"
+
+/*
+#define INTER_LATENCY_TIME_ALL "gmetad_internal_latency_time_all"
+#define INTER_LATENCY__ALL "gmetad_internal_latency__all"
+*/
+
 /* predefined gmond scoreboard elements */
 #define PKTS_RECVD_ALL "gmond_pkts_recvd_all"
 #define PKTS_RECVD_FAILED "gmond_pkts_recvd_failed"

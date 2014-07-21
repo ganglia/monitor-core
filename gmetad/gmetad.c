@@ -263,6 +263,29 @@ out:
 void initialize_scoreboard()
 {
     ganglia_scoreboard_init(global_context);
+    
+    ganglia_scoreboard_add(INTER_POLLS_NBR_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_DUR_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_TIM_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_NBR_DATA, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_DUR_DATA, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_TIM_DATA, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_NBR_CARBON, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_DUR_CARBON, GSB_COUNTER);
+    //ganglia_scoreboard_add(INTER_POLLS_TIM_CARBON, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_NBR_RRD, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_POLLS_DUR_RRD, GSB_COUNTER);
+    //ganglia_scoreboard_add(INTER_POLLS_TIM_RRD, GSB_COUNTER);
+    
+    /* This is done with the METS_SENT_...
+     ganglia_scoreboard_add(INTER_EXPORTS_NBR_ALL, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_EXPORTS_NBR_RRDTOOLS, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_EXPORTS_NBR_RRDCACHED, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_EXPORTS_NBR_GRAPHITE, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_EXPORTS_NBR_MEMCACHED, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_EXPORTS_NBR_RIEMANN, GSB_COUNTER);
+     */
+    //Will rename when done.
     ganglia_scoreboard_add(METS_RECVD_ALL, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_ALL, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_RRDTOOL, GSB_COUNTER);
@@ -270,7 +293,51 @@ void initialize_scoreboard()
     ganglia_scoreboard_add(METS_SENT_GRAPHITE, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_MEMCACHED, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_RIEMANN, GSB_COUNTER);
+    
+    ganglia_scoreboard_add(INTER_EXPORTS_TIME_EXP_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_TIME_EXP_RRDTOOLS, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_TIME_EXP_RRDCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_TIME_EXP_GRAPHITE, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_TIME_EXP_MEMCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_TIME_EXP_RIEMANN, GSB_COUNTER);
+    
+    ganglia_scoreboard_add(INTER_EXPORTS_LAST_EXP_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_LAST_EXP_RRDTOOLS, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_LAST_EXP_RRDCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_LAST_EXP_GRAPHITE, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_LAST_EXP_MEMCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_EXPORTS_LAST_EXP_RIEMANN, GSB_COUNTER);
+    /*
 
+     ganglia_scoreboard_add(INTER_IMPORTS_NBR_ALL, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_IMPORTS_NBR_RRDTOOLS, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_IMPORTS_NBR_RRDCACHED, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_IMPORTS_NBR_GRAPHITE, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_IMPORTS_NBR_MEMCACHED, GSB_COUNTER);
+     ganglia_scoreboard_add(INTER_IMPORTS_NBR_RIEMANN, GSB_COUNTER);
+    
+    ganglia_scoreboard_add(INTER_IMPORTS_TIME_EXP_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_TIME_EXP_RRDTOOLS, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_TIME_EXP_RRDCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_TIME_EXP_GRAPHITE, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_TIME_EXP_MEMCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_TIME_EXP_RIEMANN, GSB_COUNTER);
+    
+    ganglia_scoreboard_add(INTER_IMPORTS_LAST_EXP_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_LAST_EXP_RRDTOOLS, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_LAST_EXP_RRDCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_LAST_EXP_GRAPHITE, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_LAST_EXP_MEMCACHED, GSB_COUNTER);
+    ganglia_scoreboard_add(INTER_IMPORTS_LAST_EXP_RIEMANN, GSB_COUNTER);
+    
+     * 
+     * #define INTER_REQUESTS_NBR_ALL "gmetad_internal_requests_nbr_all"
+     * #define INTER_REQUESTS_SERV_ALL "gmetad_internal_requests_serv_all"
+     * 
+     * #define INTER_PROCESSING_SUM_ALL "gmetad_internal_processing_sum_all"
+     * #define INTER_PROCESSING_TIME_SUM_ALL "gmetad_internal_processing_time_sum_all"
+     * #define INTER_PROCESSING_LAST_SUM_ALL "gmetad_internal_processing_last_sum_all"
+    */
 }
 
 static int

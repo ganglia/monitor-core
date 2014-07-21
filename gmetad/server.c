@@ -19,6 +19,133 @@
 
 #define HOSTNAMESZ 64
 
+/* Local metrics */
+#include "libmetrics.h"
+
+static const struct metricinfo
+{
+  const char *name;
+    g_val_t (*func) (void);
+  g_type_t type;
+} metrics[] =
+{
+  {
+  "cpu_num", cpu_num_func, g_uint16},
+  {
+  "cpu_speed", cpu_speed_func, g_uint32},
+  {
+  "mem_total", mem_total_func, g_float},
+  {
+  "swap_total", swap_total_func, g_float},
+  {
+  "boottime", boottime_func, g_timestamp},
+  {
+  "sys_clock", sys_clock_func, g_timestamp},
+  {
+  "machine_type", machine_type_func, g_string},
+  {
+  "os_name", os_name_func, g_string},
+  {
+  "os_release", os_release_func, g_string},
+  {
+  "mtu", mtu_func, g_uint32},
+  {
+  "cpu_user", cpu_user_func, g_float},
+  {
+  "cpu_nice", cpu_nice_func, g_float},
+  {
+  "cpu_system", cpu_system_func, g_float},
+  {
+  "cpu_idle", cpu_idle_func, g_float},
+  {
+  "cpu_wio", cpu_wio_func, g_float},
+  {
+  "cpu_aidle", cpu_aidle_func, g_float},
+  {
+  "cpu_intr", cpu_intr_func, g_float},
+  {
+  "cpu_sintr", cpu_sintr_func, g_float},
+  {
+  "cpu_steal", cpu_steal_func, g_uint16},
+  {
+  "load_one", load_one_func, g_float},
+  {
+  "load_five", load_five_func, g_float},
+  {
+  "load_fifteen", load_fifteen_func, g_float},
+  {
+  "proc_run", proc_run_func, g_uint32},
+  {
+  "proc_total", proc_total_func, g_uint32},
+  {
+  "mem_free", mem_free_func, g_float},
+  {
+  "mem_shared", mem_shared_func, g_float},
+  {
+  "mem_buffers", mem_buffers_func, g_float},
+  {
+  "mem_cached", mem_cached_func, g_float},
+  {
+  "swap_free", swap_free_func, g_float},
+  {
+  "bytes_out", bytes_out_func, g_float},
+  {
+  "bytes_in", bytes_in_func, g_float},
+  {
+  "pkts_in", pkts_in_func, g_float},
+  {
+  "pkts_out", pkts_out_func, g_float},
+  {
+  "disk_free", disk_free_func, g_double},
+  {
+  "disk_total", disk_total_func, g_double},
+  {
+  "part_max_used", part_max_used_func, g_float},
+  {
+  /*
+  "gexec", gexec_func, g_string},//not implemented
+  {
+  "heartbeat", heartbeat_func, },//not implemented, type unknown
+  {
+  "location", location_func, },//not implemented, type unknown
+  {
+   */
+  #ifdef LINUX
+  "mem_sreclaimable", mem_sreclaimable_func, g_float},
+  {
+  #endif
+  #ifdef SOLARIS
+  "bread_sec", bread_sec_func, g_float},
+  {
+  "bwrite_sec", bwrite_sec_func, g_float},
+  {
+  "lread_sec", lread_sec_func, g_float},
+  {
+  "lwrite_sec", lwrite_sec_func, g_float},
+  {
+  "phread_sec", phread_sec_func, g_float},
+  {
+  "phwrite_sec", phwrite_sec_func, g_float},
+  {
+  "rchache", rcache_func, g_float},
+  {
+  "wcache", wcache_func, g_float},
+  {
+  #endif
+  #ifdef HPUX
+  "mem_rm", mem_rm_func, g_float},
+  {
+  "mem_arm", mem_arm_func, g_float},
+  {
+  "mem_vm",mem_vm _func, g_float},
+  {
+  "mem_avm", mem_avm_func, g_float},
+  {
+  #endif
+  "", NULL}
+};
+/* End Local Metrics */
+
 extern g_tcp_socket *server_socket;
 extern pthread_mutex_t  server_socket_mutex;
 extern g_tcp_socket *interactive_socket;
@@ -518,50 +645,56 @@ process_path_adapter (datum_t *key, datum_t *val, void *arg)
    return process_path(ctxt->client, ctxt->path, val, key);
 }
 
+#define BUFSIZE 4096
 static int
-status_report( client_t *client )
+status_report( client_t *client , char *callback)
 {
-   int rval, len;
-   char buf[4096];
-
+   int rval, len, i, offset;
+   char buf[BUFSIZE];
+   g_val_t val;
+   
    debug_msg("Stat request...");
 
    if(! client->valid )
       {
          return 1;
       }
-
    apr_time_t now = apr_time_now();
 
-   snprintf (buf, sizeof (buf),
+   offset = snprintf (buf, BUFSIZE,
        "HTTP/1.0 200 OK\r\n"
        "Server: gmetad/" GANGLIA_VERSION_FULL "\r\n"
        "Content-Type: application/json\r\n"
        "Connection: close\r\n"
        "\r\n"
+       "%s"
+       "%s"
        "{"
        "\"host\":\"%s\","
        "\"gridname\":\"%s\","
        "\"version\":\"%s\","
+       "\"stattime\":%lu,"
        "\"boottime\":%lu,"
        "\"uptime\":%lu,"
        "\"uptimeMillis\":%lu,"
        "\"metrics\":{"
        "\"received\":{"
-       "\"all\":%u"
+       "\"received_all\":%u"
        "},"
        "\"sent\":{"
-       "\"all\":%u,"
+       "\"sent_all\":%u,"
        "\"rrdtool\":%u,"
        "\"rrdcached\":%u,"
        "\"graphite\":%u,"
        "\"memcached\":%u,"
        "\"riemann\":%u"
-       "}}"
-       "}\r\n",
+       "},",
+       callback != NULL ? callback : "",
+       callback != NULL ? "(" : "",
        hostname,
        gmetad_config.gridname,
        GANGLIA_VERSION_FULL,
+       now, // ms
        (long int)(started / APR_TIME_C(1000)), // ms
        (long int)((now - started) / APR_USEC_PER_SEC), // seconds
        (long int)((now - started) / APR_TIME_C(1000)), // ms
@@ -574,6 +707,224 @@ status_report( client_t *client )
        ganglia_scoreboard_get("gmetad_metrics_sent_riemann")
    );
 
+   /* Get local metrics */
+   metric_init();
+   char coreBuf[512], cpuBuf[512], diskBuf[512], loadBuf[512], memoryBuf[512], networkBuf[512], processBuf[512], systemBuf[512], otherBuf[512];
+   int coreOffset, cpuOffset, diskOffset, loadOffset, memoryOffset, networkOffset, processOffset, systemOffset, otherOffset;
+   coreOffset = 0; cpuOffset = 0; diskOffset = 0; loadOffset = 0; memoryOffset = 0; networkOffset = 0; processOffset = 0; systemOffset = 0, otherOffset = 0;
+
+   coreOffset = snprintf (coreBuf, 512, "\"core\":{");
+   cpuOffset = snprintf (cpuBuf, 512, "\"cpu\":{");
+   diskOffset = snprintf (diskBuf, 512, "\"disk\":{");
+   loadOffset = snprintf (loadBuf, 512, "\"load\":{");
+   memoryOffset = snprintf (memoryBuf, 512, "\"memory\":{");
+   networkOffset = snprintf (networkBuf, 512, "\"network\":{");
+   processOffset = snprintf (processBuf, 512, "\"process\":{");
+   systemOffset = snprintf (systemBuf, 512, "\"system\":{");
+   otherOffset = snprintf (otherBuf, 512, "\"other\":{");
+
+   /* Run through the metric list */
+   for(i = 0; metrics[i].func != NULL; i++){
+      val = metrics[i].func();
+      if(strcmp(metrics[i].name, "gexec") == 0){//not implemented
+         coreOffset += snprintf (coreBuf + coreOffset, 512 > coreOffset ? 512 - coreOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
+      }
+      /*
+      else if(strcmp(metrics[i].name, "heartbeat") == 0){//not implemented, type unknown
+         coreOffset += snprintf (coreBuf + coreOffset, 512 > coreOffset ? 512 - coreOffset : 0, "\"%s\":\"%\",", metrics[i].name, );
+      }else if(strcmp(metrics[i].name, "location") == 0){//not implemented type unknown
+         coreOffset += snprintf (coreBuf + coreOffset, 512 > coreOffset ? 512 - coreOffset : 0, "\"%s\":\"%\",", metrics[i].name, );
+      }
+      */
+      else if(strcmp(metrics[i].name, "cpu_steal") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%d,", metrics[i].name, (unsigned int) val.uint16);
+      }else if(strcmp(metrics[i].name, "cpu_intr") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_sintr") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_idle") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_user") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_nice") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_aidle") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_system") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_wio") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "cpu_num") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%d,", metrics[i].name, (unsigned int) val.uint16);
+      }else if(strcmp(metrics[i].name, "cpu_speed") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
+      }else if(strcmp(metrics[i].name, "disk_free") == 0){
+         diskOffset += snprintf (diskBuf + diskOffset, 512 > diskOffset ? 512 - diskOffset : 0, "\"%s\":%f,", metrics[i].name, val.d);
+      }else if(strcmp(metrics[i].name, "part_max_used") == 0){
+         diskOffset += snprintf (diskBuf + diskOffset, 512 > diskOffset ? 512 - diskOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "disk_total") == 0){
+         diskOffset += snprintf (diskBuf + diskOffset, 512 > diskOffset ? 512 - diskOffset : 0, "\"%s\":%f,", metrics[i].name, val.d);
+      }else if(strcmp(metrics[i].name, "load_one") == 0){
+         loadOffset += snprintf (loadBuf + loadOffset, 512 > loadOffset ? 512 - loadOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "load_five") == 0){
+         loadOffset += snprintf (loadBuf + loadOffset, 512 > loadOffset ? 512 - loadOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "load_fifteen") == 0){
+         loadOffset += snprintf (loadBuf + loadOffset, 512 > loadOffset ? 512 - loadOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_total") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_cached") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "swap_total") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_free") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_buffers") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_shared") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "swap_free") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "pkts_in") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "bytes_in") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "bytes_out") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "pkts_out") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mtu") == 0){
+         networkOffset += snprintf (networkBuf + networkOffset, 512 > networkOffset ? 512 - networkOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
+      }else if(strcmp(metrics[i].name, "proc_run") == 0){
+         processOffset += snprintf (processBuf + processOffset, 512 > processOffset ? 512 - processOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
+      }else if(strcmp(metrics[i].name, "proc_total") == 0){
+         processOffset += snprintf (processBuf + processOffset, 512 > processOffset ? 512 - processOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
+      }else if(strcmp(metrics[i].name, "os_release") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
+      }else if(strcmp(metrics[i].name, "os_name") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
+      }else if(strcmp(metrics[i].name, "cpu_system") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "machine_type") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
+      }else if(strcmp(metrics[i].name, "boottime") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned) val.uint32);
+      }else if(strcmp(metrics[i].name, "sys_clock") == 0){
+         systemOffset += snprintf (systemBuf + systemOffset, 512 > systemOffset ? 512 - systemOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned) val.uint32);
+      }
+#ifdef LINUX
+      else if(strcmp(metrics[i].name, "mem_sreclaimable") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }
+#endif
+#ifdef SOLARIS
+      else if(strcmp(metrics[i].name, "bread_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "bwrite_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "lread_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "lwrite_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "phread_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "phwrite_sec") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "rcache") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "wcache") == 0){
+         cpuOffset += snprintf (cpuBuf + cpuOffset, 512 > cpuOffset ? 512 - cpuOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }
+#endif
+#ifdef HPUX
+      else if(strcmp(metrics[i].name, "mem_rm") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_arm") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_vm") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }else if(strcmp(metrics[i].name, "mem_avm") == 0){
+         memoryOffset += snprintf (memoryBuf + memoryOffset, 512 > memoryOffset ? 512 - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+      }
+#endif
+      else{
+         switch (metrics[i].type){
+            case g_string:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":\"%s\",", metrics[i].name, val.str);
+               break;
+            case g_int8:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (int) val.int8);
+               break;
+            case g_uint8:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (unsigned int) val.uint8);
+               break;
+            case g_int16:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (int) val.int16);
+               break;
+            case g_uint16:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (unsigned int) val.uint16);
+               break;
+            case g_int32:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%d,", metrics[i].name, (int) val.int32);
+               break;
+            case g_uint32:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned int) val.uint32);
+               break;
+            case g_float:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
+               break;
+            case g_double:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%f,", metrics[i].name, val.d);
+               break;
+            case g_timestamp:
+               otherOffset += snprintf (otherBuf + otherOffset, 512 > otherOffset ? 512 - otherOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned) val.uint32);
+               break;
+         }
+      }
+   }
+   /* replace trailing "," with "}" and add a ","*/
+   coreOffset += snprintf (coreBuf + (coreOffset - 1), 512 > coreOffset ? 512 - coreOffset : 0, "},") - 1;
+   cpuOffset += snprintf (cpuBuf + (cpuOffset - 1), 512 > cpuOffset ? 512 - cpuOffset : 0, "},") - 1;
+   diskOffset += snprintf (diskBuf + (diskOffset - 1), 512 > diskOffset ? 512 - diskOffset : 0, "},") - 1;
+   loadOffset += snprintf (loadBuf + (loadOffset - 1), 512 > loadOffset ? 512 - loadOffset : 0, "},") - 1;
+   memoryOffset += snprintf (memoryBuf + (memoryOffset - 1), 512 > memoryOffset ? 512 - memoryOffset : 0, "},") - 1;
+   networkOffset += snprintf (networkBuf + (networkOffset - 1), 512 > networkOffset ? 512 - networkOffset : 0, "},") - 1;
+   processOffset += snprintf (processBuf + (processOffset - 1), 512 > processOffset ? 512 - processOffset : 0, "},") - 1;
+   systemOffset += snprintf (systemBuf + (systemOffset - 1), 512 > systemOffset ? 512 - systemOffset : 0, "},") - 1;
+   otherOffset += snprintf (otherBuf + (otherOffset - 1), 512 > otherOffset ? 512 - otherOffset : 0, "},") - 1;
+   
+   /* if something was written in buffer */
+   if(coreOffset != 9){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", coreBuf);
+   }
+   if(cpuOffset != 8){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", cpuBuf);
+   }
+   if(diskOffset != 9){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", diskBuf);
+   }
+   if(loadOffset != 9){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", loadBuf);
+   }
+   if(memoryOffset != 11){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", memoryBuf);
+   }
+   if(networkOffset != 12){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", networkBuf);
+   }
+   if(processOffset != 12){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", processBuf);
+   }
+   if(systemOffset != 11){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", systemBuf);
+   }
+   if(otherOffset != 10){
+      offset += snprintf (buf + offset, BUFSIZE > offset ? BUFSIZE - offset : 0, "%s", otherBuf);
+   }
+   /* Remove trailing , */
+   snprintf (buf + (offset - 1), BUFSIZE > offset - 1 ? BUFSIZE - (offset + 1) : 0,  callback != NULL ? "}})\r\n" : "}}\r\n");
+   
+   /* End local metrics */
+   
    void *sbi = ganglia_scoreboard_iterator();
    while (sbi) {
       char *name = ganglia_scoreboard_next(&sbi);
@@ -591,6 +942,14 @@ status_report( client_t *client )
       }
 
    return 0;
+}
+
+static char* getCallback(char* path){
+   if(strstr(path, "?callback=") != NULL){
+      return strtok(strstr(path, "?callback=") + 10, "&");
+   }else{
+      return NULL;
+   }
 }
 
 
@@ -622,9 +981,9 @@ process_request (client_t *client, char *path)
    if (*path != '/')
        return 1;
 
-   if (!strcmp(path, "/status"))
+   if (strncasecmp(path, "/status", 7) == 0)
       {
-         status_report(client);
+         status_report(client, getCallback(path));
          return 2;
       }
 
