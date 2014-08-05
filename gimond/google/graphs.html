@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<!-- WARNING: Because of the license this must not be added to the main package -->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Gmetad's metrics using Google Charts</title>
+        <link  type="text/css" rel="stylesheet" href="css/stylesheet.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+        <script type="text/javascript">
+            var sent_data, sent_time_data, cpu_data, poll_data, poll_time_data, recv_data, sumrz_data, sumrz_time_data, req_data, req_time_data;
+            var sent_chart, sent_time_chart, cpu_chart, poll_chart, poll_time_chart, recv_chart, sumrz_chart, sumrz_time_chart, req_chart, req_time_chart;
+            /*
+                metricsInternal is the graph update speed.
+                lastTimeInterval is the "Last" line update speed.
+            */
+            var metricsInterval = 60000, lastTimeInterval = 5000;//ms
+            var metricsTimerId = null, lastTimeTimerId = null;
+            var timespawn;
+            var tmpsentallvar, tmprrdtoolvar, tmprrdcachedvar, tmpgraphitevar, tmpmemcachedvar, tmpriemannvar;
+            var tmppollokvar, tmppollfailvar, tmpsumrzvar, tmpreqallvar, tmpinteractivevar, tmpxmlvar;
+            var tmprecvvar, tmpsumrzclustvar, tmpsumrzrootvar, tmppollmissvar;
+
+            /* Google charts code */
+            google.load("visualization", "1", {packages:["corechart"]});
+            google.setOnLoadCallback(begin);
+            
+            function setVars(){
+                timespawn = retrieveDropVal("timespawn") * 60000; //mins
+                sent_chart = new google.visualization.LineChart(document.getElementById('Sent'));
+                sent_time_chart = new google.visualization.LineChart(document.getElementById('Sent_time'));
+                cpu_chart = new google.visualization.LineChart(document.getElementById('Cpu'));
+                poll_chart = new google.visualization.LineChart(document.getElementById('Polls'));
+                poll_time_chart = new google.visualization.LineChart(document.getElementById('Poll_time'));
+                recv_chart = new google.visualization.LineChart(document.getElementById('Received'));
+                sumrz_chart = new google.visualization.LineChart(document.getElementById('Summarized'));
+                sumrz_time_chart = new google.visualization.LineChart(document.getElementById('Summarized_time'));
+                req_chart = new google.visualization.LineChart(document.getElementById('Requests'));
+                req_time_chart = new google.visualization.LineChart(document.getElementById('Requests_time'));
+                
+                sent_data = [["Date", "All", "Rrdtool", "Rrdcached", "Graphite","Memcached","Riemann"]];
+                sent_time_data = [["Date", "All", "Rrdtool", "Rrdcached", "Graphite","Memcached","Riemann"]];
+                cpu_data = [["Date", "User", "Nice", "System", "Idle"]];
+                poll_data = [["Date", "Ok", "Failed", "Misses"]];
+                poll_time_data = [["Date", "Ok", "Failed"]];
+                recv_data = [["Date", "Metrics/min"]];
+                sumrz_data = [["Date", "Cluster", "Root"]];
+                sumrz_time_data = [["Date", "Time"]];
+                req_data = [["Date", "All", "Interactive", "Xml"]];
+                req_time_data = [["Date", "All", "Interactive", "Xml"]];
+                tmpsentallvar = [0, 0]; tmprrdtoolvar = [0, 0];
+                tmprrdcachedvar = [0, 0]; tmpgraphitevar = [0, 0];
+                tmpmemcachedvar = [0, 0]; tmpriemannvar = [0, 0];
+                tmppollokvar = [0, 0]; tmppollfailvar = [0, 0];
+                tmprecvvar = 0;
+                tmpsumrzclustvar = 0; tmpsumrzrootvar = 0;
+                tmpsumrzvar = 0; tmpreqallvar = [0, 0];
+                tmpinteractivevar = [0, 0]; tmpxmlvar = [0, 0];
+                tmppollmissvar = 0;
+            }
+
+            function drawChart(name, metrics_data){
+                var last_time = metrics_data[metrics_data.length - 1][0].getTime() - timespawn;
+                var i = 1;
+                //need minimum of 2 points for a line.
+                for(;i<metrics_data.length-1;i++){
+                    if(last_time <= metrics_data[i][0].getTime()){
+                        break;
+                    }
+                }
+                    metrics_data.splice(1,i-1);//array is sorted!
+                var options = {
+                    title: name,
+                    width: 900,
+                    height: 120,
+                    legend: {position: 'in', alignment: 'start'},
+                    hAxis: {viewWindow: {min: metrics_data[1][0], max: new Date(metrics_data[1][0].getTime() + timespawn)}},
+                    vAxis: {viewWindow: {min: 0}}
+                };
+                var data = google.visualization.arrayToDataTable(metrics_data);
+                switch (name){
+                    case "Sent":
+                        sent_chart.draw(data, options);
+                    break;
+                    case "Sent time":
+                        sent_time_chart.draw(data, options);
+                    break;
+                    case "Cpu":
+                        cpu_chart.draw(data, options);
+                    break;
+                    case "Polls/min":
+                        poll_chart.draw(data, options);
+                    break;
+                    case "Poll time":
+                        poll_time_chart.draw(data, options);
+                    break;
+                    case "Received":
+                        recv_chart.draw(data, options);
+                    break;
+                    case "Summarizations/min":
+                        sumrz_chart.draw(data, options);
+                    break;
+                    case "Summarize time":
+                        sumrz_time_chart.draw(data, options);
+                    break;
+                    case "Requests":
+                        req_chart.draw(data, options);
+                    break;
+                    case "Requests time":
+                        req_time_chart.draw(data, options);
+                    break;
+                    default:
+                    break;
+                }
+            }
+            /* End Google charts code */
+
+            /* Two different ajax calls are needed here so that there are no conflicts */
+            function getMetrics(){
+                var Gmetad = "http://" + window.location.hostname + ":8652/status";
+                $.ajax({
+                    type: "GET",
+                    url: Gmetad,
+                    dataType: "jsonp",
+                    crossDomain: true,
+                    contentType: "application/json",
+                    jsonpCallback: "jsonCallback",
+                    error: function(data, textStatus, jqXHR) { alert("Update crashed, please reload the page..."); console.log(textStatus + " " + jqXHR.responseText);}
+                    /* If the logged error is "parsererror undefined", then the ajax() call couldn't parse the json data
+                    because there was a conflict with another call to ajax(), and sometimes the metrics won't update anymore. */
+                });
+            }
+
+            function getLastTimes(){
+                var Gmetad = "http://" + window.location.hostname + ":8652/status";
+                $.ajax({
+                    type: "GET",
+                    url: Gmetad,
+                    dataType: "jsonp",
+                    crossDomain: true,
+                    contentType: "application/json",
+                    jsonpCallback: "last_timeCallback",
+                    error: function(data, textStatus, jqXHR) { alert("Update crashed, please reload the page..."); console.log(textStatus + " " + jqXHR.responseText);}
+                    /* If the logged error is "parsererror undefined", then the ajax() call couldn't parse the json data
+                    because there was a conflict with another call to ajax(), and sometimes the metrics won't update anymore. */
+                });
+            }
+
+            function jsonCallback(data){
+                sent_data.push([new Date(data["stattime"]),
+                                    (tmpsentallvar[0] != 0 ? (data["metrics"]["sent"]["all"]["num"] - tmpsentallvar[0]) : 0),
+                                    (tmprrdtoolvar[0] != 0 ? (data["metrics"]["sent"]["rrdtool"]["num"] - tmprrdtoolvar[0]) : 0),
+                                    (tmprrdcachedvar[0] != 0 ? (data["metrics"]["sent"]["rrdcached"]["num"] - tmprrdcachedvar[0]) : 0),
+                                    (tmpgraphitevar[0] != 0 ? (data["metrics"]["sent"]["graphite"]["num"] - tmpgraphitevar[0]) : 0),
+                                    (tmpmemcachedvar[0] != 0 ? (data["metrics"]["sent"]["memcached"]["num"] - tmpmemcachedvar[0]) : 0),
+                                    (tmpriemannvar[0] != 0 ? (data["metrics"]["sent"]["riemann"]["num"] - tmpriemannvar[0]) : 0)
+                                 ]);
+                drawChart('Sent', sent_data);
+
+                sent_time_data.push([new Date(data["stattime"]),
+                                    (tmpsentallvar[1] != 0 ? (data["metrics"]["sent"]["all"]["totalMillis"] - tmpsentallvar[1]) : 0),
+                                    (tmprrdtoolvar[1] != 0 ? (data["metrics"]["sent"]["rrdtool"]["totalMillis"] - tmprrdtoolvar[1]) : 0),
+                                    (tmprrdcachedvar[1] != 0 ? (data["metrics"]["sent"]["rrdcached"]["totalMillis"] - tmprrdcachedvar[1]) : 0),
+                                    (tmpgraphitevar[1] != 0 ? (data["metrics"]["sent"]["graphite"]["totalMillis"] - tmpgraphitevar[1]) : 0),
+                                    (tmpmemcachedvar[1] != 0 ? (data["metrics"]["sent"]["memcached"]["totalMillis"] - tmpmemcachedvar[1]) : 0),
+                                    (tmpriemannvar[1] != 0 ? (data["metrics"]["sent"]["riemann"]["totalMillis"] - tmpriemannvar[1]) : 0)
+                                 ]);
+                drawChart('Sent time', sent_time_data);
+
+                tmpsentallvar[0] = data["metrics"]["sent"]["all"]["num"];
+                tmprrdtoolvar[0] = data["metrics"]["sent"]["rrdtool"]["num"];
+                tmprrdcachedvar[0] = data["metrics"]["sent"]["rrdcached"]["num"];
+                tmpgraphitevar[0] = data["metrics"]["sent"]["graphite"]["num"];
+                tmpmemcachedvar[0] = data["metrics"]["sent"]["memcached"]["num"];
+                tmpriemannvar[0] = data["metrics"]["sent"]["riemann"]["num"];
+                
+                tmpsentallvar[1] = data["metrics"]["sent"]["all"]["totalMillis"];
+                tmprrdtoolvar[1] = data["metrics"]["sent"]["rrdtool"]["totalMillis"];
+                tmprrdcachedvar[1] = data["metrics"]["sent"]["rrdcached"]["totalMillis"];
+                tmpgraphitevar[1] = data["metrics"]["sent"]["graphite"]["totalMillis"];
+                tmpmemcachedvar[1] = data["metrics"]["sent"]["memcached"]["totalMillis"];
+                tmpriemannvar[1] = data["metrics"]["sent"]["riemann"]["totalMillis"];
+
+                poll_data.push([new Date(data["stattime"]),
+                                    (tmppollokvar[0] != 0 ? (data["metrics"]["polls"]["ok"]["num"] - tmppollokvar[0]) : 0),
+                                    (tmppollfailvar[0] != 0 ? (data["metrics"]["polls"]["failed"]["num"] - tmppollfailvar[0]) : 0),
+                                    (tmppollmissvar != 0 ? (data["metrics"]["polls"]["misses"] - tmppollmissvar) : 0)
+                                 ]);
+                drawChart('Polls/min', poll_data);
+                
+                poll_time_data.push([new Date(data["stattime"]),
+                                    (tmppollokvar[1] != 0 ? (data["metrics"]["polls"]["ok"]["totalMillis"] - tmppollokvar[1]) : 0),
+                                    (tmppollfailvar[1] != 0 ? (data["metrics"]["polls"]["failed"]["totalMillis"] - tmppollfailvar[1]) : 0)
+                                 ]);
+                drawChart('Poll time', poll_time_data);
+
+                tmppollokvar[0] = data["metrics"]["polls"]["ok"]["num"];
+                tmppollokvar[1] = data["metrics"]["polls"]["ok"]["totalMillis"];
+                tmppollfailvar[0] = data["metrics"]["polls"]["failed"]["num"];
+                tmppollfailvar[1] = data["metrics"]["polls"]["failed"]["totalMillis"];
+                tmppollmissvar = data["metrics"]["polls"]["misses"];
+
+                recv_data.push([new Date(data["stattime"]),
+                                   (tmprecvvar != 0 ? (data["metrics"]["received"]["all"] - tmprecvvar) : 0)
+                                 ]);
+                tmprecvvar = data["metrics"]["received"]["all"];
+                drawChart('Received', recv_data);
+
+                sumrz_data.push([new Date(data["stattime"]),
+                                    (tmpsumrzclustvar != 0 ? (data["metrics"]["summarize"]["cluster"] - tmpsumrzclustvar) : 0),
+                                    (tmpsumrzrootvar != 0 ? (data["metrics"]["summarize"]["root"] - tmpsumrzrootvar) : 0)
+                                 ]);
+                drawChart('Summarizations/min', sumrz_data);
+
+                sumrz_time_data.push([new Date(data["stattime"]),
+                                    (tmpsumrzvar != 0 ? (data["metrics"]["summarize"]["totalMillis"] - tmpsumrzvar) : 0)
+                                 ]);
+                drawChart('Summarize time', sumrz_time_data);
+
+                tmpsumrzclustvar = data["metrics"]["summarize"]["cluster"];
+                tmpsumrzrootvar = data["metrics"]["summarize"]["root"];
+                tmpsumrzvar = data["metrics"]["summarize"]["totalMillis"];
+
+                req_data.push([new Date(data["stattime"]),
+                                    (tmpreqallvar[0] != 0 ? (data["metrics"]["requests"]["all"]["num"] - tmpreqallvar[0]) : 0),
+                                    (tmpinteractivevar[0] != 0 ? (data["metrics"]["requests"]["interactive"]["num"] - tmpinteractivevar[0]) : 0),
+                                    (tmpxmlvar[0] != 0 ? (data["metrics"]["requests"]["xml"]["num"] - tmpxmlvar[0]) : 0)
+                                 ]);
+                drawChart('Requests', req_data);
+
+                req_time_data.push([new Date(data["stattime"]),
+                                    (tmpreqallvar[1] != 0 ? (data["metrics"]["requests"]["all"]["totalMillis"] - tmpreqallvar[1]) : 0),
+                                    (tmpinteractivevar[1] != 0 ? (data["metrics"]["requests"]["interactive"]["totalMillis"] - tmpinteractivevar[1]) : 0),
+                                    (tmpxmlvar[1] != 0 ? (data["metrics"]["requests"]["xml"]["totalMillis"] - tmpxmlvar[1]) : 0)
+                                 ]);
+                drawChart('Requests time', req_time_data);
+
+                tmpreqallvar[0] = data["metrics"]["requests"]["all"]["num"];
+                tmpreqallvar[1] = data["metrics"]["requests"]["all"]["totalMillis"];
+                tmpinteractivevar[0] = data["metrics"]["requests"]["interactive"]["num"];
+                tmpinteractivevar[1] = data["metrics"]["requests"]["interactive"]["totalMillis"];
+                tmpxmlvar[0] = data["metrics"]["requests"]["xml"]["num"];
+                tmpxmlvar[1] = data["metrics"]["requests"]["xml"]["totalMillis"];
+
+                cpu_data.push([new Date(data["stattime"]),
+                                   data["metrics"]["cpu"]["cpu_user"],
+                                   data["metrics"]["cpu"]["cpu_nice"],
+                                   data["metrics"]["cpu"]["cpu_system"],
+                                   data["metrics"]["cpu"]["cpu_idle"]
+                                 ]);
+                                 
+                drawChart('Cpu', cpu_data);
+            }
+
+            function retrieveDropVal(txt){
+                var e = document.getElementById(txt);
+                return e.options[e.selectedIndex].value;
+            }
+
+            function updateMetrics(){
+                if(document.getElementById("update").value == "Update"){
+                    document.getElementById("update").value = "Stop";
+                    $('#update').text("Stop");
+                    getMetrics();
+                    metricsTimerId = setInterval(getMetrics, metricsInterval);
+                }else{
+                    document.getElementById("update").value = "Update";
+                    $('#update').text("Update");
+                    setVars();
+                    clearTimeout(metricsTimerId);
+                    clearTimeout(lastTimeTimerId);
+                }
+            }
+
+            function changetimespawn(){
+                timespawn = retrieveDropVal("timespawn") * 60000; //mins
+            }
+
+            function begin(){
+                setVars();
+                lastTimeTimerId = setInterval(getLastTimes, lastTimeInterval);
+                getLastTimes();
+                updateMetrics();
+            }
+
+            function toSecondsAgo(val){
+                return (($.now() - val)/1000).toFixed(1);
+            }
+
+            function last_timeCallback(data){
+                /* 0 means no data received. */
+                $("#last_poll_ok").text((data["metrics"]["polls"]["ok"]["lastTime"] != 0 ?
+                            (toSecondsAgo(data["metrics"]["polls"]["ok"]["lastTime"]) > 1000 ? "> 15mins" : toSecondsAgo(data["metrics"]["polls"]["ok"]["lastTime"]) + "s" ) : "n/a"));
+                $("#last_poll_fail").text((data["metrics"]["polls"]["failed"]["lastTime"] != 0 ?
+                            (toSecondsAgo(data["metrics"]["polls"]["failed"]["lastTime"]) > 1000 ? "> 15mins" : toSecondsAgo(data["metrics"]["polls"]["failed"]["lastTime"]) + "s" ) : "n/a"));
+                $("#last_summary").text((data["metrics"]["summarize"]["lastTime"] != 0 ? toSecondsAgo(data["metrics"]["summarize"]["lastTime"]) + "s" : "n/a"));
+                $("#last_rrd").text((data["metrics"]["sent"]["rrdtool"]["lastTime"] != 0 ? toSecondsAgo(data["metrics"]["sent"]["rrdtool"]["lastTime"]) + "s" : "n/a"));
+                $("#last_rrdcached").text((data["metrics"]["sent"]["rrdcached"]["lastTime"] != 0 ? toSecondsAgo(data["metrics"]["sent"]["rrdcached"]["lastTime"]) + "s" : "n/a"));
+                $("#last_graphite").text((data["metrics"]["sent"]["graphite"]["lastTime"] != 0 ? toSecondsAgo(data["metrics"]["sent"]["graphite"]["lastTime"]) + "s" : "n/a"));
+                $("#last_memcached").text((data["metrics"]["sent"]["memcached"]["lastTime"] != 0 ? toSecondsAgo(data["metrics"]["sent"]["memcached"]["lastTime"]) + "s" : "n/a"));
+                $("#last_riemann").text((data["metrics"]["sent"]["riemann"]["lastTime"] != 0 ? toSecondsAgo(data["metrics"]["sent"]["riemann"]["lastTime"]) + "s" : "n/a"));
+            }
+        </script>
+    </head>
+    
+    <body>
+        <div id="buttons">
+            <button type="button" id="update" value="Update" onclick="updateMetrics()">Update</button>
+            <label>
+                <select id="timespawn" onchange="changetimespawn()">
+                    <option value=10>10</option>
+                    <option value=20>20</option>
+                    <option value=30>30</option>
+                    <option value=60>60</option>
+                    <option value=120>120</option>
+                </select>
+                Timespawn (min)
+            </label>
+        </div>
+
+        <!-- Last Times -->
+        <table class='lasts'>
+            <tr>
+            <td>Last Poll Ok:</td>
+            <td width=55px><span id="last_poll_ok">...</span></td>
+            <td>Poll Failed:</td>
+            <td width=55px><span id="last_poll_fail">...</span></td>
+            <td>Summary:</td>
+            <td width=55px><span id="last_summary">...</span></td>
+            <td>RRD:</td>
+            <td width=55px><span id="last_rrd">...</span></td>
+            <td>RRDcached:</td>
+            <td width=55px><span id="last_rrdcached">...</span></td>
+            <td>Graphite:</td>
+            <td width=55px><span id="last_graphite">...</span></td>
+            <td>Memcached:</td>
+            <td width=55px><span id="last_memcached">...</span></td>
+            <td>Riemann:</td>
+            <td width=55px><span id="last_riemann">...</span></td>
+            </tr>
+        </table>
+        <!--End Last Times -->
+
+        <!-- Graphs -->
+        <div id="Polls" style="height: 150px; width: 1000px;"></div>
+        <div id="Received" style="height: 150px; width: 1000px;"></div>
+        <div id="Summarized" style="height: 150px; width: 1000px;"></div>
+        <div id="Sent" style="height: 150px; width: 1000px;"></div>
+        <div id="Requests" style="height: 150px; width: 1000px;"></div>
+        <div id="Poll_time" style="height: 150px; width: 1000px;"></div>
+        <div id="Sent_time" style="height: 150px; width: 1000px;"></div>
+        <div id="Summarized_time" style="height: 150px; width: 1000px;"></div>
+        <div id="Requests_time" style="height: 150px; width: 1000px;"></div>
+        <div id="Cpu" style="height: 150px; width: 1000px;"></div>
+        <!--End Graphs -->
+
+    </body>
+</html>  

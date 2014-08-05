@@ -67,6 +67,9 @@ apr_pool_t *global_context = NULL;
 /* When this gmetad was started */
 apr_time_t started;
 
+/* Last gmetad run */
+apr_time_t last_metadata;
+
 char hostname[HOSTNAMESZ];
 
 static int
@@ -263,6 +266,12 @@ out:
 void initialize_scoreboard()
 {
     ganglia_scoreboard_init(global_context);
+
+    ganglia_scoreboard_add(DS_POLL_OK_REQS, GSB_COUNTER);
+    ganglia_scoreboard_add(DS_POLL_OK_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(DS_POLL_FAILED_REQS, GSB_COUNTER);
+    ganglia_scoreboard_add(DS_POLL_FAILED_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(DS_POLL_MISS, GSB_COUNTER);
     ganglia_scoreboard_add(METS_RECVD_ALL, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_ALL, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_RRDTOOL, GSB_COUNTER);
@@ -270,7 +279,21 @@ void initialize_scoreboard()
     ganglia_scoreboard_add(METS_SENT_GRAPHITE, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_MEMCACHED, GSB_COUNTER);
     ganglia_scoreboard_add(METS_SENT_RIEMANN, GSB_COUNTER);
-
+    ganglia_scoreboard_add(METS_ALL_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_RRDTOOLS_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_RRDCACHED_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_GRAPHITE_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_MEMCACHED_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_RIEMANN_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_SUMRZ_ROOT, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_SUMRZ_CLUSTER, GSB_COUNTER);
+    ganglia_scoreboard_add(METS_SUMRZ_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(TCP_REQS_ALL, GSB_COUNTER);
+    ganglia_scoreboard_add(TCP_REQS_ALL_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(TCP_REQS_XML, GSB_COUNTER);
+    ganglia_scoreboard_add(TCP_REQS_XML_DURATION, GSB_COUNTER);
+    ganglia_scoreboard_add(TCP_REQS_INTXML, GSB_COUNTER);
+    ganglia_scoreboard_add(TCP_REQS_INTXML_DURATION, GSB_COUNTER);
 }
 
 static int
@@ -303,6 +326,7 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
    if (gmetad_config.unsummarized_sflow_vm_metrics && (p = strchr(name, '.')) != NULL && *(p+1) == 'v')
      return 0;
 
+   ganglia_scoreboard_inc(METS_SUMRZ_ROOT);
    /* We log all our sums in double which does not suffer from
       wraparound errors: for example memory KB exceeding 4TB. -twitham */
    sprintf(sum, "%.5f", metric->val.d);
@@ -339,7 +363,7 @@ main ( int argc, char *argv[] )
    struct passwd *pw;
    gmetad_config_t *c = &gmetad_config;
    apr_interval_time_t sleep_time;
-   apr_time_t last_metadata;
+   apr_time_t summary_started, now;
    double random_sleep_factor;
    unsigned int rand_seed;
 
@@ -562,7 +586,7 @@ main ( int argc, char *argv[] )
 #endif /* WITH_RIEMANN */
 
     /* Meta data */
-   last_metadata = apr_time_now();
+   last_metadata = apr_time_now();  //Updating global variable
    for(;;)
       {
          /* Do at a random interval, between 
@@ -577,6 +601,7 @@ main ( int argc, char *argv[] )
          /* Need to be sure root is locked while doing summary */
          pthread_mutex_lock(root.sum_finished);
 
+         summary_started = apr_time_now();
          /* Flush the old values */
          hash_foreach(root.metric_summary, zero_out_summary, NULL);
          root.hosts_up = 0;
@@ -592,7 +617,9 @@ main ( int argc, char *argv[] )
          hash_foreach(root.metric_summary, write_root_summary, NULL);
 
          /* Remember our last run */
-         last_metadata = apr_time_now();
+         now = apr_time_now();
+         last_metadata = now;  //Updating global variable
+         ganglia_scoreboard_incby(METS_SUMRZ_DURATION, now - summary_started);
       }
 
    apr_pool_destroy(global_context);

@@ -15,6 +15,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/poll.h>
+#include <apr_time.h>
 
 #include "rrd_helpers.h"
 #include "gm_scoreboard.h"
@@ -23,6 +24,8 @@
 extern gmetad_config_t gmetad_config;
 
 pthread_mutex_t rrd_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+apr_time_t last_rrdtool, last_rrdcached;
 
 #ifdef HAVE___THREAD
 static __thread int rrdcached_conn = 0;
@@ -42,6 +45,7 @@ my_mkdir ( const char *dir )
 static int
 RRD_update_cached( char *rrd, const char *sum, const char *num, unsigned int process_time )
 {
+   apr_time_t now, start = apr_time_now();
    int *conn, c, r, off, l, to;
    char *cmd, *str, buf[1024];
    struct pollfd pfd[1];
@@ -186,6 +190,9 @@ reconnect:
             }
       }
 
+    now = apr_time_now();
+    ganglia_scoreboard_incby(METS_ALL_DURATION, now - start);
+    ganglia_scoreboard_incby(METS_RRDCACHED_DURATION, now - start);
    return 0;
 }
 
@@ -335,12 +342,14 @@ push_data_to_rrd( char *rrd, const char *sum, const char *num,
       {
          ganglia_scoreboard_inc(METS_SENT_RRDCACHED);
          ganglia_scoreboard_inc(METS_SENT_ALL);
+         last_rrdcached = apr_time_now();  //Updating global variable
          return RRD_update_cached( rrd, sum, num, process_time );
       }
    else
       {
          ganglia_scoreboard_inc(METS_SENT_RRDTOOL);
          ganglia_scoreboard_inc(METS_SENT_ALL);
+         last_rrdtool = apr_time_now();  //Updating global variable
          return RRD_update( rrd, sum, num, process_time );
       }
 }
@@ -351,9 +360,11 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
                     const char *sum, const char *num, unsigned int step,
                     unsigned int process_time, ganglia_slope_t slope)
 {
+   apr_time_t start = apr_time_now(), now;
    char rrd[ PATHSIZE + 1 ];
    char *summary_dir = "__SummaryInfo__";
    int i;
+   int ret;
 
    /* Build the path to our desired RRD file. Assume the rootdir exists. */
    strncpy(rrd, gmetad_config.rrd_rootdir, PATHSIZE);
@@ -385,5 +396,9 @@ write_data_to_rrd ( const char *source, const char *host, const char *metric,
    strncat(rrd, metric, PATHSIZE-strlen(rrd));
    strncat(rrd, ".rrd", PATHSIZE-strlen(rrd));
 
-   return push_data_to_rrd( rrd, sum, num, step, process_time, slope);
+   ret = push_data_to_rrd( rrd, sum, num, step, process_time, slope);
+   now = apr_time_now();
+   ganglia_scoreboard_incby(METS_ALL_DURATION, now - start);
+   ganglia_scoreboard_incby(METS_RRDTOOLS_DURATION, now - start);
+   return ret;
 }
