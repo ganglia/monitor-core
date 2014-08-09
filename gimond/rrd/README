@@ -1,0 +1,15 @@
+You will need python-rrdtool to run this.
+
+Run in this order:
+
+rrdcreate.py, to create the database.
+
+rrdupdate.py <ip> <port>, to update the database.
+The ip and port are the ones for Gmetad's internal metrics daemon.
+Updating it at regular intervals can be done by using this command:
+./autoupdate.sh <ip> <port>
+or any other way you want!
+
+rrdgraphs.py, to draw the graphs in a .png file.
+
+You can also use the html page to view them too, but they will not be "live" graphs.
