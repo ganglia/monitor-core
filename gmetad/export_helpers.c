@@ -33,6 +33,7 @@ apr_time_t riemann_reset_timeout = 0;
 int riemann_failures = 0;
 #endif /* WITH_RIEMANN */
 
+apr_time_t last_memcached, last_graphite, last_riemann;
 #include "export_helpers.h"
 #include "gm_scoreboard.h"
 
@@ -288,6 +289,7 @@ int
 write_data_to_memcached ( const char *cluster, const char *host, const char *metric, 
                     const char *sum, unsigned int process_time, unsigned int expiry )
 {
+   apr_time_t start = apr_time_now(), now;
    time_t expiry_time;
    char s_path[MEMCACHED_MAX_KEY_LENGTH];
    
@@ -327,8 +329,12 @@ write_data_to_memcached ( const char *cluster, const char *host, const char *met
    } else {
       debug_msg("Pushed %s value %s to the memcached server(s)", s_path, sum);
       memcached_pool_push(memcached_connection_pool, memc);
+      now = apr_time_now();
+      last_memcached = now;  //Updating global variable
       ganglia_scoreboard_inc(METS_SENT_MEMCACHED);
       ganglia_scoreboard_inc(METS_SENT_ALL);
+      ganglia_scoreboard_incby(METS_ALL_DURATION, now - start);
+      ganglia_scoreboard_incby(METS_MEMCACHED_DURATION, now - start);
       return EXIT_SUCCESS;
    }
 }
@@ -373,6 +379,8 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
 	char s_process_time[15];
    char graphite_msg[ PATHSIZE + 1 ];
    int i;
+   int ret;
+   apr_time_t start = apr_time_now(), now;
                                                                                                                                                                                                
 	/*  if process_time is undefined, we set it to the current time */
 	if (!process_time) process_time = time(0);
@@ -481,7 +489,12 @@ write_data_to_carbon ( const char *source, const char *host, const char *metric,
   	strncat(graphite_msg, "\n", PATHSIZE-strlen(graphite_msg));
 
 	graphite_msg[strlen(graphite_msg)+1] = 0;
-   return push_data_to_carbon( graphite_msg );
+        ret = push_data_to_carbon( graphite_msg );
+        now = apr_time_now();
+        ganglia_scoreboard_incby(METS_ALL_DURATION, now - start);
+        ganglia_scoreboard_incby(METS_GRAPHITE_DURATION, now - start);
+        last_graphite = now;  //Updating global variable
+   return ret;
 }
 
 #ifdef WITH_RIEMANN
@@ -596,6 +609,7 @@ create_riemann_event (const char *grid, const char *cluster, const char *host, c
 int
 send_event_to_riemann (Event *event)
 {
+   apr_time_t start = apr_time_now(), now;
    size_t len, nbytes;
    void *buf;
    int errsv;
@@ -630,12 +644,17 @@ send_event_to_riemann (Event *event)
    }
    ganglia_scoreboard_inc(METS_SENT_RIEMANN);
    ganglia_scoreboard_inc(METS_SENT_ALL);
+   now = apr_time_now();
+   ganglia_scoreboard_incby(METS_ALL_DURATION, now - start);
+   ganglia_scoreboard_incby(METS_RIEMANN_DURATION, now - start);
+   last_riemann = now;  //Updating global variable
    return EXIT_SUCCESS;
 }
 
 int
 send_message_to_riemann (Msg *message)
 {
+   apr_time_t start = apr_time_now(), now;
    debug_msg("[riemann] send_message_to_riemann()");
 
    if (riemann_circuit_breaker == RIEMANN_CB_CLOSED) {
@@ -680,6 +699,10 @@ send_message_to_riemann (Msg *message)
    }
    ganglia_scoreboard_incby(METS_SENT_RIEMANN, message->n_events);
    ganglia_scoreboard_incby(METS_SENT_ALL, message->n_events);
+   now = apr_time_now();
+   ganglia_scoreboard_incby(METS_ALL_DURATION, now - start);
+   ganglia_scoreboard_incby(METS_RIEMANN_DURATION, now - start);
+   last_riemann = now;  //Updating global variable
    return EXIT_SUCCESS;
 }
 

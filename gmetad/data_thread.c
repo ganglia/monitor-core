@@ -10,6 +10,7 @@
 
 #include <apr_time.h>
 
+#include "gm_scoreboard.h"
 /* Deliberately vary the sleep interval by this percentage: */
 #define SLEEP_RANDOMIZE 5.0
 
@@ -18,6 +19,8 @@ extern hash_t *xml;
 extern hash_t *root;
 
 extern int process_xml(data_source_list_t *, char *);
+
+apr_time_t last_poll_ok, last_poll_failed;
 
 void *
 data_thread ( void *arg )
@@ -31,7 +34,7 @@ data_thread ( void *arg )
    /* This will grow as needed */
    unsigned int buf_size = 1024*128, read_index, read_available;
    struct pollfd struct_poll;
-   apr_time_t start, end;
+   apr_time_t start, end, end_poll;
    apr_interval_time_t sleep_time, elapsed;
    double random_factor;
    unsigned int rand_seed;
@@ -283,6 +286,7 @@ data_thread ( void *arg )
 
          buf[read_index] = '\0';
 
+         end_poll = apr_time_now();
          /* Parse the buffer */
          rval = process_xml(d, buf);
          if(rval)
@@ -297,6 +301,19 @@ data_thread ( void *arg )
          d->dead = 0;
 
        take_a_break:
+        if(d->dead)
+	    {
+               end_poll = apr_time_now();
+               ganglia_scoreboard_inc(DS_POLL_FAILED_REQS);
+               ganglia_scoreboard_incby(DS_POLL_FAILED_DURATION, end_poll - start);
+               last_poll_failed = end_poll;  //Updating global variable
+            }
+        else
+	    {
+               ganglia_scoreboard_inc(DS_POLL_OK_REQS);
+               ganglia_scoreboard_incby(DS_POLL_OK_DURATION, end_poll - start);
+               last_poll_ok = end_poll;  //Updating global variable
+            }
          g_tcp_socket_delete(sock);
 
          end = apr_time_now();
@@ -306,6 +323,8 @@ data_thread ( void *arg )
          sleep_time = apr_time_from_sec(d->step) * random_factor - elapsed;
          if(sleep_time > 0)
            apr_sleep(sleep_time); 
+         else
+           ganglia_scoreboard_inc(DS_POLL_MISS);
       }
    return NULL;
 }

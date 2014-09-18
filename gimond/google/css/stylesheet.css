@@ -1,0 +1,14 @@
+#buttons {
+    font-family: Arial, sans-serif;
+    font-size: 0.8em;
+    border: 1px solid black;
+    background: #D0D0D0;
+    padding: 2px;
+    display: block;
+    width: 250px;
+}
+
+table {
+    font-family: Arial, sans-serif;
+    font-size: 0.8em;
+}

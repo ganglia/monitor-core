@@ -1,0 +1,44 @@
+.container {
+    box-sizing: border-box;
+    width: 900px;
+    height: 120px;
+}
+
+.placeholder {
+    width: 100%;
+    height: 100%;
+    font-size: 10px;
+    line-height: 1.2em;
+}
+
+.legend table {
+    border-spacing: 5px;
+}
+
+#tooltip {
+    position: absolute;
+    display: none;
+    border: 1px solid #fdd;
+    padding: 2px;
+    opacity: 0.80;
+}
+
+#buttons {
+    font-family: Arial, sans-serif;
+    font-size: 0.8em;
+    border: 1px solid black;
+    background: #D0D0D0;
+    padding: 2px;
+    display: block;
+    width: 250px;
+}
+
+table {
+    font-family: Arial, sans-serif;
+    font-size: 0.8em;
+}
+
+h1 {
+    font-family: Arial, sans-serif;
+    font-size: 0.8em;
+}
