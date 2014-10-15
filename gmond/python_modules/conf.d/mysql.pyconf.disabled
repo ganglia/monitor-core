@@ -1,8 +1,4 @@
 ###
-###
-### This module requires MySQL-python e.g. on Centos/RHEL
-###       * yum install MySQL-python
-###
 ### Note:
 ###   To setup database access:
 ###   GRANT SUPER, PROCESS ON *.* TO your_user@localhost \
@@ -34,6 +30,9 @@ modules {
     }
     param get_slave {
       value = False
+    }
+    param delta_per_second {
+      value = True
     }
   }
 }
@@ -180,6 +179,10 @@ collection_group {
 
   metric {
     name = "mysql_innodb_rows_deleted"
+  }
+
+  metric {
+    name = "mysql_innodb_buffer_pool_pages_bytes"
   }
 
   metric {
