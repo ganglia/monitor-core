@@ -3,7 +3,7 @@ modules {
     name = "tcpconn"
     language = "python"
     param RefreshRate {
-        value = 5
+      value = 5
     }
   }
 }
@@ -64,4 +64,3 @@ collection_group {
     value_threshold = 1.0
   }
 }
-

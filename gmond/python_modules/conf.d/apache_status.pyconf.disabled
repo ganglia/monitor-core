@@ -87,13 +87,11 @@ collection_group {
     title = "Keepalive (read)"
     value_threshold = 0
   }
-
   metric {
     name  = "ap_rps"
     title = "Request per second"
     value_threshold = 0.0
   }
-
   metric {
     name  = "ap_requests"
     title = "Requests"

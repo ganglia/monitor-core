@@ -105,5 +105,4 @@ collection_group {
     title = "Misses/sec"
     value_threshold = 0
   }
-
 }

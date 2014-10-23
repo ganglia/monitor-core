@@ -1,19 +1,19 @@
 modules {
-    module {
-        name = "diskfree"
-        language = "python"
-        param mounts {
-            value = '/proc/mounts'
-        }
+  module {
+   name     = "diskfree"
+   language = "python"
+
+    param mounts {
+      value = '/proc/mounts'
     }
+  }
 }
 
 collection_group {
-    collect_every = 60
-    time_threshold = 180
-    metric {
-       name_match = "disk_free_(.+)"
-    }
+  collect_every  = 60
+  time_threshold = 180
 
+  metric {
+     name_match = "disk_free_(.+)"
+  }
 }
-
