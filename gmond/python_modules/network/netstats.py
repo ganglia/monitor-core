@@ -16,7 +16,7 @@ stats_files = [ "/proc/net/netstat", "/proc/net/snmp" ]
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
-stats_pos = {} 
+stats_pos = {}
 
 def get_metrics():
     """Return all metrics"""
@@ -92,7 +92,7 @@ def get_delta(name):
 	print name + " is less 0"
 	delta = 0
     except KeyError:
-      delta = 0.0      
+      delta = 0.0
 
     return delta
 
@@ -197,7 +197,7 @@ def metric_init(params):
 	"call_back"  : get_tcploss_percentage,
 	"description": "TCP percentage loss, tcploss / insegs + outsegs",
 	"units"      : "pct",
-        'groups'      : 'tcpext'
+        'groups'     : 'tcpext'
 	}))
 
     descriptors.append(create_desc(Desc_Skel, {
@@ -205,7 +205,7 @@ def metric_init(params):
 	"call_back"  : get_retrans_percentage,
 	"description": "TCP retrans percentage, retranssegs / insegs + outsegs",
 	"units"      : "pct",
-        'groups'      : 'tcp'
+        'groups'     : 'tcp'
 	}))
 
     return descriptors
