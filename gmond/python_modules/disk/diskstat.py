@@ -253,6 +253,7 @@ def update_stats():
 
 	# Get values for each disk device
 	for dev in PARTITIONS:
+		dev = dev.replace('/', '-')
 		logging.debug(" dev: " + dev)
 
 		# Setup storage lists

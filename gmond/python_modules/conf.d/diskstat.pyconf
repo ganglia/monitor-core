@@ -8,7 +8,6 @@ modules {
     param devices {
       value = ''
     }
-
     #param device-mapper {
     #  value = 'true'
     #}
