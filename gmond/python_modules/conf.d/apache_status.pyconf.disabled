@@ -9,12 +9,10 @@ modules {
     param virtual_host {
         value = "health"
     }
-
     # Which metric group should these metrics be put into
     param metric_group {
         value = "apache"
     }
-
   }
 }
 
@@ -90,11 +88,6 @@ collection_group {
   metric {
     name  = "ap_rps"
     title = "Request per second"
-    value_threshold = 0.0
-  }
-  metric {
-    name  = "ap_requests"
-    title = "Requests"
     value_threshold = 0.0
   }
 }
