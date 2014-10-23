@@ -23,6 +23,12 @@ modules {
     param passwd {
       value = 'your_password'
     }
+    param timeout {
+      value = 30
+    }
+    param unix_socket {
+      value = ''
+    }
     param get_innodb {
       value = True
     }
