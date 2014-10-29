@@ -1032,7 +1032,9 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
       remoteip = spoofIP;
     }
 
+  apr_thread_mutex_lock(hosts_mutex);
   hostdata =  (Ganglia_host *)apr_hash_get( hosts, remoteip, APR_HASH_KEY_STRING );
+  apr_thread_mutex_unlock(hosts_mutex);
   if(!hostdata)
     {
       /* Lookup the hostname or use the proxy information if available */
@@ -1173,8 +1175,11 @@ Ganglia_metadata_check(Ganglia_host *host, Ganglia_value_msg *vmsg )
 {
     char *metric_name = vmsg->Ganglia_value_msg_u.gstr.metric_id.name;
     int is_spoof_msg = vmsg->Ganglia_value_msg_u.gstr.metric_id.spoof;
-    Ganglia_metadata *metric = 
-        (Ganglia_metadata *)apr_hash_get(host->metrics, metric_name, APR_HASH_KEY_STRING);
+    Ganglia_metadata *metric;
+
+    apr_thread_mutex_lock(host->mutex);
+    metric = (Ganglia_metadata *)apr_hash_get(host->metrics, metric_name, APR_HASH_KEY_STRING);
+    apr_thread_mutex_unlock(host->mutex);
     
     if(!metric)
       {
@@ -1224,14 +1229,19 @@ Ganglia_metadata_free( Ganglia_metadata *metric )
 void
 Ganglia_metadata_save( Ganglia_host *host, Ganglia_metadata_msg *message )
 {
-    /* Search for the Ganglia_metadata in the Ganglia_host */
-    sanitize_metric_name(message->Ganglia_metadata_msg_u.gfull.metric_id.name, message->Ganglia_metadata_msg_u.gfull.metric_id.spoof);
-    Ganglia_metadata *metric = 
-        (Ganglia_metadata *)apr_hash_get(host->metrics, 
-                                         message->Ganglia_metadata_msg_u.gfull.metric_id.name,
-                                         APR_HASH_KEY_STRING);
+    Ganglia_metadata *metric;
+
     if(!host || !message)
         return;
+
+    /* Search for the Ganglia_metadata in the Ganglia_host */
+    sanitize_metric_name(message->Ganglia_metadata_msg_u.gfull.metric_id.name, message->Ganglia_metadata_msg_u.gfull.metric_id.spoof);
+
+    apr_thread_mutex_lock(host->mutex);
+    metric = (Ganglia_metadata *)apr_hash_get(host->metrics,
+                                              message->Ganglia_metadata_msg_u.gfull.metric_id.name,
+                                              APR_HASH_KEY_STRING);
+    apr_thread_mutex_unlock(host->mutex);
     
     if(metric)
       {
@@ -1334,13 +1344,17 @@ Ganglia_metadata_request( Ganglia_host *host, Ganglia_metadata_msg *message )
 void
 Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
 {
-    /* Search for the Ganglia_metric in the Ganglia_host */
-    Ganglia_metadata *metric = 
-        (Ganglia_metadata *)apr_hash_get( host->gmetrics,
-                                        message->Ganglia_value_msg_u.gstr.metric_id.name,
-                                        APR_HASH_KEY_STRING);
+  Ganglia_metadata *metric;
+
   if(!host || !message)
     return;
+
+  /* Search for the Ganglia_metric in the Ganglia_host */
+  apr_thread_mutex_lock(host->mutex);
+  metric = (Ganglia_metadata *)apr_hash_get(host->gmetrics,
+                                            message->Ganglia_value_msg_u.gstr.metric_id.name,
+                                            APR_HASH_KEY_STRING);
+  apr_thread_mutex_unlock(host->mutex);
 
   if(metric)
     {
@@ -3088,6 +3102,7 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
   apr_hash_index_t *hi, *metric_hi;
 
   /* Walk the host hash */
+  apr_thread_mutex_lock(hosts_mutex);
   for(hi = apr_hash_first(pool, hosts);
       hi;
       hi = apr_hash_next(hi))
@@ -3102,15 +3117,14 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
           /* this host is older than dmax... delete it */
           debug_msg("deleting old host '%s' from host hash'", host->hostname);
           /* remove it from the hash */
-          apr_thread_mutex_lock(hosts_mutex);
           apr_hash_set( hosts, host->ip, APR_HASH_KEY_STRING, NULL);
-          apr_thread_mutex_unlock(hosts_mutex);
           /* free all its memory */
           apr_pool_destroy( host->pool);
         } 
       else
         {
           /* this host isn't being deleted but it might have some stale gmetric data */
+	  apr_thread_mutex_lock(host->mutex);
           for( metric_hi = apr_hash_first( pool, host->metrics );
                metric_hi;
                metric_hi = apr_hash_next( metric_hi ))
@@ -3132,16 +3146,16 @@ cleanup_data( apr_pool_t *pool, apr_time_t now)
                   debug_msg("deleting old metric '%s' from host '%s'", metric->name, host->hostname);
 
                   /* remove the metric from the metric and values hash */
-                  apr_thread_mutex_lock(host->mutex);
                   apr_hash_set( host->metrics, metric->name, APR_HASH_KEY_STRING, NULL);
                   apr_hash_set( host->gmetrics, metric->name, APR_HASH_KEY_STRING, NULL);
-                  apr_thread_mutex_unlock(host->mutex);
                   /* destroy any memory that was allocated for this gmetric */
                   apr_pool_destroy( metric->pool );
                 }
             }
+	  apr_thread_mutex_unlock(host->mutex);
         }
     }
+  apr_thread_mutex_unlock(hosts_mutex);
 
   apr_pool_clear( pool );
 }
