@@ -11,39 +11,82 @@ export TMPDIR
 
 . /etc/rc.d/init.d/functions
 
-RETVAL=0
+start() {
+    [ -x $GMOND ] || exit 5
+    [ -f /etc/ganglia/gmond.conf ] || exit 6
+    echo -n "Starting GANGLIA gmond: "
+    daemon $GMOND
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/gmond
+    return $RETVAL
+}
+
+stop() {
+    echo -n "Shutting down GANGLIA gmond: "
+    killproc gmond
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/gmond
+    return $RETVAL
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    status $GMOND
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+usage() {
+    echo "Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+}
 
 case "$1" in
-   start)
-      echo -n "Starting GANGLIA gmond: "
-      [ -f $GMOND ] || exit 1
-
-      daemon $GMOND
-      RETVAL=$?
-      echo
-      [ $RETVAL -eq 0 ] && touch /var/lock/subsys/gmond
+    start)
+	rh_status_q && exit 0
+	$1
 	;;
-
-  stop)
-      echo -n "Shutting down GANGLIA gmond: "
-      killproc gmond
-      RETVAL=$?
-      echo
-      [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/gmond
+    stop)
+	rh_status_q || exit 1
+	$1
 	;;
-
-  restart|reload)
-   	$0 stop
-   	$0 start
-   	RETVAL=$?
+    restart)
+	$1
 	;;
-  status)
-   	status gmond
-   	RETVAL=$?
+    reload)
+	rh_status_q || exit 7
+	$1
 	;;
-  *)
-	echo "Usage: $0 {start|stop|restart|status}"
-	exit 1
+    force-reload)
+	force_reload
+	;;
+    status)
+	rh_status
+	;;
+    condrestart|try-restart)
+	rh_status_q || exit 0
+	restart
+	;;
+    usage)
+	$1
+	;;
+    *)
+	usage
+	exit 2
 esac
-
-exit $RETVAL
+exit $?
