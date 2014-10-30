@@ -247,6 +247,12 @@ then
    /sbin/chkconfig --del gmetad
 fi
 
+%postun gmetad
+if [ "$1" -ge 1 ]
+then
+   /etc/init.d/gmetad condrestart
+fi
+
 #%preun gmetad-python
 #if [ "$1" = 0 ]
 #then
@@ -259,6 +265,12 @@ if [ "$1" = 0 ]
 then
    /etc/init.d/gmond stop
    /sbin/chkconfig --del gmond
+fi
+
+%postun gmond
+if [ "$1" -ge 1 ]
+then
+   /etc/init.d/gmond condrestart
 fi
 
 %post   -n libganglia -p /sbin/ldconfig
