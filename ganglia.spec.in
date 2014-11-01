@@ -177,7 +177,7 @@ gmetad packages
 %build
 %configure --with-gmetad --enable-status --sysconfdir=%{conf_dir}
 %ifnarch noarch
-make
+%__make
 %endif
 #cd gmetad-python
 #%{__python} setup.py build
