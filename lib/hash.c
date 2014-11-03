@@ -146,44 +146,27 @@ hash_set_flags (hash_t *hash, int flags)
    hash->flags = flags;
 }
 
+/*
+ * 64 bit magic FNV-1a prime
+ */
+#define FNV_64_PRIME ((uint64_t)0x100000001b3ULL)
+
 static uint64_t
 hash_key (const void *key, size_t len, uint64_t seed)
 {
-        const uint64_t m = 0xc6a4a7935bd1e995LLU;
-        const int r = 47;
-        uint64_t h = seed ^ (len * m);
-        const uint64_t *data = (const uint64_t *)key;
-        const uint64_t *end = data + (len/8);
-        const unsigned char *data2;
+	unsigned char *bp = (unsigned char *)key;	/* start of buffer */
+	unsigned char *be = bp + len;		/* beyond end of buffer */
 
-        while(data != end) {
-                uint64_t k = *data++;
+	/* FNV-1a hash; assume we have stdint.h available */
+	while (bp < be) {
+		/* xor the bottom with the current octet */
+		seed ^= (uint64_t)*bp++;
+		/* multiply by the 64 bit FNV magic prime mod 2^64 */
+		seed *= FNV_64_PRIME;
+	}
 
-                k *= m;
-                k ^= k >> r;
-                k *= m;
-
-                h ^= k;
-                h *= m;
-        }
-
-        data2 = (const unsigned char *)data;
-        switch(len & 7) {
-                case 7: h ^= ((uint64_t)(data2[6])) << 48;
-                case 6: h ^= ((uint64_t)(data2[5])) << 40;
-                case 5: h ^= ((uint64_t)(data2[4])) << 32;
-                case 4: h ^= ((uint64_t)(data2[3])) << 24;
-                case 3: h ^= ((uint64_t)(data2[2])) << 16;
-                case 2: h ^= ((uint64_t)(data2[1])) << 8;
-                case 1: h ^= ((uint64_t)(data2[0]));
-                        h *= m;
-        }
-
-        h ^= h >> r;
-        h *= m;
-        h ^= h >> r;
-
-        return (h);
+	/* return our new hash value */
+	return seed;
 }
 
 inline size_t
