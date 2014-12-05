@@ -336,6 +336,10 @@ process_struct_CPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
   float load_one,load_five,load_fifteen;
   uint32_t proc_run,proc_total,cpu_num,cpu_speed,cpu_uptime,cpu_user,cpu_nice,cpu_system,cpu_idle,cpu_wio,cpu_intr,cpu_sintr;
   uint32_t interrupts,contexts;
+  /* cpu_steal, guest and guest_nice added December 2014 */
+  uint32_t cpu_steal,cpu_guest,cpu_guest_nice;
+  bool_t steal_and_guest = (x->st_quads.CPU > 17);
+
   SFLOWXDR_next_float(x,&load_one);
   SFLOWXDR_next_float(x,&load_five);
   SFLOWXDR_next_float(x,&load_fifteen);
@@ -353,7 +357,12 @@ process_struct_CPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
   cpu_sintr  = SFLOWXDR_next(x);
   interrupts = SFLOWXDR_next(x);
   contexts   = SFLOWXDR_next(x);
-  
+  if(steal_and_guest) {
+    cpu_steal  = SFLOWXDR_next(x);
+    cpu_guest  = SFLOWXDR_next(x);
+    cpu_guest_nice = SFLOWXDR_next(x);
+  }
+
   submit_sflow_float(hostdata, metric_prefix, SFLOW_M_load_one, load_one, SFLOW_OK_FLOAT(load_one));
   submit_sflow_float(hostdata, metric_prefix, SFLOW_M_load_five, load_five, SFLOW_OK_FLOAT(load_five));
   submit_sflow_float(hostdata, metric_prefix, SFLOW_M_load_fifteen, load_fifteen, SFLOW_OK_FLOAT(load_fifteen));
@@ -371,6 +380,14 @@ process_struct_CPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
     uint32_t delta_cpu_wio =    SFLOW_CTR_DELTA(dataSource, cpu_wio);
     uint32_t delta_cpu_intr =   SFLOW_CTR_DELTA(dataSource, cpu_intr);
     uint32_t delta_cpu_sintr =  SFLOW_CTR_DELTA(dataSource, cpu_sintr);
+    uint32_t delta_cpu_steal = 0;
+    uint32_t delta_cpu_guest = 0;
+    uint32_t delta_cpu_guest_nice = 0;
+    if(steal_and_guest) {
+      delta_cpu_steal = SFLOW_CTR_DELTA(dataSource, cpu_steal);
+      delta_cpu_guest = SFLOW_CTR_DELTA(dataSource, cpu_guest);
+      delta_cpu_guest_nice = SFLOW_CTR_DELTA(dataSource, cpu_guest_nice);
+    }
       
     uint32_t cpu_total = \
       delta_cpu_user +
@@ -381,6 +398,14 @@ process_struct_CPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
       delta_cpu_intr +
       delta_cpu_sintr;
 
+    if(steal_and_guest) {
+      cpu_total += delta_cpu_steal;
+      /* Note: cpu_guest is included in cpu_idle
+       * and cpu_guest_nice is included in cpu_nice
+       * so they do not contribute to cpu_total.
+       */
+    }
+
 #define SFLOW_CTR_CPU_PC(field) (cpu_total ? ((float)field * 100.0 / (float)cpu_total) : 0)
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_cpu_user, SFLOW_CTR_CPU_PC(delta_cpu_user), SFLOW_OK_COUNTER32(cpu_user));
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_cpu_nice, SFLOW_CTR_CPU_PC(delta_cpu_nice), SFLOW_OK_COUNTER32(cpu_nice));
@@ -389,6 +414,11 @@ process_struct_CPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_cpu_wio, SFLOW_CTR_CPU_PC(delta_cpu_wio), SFLOW_OK_COUNTER32(cpu_wio));
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_cpu_intr, SFLOW_CTR_CPU_PC(delta_cpu_intr), SFLOW_OK_COUNTER32(cpu_intr));
     submit_sflow_float(hostdata, metric_prefix, SFLOW_M_cpu_sintr, SFLOW_CTR_CPU_PC(delta_cpu_sintr), SFLOW_OK_COUNTER32(cpu_sintr));
+    if(steal_and_guest) {
+      submit_sflow_float(hostdata, metric_prefix, SFLOW_M_cpu_steal, SFLOW_CTR_CPU_PC(delta_cpu_steal), SFLOW_OK_COUNTER32(cpu_steal));
+      submit_sflow_float(hostdata, metric_prefix, SFLOW_M_cpu_guest, SFLOW_CTR_CPU_PC(delta_cpu_guest), SFLOW_OK_COUNTER32(cpu_guest));
+      submit_sflow_float(hostdata, metric_prefix, SFLOW_M_cpu_guest_nice, SFLOW_CTR_CPU_PC(delta_cpu_guest_nice), SFLOW_OK_COUNTER32(cpu_guest_nice));
+    }
 
     if(sflowCFG.submit_all_physical) {
       submit_sflow_float(hostdata, metric_prefix, SFLOW_M_interrupts, SFLOW_CTR_RATE(dataSource, interrupts, ctr_ival_mS), SFLOW_OK_COUNTER32(interrupts));
@@ -406,6 +436,11 @@ process_struct_CPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
   SFLOW_CTR_LATCH(dataSource, cpu_sintr);
   SFLOW_CTR_LATCH(dataSource, interrupts);
   SFLOW_CTR_LATCH(dataSource, contexts);
+  if(steal_and_guest) {
+    SFLOW_CTR_LATCH(dataSource, cpu_steal);
+    SFLOW_CTR_LATCH(dataSource, cpu_guest);
+    SFLOW_CTR_LATCH(dataSource, cpu_guest_nice);
+  }
 }
 
 static void
@@ -1489,7 +1524,7 @@ process_sflow_datagram(apr_sockaddr_t *remotesa, char *buf, apr_size_t len, apr_
 	  switch(ceTag) {
 	  case SFLOW_COUNTERBLOCK_HOST_HID: x->offset.HID = SFLOWXDR_mark(x,0); break; /* HID can be Physical or Virtual */
 
-	  case SFLOW_COUNTERBLOCK_HOST_CPU: x->offset.CPU = SFLOWXDR_mark(x,0); x->offset.foundPH++; break;
+	  case SFLOW_COUNTERBLOCK_HOST_CPU: x->st_quads.CPU = ceQuads; x->offset.CPU = SFLOWXDR_mark(x,0); x->offset.foundPH++; break;
 	  case SFLOW_COUNTERBLOCK_HOST_MEM: x->offset.MEM = SFLOWXDR_mark(x,0); x->offset.foundPH++; break;
 	  case SFLOW_COUNTERBLOCK_HOST_DSK: x->offset.DSK = SFLOWXDR_mark(x,0); x->offset.foundPH++; break;
 	  case SFLOW_COUNTERBLOCK_HOST_NIO: x->offset.NIO = SFLOWXDR_mark(x,0); x->offset.foundPH++; break;
