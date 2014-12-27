@@ -522,7 +522,7 @@ fi
 - Cleanup of *.{la,a} in %{_libdir}/ganglia is not needed anymore
 * Mon Mar 31 2008 Carlo Marcelo Arenas Belon <carenas@sajinet.com.pe>
 - Add gm_value.h and gm_msg.h
-* Thu Mar 28 2008 Brad Nicholes <bnicholes@novell.com>
+* Fri Mar 28 2008 Brad Nicholes <bnicholes@novell.com>
 - Add the headers file in the include directory
 * Thu Mar 27 2008 Bernard Li <bernard@vanhpc.org>
 - Added man1 pages gmetad, gmetric, gmond, gstat
@@ -554,11 +554,11 @@ fi
 - Don't install the example modules
 * Wed Jul 11 2007 Bernard Li <bernard@vanhpc.org>
 - Delete .in files in %{web_prefixdir}
-* Wed Jul 10 2007 Bernard Li <bernard@vanhpc.org>
+* Tue Jul 10 2007 Bernard Li <bernard@vanhpc.org>
 - Added python-devel to BuildRequires
-* Wed Jul 3 2007 Brad Nicholes <bnicholes@novell.com>
+* Tue Jul 3 2007 Brad Nicholes <bnicholes@novell.com>
 - Add the python modules and configuration
-* Wed Jun 14 2007 Brad Nicholes <bnicholes@novell.com>
+* Thu Jun 14 2007 Brad Nicholes <bnicholes@novell.com>
 - Build the python support module by default
 * Fri May 18 2007 Bernard Li <bernard@vanhpc.org>
 - Add php-gd to web subpackage Requires
@@ -600,7 +600,7 @@ fi
 * Sun May 21 2006 Bernard Li <bli@bcgsc.ca>
 - Correct init scripts dir for SuSE
 - Add BuildRequires for libpng-devel
-* Fri Feb 25 2006 Bernard Li <bli@bcgsc.ca>
+* Sat Feb 25 2006 Bernard Li <bli@bcgsc.ca>
 - Use SuSE specific init scripts if /etc/SuSE-release file exists
 * Fri Dec 10 2004 Matt Massie <massie@cs.berkeley.edu>
 - Updated the spec file for 2.6.0 release
