@@ -110,6 +110,10 @@ typedef struct _SFlowXDR {
     uint32_t NVML_GPU;
     uint32_t WORKERS;
   } offset;
+  /* structure length in quads (where needed) */
+  struct {
+    uint32_t CPU;
+  } st_quads;
 } SFlowXDR;
 
 #define SFLOWXDR_init(x,buf,len) do {  x->datap = (uint32_t *)buf; x->quads = (len >> 2); } while(0)
@@ -137,6 +141,9 @@ typedef struct _SFlowCounterState {
   uint32_t cpu_sintr;
   uint32_t interrupts;
   uint32_t contexts;
+  uint32_t cpu_steal;
+  uint32_t cpu_guest;
+  uint32_t cpu_guest_nice;
 
   /* memory */
   uint32_t page_in;
