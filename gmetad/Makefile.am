@@ -25,7 +25,8 @@ gmetad_SOURCES =  gmetad.c cmdline.c.in cmdline.c cmdline.h gmetad.h data_thread
    server_priv.h
 
 if BUILD_RIEMANN
-  gmetad_SOURCES += riemann.pb-c.h riemann.pb-c.c circuit_breaker.c
+  gmetad_SOURCES +=  circuit_breaker.c
+  nodist_gmetad_SOURCES = riemann.pb-c.h riemann.pb-c.c
 endif
 
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
