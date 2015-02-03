@@ -438,13 +438,13 @@ if test x"$memcache" == xyes; then
   CFLAGS="$CFLAGS -DWITH_MEMCACHED"
 fi
 
+AC_ARG_WITH( riemann, AS_HELP_STRING([--with-riemann], [enable riemann metric forwarding]),
+if test x"$withval" = xyes; then with_riemann="yes"; fi)
+
+if test x"$with_riemann" == xyes; then
 echo
 echo Checking for Protocol Buffers
-AC_ARG_WITH( riemann,
-[  --with-riemann          enable riemann metric forwarding],
-if test x"$withval" = xyes; then riemann="yes"; fi)
 
-if test x"$riemann" == xyes; then
   PKG_CHECK_MODULES([PROTOBUF_C], [libprotobuf-c],[],[AC_MSG_WARN([No pkg-config for protobuf-c.])] )
   if test "x$PROTOBUF_C_CFLAGS" = x; then
     echo "trying harder - bug your distro"
@@ -464,7 +464,7 @@ if test x"$riemann" == xyes; then
   AC_CONFIG_COMMANDS([riemann_pb-c.c], [protoc-c -Igmetad/ --c_out=./gmetad gmetad/riemann.proto])
   CFLAGS="$CFLAGS -DWITH_RIEMANN"
 fi
-AM_CONDITIONAL(BUILD_RIEMANN, test x"$riemann" = xyes)
+AM_CONDITIONAL(BUILD_RIEMANN, test x"$with_riemann" = xyes)
 
 echo
 echo Checking for confuse
