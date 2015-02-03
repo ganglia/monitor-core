@@ -1,8 +1,6 @@
-#
-
 modules {
   module {
-    name = 'diskstat'
+    name    = 'diskstat'
     language = 'python'
 
     # Specify devices you want to monitor or if empty it will 
@@ -10,7 +8,6 @@ modules {
     param devices {
       value = ''
     }
-
     #param device-mapper {
     #  value = 'true'
     #}
@@ -18,11 +15,10 @@ modules {
 }
 
 collection_group {
-  collect_every = 30
+  collect_every  = 30
   time_threshold = 30
 
   metric {
     name_match = "diskstat_(.+)"
   }
 }
-

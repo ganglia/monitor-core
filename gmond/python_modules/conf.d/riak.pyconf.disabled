@@ -2,8 +2,9 @@ modules {
   module {
     name     = "riak"
     language = "python"
+
     param url {
-        value = "http://localhost:8098/stats"
+      value = "http://localhost:8098/stats"
     }
   }
 }

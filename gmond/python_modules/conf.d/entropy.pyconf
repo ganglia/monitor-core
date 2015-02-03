@@ -1,17 +1,16 @@
 modules {
   module {
-    name = "entropy"
+    name     = "entropy"
     language = "python"
   }
 }
 
 collection_group {
-  collect_every = 15
+  collect_every  = 15
   time_threshold = 50
 
   metric {
-    name = "entropy_avail"
+    name  = "entropy_avail"
     title = "Entropy Available"
   }
-
 }

@@ -87,7 +87,7 @@ def get_metrics():
              traceback.print_exc()
 
         # If we are collecting SSL metrics we'll do
-        if COLLECT_SSL:    
+        if COLLECT_SSL:
     
             try:
                 req2 = urllib2.Request(SERVER_STATUS_URL)
@@ -198,7 +198,7 @@ def metric_init(params):
                 "name"       : NAME_PREFIX + "rps",
                 "value_type" : "float",
                 "units"      : "req/sec",
-                "call_back"   : get_delta,                
+                "call_back"   : get_delta,
                 "format"     : "%.3f",
                 "description": "request per second",
                 }))
@@ -207,7 +207,7 @@ def metric_init(params):
                 "name"       : NAME_PREFIX + "bytes",
                 "value_type" : "float",
                 "units"      : "bytes/sec",
-                "call_back"   : get_delta,                
+                "call_back"   : get_delta,
                 "format"     : "%.3f",
                 "description": "bytes transferred per second",
                 }))

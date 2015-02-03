@@ -1,6 +1,6 @@
 modules {
   module {
-    name = "multi_interface"
+    name     = "multi_interface"
     language = "python"
 
     # Leaving the interfaces value empty will result in all interfaces being
@@ -25,13 +25,11 @@ modules {
     param excluded_interfaces {
       value = "lo vnet[0-9]+"
     }
-
-
   }
 }
 
 collection_group {
-  collect_every = 15
+  collect_every  = 15
   time_threshold = 45
 
   metric {
@@ -44,25 +42,24 @@ collection_group {
   }
 
 #  Uncomment only if param send_aggregate_bytes_packets set to True
-#  metric { 
-#    name = "bytes_out" 
-#    value_threshold = 4096 
-#    title = "Bytes Sent" 
-#  } 
-#  metric { 
-#    name = "bytes_in" 
-#    value_threshold = 4096 
-#    title = "Bytes Received" 
-#  } 
-#  metric { 
-#    name = "pkts_in" 
-#    value_threshold = 256 
-#    title = "Packets Received" 
-#  } 
-#  metric { 
-#    name = "pkts_out" 
-#    value_threshold = 256 
-#    title = "Packets Sent" 
-#  }  
-  
+#  metric {
+#    name = "bytes_out"
+#    value_threshold = 4096
+#    title = "Bytes Sent"
+#  }
+#  metric {
+#    name = "bytes_in"
+#    value_threshold = 4096
+#    title = "Bytes Received"
+#  }
+#  metric {
+#    name = "pkts_in"
+#    value_threshold = 256
+#    title = "Packets Received"
+#  }
+#  metric {
+#    name = "pkts_out"
+#    value_threshold = 256
+#    title = "Packets Sent"
+#  }
 }

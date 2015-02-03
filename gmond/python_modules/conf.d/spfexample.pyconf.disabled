@@ -4,9 +4,9 @@
 #    as an example to write your own spoof module. */
 modules {
   module {
-    name = "spfexample"
+    name     = "spfexample"
     language = "python"
-    enabled = "no"
+    enabled  = "no"
   }
 }
 
@@ -16,8 +16,9 @@ modules {
 #/* This metric gathers a simulated
 #    cpu utilization value */
 collection_group {
-  collect_every = 10
+  collect_every  = 10
   time_threshold = 50
+
   metric {
     name = "spf_random_cpu_util"
     value_threshold = 1.0
@@ -28,10 +29,11 @@ collection_group {
 #/* This metric spoofs a heartbeat for an
 #    imaginary box */
 collection_group {
-  collect_once = yes
+  collect_once   = yes
   time_threshold = 20
+
   metric {
-    name = "spf_heartbeat"
+    name  = "spf_heartbeat"
     title = "Spoofed Heartbeat"
   }
 }
@@ -39,18 +41,19 @@ collection_group {
 #/* These metrics spoof the location, boottime and OS name
 #    for an imaginary box */
 collection_group {
-  collect_once = yes
+  collect_once   = yes
   time_threshold = 1200
+
   metric {
-    name = "spf_location"
+    name  = "spf_location"
     title = "Spoofed Location"
   }
   metric {
-    name = "spf_boottime"
+    name  = "spf_boottime"
     title = "Spoofed Boot Time"
   }
   metric {
-    name = "spf_osname"
+    name  = "spf_osname"
     title = "Spoofed OS Name"
   }
 }
