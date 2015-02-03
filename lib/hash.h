@@ -2,7 +2,7 @@
 #define HASH__H 1
 
 #include <stddef.h>				  /* For size_t     */
-#include <ck_rwlock.h>
+#include <apr_thread_rwlock.h>
 
 #define HASH_FLAG_IGNORE_CASE 1
 
@@ -24,7 +24,8 @@ node_t;
 
 typedef struct
 {
-   ck_rwlock_t *lock;
+   apr_pool_t *lockpool;
+   apr_thread_rwlock_t **lock;
    size_t size;
    node_t *node;
    int flags;

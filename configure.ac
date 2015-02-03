@@ -614,8 +614,6 @@ AC_CHECK_HEADER([rpc/xdr.h], [],
 #endif
 ])
 
-PKG_CHECK_MODULES([CK], [ck])
-
 dnl ##################################################################
 dnl Checks for typedefs.
 dnl
