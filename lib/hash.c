@@ -96,6 +96,14 @@ hash_create (size_t size)
          return NULL;
       }
 
+   hash->lock = calloc(hash->size, sizeof (*hash->lock));
+   if (hash->lock == NULL)
+      {
+         debug_msg("hash->lock alloc error; freeing hash");
+         free(hash);
+         return NULL;
+      }
+
    status = apr_pool_create(&hash->lockpool, NULL);
    if (status != APR_SUCCESS)
       {
@@ -106,11 +114,12 @@ hash_create (size_t size)
 
    for (i = 0; i < size; i++)
       {
-         status = apr_thread_rwlock_create(&(hash->lock[i]), hash->lockpool);
+         status = apr_thread_rwlock_create(&hash->lock[i], hash->lockpool);
          if (status != APR_SUCCESS)
             {
                debug_msg("Error initializing locks.");
                apr_pool_destroy(hash->lockpool);
+               free(hash->lock);
                free(hash);
                return NULL;
             }
