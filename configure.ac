@@ -892,6 +892,7 @@ AC_OUTPUT(Makefile
           gmond/perl_modules/example/Makefile
           gmond/python_modules/Makefile
           gmond/python_modules/apache_status/Makefile
+          gmond/python_modules/cpu/Makefile
           gmond/python_modules/db/Makefile
           gmond/python_modules/disk/Makefile
           gmond/python_modules/example/Makefile
