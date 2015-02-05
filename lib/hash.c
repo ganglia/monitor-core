@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <ck_rwlock.h>
+#include <apr_thread_rwlock.h>
 
 #include "hash.h"
 #include "ganglia.h"
@@ -60,7 +60,9 @@ datum_free (datum_t *datum)
 hash_t *
 hash_create (size_t size)
 {
+   apr_status_t status;
    hash_t *hash;
+   size_t i;
 
    debug_msg("hash_create size = %zd", size);
 
@@ -95,17 +97,33 @@ hash_create (size_t size)
       }
 
    hash->lock = calloc(hash->size, sizeof (*hash->lock));
-   if (hash->lock == NULL) 
+   if (hash->lock == NULL)
       {
-         debug_msg("hash->lock malloc error. freeing hash.");
+         debug_msg("hash->lock alloc error; freeing hash");
          free(hash);
          return NULL;
       }
-   /*
-    * ck_rwlock_init just sets things to zero and does a memory fence. calloc 
-    * already set zero, so add mfence only.
-    */
-   ck_pr_fence_memory();
+
+   status = apr_pool_create(&hash->lockpool, NULL);
+   if (status != APR_SUCCESS)
+      {
+         debug_msg("lock pool failed, freeing hash.");
+         free(hash);
+         return NULL;
+      }
+
+   for (i = 0; i < size; i++)
+      {
+         status = apr_thread_rwlock_create(&hash->lock[i], hash->lockpool);
+         if (status != APR_SUCCESS)
+            {
+               debug_msg("Error initializing locks.");
+               apr_pool_destroy(hash->lockpool);
+               free(hash->lock);
+               free(hash);
+               return NULL;
+            }
+      }
 
    return hash;
 }
@@ -190,7 +208,7 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
 
   i = hashval(key, hash);
 
-  ck_rwlock_write_lock(&hash->lock[i]);
+  apr_thread_rwlock_wrlock(hash->lock[i]);
 
   bucket = &hash->node[i];
   if (bucket->key == NULL)
@@ -201,7 +219,7 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
            {
               free(bucket);
               bucket = NULL;
-              ck_rwlock_write_unlock(&hash->lock[i]);
+              apr_thread_rwlock_unlock(hash->lock[i]);
               return NULL;
            } 
         bucket->val = datum_dup(val);
@@ -209,10 +227,10 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
            {
               free(bucket);
               bucket = NULL;
-              ck_rwlock_write_unlock(&hash->lock[i]);
+              apr_thread_rwlock_unlock(hash->lock[i]);
               return NULL;
            }
-        ck_rwlock_write_unlock(&hash->lock[i]);
+        apr_thread_rwlock_unlock(hash->lock[i]);
         return bucket->val;
      }
 
@@ -231,7 +249,7 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
                      /* Make sure we have enough room */
                      if(! (bucket->val->data = realloc(bucket->val->data, val->size)) )
                         {
-                           ck_rwlock_write_unlock(&hash->lock[i]);
+                           apr_thread_rwlock_unlock(hash->lock[i]);
                            return NULL;
                         }
                      bucket->val->size = val->size;
@@ -239,7 +257,7 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
 
                memset( bucket->val->data, 0, val->size );
                memcpy( bucket->val->data, val->data, val->size );
-               ck_rwlock_write_unlock(&hash->lock[i]);
+               apr_thread_rwlock_unlock(hash->lock[i]);
                return bucket->val;
             }
       }
@@ -248,14 +266,14 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
   bucket = calloc(1, sizeof(*bucket));
   if (bucket == NULL)
      {
-        ck_rwlock_write_unlock(&hash->lock[i]);
+        apr_thread_rwlock_unlock(hash->lock[i]);
         return NULL;
      }
   bucket->key = datum_dup (key);
   if ( bucket->key == NULL )
      {
         free(bucket);
-        ck_rwlock_write_unlock(&hash->lock[i]);
+        apr_thread_rwlock_unlock(hash->lock[i]);
         return NULL;
      }
   bucket->val = datum_dup (val);
@@ -263,14 +281,14 @@ hash_insert (datum_t *key, datum_t *val, hash_t *hash)
      {
         datum_free(bucket->key);
         free(bucket);
-        ck_rwlock_write_unlock(&hash->lock[i]);
+        apr_thread_rwlock_unlock(hash->lock[i]);
         return NULL;
      }  
 
   
   bucket->next = hash->node[i].next;
   hash->node[i].next = bucket;
-  ck_rwlock_write_unlock(&hash->lock[i]);
+  apr_thread_rwlock_unlock(hash->lock[i]);
   return bucket->val;
 }
 
@@ -283,13 +301,13 @@ hash_lookup (datum_t *key, hash_t * hash)
 
   i = hashval(key, hash);
 
-  ck_rwlock_read_lock(&hash->lock[i]);
+  apr_thread_rwlock_rdlock(hash->lock[i]);
 
   bucket = &hash->node[i];
 
   if ( bucket == NULL )
      {
-        ck_rwlock_read_unlock(&hash->lock[i]);
+        apr_thread_rwlock_unlock(hash->lock[i]);
         return NULL;
      }
 
@@ -298,12 +316,12 @@ hash_lookup (datum_t *key, hash_t * hash)
       if (bucket->key && hash_keycmp(hash, key, bucket->key))
          {
             val =  datum_dup( bucket->val );
-            ck_rwlock_read_unlock(&hash->lock[i]);
+            apr_thread_rwlock_unlock(hash->lock[i]);
             return val;
          }
     }
 
-  ck_rwlock_read_unlock(&hash->lock[i]);
+  apr_thread_rwlock_unlock(hash->lock[i]);
   return NULL;
 }
 
@@ -315,12 +333,12 @@ hash_delete (datum_t *key, hash_t * hash)
 
   i = hashval(key,hash);
 
-  ck_rwlock_write_lock(&hash->lock[i]);
+  apr_thread_rwlock_wrlock(hash->lock[i]);
 
   bucket = &hash->node[i];
   if (bucket->key == NULL )
      {
-        ck_rwlock_write_unlock(&hash->lock[i]);
+        apr_thread_rwlock_unlock(hash->lock[i]);
         return NULL;
      }
 
@@ -344,7 +362,7 @@ hash_delete (datum_t *key, hash_t * hash)
             }
 
           datum_free(tmp.key);
-          ck_rwlock_write_unlock(&hash->lock[i]);
+          apr_thread_rwlock_unlock(hash->lock[i]);
         }
       else
         {
@@ -352,13 +370,13 @@ hash_delete (datum_t *key, hash_t * hash)
           datum_free(bucket->key);
           tmp.val = bucket->val;
           free(bucket);
-          ck_rwlock_write_unlock(&hash->lock[i]);
+          apr_thread_rwlock_unlock(hash->lock[i]);
         }
 
       return tmp.val;
     }
 
-  ck_rwlock_write_unlock(&hash->lock[i]);
+  apr_thread_rwlock_unlock(hash->lock[i]);
   return NULL;
 }
 
@@ -376,14 +394,14 @@ hash_walkfrom (hash_t * hash, size_t from,
 
   for (i = from; i < hash->size && !stop; i++)
     {
-       ck_rwlock_read_lock(&hash->lock[i]);
+       apr_thread_rwlock_rdlock(hash->lock[i]);
        for (bucket = &hash->node[i]; bucket != NULL && bucket->key != NULL; bucket = bucket->next)
          {
            if (bucket->key == NULL) continue;
            stop = func(bucket->key, bucket->val, arg);
            if (stop) break;
          }
-       ck_rwlock_read_unlock(&hash->lock[i]);
+       apr_thread_rwlock_unlock(hash->lock[i]);
     }
   return stop;
 }
@@ -397,14 +415,14 @@ hash_foreach (hash_t * hash, int (*func)(datum_t *, datum_t *, void *), void *ar
 
   for (i = 0; i < hash->size && !stop; i++)
     {
-       ck_rwlock_read_lock(&hash->lock[i]);
+       apr_thread_rwlock_rdlock(hash->lock[i]);
        for (bucket = &hash->node[i]; bucket != NULL && bucket->key != NULL; bucket = bucket->next)
          {
            if (bucket->key == NULL) continue;
            stop = func(bucket->key, bucket->val, arg);
            if (stop) break;
          }
-       ck_rwlock_read_unlock(&hash->lock[i]);
+       apr_thread_rwlock_unlock(hash->lock[i]);
     }
   return stop;
 }

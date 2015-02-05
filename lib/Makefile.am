@@ -15,7 +15,7 @@ GCFLAGS += -DSFLOW
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I.. -I. -I$(top_builddir)/include/ $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"' @CK_CFLAGS@
+AM_CFLAGS = -I.. -I. -I$(top_builddir)/include/ $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"'
 
 include_HEADERS = gm_protocol.h
 
@@ -36,7 +36,7 @@ libganglia_la_LDFLAGS = \
 	-export-dynamic \
 	$(GLDFLAGS)
 
-libganglia_la_LIBADD = $(GLDADD) @CK_LIBS@
+libganglia_la_LIBADD = $(GLDADD)
 
 noinst_LIBRARIES = libgetopthelper.a
 # A little helper for getopt functions

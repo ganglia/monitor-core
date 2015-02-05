@@ -12,7 +12,7 @@ GLDFLAGS =
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/include $(GCFLAGS) @CK_CFLAGS@ @PROTOBUF_C_CFLAGS@
+AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/include $(GCFLAGS) @PROTOBUF_C_CFLAGS@
 
 sbin_PROGRAMS = gmetad
 
@@ -31,7 +31,7 @@ endif
 
 gmetad_LDADD   = $(top_builddir)/lib/libganglia.la -lrrd -lm \
                  $(top_builddir)/libmetrics/libmetrics.la \
-                 $(GLDADD) $(DEPS_LIBS) @CK_LIBS@ @PROTOBUF_C_LIBS@
+                 $(GLDADD) $(DEPS_LIBS) @PROTOBUF_C_LIBS@
 
 gmetad_LDFLAGS = $(GLDFLAGS)
 
