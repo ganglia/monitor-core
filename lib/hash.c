@@ -146,8 +146,9 @@ hash_destroy (hash_t * hash)
                   datum_free(val);
                 }
            }
+	apr_thread_rwlock_destroy(hash->lock[i]);
      }
-        
+   apr_pool_destroy(hash->lockpool);
    free( hash->node );
    free( hash );
 }
