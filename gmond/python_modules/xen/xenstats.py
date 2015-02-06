@@ -1,17 +1,17 @@
 #       xenstats.py
-#       
+#
 #       Copyright 2011 Marcos Amorim <marcosmamorim@gmail.com>
-#       
+#
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
 #       the Free Software Foundation; either version 2 of the License, or
 #       (at your option) any later version.
-#       
+#
 #       This program is distributed in the hope that it will be useful,
 #       but WITHOUT ANY WARRANTY; without even the implied warranty of
 #       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #       GNU General Public License for more details.
-#       
+#
 #       You should have received a copy of the GNU General Public License
 #       along with this program; if not, write to the Free Software
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -25,13 +25,15 @@ descriptors = list()
 conn        = libvirt.openReadOnly("xen:///")
 conn_info   = conn.getInfo()
 
+
 def xen_vms(name):
     '''Return number of virtual is running'''
     global conn
 
-    vm_count   = conn.numOfDomains()
+    vm_count = conn.numOfDomains()
 
     return vm_count
+
 
 def xen_mem(name):
     '''Return node memory '''
@@ -40,6 +42,7 @@ def xen_mem(name):
 
     # O xen retorna o valor da memoria em MB, vamos passar por KB
     return conn_info[1] * 1024
+
 
 def xen_cpu(name):
     '''Return numbers of CPU's'''
@@ -61,6 +64,7 @@ def xen_mem_use(name):
         vm_mem = vm_mem + info[2]
 
     return vm_mem
+
 
 def metric_init(params):
     global descriptors
@@ -108,9 +112,10 @@ def metric_init(params):
             'groups': 'xen'
             }
 
-    descriptors = [d1,d2,d3,d4]
+    descriptors = [d1, d2, d3, d4]
 
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''
@@ -124,4 +129,3 @@ if __name__ == '__main__':
     for d in descriptors:
         v = d['call_back'](d['name'])
         print 'value for %s is %u' % (d['name'],  v)
-

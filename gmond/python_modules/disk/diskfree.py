@@ -34,11 +34,11 @@ import re
 import os
 
 # Minimum disk size
-MIN_DISK_SIZE=1
+MIN_DISK_SIZE = 1
 
 NAME_PREFIX = 'disk_free_'
 PARAMS = {
-    'mounts' : '/proc/mounts'
+    'mounts': '/proc/mounts'
 }
 PATHS = {}
 
@@ -62,7 +62,7 @@ def get_value(name):
         if unit_type == 'percent':
             result = (float(disk.f_bavail) / float(disk.f_blocks)) * 100
         else:
-            result = (disk.f_bavail * disk.f_frsize) / float(2**30) # GB
+            result = (disk.f_bavail * disk.f_frsize) / float(2**30)  # GB
 
     except OSError:
         result = 0
@@ -100,15 +100,15 @@ def metric_init(lparams):
                 path_key = 'rootfs'
             else:
                 path_key = mount_info[1][1:].replace('/', '_')
-                
+
             # Calculate the size of the disk. We'll use it exclude small disks
-            disk = os.statvfs(mount_info[1])            
+            disk = os.statvfs(mount_info[1])
             disk_size = (disk.f_blocks * disk.f_frsize) / float(2**30)
 
             if disk_size > MIN_DISK_SIZE and mount_info[1] != "/dev":
                 PATHS[path_key] = mount_info[1]
                 for unit_type in ['absolute', 'percent']:
-                    if unit_type == 'percent': 
+                    if unit_type == 'percent':
                         units = '%'
                     else:
                         units = 'GB'

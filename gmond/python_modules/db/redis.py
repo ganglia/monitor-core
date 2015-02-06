@@ -17,13 +17,13 @@
 # Raphaelli's MySQL plugin, on which this one is based can be found at
 # <http://g.raphaelli.com/2009/1/5/ganglia-mysql-metrics>.
 
-
 import socket
 import time
 #import logging
 
 #logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log', filemode='w')
 #logging.debug('starting up')
+
 
 def metric_handler(name):
 
@@ -82,7 +82,7 @@ def metric_handler(name):
                           metric_handler.prev_total_commands = int(v)
                           v = cps
                   #logging.debug("submittincg metric %s is %s" % (n, int(v)))
-                  metric_handler.info[n] = int(v) # TODO Use value_type.
+                  metric_handler.info[n] = int(v)  # TODO Use value_type.
         except Exception, e:
             #logging.debug("caught exception %s" % e)
             pass
@@ -91,6 +91,7 @@ def metric_handler(name):
 
     #logging.debug("returning metric_handl: %s %s %s" % (metric_handler.info.get(name, 0), metric_handler.info, metric_handler))
     return metric_handler.info.get(name, 0)
+
 
 def metric_init(params={}):
     metric_handler.host = params.get("host", "127.0.0.1")
@@ -109,9 +110,9 @@ def metric_init(params={}):
         "master_sync_in_progress": {"units": "yes/no"},
         "master_link_status": {"units": "yes/no"},
         #"aof_bgrewriteaof_in_progress": {"units": "yes/no"},
-        "total_connections_received": { "units": "connections/sec" },
+        "total_connections_received": {"units": "connections/sec"},
         "instantaneous_ops_per_sec": {"units": "ops"},
-        "total_commands_processed": { "units": "commands/sec" },
+        "total_commands_processed": {"units": "commands/sec"},
         "expired_keys": {"units": "keys"},
         "pubsub_channels": {"units": "channels"},
         "pubsub_patterns": {"units": "patterns"},
@@ -135,6 +136,7 @@ def metric_init(params={}):
         descriptor.update(updates)
         metric_handler.descriptors[name] = descriptor
     return metric_handler.descriptors.values()
+
 
 def metric_cleanup():
     pass

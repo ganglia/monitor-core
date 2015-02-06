@@ -16,8 +16,8 @@ if sys.version_info < (2, 6):
 
 # global to store state for "total accesses"
 METRICS = {
-    'time' : 0,
-    'data' : {}
+    'time': 0,
+    'data': {}
 }
 
 LAST_METRICS = copy.deepcopy(METRICS)
@@ -30,21 +30,21 @@ SSL_NAME_PREFIX = "apssl_"
 SERVER_STATUS_URL = ""
 
 descriptors = list()
-Desc_Skel   = {}
-Scoreboard  = {
-    NAME_PREFIX + 'waiting'         : { 'key': '_', 'desc': 'Waiting for Connection' },
-    NAME_PREFIX + 'starting'        : { 'key': 'S', 'desc': 'Starting up' },
-    NAME_PREFIX + 'reading_request' : { 'key': 'R', 'desc': 'Reading Request' },
-    NAME_PREFIX + 'sending_reply'   : { 'key': 'W', 'desc': 'Sending Reply' },
-    NAME_PREFIX + 'keepalive'       : { 'key': 'K', 'desc': 'Keepalive (read)' },
-    NAME_PREFIX + 'dns_lookup'      : { 'key': 'D', 'desc': 'DNS Lookup' },
-    NAME_PREFIX + 'closing'         : { 'key': 'C', 'desc': 'Closing connection' },
-    NAME_PREFIX + 'logging'         : { 'key': 'L', 'desc': 'Logging' },
-    NAME_PREFIX + 'gracefully_fin'  : { 'key': 'G', 'desc': 'Gracefully finishing' },
-    NAME_PREFIX + 'idle'            : { 'key': 'I', 'desc': 'Idle cleanup of worker' },
-    NAME_PREFIX + 'open_slot'       : { 'key': '.', 'desc': 'Open slot with no current process' },
+Desc_Skel = {}
+Scoreboard = {
+    NAME_PREFIX + 'waiting'         : {'key': '_', 'desc': 'Waiting for Connection'},
+    NAME_PREFIX + 'starting'        : {'key': 'S', 'desc': 'Starting up'},
+    NAME_PREFIX + 'reading_request' : {'key': 'R', 'desc': 'Reading Request'},
+    NAME_PREFIX + 'sending_reply'   : {'key': 'W', 'desc': 'Sending Reply'},
+    NAME_PREFIX + 'keepalive'       : {'key': 'K', 'desc': 'Keepalive (read)'},
+    NAME_PREFIX + 'dns_lookup'      : {'key': 'D', 'desc': 'DNS Lookup'},
+    NAME_PREFIX + 'closing'         : {'key': 'C', 'desc': 'Closing connection'},
+    NAME_PREFIX + 'logging'         : {'key': 'L', 'desc': 'Logging'},
+    NAME_PREFIX + 'gracefully_fin'  : {'key': 'G', 'desc': 'Gracefully finishing'},
+    NAME_PREFIX + 'idle'            : {'key': 'I', 'desc': 'Idle cleanup of worker'},
+    NAME_PREFIX + 'open_slot'       : {'key': '.', 'desc': 'Open slot with no current process'},
     }
-Scoreboard_bykey = dict([(v["key"],k) for (k,v) in Scoreboard.iteritems()])
+Scoreboard_bykey = dict([(v["key"], k) for (k, v) in Scoreboard.iteritems()])
 
 SSL_REGEX = re.compile('^(cache type:) (.*)(<b>)(?P<shared_mem>[0-9]+)(</b> bytes, current sessions: <b>)(?P<current_sessions>[0-9]+)(</b><br>subcaches: <b>)(?P<num_subcaches>[0-9]+)(</b>, indexes per subcache: <b>)(?P<indexes_per_subcache>[0-9]+)(</b><br>)(.*)(<br>index usage: <b>)(?P<index_usage>[0-9]+)(%</b>, cache usage: <b>)(?P<cache_usage>[0-9]+)(%</b><br>total sessions stored since starting: <b>)(?P<sessions_stored>[0-9]+)(</b><br>total sessions expired since starting: <b>)(?P<sessions_expired>[0-9]+)(</b><br>total \(pre-expiry\) sessions scrolled out of the cache: <b>)(?P<sessions_scrolled_outof_cache>[0-9]+)(</b><br>total retrieves since starting: <b>)(?P<retrieves_hit>[0-9]+)(</b> hit, <b>)(?P<retrieves_miss>[0-9]+)(</b> miss<br>total removes since starting: <b>)(?P<removes_hit>[0-9]+)(</b> hit, <b>)(?P<removes_miss>[0-9]+)')
 # Good for Apache 2.2
@@ -60,18 +60,19 @@ Metric_Map = {
     "Total Accesses" : NAME_PREFIX + "rps"
 }
 
+
 def get_metrics():
 
     global METRICS, LAST_METRICS, SERVER_STATUS_URL, COLLECT_SSL
 
     if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
-        metrics = dict( [(k, 0) for k in Scoreboard.keys()] )
+        metrics = dict([(k, 0) for k in Scoreboard.keys()])
 
         # This is the short server-status. Lacks SSL metrics
         try:
             req = urllib2.Request(SERVER_STATUS_URL + "?auto")
-            
+
             # Download the status file
             if sys.version_info < (2, 6):
                 res = urllib2.urlopen(req)
@@ -79,33 +80,33 @@ def get_metrics():
                 res = urllib2.urlopen(req, timeout=2)
 
             for line in res:
-               split_line = line.rstrip().split(": ")
-               long_metric_name = split_line[0]
-               if long_metric_name == "Scoreboard":
-                   for sck in split_line[1]:
-                      metrics[ Scoreboard_bykey[sck] ] += 1
-               else:
-                    if long_metric_name in Metric_Map:
-                       metric_name = Metric_Map[long_metric_name]
+                split_line = line.rstrip().split(": ")
+                long_metric_name = split_line[0]
+                if long_metric_name == "Scoreboard":
+                    for sck in split_line[1]:
+                        metrics[ Scoreboard_bykey[sck] ] += 1
                     else:
-                       metric_name = long_metric_name
+                        if long_metric_name in Metric_Map:
+                            metric_name = Metric_Map[long_metric_name]
+                        else:
+                            metric_name = long_metric_name
                     metrics[metric_name] = split_line[1]
 
         except urllib2.URLError:
-             traceback.print_exc()
+            traceback.print_exc()
 
         # If we are collecting SSL metrics we'll do
-        if COLLECT_SSL:    
-    
+        if COLLECT_SSL:
+
             try:
                 req2 = urllib2.Request(SERVER_STATUS_URL)
-                
+
                 # Download the status file
                 if sys.version_info < (2, 6):
                     res = urllib2.urlopen(req2)
                 else:
                     res = urllib2.urlopen(req2, timeout=2)
-                
+
                 for line in res:
                     regMatch = SSL_REGEX.match(line)
                     if regMatch:
@@ -113,10 +114,9 @@ def get_metrics():
                         for key in linebits:
                             #print SSL_NAME_PREFIX + key + "=" + linebits[key]
                             metrics[SSL_NAME_PREFIX + key] = linebits[key]
-    
-            except urllib2.URLError:
-                 traceback.print_exc()
 
+            except urllib2.URLError:
+                traceback.print_exc()
 
         LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
@@ -139,6 +139,7 @@ def get_value(name):
 
     return result
 
+
 def get_delta(name):
     """Return change over time for the requested metric"""
 
@@ -152,21 +153,22 @@ def get_delta(name):
         multiplier = 1
 
     try:
-      delta = multiplier * (float(curr_metrics['data'][name]) - float(last_metrics['data'][name])) /(curr_metrics['time'] - last_metrics['time'])
-      if delta < 0:
-	print name + " is less 0"
-	delta = 0
+        delta = multiplier * (float(curr_metrics['data'][name]) - float(last_metrics['data'][name])) / (curr_metrics['time'] - last_metrics['time'])
+        if delta < 0:
+            print name + " is less 0"
+            delta = 0
     except KeyError:
-      delta = 0.0      
+        delta = 0.0
 
     return delta
 
 
 def create_desc(prop):
     d = Desc_Skel.copy()
-    for k,v in prop.iteritems():
+    for k, v in prop.iteritems():
         d[k] = v
     return d
+
 
 def metric_init(params):
     global descriptors, Desc_Skel, SERVER_STATUS_URL, COLLECT_SSL
@@ -194,7 +196,7 @@ def metric_init(params):
 
     if "url" not in params:
         params["url"] = "http://localhost:7070/server-status"
-        
+
     if "collect_ssl" not in params:
         params["collect_ssl"] = False
 
@@ -209,7 +211,7 @@ def metric_init(params):
                 "name"       : NAME_PREFIX + "rps",
                 "value_type" : "float",
                 "units"      : "req/sec",
-                "call_back"   : get_delta,                
+                "call_back"   : get_delta,
                 "format"     : "%.3f",
                 "description": "request per second",
                 }))
@@ -218,7 +220,7 @@ def metric_init(params):
                 "name"       : NAME_PREFIX + "bytes",
                 "value_type" : "float",
                 "units"      : "bytes/sec",
-                "call_back"   : get_delta,                
+                "call_back"   : get_delta,
                 "format"     : "%.3f",
                 "description": "bytes transferred per second",
                 }))
@@ -259,18 +261,18 @@ def metric_init(params):
                 "description": "Uptime",
                 }))
 
-    for k,v in Scoreboard.iteritems():
+    for k, v in Scoreboard.iteritems():
         descriptors.append(create_desc({
                     "name"        : k,
                     "call_back"   : get_value,
                     "description" : v["desc"],
                     }))
-        
+
     ##########################################################################
     # SSL metrics
     ##########################################################################
     if params['collect_ssl']:
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "shared_mem",
                     "value_type" : "float",
@@ -279,7 +281,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Shared memory",
                     }))
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "current_sessions",
                     "value_type" : "uint",
@@ -288,7 +290,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Current sessions",
                     }))
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "num_subcaches",
                     "value_type" : "uint",
@@ -297,7 +299,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Number of subcaches",
                     }))
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "indexes_per_subcache",
                     "value_type" : "float",
@@ -306,8 +308,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Subcaches",
                     }))
-    
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "index_usage",
                     "value_type" : "float",
@@ -316,7 +317,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Index usage",
                     }))
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "cache_usage",
                     "value_type" : "float",
@@ -325,8 +326,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Cache usage",
                     }))
-    
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "sessions_stored",
                     "value_type" : "float",
@@ -335,7 +335,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Sessions stored",
                     }))
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "sessions_expired",
                     "value_type" : "float",
@@ -344,7 +344,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Sessions expired",
                     }))
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "retrieves_hit",
                     "value_type" : "float",
@@ -353,7 +353,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Retrieves Hit",
                     }))
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "retrieves_miss",
                     "value_type" : "float",
@@ -362,7 +362,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Retrieves Miss",
                     }))
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "removes_hit",
                     "value_type" : "float",
@@ -371,7 +371,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Removes Hit",
                     }))
-    
+
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "removes_miss",
                     "value_type" : "float",
@@ -383,9 +383,11 @@ def metric_init(params):
 
     return descriptors
 
+
 def metric_cleanup():
     '''Clean up the metric module.'''
     _Worker_Thread.shutdown()
+
 
 if __name__ == '__main__':
     try:
@@ -400,7 +402,7 @@ if __name__ == '__main__':
                 if d['name'] == NAME_PREFIX + "rps":
                     print 'value for %s is %.4f' % (d['name'], v)
                 else:
-                    print 'value for %s is %s'   % (d['name'], v)
+                    print 'value for %s is %s' % (d['name'], v)
             time.sleep(15)
     except KeyboardInterrupt:
         os._exit(1)
