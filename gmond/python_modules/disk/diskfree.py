@@ -25,6 +25,11 @@
 # THE SOFTWARE.
 #
 
+# This module reads a list of mountpoints from the "mounts" parameter (probably
+# /proc/mounts) and creates a "disk_free_(absolute|percent)_*" metric for each
+# mountpoint it finds.
+
+
 import re
 import os
 

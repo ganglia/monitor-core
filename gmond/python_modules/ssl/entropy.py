@@ -1,3 +1,12 @@
+# This module allows you to collect available entropy on your system. Why is
+# entropy important.
+# [http://www.chrissearle.org/node/326]
+#   There are two random number sources on linux - /dev/random and /dev/urandom.
+#   /dev/random will block if there is nothing left in the entropy bit bucket.
+#   /dev/urandom uses the same bucket - but will not block
+#   (it can reuse the pool of bits).
+# Therefore if you are running SSL on the box you want to know this.
+
 import sys
 
 

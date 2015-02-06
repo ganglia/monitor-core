@@ -1,3 +1,23 @@
+# ## DESCRIPTION
+# Redis plugin for Ganglia that exposes most of the counters in the
+# Redis `INFO` command to Ganglia for all your graphing needs.  The
+# metrics it comes with are pretty rudimentary but they get the job
+# done.
+#
+# ## FILES
+# ## THEME SONG
+#
+# The Arcade Fire - "Wake Up"
+#
+# ## SEE ALSO
+# The Redis `INFO` command is described at <http://code.google.com/p/redis/wiki/InfoCommand>.
+#
+# The original blog post on this plugin is at
+# <http://rcrowley.org/2010/06/24/redis-in-ganglia.html>.  Gil
+# Raphaelli's MySQL plugin, on which this one is based can be found at
+# <http://g.raphaelli.com/2009/1/5/ganglia-mysql-metrics>.
+
+
 import socket
 import time
 #import logging

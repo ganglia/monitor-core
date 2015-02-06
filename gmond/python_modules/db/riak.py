@@ -1,6 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# [Riak](https://wiki.basho.com/display/RIAK/Riak) is a Dynamo-inspired
+# key/value store.
+#
+# This module collects metrics from the JSON stats interface of riak, available
+# at http://localhost:8098/stats. The statistics-aggregator must be enabled in
+# your riak configuration for this to work:
+#     {riak_kv, [
+#       %% ...
+#       {riak_kv_stat, true},
+#       %% ...
+#     ]},
+#
+# You'll want to edit the url key in riak.conf to point at the interface your
+# riak install is listening on:
+#
+#     param url {
+#         value = "http://10.0.1.123:8098/stats"
+#     }
+
 import os
 import sys
 import threading

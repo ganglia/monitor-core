@@ -1,5 +1,15 @@
 #!/usr/bin/python
 
+# This module reads NFS client and server statistics out of /proc and
+# creates a nfs_v3_* and nfsd_v3_* metric for each. 
+#
+# Originally based on Vladimir Vuksan's perl scripts, this version differs
+# in the following significant respects:
+#
+# 1) it is written as a python plugin
+# 2) the code is structured in a way intended to make it easy to repurpose
+#   the code for extracting other information out of /proc
+
 import os
 import stat
 import re

@@ -1,3 +1,8 @@
+# This module allows you to collect VM metrics.
+# are values that are collected from
+#
+# /proc/vmstat
+
 import sys
 import re
 import time

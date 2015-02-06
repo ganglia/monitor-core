@@ -1,3 +1,44 @@
+# This module allows you to collect per network interface network stats. Out
+# of the box Ganglia provides only aggregate network metrics. This module will
+# give you rx (receive) and tx (transmit) stats for every interface it encounters
+# e.g.
+
+# value for rx_bytes_lo is 21847.3723
+# value for rx_pkts_lo is 17.5771
+# value for rx_errs_lo is 0.0000
+# value for rx_drops_lo is 0.0000
+# value for tx_bytes_lo is 21847.3723
+# value for tx_pkts_lo is 17.5771
+# value for tx_errs_lo is 0.0000
+# value for tx_drops_lo is 0.0000
+# value for rx_bytes_eth0 is 0.0000
+# value for rx_pkts_eth0 is 0.0000
+# value for rx_errs_eth0 is 0.0000
+# value for rx_drops_eth0 is 0.0000
+# value for tx_bytes_eth0 is 0.0000
+# value for tx_pkts_eth0 is 0.0000
+# value for tx_errs_eth0 is 0.0000
+# value for tx_drops_eth0 is 0.0000
+# value for rx_bytes_eth1 is 0.0000
+# value for rx_pkts_eth1 is 0.0000
+# value for rx_errs_eth1 is 0.0000
+# value for rx_drops_eth1 is 0.0000
+# value for tx_bytes_eth1 is 0.0000
+# value for tx_pkts_eth1 is 0.0000
+# value for tx_errs_eth1 is 0.0000
+# value for tx_drops_eth1 is 0.0000
+
+# You can run the multi_interface.py script by hand to see all of the metrics.
+
+# In addition this script can be used to override "default" bytes_in, bytes_out, pkts_in and pkts_out
+# metrics. To do that you will need to 
+
+# * set send_aggregate_bytes_packets to True in multi_interface.pyconf
+# * Uncomment bytes_in, bytes_out metrics to be sent in in multi_interface.pyconf
+# * Comment out those same metrics you uncommented in step above in gmond.conf so they don't override 
+#  each other
+
+
 import re
 import time
 import sys

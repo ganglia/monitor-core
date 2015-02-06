@@ -1,3 +1,7 @@
+# This module allows you to collect network stats. These values that are collected from
+#
+# /proc/net/netstat
+
 import sys
 import re
 import time

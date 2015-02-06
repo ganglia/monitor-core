@@ -27,6 +27,17 @@
 #    ignoring any devices present in IGNORE_DEV by default.
 #    [Can be overriden if "devices" is set]
 #
+#   Example  Metrics
+#    * diskstat_XXX_io_time
+#    * diskstat_XXX_read_kbytes_per_sec
+#    * diskstat_XXX_read_time
+#    * diskstat_XXX_reads
+#    * diskstat_XXX_reads_merged
+#    * diskstat_XXX_weighted_io_time
+#    * diskstat_XXX_write_kbytes_per_sec
+#    * diskstat_XXX_write_time
+#    * diskstat_XXX_writes
+#    * diskstat_XXX_writes_merged
 #  Changelog:
 #    v1.0.1 - 2010-07-22
 #       * Initial version

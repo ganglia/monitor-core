@@ -24,6 +24,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
+# This module parses output from the varnishstat command and creates "varnish_*"
+# metrics:
+#  * Client Requests per second
+#  * Backend Requests per second
+#  * Cache Hit Ratio
+#  * Objects in Cache
+#  * Allocated Storage
+#  * Worker Threads
+
 
 import os
 import time
