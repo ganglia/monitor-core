@@ -8,6 +8,11 @@ import urllib2
 import traceback
 import re
 import copy
+import sys
+import socket
+
+if sys.version_info < (2, 6):
+    socket.setdefaulttimeout(2)
 
 # global to store state for "total accesses"
 METRICS = {
@@ -68,7 +73,10 @@ def get_metrics():
             req = urllib2.Request(SERVER_STATUS_URL + "?auto")
             
             # Download the status file
-            res = urllib2.urlopen(req, None, 2)
+            if sys.version_info < (2, 6):
+                res = urllib2.urlopen(req)
+            else:
+                res = urllib2.urlopen(req, timeout=2)
 
             for line in res:
                split_line = line.rstrip().split(": ")
@@ -93,7 +101,10 @@ def get_metrics():
                 req2 = urllib2.Request(SERVER_STATUS_URL)
                 
                 # Download the status file
-                res = urllib2.urlopen(req2, None, 2)
+                if sys.version_info < (2, 6):
+                    res = urllib2.urlopen(req2)
+                else:
+                    res = urllib2.urlopen(req2, timeout=2)
                 
                 for line in res:
                     regMatch = SSL_REGEX.match(line)

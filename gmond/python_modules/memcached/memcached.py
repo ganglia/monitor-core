@@ -8,6 +8,7 @@ import threading
 import time
 import socket
 import select
+import errno
 
 descriptors = list()
 Desc_Skel   = {}
@@ -78,18 +79,27 @@ class UpdateMetricThread(threading.Thread):
             sock.send("stats\r\n")
 
             while True:
-                rfd, wfd, xfd = select.select([sock], [], [], self.timeout)
-                if not rfd:
-                    print >>sys.stderr, "ERROR: select timeout"
-                    break
+                try:
+                    rfd, wfd, xfd = select.select([sock], [], [], self.timeout)
 
-                for fd in rfd:
-                    if fd == sock:
-                        data = fd.recv(8192)
-                        msg += data
+                    if not rfd:
+                        print >>sys.stderr, "ERROR: select timeout"
+                        break
 
-                if msg.find("END"):
-                    break
+                    for fd in rfd:
+                        if fd == sock:
+                            try:
+                                data = fd.recv(8192)
+                                msg += data
+                            except (IOError, OSError), e:
+                                if e.errno != errno.EINTR:
+                                    raise
+
+                    if msg.find("END"):
+                        break
+                except select.error, e:
+                    if e[0] != errno.EINTR:
+                        raise
 
             sock.close()
         except socket.error, e:

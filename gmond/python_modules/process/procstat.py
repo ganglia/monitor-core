@@ -120,8 +120,7 @@ MAX_UPDATE_TIME = 15
 # clock ticks per second... jiffies (HZ)
 JIFFIES_PER_SEC = os.sysconf('SC_CLK_TCK')
 
-# KiB
-PAGE_SIZE=os.sysconf('SC_PAGE_SIZE') / 1024
+PAGE_SIZE=os.sysconf('SC_PAGE_SIZE')
 
 PROCESSES = {}
 
@@ -222,7 +221,6 @@ def get_rss(pids):
 
 		rss += int(statm[1])
 
-	# Convert to KiB
 	rss *= PAGE_SIZE
 	return rss
 
@@ -371,7 +369,7 @@ def metric_init(params):
 			'description': 'The total percent CPU utilization'},
 
 		mem = {
-			'units': 'KB',
+			'units': 'B',
 			'description': 'The total memory utilization'}
 	)
 

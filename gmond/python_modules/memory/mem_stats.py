@@ -110,7 +110,7 @@ def metric_init(params):
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
-                "name"       : "mem_total",
+                "name"       : "mem_total_anon",
                 "orig_name"  : "Active(anon)",
                 "units"      : "Bytes",
                 "description": "Active(anon)",

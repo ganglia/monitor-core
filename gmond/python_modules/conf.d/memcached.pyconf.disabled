@@ -86,6 +86,11 @@ collection_group {
     value_threshold = 0
   }
   metric {
+    name  = "mc_evictions_rate"
+    title = "Rate of valid items removed from cache to free memory for new items"
+    value_threshold = 0
+  }
+  metric {
     name  = "mc_get_hits"
     title = "Number of keys that have been requested and found present "
     value_threshold = 0

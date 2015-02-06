@@ -20,6 +20,12 @@ collection_group {
   }
 
   metric {
+    name = "mem_anonpages"
+    title = "AnonPages"
+    value_threshold = 1.0
+  }
+
+  metric {
     name = "mem_mapped"
     title = "Memory Mapped"
     value_threshold = 1.0
