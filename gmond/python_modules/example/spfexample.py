@@ -30,7 +30,8 @@
 #* Author: Brad Nicholes (bnicholes novell.com)
 #******************************************************************************/
 
-import random, time
+import random
+import time
 
 descriptors = list()
 
@@ -39,7 +40,7 @@ descriptors = list()
 #  module would be expected to discover spoofed hosts through
 #  some sort of query mechanism or by reading some type of
 #  input file.
-spoofHosts = [['spf1.myhost.org','10.10.0.1'], ['spf2.myhost.org','10.10.0.2'], ['spf3.myhost.org','10.10.0.3']]
+spoofHosts = [['spf1.myhost.org', '10.10.0.1'], ['spf2.myhost.org', '10.10.0.2'], ['spf3.myhost.org', '10.10.0.3']]
 
 # Default hardcoded metric values
 location = 'unspecified'
@@ -47,27 +48,33 @@ osname = 'SuSE Linux Ultimate'
 started = int(time.time())
 bootTime = {}
 
+
 def spf_heartbeat(name):
     '''Return heartbeat.'''
     return started
+
 
 def spf_location(name):
     '''Return location.'''
     return location
 
+
 def spf_boottime(name):
     '''Return boottime.'''
     return started
+
 
 def spf_osname(name):
     '''Return OS Name.'''
     return osname
 
+
 def Random_Numbers(name):
     '''Return a random number.'''
     return int(random.uniform(0, 100))
 
-def Init_Metric (spfHost, name, tmax, metrictype, units, slope, fmt, desc, metricAlias, ipAddr, handler):
+
+def Init_Metric(spfHost, name, tmax, metrictype, units, slope, fmt, desc, metricAlias, ipAddr, handler):
     '''Create a metric definition dictionary object for an imaginary box.'''
     metric_name = name + ':' + spfHost
     spoofHost = ipAddr + ':' + spfHost
@@ -79,7 +86,6 @@ def Init_Metric (spfHost, name, tmax, metrictype, units, slope, fmt, desc, metri
     # spoof_name - Must be the original name of the metric that this definition will be spoofing.
     #          In other words, if this metric name is spf_boottime, the spoof_name would be
     #          boottime if this metric is meant to spoof the original boottime metric.
-
 
     d = {'name': metric_name,
         'call_back': handler,
@@ -93,6 +99,7 @@ def Init_Metric (spfHost, name, tmax, metrictype, units, slope, fmt, desc, metri
         'spoof_name': metricAlias}
 
     return d
+
 
 def metric_init(params):
     '''Initialize the random number generator and create the
@@ -114,9 +121,11 @@ def metric_init(params):
 
     return descriptors
 
+
 def metric_cleanup():
     '''Clean up the metric module.'''
     pass
+
 
 #This code is for debugging and unit testing
 if __name__ == '__main__':
@@ -124,5 +133,5 @@ if __name__ == '__main__':
     d = metric_init(params)
     for d in descriptors:
         v = d['call_back'](d['name'])
-        print 'value for %s is %s' % (d['name'],  str(v))
-    print  d
+        print 'value for %s is %s' % (d['name'], str(v))
+    print d

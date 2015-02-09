@@ -46,6 +46,7 @@ btool
 **/*.la
 **/*.lo
 *~
+*.pyc
 scripts/fixconfig
 stamp-h1
 lib/default_conf.h

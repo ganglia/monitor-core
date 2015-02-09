@@ -35,13 +35,16 @@ descriptors = list()
 Random_Max = 50
 Constant_Value = 50
 
+
 def Random_Numbers(name):
     '''Return a random number.'''
     return int(random.uniform(0, Random_Max))
 
+
 def Constant_Number(name):
     '''Return a constant number.'''
     return int(Constant_Value)
+
 
 def metric_init(params):
     '''Initialize the random number generator and create the
@@ -81,9 +84,11 @@ def metric_init(params):
     descriptors = [d1, d2]
     return descriptors
 
+
 def metric_cleanup():
     '''Clean up the metric module.'''
     pass
+
 
 #This code is for debugging and unit testing
 if __name__ == '__main__':
@@ -92,5 +97,4 @@ if __name__ == '__main__':
     metric_init(params)
     for d in descriptors:
         v = d['call_back'](d['name'])
-        print 'value for %s is %u' % (d['name'],  v)
-
+        print 'value for %s is %u' % (d['name'], v)

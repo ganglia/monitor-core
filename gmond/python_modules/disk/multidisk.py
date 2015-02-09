@@ -35,21 +35,24 @@ import os
 import ganglia
 
 descriptors = list()
-    
-def Find_Metric (name):
+
+
+def Find_Metric(name):
     '''Find the metric definition data given the metric name.
    The metric name should always be unique.'''
     for d in descriptors:
         if d['name'] == name:
             return d
     pass
-    
+
+
 def Remote_Mount(device, type):
     '''Determine if the device specifed is a local or remote device.'''
-    return ((device.rfind(':') != -1) 
+    return ((device.rfind(':') != -1)
         or ((type == "smbfs") and device.startswith('//'))
         or type.startswith('nfs') or (type == 'autofs')
         or (type == 'gfs') or (type == 'none'))
+
 
 def DiskTotal_Handler(name):
     '''Calculate the total disk space for the device that is associated
@@ -64,26 +67,28 @@ def DiskTotal_Handler(name):
     vv = (size * blocksize) / 1e9
     return vv
 
+
 def DiskUsed_Handler(name):
     '''Calculate the used disk space for the device that is associated
     with the metric name.'''
     d = Find_Metric(name)
     if not d:
         return float(0)
-    
+
     st = os.statvfs(d['mount'])
     free = st[statvfs.F_BAVAIL]
     size = st[statvfs.F_BLOCKS]
-    
+
     if size:
         return ((size - free) / float(size)) * 100
     else:
         return float(0)
 
-def Init_Metric (line, name, tmax, type, units, slope, fmt, desc, handler):
+
+def Init_Metric(line, name, tmax, type, units, slope, fmt, desc, handler):
     '''Create a metric definition dictionary object for a device.'''
     metric_name = line[0] + '-' + name
-    
+
     d = {'name': metric_name.replace('/', '-').lstrip('-'),
         'call_back': handler,
         'time_max': tmax,
@@ -95,38 +100,42 @@ def Init_Metric (line, name, tmax, type, units, slope, fmt, desc, handler):
         'groups': 'disk',
         'mount': line[1]}
     return d
-    
+
 
 def metric_init(params):
     '''Discover all of the local disk devices on the system and create
     a metric definition dictionary object for each.'''
     global descriptors
     f = open('/proc/mounts', 'r')
-    
+
     for l in f:
         line = l.split()
-        if line[3].startswith('ro'): continue
-        elif Remote_Mount(line[0], line[2]): continue
-        elif (not line[0].startswith('/dev/')) and (not line[0].startswith('/dev2/')): continue;
-        
-	if ganglia.get_debug_msg_level() > 1:
+        if line[3].startswith('ro'):
+            continue
+        elif Remote_Mount(line[0], line[2]):
+            continue
+        elif (not line[0].startswith('/dev/')) and (not line[0].startswith('/dev2/')):
+            continue
+
+        if ganglia.get_debug_msg_level() > 1:
             print 'Discovered device %s' % line[1]
-        
-        descriptors.append(Init_Metric(line, 'disk_total', int(1200), 
-            'double', 'GB', 'both', '%.3f', 
+
+        descriptors.append(Init_Metric(line, 'disk_total', int(1200),
+            'double', 'GB', 'both', '%.3f',
             'Available disk space', DiskTotal_Handler))
-        descriptors.append(Init_Metric(line, 'disk_used', int(180), 
-            'float', '%', 'both', '%.1f', 
+        descriptors.append(Init_Metric(line, 'disk_used', int(180),
+            'float', '%', 'both', '%.1f',
             'Percent used disk space', DiskUsed_Handler))
-        
+
     f.close()
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''
     pass
 
-#This code is for debugging and unit testing    
+#This code is for debugging and unit testing
 if __name__ == '__main__':
     metric_init(None)
     for d in descriptors:

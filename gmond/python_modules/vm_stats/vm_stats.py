@@ -1,3 +1,8 @@
+# This module allows you to collect VM metrics.
+# are values that are collected from
+#
+# /proc/vmstat
+
 import sys
 import re
 import time
@@ -8,8 +13,8 @@ PARAMS = {}
 NAME_PREFIX = 'vm_'
 
 METRICS = {
-    'time' : 0,
-    'data' : {}
+    'time': 0,
+    'data': {}
 }
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
@@ -33,11 +38,11 @@ def get_metrics():
 
     if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
-	try:
-	    file = open(vminfo_file, 'r')
-    
-	except IOError:
-	    return 0
+        try:
+            file = open(vminfo_file, 'r')
+
+        except IOError:
+            return 0
 
         # convert to dict
         metrics = {}
@@ -54,12 +59,13 @@ def get_metrics():
 
     return [METRICS, LAST_METRICS]
 
+
 def get_value(name):
     """Return a value for the requested metric"""
 
     metrics = get_metrics()[0]
 
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
 
     try:
         result = metrics['data'][name]
@@ -75,15 +81,15 @@ def get_delta(name):
     # get metrics
     [curr_metrics, last_metrics] = get_metrics()
 
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
 
     try:
-      delta = (float(curr_metrics['data'][name]) - float(last_metrics['data'][name])) /(curr_metrics['time'] - last_metrics['time'])
-      if delta < 0:
-	print name + " is less 0"
-	delta = 0
+        delta = (float(curr_metrics['data'][name]) - float(last_metrics['data'][name])) / (curr_metrics['time'] - last_metrics['time'])
+        if delta < 0:
+            print name + " is less 0"
+            delta = 0
     except KeyError:
-      delta = 0.0      
+        delta = 0.0
 
     return delta
 
@@ -91,34 +97,35 @@ def get_delta(name):
 # Calculate VM efficiency
 # Works similar like sar -B 1
 # Calculated as pgsteal / pgscan, this is a metric of the efficiency of page reclaim. If  it  is  near  100%  then
-# almost  every  page coming off the tail of the inactive list is being reaped. If it gets too low (e.g. less than 30%)  
+# almost  every  page coming off the tail of the inactive list is being reaped. If it gets too low (e.g. less than 30%)
 # then the virtual memory is having some difficulty.  This field is displayed as zero if no pages  have  been
 # scanned during the interval of time
-def get_vmeff(name):  
+def get_vmeff(name):
     # get metrics
     [curr_metrics, last_metrics] = get_metrics()
-        
+
     try:
-      pgscan_diff = float(curr_metrics['data']['pgscan_kswapd_normal']) - float(last_metrics['data']['pgscan_kswapd_normal'])
-      # To avoid division by 0 errors check whether pgscan is 0
-      if pgscan_diff == 0:
-	return 0.0
-	
-      delta = 100 * (float(curr_metrics['data']['pgsteal_normal']) - float(last_metrics['data']['pgsteal_normal'])) / pgscan_diff
-      if delta < 0:
-        print name + " is less 0"
-        delta = 0
+        pgscan_diff = float(curr_metrics['data']['pgscan_kswapd_normal']) - float(last_metrics['data']['pgscan_kswapd_normal'])
+        # To avoid division by 0 errors check whether pgscan is 0
+        if pgscan_diff == 0:
+            return 0.0
+
+        delta = 100 * (float(curr_metrics['data']['pgsteal_normal']) - float(last_metrics['data']['pgsteal_normal'])) / pgscan_diff
+        if delta < 0:
+            print name + " is less 0"
+            delta = 0
     except KeyError:
-      delta = 0.0      
+        delta = 0.0
 
     return delta
-  
+
 
 def create_desc(skel, prop):
     d = skel.copy()
-    for k,v in prop.iteritems():
+    for k, v in prop.iteritems():
         d[k] = v
     return d
+
 
 def metric_init(params):
     global descriptors, metric_map, Desc_Skel
@@ -132,7 +139,7 @@ def metric_init(params):
         'value_type'  : 'float',
         'format'      : '%.4f',
         'units'       : 'count',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'memory_vm',
         }
@@ -715,6 +722,7 @@ def metric_init(params):
                 }))
 
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''

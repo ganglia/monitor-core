@@ -1,9 +1,19 @@
+# This module allows you to collect available entropy on your system. Why is
+# entropy important.
+# [http://www.chrissearle.org/node/326]
+#   There are two random number sources on linux - /dev/random and /dev/urandom.
+#   /dev/random will block if there is nothing left in the entropy bit bucket.
+#   /dev/urandom uses the same bucket - but will not block
+#   (it can reuse the pool of bits).
+# Therefore if you are running SSL on the box you want to know this.
+
 import sys
 
 
 entropy_file = "/proc/sys/kernel/random/entropy_avail"
 
-def metrics_handler(name):  
+
+def metrics_handler(name):
     try:
         f = open(entropy_file, 'r')
 
@@ -14,6 +24,7 @@ def metrics_handler(name):
         line = l
 
     return int(line)
+
 
 def metric_init(params):
     global descriptors, node_id
@@ -31,6 +42,7 @@ def metric_init(params):
     descriptors = [dict]
 
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''

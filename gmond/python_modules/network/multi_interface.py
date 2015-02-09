@@ -1,3 +1,44 @@
+# This module allows you to collect per network interface network stats. Out
+# of the box Ganglia provides only aggregate network metrics. This module will
+# give you rx (receive) and tx (transmit) stats for every interface it encounters
+# e.g.
+
+# value for rx_bytes_lo is 21847.3723
+# value for rx_pkts_lo is 17.5771
+# value for rx_errs_lo is 0.0000
+# value for rx_drops_lo is 0.0000
+# value for tx_bytes_lo is 21847.3723
+# value for tx_pkts_lo is 17.5771
+# value for tx_errs_lo is 0.0000
+# value for tx_drops_lo is 0.0000
+# value for rx_bytes_eth0 is 0.0000
+# value for rx_pkts_eth0 is 0.0000
+# value for rx_errs_eth0 is 0.0000
+# value for rx_drops_eth0 is 0.0000
+# value for tx_bytes_eth0 is 0.0000
+# value for tx_pkts_eth0 is 0.0000
+# value for tx_errs_eth0 is 0.0000
+# value for tx_drops_eth0 is 0.0000
+# value for rx_bytes_eth1 is 0.0000
+# value for rx_pkts_eth1 is 0.0000
+# value for rx_errs_eth1 is 0.0000
+# value for rx_drops_eth1 is 0.0000
+# value for tx_bytes_eth1 is 0.0000
+# value for tx_pkts_eth1 is 0.0000
+# value for tx_errs_eth1 is 0.0000
+# value for tx_drops_eth1 is 0.0000
+
+# You can run the multi_interface.py script by hand to see all of the metrics.
+
+# In addition this script can be used to override "default" bytes_in, bytes_out, pkts_in and pkts_out
+# metrics. To do that you will need to
+
+# * set send_aggregate_bytes_packets to True in multi_interface.pyconf
+# * Uncomment bytes_in, bytes_out metrics to be sent in in multi_interface.pyconf
+# * Comment out those same metrics you uncommented in step above in gmond.conf so they don't override
+#  each other
+
+
 import re
 import time
 import sys
@@ -7,8 +48,8 @@ import copy
 PARAMS = {}
 
 METRICS = {
-    'time' : 0,
-    'data' : {}
+    'time': 0,
+    'data': {}
 }
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
@@ -17,35 +58,37 @@ INTERFACES = []
 descriptors = []
 
 stats_tab = {
-    "rx_bytes"  : 0,
-    "rx_pkts"   : 1,
-    "rx_errs"   : 2,
-    "rx_drops"  : 3,
-    "tx_bytes" : 8,
-    "tx_pkts"  : 9,
-    "tx_errs"  : 10,
-    "tx_drops" : 11,
+    "rx_bytes": 0,
+    "rx_pkts": 1,
+    "rx_errs": 2,
+    "rx_drops": 3,
+    "tx_bytes": 8,
+    "tx_pkts": 9,
+    "tx_errs": 10,
+    "tx_drops": 11,
 }
 
 # Where to get the stats from
 net_stats_file = "/proc/net/dev"
 
+
 def create_desc(skel, prop):
     d = skel.copy()
-    for k,v in prop.iteritems():
+    for k, v in prop.iteritems():
         d[k] = v
     return d
+
 
 def metric_init(params):
     global descriptors
     global INTERFACES
-    
-#    INTERFACES = params.get('interfaces')
+
+    # INTERFACES = params.get('interfaces')
     watch_interfaces = params.get('interfaces')
     excluded_interfaces = params.get('excluded_interfaces')
     get_interfaces(watch_interfaces,excluded_interfaces)
 
-#    print INTERFACES
+    # print INTERFACES
     time_max = 60
 
     Desc_Skel = {
@@ -55,11 +98,10 @@ def metric_init(params):
         'value_type'  : 'float',
         'format'      : '%.0f',
         'units'       : '/s',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'network',
         }
-
 
     for dev in INTERFACES:
         descriptors.append(create_desc(Desc_Skel, {
@@ -82,7 +124,7 @@ def metric_init(params):
                     "units"       : "pkts/sec",
                     "description" : "receive packets dropped per sec",
                     }))
-    
+
         descriptors.append(create_desc(Desc_Skel, {
                     "name"        : "tx_bytes_" + dev,
                     "units"       : "bytes/sec",
@@ -132,39 +174,43 @@ def metric_init(params):
 
     return descriptors
 
+
 def metric_cleanup():
     '''Clean up the metric module.'''
     pass
-    
+
+
 ###################################################################################
 # Build a list of interfaces
-###################################################################################    
-def get_interfaces(watch_interfaces, excluded_interfaces):
-   global INTERFACES
-   if_excluded = 0
-        
-   # check if particular interfaces have been specifieid. Watch only those
-   if watch_interfaces != "":
-      INTERFACES = watch_interfaces.split(" ")      
-   else:
-      if excluded_interfaces != "":
-         excluded_if_list = excluded_interfaces.split(" ")
-      f = open(net_stats_file, "r")
-      for line in f:
-         # Find only lines with :
-         if re.search(":", line):
-            a = line.split(":")
-            dev_name = a[0].lstrip()
-                    
-            # Determine if interface is excluded by name or regex
-            for ex in excluded_if_list:
-               if re.match(ex,dev_name):
-                  if_excluded = 1
+###################################################################################
 
-            if not if_excluded:
-               INTERFACES.append(dev_name)
-            if_excluded = 0
-   return 0
+
+def get_interfaces(watch_interfaces, excluded_interfaces):
+    global INTERFACES
+    if_excluded = 0
+
+    # check if particular interfaces have been specifieid. Watch only those
+    if watch_interfaces != "":
+        INTERFACES = watch_interfaces.split(" ")
+    else:
+        if excluded_interfaces != "":
+            excluded_if_list = excluded_interfaces.split(" ")
+        f = open(net_stats_file, "r")
+        for line in f:
+            # Find only lines with :
+            if re.search(":", line):
+                a = line.split(":")
+                dev_name = a[0].lstrip()
+
+                # Determine if interface is excluded by name or regex
+                for ex in excluded_if_list:
+                    if re.match(ex, dev_name):
+                        if_excluded = 1
+
+                if not if_excluded:
+                    INTERFACES.append(dev_name)
+                if_excluded = 0
+    return 0
 
 
 ###################################################################################
@@ -176,36 +222,34 @@ def get_aggregates(name):
 
     # get metrics
     [curr_metrics, last_metrics] = get_metrics()
-    
+
     # Determine the index of metric we need
     if name == "bytes_in":
-      index = stats_tab["rx_bytes"]
+        index = stats_tab["rx_bytes"]
     elif name == "bytes_out":
-      index = stats_tab["tx_bytes"]
+        index = stats_tab["tx_bytes"]
     elif name == "pkts_out":
-      index = stats_tab["tx_pkts"]
+        index = stats_tab["tx_pkts"]
     elif name == "pkts_in":
-      index = stats_tab["rx_pkts"]
+        index = stats_tab["rx_pkts"]
     else:
-      return 0
+        return 0
 
     sum = 0
-    
+
     # Loop through the list of interfaces we care for
     for iface in INTERFACES:
-      
-      try:
-	delta = (float(curr_metrics['data'][iface][index]) - float(last_metrics['data'][iface][index])) /(curr_metrics['time'] - last_metrics['time'])
-	if delta < 0:
-	  print name + " is less 0"
-	  delta = 0
-      except KeyError:
-	delta = 0.0      
-    
-      sum += delta
+        try:
+            delta = (float(curr_metrics['data'][iface][index]) - float(last_metrics['data'][iface][index])) / (curr_metrics['time'] - last_metrics['time'])
+            if delta < 0:
+                print name + " is less 0"
+                delta = 0
+        except KeyError:
+            delta = 0.0
+
+    sum += delta
 
     return sum
-
 
 
 def get_metrics():
@@ -215,11 +259,11 @@ def get_metrics():
 
     if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
-	try:
-	    file = open(net_stats_file, 'r')
-    
-	except IOError:
-	    return 0
+        try:
+            file = open(net_stats_file, 'r')
+
+        except IOError:
+            return 0
 
         # convert to dict
         metrics = {}
@@ -237,7 +281,8 @@ def get_metrics():
         }
 
     return [METRICS, LAST_METRICS]
-    
+
+
 def get_delta(name):
     """Return change over time for the requested metric"""
 
@@ -253,12 +298,12 @@ def get_delta(name):
     index = stats_tab[name]
 
     try:
-      delta = (float(curr_metrics['data'][iface][index]) - float(last_metrics['data'][iface][index])) /(curr_metrics['time'] - last_metrics['time'])
-      if delta < 0:
-	print name + " is less 0"
-	delta = 0
+        delta = (float(curr_metrics['data'][iface][index]) - float(last_metrics['data'][iface][index])) / (curr_metrics['time'] - last_metrics['time'])
+        if delta < 0:
+            print name + " is less 0"
+            delta = 0
     except KeyError:
-      delta = 0.0      
+        delta = 0.0
 
     return delta
 
@@ -269,13 +314,13 @@ if __name__ == '__main__':
             "interfaces": "",
             "excluded_interfaces": "dummy",
             "send_aggregate_bytes_packets": True,
-            "debug"        : True,
+            "debug": True,
             }
         metric_init(params)
         while True:
             for d in descriptors:
                 v = d['call_back'](d['name'])
-                print ('value for %s is '+d['format']) % (d['name'],  v)
+                print ('value for %s is ' + d['format']) % (d['name'],  v)
             time.sleep(5)
     except StandardError:
         print sys.exc_info()[0]

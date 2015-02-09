@@ -42,34 +42,35 @@ except ImportError:
 import threading
 import time
 
-_WorkerThread = None    #Worker thread object
-_glock = threading.Lock()   #Synchronization lock
-_refresh_rate = 30 #Refresh rate of the netstat data
+_WorkerThread = None  # Worker thread object
+_glock = threading.Lock()   # Synchronization lock
+_refresh_rate = 30  # Refresh rate of the netstat data
 
 #Global dictionary storing the counts of the last connection state
 # read from the netstat output
 _conns = {'tcp_established': 0,
         'tcp_listen': 0,
-        'tcp_timewait':0,
-        'tcp_closewait':0,
-        'tcp_synsent':0,
-        'tcp_synrecv':0,
-        'tcp_synwait':0,
-        'tcp_finwait1':0,
-        'tcp_finwait2':0,
-        'tcp_closed':0,
-        'tcp_lastack':0,
-        'tcp_closing':0,
-        'tcp_unknown':0}
+        'tcp_timewait': 0,
+        'tcp_closewait': 0,
+        'tcp_synsent': 0,
+        'tcp_synrecv': 0,
+        'tcp_synwait': 0,
+        'tcp_finwait1': 0,
+        'tcp_finwait2': 0,
+        'tcp_closed': 0,
+        'tcp_lastack': 0,
+        'tcp_closing': 0,
+        'tcp_unknown': 0}
+
 
 def TCP_Connections(name):
     '''Return the requested connection type status.'''
     global _WorkerThread
-    
+
     if _WorkerThread is None:
         print 'Error: No netstat data gathering thread created for metric %s' % name
         return 0
-        
+
     if not _WorkerThread.running and not _WorkerThread.shuttingdown:
         try:
             _WorkerThread.start()
@@ -215,9 +216,10 @@ _descriptors = [{'name': 'tcp_established',
         'groups': 'network',
         }]
 
+
 class NetstatThread(threading.Thread):
     '''This thread continually gathers the current states of the tcp socket
-    connections on the machine.  The refresh rate is controlled by the 
+    connections on the machine.  The refresh rate is controlled by the
     RefreshRate parameter that is passed in through the gmond.conf file.'''
 
     def __init__(self):
@@ -232,7 +234,7 @@ class NetstatThread(threading.Thread):
             try:
                 self.popenChild.wait()
             except OSError, e:
-                if e.errno == 10: # No child processes
+                if e.errno == 10:  # No child processes
                     pass
 
         if not self.running:
@@ -241,23 +243,23 @@ class NetstatThread(threading.Thread):
 
     def run(self):
         global _conns, _refresh_rate
-        
+
         #Array positions for the connection type and state data
         # acquired from the netstat output.
         tcp_at = 0
         tcp_state_at = 5
-        
+
         #Make a temporary copy of the tcp connecton dictionary.
         tempconns = _conns.copy()
-        
+
         #Set the state of the running thread
         self.running = True
-        
+
         #Continue running until a shutdown event is indicated
         while not self.shuttingdown:
             if self.shuttingdown:
                 break
-                
+
             #Zero out the temporary connection state dictionary.
             for conn in tempconns:
                 tempconns[conn] = 0
@@ -273,11 +275,11 @@ class NetstatThread(threading.Thread):
             try:
                 self.popenChild.wait()
             except OSError, e:
-                if e.errno == 10: # No child process
+                if e.errno == 10:  # No child process
                     continue
-            
-            #Iterate through the netstat output looking for the 'tcp' keyword in the tcp_at 
-            # position and the state information in the tcp_state_at position. Count each 
+
+            #Iterate through the netstat output looking for the 'tcp' keyword in the tcp_at
+            # position and the state information in the tcp_state_at position. Count each
             # occurance of each state.
             for tcp in lines:
                 # skip empty lines
@@ -312,43 +314,46 @@ class NetstatThread(threading.Thread):
                         tempconns['tcp_closing'] += 1
                     elif line[tcp_state_at] == 'UNKNOWN':
                         tempconns['tcp_unknown'] += 1
-                        
+
             #Acquire a lock and copy the temporary connection state dictionary
             # to the global state dictionary.
             _glock.acquire()
             for conn in _conns:
                 _conns[conn] = tempconns[conn]
             _glock.release()
-            
+
             #Wait for the refresh_rate period before collecting the netstat data again.
             if not self.shuttingdown:
                 time.sleep(_refresh_rate)
-            
+
         #Set the current state of the thread after a shutdown has been indicated.
         self.running = False
+
 
 def metric_init(params):
     '''Initialize the tcp connection status module and create the
     metric definition dictionary object for each metric.'''
     global _refresh_rate, _WorkerThread
-    
+
     #Read the refresh_rate from the gmond.conf parameters.
     if 'RefreshRate' in params:
         _refresh_rate = int(params['RefreshRate'])
-    
+
     #Start the worker thread
     _WorkerThread = NetstatThread()
-    
+
     #Return the metric descriptions to Gmond
     return _descriptors
 
+
 def metric_cleanup():
     '''Clean up the metric module.'''
-    
+
     #Tell the worker thread to shutdown
     _WorkerThread.shutdown()
 
-#This code is for debugging and unit testing    
+
+#This code is for debugging and unit testing
 if __name__ == '__main__':
     params = {'Refresh': '20'}
     metric_init(params)

@@ -1,9 +1,10 @@
 modules {
   module {
-    name = "redis"
+    name = "redis-gmond"
     language = "python"
     param host { value = "127.0.0.1" }
     param port { value = 6379 }
+    /* param auth { value = "passwordhere" } */
   }
 }
 collection_group {
@@ -13,14 +14,18 @@ collection_group {
   metric { name = "connected_slaves" }
   metric { name = "blocked_clients" }
   metric { name = "used_memory" }
-  metric { name = "changes_since_last_save" }
-  metric { name = "bgsave_in_progress" }
-  metric { name = "bgrewriteaof_in_progress" }
+  metric { name = "rdb_changes_since_last_save" }
+  metric { name = "rdb_bgsave_in_progress" }
+  metric { name = "master_sync_in_progress" }
+  metric { name = "master_link_status" }
   metric { name = "total_connections_received" }
+  metric { name = "instantaneous_ops_per_sec" }
   metric { name = "total_commands_processed" }
   metric { name = "expired_keys" }
   metric { name = "pubsub_channels" }
   metric { name = "pubsub_patterns" }
-  metric { name = "vm_enabled" }
   metric { name = "master_last_io_seconds_ago" }
+  metric { name = "db0" }
 }
+
+

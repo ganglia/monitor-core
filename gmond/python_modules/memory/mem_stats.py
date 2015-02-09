@@ -16,7 +16,8 @@ import re
 
 meminfo_file = "/proc/meminfo"
 
-def metrics_handler(name):  
+
+def metrics_handler(name):
     try:
         file = open(meminfo_file, 'r')
 
@@ -25,22 +26,24 @@ def metrics_handler(name):
 
     value = 0
     for line in file:
-	parts = re.split("\s+", line)
-	if parts[0] == metric_map[name]['name'] + ":" :
-	    # All of the measurements are in kBytes. We want to change them over
-	    # to Bytes
-	    if metric_map[name]['units'] == "Bytes":
-		value = float(parts[1]) * 1024
-	    else:
+        parts = re.split("\s+", line)
+        if parts[0] == metric_map[name]['name'] + ":":
+            # All of the measurements are in kBytes. We want to change them over
+            # to Bytes
+            if metric_map[name]['units'] == "Bytes":
+                value = float(parts[1]) * 1024
+            else:
                 value = parts[1]
-	
+
     return float(value)
+
 
 def create_desc(skel, prop):
     d = skel.copy()
-    for k,v in prop.iteritems():
+    for k, v in prop.iteritems():
         d[k] = v
     return d
+
 
 def metric_init(params):
     global descriptors, metric_map, Desc_Skel
@@ -55,7 +58,7 @@ def metric_init(params):
         'value_type'  : 'float',
         'format'      : '%.0f',
         'units'       : 'XXX',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'memory',
         }
@@ -110,7 +113,7 @@ def metric_init(params):
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
-                "name"       : "mem_total",
+                "name"       : "mem_total_anon",
                 "orig_name"  : "Active(anon)",
                 "units"      : "Bytes",
                 "description": "Active(anon)",
@@ -349,20 +352,22 @@ def metric_init(params):
 
     # We need a metric_map that maps metric_name to the index in /proc/meminfo
     metric_map = {}
-    
+
     for d in descriptors:
-	metric_name = d['name']
-        metric_map[metric_name] = { "name": d['orig_name'], "units": d['units'] }
-        
+        metric_name = d['name']
+        metric_map[metric_name] = {"name": d['orig_name'], "units": d['units']}
+
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''
     pass
 
-#This code is for debugging and unit testing
+
+# This code is for debugging and unit testing
 if __name__ == '__main__':
     metric_init({})
     for d in descriptors:
         v = d['call_back'](d['name'])
-        print 'value for %s is %f' % (d['name'],  v)
+        print 'value for %s is %f' % (d['name'], v)

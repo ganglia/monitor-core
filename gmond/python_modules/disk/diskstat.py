@@ -27,6 +27,17 @@
 #    ignoring any devices present in IGNORE_DEV by default.
 #    [Can be overriden if "devices" is set]
 #
+#   Example  Metrics
+#    * diskstat_XXX_io_time
+#    * diskstat_XXX_read_kbytes_per_sec
+#    * diskstat_XXX_read_time
+#    * diskstat_XXX_reads
+#    * diskstat_XXX_reads_merged
+#    * diskstat_XXX_weighted_io_time
+#    * diskstat_XXX_write_kbytes_per_sec
+#    * diskstat_XXX_write_time
+#    * diskstat_XXX_writes
+#    * diskstat_XXX_writes_merged
 #  Changelog:
 #    v1.0.1 - 2010-07-22
 #       * Initial version
@@ -172,7 +183,7 @@ def get_partitions():
     global PARTITIONS
 
     # We need DEVICES != "" because on at least Centos 6 this evaluates to true
-    if DEVICES is not None and DEVICES != "" :
+    if DEVICES is not None and DEVICES != "":
         # Explicit device list has been set
         logging.debug(' DEVICES has already been set')
         out = DEVICES

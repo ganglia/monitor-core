@@ -7,30 +7,32 @@ import threading
 import time
 
 descriptors = list()
-Desc_Skel   = {}
+Desc_Skel = {}
 _Worker_Thread = None
-_Lock = threading.Lock() # synchronization lock
+_Lock = threading.Lock()  # synchronization lock
 
 Debug = False
 
+
 def dprint(f, *v):
     if Debug:
-        print >> sys.stderr, "DEBUG: "+f % v
+        print >> sys.stderr, "DEBUG: " + f % v
+
 
 class UpdateTrafficThread(threading.Thread):
 
-    __slots__ = ( 'proc_file' )
+    __slots__ = ('proc_file')
 
     def __init__(self, params):
         threading.Thread.__init__(self)
-        self.running       = False
-        self.shuttingdown  = False
+        self.running = False
+        self.shuttingdown = False
         self.refresh_rate = 10
         if "refresh_rate" in params:
             self.refresh_rate = int(params["refresh_rate"])
 
         self.target_device = params["target_device"]
-        self.metric       = {}
+        self.metric = {}
 
         self.proc_file = "/proc/net/dev"
         self.stats_tab = {
@@ -43,7 +45,7 @@ class UpdateTrafficThread(threading.Thread):
             "trans_errs"  : 10,
             "trans_drops" : 11,
             }
-        self.stats      = {}
+        self.stats = {}
         self.stats_prev = {}
 
     def shutdown(self):
@@ -68,21 +70,22 @@ class UpdateTrafficThread(threading.Thread):
         for l in f:
             a = l.split(":")
             dev = a[0].lstrip()
-            if dev != self.target_device: continue
+            if dev != self.target_device:
+                continue
 
             dprint("%s", ">>update_metric")
             self.stats = {}
             _stats = a[1].split()
             for name, index in self.stats_tab.iteritems():
-                self.stats[name+'_'+self.target_device] = int(_stats[index])
+                self.stats[name + '_' + self.target_device] = int(_stats[index])
             self.stats["time"] = time.time()
             dprint("%s", self.stats)
 
             if "time" in self.stats_prev:
-                dprint("%s: %d = %d - %d", "DO DIFF", self.stats["time"]-self.stats_prev["time"], self.stats["time"], self.stats_prev["time"])
+                dprint("%s: %d = %d - %d", "DO DIFF", self.stats["time"] - self.stats_prev["time"], self.stats["time"], self.stats_prev["time"])
                 d = self.stats["time"] - self.stats_prev["time"]
                 for name, cur in self.stats.iteritems():
-                    self.metric[name] = float(cur - self.stats_prev[name])/d
+                    self.metric[name] = float(cur - self.stats_prev[name]) / d
 
             self.stats_prev = self.stats.copy()
             break
@@ -96,6 +99,7 @@ class UpdateTrafficThread(threading.Thread):
             val = self.metric[name]
             _Lock.release()
         return val
+
 
 def metric_init(params):
     global Desc_Skel, _Worker_Thread, Debug
@@ -165,17 +169,21 @@ def metric_init(params):
 
     return descriptors
 
+
 def create_desc(skel, prop):
     d = skel.copy()
     for k, v in prop.iteritems():
         d[k] = v
     return d
 
+
 def metric_of(name):
     return _Worker_Thread.metric_of(name)
 
+
 def metric_cleanup():
     _Worker_Thread.shutdown()
+
 
 if __name__ == '__main__':
     try:
@@ -187,7 +195,7 @@ if __name__ == '__main__':
         while True:
             for d in descriptors:
                 v = d['call_back'](d['name'])
-                print ('value for %s is '+d['format']) % (d['name'],  v)
+                print ('value for %s is ' + d['format']) % (d['name'], v)
             time.sleep(5)
     except KeyboardInterrupt:
         time.sleep(0.2)
