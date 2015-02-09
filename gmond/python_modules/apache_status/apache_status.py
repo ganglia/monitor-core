@@ -386,7 +386,7 @@ def metric_init(params):
 
 def metric_cleanup():
     '''Clean up the metric module.'''
-    _Worker_Thread.shutdown()
+    pass
 
 
 if __name__ == '__main__':
