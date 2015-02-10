@@ -25,6 +25,9 @@ def metrics_handler(name):
         return 0
 
     value = 0
+
+    if name == 'mem_swap_used':
+        return metrics_handler('mem_swap_total') - metrics_handler('mem_swap_free')
     for line in file:
         parts = re.split("\s+", line)
         if parts[0] == metric_map[name]['name'] + ":":
@@ -166,6 +169,17 @@ def metric_init(params):
                 "orig_name"  : "SwapFree",
                 "units"      : "Bytes",
                 "description": "Total amount of swap memory free",
+                }))
+
+    # /proc/meminfo does not provide a 'SwapUsed', instead relying on
+    # the user to do the simple subtraction.  This isn't hard, but
+    # monitoring & graphing tools that use ganglia metrics often do
+    # not have a mechanism to do compound operations.
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : "mem_swap_used",
+                "orig_name"  : "NA",
+                "units"      : "Bytes",
+                "description": "Calculated metric.  SwapTotal - SwapFree",
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
