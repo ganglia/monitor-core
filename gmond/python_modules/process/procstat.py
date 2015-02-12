@@ -191,24 +191,30 @@ def get_pgroup(ppid, pgid):
     '''Return a list of pids having the same pgid, with the first in the list being the parent pid.'''
     logging.debug('getting pids for ppid/pgid: ' + ppid + '/' + pgid)
 
-    try:
-        # Get all processes in this group
-        p_list = []
-        for stat_file in glob.glob('/proc/[1-9]*/stat'):
+    # Get all processes in this group
+    p_list = []
+    for stat_file in glob.glob('/proc/[1-9]*/stat'):
+        try:
             stat = file(stat_file, 'rt').readline().split()
             if stat[4] == pgid:
                 p_list.append(stat[0])
+        except:
+            # likely the pid has exited. this is normal.
+            pass
 
-        # place pid at the top of the list
+    # place pid at the top of the list
+    if ppid in p_list:
         p_list.remove(ppid)
         p_list.insert(0, ppid)
+    else:
+        logging.warning('failed to find ppid ' + str(ppid) + ' in p_list')
 
-        logging.debug('p_list: ' + str(p_list))
+    logging.debug('p_list: ' + str(p_list))
 
-        return p_list
-
-    except:
+    if not len(p_list):
         logging.warning('failed getting pids')
+
+    return p_list
 
 
 def get_rss(pids):
