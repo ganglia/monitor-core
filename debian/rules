@@ -32,7 +32,7 @@ config.status: configure
 		--libdir=\$${prefix}/lib \
 		--sysconfdir=/etc/ganglia \
 		--infodir=\$${prefix}/share/info --enable-shared \
-		--with-gmetad  
+		--with-gmetad --with-memcached --with-riemann
 build: build-stamp
 
 build-stamp:  config.status
