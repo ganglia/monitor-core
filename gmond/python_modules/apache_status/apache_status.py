@@ -85,11 +85,11 @@ def get_metrics():
                 if long_metric_name == "Scoreboard":
                     for sck in split_line[1]:
                         metrics[ Scoreboard_bykey[sck] ] += 1
+                else:
+                    if long_metric_name in Metric_Map:
+                        metric_name = Metric_Map[long_metric_name]
                     else:
-                        if long_metric_name in Metric_Map:
-                            metric_name = Metric_Map[long_metric_name]
-                        else:
-                            metric_name = long_metric_name
+                        metric_name = long_metric_name
                     metrics[metric_name] = split_line[1]
 
         except urllib2.URLError:
