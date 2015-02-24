@@ -1,0 +1,7 @@
+description "Ganglia Monitor Daemon"
+
+start on runlevel [2345]
+stop on runlevel [016] or unmounting-filesystem
+
+respawn
+exec /usr/sbin/gmond -f
