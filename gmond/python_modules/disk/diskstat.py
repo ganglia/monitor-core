@@ -129,8 +129,7 @@ def build_block_major_minor_tables():
     p2d = {}
 
     # Get values from diskstats file
-    with open(DISKSTATS_FILE, 'r') as f:
-        lines = f.readlines()
+    lines = tuple(open(PARTITIONS_FILE, 'r'))
     logging.debug('grabbed diskstat device info')
     logging.debug('diskstat devices: ' + '\n'.join(lines))
 
@@ -191,10 +190,11 @@ def get_partitions():
     else:
         # Load partitions
         devices = []
-        with open(PARTITIONS_FILE, 'r') as f:
-            # read /proc/partitions and remove the first two header lines
-            lines = f.readlines()[2:]
+        lines = tuple(open(PARTITIONS_FILE, 'r'))
         for line in lines:
+            # There needs to be a major value or otherwise we skip that line. Skips headers etc.
+            if not re.search("(\w+)?\d+", line):
+                continue
             device_name = line.split()[3]
             device_ends_with_number = re.search('\d$', device_name)
             if 'md' in device_name or not device_ends_with_number:
@@ -209,8 +209,7 @@ def get_partitions():
             PARTITIONS.append(dev)
         else:
             # Load disk block size
-            with open('/sys/block/' + dev + '/size', 'r') as f:
-                c = f.read()
+            c = open('/sys/block/' + dev + '/size', 'r').read(256)
 
             # Make sure device is large enough to collect stats
             if (int(c) * BYTES_PER_SECTOR / 1024) > MIN_DISK_SIZE:
@@ -284,8 +283,7 @@ def update_stats():
             dev = get_devname(dev)
 
         # Get values from diskstats file
-        with open(DISKSTATS_FILE, 'r') as f:
-            lines = f.readlines()
+        lines = tuple(open(DISKSTATS_FILE, 'r'))
         for line in lines:
             if dev in line:
                 vals = line.split()

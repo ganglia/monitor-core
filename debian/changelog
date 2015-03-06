@@ -1,3 +1,9 @@
+ganglia (3.7.1-1) unstable; urgency=low
+
+  * Bump version.
+
+ -- Jeff Buchbinder <jeff@freemedsoftware.org>  Wed, 18 Jan 2012 20:30:31 -0500
+
 ganglia (3.3.0-1) unstable; urgency=low
 
   * Bump version.
