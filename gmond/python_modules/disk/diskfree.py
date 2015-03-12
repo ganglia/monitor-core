@@ -33,12 +33,11 @@
 import re
 import os
 
-# Minimum disk size
-MIN_DISK_SIZE = 1
-
 NAME_PREFIX = 'disk_free_'
 PARAMS = {
-    'mounts': '/proc/mounts'
+    'mounts': '/proc/mounts',
+    'min_disk_size': 1,
+    'explicit_mounts_to_check': ''
 }
 PATHS = {}
 
@@ -76,7 +75,7 @@ def get_value(name):
 def metric_init(lparams):
     """Initialize metric descriptors"""
 
-    global PARAMS, MIN_DISK_SIZE, PATHS
+    global PARAMS, PATHS
 
     # set parameters
     for key in lparams:
@@ -87,6 +86,16 @@ def metric_init(lparams):
         f = open(PARAMS['mounts'])
     except IOError:
         f = []
+
+    # Let's see if there are any mounts we need to add to the explicit list of mounts to check
+    explicit_mounts_to_check = list()
+
+    if "explicit_mounts_to_check" in PARAMS and PARAMS['explicit_mounts_to_check'] != "":
+        explicit_mounts_temp = PARAMS['explicit_mounts_to_check'].split(" ")
+        for mount in explicit_mounts_temp:
+            explicit_mounts_to_check.append( mount[1:].replace('/', '_') )
+
+        del explicit_mounts_temp
 
     # parse mounts and create descriptors
     descriptors = []
@@ -99,13 +108,14 @@ def metric_init(lparams):
             if mount_info[1] == '/':
                 path_key = 'rootfs'
             else:
+                # strip off leading slash
                 path_key = mount_info[1][1:].replace('/', '_')
 
             # Calculate the size of the disk. We'll use it exclude small disks
             disk = os.statvfs(mount_info[1])
             disk_size = (disk.f_blocks * disk.f_frsize) / float(2**30)
 
-            if disk_size > MIN_DISK_SIZE and mount_info[1] != "/dev":
+            if (disk_size > PARAMS['min_disk_size'] and mount_info[1] != "/dev") or path_key in explicit_mounts_to_check:
                 PATHS[path_key] = mount_info[1]
                 for unit_type in ['absolute', 'percent']:
                     if unit_type == 'percent':
@@ -135,6 +145,11 @@ def metric_cleanup():
 
 # the following code is for debugging and testing
 if __name__ == '__main__':
+    PARAMS = {
+        'mounts': '/proc/mounts',
+        'min_disk_size': 1,
+        'explicit_mounts_to_check': ""
+    }
     descriptors = metric_init(PARAMS)
     for d in descriptors:
         print (('%s = %s') % (d['name'], d['format'])) % (d['call_back'](d['name']))
