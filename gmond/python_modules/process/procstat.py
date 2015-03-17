@@ -341,11 +341,9 @@ def get_stat(name):
 
     if ret:
         if name.startswith('procstat_'):
-            fir = name.find('_')
-            sec = name.find('_', fir + 1)
-
-            proc = name[fir + 1:sec]
-            label = name[sec + 1:]
+            nsp = name.split('_')
+            proc = '_'.join(nsp[1:-1])
+            label = nsp[-1]
 
             try:
                 return stats[proc][label]
