@@ -16,8 +16,6 @@ modules {
     param collect_ssl {
         value = False
     }
-
-
   }
 }
 
@@ -90,24 +88,19 @@ collection_group {
     title = "Keepalive (read)"
     value_threshold = 0
   }
-
   metric {
     name  = "ap_rps"
     title = "Requests per second"
     value_threshold = 0.0
   }
-  
   metric {
     name  = "ap_cpuload"
     title = "Pct of time CPU utilized"
     value_threshold = 0.0
-  }  
-
+  }
 #  Uncomment if you are collecting SSL metrics
 #  metric {
-#      name_match = "apssl_(.+)"
-#      value_threshold = 0.0
+#    name_match = "apssl_(.+)"
+#    value_threshold = 0.0
 #  }
-
-
 }
