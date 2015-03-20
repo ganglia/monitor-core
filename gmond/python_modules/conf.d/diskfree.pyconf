@@ -7,32 +7,31 @@
 # Alternative specify additional paths you want monitored under explicit_mounts_to_check
 
 modules {
-    module {
-        name = "diskfree"
-        language = "python"
-        param mounts {
-            value = '/proc/mounts'
-        }
+  module {
+    name = "diskfree"
+    language = "python"
 
-	# Minimum disk size to report in GB
-        param min_disk_size {
-            value = 1
-        }
+    param mounts {
+      value = '/proc/mounts'
+    }
+
+    # Minimum disk size to report in GB
+    param min_disk_size {
+      value = 1
+   }
 
 # Values are space delimited
-#        param explicit_mounts_to_check {
-#            value = "/run /boot"
-#        }
-
+#    param explicit_mounts_to_check {
+#      value = "/run /boot"
+#    }
     }
 }
 
 collection_group {
-    collect_every = 60
+    collect_every  = 60
     time_threshold = 180
+
     metric {
        name_match = "disk_free_(.+)"
     }
-
 }
-
