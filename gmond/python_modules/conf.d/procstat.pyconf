@@ -1,8 +1,6 @@
-#
-
 modules {
   module {
-    name = 'procstat'
+    name     = 'procstat'
     language = 'python'
 
     param gmond {
@@ -31,15 +29,13 @@ modules {
 }
 
 collection_group {
-  collect_every = 30
+  collect_every  = 30
   time_threshold = 30
 
   metric {
     name_match = "procstat_(.+)_cpu"
   }
-
   metric {
     name_match = "procstat_(.+)_mem"
   }
 }
-
