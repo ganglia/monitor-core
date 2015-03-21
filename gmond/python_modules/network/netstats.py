@@ -220,7 +220,7 @@ def metric_init(params):
         "call_back"  : get_tcploss_percentage,
         "description": "TCP percentage loss, tcploss / insegs + outsegs",
         "units"      : "pct",
-        'groups'      : 'tcpext'
+        'groups'     : 'tcpext'
         }))
 
     descriptors.append(create_desc(Desc_Skel, {
@@ -228,7 +228,7 @@ def metric_init(params):
         "call_back"  : get_tcpattemptfail_percentage,
         "description": "TCP attemptfail percentage, tcpattemptfail / insegs + outsegs",
         "units"      : "pct",
-        'groups'      : 'tcp'
+        'groups'     : 'tcp'
         }))
 
     descriptors.append(create_desc(Desc_Skel, {
@@ -236,7 +236,7 @@ def metric_init(params):
         "call_back"  : get_retrans_percentage,
         "description": "TCP retrans percentage, retranssegs / insegs + outsegs",
         "units"      : "pct",
-        'groups'      : 'tcp'
+        'groups'     : 'tcp'
         }))
 
     return descriptors
