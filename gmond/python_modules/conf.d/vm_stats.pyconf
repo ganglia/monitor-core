@@ -32,4 +32,9 @@ collection_group {
     title = "Pages out to disk"
     value_threshold = 1.0
   }
+
+  #metric {
+  #  name = "vm_nr_written"
+  #  value_threshold = 1.0
+  #}
 }
