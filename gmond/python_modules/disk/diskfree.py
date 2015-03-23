@@ -115,7 +115,7 @@ def metric_init(lparams):
             disk = os.statvfs(mount_info[1])
             disk_size = (disk.f_blocks * disk.f_frsize) / float(2**30)
 
-            if (disk_size > PARAMS['min_disk_size'] and mount_info[1] != "/dev") or path_key in explicit_mounts_to_check:
+            if (disk_size > float(PARAMS['min_disk_size']) and mount_info[1] != "/dev") or path_key in explicit_mounts_to_check:
                 PATHS[path_key] = mount_info[1]
                 for unit_type in ['absolute', 'percent']:
                     if unit_type == 'percent':
