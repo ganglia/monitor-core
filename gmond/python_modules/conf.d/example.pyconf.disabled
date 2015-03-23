@@ -1,13 +1,14 @@
 modules {
   module {
-    name = "example"
+    name     = "example"
     language = "python"
-    enabled = "no"
+    enabled  = "no"
+
     param RandomMax {
-        value = 600
+      value = 600
     }
     param ConstantValue {
-        value = 112
+      value = 112
     }
   }
 }
@@ -15,8 +16,9 @@ modules {
 #/* Collection groups for the
 #    example python module */
 collection_group {
-  collect_every = 10
+  collect_every  = 10
   time_threshold = 50
+
   metric {
     name = "PyRandom_Numbers"
     value_threshold = 1.0
@@ -24,8 +26,9 @@ collection_group {
 }
 
 collection_group {
-  collect_once = yes
+  collect_once   = yes
   time_threshold = 20
+
   metric {
     name = "PyConstant_Number"
   }
