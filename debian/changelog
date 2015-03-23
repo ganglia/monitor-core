@@ -1,8 +1,10 @@
 ganglia (3.7.1-1) unstable; urgency=low
 
-  * Bump version.
+  * Move rrdcached configuration in gmetad.conf from an environment variable
+  * Performance improvements for large clusters
+  * Numerous Python module improvements
 
- -- Jeff Buchbinder <jeff@freemedsoftware.org>  Wed, 18 Jan 2012 20:30:31 -0500
+ -- Vladimir Vuksan <vlemp@vuksan.com> Mon, 23 Mar 2015 10:12:02 -0400
 
 ganglia (3.3.0-1) unstable; urgency=low
 
