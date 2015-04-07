@@ -268,7 +268,7 @@ if __name__ == '__main__':
         parser.add_option("-H", "--Host", dest="host", help="Host running mysql", default="localhost")
         parser.add_option("-u", "--user", dest="user", help="user to connect as", default="")
         parser.add_option("-p", "--password", dest="passwd", help="password", default="")
-        parser.add_option("-S", "--socket", dest="unix_socket", help="unix_socket", default=""
+        parser.add_option("-S", "--socket", dest="unix_socket", help="unix_socket", default="")
         (options, args) = parser.parse_args()
 
         try:
