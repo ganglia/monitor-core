@@ -1351,7 +1351,7 @@ float device_space(char *mount, char *device, double *total_size, double *total_
    *total_size += size * blocksize;
    *total_free += free * blocksize;
    /* The percentage of space used on this partition. */
-   pct = size ? ((size - free) / (float) size) * 100 : 0.0;
+   pct = size ? ((size - free) / (double) size) * 100 : 0.0;
    return pct;
 }
 
