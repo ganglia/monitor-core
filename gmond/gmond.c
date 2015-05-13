@@ -665,20 +665,25 @@ setup_listen_channels_pollset( void )
       pollset_opts = APR_POLLSET_THREADSAFE;
   }
 #endif
-  if((status = apr_pollset_create(&udp_listen_channels, num_udp_recv_channels, global_context, pollset_opts)) != APR_SUCCESS)
-    {
-      char apr_err[512];
-      apr_strerror(status, apr_err, 511);
-      err_msg("apr_pollset_create failed: %s", apr_err);
-      exit(EXIT_FAILURE);
-    }
-  if((status = apr_pollset_create(&tcp_listen_channels, num_tcp_accept_channels, global_context, pollset_opts)) != APR_SUCCESS)
-    {
-      char apr_err[512];
-      apr_strerror(status, apr_err, 511);
-      err_msg("apr_pollset_create failed: %s", apr_err);
-      exit(EXIT_FAILURE);
-    }
+  if (num_udp_recv_channels > 0) {
+    if((status = apr_pollset_create(&udp_listen_channels, num_udp_recv_channels, global_context, pollset_opts)) != APR_SUCCESS)
+      {
+        char apr_err[512];
+        apr_strerror(status, apr_err, 511);
+        err_msg("apr_pollset_create failed: %s", apr_err);
+        exit(EXIT_FAILURE);
+      }
+  }
+
+  if (num_tcp_accept_channels > 0) {
+    if((status = apr_pollset_create(&tcp_listen_channels, num_tcp_accept_channels, global_context, pollset_opts)) != APR_SUCCESS)
+      {
+        char apr_err[512];
+        apr_strerror(status, apr_err, 511);
+        err_msg("apr_pollset_create failed: %s", apr_err);
+        exit(EXIT_FAILURE);
+      }
+  }
 
   if((udp_recv_sockets = (apr_socket_t **)apr_pcalloc(global_context, sizeof(apr_socket_t *) * (num_udp_recv_channels + 1))) == NULL)
     err_quit("unable to allocate UDP listening sockets");
@@ -3255,6 +3260,9 @@ static void* APR_THREAD_FUNC tcp_listener(apr_thread_t *thd, void *data)
   apr_time_t now;
   apr_interval_time_t wait = 100 * 1000; // 100ms
 
+  if (tcp_listen_channels == NULL)
+    return NULL;
+
   debug_msg("[tcp] Starting TCP listener thread...");
   for(;!done;)
     {
@@ -3406,7 +3414,8 @@ main ( int argc, char *argv[] )
     {
       /* Make sure we never wait for negative seconds (shouldn't happen) */
       apr_interval_time_t wait = next_collection >= now ? next_collection - now : 1;
-      if(!deaf)
+
+      if (udp_listen_channels != NULL)
         {
           /* Pull in incoming data */
           poll_udp_listen_channels(wait, now);
