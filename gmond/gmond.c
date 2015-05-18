@@ -2535,8 +2535,8 @@ setup_metric_info_impl(Ganglia_metric_callback *metric_cb, int group_once, const
             spfname_val = apr_table_get((apr_table_t *)metric_info->metadata, SPOOF_NAME);
             if (spfname_val) 
             {
-                char *spoofedname = apr_pstrcat(global_context, spfname_val, ":", name, NULL);
-                char *spoofedkey = apr_pstrcat(global_context, spfname_val, ":", name, ":", spfhost_val, NULL);
+                char *spoofedname = apr_pstrcat(global_context, spfname_val, ":", name, (void *)0);
+                char *spoofedkey = apr_pstrcat(global_context, spfname_val, ":", name, ":", spfhost_val, (void *)0);
 
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.name = spoofedname;
                 metric_cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
@@ -2750,7 +2750,7 @@ setup_collection_groups( void )
                               ptrs[j++].iov_len = i-k;
                             }
 
-                          title_r = apr_pstrcatv(p, ptrs, j, NULL);
+                          title_r = apr_pstrcatv(p, ptrs, j, (void *)0);
                         }
 
                       cb = val;
@@ -2976,7 +2976,7 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
             name = cb->msg.Ganglia_value_msg_u.gstr.metric_id.name;
             if (override_hostname != NULL)
               {
-                cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrcat(global_context, (char *)( override_ip != NULL ? override_ip : override_hostname ), ":", (char *) override_hostname, NULL);
+                cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrcat(global_context, (char *)( override_ip != NULL ? override_ip : override_hostname ), ":", (char *) override_hostname, (void *)0);
                 cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
               }
             val = apr_pstrdup(gm_pool, host_metric_value(cb->info, &(cb->msg)));
