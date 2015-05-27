@@ -800,7 +800,11 @@ Ganglia_cfg_include(cfg_t *cfg, cfg_opt_t *opt, int argc,
     else if (has_wildcard(fname))
     {
         int ret;
-        char *path = calloc(strlen(fname) + 1, sizeof(char));
+        size_t fname_len = strlen(fname);
+        if (fname_len == 0) {
+          fname_len = 1;
+        }
+        char *path = calloc(fname_len + 1, sizeof(char));
         char *pattern = NULL;
         char *idx = strrchr(fname, '/');
         apr_pool_t *p;
