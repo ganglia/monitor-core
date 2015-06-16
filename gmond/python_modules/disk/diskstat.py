@@ -286,7 +286,7 @@ def update_stats():
         # Get values from diskstats file
         lines = tuple(open(DISKSTATS_FILE, 'r'))
         for line in lines:
-            if dev in line:
+            if dev in line.split():
                 vals = line.split()
 
         logging.debug('  vals: ' + str(vals))
