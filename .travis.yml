@@ -1,9 +1,22 @@
 language: c
 script:
   - ./bootstrap
-  - ./configure --with-gmetad --with-perl=/usr --enable-status --with-memcached
+  - ./configure --with-gmetad --with-perl=/usr --enable-status
   - make all
-before_script:
-  - sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu/ trusty main universe"
-  - sudo apt-get update
-  - sudo apt-get -o Dpkg::Options::="--force-overwrite" -y install libapr1-dev libaprutil1-dev libconfuse-dev libexpat1-dev libpcre3-dev libssl-dev librrd-dev libperl-dev libmemcached-dev libtool m4 gperf zlib1g-dev pkg-config
+sudo: false
+addons:
+  apt:
+    packages:
+    - libapr1-dev
+    - libaprutil1-dev
+    - libconfuse-dev
+    - libexpat1-dev
+    - libpcre3-dev
+    - libssl-dev
+    - librrd-dev
+    - libperl-dev
+    - libtool
+    - m4
+    - gperf
+    - zlib1g-dev
+    - pkg-config
