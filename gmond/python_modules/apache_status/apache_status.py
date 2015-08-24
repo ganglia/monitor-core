@@ -86,6 +86,10 @@ def get_metrics():
                     for sck in split_line[1]:
                         metrics[ Scoreboard_bykey[sck] ] += 1
                 else:
+                    # Apache > 2.4.16 inserts the hostname as the first line, so ignore
+                    if len(split_line) == 1:
+                        continue
+                    
                     if long_metric_name in Metric_Map:
                         metric_name = Metric_Map[long_metric_name]
                     else:
