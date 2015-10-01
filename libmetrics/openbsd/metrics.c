@@ -21,6 +21,7 @@
 #include <sys/swap.h>
 #include <uvm/uvm_param.h>
 #include <sys/proc.h>
+#include <sys/vmmeter.h>
 
 #include <sys/socket.h>
 #include <net/if.h>
