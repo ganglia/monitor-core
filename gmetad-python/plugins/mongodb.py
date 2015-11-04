@@ -70,7 +70,7 @@ class MongodbPlugin(GmetadPlugin) :
 
         from lib.api.api_service_client import APIClient
         self.api = APIClient(self.api)
-        self.api.dashboard_conn_check(self.cloud_name)
+        self.api.dashboard_conn_check(self.cloud_name, check_for_vpn = True)
         self.msci = self.api.msci
 
         self.obj_cache = {}
