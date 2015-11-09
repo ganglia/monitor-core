@@ -19,6 +19,8 @@ stats_files = ["/proc/net/netstat", "/proc/net/snmp"]
 
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
+# Metrics that are not counters but absolute values
+ABSOLUTE_VALUES = [ "currestab" ]
 
 stats_pos = {}
 
@@ -69,12 +71,15 @@ def get_metrics():
 def get_value(name):
     """Return a value for the requested metric"""
 
-    metrics = get_metrics()[0]
+    # get metrics
+    [curr_metrics, last_metrics] = get_metrics()
 
-    name = name[len(NAME_PREFIX):]  # remove prefix from name
+    parts = name.split("_")
+    group = parts[0]
+    metric = "_".join(parts[1:])
 
     try:
-        result = metrics['data'][name]
+        result = float(curr_metrics['data'][group][metric])    
     except StandardError:
         result = 0
 
@@ -208,12 +213,18 @@ def metric_init(params):
         file.close()
 
     for group in stats_pos:
-        for item in stats_pos[group]:
-            descriptors.append(create_desc(Desc_Skel, {
-                    "name"       : group + "_" + stats_pos[group][item],
-                    "description": stats_pos[group][item],
-                    'groups'     : group
-                    }))
+	for item in stats_pos[group]:
+	    if stats_pos[group][item] in ABSOLUTE_VALUES:
+	        descriptors.append(create_desc(Desc_Skel, {
+		    "name"       : group + "_" + stats_pos[group][item],
+                    "call_back"  : get_value,
+		    "groups"	 : group
+		    }))
+            else:
+	        descriptors.append(create_desc(Desc_Skel, {
+		    "name"       : group + "_" + stats_pos[group][item],
+		    "groups"	 : group
+		    }))
 
     descriptors.append(create_desc(Desc_Skel, {
         "name"       : "tcpext_tcploss_percentage",
