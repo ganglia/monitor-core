@@ -276,8 +276,8 @@ RRD_create( char *rrd, int summary, unsigned int step,
            heartbeat);
    argv[argc++] = sum;
    if (summary) {
-      sprintf(num,"DS:num:%s:%d:U:U", 
-              data_source_type,
+      sprintf(num,"DS:num:%s:%d:U:U",
+              "GAUGE",
               heartbeat);
       argv[argc++] = num;
    }
