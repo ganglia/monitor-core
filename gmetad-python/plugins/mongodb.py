@@ -30,6 +30,7 @@ from time import time
 from Gmetad.gmetad_plugin import GmetadPlugin
 from Gmetad.gmetad_config import getConfig, GmetadConfig
 from sys import path
+from datetime import datetime
 
 def get_plugin():
     ''' 
@@ -74,7 +75,9 @@ class MongodbPlugin(GmetadPlugin) :
         self.msci = self.api.msci
 
         self.obj_cache = {}
-        self.last_refresh = str(time())
+        tzoffset = datetime.utcfromtimestamp(-1).hour - datetime.fromtimestamp(0).hour + 1
+        _now = int(time()) + (3600 * tzoffset)
+        self.last_refresh = str(_now)
 
         self.expid = self.api.cldshow(self.cloud_name, "time")["experiment_id"]
         self.username = self.api.username
@@ -103,7 +106,9 @@ class MongodbPlugin(GmetadPlugin) :
             if verbose :
                 logging.debug("Should refresh returned true!")
             plugin.obj_cache = {}
-            plugin.last_refresh = str(time())
+            tzoffset = datetime.utcfromtimestamp(-1).hour - datetime.fromtimestamp(0).hour + 1
+            _now = int(time()) + (3600 * tzoffset)
+            plugin.last_refresh = str(_now)
         if ip in plugin.obj_cache :
             (exists, unused_obj) = plugin.obj_cache[ip]
             if verbose : 
@@ -219,7 +224,8 @@ class MongodbPlugin(GmetadPlugin) :
                 empty = False
 
             if not empty :
-                _now = int(time())
+                tzoffset = datetime.utcfromtimestamp(-1).hour - datetime.fromtimestamp(0).hour + 1
+                _now = int(time()) + (3600 * tzoffset)
                 _data["time_h"] = makeTimestamp(_now)
                 _data["time"] = _now 
                 _data["latest_update"] = _now
