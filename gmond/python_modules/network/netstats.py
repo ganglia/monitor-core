@@ -48,6 +48,8 @@ def get_metrics():
                     count = 0
                     metrics = re.split("\s+", line)
                     metric_group = metrics[0].replace(":", "").lower()
+                    if metric_group not in stats_pos:
+                        continue
                     new_metrics[metric_group] = dict()
                     for value in metrics:
                         # Skip first
