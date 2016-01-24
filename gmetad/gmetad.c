@@ -610,11 +610,11 @@ main ( int argc, char *argv[] )
          /* Sum the new values */
          hash_foreach(root.authority, do_root_summary, NULL );
 
-         /* summary completed */
-         pthread_mutex_unlock(root.sum_finished);
-
          /* Save them to RRD */
          hash_foreach(root.metric_summary, write_root_summary, NULL);
+
+         /* summary completed */
+         pthread_mutex_unlock(root.sum_finished);
 
          /* Remember our last run */
          now = apr_time_now();
