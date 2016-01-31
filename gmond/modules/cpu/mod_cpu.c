@@ -58,6 +58,10 @@ static g_val_t cpu_metric_handler ( int metric_index )
         return cpu_sintr_func();
     case 10:
         return cpu_steal_func();
+    case 11:
+        return cpu_guest_func();
+    case 12:
+        return cpu_gnice_func();
     }
 
     /* default case */
@@ -78,6 +82,8 @@ static Ganglia_25metric cpu_metric_info[] =
     {0, "cpu_intr",     90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_intr"},
     {0, "cpu_sintr",    90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_sintr"},
     {0, "cpu_steal",    90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_steal"},
+    {0, "cpu_guest",    90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_guest"},
+    {0, "cpu_gnice",    90, GANGLIA_VALUE_FLOAT,          "%",    "both", "%.1f", UDP_HEADER_SIZE+8, "cpu_gnice"},
     {0, NULL}
 
 };

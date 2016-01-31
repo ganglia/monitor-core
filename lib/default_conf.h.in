@@ -270,6 +270,19 @@ collection_group {\n\
     title = \"CPU sintr\"\n\
   }\n\
   */\n\
+  /* The next two metrics are optional if you want more detail...\n\
+     ... since they are accounted for in cpu_user and cpu_nice.\n\
+  metric {\n\
+    name = \"cpu_guest\"\n\
+    value_threshold = \"1.0\"\n\
+    title = \"CPU guest\"\n\
+  }\n\
+  metric {\n\
+    name = \"cpu_gnice\"\n\
+    value_threshold = \"1.0\"\n\
+    title = \"CPU gnice\"\n\
+  }\n\
+  */\n\
 }\n\
 \n\
 collection_group {\n\

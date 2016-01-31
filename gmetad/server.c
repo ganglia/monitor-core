@@ -70,6 +70,10 @@ static const struct metricinfo
   {
   "cpu_steal", cpu_steal_func, g_float},
   {
+  "cpu_guest", cpu_guest_func, g_float},
+  {
+  "cpu_gnice", cpu_gnice_func, g_float},
+  {
   "load_one", load_one_func, g_float},
   {
   "load_five", load_five_func, g_float},
