@@ -20,7 +20,7 @@ stats_files = ["/proc/net/netstat", "/proc/net/snmp"]
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 # Metrics that are not counters but absolute values
-ABSOLUTE_VALUES = [ "currestab" ]
+ABSOLUTE_VALUES = ["currestab"]
 
 stats_pos = {}
 
@@ -81,7 +81,7 @@ def get_value(name):
     metric = "_".join(parts[1:])
 
     try:
-        result = float(curr_metrics['data'][group][metric])    
+        result = float(curr_metrics['data'][group][metric])
     except StandardError:
         result = 0
 
@@ -215,18 +215,18 @@ def metric_init(params):
         file.close()
 
     for group in stats_pos:
-	for item in stats_pos[group]:
-	    if stats_pos[group][item] in ABSOLUTE_VALUES:
-	        descriptors.append(create_desc(Desc_Skel, {
-		    "name"       : group + "_" + stats_pos[group][item],
+        for item in stats_pos[group]:
+            if stats_pos[group][item] in ABSOLUTE_VALUES:
+                descriptors.append(create_desc(Desc_Skel, {
+                    "name"       : group + "_" + stats_pos[group][item],
                     "call_back"  : get_value,
-		    "groups"	 : group
-		    }))
+                    "groups"     : group
+                }))
             else:
-	        descriptors.append(create_desc(Desc_Skel, {
-		    "name"       : group + "_" + stats_pos[group][item],
-		    "groups"	 : group
-		    }))
+                descriptors.append(create_desc(Desc_Skel, {
+                    "name"       : group + "_" + stats_pos[group][item],
+                    "groups"     : group
+                }))
 
     descriptors.append(create_desc(Desc_Skel, {
         "name"       : "tcpext_tcploss_percentage",
@@ -234,7 +234,7 @@ def metric_init(params):
         "description": "TCP percentage loss, tcploss / insegs + outsegs",
         "units"      : "pct",
         'groups'     : 'tcpext'
-        }))
+    }))
 
     descriptors.append(create_desc(Desc_Skel, {
         "name"       : "tcp_attemptfails_percentage",
@@ -242,7 +242,7 @@ def metric_init(params):
         "description": "TCP attemptfail percentage, tcpattemptfail / insegs + outsegs",
         "units"      : "pct",
         'groups'     : 'tcp'
-        }))
+    }))
 
     descriptors.append(create_desc(Desc_Skel, {
         "name"       : "tcp_retrans_percentage",
@@ -250,7 +250,7 @@ def metric_init(params):
         "description": "TCP retrans percentage, retranssegs / insegs + outsegs",
         "units"      : "pct",
         'groups'     : 'tcp'
-        }))
+    }))
 
     return descriptors
 
@@ -260,12 +260,12 @@ def metric_cleanup():
     pass
 
 
-#This code is for debugging and unit testing
+# This code is for debugging and unit testing
 if __name__ == '__main__':
     descriptors = metric_init(PARAMS)
     while True:
         for d in descriptors:
             v = d['call_back'](d['name'])
-            print '%s = %s' % (d['name'],  v)
+            print '%s = %s' % (d['name'], v)
         print 'Sleeping 15 seconds'
         time.sleep(15)
