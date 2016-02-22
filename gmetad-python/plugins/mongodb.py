@@ -76,6 +76,8 @@ class MongodbPlugin(GmetadPlugin) :
 
         self.obj_cache = {}
         tzoffset = datetime.utcfromtimestamp(-1).hour - datetime.fromtimestamp(0).hour + 1
+        if tzoffset == 24 :
+            tzoffset = 0
         _now = int(time()) + (3600 * tzoffset)
         self.last_refresh = str(_now)
 
@@ -107,6 +109,8 @@ class MongodbPlugin(GmetadPlugin) :
                 logging.debug("Should refresh returned true!")
             plugin.obj_cache = {}
             tzoffset = datetime.utcfromtimestamp(-1).hour - datetime.fromtimestamp(0).hour + 1
+            if tzoffset == 24 :
+                tzoffset = 0
             _now = int(time()) + (3600 * tzoffset)
             plugin.last_refresh = str(_now)
         if ip in plugin.obj_cache :
@@ -225,6 +229,8 @@ class MongodbPlugin(GmetadPlugin) :
 
             if not empty :
                 tzoffset = datetime.utcfromtimestamp(-1).hour - datetime.fromtimestamp(0).hour + 1
+                if tzoffset == 24 :
+                    tzoffset = 0
                 _now = int(time()) + (3600 * tzoffset)
                 _data["time_h"] = makeTimestamp(_now)
                 _data["time"] = _now 
