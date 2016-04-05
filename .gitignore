@@ -63,3 +63,6 @@ libmetrics/**/*.lo
 libmetrics/**/*.o
 libtool
 .idea
+**/tags
+**/*.m4
+**/*.swp
