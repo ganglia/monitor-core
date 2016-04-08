@@ -1388,7 +1388,8 @@ float find_disk_space(double *total_size, double *total_free)
       if (!strncmp(mode, "ro", 2)) continue;
       if (remote_mount(device, type)) continue;
       if (strncmp(device, "/dev/", 5) != 0 &&
-          strncmp(device, "/dev2/", 6) != 0) continue;
+          strncmp(device, "/dev2/", 6) != 0 &&
+          strncmp(type, "zfs", 3) != 0) continue;
       thispct = device_space(mount, device, total_size, total_free);
       debug_msg("Counting device %s (%.2f %%)", device, thispct);
       if (!max || max<thispct)
