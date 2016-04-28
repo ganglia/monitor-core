@@ -12,12 +12,12 @@ GLDFLAGS =
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/gmond -I$(top_builddir)/libmetrics -I$(top_builddir)/include $(GCFLAGS) @PROTOBUF_C_CFLAGS@
+AM_CFLAGS = -I$(top_srcdir)/lib -I$(top_builddir)/lib -I$(top_srcdir)/gmond -I$(top_srcdir)/libmetrics -I$(top_builddir)/libmetrics -I$(top_builddir)/include $(GCFLAGS) @PROTOBUF_C_CFLAGS@
 
 sbin_PROGRAMS = gmetad
 
 cmdline.c: cmdline.c.in $(FIXCONFIG)
-	$(FIXCONFIG) cmdline.c.in
+	$(FIXCONFIG) $<
 
 gmetad_SOURCES =  gmetad.c cmdline.c.in cmdline.c cmdline.h gmetad.h data_thread.c \
    server.c process_xml.c rrd_helpers.c export_helpers.c conf.c conf.h type_hash.c \

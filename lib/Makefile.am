@@ -15,7 +15,7 @@ GCFLAGS += -DSFLOW
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I.. -I. -I$(top_builddir)/include/ $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"'
+AM_CFLAGS = -I.. -I. -I$(top_srcdir)/include -I$(top_builddir)/include $(GCFLAGS) -DSYSCONFDIR='"$(sysconfdir)"'
 
 include_HEADERS = gm_protocol.h
 

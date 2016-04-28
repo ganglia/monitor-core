@@ -1,6 +1,6 @@
 
 
-FIXCONFIG = $(top_srcdir)/scripts/fixconfig
+FIXCONFIG = $(top_builddir)/scripts/fixconfig
 
 # Unfortunately, we can't do this here with a pattern rule because
 # that is a GNU make feature and is not fully portable

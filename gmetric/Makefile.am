@@ -17,7 +17,7 @@ AM_CFLAGS = -I../lib -I../include $(GCFLAGS)
 bin_PROGRAMS = gmetric
 
 cmdline.c: cmdline.c.in $(FIXCONFIG)
-	$(FIXCONFIG) cmdline.c.in
+	$(FIXCONFIG) $<
 
 gmetric_SOURCES =  gmetric.c cmdline.c.in cmdline.c cmdline.h
 gmetric_LDADD   =  $(top_builddir)/lib/libganglia.la \
