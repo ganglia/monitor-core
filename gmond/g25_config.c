@@ -373,5 +373,6 @@ print_ganglia_25_config( char *path )
    dotconf_cleanup(configfile);
 
    print_config(path, &gmond_config);
+   fclose(fp);
    return 0;
 }
