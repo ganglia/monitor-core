@@ -2298,6 +2298,7 @@ load_metric_modules( void )
 {
     cfg_t *tmp;
     int j;
+    apr_hash_t *modules_loaded = apr_hash_make(global_context);
 
     tmp = cfg_getsec( config_file, "modules");
     for (j = 0; j < cfg_size(tmp, "module"); j++) 
@@ -2309,6 +2310,7 @@ load_metric_modules( void )
         apr_array_header_t *modParams_list = NULL;
         int k, modEnabled;
         apr_status_t merge_ret;
+        char *module_key = NULL;
 
         cfg_t *module = cfg_getnsec(tmp, "module", j);
 
@@ -2345,6 +2347,17 @@ load_metric_modules( void )
           }
         modName = cfg_getstr(module, "name");
         modparams = cfg_getstr(module, "params");
+
+
+        /* Check that we haven't loaded this module already, now
+         * that we've pulled the module name and path */
+        module_key = apr_pstrcat(global_context, modName, ":", modPath, NULL);
+        debug_msg("loading %s @ %s", modName, modPath);
+        if (NULL != apr_hash_get(modules_loaded, module_key, APR_HASH_KEY_STRING)) {
+            err_quit("Attempt to load module %s @ %s more than once.", modName, modPath);
+            continue;
+        }
+
         modParams_list = apr_array_make(global_context, 2, sizeof(mmparam));
 
         for (k = 0; k < cfg_size(module, "param"); k++) 
@@ -2372,6 +2385,7 @@ load_metric_modules( void )
             continue;
           }
         debug_msg("loaded module: %s", modName);
+        apr_hash_set(modules_loaded, module_key, APR_HASH_KEY_STRING, apr_pstrdup(global_context, "true"));
 
         /*
          * Retrieve the pointer to the module structure through the module name.
