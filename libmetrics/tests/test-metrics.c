@@ -41,6 +41,10 @@ static const struct metricinfo
   {
   "cpu_nice", cpu_nice_func, g_float},
   {
+  "cpu_guest", cpu_guest_func, g_float},
+  {
+  "cpu_gnice", cpu_gnice_func, g_float},
+  {
   "cpu_system", cpu_system_func, g_float},
   {
   "cpu_idle", cpu_idle_func, g_float},

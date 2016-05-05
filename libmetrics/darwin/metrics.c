@@ -467,6 +467,28 @@ cpu_sintr_func ( void )
    return val;
 }
 
+/*
+** FIXME
+*/
+g_val_t 
+cpu_guest_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
+/*
+** FIXME
+*/
+g_val_t 
+cpu_gnice_func ( void )
+{
+   g_val_t val;
+   val.f = 0.0;
+   return val;
+}
+
 
 g_val_t 
 bytes_in_func ( void )

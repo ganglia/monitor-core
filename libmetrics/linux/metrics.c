@@ -104,6 +104,8 @@ num_cpustates_func ( void )
 ** i=4 : Linux 2.4.x
 ** i=7 : Linux 2.6.x
 ** i=8 : Linux 2.6.11
+** i=9 : Linux 2.6.24
+** i=10 : Linux 2.6.33
 */
    while (strncmp(p, "cpu", 3)) {
      p = skip_token(p);
@@ -691,6 +693,8 @@ total_jiffies_func ( void )
    p = skip_whitespace(p);
    steal_jiffies = strtod( p, &p );
 
+   /* guest is included in user already, and gnice is included in nice */
+
    return user_jiffies + nice_jiffies + system_jiffies + idle_jiffies +
           wio_jiffies + irq_jiffies + sirq_jiffies + steal_jiffies;
 }
@@ -1049,6 +1053,89 @@ cpu_steal_func ( void )
        val.f = 0.0;
 
      last_steal_jiffies  = steal_jiffies;
+     last_total_jiffies = total_jiffies;
+
+   }
+
+   return val;
+}
+
+g_val_t
+cpu_guest_func ( void )
+{
+   char *p;
+   static g_val_t val;
+   static struct timeval stamp={0,0};
+   static double last_guest_jiffies,  guest_jiffies,
+                 last_total_jiffies, total_jiffies, diff;
+
+   p = update_file(&proc_stat);
+   if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+      (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
+     stamp = proc_stat.last_read;
+
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     guest_jiffies  = strtod( p , (char **)NULL );
+     total_jiffies = total_jiffies_func();
+
+     diff = guest_jiffies - last_guest_jiffies;
+
+     if ( diff )
+       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
+     else
+       val.f = 0.0;
+
+     last_guest_jiffies  = guest_jiffies;
+     last_total_jiffies = total_jiffies;
+
+   }
+
+   return val;
+}
+
+g_val_t
+cpu_gnice_func ( void )
+{
+   char *p;
+   static g_val_t val;
+   static struct timeval stamp={0,0};
+   static double last_gnice_jiffies,  gnice_jiffies,
+                 last_total_jiffies, total_jiffies, diff;
+
+   p = update_file(&proc_stat);
+   if((proc_stat.last_read.tv_sec != stamp.tv_sec) &&
+      (proc_stat.last_read.tv_usec != stamp.tv_usec)) {
+     stamp = proc_stat.last_read;
+
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     p = skip_token(p);
+     gnice_jiffies  = strtod( p , (char **)NULL );
+     total_jiffies = total_jiffies_func();
+
+     diff = gnice_jiffies - last_gnice_jiffies;
+
+     if ( diff )
+       val.f = (diff/(total_jiffies - last_total_jiffies))*100;
+     else
+       val.f = 0.0;
+
+     last_gnice_jiffies  = gnice_jiffies;
      last_total_jiffies = total_jiffies;
 
    }

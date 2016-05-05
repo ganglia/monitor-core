@@ -400,7 +400,7 @@ process_struct_CPU(SFlowXDR *x, SFlowDataSource *dataSource, Ganglia_host *hostd
 
     if(steal_and_guest) {
       cpu_total += delta_cpu_steal;
-      /* Note: cpu_guest is included in cpu_idle
+      /* Note: cpu_guest is included in cpu_user
        * and cpu_guest_nice is included in cpu_nice
        * so they do not contribute to cpu_total.
        */
