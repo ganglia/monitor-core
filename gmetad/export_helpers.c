@@ -349,10 +349,11 @@ path_macro_replace(char *path, graphite_path_macro *patrn)
 	char *prefix; 
 	char *suffix;
 	char *offset;     
+	int i;
 
 	strncpy(final, path, PATHSIZE);
 	strncpy(path_cp, path, PATHSIZE);
-	for(int i=0; patrn[i].torepl != 0; i++){
+	for(i=0; patrn[i].torepl != 0; i++){
 		while((offset = strstr(path_cp, patrn[i].torepl)))
 		{
 			prefix=path_cp; //pointer to the beginning of path_cp (for clarity)

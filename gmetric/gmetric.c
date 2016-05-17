@@ -113,7 +113,8 @@ main( int argc, char *argv[] )
   if(args_info.group_given)
     {
       char *last;
-      for (char *group = apr_strtok(args_info.group_arg, ", ", &last); group != NULL; group = apr_strtok(NULL, ", ", &last)) {
+      char *group;
+      for (group = apr_strtok(args_info.group_arg, ", ", &last); group != NULL; group = apr_strtok(NULL, ", ", &last)) {
         Ganglia_metadata_add(gmetric, "GROUP", group);
       }
     }
