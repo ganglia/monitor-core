@@ -166,6 +166,10 @@ For example, in a 32-bit Intel compatible Linux host that is usually:
 
   /usr/lib/ganglia
 
+The B<tags> parameter is optional, and may be used to include arbitrary
+information in various output produced by Gmond, including the XML.
+It will be included as the I<TAGS> attribute of the <HOST> XML tab.
+
 =head2 udp_send_channel
 
 You can define as many B<udp_send_channel> sections as you like within
