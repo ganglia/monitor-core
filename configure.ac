@@ -708,7 +708,7 @@ dnl the definitions that we're looking for in some system headers.
 
 dnl default VARSTATEDIR to /var/lib since that's the traditional location.
 dnl
-varstatedir="/var/lib"
+varstatedir="$localstatedir/lib"
 
 # Used when static linking requested
 EXPORT_SYMBOLS="-export-dynamic"
