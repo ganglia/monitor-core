@@ -19,14 +19,14 @@ endif
 README:	README.in $(FIXCONFIG)
 	$(FIXCONFIG) $< $@
 
-../conf.d/modperl.conf:	../conf.d/modperl.conf.in $(FIXCONFIG)
+$(builddir)/../conf.d/modperl.conf:	$(srcdir)/../conf.d/modperl.conf.in $(FIXCONFIG)
 	mkdir -p $(builddir)/../conf.d && \
 	  $(FIXCONFIG) $< $@
 
 # Note that README is listed as a dependency to be generated, but it
 # is not currently installed anywhere
-install-exec-hook:	../conf.d/modperl.conf README
+install-exec-hook:	$(builddir)/../conf.d/modperl.conf README
 	mkdir -p $(DESTDIR)$(sysconfdir)/conf.d && \
-	  $(INSTALL_DATA) ../conf.d/modperl.conf $(DESTDIR)$(sysconfdir)/conf.d/modperl.conf
+	  $(INSTALL_DATA) $(builddir)/../conf.d/modperl.conf $(DESTDIR)$(sysconfdir)/conf.d/modperl.conf
 
 INCLUDES = @APR_INCLUDES@ @PERL_INCLUDES@
