@@ -17,7 +17,7 @@ AM_CFLAGS = -I$(top_srcdir)/lib -I$(top_builddir)/lib -I$(top_srcdir)/gmond -I$(
 sbin_PROGRAMS = gmetad
 
 cmdline.c: cmdline.c.in $(FIXCONFIG)
-	$(FIXCONFIG) $<
+	$(FIXCONFIG) $< $@
 
 gmetad_SOURCES =  gmetad.c cmdline.c.in cmdline.c cmdline.h gmetad.h data_thread.c \
    server.c process_xml.c rrd_helpers.c export_helpers.c conf.c conf.h type_hash.c \
@@ -45,10 +45,10 @@ type_hash.c: type_hash.gperf
 	gperf -G -l -H type_hash -t -F ', 0' -N in_type_list -k '1,$$' -W types type_hash.gperf > type_hash.c
 
 gmetad.conf:	gmetad.conf.in $(FIXCONFIG)
-	$(FIXCONFIG) gmetad.conf.in
+	$(FIXCONFIG) $< $@
 
 gmetad.service:	gmetad.service.in $(FIXCONFIG)
-	$(FIXCONFIG) gmetad.service.in
+	$(FIXCONFIG) $< $@
 
 install-data-hook:	gmetad.conf
 	mkdir -p $(DESTDIR)$(sysconfdir) && \

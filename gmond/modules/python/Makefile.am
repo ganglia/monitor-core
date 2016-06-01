@@ -16,10 +16,11 @@ EXTRA_DIST = README.in ../conf.d/modpython.conf.in
 endif 
 
 README:	README.in $(FIXCONFIG)
-	$(FIXCONFIG) README.in
+	$(FIXCONFIG) $< $@
 
 ../conf.d/modpython.conf:	../conf.d/modpython.conf.in $(FIXCONFIG)
-	$(FIXCONFIG) ../conf.d/modpython.conf.in
+	mkdir -p $(builddir)/../conf.d && \
+	  $(FIXCONFIG) $< $@
 
 # Note that README is listed as a dependency to be generated, but it
 # is not currently installed anywhere

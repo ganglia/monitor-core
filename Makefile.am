@@ -65,20 +65,23 @@ dist-hook:
 #bin_SCRIPTS = ganglia-config
 
 ganglia-config:	ganglia-config.in $(FIXCONFIG)
-	$(FIXCONFIG) $<
+	$(FIXCONFIG) $< $@
 
 install-exec-hook: ganglia-config
 	mkdir -p $(DESTDIR)$(bindir) && \
 	  $(INSTALL_SCRIPT) $< $(DESTDIR)$(bindir)/ganglia-config
 
 contrib/ganglia_gmond.xml: contrib/ganglia_gmond.xml.in $(FIXCONFIG)
-	$(FIXCONFIG) $<
+	mkdir -p contrib && \
+	  $(FIXCONFIG) $< $@
 
 solaris/pkginfo: solaris/pkginfo.in $(FIXCONFIG)
-	$(FIXCONFIG) $<
+	mkdir -p solaris && \
+	  $(FIXCONFIG) $< $@
 
 gmetad-python/gmetad-python.service: gmetad-python/gmetad-python.service.in $(FIXCONFIG)
-	$(FIXCONFIG) $<
+	mkdir -p gmetad-python && \
+	  $(FIXCONFIG) $< $@
 
 # Notice that some files declared in this hook never get installed anywhere
 # We use the hook to force the files to be generated, but they remain

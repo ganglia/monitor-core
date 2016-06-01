@@ -17,10 +17,11 @@ EXTRA_DIST = README.in ../conf.d/modperl.conf.in
 endif 
 
 README:	README.in $(FIXCONFIG)
-	$(FIXCONFIG) README.in
+	$(FIXCONFIG) $< $@
 
 ../conf.d/modperl.conf:	../conf.d/modperl.conf.in $(FIXCONFIG)
-	$(FIXCONFIG) ../conf.d/modperl.conf.in
+	mkdir -p $(builddir)/../conf.d && \
+	  $(FIXCONFIG) $< $@
 
 # Note that README is listed as a dependency to be generated, but it
 # is not currently installed anywhere
