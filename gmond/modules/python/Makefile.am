@@ -30,4 +30,7 @@ install-exec-hook:	$(builddir)/../conf.d/modpython.conf README
 
 CLEANFILES = $(builddir)/../conf.d/modpython.conf README
 
+uninstall-hook:
+	rm $(DESTDIR)$(sysconfdir)/conf.d/modpython.conf
+
 INCLUDES = @APR_INCLUDES@ @PYTHON_INCLUDES@

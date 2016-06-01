@@ -74,6 +74,9 @@ install-exec-hook: ganglia-config
 
 CLEANFILES += ganglia-config
 
+uninstall-hook:
+	rm $(DESTDIR)$(bindir)/ganglia-config
+
 contrib/ganglia_gmond.xml: contrib/ganglia_gmond.xml.in $(FIXCONFIG)
 	mkdir -p contrib && \
 	  $(FIXCONFIG) $< $@

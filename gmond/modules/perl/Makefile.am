@@ -31,4 +31,7 @@ install-exec-hook:	$(builddir)/../conf.d/modperl.conf README
 
 CLEANFILES = $(builddir)/../conf.d/modperl.conf README
 
+uninstall-hook:
+	rm $(DESTDIR)$(sysconfdir)/conf.d/modperl.conf
+
 INCLUDES = @APR_INCLUDES@ @PERL_INCLUDES@
