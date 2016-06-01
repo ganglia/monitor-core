@@ -37,9 +37,4 @@ SUBDIRS += system
 SUBDIRS += $(STATUS_SUBDIR)
 SUBDIRS += $(PYTHON_SUBDIR)
 SUBDIRS += $(PERL_SUBDIR)
-
-install: install-recursive
-	@rm -rf $(DESTDIR)$(pkglibdir)/*.a
-	@rm -rf $(DESTDIR)$(pkglibdir)/*.la
-
 endif
