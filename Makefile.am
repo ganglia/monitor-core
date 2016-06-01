@@ -38,6 +38,7 @@ README: ganglia.sub
 	pod2text ganglia.sub README
 
 CLEANFILES = ganglia.sub pod2htm*
+DISTCLEANFILES = README ganglia.html
 
 dist-local: README ganglia.html
 
@@ -71,6 +72,8 @@ install-exec-hook: ganglia-config
 	mkdir -p $(DESTDIR)$(bindir) && \
 	  $(INSTALL_SCRIPT) $< $(DESTDIR)$(bindir)/ganglia-config
 
+CLEANFILES += ganglia-config
+
 contrib/ganglia_gmond.xml: contrib/ganglia_gmond.xml.in $(FIXCONFIG)
 	mkdir -p contrib && \
 	  $(FIXCONFIG) $< $@
@@ -88,3 +91,5 @@ gmetad-python/gmetad-python.service: gmetad-python/gmetad-python.service.in $(FI
 # within the build tree for someone to inspect or manually copy to
 # the desired location if needed
 all: contrib/ganglia_gmond.xml solaris/pkginfo gmetad-python/gmetad-python.service
+
+CLEANFILES += contrib/ganglia_gmond.xml solaris/pkginfo gmetad-python/gmetad-python.service

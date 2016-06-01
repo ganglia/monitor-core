@@ -28,4 +28,6 @@ install-exec-hook:	$(builddir)/../conf.d/modpython.conf README
 	mkdir -p $(DESTDIR)$(sysconfdir)/conf.d && \
 	  $(INSTALL_DATA) $(builddir)/../conf.d/modpython.conf $(DESTDIR)$(sysconfdir)/conf.d/modpython.conf
 
+CLEANFILES = $(builddir)/../conf.d/modpython.conf README
+
 INCLUDES = @APR_INCLUDES@ @PYTHON_INCLUDES@

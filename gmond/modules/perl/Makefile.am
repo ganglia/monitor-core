@@ -29,4 +29,6 @@ install-exec-hook:	$(builddir)/../conf.d/modperl.conf README
 	mkdir -p $(DESTDIR)$(sysconfdir)/conf.d && \
 	  $(INSTALL_DATA) $(builddir)/../conf.d/modperl.conf $(DESTDIR)$(sysconfdir)/conf.d/modperl.conf
 
+CLEANFILES = $(builddir)/../conf.d/modperl.conf README
+
 INCLUDES = @APR_INCLUDES@ @PERL_INCLUDES@

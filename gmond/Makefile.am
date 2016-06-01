@@ -91,6 +91,7 @@ install-exec-hook:	gmond.solaris.init
 #	$(INSTALL_SCRIPT) gmond.solaris.init
 
 CLEANFILES = cmdline.c	
+CLEANFILES += gmond.solaris.init
 
 if HAVE_SYSTEMD
 systemdsystemunit_DATA = \
