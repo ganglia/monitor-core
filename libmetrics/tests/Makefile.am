@@ -1,6 +1,6 @@
 TESTS = test-metrics
 
-AM_CFLAGS = -I../../include
+AM_CFLAGS = -I$(top_builddir)/../include -I$(top_srcdir)
 
 check_PROGRAMS = test-metrics
 

@@ -1,2 +1,2 @@
 DIST_SUBDIRS = example
-EXTRA_DIST = ./conf.d/*.plconf
+EXTRA_DIST = $(srcdir)/conf.d/*.plconf

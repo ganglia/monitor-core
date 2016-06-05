@@ -45,12 +45,12 @@ GCFLAGS += -DSFLOW
 endif
 
 INCLUDES = @APR_INCLUDES@
-AM_CFLAGS = -I$(top_builddir)/lib -I$(top_builddir)/include/ -I$(top_builddir)/libmetrics $(GCFLAGS)
+AM_CFLAGS = -I$(top_srcdir)/lib -I$(top_builddir)/lib -I$(top_builddir)/include/ -I$(top_srcdir)/libmetrics -I$(top_builddir)/libmetrics $(GCFLAGS)
 
 sbin_PROGRAMS = gmond
 
 cmdline.c: cmdline.c.in $(FIXCONFIG)
-	$(FIXCONFIG) cmdline.c.in
+	$(FIXCONFIG) $< $@
 
 # metric.h and dtd.h are for gmetad/gmetric for now....
 gmond_SOURCES = gmond.c cmdline.c.in cmdline.c cmdline.h dtd.h g25_config.c core_metrics.c g25_config.h gmond_internal.h
@@ -60,10 +60,10 @@ endif
 dist_man_MANS  = gmond.conf.5
 
 gmond.conf.5: conf.pod gmond.conf.html
-	pod2man --name="gmond.conf" --section=5 conf.pod --center="Ganglia Monitoring System" --release="ganglia/@VERSION@" > gmond.conf.5
+	pod2man --name="gmond.conf" --section=5 $< --center="Ganglia Monitoring System" --release="ganglia/@VERSION@" > gmond.conf.5
 
 gmond.conf.html: conf.pod
-	pod2html --title="Ganglia Monitoring Daemon v@VERSION@ Configuration" --header --infile=conf.pod --outfile=gmond.conf.html
+	pod2html --title="Ganglia Monitoring Daemon v@VERSION@ Configuration" --header --infile=$< --outfile=gmond.conf.html
 
 #monitor.c server.c listen.c cleanup.c \
 #metric.h dtd.h 
@@ -77,10 +77,10 @@ gmond_DEPENDENCIES = $(gmond_LDADD)
 gmond_LDFLAGS = $(GLDFLAGS)
 
 gmond.solaris.init:	gmond.solaris.init.in $(FIXCONFIG)
-	$(FIXCONFIG) gmond.solaris.init.in
+	$(FIXCONFIG) $< $@
 
 gmond.service:	gmond.service.in $(FIXCONFIG)
-	$(FIXCONFIG) gmond.service.in
+	$(FIXCONFIG) $< $@
 
 # we declare the hook so that gmond.solaris.init will be created within the
 # build tree during the install phase
@@ -91,6 +91,7 @@ install-exec-hook:	gmond.solaris.init
 #	$(INSTALL_SCRIPT) gmond.solaris.init
 
 CLEANFILES = cmdline.c	
+CLEANFILES += gmond.solaris.init
 
 if HAVE_SYSTEMD
 systemdsystemunit_DATA = \
