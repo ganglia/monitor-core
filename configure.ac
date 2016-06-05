@@ -214,8 +214,8 @@ AC_DEFINE(SUPPORT_GEXEC, 1, SUPPORT_GEXEC), AC_DEFINE(SUPPORT_GEXEC, 0, SUPPORT_
 setuid_user=nobody
 AC_ARG_ENABLE(setuid,
 [  --enable-setuid=USER    turn on setuid support (default setuid=nobody) ],
-[if test x"$enableval" != xno; then no_setuid=0; setuid_user=$enableval ; fi],
-[ no_setuid=0 ])
+[if test x"$enableval" != xno; then no_setuid=0; setuid_user=$enableval ; else no_setuid=1; fi],
+[ no_setuid=1 ])
 AC_DEFINE_UNQUOTED(NO_SETUID, $no_setuid, NO_SETUID)
 AC_DEFINE_UNQUOTED(SETUID_USER, "$setuid_user", SETUID_USER)
 AC_SUBST(setuid_user)
@@ -223,7 +223,7 @@ AC_SUBST(setuid_user)
 setgid_group=daemon
 AC_ARG_ENABLE(setgid,
 [  --enable-setgid=GROUP   turn on setgid support (default setgid=no) ],
-[if test x"$enableval" != xno; then no_setgid=0; setgid_group=$enableval ; fi],
+[if test x"$enableval" != xno; then no_setgid=0; setgid_group=$enableval ; else no_setgid=1; fi],
 [ no_setgid=1 ])
 AC_DEFINE_UNQUOTED(NO_SETGID, $no_setgid, NO_SETGID)
 AC_DEFINE_UNQUOTED(SETGID_GROUP, "$setgid_group", SETGID_GROUP)
