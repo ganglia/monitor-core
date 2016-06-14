@@ -20,7 +20,7 @@ SFLOW_GMETRIC(SFLOW_M_cpu_intr, "cpu_intr", "", GANGLIA_SLOPE_BOTH, "%.2f", "cpu
 SFLOW_GMETRIC(SFLOW_M_cpu_sintr, "cpu_sintr", "", GANGLIA_SLOPE_BOTH, "%.2f", "cpu", NULL, "CPU Soft Interrupts" )
 SFLOW_GMETRIC(SFLOW_M_cpu_steal, "cpu_steal", "%", GANGLIA_SLOPE_BOTH, "%.2f", "cpu", NULL, "CPU Steal" )
 SFLOW_GMETRIC(SFLOW_M_cpu_guest, "cpu_guest", "%", GANGLIA_SLOPE_BOTH, "%.2f", "cpu", NULL, "CPU Guest" )
-SFLOW_GMETRIC(SFLOW_M_cpu_guest_nice, "cpu_guest_nice", "%", GANGLIA_SLOPE_BOTH, "%.2f", "cpu", NULL, "CPU Guest Nice" )
+SFLOW_GMETRIC(SFLOW_M_cpu_guest_nice, "cpu_gnice", "%", GANGLIA_SLOPE_BOTH, "%.2f", "cpu", NULL, "CPU Guest Nice" )
 SFLOW_GMETRIC(SFLOW_M_interrupts, "interrupts", "", GANGLIA_SLOPE_BOTH, "%.0f", "cpu", NULL, "Interrupts" )
 SFLOW_GMETRIC(SFLOW_M_contexts, "contexts", "", GANGLIA_SLOPE_BOTH, "%.0f", "cpu", NULL, "Context Switches" )
 SFLOW_GMETRIC(SFLOW_M_mem_total, "mem_total", "KB", GANGLIA_SLOPE_ZERO, "%.0f", "memory", NULL, "Memory Total" )
