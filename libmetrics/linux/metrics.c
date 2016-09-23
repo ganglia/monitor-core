@@ -620,6 +620,9 @@ machine_type_func ( void )
 #ifdef __arm__
    snprintf(val.str, MAX_G_STRING_SIZE, "arm");
 #endif
+#ifdef __aarch64__
+   snprintf(val.str, MAX_G_STRING_SIZE, "aarch64");
+#endif
 #ifdef __hppa__
    snprintf(val.str, MAX_G_STRING_SIZE, "hppa");
 #endif
