@@ -775,16 +775,15 @@ setup_listen_channels_pollset( void )
 
                   if(buffer)
                     {
-                      /* RB: getsockopt() returns double SO_RCVBUF since kernel reserves overhead space */
+                      /* NOTE: getsockopt() returns double SO_RCVBUF on Linux for reserved overhead space */
                       if(rx_buf_sz!=(buffer*2))
                         {
-                          err_msg("Error setting UDP receive buffer for port %d bind=%s to size: %d.\n",
+                          err_msg("WARNING When setting UDP receive buffer for port %d bind=%s to size: %d.\n",
                             port, bindaddr? bindaddr: "unspecified", (apr_int32_t) buffer);
-                          err_msg("Reported buffer size by OS: %d : does not match config setting %d.\n",
-                            (int) (rx_buf_sz/2), (int) buffer);
-                          err_msg("NOTE: only supported on systems that have Apache Portable Runtime library version 0.9.4 or higher.\n");
-                          err_msg("Check Operating System (kernel) limits, change or disable buffer size. Exiting.\n");
-                          exit(EXIT_FAILURE);
+                          err_msg("Reported raw buffer size by OS: %d : config setting %d. Unable to verify\n",
+                            (int) rx_buf_sz, (int) buffer);
+                          err_msg("NOTE: Linux will report twice the configured value.  See socket(7).\n");
+                          err_msg("Check Operating System (kernel) limits, change or disable buffer size.\n");
                         }
                       else
                         { /* RB: Eureka */
