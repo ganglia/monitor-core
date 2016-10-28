@@ -383,6 +383,8 @@ def metric_init(params):
 
         mem = {
             'units': 'B',
+            'value_type': 'float',
+            'format': '%.0f',
             'description': 'The total memory utilization'}
     )
 
