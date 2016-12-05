@@ -303,7 +303,8 @@ submit_sflow_string(Ganglia_host *hostdata, char *metric_prefix, EnumSFLOWGMetri
   char mtitle_buf[SFLOW_MAX_METRIC_NAME_LEN];
   if(ok || sflowCFG.submit_null_str) {
     set_metric_name_and_title(&mname, &mtitle, mname_buf, mtitle_buf, metric_prefix, tag);
-    fmsg.id = vmsg.id = gmetric_uint;
+    //fmsg.id = vmsg.id = gmetric_uint;
+    fmsg.id = vmsg.id = gmetric_string;
     fmsg.Ganglia_metadata_msg_u.gfull.metric.type = "string";
     vmsg.Ganglia_value_msg_u.gstr.metric_id.name = mname;
     vmsg.Ganglia_value_msg_u.gstr.str = (ok ? (char *)val : sflowCFG.null_str);
@@ -1188,6 +1189,7 @@ processCounterSample(SFlowXDR *x, char **errorMsg)
     SFLOWXDR_skip(x,4);
     
     machine_type = SFLOWXDR_next(x);
+
     os_name = SFLOWXDR_next(x);
     osrelease_len = SFLOWXDR_next(x);
     if(osrelease_len > 0 && osrelease_len <= SFLOW_MAX_OSRELEASE_LEN) {
