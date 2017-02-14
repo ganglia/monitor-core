@@ -323,7 +323,7 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
        return 0;
 
    /* Don't write a summary for metris that appears to be sFlow VM metrics */
-   if (gmetad_config.unsummarized_sflow_vm_metrics && (p = strchr(name, '.')) != NULL && *(p+1) == 'v')
+   if (gmetad_config.unsummarized_sflow_vm_metrics && (p = strrchr(name, '.')) != NULL && *(p+1) == 'v')
      return 0;
 
    ganglia_scoreboard_inc(METS_SUMRZ_ROOT);

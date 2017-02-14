@@ -1172,7 +1172,7 @@ finish_processing_source(datum_t *key, datum_t *val, void *arg)
       return 0;
 
    /* Don't save to RRD if this metrics appears to be an sFlow VM metrics */
-   if (gmetad_config.unsummarized_sflow_vm_metrics && (p = strchr(name, '.')) != NULL && *(p+1) == 'v')
+   if (gmetad_config.unsummarized_sflow_vm_metrics && (p = strrchr(name, '.')) != NULL && *(p+1) == 'v')
        return 0;
 
    switch (tt->type)
