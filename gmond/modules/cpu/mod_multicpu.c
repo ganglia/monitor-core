@@ -457,7 +457,7 @@ static cpu_util *init_metric (apr_pool_t *p, apr_array_header_t *ar, int cpu_cou
 static g_val_t multi_cpu_steal_func (int cpu_index)
 {
     char *p;
-    cpu_util *cpu = &(cpu_user[cpu_index]);
+    cpu_util *cpu = &(cpu_steal[cpu_index]);
 
     p = update_file(&proc_stat);
     if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
