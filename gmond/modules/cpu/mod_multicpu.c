@@ -76,6 +76,8 @@ static cpu_util *cpu_wio = NULL;
 static cpu_util *cpu_intr = NULL;
 static cpu_util *cpu_sintr = NULL;
 static cpu_util *cpu_steal = NULL;
+static cpu_util *cpu_guest = NULL;
+static cpu_util *cpu_gnice = NULL;
 
 /*
  * A helper function to determine the number of cpustates in /proc/stat (MKN)
@@ -102,6 +104,10 @@ static void init_cpu_info (void)
     ** Loop over file until next "cpu" token is found.
     ** i=4 : Linux 2.4.x
     ** i=7 : Linux 2.6.x
+    **
+    ** i=8 : Linux 2.6.11+
+    ** i=9 : Linux 2.6.24+
+    ** i=10: Linux 2.6.33+
     */
     while (strncmp(p,"cpu",3)) {
         p = skip_token(p);
@@ -190,7 +196,8 @@ static char *find_cpu (char *p, int cpu_index, double *total_jiffies)
 static double total_jiffies_func (char *p)
 {
     unsigned long user_jiffies, nice_jiffies, system_jiffies, idle_jiffies,
-        wio_jiffies, irq_jiffies, sirq_jiffies, steal_jiffies;
+        wio_jiffies, irq_jiffies, sirq_jiffies, steal_jiffies,
+        guest_jiffies, gnice_jiffies;
 
     user_jiffies = strtod( p, &p );
     p = skip_whitespace(p);
@@ -216,6 +223,10 @@ static double total_jiffies_func (char *p)
 
     p = skip_whitespace(p);
     steal_jiffies = strtod( p , &p );
+    p = skip_whitespace(p);
+    guest_jiffies = strtod( p , &p ); /* "guest" included in user already */
+    p = skip_whitespace(p);
+    gnice_jiffies = strtod( p , &p ); /* "gnice" included in nice already */
     return user_jiffies + nice_jiffies + system_jiffies + idle_jiffies +
         wio_jiffies + irq_jiffies + sirq_jiffies + steal_jiffies;
 }   
@@ -479,6 +490,59 @@ static g_val_t multi_cpu_steal_func (int cpu_index)
     return cpu->val;
 }
 
+static g_val_t multi_cpu_guest_func (int cpu_index)
+{
+    char *p;
+    cpu_util *cpu = &(cpu_guest[cpu_index]);
+
+    p = update_file(&proc_stat);
+    if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
+        cpu->stamp = proc_stat.last_read;
+
+        p = find_cpu (p, cpu_index, &cpu->curr_total_jiffies);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_whitespace(p);
+        calculate_utilization (p, cpu);
+    }
+
+    return cpu->val;
+}
+
+static g_val_t multi_cpu_gnice_func (int cpu_index)
+{
+    char *p;
+    cpu_util *cpu = &(cpu_gnice[cpu_index]);
+
+    p = update_file(&proc_stat);
+    if((proc_stat.last_read.tv_sec != cpu->stamp.tv_sec) &&
+       (proc_stat.last_read.tv_usec != cpu->stamp.tv_usec)) {
+        cpu->stamp = proc_stat.last_read;
+
+        p = find_cpu (p, cpu_index, &cpu->curr_total_jiffies);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_token(p);
+        p = skip_whitespace(p);
+        calculate_utilization (p, cpu);
+    }
+
+    return cpu->val;
+}
+
 static int ex_metric_init (apr_pool_t *p)
 {
     int i;
@@ -515,6 +579,10 @@ static int ex_metric_init (apr_pool_t *p)
                             "executing at the sintr level");
     cpu_steal = init_metric (pool, metric_info, cpu_count, "multicpu_steal",
                             "Percentage of CPU preempted by the hypervisor");
+    cpu_guest = init_metric (pool, metric_info, cpu_count, "multicpu_guest",
+                            "Percentage of CPU running a virtual CPU");
+    cpu_gnice = init_metric (pool, metric_info, cpu_count, "multicpu_gnice",
+                            "Percentage of CPU running a niced guest");
 
     /* Add a terminator to the array and replace the empty static metric definition 
         array with the dynamic array that we just created 
@@ -573,6 +641,12 @@ static g_val_t ex_metric_handler ( int metric_index )
 
     if (strcmp(name, "multicpu_steal") == 0)
         return multi_cpu_steal_func(index);
+
+    if (strcmp(name, "multicpu_guest") == 0)
+        return multi_cpu_guest_func(index);
+
+    if (strcmp(name, "multicpu_gnice") == 0)
+        return multi_cpu_gnice_func(index);
 
     /* default case */
     val.f = 0;
