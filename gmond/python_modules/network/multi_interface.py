@@ -247,7 +247,7 @@ def get_aggregates(name):
         except KeyError:
             delta = 0.0
 
-    sum += delta
+        sum += delta
 
     return sum
 
