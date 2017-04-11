@@ -1,6 +1,6 @@
 [Unit]
 Description=Ganglia Monitor Daemon
-After=network.target
+After=network-online.target
 
 [Service]
 Type=forking
