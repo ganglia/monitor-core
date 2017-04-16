@@ -77,7 +77,7 @@ print_sources ( datum_t *key, datum_t *val, void *arg )
 {
    int i;
    data_source_list_t *d = *((data_source_list_t **)(val->data));
-   g_inet_addr *addr;
+   g_inet6_addr *addr;
 
    fprintf(stderr,"Source: [%s, step %d] has %d sources\n",
       (char*) key->data, d->step, d->num_sources);
@@ -535,12 +535,12 @@ main ( int argc, char *argv[] )
       {
          if (!strcmp(c->riemann_protocol, "udp"))
             {
-               riemann_udp_socket = init_riemann_udp_socket (c->riemann_server, c->riemann_port);
+               riemann_udp_socket = init_riemann_udp6_socket (c->riemann_server, c->riemann_port);
 
                if (riemann_udp_socket == NULL)
                   err_quit("[riemann] %s socket failed for %s:%d", c->riemann_protocol, c->riemann_server, c->riemann_port);
             } else if (!strcmp(c->riemann_protocol, "tcp")) {
-                riemann_tcp_socket = init_riemann_tcp_socket (c->riemann_server, c->riemann_port);
+                riemann_tcp_socket = init_riemann_tcp6_socket (c->riemann_server, c->riemann_port);
                 if (riemann_tcp_socket == NULL) {
                    riemann_circuit_breaker = RIEMANN_CB_OPEN;
                    riemann_reset_timeout = apr_time_now () + RIEMANN_RETRY_TIMEOUT * APR_USEC_PER_SEC;

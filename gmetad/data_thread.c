@@ -71,7 +71,7 @@ data_thread ( void *arg )
          
          /* If we successfully read from a good data source last time then try the same host again first. */
          if(d->last_good_index != -1)
-           sock = g_tcp_socket_new ( d->sources[d->last_good_index] );
+           sock = g_tcp6_socket_new ( d->sources[d->last_good_index] );
 
          /* If there was no good connection last time or the above connect failed then try each host in the list. */
          if(!sock)
@@ -79,7 +79,7 @@ data_thread ( void *arg )
              for(i=0; i < d->num_sources; i++)
                {
                  /* Find first viable source in list. */
-                 sock = g_tcp_socket_new ( d->sources[i] );
+                 sock = g_tcp6_socket_new ( d->sources[i] );
                  if( sock )
                    {
                      d->last_good_index = i;
