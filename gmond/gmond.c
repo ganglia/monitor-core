@@ -3315,6 +3315,7 @@ main ( int argc, char *argv[] )
 {
   apr_time_t now, next_collection, last_cleanup;
   apr_pool_t *cleanup_context;
+  apr_thread_t *tcp_listener_thread = NULL;
 
   gmond_argv = argv;
 
@@ -3436,8 +3437,7 @@ main ( int argc, char *argv[] )
   /* Create TCP listener thread */
   if(!deaf)
     {
-      apr_thread_t *thread;
-      if (apr_thread_create(&thread, NULL, tcp_listener, NULL, global_context) != APR_SUCCESS)
+      if (apr_thread_create(&tcp_listener_thread, NULL, tcp_listener, NULL, global_context) != APR_SUCCESS)
         {
           err_msg("Failed to create TCP listener thread. Exiting.\n");
           exit(EXIT_FAILURE);
@@ -3495,6 +3495,16 @@ main ( int argc, char *argv[] )
         {
           /* we're mute. nothing to collect and send. */
           next_collection = now + 60 * APR_USEC_PER_SEC;
+        }
+    }
+
+  if(tcp_listener_thread)
+    {
+      apr_status_t status = SUCCESS;
+      if((status = apr_thread_join(&status, tcp_listener_thread)) != APR_SUCCESS)
+        {
+          char buff[512];
+          debug_msg("apr_thread_join returned unexpected status %d = %s\n", status, apr_strerror(status, buff, 511));
         }
     }
 
