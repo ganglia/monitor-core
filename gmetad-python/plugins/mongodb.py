@@ -130,13 +130,13 @@ class MongodbPlugin(GmetadPlugin) :
             obj = msci.find_document(plugin.manage_collection["VM"], 
                     { "$or" : [{"cloud_ip" : ip}, {"cloud_hostname" : name}], 
                         "mgt_901_deprovisioning_request_originated" : { "$exists" : False},
-                        "mgt_903_deprovisioning_request_completed" : { "$exists" : False} })
+                        "mgt_903_deprovisioning_request_completed" : { "$exists" : False}, "expid" : self.expid })
 
             if obj is not None : 
                 obj = plugin.api.vmshow(plugin.cloud_name, obj["_id"])
             else :
                 vm = False
-                obj = msci.find_document(plugin.manage_collection["HOST"], { "$or" : [{"cloud_ip" : ip}, {"cloud_hostname" : name}] })
+                obj = msci.find_document(plugin.manage_collection["HOST"], { "$or" : [{"cloud_ip" : ip}, {"cloud_hostname" : name}], "expid" : self.expid })
                 if obj is not None : 
                     obj = plugin.api.hostshow(plugin.cloud_name, obj["_id"])
                 else :
@@ -149,7 +149,7 @@ class MongodbPlugin(GmetadPlugin) :
 
             obj = None
             vm = None
-            logging.debug("Can't get VM or HOST object for ip: " + ip)
+            logging.debug("Can't get VM or HOST object for ip: " + ip + ": " + str(e))
 
         finally :
             if vm and obj :
@@ -242,7 +242,7 @@ class MongodbPlugin(GmetadPlugin) :
                     name = obj["name"]
               #      print_list(_data, "data")
                     self.msci.add_document(self.data_collection[obj_type], _data)
-                    old = self.msci.find_document(self.latest_collection[obj_type], {"_id" : obj["uuid"]})
+                    old = self.msci.find_document(self.latest_collection[obj_type], {"_id" : obj["uuid"], "expid" : self.expid})
                     if old is not None :
               #          print_list(old, "old latest")
                         old.update(_data);
