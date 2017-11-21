@@ -97,10 +97,10 @@ while (<FICH>) {
   $cdo=0;
   if ($linea=~/^(.*)<row>/) { $tstamp=$1; }
   if ($linea=~/(<row>.*)$/) { $tresto=$1; }
-  if (/<v>\s\d\.\d+e.(\d+)\s<\/v>/) {
+  if (/<v>\s?\d\.\d+e.(\d+)\s?<\/v>/) {
     @dump = split(/<\/v>/, $tresto);
     for ($lino=0; $lino<=$#dump-1; $lino++) {   # scans DS's within each row 
-      if ( $dump[$lino]=~/\d\.\d+e.(\d+)\s/ ) { # make sure it is a number (and not NaN)
+      if ( $dump[$lino]=~/\d\.\d+e.(\d+)\s?/ ) { # make sure it is a number (and not NaN)
         $a=substr("0$lino",-2).":".$1;
         $exp{$a}++;                             # store exponents
         $tot{substr("0$lino",-2)}++;            # and keep a per DS total
@@ -146,11 +146,11 @@ while (<FICH>) {
   $cdo=0;
   if ($linea=~/^(.*)<row>/) { $tstamp=$1; }     # Grab timestamp
   if ($linea=~/(<row>.*)$/) { $tresto=$1; }     # grab rest-of-line :-)
-  if (/<v>\s\d\.\d+e.(\d+)\s<\/v>/) {           # are there DS's?
+  if (/<v>\s?\d\.\d+e.(\d+)\s?<\/v>/) {           # are there DS's?
     @dump=split(/<\/v>/, $tresto);              # split them
     if ($linbak ne '') {
       for ($lino=0;$lino<=$#dump-1;$lino++) {   # for each DS:
-        if ($dump[$lino]=~/\d\.\d+e.(\d+)\s/) { # grab number (and not a NaN)
+        if ($dump[$lino]=~/\d\.\d+e.(\d+)\s?/) { # grab number (and not a NaN)
 	  $c=$&;
           $a=$1*1;                              # and exponent
           $b=substr("0$lino",-2).":$1";         # calculate the max percentage of this DS
