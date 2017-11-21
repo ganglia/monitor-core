@@ -264,7 +264,11 @@ void update_ifdata ( char *caller )
                        l_bytes_in += rbi - ns->rbi;
                     } else {
                        debug_msg("update_ifdata(%s) - Overflow in rbi: %"PRI_STAT" -> %"PRI_STAT,caller,ns->rbi,rbi);
-                       l_bytes_in += STAT_MAX - ns->rbi + rbi;
+                       if ( ns->rbi <= ULONG_MAX ) { /* assume it's more reasonable that the counter rolled over at ULONG_MAX than ULLONG_MAX */
+                          l_bytes_in += ULONG_MAX - ns->rbi + rbi;
+                       } else {
+                          l_bytes_in += STAT_MAX - ns->rbi + rbi;
+                       }
                     }
                     ns->rbi = rbi;
 
@@ -273,7 +277,11 @@ void update_ifdata ( char *caller )
                        l_pkts_in += rpi - ns->rpi;
                     } else {
                        debug_msg("updata_ifdata(%s) - Overflow in rpi: %"PRI_STAT" -> %"PRI_STAT,caller,ns->rpi,rpi);
-                       l_pkts_in += STAT_MAX - ns->rpi + rpi;
+                       if ( ns->rpi <= ULONG_MAX ) {
+                          l_pkts_in += ULONG_MAX - ns->rpi + rpi;
+                       } else {
+                          l_pkts_in += STAT_MAX - ns->rpi + rpi;
+                       }
                     }
                     ns->rpi = rpi;
 
@@ -286,7 +294,11 @@ void update_ifdata ( char *caller )
                        l_bytes_out += rbo - ns->rbo;
                     } else {
                        debug_msg("update_ifdata(%s) - Overflow in rbo: %"PRI_STAT" -> %"PRI_STAT,caller,ns->rbo,rbo);
-                       l_bytes_out += STAT_MAX - ns->rbo + rbo;
+                       if ( ns->rbo <= ULONG_MAX ) {
+                          l_bytes_out += ULONG_MAX - ns->rbo + rbo;
+                       } else {
+                          l_bytes_out += STAT_MAX - ns->rbo + rbo;
+                       }
                     }
                     ns->rbo = rbo;
 
@@ -295,7 +307,11 @@ void update_ifdata ( char *caller )
                        l_pkts_out += rpo - ns->rpo;
                     } else {
                        debug_msg("update_ifdata(%s) - Overflow in rpo: %"PRI_STAT" -> %"PRI_STAT,caller,ns->rpo,rpo);
-                       l_pkts_out += STAT_MAX - ns->rpo + rpo;
+                       if ( ns->rpo <= ULONG_MAX ) {
+                          l_pkts_out += ULONG_MAX - ns->rpo + rpo;
+                       } else {
+                          l_pkts_out += STAT_MAX - ns->rpo + rpo;
+                       }
                     }
                     ns->rpo = rpo;
                   }
