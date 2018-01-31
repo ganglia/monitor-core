@@ -346,6 +346,10 @@ hash_delete (datum_t *key, hash_t * hash)
   for (; bucket != NULL; last = bucket, bucket = bucket->next)
     {
       node_t tmp;
+      if (bucket->key && !hash_keycmp(hash, key, bucket->key))
+        {
+          continue;
+        }
       if (bucket == &hash->node[i]) 
         {
           tmp.key = bucket->key;
