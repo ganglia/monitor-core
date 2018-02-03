@@ -410,6 +410,19 @@ include (\"" SYSCONFDIR "/conf.d/*.conf\")\n\
 \n\
 "
 
+#define LINUX_SPECIFIC_CONFIGURATION "\
+collection_group {\n\
+  collect_every = 40\n\
+  time_threshold = 180\n\
+  metric {\n\
+    name = \"mem_slab\"\n\
+    value_threshold = \"1024.0\"\n\
+    title = \"Slab Memory\"\n\
+  }\n\
+}\n\
+\n\
+"
+
 #define SOLARIS_SPECIFIC_CONFIGURATION "\
 /* solaris specific metrics begin */\n\
 collection_group {\n\
