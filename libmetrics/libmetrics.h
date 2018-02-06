@@ -79,7 +79,9 @@ void libmetrics_init( void );
  g_val_t location_func(void);
 
 #ifdef LINUX
+ g_val_t mem_slab_func (void);
  g_val_t mem_sreclaimable_func (void);
+ g_val_t mem_sunreclaim_func (void);
 #endif
 
 /* the following are additional internal metrics added by swagner

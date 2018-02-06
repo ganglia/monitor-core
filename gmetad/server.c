@@ -119,6 +119,8 @@ static const struct metricinfo
   #ifdef LINUX
   "mem_sreclaimable", mem_sreclaimable_func, g_float},
   {
+  "mem_slab", mem_slab_func, g_float},
+  {
   #endif
   #ifdef SOLARIS
   "bread_sec", bread_sec_func, g_float},
@@ -894,7 +896,8 @@ status_report( client_t *client , char *callback)
          systemOffset += snprintf (systemBuf + systemOffset, METRICSBUFSIZE > systemOffset ? METRICSBUFSIZE - systemOffset : 0, "\"%s\":%u,", metrics[i].name, (unsigned) val.uint32);
       }
 #ifdef LINUX
-      else if(strcmp(metrics[i].name, "mem_sreclaimable") == 0){
+      else if(strcmp(metrics[i].name, "mem_slab") == 0 ||
+              strcmp(metrics[i].name, "mem_sreclaimable") == 0){
          memoryOffset += snprintf (memoryBuf + memoryOffset, METRICSBUFSIZE > memoryOffset ? METRICSBUFSIZE - memoryOffset : 0, "\"%s\":%f,", metrics[i].name, val.f);
       }
 #endif
