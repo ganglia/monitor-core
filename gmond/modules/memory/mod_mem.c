@@ -52,6 +52,8 @@ static g_val_t mem_metric_handler ( int metric_index )
         return mem_sreclaimable_func();
     case 8:
         return mem_slab_func();
+    case 9:
+        return mem_available_func();
 #endif
 #if HPUX
     case 7:
@@ -82,6 +84,7 @@ static Ganglia_25metric mem_metric_info[] =
 #ifdef LINUX
     {0, "mem_sreclaimable", 180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.0f", UDP_HEADER_SIZE+8, "Amount of reclaimable slab memory"},
     {0, "mem_slab",    180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.0f", UDP_HEADER_SIZE+8, "Amount of in-kernel data structures cache"},
+    {0, "mem_available",    180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.0f", UDP_HEADER_SIZE+8, "Estimate of how much memory is available"},
 #endif
 #if HPUX
     {0, "mem_arm",     180, GANGLIA_VALUE_FLOAT, "KB", "both", "%.0f", UDP_HEADER_SIZE+8, "mem_arm"},

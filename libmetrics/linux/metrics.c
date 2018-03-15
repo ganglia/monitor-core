@@ -1248,6 +1248,23 @@ mem_free_func ( void )
 }
 
 g_val_t
+mem_available_func ( void )
+{
+   char *p;
+   g_val_t val;
+
+   p = strstr( update_file(&proc_meminfo), "MemAvailable:" );
+   if (p) {
+     p = skip_token(p);
+     val.f = atof( p );
+   } else {
+     val.f = 0.0;
+   }
+
+   return val;
+}
+
+g_val_t
 mem_shared_func ( void )
 {
    char *p;
