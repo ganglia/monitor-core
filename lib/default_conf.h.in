@@ -415,9 +415,9 @@ collection_group {\n\
   collect_every = 40\n\
   time_threshold = 180\n\
   metric {\n\
-    name = \"mem_slab\"\n\
+    name = \"mem_sreclaimable\"\n\
     value_threshold = \"1024.0\"\n\
-    title = \"Slab Memory\"\n\
+    title = \"Slab Memory Reclaimable\"\n\
   }\n\
 }\n\
 \n\
