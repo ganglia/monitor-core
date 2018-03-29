@@ -611,39 +611,30 @@ machine_type_func ( void )
 
 #ifdef __i386__
    snprintf(val.str, MAX_G_STRING_SIZE, "x86");
-#endif
-#ifdef __x86_64__
+#elif __x86_64__
    snprintf(val.str, MAX_G_STRING_SIZE, "x86_64");
-#endif
-#ifdef __ia64__
+#elif __ia64__
    snprintf(val.str, MAX_G_STRING_SIZE, "ia64");
-#endif
-#ifdef __sparc__
+#elif __sparc__
    snprintf(val.str, MAX_G_STRING_SIZE, "sparc");
-#endif
-#ifdef __alpha__
+#elif __alpha__
    snprintf(val.str, MAX_G_STRING_SIZE, "alpha");
-#endif
-#ifdef __powerpc__
+#elif __powerpc__
    snprintf(val.str, MAX_G_STRING_SIZE, "powerpc");
-#endif
-#ifdef __m68k__
+#elif __m68k__
    snprintf(val.str, MAX_G_STRING_SIZE, "m68k");
-#endif
-#ifdef __mips__
+#elif __mips__
    snprintf(val.str, MAX_G_STRING_SIZE, "mips");
-#endif
-#ifdef __arm__
+#elif __arm__
    snprintf(val.str, MAX_G_STRING_SIZE, "arm");
-#endif
-#ifdef __aarch64__
+#elif __aarch64__
    snprintf(val.str, MAX_G_STRING_SIZE, "aarch64");
-#endif
-#ifdef __hppa__
+#elif __hppa__
    snprintf(val.str, MAX_G_STRING_SIZE, "hppa");
-#endif
-#ifdef __s390__
+#elif __s390__
    snprintf(val.str, MAX_G_STRING_SIZE, "s390");
+#else
+   snprintf(val.str, MAX_G_STRING_SIZE, "unknown");
 #endif
 
    return val;
