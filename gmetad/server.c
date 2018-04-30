@@ -119,6 +119,10 @@ static const struct metricinfo
   #ifdef LINUX
   "mem_sreclaimable", mem_sreclaimable_func, g_float},
   {
+  "mem_slab", mem_slab_func, g_float},
+  {
+  "mem_available", mem_available_func, g_float},
+  {
   #endif
   #ifdef SOLARIS
   "bread_sec", bread_sec_func, g_float},
