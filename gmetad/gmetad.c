@@ -341,7 +341,8 @@ write_root_summary(datum_t *key, datum_t *val, void *arg)
 
    debug_msg("Writing Root Summary data for metric %s", name);
 
-   rc = write_data_to_rrd( NULL, NULL, name, sum, num, 15, 0, metric->slope);
+   rc = write_data_to_rrd( NULL, NULL, name, sum, num, 15, 0,
+      cstr_to_slope(getfield(metric->strings, metric->slope)));
    if (rc)
       {
          err_msg("Unable to write meta data for metric %s to RRD", name);
