@@ -1012,34 +1012,49 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
 
   /* split out the spoofed host name and ip address so that it can
    * be used to get the spoofed host. */
-  if(metric_id && metric_id->spoof)
+  if(metric_id && metric_id->spoof && metric_id->host)
     {
-      char *spoofName;
-      char *spoofIP;
       int spoof_info_len;
 
       spoof_info_len = strlen(metric_id->host);
-      buff = malloc(spoof_info_len+1);
-      strncpy(buff, metric_id->host, spoof_info_len + 1);
-      spoofIP = buff;
-      if( !(spoofName = strchr(buff+1,':')) ){
-          err_msg("Incorrect format for spoof argument. exiting.\n");
-          if (spoofIP) debug_msg("spoofIP: %s \n",spoofIP);
-          if (buff) debug_msg("buff: %s \n",buff);
-          if (buff) free(buff);
+      /* don't bother if the host string is empty */
+      if(spoof_info_len > 0)
+        {
+          char *spoofName;
+          char *spoofIP;
+          
+          buff = malloc(spoof_info_len+1);
+          if(buff == NULL)
+            {
+              err_msg("Unable to allocate spoof argument parse buffer. exiting.\n");
+              return NULL;
+            }
+          strncpy(buff, metric_id->host, spoof_info_len + 1);
+          spoofIP = buff;
+          if( !(spoofName = strchr(buff+1,':')) ){
+              err_msg("Incorrect format for spoof argument (no colon delimiter). exiting.\n");
+              if (spoofIP) debug_msg("spoofIP: %s \n",spoofIP);
+              if (buff) debug_msg("buff: %s \n",buff);
+              if (buff) free(buff);
+              return NULL;
+          }
+          *spoofName = 0;
+          spoofName++;
+          if(!(*spoofName)){
+              err_msg("Incorrect format for spoof argument (empty hostname). exiting.\n");
+              if (buff) free(buff);
+              return NULL;
+          }
+          debug_msg(" spoofName: %s    spoofIP: %s \n",spoofName,spoofIP);
+          
+          hostname = spoofName;
+          remoteip = spoofIP;
+        }
+      else
+        {
+          err_msg("Incorrect format for spoof argument (host string empty). exiting.\n");
           return NULL;
-      }
-      *spoofName = 0;
-      spoofName++;
-      if(!(*spoofName)){
-          err_msg("Incorrect format for spoof argument. exiting.\n");
-          if (buff) free(buff);
-          return NULL;
-      }
-      debug_msg(" spoofName: %s    spoofIP: %s \n",spoofName,spoofIP);
-
-      hostname = spoofName;
-      remoteip = spoofIP;
+        }
     }
 
   apr_thread_mutex_lock(hosts_mutex);
@@ -2997,7 +3012,13 @@ Ganglia_collection_group_send( Ganglia_collection_group *group, apr_time_t now)
             name = cb->msg.Ganglia_value_msg_u.gstr.metric_id.name;
             if (override_hostname != NULL)
               {
-                cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrcat(gm_pool, (char *)( override_ip != NULL ? override_ip : override_hostname ), ":", (char *) override_hostname, NULL);
+                /* Since cb will live beyond this function call, we need to
+                 * allocate the host field from the global pool and NOT the
+                 * temporary gm_pool from the metric object.  (Note that
+                 * Ganglia_metric_callback objects are allocated from
+                 * global_context elsewhere in this file.)
+                 */
+                cb->msg.Ganglia_value_msg_u.gstr.metric_id.host = apr_pstrcat(global_context, (char *)( override_ip != NULL ? override_ip : override_hostname ), ":", (char *) override_hostname, NULL);
                 cb->msg.Ganglia_value_msg_u.gstr.metric_id.spoof = TRUE;
               }
             val = apr_pstrdup(gm_pool, host_metric_value(cb->info, &(cb->msg)));
