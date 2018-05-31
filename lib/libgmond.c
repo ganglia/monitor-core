@@ -26,7 +26,11 @@
 #include <dirent.h>
 #include <fnmatch.h>
 
-static char myhost[APRMAXHOSTLEN+1];
+/* functions throughout this file will initialize this
+ * variable if myhost[0] == '\0', so ensure the compiler
+ * initializes it as an empty string:
+ */
+static char myhost[APRMAXHOSTLEN+1] = "";
 
 /***** IMPORTANT ************
 Any changes that you make to this file need to be reconciled in ./conf.pod
