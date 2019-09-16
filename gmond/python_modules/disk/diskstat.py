@@ -197,7 +197,8 @@ def get_partitions():
                 continue
             device_name = line.split()[3]
             device_ends_with_number = re.search('\d$', device_name)
-            if 'md' in device_name or not device_ends_with_number:
+            nvme_device = re.search('^nvme\dn1$', device_name)
+            if 'md' in device_name or nvme_device or not device_ends_with_number:
                 # only include md devices and base block devices
                 devices.append(device_name)
         out = ' '.join(devices)
