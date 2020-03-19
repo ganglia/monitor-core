@@ -319,21 +319,26 @@ if test x"$enable_python" = xyes; then
   if test -n "$PYTHON_BIN"; then
     # find out python version
     AC_MSG_CHECKING(Python version)
-    PyVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:3]'`]
-    PyMAJVERSION=`$PYTHON_BIN -c ['import sys; print sys.version[:1]'`]
+    PyVERSION=`$PYTHON_BIN -c ['import sys; print(sys.version[:3])'`]
+    PyMAJVERSION=`$PYTHON_BIN -c ['import sys; print(sys.version[:1])'`]
     AC_MSG_RESULT($PyVERSION)
     PYTHON_VERSION=$PyVERSION
     AC_SUBST(PYTHON_VERSION)
 
-    PyEXEC_INSTALLDIR=`$PYTHON_BIN -c "import sys; print sys.exec_prefix"`
-    if test -f "$PyEXEC_INSTALLDIR/include/python/Python.h"; then
-      PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python"
+    PyEXEC_INSTALLDIR=`$PYTHON_BIN -c "import sys; print(sys.exec_prefix)"`
+    if test -f "$PyEXEC_INSTALLDIR/include/python$PyVERSION/Python.h"; then
+      PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python$PyVERSION"
     else
-      if test -f "$PyEXEC_INSTALLDIR/include/python$PyVERSION/Python.h"; then
-        PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python$PyVERSION"
+      if test -f $PyEXEC_INSTALLDIR'/include/python'$PyVERSION'm/Python.h'; then
+        PYTHON_VERSION=$PYTHON_VERSION'm'
+        PYTHON_INCLUDES='-I'$PyEXEC_INSTALLDIR'/include/python'$PyVERSION'm'
       else
-        PYTHON_INCLUDES=""
-        enable_python="no"
+        if test -f "$PyEXEC_INSTALLDIR/include/python/Python.h"; then
+          PYTHON_INCLUDES="-I$PyEXEC_INSTALLDIR/include/python"
+        else
+          PYTHON_INCLUDES=""
+          enable_python="no"
+        fi
       fi
     fi
     AC_SUBST(PYTHON_INCLUDES)
@@ -341,6 +346,7 @@ if test x"$enable_python" = xyes; then
     enable_python="no"
   fi
 fi
+
 
 AC_MSG_CHECKING(Python support)
 AC_MSG_RESULT($enable_python)
