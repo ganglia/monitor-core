@@ -592,6 +592,7 @@ static PyMethodDef GangliaMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+#if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef gangliaModPy =
 {
     PyModuleDef_HEAD_INIT,
@@ -600,6 +601,7 @@ static struct PyModuleDef gangliaModPy =
     -1,          /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
     GangliaMethods
 };
+#endif
 
 static int pyth_metric_init (apr_pool_t *p)
 {
