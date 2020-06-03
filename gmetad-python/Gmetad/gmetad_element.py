@@ -54,7 +54,7 @@ class Element:
         # If any attributes where given during intialization, add them here.
         self.attrs = {}
         self.lastReportedTime = 0
-        for k,v in attrs.items():
+        for k,v in list(attrs.items()):
             self.attrs[k.lower()] = v
         self.children = {}
         self.gridDepth = -1
@@ -72,7 +72,7 @@ class Element:
         
     def update(self, elem):
         ''' This method updates an existing chld node based on a new node. '''
-        for k in self.attrs.keys():
+        for k in list(self.attrs.keys()):
             try:
                 self.attrs[k] = elem.attrs[k]
             except ValueError:
@@ -80,18 +80,18 @@ class Element:
         
     def __str__(self):
         ''' This method generates a string representation of a node. '''
-        if self.attrs.has_key('name'):
+        if 'name' in self.attrs:
             return Element.generateKey([self.id,self.attrs['name']])
         return Element.generateKey(self.id)
         
     def __iter__(self):
         ''' This method allow the class to be an interator over it's children. '''
-        return self.children.itervalues()
+        return iter(self.children.values())
         
     def __copy__(self):
         ''' Shallow copy method, may not be used. '''
         cp = Element(self.id, {})
-        for k in self.attrs.keys():
+        for k in list(self.attrs.keys()):
             try:
                 cp.attrs[k.lower()] = copy.copy(self.attrs[k])
             except ValueError:
@@ -102,7 +102,7 @@ class Element:
         '''  This method creates a copy of the node that can be used as a summary node. '''
         attrs = {}
         # Copy all of the attributes that are necessary for a summary node.
-        for k in self.attrs.keys():
+        for k in list(self.attrs.keys()):
             try:
                 if k.lower() in ['name', 'sum', 'num', 'type', 'units', 'slope', 'source']:
                     attrs[k.lower()] = self.attrs[k]
@@ -117,7 +117,7 @@ class Element:
         return cp
         
     def getAttr(self, attr):
-        if self.attrs.has_key(attr.lower()):
+        if attr.lower() in self.attrs:
             return self.attrs[attr.lower()]
         return None
         
@@ -130,8 +130,8 @@ class Element:
     def incAttr(self, attr, val):
         try:
             self.attrs[attr.lower()] += val
-        except Exception, e:
-            print 'Can not increment attribute ' + str(e)
+        except Exception as e:
+            print('Can not increment attribute ' + str(e))
         
     def getSummaryData(self):
         try:

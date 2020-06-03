@@ -32,13 +32,13 @@
 #******************************************************************************/
 
 import threading
-import cPickle as pickle
+import pickle as pickle
 import zlib
 import logging
 
-from gmetad_element import Element
-from gmetad_config import getConfig, GmetadConfig
-from gmetad_plugin import load_plugins, start_plugins, stop_plugins, notify_plugins
+from .gmetad_element import Element
+from .gmetad_config import getConfig, GmetadConfig
+from .gmetad_plugin import load_plugins, start_plugins, stop_plugins, notify_plugins
 
 _decode = lambda x: (pickle.loads(zlib.decompress(x)))
 _encode = lambda x: buffer(zlib.compress(pickle.dumps(x, pickle.HIGHEST_PROTOCOL)))

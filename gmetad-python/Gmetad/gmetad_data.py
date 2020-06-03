@@ -31,14 +31,14 @@
 #*                  Brad Nicholes (bnicholes novell.com)
 #******************************************************************************/
 
-import thread, threading
+import _thread, threading
 import logging
 import time
 
-from gmetad_element import Element
-from gmetad_config import getConfig, GmetadConfig
-from gmetad_notifier import GmetadNotifier
-from gmetad_random import getRandomInterval
+from .gmetad_element import Element
+from .gmetad_config import getConfig, GmetadConfig
+from .gmetad_notifier import GmetadNotifier
+from .gmetad_random import getRandomInterval
 
 class DataStore:
     '''The Datastore object stores all of the metric data
@@ -47,7 +47,7 @@ class DataStore:
        of the object will produce the same data store. '''
     _shared_state = {} #Storage for a singleton object
     _initialized = False
-    lock = thread.allocate_lock()
+    lock = _thread.allocate_lock()
     
     def __init__(self):
         # Replace the objects attributes with the original
@@ -58,7 +58,7 @@ class DataStore:
         if not DataStore._initialized:
             # Allocate a lock that will be used by all threads
             #  that are reading or writing to the data store.
-            self.lock = thread.allocate_lock()
+            self.lock = _thread.allocate_lock()
             self.lock.acquire()
             self.rootElement = None
             # Initialize the data store with the GANGLIA_XML and GRID tags.
@@ -230,8 +230,8 @@ class DataStore:
                     currSum = summaryNode.getAttr('sum')
                     try :
                         summaryNode.incAttr('sum',  float(metricNode.getAttr('val')))
-                    except ValueError, msg:
-                        print str(msg) + " sum: " + metricNode.getAttr('val')
+                    except ValueError as msg:
+                        print(str(msg) + " sum: " + metricNode.getAttr('val'))
                 except KeyError:
                     # Since summary metrics use a different tag, create the new 
                     #  summary node with correct tag.
@@ -241,8 +241,8 @@ class DataStore:
                     try :
                         summaryNode.setAttr('sum', float(metricNode.getAttr('val')))
                         summaryNode.setAttr('type', 'double')
-                    except ValueError, msg:
-                        print str(msg) + " sum: " + metricNode.getAttr('val')
+                    except ValueError as msg:
+                        print(str(msg) + " sum: " + metricNode.getAttr('val'))
                     # Add the summary node to the summary dictionary
                     clusterNode.summaryData['summary'][str(summaryNode)] = summaryNode
                 summaryNode.incAttr('num', 1)
@@ -358,7 +358,7 @@ class DataStoreGridSummary(threading.Thread):
                     except KeyError:
                         pass
                     # Summarize over all of the metrics in the cluster node summary.
-                    for metricNode in clusterNode.summaryData['summary'].itervalues():
+                    for metricNode in clusterNode.summaryData['summary'].values():
                         # Don't include metrics that can not be summarized
                         if metricNode.getAttr('type') in ['string', 'timestamp']:
                             continue
@@ -374,8 +374,8 @@ class DataStoreGridSummary(threading.Thread):
                             gridNode.summaryData['summary'][str(summaryNode)] = summaryNode
                             summaryNode.setAttr('sum', metricNode.getAttr('sum'))
                         summaryNode.incAttr('num', 1)
-        except Exception, e:
-            print 'Grid summary ' + str(e) 
+        except Exception as e:
+            print('Grid summary ' + str(e)) 
         ds.releaseLock(self)
 
     def run(self):

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #/*******************************************************************************
 #* Portions Copyright (C) 2008 Novell, Inc. All rights reserved.
@@ -212,7 +212,7 @@ if __name__ == '__main__':
             logging.debug('Wrote pid %d to pidfile %s' % (os.getpid(), gmetadConfig[GmetadConfig.PIDFILE]))
             pffd.close()
             pffd = open(gmetadConfig[GmetadConfig.PIDFILE], 'r')
-        except Exception, e:
+        except Exception as e:
             logging.error('Unable to write PID %d to %s (%s)' % (os.getpid(), gmetadConfig[GmetadConfig.PIDFILE], e))
             sys.exit()
 
@@ -240,7 +240,7 @@ if __name__ == '__main__':
             asyncore.loop()
         except KeyboardInterrupt:
             logging.info('Shutting down...')
-        except Exception, e:
+        except Exception as e:
             logging.error('Caught exception: %s' % e)
             raise
     finally:
@@ -255,9 +255,9 @@ if __name__ == '__main__':
         try:
             xmlSocket.close()
             interactiveSocket.close()
-        except AttributeError, e:
+        except AttributeError as e:
             logging.error ('Problem closing socket: %s'% e)
-        except Exception, e:
+        except Exception as e:
             logging.error('Caught exception: %s' % e)
         if pffd is not None:
             pffd.close()

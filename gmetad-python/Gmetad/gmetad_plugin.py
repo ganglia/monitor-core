@@ -36,7 +36,7 @@ import logging
 import os
 import sys
 
-from gmetad_config import getConfig
+from .gmetad_config import getConfig
 
 _plugins = []  # Holds a list of all of the plugins
 
@@ -69,7 +69,7 @@ def load_plugins(pdir):
                     logging.warning('Plugin %s is not a gmetad plugin' % plugin_name)
                 else:
                     _plugins.append(plugin)
-            except Exception, e:
+            except Exception as e:
                 logging.warning('Failed to load plugin %s (caught exception %s)' % (plugin_name, e))
         finally:
             if fp: fp.close()
@@ -117,9 +117,9 @@ class GmetadPlugin:
     def start(self):
         '''Called by the engine during initialization to get the plugin going.  Must
         be overridden by subclasses.'''
-        raise Exception, 'No definition provided for plugin "start" method.'
+        raise Exception('No definition provided for plugin "start" method.')
     
     def stop(self):
         '''Called by the engine during shutdown to allow the plugin to shutdown.  Must
         be overridden by subclasses.'''
-        raise Exception, 'No definition provided for plugin "stop" method.'
+        raise Exception('No definition provided for plugin "stop" method.')

@@ -143,7 +143,7 @@ class MongodbPlugin(GmetadPlugin) :
                     vm = None
                     obj = None
 
-        except Exception, e :
+        except Exception as e :
             _status = 23
             _fmsg = str(e)
 
@@ -189,10 +189,10 @@ class MongodbPlugin(GmetadPlugin) :
 
             try :
                 vm, obj = self.find_object(hostNode.getAttr('ip'), self, hostNode.getAttr('name'))
-            except APIException, obj :
+            except APIException as obj :
                 logging.error("Problem with API connectivity: " + str(obj))
                 continue
-            except Exception, obj2 :
+            except Exception as obj2 :
                 logging.error("Problem with API object lookup: " + str(obj2))
                 continue
 
@@ -252,7 +252,7 @@ class MongodbPlugin(GmetadPlugin) :
                     old["_id"] = obj["uuid"]
                     self.msci.update_document(self.latest_collection[obj_type], old)
 
-                except Exception, e :
+                except Exception as e :
                     _status = 23
                     _fmsg = str(e)
                     logging.error("Could not write to metric store: " + str(_fmsg))

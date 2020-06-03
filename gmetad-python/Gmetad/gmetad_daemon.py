@@ -36,7 +36,7 @@ import pwd
 import sys
 import resource
 
-from gmetad_config import getConfig, GmetadConfig
+from .gmetad_config import getConfig, GmetadConfig
 
 def setuid():
     cfg = getConfig()
@@ -47,7 +47,7 @@ def setuid():
         try:
             os.setuid(pwd.getpwnam(setuid_user)[2])
         except Exception:
-            print 'Unable to setuid to user "%s", exiting' % setuid_user
+            print('Unable to setuid to user "%s", exiting' % setuid_user)
             sys.exit()
         
 def daemonize(ignore_fds=[]):
@@ -60,15 +60,15 @@ def daemonize(ignore_fds=[]):
         
     try:
         pid = os.fork()
-    except OSError, e:
-        raise Exception, 'Daemonize error: %d (%s)' % (e.errno, e.strerror)
+    except OSError as e:
+        raise Exception('Daemonize error: %d (%s)' % (e.errno, e.strerror))
     if pid == 0:
         # first child
         os.setsid()
         try:
             pid = os.fork()
-        except OSError, e:
-            raise Exception, 'Daemonize error: %d (%s)' % (e.errno, e.strerror)
+        except OSError as e:
+            raise Exception('Daemonize error: %d (%s)' % (e.errno, e.strerror))
         if pid == 0:
             # second child
             os.chdir(WORKDIR)

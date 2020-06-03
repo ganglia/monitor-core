@@ -155,7 +155,7 @@ class GmetadConfig:
                 break
             if args is None:
                 continue
-            if self.kwHandlers.has_key(kw):
+            if kw in self.kwHandlers:
                 self.kwHandlers[kw](args)
             elif (args.strip().startswith('{')):
                 self._setSection(kw,f)
@@ -323,17 +323,17 @@ def getConfig(args=sys.argv):
     options, arguments = parser.parse_args()
 
     if not options.debug.isdigit():
-        print 'Invalid numeric value for --debug: %s' % options.debug
+        print('Invalid numeric value for --debug: %s' % options.debug)
         parser.print_help()
         sys.exit()
     elif not options.interactive_port.isdigit():
-        print 'Invalid numeric value for --interactive_port: %s' % options.interactive_port
+        print('Invalid numeric value for --interactive_port: %s' % options.interactive_port)
         sys.exit()
     elif not options.xml_port.isdigit():
-        print 'Invalid numeric value for --xml_port: %s' % options.xml_port
+        print('Invalid numeric value for --xml_port: %s' % options.xml_port)
         sys.exit()
     elif not os.path.exists(options.conf):
-        print 'No such configuration file: %s' % options.conf
+        print('No such configuration file: %s' % options.conf)
         parser.print_help()
         sys.exit()
         

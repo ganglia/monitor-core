@@ -31,12 +31,12 @@
 #*                  Brad Nicholes (bnicholes novell.com)
 #******************************************************************************/
 
-import thread
+import _thread
 import time
 import logging
 
-from gmetad_config import GmetadConfig
-from gmetad_data import DataStore, Element
+from .gmetad_config import GmetadConfig
+from .gmetad_data import DataStore, Element
 
 class XmlWriter:
     _xml_starttag = '<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>'
@@ -122,13 +122,13 @@ class XmlWriter:
         # If we have summary data, then interate through all of the metric nodes and generate XML for each.
         summaryData = gridnode.getSummaryData()
         if summaryData is not None:
-            for m in summaryData['summary'].itervalues():
+            for m in summaryData['summary'].values():
                 cbuf += self._getXmlImpl(m, filterList, queryargs)
         # Format the XML based on all of the results.
         rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n%s' % (hosts[0], hosts[1], cbuf)
         if self.gridDepth == 0:
             # Generate the XML for each cluster/grid node.
-            for c in gridnode.children.values():
+            for c in list(gridnode.children.values()):
                 if 'CLUSTER' == c.id or 'GRID' == c.id:
                     rbuf += self._getXmlImpl(c, filterList, queryargs)
         return rbuf
@@ -141,7 +141,7 @@ class XmlWriter:
         # If we have summary data, then interate through all of the metric nodes and generate XML for each.
         summaryData = clusternode.getSummaryData()
         if summaryData is not None:
-            for m in summaryData['summary'].itervalues():
+            for m in summaryData['summary'].values():
                 cbuf += self._getXmlImpl(m, filterList, queryargs)
         # Format the XML based on all of the results.
         rbuf = '<HOSTS UP="%d" DOWN="%d" SOURCE="gmetad" />\n%s' % (hosts[0], hosts[1], cbuf)
@@ -163,7 +163,7 @@ class XmlWriter:
             # Add the XML tag
             rbuf = '<%s' % element.tag
             # Add each attribute that is contained in the.  By pass some specific attributes.
-            for k,v in element.getAttrs().items():
+            for k,v in list(element.getAttrs().items()):
                 rbuf += ' %s="%s"' % (k.upper(), v)
         if queryargs is not None or ('GRID' == element.id and self.gridDepth > 0):
             if (('GRID' == element.id or 'CLUSTER' == element.id) and (filterList is None or not len(filterList))) or ('GRID' == element.id and self.gridDepth > 0):
@@ -204,7 +204,7 @@ class XmlWriter:
                     pass
             if showAllChildren:
                 # For each child, call this method recusively.  This will produce a complete dump of all children
-                for c in element.children.values():
+                for c in list(element.children.values()):
                     rbuf += self._getXmlImpl(c, filterList, queryargs)
             if 'GRID' == element.tag:
                 self.gridDepth -= 1
