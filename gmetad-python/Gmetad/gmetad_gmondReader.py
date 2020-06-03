@@ -133,7 +133,7 @@ class GmondReader(threading.Thread):
                     buf = sock.recv(8192)
                     if not buf:
                         break
-                    xmlbuf += buf
+                    xmlbuf += buf.decode("utf-8")
                 sock.close()
                 # Create an XML parser and parse the buffer
                 gch = GmondContentHandler()
