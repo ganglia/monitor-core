@@ -41,7 +41,7 @@ from .gmetad_config import getConfig, GmetadConfig
 from .gmetad_plugin import load_plugins, start_plugins, stop_plugins, notify_plugins
 
 _decode = lambda x: (pickle.loads(zlib.decompress(x)))
-_encode = lambda x: buffer(zlib.compress(pickle.dumps(x, pickle.HIGHEST_PROTOCOL)))
+_encode = lambda x: memoryview(zlib.compress(pickle.dumps(x, pickle.HIGHEST_PROTOCOL)))
 
 class GmetadNotifier(threading.Thread):
     ''' This class implements a notifier thread.  This create receives transactions from the data store

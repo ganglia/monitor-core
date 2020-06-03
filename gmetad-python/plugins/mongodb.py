@@ -185,7 +185,7 @@ class MongodbPlugin(GmetadPlugin) :
             # Cache object attributes using an ordered dictionary
             path.insert(0, self.path)
     
-            from lib.api.api_service_client import * 
+            from lib.api.api_service_client import APIException
 
             try :
                 vm, obj = self.find_object(hostNode.getAttr('ip'), self, hostNode.getAttr('name'))
