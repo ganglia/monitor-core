@@ -55,7 +55,7 @@ def metric_handler(name):
                   continue
               n, v = line.split(":")
               if n in metric_handler.descriptors:
-                  if n == "master_sync_status":
+                  if n == "main_sync_status":
                       v = 1 if v == 'up' else 0
                   if n == "db0":
                       v = v.split('=')[1].split(',')[0]
@@ -102,13 +102,13 @@ def metric_init(params={}):
     metric_handler.prev_total_connections = 0
     metrics = {
         "connected_clients": {"units": "clients"},
-        "connected_slaves": {"units": "slaves"},
+        "connected_subordinates": {"units": "subordinates"},
         "blocked_clients": {"units": "clients"},
         "used_memory": {"units": "KB"},
         "rdb_changes_since_last_save": {"units": "changes"},
         "rdb_bgsave_in_progress": {"units": "yes/no"},
-        "master_sync_in_progress": {"units": "yes/no"},
-        "master_link_status": {"units": "yes/no"},
+        "main_sync_in_progress": {"units": "yes/no"},
+        "main_link_status": {"units": "yes/no"},
         #"aof_bgrewriteaof_in_progress": {"units": "yes/no"},
         "total_connections_received": {"units": "connections/sec"},
         "instantaneous_ops_per_sec": {"units": "ops"},
@@ -117,7 +117,7 @@ def metric_init(params={}):
         "pubsub_channels": {"units": "channels"},
         "pubsub_patterns": {"units": "patterns"},
         #"vm_enabled": {"units": "yes/no"},
-        "master_last_io_seconds_ago": {"units": "seconds ago"},
+        "main_last_io_seconds_ago": {"units": "seconds ago"},
         "db0": {"units": "keys"},
     }
     metric_handler.descriptors = {}

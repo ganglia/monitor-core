@@ -66,7 +66,7 @@ REPORT_SLAVE = True
 MAX_UPDATE_TIME = 15
 
 
-def update_stats(get_innodb=True, get_master=True, get_slave=True):
+def update_stats(get_innodb=True, get_main=True, get_subordinate=True):
     """
 
     """
@@ -131,7 +131,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 
         # try not to fail ?
         get_innodb = get_innodb and have_innodb
-        get_master = get_master and variables['log_bin'].lower() == 'on'
+        get_main = get_main and variables['log_bin'].lower() == 'on'
 
         innodb_status = defaultdict(int)
         if get_innodb:
@@ -141,23 +141,23 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
             cursor.close()
             logging.debug('innodb_status: ' + str(innodb_status))
 
-        master_logs = tuple
-        if get_master:
+        main_logs = tuple
+        if get_main:
             cursor = conn.cursor(MySQLdb.cursors.Cursor)
             cursor.execute("SHOW MASTER LOGS")
-            master_logs = cursor.fetchall()
+            main_logs = cursor.fetchall()
             cursor.close()
 
-        slave_status = {}
-        if get_slave:
+        subordinate_status = {}
+        if get_subordinate:
             cursor = conn.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SHOW SLAVE STATUS")
             res = cursor.fetchone()
             if res:
                 for (k,v) in res.items():
-                    slave_status[k.lower()] = v
+                    subordinate_status[k.lower()] = v
             else:
-                get_slave = False
+                get_subordinate = False
             cursor.close()
 
         cursor = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -221,8 +221,8 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
         'select_range',
         'select_range_check',
         'select_scan',
-        'slave_open_temp_tables',
-        'slave_retried_transactions',
+        'subordinate_open_temp_tables',
+        'subordinate_retried_transactions',
         'slow_launch_threads',
         'slow_queries',
         'sort_range',
@@ -244,7 +244,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
         'qcache_free_blocks',
         'qcache_free_memory',
         'qcache_total_blocks',
-        'slave_open_temp_tables',
+        'subordinate_open_temp_tables',
         'threads_cached',
         'threads_connected',
         'threads_running',
@@ -302,32 +302,32 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
             else:
                 mysql_stats[key] = innodb_status[istat]
 
-    # process master logs
-    if get_master:
-        mysql_stats['binlog_count'] = len(master_logs)
-        mysql_stats['binlog_space_current'] = master_logs[-1][1]
-        #mysql_stats['binlog_space_total'] = sum((long(s[1]) for s in master_logs))
+    # process main logs
+    if get_main:
+        mysql_stats['binlog_count'] = len(main_logs)
+        mysql_stats['binlog_space_current'] = main_logs[-1][1]
+        #mysql_stats['binlog_space_total'] = sum((long(s[1]) for s in main_logs))
         mysql_stats['binlog_space_total'] = 0
-        for s in master_logs:
+        for s in main_logs:
             mysql_stats['binlog_space_total'] += int(s[1])
-        mysql_stats['binlog_space_used'] = float(master_logs[-1][1]) / float(variables['max_binlog_size']) * 100
+        mysql_stats['binlog_space_used'] = float(main_logs[-1][1]) / float(variables['max_binlog_size']) * 100
 
-    # process slave status
-    if get_slave:
-        mysql_stats['slave_exec_master_log_pos'] = slave_status['exec_master_log_pos']
-        #mysql_stats['slave_io'] = 1 if slave_status['slave_io_running'].lower() == "yes" else 0
-        if slave_status['slave_io_running'].lower() == "yes":
-            mysql_stats['slave_io'] = 1
+    # process subordinate status
+    if get_subordinate:
+        mysql_stats['subordinate_exec_main_log_pos'] = subordinate_status['exec_main_log_pos']
+        #mysql_stats['subordinate_io'] = 1 if subordinate_status['subordinate_io_running'].lower() == "yes" else 0
+        if subordinate_status['subordinate_io_running'].lower() == "yes":
+            mysql_stats['subordinate_io'] = 1
         else:
-            mysql_stats['slave_io'] = 0
-        #mysql_stats['slave_sql'] = 1 if slave_status['slave_sql_running'].lower() =="yes" else 0
-        if slave_status['slave_sql_running'].lower() == "yes":
-            mysql_stats['slave_sql'] = 1
+            mysql_stats['subordinate_io'] = 0
+        #mysql_stats['subordinate_sql'] = 1 if subordinate_status['subordinate_sql_running'].lower() =="yes" else 0
+        if subordinate_status['subordinate_sql_running'].lower() == "yes":
+            mysql_stats['subordinate_sql'] = 1
         else:
-            mysql_stats['slave_sql'] = 0
-        mysql_stats['slave_lag'] = slave_status['seconds_behind_master']
-        mysql_stats['slave_relay_log_pos'] = slave_status['relay_log_pos']
-        mysql_stats['slave_relay_log_space'] = slave_status['relay_log_space']
+            mysql_stats['subordinate_sql'] = 0
+        mysql_stats['subordinate_lag'] = subordinate_status['seconds_behind_main']
+        mysql_stats['subordinate_relay_log_pos'] = subordinate_status['relay_log_pos']
+        mysql_stats['subordinate_relay_log_space'] = subordinate_status['relay_log_space']
 
     logging.debug('success updating stats')
     logging.debug('mysql_stats: ' + str(mysql_stats))
@@ -370,8 +370,8 @@ def metric_init(params):
     global REPORT_SLAVE
 
     REPORT_INNODB = str(params.get('get_innodb', True)) == "True"
-    REPORT_MASTER = str(params.get('get_master', True)) == "True"
-    REPORT_SLAVE = str(params.get('get_slave', True)) == "True"
+    REPORT_MASTER = str(params.get('get_main', True)) == "True"
+    REPORT_SLAVE = str(params.get('get_subordinate', True)) == "True"
 
     logging.debug("init: " + str(params))
 
@@ -388,9 +388,9 @@ def metric_init(params):
     if params.get("delta_per_second", '') != '':
         delta_per_second = True
 
-    master_stats_descriptions = {}
+    main_stats_descriptions = {}
     innodb_stats_descriptions = {}
-    slave_stats_descriptions = {}
+    subordinate_stats_descriptions = {}
 
     misc_stats_descriptions = dict(
         aborted_clients = {
@@ -649,15 +649,15 @@ def metric_init(params):
             'units': 'joins',
         },
 
-        slave_open_temp_tables = {
-            'description': 'The number of temporary tables that the slave SQL thread currently has open',
+        subordinate_open_temp_tables = {
+            'description': 'The number of temporary tables that the subordinate SQL thread currently has open',
             'value_type': 'float',
             'units': 'tables',
             'slope': 'both',
         },
 
-        slave_retried_transactions = {
-            'description': 'The total number of times since startup that the replication slave SQL thread has retried transactions',
+        subordinate_retried_transactions = {
+            'description': 'The total number of times since startup that the replication subordinate SQL thread has retried transactions',
             'value_type': 'float',
             'units': 'count',
         },
@@ -756,7 +756,7 @@ def metric_init(params):
     )
 
     if REPORT_MASTER:
-        master_stats_descriptions = dict(
+        main_stats_descriptions = dict(
             binlog_count = {
                 'description': "Number of binary logs",
                 'units': 'logs',
@@ -784,34 +784,34 @@ def metric_init(params):
         )
 
     if REPORT_SLAVE:
-        slave_stats_descriptions = dict(
-            slave_exec_master_log_pos = {
-                'description': "The position of the last event executed by the SQL thread from the master's binary log",
+        subordinate_stats_descriptions = dict(
+            subordinate_exec_main_log_pos = {
+                'description': "The position of the last event executed by the SQL thread from the main's binary log",
                 'units': 'bytes',
                 'slope': 'both',
             },
 
-            slave_io = {
-                'description': "Whether the I/O thread is started and has connected successfully to the master",
+            subordinate_io = {
+                'description': "Whether the I/O thread is started and has connected successfully to the main",
                 'value_type': 'uint8',
                 'units': 'True/False',
                 'slope': 'both',
             },
 
-            slave_lag = {
+            subordinate_lag = {
                 'description': "Replication Lag",
                 'units': 'secs',
                 'slope': 'both',
             },
 
-            slave_relay_log_pos = {
+            subordinate_relay_log_pos = {
                 'description': "The position up to which the SQL thread has read and executed in the current relay log",
                 'units': 'bytes',
                 'slope': 'both',
             },
 
-            slave_sql = {
-                'description': "Slave SQL Running",
+            subordinate_sql = {
+                'description': "Subordinate SQL Running",
                 'value_type': 'uint8',
                 'units': 'True/False',
                 'slope': 'both',
@@ -1095,7 +1095,7 @@ def metric_init(params):
     time.sleep(MAX_UPDATE_TIME)
     update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE)
 
-    for stats_descriptions in (innodb_stats_descriptions, master_stats_descriptions, misc_stats_descriptions, slave_stats_descriptions):
+    for stats_descriptions in (innodb_stats_descriptions, main_stats_descriptions, misc_stats_descriptions, subordinate_stats_descriptions):
         for label in stats_descriptions:
             if mysql_stats.has_key(label):
                 format = '%u'
@@ -1142,8 +1142,8 @@ if __name__ == '__main__':
     parser.add_option("-P", "--port", dest="port", help="port", default=3306, type="int")
     parser.add_option("-S", "--socket", dest="unix_socket", help="unix_socket", default="")
     parser.add_option("--no-innodb", dest="get_innodb", action="store_false", default=True)
-    parser.add_option("--no-master", dest="get_master", action="store_false", default=True)
-    parser.add_option("--no-slave", dest="get_slave", action="store_false", default=True)
+    parser.add_option("--no-main", dest="get_main", action="store_false", default=True)
+    parser.add_option("--no-subordinate", dest="get_subordinate", action="store_false", default=True)
     parser.add_option("-b", "--gmetric-bin", dest="gmetric_bin", help="path to gmetric binary", default="/usr/bin/gmetric")
     parser.add_option("-c", "--gmond-conf", dest="gmond_conf", help="path to gmond.conf", default="/etc/ganglia/gmond.conf")
     parser.add_option("-g", "--gmetric", dest="gmetric", help="submit via gmetric", action="store_true", default=False)
@@ -1157,8 +1157,8 @@ if __name__ == '__main__':
         'user': options.user,
         'port': options.port,
         'get_innodb': options.get_innodb,
-        'get_master': options.get_master,
-        'get_slave': options.get_slave,
+        'get_main': options.get_main,
+        'get_subordinate': options.get_subordinate,
         'unix_socket': options.unix_socket,
     })
 
