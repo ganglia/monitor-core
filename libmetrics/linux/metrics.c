@@ -633,6 +633,8 @@ machine_type_func ( void )
    snprintf(val.str, MAX_G_STRING_SIZE, "hppa");
 #elif __s390__
    snprintf(val.str, MAX_G_STRING_SIZE, "s390");
+#elif __PPC64__
+   snprintf(val.str, MAX_G_STRING_SIZE, "ppc64");
 #else
    snprintf(val.str, MAX_G_STRING_SIZE, "unknown");
 #endif
