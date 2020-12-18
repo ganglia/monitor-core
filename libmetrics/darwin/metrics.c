@@ -37,7 +37,7 @@
 #include <sys/socket.h>
 #include <stdio.h>
 
-/* Added for disk statstics */
+/* Added for disk statistics */
 #include <sys/param.h>
 #include <sys/ucred.h>
 #include <sys/mount.h>
