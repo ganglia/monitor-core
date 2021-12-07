@@ -51,11 +51,22 @@
 /*
  * Backward compatibility for 2.1 to 2.4
  */
+
+#if PY_MAJOR_VERSION == 2
 #if PY_MINOR_VERSION < 5
 #define Py_ssize_t int
+#endif
 #if PY_MINOR_VERSION < 3
 #define PyInt_AsUnsignedLongMask PyInt_AsLong
 #endif
+#endif
+#if PY_MAJOR_VERSION >= 3
+#define PyInt_AsUnsignedLongMask PyLong_AsUnsignedLongMask
+#define PyInt_AsLong             PyLong_AsLong
+#define PyString_AsString        PyThreeString_AsString
+#define PyString_FromString      PyThreeString_FromString
+#define PyInt_Check              PyLong_Check
+#define PyString_Check           PyThreeStringCheck
 #endif
 
 /*
@@ -111,6 +122,47 @@ static char* is_python_module(const char* fname)
     modname_bfr[p-fname] = 0;
     return modname_bfr;
 }
+
+static int PyThreeStringCheck(PyObject* dv)
+{
+    if (PyUnicode_Check(dv)) {
+      return 1;
+    } else if (PyBytes_Check(dv)) {
+      return 1;
+    } else {
+      return 0;
+    }
+}
+
+static char* PyThreeString_AsString(PyObject* dv)
+{
+    if (PyUnicode_Check(dv)) {
+        PyObject * temp_bytes = PyUnicode_AsEncodedString(dv, "UTF-8", "strict"); // Owned reference
+        if (temp_bytes != NULL) {
+            char* result = PyBytes_AS_STRING(temp_bytes); // Borrowed pointer
+            result = strdup(result);
+            Py_DECREF(temp_bytes);
+            return result;
+        } else {
+            return NULL;
+        }
+    } else if (PyBytes_Check(dv)) {
+        char* result = PyBytes_AS_STRING(dv); // Borrowed pointer
+        result = strdup(result);
+        return result;
+    } else {
+      return NULL;
+    }
+}
+
+static PyObject* PyThreeString_FromString(const char* v)
+{
+    PyObject* dv = PyUnicode_FromString(v);
+    return dv;
+}
+
+
+
 
 int
 get_python_string_value(PyObject* dv, char* bfr, int len)
@@ -540,6 +592,17 @@ static PyMethodDef GangliaMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef gangliaModPy =
+{
+    PyModuleDef_HEAD_INIT,
+    "ganglia", /* name of module */
+    NULL,          /* module documentation, may be NULL */
+    -1,          /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    GangliaMethods
+};
+#endif
+
 static int pyth_metric_init (apr_pool_t *p)
 {
     DIR *dp;
@@ -551,6 +614,7 @@ static int pyth_metric_init (apr_pool_t *p)
     Ganglia_25metric *gmi;
     mapped_info_t *mi;
     const char* path = python_module.module_params;
+    //const char* path = "/root/cpythontest/conf/modpython.conf";
     cfg_t *module_cfg;
 
     /* Allocate a pool that will be used by this module */
@@ -584,7 +648,11 @@ static int pyth_metric_init (apr_pool_t *p)
 
     /* Set up the python path to be able to load module from our module path */
     Py_Initialize();
-    Py_InitModule("ganglia", GangliaMethods);
+    #if PY_MAJOR_VERSION >= 3
+      PyModule_Create(&gangliaModPy);
+    #else
+      Py_InitModule("ganglia", GangliaMethods);
+    #endif
 
     PyObject *sys_path = PySys_GetObject("path");
     PyObject *addpath = PyString_FromString(path);
