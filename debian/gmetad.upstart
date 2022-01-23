@@ -1,8 +1,0 @@
-description "Ganglia Monitor Meta-daemon"
-
-start on runlevel [2345]
-stop on runlevel [016] or unmounting-filesystem
-
-expect daemon
-respawn
-exec /usr/sbin/gmetad
