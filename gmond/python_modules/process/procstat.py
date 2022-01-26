@@ -68,12 +68,12 @@
 ###  Example Values:
 ###    httpd:      /var/run/httpd.pid or \/usr\/sbin\/httpd
 ###    mysqld:     /var/run/mysqld/mysqld.pid or /\/usr\/bin\/mysqld_safe/
-###    postgresql: /var/run/postmaster.[port].pid or /\/usr\/bin\/postmaster.*[port]/
+###    postgresql: /var/run/postmain.[port].pid or /\/usr\/bin\/postmain.*[port]/
 ###    splunk:     /splunkd.*start/
 ###    splunk-web: /twistd.*SplunkWeb/
 ###    opennms:    /opt/opennms/logs/daemon/opennms.pid or java.*Dopennms
 ###    netflow:    /java.*NetFlow/
-###    postfix:    /var/spool/postfix/pid/master.pid or /\/usr\/libexec\/postfix\/master/
+###    postfix:    /var/spool/postfix/pid/main.pid or /\/usr\/libexec\/postfix\/main/
 ###
 ###  Error Tests:
 ###    python procstat.py -p test-more,test-none,test-pidfail -v '/java/','/javaw/','java.pid' -t
