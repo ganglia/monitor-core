@@ -1141,7 +1141,9 @@ Ganglia_host_get( char *remIP, apr_sockaddr_t *sa, Ganglia_metric_id *metric_id)
   else
     {
       /* We already have this host in our "hosts" hash update timestamp */
-      hostdata->last_heard_from = apr_time_now();
+	if ( !metric_id->spoof ) {
+	    hostdata->last_heard_from = apr_time_now();
+	}
     }
 
   if (buff) free(buff);
@@ -1179,6 +1181,9 @@ Ganglia_update_vidals( Ganglia_host *host, Ganglia_value_msg *vmsg)
       {
         /* nothing more needs to be done. we handled the timestamps above. */
         host->gmond_started = vmsg->Ganglia_value_msg_u.gu_int.ui;
+	if(vmsg->Ganglia_value_msg_u.gstr.metric_id.spoof) {  // always true?
+	    host->last_heard_from = apr_time_now();
+	}
         debug_msg("Got a heartbeat message %d\n", host->gmond_started);
         /* Processing is finished */
       }
@@ -1457,7 +1462,9 @@ Ganglia_value_save( Ganglia_host *host, Ganglia_value_msg *message )
           break;
         }
 
-      metric->last_heard_from = apr_time_now();
+      if ( !message->Ganglia_value_msg_u.gstr.metric_id.spoof ) {
+	  metric->last_heard_from = apr_time_now();
+      }
 
       /* Save the last update metric */
       apr_thread_mutex_lock(host->mutex);
