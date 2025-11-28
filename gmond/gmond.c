@@ -1689,14 +1689,17 @@ socket_flush( apr_socket_t *client, int gzip_output )
   return APR_SUCCESS;
 }
 
-static void
-zstream_destroy( z_stream *strm )
+
+static apr_status_t
+zstream_destroy( void *data )
 {
+  z_stream *strm = (z_stream *)data;
   if (strm)
     {
       deflateEnd(strm);
       free (strm);
     }
+  return APR_SUCCESS;
 }
 
 static apr_status_t

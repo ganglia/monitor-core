@@ -1,0 +1,9 @@
+# Configuration file for gmond service
+# Place this file at /usr/local/etc/sysconfig/gmond
+
+# Path to gmond configuration file
+GMOND_OPTIONS="-c /usr/local/etc/ganglia/gmond.conf"
+
+# Add any additional options here
+# For example, to run in the foreground (useful for debugging):
+# GMOND_OPTIONS="-c /usr/local/etc/ganglia/gmond.conf -f"
