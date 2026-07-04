@@ -1,4 +1,6 @@
 #include <gm_metric.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <libmetrics.h>
 
 mmodule mem_module;
@@ -38,6 +40,22 @@ static g_val_t mem_metric_handler ( int metric_index )
     case 1:
         return mem_free_func();
     case 2:
+        #ifdef LINUX
+        {
+            FILE *fp = fopen("/proc/meminfo", "r");
+            if (fp) {
+                char line[256];
+                while (fgets(line, sizeof(line), fp)) {
+                    if (strncmp(line, "Shmem:", 6) == 0) {
+                        val.f = atof(line + 6);
+                        fclose(fp);
+                        return val;
+                    }
+                }
+                fclose(fp);
+            }
+        }
+        #endif
         return mem_shared_func();
     case 3:
         return mem_buffers_func();

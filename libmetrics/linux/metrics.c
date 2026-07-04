@@ -1267,18 +1267,25 @@ mem_available_func ( void )
 g_val_t
 mem_shared_func ( void )
 {
-   char *p;
+   char *p, *buff;
    g_val_t val;
 
-   /*
-   ** Broken since linux-2.5.52 when Memshared was removed !!
-   */
-   p = strstr( update_file(&proc_meminfo), "MemShared:" );
+   buff = update_file(&proc_meminfo);
+   
+   /* Modern Linux kernels use Shmem instead of MemShared */
+   p = strstr( buff, "Shmem:" );
    if (p) {
       p = skip_token(p);
       val.f = atof( p );
    } else {
-      val.f = 0.0;
+      /* Fallback to legacy MemShared for very old kernels */
+      p = strstr( buff, "MemShared:" );
+      if (p) {
+         p = skip_token(p);
+         val.f = atof( p );
+      } else {
+         val.f = 0.0;
+      }
    }
 
    return val;
